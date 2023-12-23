@@ -19,8 +19,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
@@ -40,6 +38,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaMessenger;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

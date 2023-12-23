@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.base;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
@@ -48,6 +46,8 @@ import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
 import org.lastaflute.web.validation.VaMessenger;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author jflute

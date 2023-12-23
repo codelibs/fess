@@ -25,8 +25,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.Constants;
@@ -48,6 +46,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

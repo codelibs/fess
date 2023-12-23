@@ -15,11 +15,11 @@
  */
 package org.codelibs.fess.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.codelibs.core.lang.StringUtil;
 import org.lastaflute.job.util.LaCronUtil;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CronExpressionValidator implements ConstraintValidator<CronExpression, String> {
 

@@ -24,8 +24,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
@@ -35,6 +33,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
+
+import jakarta.annotation.PostConstruct;
 
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LogManager.getLogger(CommandGenerator.class);

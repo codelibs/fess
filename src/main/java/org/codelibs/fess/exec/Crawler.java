@@ -34,8 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
@@ -75,6 +73,8 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.opensearch.monitor.jvm.JvmInfo;
 import org.opensearch.monitor.os.OsProbe;
 import org.opensearch.monitor.process.ProcessProbe;
+
+import jakarta.annotation.Resource;
 
 public class Crawler {
 

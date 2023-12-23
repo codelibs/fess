@@ -17,8 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -29,6 +27,8 @@ import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+
+import jakarta.annotation.Resource;
 
 public class DuplicateHostService extends FessAppService {
 

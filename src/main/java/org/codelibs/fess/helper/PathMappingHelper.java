@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -35,6 +33,8 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class PathMappingHelper extends AbstractConfigHelper {
 

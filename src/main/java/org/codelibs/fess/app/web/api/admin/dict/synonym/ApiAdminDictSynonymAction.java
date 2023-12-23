@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.app.service.SynonymService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -35,6 +33,8 @@ import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminDictSynonymAction extends FessApiAdminAction {
 

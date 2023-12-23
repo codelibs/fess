@@ -15,10 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.fileconfig;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
-
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -28,6 +24,10 @@ import org.codelibs.fess.validation.UriType;
 import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author codelibs

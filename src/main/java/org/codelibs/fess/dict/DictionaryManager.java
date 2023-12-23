@@ -23,8 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.FileUtil;
@@ -33,6 +31,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.optional.OptionalEntity;
+
+import jakarta.annotation.PostConstruct;
 
 public class DictionaryManager {
     private static final Logger logger = LogManager.getLogger(DictionaryManager.class);

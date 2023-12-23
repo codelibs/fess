@@ -18,13 +18,13 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class DuplicateHostHelper {
     private static final Logger logger = LogManager.getLogger(DuplicateHostHelper.class);

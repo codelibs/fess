@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.xml.xpath.XPathEvaluationResult;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathNodes;
@@ -77,6 +76,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
+import jakarta.annotation.PostConstruct;
 
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
 

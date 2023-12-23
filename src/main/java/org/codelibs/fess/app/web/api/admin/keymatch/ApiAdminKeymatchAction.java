@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.keymatch.AdminKeymatchAction.getKe
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.KeyMatchPager;
 import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -34,6 +32,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
@@ -40,6 +38,8 @@ import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

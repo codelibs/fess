@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.webauth.AdminWebauthAction.getWebA
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
@@ -36,6 +34,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

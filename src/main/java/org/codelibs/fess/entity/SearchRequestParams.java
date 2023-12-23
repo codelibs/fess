@@ -20,10 +20,10 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public abstract class SearchRequestParams {
 

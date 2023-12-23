@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.CoreLibConstants;
@@ -53,6 +51,8 @@ import org.dbflute.optional.OptionalEntity;
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
+
+import jakarta.annotation.Resource;
 
 public class CrawlingInfoService {
 

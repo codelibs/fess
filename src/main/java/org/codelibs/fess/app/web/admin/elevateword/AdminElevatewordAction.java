@@ -30,8 +30,6 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -56,6 +54,8 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

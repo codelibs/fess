@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>fess</artifactId>
-	<version>14.12.0-SNAPSHOT</version>
+	<version>15.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -30,7 +30,7 @@
 	<parent>
 		<groupId>org.codelibs.fess</groupId>
 		<artifactId>fess-parent</artifactId>
-		<version>14.12.0-SNAPSHOT</version>
+		<version>15.0.0-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 	<properties>
@@ -939,16 +939,31 @@
 
 		<!-- J2EE -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>${jstl.version}</version>
+			<groupId>jakarta.servlet.jsp.jstl</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+			<version>${jakarta.jstl.api.version}</version>
 			<!-- contains taglibs.standard -->
 			<!-- <scope>provided</scope> -->
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.el</groupId>
+					<artifactId>jakarta.el-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>jakarta.servlet</groupId>
+					<artifactId>jakarta.servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>javax.transaction-api</artifactId>
-			<version>${javax.transaction.api.version}</version>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
+			<version>${jakarta.jstl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.transaction</groupId>
+			<artifactId>jakarta.transaction-api</artifactId>
+			<version>${jakarta.transaction.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -1314,7 +1329,7 @@
 			<version>${okhttp.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.onelogin</groupId>
+			<groupId>org.codelibs</groupId>
 			<artifactId>java-saml</artifactId>
 			<version>${java.saml.version}</version>
 			<exclusions>
@@ -1339,8 +1354,8 @@
 
 		<!-- fileupload -->
 		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-fileupload2-jakarta</artifactId>
 			<version>${commons.fileupload.version}</version>
 		</dependency>
 
@@ -1528,7 +1543,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.dbflute.utflute</groupId>
-			<artifactId>utflute-lastaflute</artifactId>
+			<artifactId>utflute-lastaflute-jakarta</artifactId>
 			<version>${utflute.version}</version>
 			<scope>test</scope>
 		</dependency>

@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.StemmerOverridePager;
 import org.codelibs.fess.app.service.StemmerOverrideService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -35,6 +33,8 @@ import org.codelibs.fess.dict.stemmeroverride.StemmerOverrideItem;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
 

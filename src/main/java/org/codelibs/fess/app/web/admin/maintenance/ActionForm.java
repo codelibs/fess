@@ -15,9 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.maintenance;
 
-import javax.validation.constraints.Size;
-
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.validation.constraints.Size;
 
 public class ActionForm {
     @Size(max = 10)

@@ -23,8 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -32,6 +30,8 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class RelatedContentHelper extends AbstractConfigHelper {
 

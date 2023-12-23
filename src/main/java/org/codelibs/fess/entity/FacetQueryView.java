@@ -21,11 +21,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class FacetQueryView {
     private static final Logger logger = LogManager.getLogger(FacetQueryView.class);

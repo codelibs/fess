@@ -15,11 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.dict.synonym;
 
-import javax.validation.constraints.Size;
-
 import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
+
+import jakarta.validation.constraints.Size;
 
 /**
  * @author shinsuke

@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class PasswordForm {
 

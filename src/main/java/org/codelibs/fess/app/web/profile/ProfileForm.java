@@ -18,7 +18,7 @@
  */
 package org.codelibs.fess.app.web.profile;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class ProfileForm {
 

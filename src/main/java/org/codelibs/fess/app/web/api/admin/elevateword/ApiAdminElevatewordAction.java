@@ -30,8 +30,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -51,6 +49,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminElevatewordAction extends FessApiAdminAction {
 

@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.reqheader.AdminReqheaderAction.get
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
@@ -36,6 +34,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

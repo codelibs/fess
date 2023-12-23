@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.api.admin.general;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.core.misc.DynamicProperties;
@@ -28,6 +26,8 @@ import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

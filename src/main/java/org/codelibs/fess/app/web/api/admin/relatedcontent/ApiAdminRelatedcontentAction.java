@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.relatedcontent.AdminRelatedcontent
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.RelatedContentPager;
 import org.codelibs.fess.app.service.RelatedContentService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -34,6 +32,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.RelatedContent;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
 

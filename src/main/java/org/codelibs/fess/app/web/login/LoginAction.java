@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -34,6 +31,9 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;
+
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpSession;
 
 public class LoginAction extends FessLoginAction {
 

@@ -19,23 +19,23 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileUploadByteCountLimitException;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.JakartaServletDiskFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.helper.message.ExceptionMessageBuilder;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.exception.Forced404NotFoundException;
 import org.lastaflute.web.ruts.config.ModuleConfig;
@@ -44,6 +44,9 @@ import org.lastaflute.web.ruts.multipart.MultipartRequestHandler;
 import org.lastaflute.web.ruts.multipart.MultipartRequestWrapper;
 import org.lastaflute.web.ruts.multipart.exception.MultipartExceededException;
 import org.lastaflute.web.util.LaServletContextUtil;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author modified by jflute (originated in Seasar)
@@ -54,7 +57,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                          Definition
     //                                                                          ==========
     private static final Logger logger = LogManager.getLogger(FessMultipartRequestHandler.class);
-    protected static final String CONTEXT_TEMPDIR_KEY = "javax.servlet.context.tempdir";
+    protected static final String CONTEXT_TEMPDIR_KEY = "jakarta.searvlet.context.tempdir";
     protected static final String JAVA_IO_TMPDIR_KEY = "java.io.tmpdir";
 
     // ===================================================================================
@@ -74,12 +77,12 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         // basically for JVN#14876762
         // thought not all problems are resolved however the main case is safety
         // - - - - - - - - - -/
-        final ServletFileUpload upload = createServletFileUpload(request);
+        final JakartaServletDiskFileUpload upload = createServletFileUpload(request);
         prepareElementsHash();
         try {
-            final List<FileItem> items = parseRequest(request, upload);
+            final List<DiskFileItem> items = parseRequest(request, upload);
             mappingParameter(request, items);
-        } catch (final SizeLimitExceededException e) {
+        } catch (final FileUploadByteCountLimitException e) {
             handleSizeLimitExceededException(request, e);
         } catch (final FileUploadException e) {
             handleFileUploadException(e);
@@ -93,18 +96,31 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                            Create ServletFileUpload
     //                                                            ========================
-    protected ServletFileUpload createServletFileUpload(final HttpServletRequest request) {
+    protected JakartaServletDiskFileUpload createServletFileUpload(final HttpServletRequest request) {
         final DiskFileItemFactory fileItemFactory = createDiskFileItemFactory();
-        final ServletFileUpload upload = newServletFileUpload(fileItemFactory);
-        upload.setHeaderEncoding(request.getCharacterEncoding());
+        final JakartaServletDiskFileUpload upload = newServletFileUpload(fileItemFactory);
+        final Charset charset = getRequestCharset(request);
+        if (charset != null) {
+            upload.setHeaderCharset(charset);
+        }
         upload.setSizeMax(getSizeMax());
         return upload;
     }
 
-    protected ServletFileUpload newServletFileUpload(final DiskFileItemFactory fileItemFactory) {
-        return new ServletFileUpload(fileItemFactory) {
+    protected Charset getRequestCharset(final HttpServletRequest request) {
+        final String characterEncoding = request.getCharacterEncoding();
+        try {
+            return Charset.forName(characterEncoding);
+        } catch (Exception e) {
+            logger.warn("Invalid charset: {}", characterEncoding, e);
+        }
+        return null;
+    }
+
+    protected JakartaServletDiskFileUpload newServletFileUpload(final DiskFileItemFactory fileItemFactory) {
+        return new JakartaServletDiskFileUpload(fileItemFactory) {
             @Override
-            protected byte[] getBoundary(final String contentType) { // for security
+            public byte[] getBoundary(final String contentType) { // for security
                 final byte[] boundary = super.getBoundary(contentType);
                 checkBoundarySize(contentType, boundary);
                 return boundary;
@@ -148,7 +164,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected DiskFileItemFactory createDiskFileItemFactory() {
         final File repository = createRepositoryFile();
-        return new DiskFileItemFactory((int) getSizeThreshold(), repository);
+        return DiskFileItemFactory.builder().setFile(repository).setBufferSize(getSizeThreshold()).get();
     }
 
     protected File createRepositoryFile() {
@@ -164,13 +180,14 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         elementsAll = new Hashtable<>();
     }
 
-    protected List<FileItem> parseRequest(final HttpServletRequest request, final ServletFileUpload upload) throws FileUploadException {
+    protected List<DiskFileItem> parseRequest(final HttpServletRequest request, final JakartaServletDiskFileUpload upload)
+            throws FileUploadException {
         return upload.parseRequest(request);
     }
 
-    protected void mappingParameter(final HttpServletRequest request, final List<FileItem> items) {
+    protected void mappingParameter(final HttpServletRequest request, final List<DiskFileItem> items) {
         showFieldLoggingTitle();
-        for (final FileItem item : items) {
+        for (final DiskFileItem item : items) {
             if (item.isFormField()) {
                 showFormFieldParameter(item);
                 addTextParameter(request, item);
@@ -191,21 +208,21 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         }
     }
 
-    protected void showFormFieldParameter(final FileItem item) {
+    protected void showFormFieldParameter(final DiskFileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}={}", item.getFieldName(), item.getString());
         }
     }
 
-    protected void showFileFieldParameter(final FileItem item) {
+    protected void showFileFieldParameter(final DiskFileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}:{name={}, size={}}", item.getFieldName(), item.getName(), item.getSize());
         }
     }
 
-    protected void handleSizeLimitExceededException(final HttpServletRequest request, final SizeLimitExceededException e) {
+    protected void handleSizeLimitExceededException(final HttpServletRequest request, final FileUploadByteCountLimitException e) {
         final long actual = e.getActualSize();
-        final long permitted = e.getPermittedSize();
+        final long permitted = e.getPermitted();
         final String msg = "Exceeded size of the multipart request: actual=" + actual + " permitted=" + permitted;
         request.setAttribute(MAX_LENGTH_EXCEEDED_KEY, new MultipartExceededException(msg, actual, permitted, e));
         try {
@@ -233,16 +250,20 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     @Override
     public void rollback() {
         for (final MultipartFormFile formFile : elementsFile.values()) {
-            formFile.destroy();
+            try {
+                formFile.destroy();
+            } catch (final Exception e) {
+                logger.warn("Failed to destroy {}", formFile, e);
+            }
         }
     }
 
     // ===================================================================================
     //                                                                            Add Text
     //                                                                            ========
-    protected void addTextParameter(final HttpServletRequest request, final FileItem item) {
+    protected void addTextParameter(final HttpServletRequest request, final DiskFileItem item) {
         final String name = item.getFieldName();
-        final String encoding = request.getCharacterEncoding();
+        final Charset encoding = getRequestCharset(request);
         String value = null;
         boolean haveValue = false;
         if (encoding != null) {
@@ -253,8 +274,8 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         }
         if (!haveValue) {
             try {
-                value = item.getString("ISO-8859-1");
-            } catch (final java.io.UnsupportedEncodingException uee) {
+                value = item.getString(StandardCharsets.ISO_8859_1);
+            } catch (final Exception uee) {
                 value = item.getString();
             }
             haveValue = true;
@@ -275,13 +296,13 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         elementsAll.put(name, newArray);
     }
 
-    protected void addFileParameter(final FileItem item) {
+    protected void addFileParameter(final DiskFileItem item) {
         final MultipartFormFile formFile = newActionMultipartFormFile(item);
         elementsFile.put(item.getFieldName(), formFile);
         elementsAll.put(item.getFieldName(), formFile);
     }
 
-    protected ActionMultipartFormFile newActionMultipartFormFile(final FileItem item) {
+    protected ActionMultipartFormFile newActionMultipartFormFile(final DiskFileItem item) {
         return new ActionMultipartFormFile(item);
     }
 
@@ -296,11 +317,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected long getSizeMax() {
+    protected Integer getSizeMax() {
         return ComponentUtil.getFessConfig().getHttpFileuploadMaxSizeAsInteger();
     }
 
-    protected long getSizeThreshold() {
+    protected Integer getSizeThreshold() {
         return ComponentUtil.getFessConfig().getHttpFileuploadThresholdSizeAsInteger();
     }
 
@@ -320,9 +341,9 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         private static final long serialVersionUID = 1L;
 
-        protected final FileItem fileItem;
+        protected final DiskFileItem fileItem;
 
-        public ActionMultipartFormFile(final FileItem fileItem) {
+        public ActionMultipartFormFile(final DiskFileItem fileItem) {
             this.fileItem = fileItem;
         }
 
@@ -366,7 +387,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         @Override
         public void destroy() {
-            fileItem.delete();
+            try {
+                fileItem.delete();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override

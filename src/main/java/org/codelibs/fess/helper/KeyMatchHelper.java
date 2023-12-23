@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -43,6 +41,8 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
+
+import jakarta.annotation.PostConstruct;
 
 public class KeyMatchHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);

@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.dict;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.DictionaryFile;
@@ -26,6 +24,8 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

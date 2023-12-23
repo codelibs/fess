@@ -23,13 +23,13 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.util.LaServletContextUtil;
+
+import jakarta.servlet.ServletContext;
 
 public class ResourceUtil {
     private static final String FESS_OVERRIDE_CONF_PATH = "FESS_OVERRIDE_CONF_PATH";

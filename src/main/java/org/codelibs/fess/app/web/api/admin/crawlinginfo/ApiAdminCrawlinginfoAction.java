@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.api.admin.crawlinginfo;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -31,6 +29,8 @@ import org.codelibs.fess.es.config.exentity.CrawlingInfo;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

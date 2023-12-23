@@ -21,14 +21,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaMessenger;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class ApiResult {
 

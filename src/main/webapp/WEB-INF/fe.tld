@@ -9,7 +9,7 @@
   <display-name>JSTL functions</display-name>
   <tlib-version>1.1</tlib-version>
   <short-name>fe</short-name>
-  <uri>http://fess.codelibs.org/functions</uri>
+  <uri>fess.tags.functions</uri>
   
   <function>
     <description>

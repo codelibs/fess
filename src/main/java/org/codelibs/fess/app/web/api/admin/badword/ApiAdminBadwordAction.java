@@ -29,8 +29,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -47,6 +45,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminBadwordAction extends FessApiAdminAction {
 

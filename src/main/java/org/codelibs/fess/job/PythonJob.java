@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +35,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.SystemUtil;
+
+import jakarta.servlet.ServletContext;
 
 public class PythonJob extends ExecJob {
     static final Logger logger = LogManager.getLogger(PythonJob.class);

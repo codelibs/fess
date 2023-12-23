@@ -18,8 +18,6 @@ package org.codelibs.fess.mylasta.direction;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
@@ -44,6 +42,8 @@ import org.lastaflute.db.direction.FwDbDirection;
 import org.lastaflute.web.direction.FwWebDirection;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.ruts.renderer.JspHtmlRenderingProvider;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author jflute

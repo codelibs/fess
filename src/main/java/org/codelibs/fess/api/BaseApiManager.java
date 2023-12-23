@@ -20,13 +20,13 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class BaseApiManager implements WebApiManager {
 

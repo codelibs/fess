@@ -19,11 +19,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ResourceUtil;
@@ -48,6 +43,11 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class SpnegoAuthenticator implements SsoAuthenticator {
 

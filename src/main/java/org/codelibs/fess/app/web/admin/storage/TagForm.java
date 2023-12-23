@@ -18,9 +18,9 @@ package org.codelibs.fess.app.web.admin.storage;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.Size;
-
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
+
+import jakarta.validation.constraints.Size;
 
 public class TagForm {
 

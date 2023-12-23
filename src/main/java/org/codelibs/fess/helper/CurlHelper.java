@@ -24,7 +24,6 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
@@ -39,6 +38,8 @@ import org.codelibs.fesen.client.node.NodeManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class CurlHelper {
     private static final Logger logger = LogManager.getLogger(CurlHelper.class);

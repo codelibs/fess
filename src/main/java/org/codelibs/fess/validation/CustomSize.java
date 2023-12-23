@@ -26,10 +26,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
-
 import org.codelibs.core.lang.StringUtil;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
@@ -37,7 +37,7 @@ import org.codelibs.core.lang.StringUtil;
 @Constraint(validatedBy = CustomSizeValidator.class)
 public @interface CustomSize {
 
-    String message() default "{javax.validation.constraints.Size.message}";
+    String message() default "{jakarta.validation.constraints.Size.message}";
 
     Class<?>[] groups() default {};
 

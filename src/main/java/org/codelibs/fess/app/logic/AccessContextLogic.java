@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.app.logic;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextResource;
+
+import jakarta.annotation.Resource;
 
 public class AccessContextLogic {
 

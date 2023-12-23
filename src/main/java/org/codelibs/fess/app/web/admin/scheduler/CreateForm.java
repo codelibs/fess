@@ -15,16 +15,16 @@
  */
 package org.codelibs.fess.app.web.admin.scheduler;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
-
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CronExpression;
 import org.codelibs.fess.validation.CustomSize;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 /**
  * @author shinsuke

@@ -19,9 +19,9 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.Constants;
+
+import jakarta.annotation.Resource;
 
 public abstract class DictionaryCreator {
 

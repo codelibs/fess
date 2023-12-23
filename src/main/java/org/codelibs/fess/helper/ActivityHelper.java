@@ -25,8 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +35,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * @author shinsuke

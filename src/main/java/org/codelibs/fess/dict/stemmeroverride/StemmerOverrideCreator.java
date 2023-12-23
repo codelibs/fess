@@ -17,13 +17,13 @@ package org.codelibs.fess.dict.stemmeroverride;
 
 import java.util.Date;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.dict.DictionaryCreator;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
+
+import jakarta.annotation.PostConstruct;
 
 public class StemmerOverrideCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(StemmerOverrideCreator.class);

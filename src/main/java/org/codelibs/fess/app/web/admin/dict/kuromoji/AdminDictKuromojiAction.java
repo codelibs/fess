@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -43,6 +41,8 @@ import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
 import org.lastaflute.web.validation.exception.ValidationErrorException;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

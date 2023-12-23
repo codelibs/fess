@@ -21,8 +21,6 @@ import static org.codelibs.fess.app.web.admin.relatedquery.AdminRelatedqueryActi
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RelatedQueryPager;
@@ -37,6 +35,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.config.exentity.RelatedQuery;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
 

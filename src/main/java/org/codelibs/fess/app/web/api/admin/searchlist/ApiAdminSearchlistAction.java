@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction.v
 
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -45,6 +43,8 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

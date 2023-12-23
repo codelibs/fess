@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.ResponseData;
@@ -25,6 +23,8 @@ import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class FessFileTransformer extends AbstractFessFileTransformer {
     private static final Logger logger = LogManager.getLogger(FessFileTransformer.class);

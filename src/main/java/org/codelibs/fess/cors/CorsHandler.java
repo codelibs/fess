@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.cors;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 public abstract class CorsHandler {
 

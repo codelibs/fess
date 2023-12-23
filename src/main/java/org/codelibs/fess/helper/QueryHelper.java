@@ -25,9 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
@@ -59,6 +56,9 @@ import org.opensearch.search.rescore.RescorerBuilder;
 import org.opensearch.search.sort.SortBuilder;
 import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.search.sort.SortOrder;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class QueryHelper {
     private static final Logger logger = LogManager.getLogger(QueryHelper.class);

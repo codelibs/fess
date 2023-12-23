@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.admin.scheduler;
 import java.text.MessageFormat;
 import java.util.Base64;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.SchedulerPager;
@@ -38,6 +36,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author shinsuke

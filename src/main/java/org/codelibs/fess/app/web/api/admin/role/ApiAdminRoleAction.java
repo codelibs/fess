@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.role.AdminRoleAction.getRole;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -30,6 +28,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminRoleAction extends FessApiAdminAction {
 

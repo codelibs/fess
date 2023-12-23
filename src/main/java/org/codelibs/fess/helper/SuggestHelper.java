@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -63,6 +61,8 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.opensearch.search.sort.SortBuilders;
+
+import jakarta.annotation.PostConstruct;
 
 public class SuggestHelper {
     private static final Logger logger = LogManager.getLogger(SuggestHelper.class);

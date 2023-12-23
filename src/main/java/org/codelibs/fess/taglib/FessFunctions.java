@@ -43,8 +43,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -66,6 +64,8 @@ import org.opensearch.common.joda.Joda;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class FessFunctions {
     private static final Logger logger = LogManager.getLogger(FessFunctions.class);

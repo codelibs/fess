@@ -30,9 +30,8 @@ import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.saml2.Auth;
 import org.lastaflute.web.login.credential.LoginCredential;
-
-import com.onelogin.saml2.Auth;
 
 public class SamlCredential implements LoginCredential, FessCredential {
 

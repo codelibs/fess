@@ -18,8 +18,6 @@ package org.codelibs.fess.app.service;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
@@ -29,6 +27,8 @@ import org.codelibs.fess.dict.kuromoji.KuromojiFile;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
+
+import jakarta.annotation.Resource;
 
 public class KuromojiService {
     @Resource

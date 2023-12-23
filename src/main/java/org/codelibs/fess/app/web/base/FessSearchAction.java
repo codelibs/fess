@@ -23,10 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
@@ -50,6 +46,10 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public abstract class FessSearchAction extends FessBaseAction {
 

@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
@@ -29,6 +27,8 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
+
+import jakarta.annotation.PostConstruct;
 
 public class QueryProcessor {
     private static final Logger logger = LogManager.getLogger(QueryProcessor.class);
