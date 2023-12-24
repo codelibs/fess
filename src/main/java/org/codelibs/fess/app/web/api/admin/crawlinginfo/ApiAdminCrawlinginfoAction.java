@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.api.admin.crawlinginfo;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -36,6 +38,8 @@ import jakarta.annotation.Resource;
  * @author Keiichi Watanabe
  */
 public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminCrawlinginfoAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -77,6 +81,7 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
                 crawlingInfoService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
         }).orElse(() -> {
@@ -92,6 +97,7 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
             crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());
             saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResponse().status(Status.OK).result());

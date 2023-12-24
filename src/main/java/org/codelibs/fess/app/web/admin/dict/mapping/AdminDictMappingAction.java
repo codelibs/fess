@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -53,6 +55,8 @@ import jakarta.annotation.Resource;
 public class AdminDictMappingAction extends FessAdminAction {
 
     public static final String ROLE = "admin-dict";
+
+    private static final Logger logger = LogManager.getLogger(AdminDictMappingAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -261,6 +265,7 @@ public class AdminDictMappingAction extends FessAdminAction {
             try (InputStream inputStream = form.charMappingFile.getInputStream()) {
                 file.update(inputStream);
             } catch (final IOException e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL),
                         () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
             }
@@ -287,6 +292,7 @@ public class AdminDictMappingAction extends FessAdminAction {
                 charMappingService.store(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -307,6 +313,7 @@ public class AdminDictMappingAction extends FessAdminAction {
                 charMappingService.store(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -327,6 +334,7 @@ public class AdminDictMappingAction extends FessAdminAction {
                 charMappingService.delete(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

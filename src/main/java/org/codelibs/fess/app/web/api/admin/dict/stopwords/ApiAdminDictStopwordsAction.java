@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.StopwordsPager;
 import org.codelibs.fess.app.service.StopwordsService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -37,6 +39,9 @@ import org.lastaflute.web.response.StreamResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminDictStopwordsAction.class);
+
     @Resource
     private StopwordsService stopwordsService;
 
@@ -122,6 +127,7 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         try (InputStream inputStream = form.stopwordsFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadStopwordsFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

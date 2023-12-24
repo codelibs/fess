@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.KeyMatchPager;
@@ -46,6 +48,8 @@ import jakarta.annotation.Resource;
 public class AdminKeymatchAction extends FessAdminAction {
 
     public static final String ROLE = "admin-keymatch";
+
+    private static final Logger logger = LogManager.getLogger(AdminKeymatchAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -197,6 +201,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                 ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -218,6 +223,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                 ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -240,6 +246,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                 ComponentUtil.getKeyMatchHelper().update();
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

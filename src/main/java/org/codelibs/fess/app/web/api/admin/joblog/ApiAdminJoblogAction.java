@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.api.admin.joblog;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -35,6 +37,8 @@ import jakarta.annotation.Resource;
  * @author Keiichi Watanabe
  */
 public class ApiAdminJoblogAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminJoblogAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -73,6 +77,7 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
                 jobLogService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
         }).orElse(() -> {

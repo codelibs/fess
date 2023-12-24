@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.admin.scheduler;
 import java.text.MessageFormat;
 import java.util.Base64;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.pager.SchedulerPager;
@@ -46,6 +48,8 @@ import jakarta.annotation.Resource;
 public class AdminSchedulerAction extends FessAdminAction {
 
     public static final String ROLE = "admin-scheduler";
+
+    private static final Logger logger = LogManager.getLogger(AdminSchedulerAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -225,6 +229,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                 scheduledJobService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -245,6 +250,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                 scheduledJobService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -266,6 +272,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                 scheduledJobService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -292,6 +299,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                 entity.start();
                 saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, entity.getName()));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> {
                     messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
                 }, () -> asDetailsHtml(id));
@@ -316,6 +324,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                 entity.stop();
                 saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, entity.getName()));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> {
                     messages.addErrorsFailedToStopJob(GLOBAL, entity.getName());
                 }, () -> asDetailsHtml(id));

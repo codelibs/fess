@@ -86,6 +86,9 @@ public class LoginAction extends FessLoginAction {
             getSession().ifPresent(session -> session.setAttribute(INVALID_OLD_PASSWORD, password));
             return asHtml(virtualHost(path_Login_NewpasswordJsp));
         } catch (final LoginFailureException lfe) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Login is failed.", lfe);
+            }
             activityHelper.loginFailure(OptionalThing.of(new LocalUserCredential(username, password)));
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
         }

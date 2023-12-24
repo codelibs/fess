@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -50,6 +52,8 @@ import jakarta.annotation.Resource;
 public class AdminDictProtwordsAction extends FessAdminAction {
 
     public static final String ROLE = "admin-dict";
+
+    private static final Logger logger = LogManager.getLogger(AdminDictProtwordsAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -256,6 +260,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
             try (InputStream inputStream = form.protwordsFile.getInputStream()) {
                 file.update(inputStream);
             } catch (final IOException e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL),
                         () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
             }

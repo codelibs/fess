@@ -20,6 +20,8 @@ import static org.codelibs.fess.app.web.admin.role.AdminRoleAction.getRole;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -32,6 +34,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminRoleAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminRoleAction.class);
 
     @Resource
     private RoleService roleService;
@@ -71,6 +75,7 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         try {
             roleService.store(entity);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -90,6 +95,7 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         try {
             roleService.store(entity);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
@@ -105,6 +111,7 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         try {
             roleService.delete(entity);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());

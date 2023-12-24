@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.CharMappingPager;
 import org.codelibs.fess.app.service.CharMappingService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -37,6 +39,8 @@ import org.lastaflute.web.response.StreamResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminDictMappingAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminDictMappingAction.class);
 
     @Resource
     private CharMappingService charMappingService;
@@ -123,6 +127,7 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         try (InputStream inputStream = form.charMappingFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

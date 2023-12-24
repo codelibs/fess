@@ -20,6 +20,8 @@ import static org.codelibs.fess.app.web.admin.scheduler.AdminSchedulerAction.get
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
@@ -36,6 +38,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminSchedulerAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminSchedulerAction.class);
 
     @Resource
     private ScheduledJobService scheduledJobService;
@@ -76,6 +80,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
             try {
                 entity.stop();
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> {
                     messages.addErrorsFailedToStopJob(GLOBAL, entity.getName());
                 });
@@ -125,6 +130,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
             scheduledJobService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -144,6 +150,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         try {
             scheduledJobService.store(entity);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
@@ -160,6 +167,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
             scheduledJobService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());

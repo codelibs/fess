@@ -145,12 +145,12 @@ public class AdminSearchlistAction extends FessAdminAction {
             });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
+                logger.debug("Invalid query: {}", form.q, e);
             }
             throwValidationError(e.getMessageCode(), this::asListHtml);
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
+                logger.debug("Invalid offset: {}", form.offset, e);
             }
             throwValidationError(messages -> messages.addErrorsResultSizeExceeded(GLOBAL), this::asListHtml);
         }
@@ -215,6 +215,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), this::asListHtml);
         }
         return asListHtml();
@@ -230,7 +231,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
+                logger.debug("Invalid query: {}", form.q, e);
             }
             throwValidationError(e.getMessageCode(), this::asListHtml);
         }
@@ -283,7 +284,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to add {}", entity, e);
+                logger.warn("Failed to add {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -320,7 +321,7 @@ public class AdminSearchlistAction extends FessAdminAction {
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to update {}", entity, e);
+                logger.warn("Failed to update {}", entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

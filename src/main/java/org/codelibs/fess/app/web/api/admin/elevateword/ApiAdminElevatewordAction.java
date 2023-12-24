@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -53,6 +55,8 @@ import org.lastaflute.web.response.StreamResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminElevatewordAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminElevatewordAction.class);
 
     @Resource
     private ElevateWordService elevateWordService;
@@ -104,6 +108,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
             suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(), entity.getPermissions(),
                     entity.getBoost(), false);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -120,6 +125,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
                 suggestHelper.deleteAllElevateWord(false);
                 suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -141,12 +147,14 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
                     suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
                     saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
                 }
             }).orElse(() -> {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
             });
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
@@ -177,6 +185,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     elevateWordService.exportCsv(writer);
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL));
                 }
                 try (InputStream in = Files.newInputStream(tempFile)) {

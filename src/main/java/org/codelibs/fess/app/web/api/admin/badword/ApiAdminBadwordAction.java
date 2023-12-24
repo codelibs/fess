@@ -29,6 +29,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -49,6 +51,8 @@ import org.lastaflute.web.response.StreamResponse;
 import jakarta.annotation.Resource;
 
 public class ApiAdminBadwordAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminBadwordAction.class);
 
     @Resource
     private BadWordService badWordService;
@@ -96,6 +100,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
             badWordService.store(entity);
             suggestHelper.addBadWord(entity.getSuggestWord(), false);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -111,6 +116,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
                 badWordService.store(entity);
                 suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -132,12 +138,14 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
                     suggestHelper.deleteBadWord(entity.getSuggestWord());
                     saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
                 }
             }).orElse(() -> {
                 throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
             });
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
@@ -168,6 +176,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     badWordService.exportCsv(writer);
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadBadwordFile(GLOBAL));
                 }
                 try (InputStream in = Files.newInputStream(tempFile)) {

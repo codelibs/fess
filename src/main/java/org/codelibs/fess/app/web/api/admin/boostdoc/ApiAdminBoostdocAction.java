@@ -20,6 +20,8 @@ import static org.codelibs.fess.app.web.admin.boostdoc.AdminBoostdocAction.getBo
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.app.service.BoostDocumentRuleService;
@@ -41,6 +43,8 @@ import jakarta.annotation.Resource;
  * @author shinsuke
  */
 public class ApiAdminBoostdocAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminBoostdocAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -82,6 +86,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
             try {
                 boostDocumentRuleService.store(entity);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -101,6 +106,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
             try {
                 boostDocumentRuleService.store(entity);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -119,6 +125,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
                 boostDocumentRuleService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
         }).orElse(() -> {

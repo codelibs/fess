@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -63,6 +65,8 @@ import jakarta.annotation.Resource;
 public class AdminElevatewordAction extends FessAdminAction {
 
     public static final String ROLE = "admin-elevateword";
+
+    private static final Logger logger = LogManager.getLogger(AdminElevatewordAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -226,6 +230,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     elevateWordService.exportCsv(writer);
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL), this::asDownloadHtml);
                 }
                 try (InputStream in = Files.newInputStream(tempFile)) {
@@ -263,6 +268,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         entity.getPermissions(), entity.getBoost(), false);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -285,6 +291,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 suggestHelper.storeAllElevateWords(false);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -307,6 +314,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 suggestHelper.deleteElevateWord(entity.getSuggestWord(), false);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

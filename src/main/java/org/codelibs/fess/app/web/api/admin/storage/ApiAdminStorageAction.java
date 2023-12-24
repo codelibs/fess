@@ -71,9 +71,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
             try {
                 downloadObject(getObjectName(pi.getPath(), pi.getName()), out);
             } catch (final StorageException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to download {}", id, e);
-                }
+                logger.warn("Failed to download {}", id, e);
                 throwValidationErrorApi(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, pi.getName()));
             }
         });
@@ -92,9 +90,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
             saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, pi.getName()));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to delete {}", id, e);
-            }
+            logger.warn("Failed to delete {}", id, e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, pi.getName()));
         }
         return null;
@@ -114,9 +110,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
             saveInfo(messages -> messages.addSuccessUploadFileToStorage(GLOBAL, fileName));
             return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
         } catch (final StorageException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to upload {}", fileName, e);
-            }
+            logger.warn("Failed to upload {}", fileName, e);
             throwValidationErrorApi(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, fileName));
         }
         return null;
