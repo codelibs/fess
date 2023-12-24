@@ -71,7 +71,7 @@ public class ProfileAction extends FessSearchAction {
             userService.changePassword(username, form.newPassword);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
-            logger.error("Failed to change password for {}", username, e);
+            logger.warn("Failed to change password for {}", username, e);
             throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
         }
         return redirect(getClass());

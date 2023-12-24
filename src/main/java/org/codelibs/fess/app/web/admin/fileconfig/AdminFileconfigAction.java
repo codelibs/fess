@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
@@ -52,6 +54,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 public class AdminFileconfigAction extends FessAdminAction {
 
     public static final String ROLE = "admin-fileconfig";
+
+    private static final Logger logger = LogManager.getLogger(AdminFileconfigAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -223,6 +227,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                 fileConfigService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -243,6 +248,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                 fileConfigService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -264,6 +270,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                 fileConfigService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

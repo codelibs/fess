@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.app.service.PathMappingService;
@@ -33,6 +35,8 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 public class ApiAdminPathmapAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminPathmapAction.class);
 
     @Resource
     private PathMappingService pathMappingService;
@@ -74,6 +78,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
             pathMappingService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -93,6 +98,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
         try {
             pathMappingService.store(entity);
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
@@ -109,6 +115,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
             pathMappingService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());

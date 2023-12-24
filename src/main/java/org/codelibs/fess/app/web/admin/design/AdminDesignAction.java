@@ -135,6 +135,7 @@ public class AdminDesignAction extends FessAdminAction {
                     fileName = fileName.substring(pos + 1);
                 }
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid("designFile"), this::asListHtml);
             }
         }
@@ -274,7 +275,7 @@ public class AdminDesignAction extends FessAdminAction {
             write(jspFile.getAbsolutePath(), form.content.getBytes(Constants.UTF_8));
             saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, jspFile.getAbsolutePath()));
         } catch (final Exception e) {
-            logger.error("Failed to update {}", form.fileName, e);
+            logger.warn("Failed to update {}", form.fileName, e);
             throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), this::asListHtml);
         }
         return redirect(getClass());

@@ -102,9 +102,7 @@ public class AdminStorageAction extends FessAdminAction {
         try {
             uploadObject(getObjectName(form.path, form.uploadFile.getFileName()), form.uploadFile);
         } catch (final StorageException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to upload {}", form.uploadFile.getFileName(), e);
-            }
+            logger.warn("Failed to upload {}", form.uploadFile.getFileName(), e);
             throwValidationError(messages -> messages.addErrorsStorageFileUploadFailure(GLOBAL, form.uploadFile.getFileName()),
                     () -> asListHtml(encodeId(form.path)));
 
@@ -132,9 +130,7 @@ public class AdminStorageAction extends FessAdminAction {
             try {
                 downloadObject(getObjectName(pi.getPath(), pi.getName()), out);
             } catch (final StorageException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to download {}", pi.getName(), e);
-                }
+                logger.warn("Failed to download {}", pi.getName(), e);
                 throwValidationError(messages -> messages.addErrorsStorageFileDownloadFailure(GLOBAL, pi.getName()),
                         () -> asListHtml(encodeId(pi.getPath())));
             }
@@ -152,7 +148,7 @@ public class AdminStorageAction extends FessAdminAction {
         try {
             deleteObject(objectName);
         } catch (final StorageException e) {
-            logger.debug("Failed to delete {}", pi.getName(), e);
+            logger.warn("Failed to delete {}", pi.getName(), e);
             throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, pi.getName()),
                     () -> asListHtml(encodeId(pi.getPath())));
         }
@@ -186,7 +182,7 @@ public class AdminStorageAction extends FessAdminAction {
         try {
             updateObjectTags(objectName, form.tags);
         } catch (final StorageException e) {
-            logger.debug("Failed to update tags in {}", form.path, e);
+            logger.warn("Failed to update tags in {}", form.path, e);
             throwValidationError(messages -> messages.addErrorsStorageTagsUpdateFailure(GLOBAL, objectName),
                     () -> asEditTagsHtml(form.path, form.name));
         }

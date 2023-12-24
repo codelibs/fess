@@ -87,12 +87,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             return asJson(new ApiDocsResponse().renderData(renderData).status(Status.OK).result());
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
+                logger.debug("Invalid query: {}", body.q, e);
             }
             throwValidationErrorApi(e.getMessageCode());
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(e.getMessage(), e);
+                logger.debug("Invalid offset: {}", body.offset, e);
             }
             throwValidationErrorApi(messages -> messages.addErrorsResultSizeExceeded(GLOBAL));
         }
@@ -133,7 +133,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to add {}", entity, e);
+                logger.warn("Failed to add {}", entity, e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -174,7 +174,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 searchEngineClient.store(index, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
-                logger.error("Failed to update {}", entity, e);
+                logger.warn("Failed to update {}", entity, e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -194,6 +194,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
             searchEngineClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL));
         }
         return asJson(new ApiResponse().status(Status.OK).result());

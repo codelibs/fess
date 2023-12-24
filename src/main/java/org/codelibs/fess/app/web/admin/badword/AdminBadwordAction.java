@@ -27,6 +27,8 @@ import java.nio.file.Path;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.fess.Constants;
@@ -55,6 +57,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 public class AdminBadwordAction extends FessAdminAction {
 
     public static final String ROLE = "admin-badword";
+
+    private static final Logger logger = LogManager.getLogger(AdminBadwordAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -208,6 +212,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     badWordService.exportCsv(writer);
                 } catch (final Exception e) {
+                    logger.warn("Failed to process a request.", e);
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadBadwordFile(GLOBAL), this::asDownloadHtml);
                 }
                 try (InputStream in = Files.newInputStream(tempFile)) {
@@ -244,6 +249,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 suggestHelper.addBadWord(entity.getSuggestWord(), false);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -265,6 +271,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 suggestHelper.storeAllBadWords(false);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -287,6 +294,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 suggestHelper.deleteBadWord(entity.getSuggestWord());
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asDetailsHtml);
             }

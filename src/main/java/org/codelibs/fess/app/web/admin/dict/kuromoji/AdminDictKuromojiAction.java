@@ -21,6 +21,8 @@ import java.io.InputStream;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -51,6 +53,8 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 public class AdminDictKuromojiAction extends FessAdminAction {
 
     public static final String ROLE = "admin-dict";
+
+    private static final Logger logger = LogManager.getLogger(AdminDictKuromojiAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -258,6 +262,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
                 file.update(inputStream);
             } catch (final IOException e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL),
                         () -> redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId)));
             }
@@ -285,6 +290,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                 kuromojiService.store(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -306,6 +312,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                 kuromojiService.store(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -326,6 +333,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                 kuromojiService.delete(form.dictId, entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }

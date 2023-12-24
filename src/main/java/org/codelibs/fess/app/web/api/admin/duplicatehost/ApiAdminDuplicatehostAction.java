@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.DuplicateHostPager;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -39,6 +41,8 @@ import org.lastaflute.web.response.JsonResponse;
  * @author Keiichi Watanabe
  */
 public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminDuplicatehostAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -80,6 +84,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
             try {
                 duplicateHostService.store(entity);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -100,6 +105,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
             try {
                 duplicateHostService.store(entity);
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
             return entity;
@@ -118,6 +124,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
                 duplicateHostService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
         }).orElse(() -> {

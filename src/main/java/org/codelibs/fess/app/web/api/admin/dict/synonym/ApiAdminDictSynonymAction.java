@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.app.service.SynonymService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -37,6 +39,8 @@ import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 public class ApiAdminDictSynonymAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminDictSynonymAction.class);
 
     @Resource
     private SynonymService synonymService;
@@ -123,6 +127,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         try (InputStream inputStream = form.synonymFile.getInputStream()) {
             file.update(inputStream);
         } catch (final IOException e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL));
         }
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());

@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -34,6 +36,8 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 public class ApiAdminGroupAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminGroupAction.class);
 
     @Resource
     private GroupService groupService;
@@ -75,6 +79,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
             groupService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -116,6 +121,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
             groupService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());

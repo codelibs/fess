@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.api.ApiResult;
@@ -36,6 +38,8 @@ import org.lastaflute.web.response.JsonResponse;
  * @author Keiichi Watanabe
  */
 public class ApiAdminFailureurlAction extends FessApiAdminAction {
+
+    private static final Logger logger = LogManager.getLogger(ApiAdminFailureurlAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -79,6 +83,7 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
                 failureUrlService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
             } catch (final Exception e) {
+                logger.warn("Failed to process a request.", e);
                 throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
             }
         }).orElse(() -> {
@@ -95,6 +100,7 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
             failureUrlPager.clear();
             saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
         } catch (final Exception e) {
+            logger.warn("Failed to process a request.", e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResponse().status(Status.OK).result());

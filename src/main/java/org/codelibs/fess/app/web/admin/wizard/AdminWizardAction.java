@@ -215,7 +215,7 @@ public class AdminWizardAction extends FessAdminAction {
             }
             return configName;
         } catch (final Exception e) {
-            logger.error("Failed to create crawling config: {}", form.crawlingConfigPath, e);
+            logger.warn("Failed to create crawling config: {}", form.crawlingConfigPath, e);
             throwValidationError(messages -> messages.addErrorsFailedToCreateCrawlingConfigAtWizard(GLOBAL),
                     () -> asHtml(path_AdminWizard_AdminWizardConfigJsp));
             return null;
