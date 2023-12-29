@@ -15,14 +15,21 @@
  */
 package org.codelibs.fess.util;
 
+import static org.apache.commons.io.FileUtils.ONE_EB_BI;
+import static org.apache.commons.io.FileUtils.ONE_GB_BI;
+import static org.apache.commons.io.FileUtils.ONE_KB_BI;
+import static org.apache.commons.io.FileUtils.ONE_MB_BI;
+import static org.apache.commons.io.FileUtils.ONE_PB_BI;
+import static org.apache.commons.io.FileUtils.ONE_TB_BI;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.codelibs.core.lang.StringUtil;
+import java.util.Objects;
 
 public final class MemoryUtil {
     private MemoryUtil() {
@@ -39,7 +46,29 @@ public final class MemoryUtil {
     }
 
     public static String byteCountToDisplaySize(final long size) {
-        return FileUtils.byteCountToDisplaySize(size).replace(" ", StringUtil.EMPTY);
+        return byteCountToDisplaySize(BigInteger.valueOf(size));
+    }
+
+    private static String byteCountToDisplaySize(final BigInteger size) {
+        Objects.requireNonNull(size, "size");
+        final String displaySize;
+
+        if (size.divide(ONE_EB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size.divide(ONE_PB_BI)).divide(BigDecimal.valueOf(1000)) + "EB";
+        } else if (size.divide(ONE_PB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size.divide(ONE_TB_BI)).divide(BigDecimal.valueOf(1000)) + "PB";
+        } else if (size.divide(ONE_TB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size.divide(ONE_GB_BI)).divide(BigDecimal.valueOf(1000)) + "TB";
+        } else if (size.divide(ONE_GB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size.divide(ONE_MB_BI)).divide(BigDecimal.valueOf(1000)) + "GB";
+        } else if (size.divide(ONE_MB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size.divide(ONE_KB_BI)).divide(BigDecimal.valueOf(1000)) + "MB";
+        } else if (size.divide(ONE_KB_BI).compareTo(BigInteger.ZERO) > 0) {
+            displaySize = new BigDecimal(size).divide(BigDecimal.valueOf(1000)) + "KB";
+        } else {
+            displaySize = size + "bytes";
+        }
+        return displaySize;
     }
 
     public static long getUsedMemory() {
