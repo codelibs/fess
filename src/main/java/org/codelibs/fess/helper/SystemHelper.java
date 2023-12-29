@@ -30,14 +30,17 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -122,6 +125,8 @@ public class SystemHelper {
     private long systemCpuCheckInterval = 1000L;
 
     protected Map<String, Supplier<String>> updateConfigListenerMap = new HashMap<>();
+
+    protected Set<String> waitingThreadNames = Collections.synchronizedSet(new HashSet<>());
 
     @PostConstruct
     public void init() {
@@ -589,15 +594,40 @@ public class SystemHelper {
     }
 
     public void calibrateCpuLoad() {
-        final int percent = ComponentUtil.getFessConfig().getAdaptiveLoadControlAsInteger();
+        final short percent = ComponentUtil.getFessConfig().getAdaptiveLoadControlAsInteger().shortValue();
         if (percent <= 0) {
             return;
         }
-        while (getSystemCpuPercent() > percent) {
+        short current = getSystemCpuPercent();
+        if (current < percent) {
+            return;
+        }
+        final String threadName = Thread.currentThread().getName();
+        try {
+            waitingThreadNames.add(threadName);
+            while (current >= percent) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Cpu Load {}% is greater than {}%. {} threads are waiting.", current, percent, waitingThreadNames.size());
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Waiting threads: {}", waitingThreadNames);
+                }
+                ThreadUtil.sleep(systemCpuCheckInterval);
+                current = getSystemCpuPercent();
+            }
+        } finally {
+            waitingThreadNames.remove(threadName);
+        }
+    }
+
+    public void waitForNoWaitingThreads() {
+        int count = waitingThreadNames.size();
+        while (count > 0) {
             if (logger.isInfoEnabled()) {
-                logger.info("Cpu Load {}% is greater than {}%.", getSystemCpuPercent(), percent);
+                logger.info("{} threads are waiting.", count);
             }
             ThreadUtil.sleep(systemCpuCheckInterval);
+            count = waitingThreadNames.size();
         }
     }
 

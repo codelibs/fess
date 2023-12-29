@@ -197,6 +197,9 @@ public class IndexUpdater extends Thread {
                     final int sessionIdListSize = finishedSessionIdList.size();
                     intervalControlHelper.setCrawlerRunning(true);
 
+                    docList.clear();
+                    accessResultList.clear();
+
                     updateTime = System.currentTimeMillis() - updateTime;
 
                     final long interval = updateInterval - updateTime;
@@ -206,9 +209,7 @@ public class IndexUpdater extends Thread {
                     }
 
                     systemHelper.calibrateCpuLoad();
-
-                    docList.clear();
-                    accessResultList.clear();
+                    systemHelper.waitForNoWaitingThreads();
 
                     intervalControlHelper.delayByRules();
 
