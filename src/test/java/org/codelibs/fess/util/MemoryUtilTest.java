@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.codelibs.core.collection.Maps;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.sai.internal.ir.debug.ObjectSizeCalculator;
@@ -26,6 +27,28 @@ import org.codelibs.sai.internal.ir.debug.ObjectSizeCalculator;
 import com.google.common.collect.Lists;
 
 public class MemoryUtilTest extends UnitFessTestCase {
+
+    public void test_byteCountToDisplaySize() {
+        assertEquals("0bytes", MemoryUtil.byteCountToDisplaySize(0L));
+        assertEquals("999bytes", MemoryUtil.byteCountToDisplaySize(999L));
+        assertEquals("1000bytes", MemoryUtil.byteCountToDisplaySize(1000L));
+        assertEquals("1.024KB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_KB));
+        assertEquals("999.999KB", MemoryUtil.byteCountToDisplaySize(999_999L));
+        assertEquals("1000KB", MemoryUtil.byteCountToDisplaySize(1000_000L));
+        assertEquals("1.024MB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_MB));
+        assertEquals("976.562MB", MemoryUtil.byteCountToDisplaySize(999_999_999L));
+        assertEquals("976.562MB", MemoryUtil.byteCountToDisplaySize(1000_000_000L));
+        assertEquals("1.024GB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_GB));
+        assertEquals("953.674GB", MemoryUtil.byteCountToDisplaySize(999_999_999_999L));
+        assertEquals("953.674GB", MemoryUtil.byteCountToDisplaySize(1000_000_000_000L));
+        assertEquals("1.024TB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_TB));
+        assertEquals("931.322TB", MemoryUtil.byteCountToDisplaySize(999_999_999_999_999L));
+        assertEquals("931.322TB", MemoryUtil.byteCountToDisplaySize(1000_000_000_000_000L));
+        assertEquals("1.024PB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_PB));
+        assertEquals("909.494PB", MemoryUtil.byteCountToDisplaySize(999_999_999_999_999_999L));
+        assertEquals("909.494PB", MemoryUtil.byteCountToDisplaySize(1000_000_000_000_000_000L));
+        assertEquals("1.024EB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_EB));
+    }
 
     public void test_getUsedMemory() {
         assertTrue(MemoryUtil.getUsedMemory() >= 0);
