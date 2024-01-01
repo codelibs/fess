@@ -67,6 +67,7 @@
 			<id>integrationTests</id>
 			<properties>
 				<test.include.path>**/*Tests.java</test.include.path>
+				<test.command.args></test.command.args>
 			</properties>
 		</profile>
 	</profiles>
