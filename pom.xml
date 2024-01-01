@@ -135,9 +135,13 @@
 					<includes>
 						<include>${test.include.path}</include>
 					</includes>
-					<argLine>${test.command.args}</argLine>
+					<argLine>@{argLine} ${test.command.args}</argLine>
 					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
