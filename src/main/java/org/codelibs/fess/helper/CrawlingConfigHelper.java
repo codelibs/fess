@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -123,7 +122,7 @@ public class CrawlingConfigHelper {
                 default -> null;
                 };
             });
-        } catch (final ExecutionException e) {
+        } catch (final Exception e) {
             logger.warn("Failed to access a crawling config cache: {}", configId, e);
             return null;
         }
