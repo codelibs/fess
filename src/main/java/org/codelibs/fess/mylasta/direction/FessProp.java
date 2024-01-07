@@ -694,8 +694,8 @@ public interface FessProp {
     }
 
     default String getUserAgentName() {
-        return getSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, "Mozilla/5.0 (compatible; Fess/"
-                + ComponentUtil.getSystemHelper().getProductVersion() + "; +http://fess.codelibs.org/bot.html)");
+        return getSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, Constants.CRAWLING_USER_AGENT_PREFIX
+                + ComponentUtil.getSystemHelper().getProductVersion() + Constants.CRAWLING_USER_AGENT_SUFFIX);
     }
 
     default void setLtrModelName(final String value) {

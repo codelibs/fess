@@ -88,6 +88,7 @@ import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.security.PrimaryCipher;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.exception.AutoBindingFailureException;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
@@ -520,6 +521,7 @@ public final class ComponentUtil {
         return getComponent(RANK_FUSION_PROCESSOR);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getComponent(final Class<T> clazz) {
         try {
             return SingletonLaContainer.getComponent(clazz);
@@ -528,6 +530,11 @@ public final class ComponentUtil {
                 throw new ContainerNotAvailableException(clazz.getCanonicalName(), e);
             }
             throw new ContainerNotAvailableException(clazz.getCanonicalName());
+        } catch (final ComponentNotFoundException | AutoBindingFailureException e) {
+            if (componentMap.containsKey(clazz.getCanonicalName())) {
+                return (T) componentMap.get(clazz.getCanonicalName());
+            }
+            throw e;
         }
     }
 
@@ -540,7 +547,7 @@ public final class ComponentUtil {
                 throw new ContainerNotAvailableException(componentName, e);
             }
             throw new ContainerNotAvailableException(componentName);
-        } catch (final ComponentNotFoundException e) {
+        } catch (final ComponentNotFoundException | AutoBindingFailureException e) {
             if (componentMap.containsKey(componentName)) {
                 return (T) componentMap.get(componentName);
             }

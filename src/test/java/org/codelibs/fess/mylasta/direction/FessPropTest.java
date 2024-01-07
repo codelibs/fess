@@ -21,10 +21,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
@@ -260,6 +264,30 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(fessConfig.isValidUserCode("123456789"));
         assertFalse(fessConfig.isValidUserCode("123456789012345678901"));
         assertFalse(fessConfig.isValidUserCode("123456789?"));
+    }
+
+    public void test_getUserAgentName() throws IOException {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+        };
+        ComponentUtil.setFessConfig(fessConfig);
+        SystemHelper systemHelper = new SystemHelper() {
+            @Override
+            public String getProductVersion() {
+                return "98.76";
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+
+        assertEquals("Mozilla/5.0 (compatible; Fess/98.76; +http://fess.codelibs.org/bot.html)", fessConfig.getUserAgentName());
+
+        systemPropMap.put(Constants.CRAWLING_USER_AGENT_PROPERTY, "TestAgent");
+        assertEquals("TestAgent", fessConfig.getUserAgentName());
     }
 
     private void assertArrays(final String[] expected, final String[] actual) {
