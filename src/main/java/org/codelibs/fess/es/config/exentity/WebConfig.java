@@ -173,7 +173,13 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
         final String userAgent = getUserAgent();
         if (StringUtil.isNotBlank(userAgent)) {
-            paramMap.put(Client.USER_AGENT, userAgent);
+            if (userAgent.startsWith(Constants.CRAWLING_USER_AGENT_PREFIX) && userAgent.endsWith(Constants.CRAWLING_USER_AGENT_SUFFIX)) {
+                paramMap.put(Client.USER_AGENT, fessConfig.getUserAgentName());
+            } else {
+                paramMap.put(Client.USER_AGENT, userAgent);
+            }
+        } else {
+            paramMap.put(Client.USER_AGENT, fessConfig.getUserAgentName());
         }
 
         final List<WebAuthentication> webAuthList = webAuthenticationService.getWebAuthenticationList(getId());

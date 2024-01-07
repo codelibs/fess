@@ -79,6 +79,10 @@ public class Constants extends CoreLibConstants {
 
     public static final long DEFAULT_CRAWLING_EXECUTION_INTERVAL = 5000L;
 
+    public static final String CRAWLING_USER_AGENT_PREFIX = "Mozilla/5.0 (compatible; Fess/";
+
+    public static final String CRAWLING_USER_AGENT_SUFFIX = "; +http://fess.codelibs.org/bot.html)";
+
     // fess properties
     public static final String USER_INFO_PROPERTY = "user.info";
 
