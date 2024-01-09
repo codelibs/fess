@@ -170,7 +170,7 @@ public class SystemHelper {
 
         ComponentUtil.doInitProcesses(Runnable::run);
 
-        parseProjectProperties();
+        parseProjectProperties(ResourceUtil.getProjectPropertiesFile());
 
         updateConfigListenerMap.put("Label", () -> Integer.toString(ComponentUtil.getLabelTypeHelper().load()));
         updateConfigListenerMap.put("PathMapping", () -> Integer.toString(ComponentUtil.getPathMappingHelper().load()));
@@ -179,8 +179,7 @@ public class SystemHelper {
         updateConfigListenerMap.put("KeyMatch", () -> Integer.toString(ComponentUtil.getKeyMatchHelper().load()));
     }
 
-    protected void parseProjectProperties() {
-        final Path propPath = ResourceUtil.getProjectPropertiesFile();
+    protected void parseProjectProperties(final Path propPath) {
         try (final InputStream in = Files.newInputStream(propPath)) {
             final Properties prop = new Properties();
             prop.load(in);
@@ -358,7 +357,7 @@ public class SystemHelper {
     }
 
     public void setForceStop(final boolean b) {
-        forceStop.set(true);
+        forceStop.set(b);
     }
 
     public String generateDocId(final Map<String, Object> map) {
