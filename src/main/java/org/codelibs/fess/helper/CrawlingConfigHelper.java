@@ -151,12 +151,12 @@ public class CrawlingConfigHelper {
         return sessionCountId;
     }
 
-    public void remove(final String sessionId) {
-        crawlingConfigMap.remove(sessionId);
+    public void remove(final String sessionCountId) {
+        crawlingConfigMap.remove(sessionCountId);
     }
 
-    public CrawlingConfig get(final String sessionId) {
-        return crawlingConfigMap.get(sessionId);
+    public CrawlingConfig get(final String sessionCountId) {
+        return crawlingConfigMap.get(sessionCountId);
     }
 
     public List<WebConfig> getAllWebConfigList() {
@@ -277,6 +277,10 @@ public class CrawlingConfigHelper {
     }
 
     public OptionalEntity<CrawlingConfig> getDefaultConfig(final ConfigType configType) {
+        if (configType == null) {
+            return OptionalEntity.empty();
+        }
+
         final String name = ComponentUtil.getFessConfig().getFormAdminDefaultTemplateName();
 
         return switch (configType) {
