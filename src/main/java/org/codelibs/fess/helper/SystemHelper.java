@@ -27,7 +27,9 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -53,7 +55,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -212,7 +213,7 @@ public class SystemHelper {
     }
 
     public Date getCurrentTime() {
-        return new Date();
+        return new Date(getCurrentTimeAsLong());
     }
 
     public long getCurrentTimeAsLong() {
@@ -220,7 +221,8 @@ public class SystemHelper {
     }
 
     public LocalDateTime getCurrentTimeAsLocalDateTime() {
-        return LocalDateTime.now();
+        final Instant instant = Instant.ofEpochMilli(getCurrentTimeAsLong());
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     public String getLogFilePath() {
@@ -333,23 +335,30 @@ public class SystemHelper {
         return designJspFileNameMap.entrySet().stream().map(e -> new Pair<>(e.getKey(), e.getValue())).toArray(n -> new Pair[n]);
     }
 
-    public void refreshDesignJspFiles() {
-        final ServletContext servletContext = LaServletContextUtil.getServletContext();
+    public List<Path> refreshDesignJspFiles() {
+        final List<Path> fileList = new ArrayList<>();
         stream(ComponentUtil.getVirtualHostHelper().getVirtualHostPaths())
                 .of(stream -> stream.filter(s -> s != null && !"/".equals(s)).forEach(key -> {
                     designJspFileNameMap.entrySet().stream().forEach(e -> {
-                        final File jspFile = new File(servletContext.getRealPath("/WEB-INF/view" + key + "/" + e.getValue()));
+                        final File jspFile = getDesignJspFile("/WEB-INF/view" + key + "/" + e.getValue());
                         if (!jspFile.exists()) {
                             jspFile.getParentFile().mkdirs();
-                            final File baseJspFile = new File(servletContext.getRealPath("/WEB-INF/view/" + e.getValue()));
+                            final File baseJspFile = getDesignJspFile("/WEB-INF/view/" + e.getValue());
                             try {
-                                Files.copy(baseJspFile.toPath(), jspFile.toPath());
+                                final Path jspPath = jspFile.toPath();
+                                Files.copy(baseJspFile.toPath(), jspPath);
+                                fileList.add(jspPath);
                             } catch (final IOException ex) {
                                 logger.warn("Could not copy from {} to {}", baseJspFile.getAbsolutePath(), jspFile.getAbsolutePath(), ex);
                             }
                         }
                     });
                 }));
+        return fileList;
+    }
+
+    protected File getDesignJspFile(final String path) {
+        return new File(LaServletContextUtil.getServletContext().getRealPath(path));
     }
 
     public boolean isForceStop() {
