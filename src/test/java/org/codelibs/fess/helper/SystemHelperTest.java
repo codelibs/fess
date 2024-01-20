@@ -18,16 +18,21 @@ package org.codelibs.fess.helper;
 import java.io.File;
 import java.nio.file.Path;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.core.misc.Tuple3;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -37,7 +42,7 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     public SystemHelper systemHelper;
 
-    private Map<String, String> envMap = new HashMap<>();
+    private final Map<String, String> envMap = new HashMap<>();
 
     @Override
     public void setUp() throws Exception {
@@ -45,6 +50,9 @@ public class SystemHelperTest extends UnitFessTestCase {
         final File propFile = File.createTempFile("project", ".properties");
         propFile.deleteOnExit();
         FileUtil.writeBytes(propFile.getAbsolutePath(), "fess.version=98.76.5".getBytes());
+        final File desginJspRootFile = File.createTempFile("jsp", "");
+        desginJspRootFile.delete();
+        desginJspRootFile.deleteOnExit();
         systemHelper = new SystemHelper() {
             @Override
             protected void parseProjectProperties(final Path propPath) {
@@ -59,9 +67,15 @@ public class SystemHelperTest extends UnitFessTestCase {
             protected Map<String, String> getEnvMap() {
                 return envMap;
             }
+
+            @Override
+            protected File getDesignJspFile(String path) {
+                return new File(desginJspRootFile, path);
+            }
         };
         envMap.clear();
         systemHelper.init();
+        systemHelper.addShutdownHook(() -> {});
         ComponentUtil.register(systemHelper, "systemHelper");
     }
 
@@ -74,7 +88,7 @@ public class SystemHelperTest extends UnitFessTestCase {
                 1000 * systemHelper.getCurrentTimeAsLocalDateTime().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
         final long now = System.currentTimeMillis();
         assertTrue(now + ">=" + current + " : " + (now - current), now >= current);
-        assertTrue((now - 1000) + "<" + current + " : " + (current - now + 1000), now - 1000 < current);
+        assertTrue(now - 1000 + "<" + current + " : " + (current - now + 1000), now - 1000 < current);
     }
 
     public void test_getLogFilePath() {
@@ -90,10 +104,34 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     public void test_getForumLink() {
+        getMockRequest().setLocale(Locale.ENGLISH);
         assertEquals("https://discuss.codelibs.org/c/FessEN/", systemHelper.getForumLink());
+        getMockRequest().setLocale(Locale.JAPANESE);
+        assertEquals("https://discuss.codelibs.org/c/FessJA/", systemHelper.getForumLink());
+        getMockRequest().setLocale(Locale.ITALIAN);
+        assertEquals("https://discuss.codelibs.org/c/FessEN/", systemHelper.getForumLink());
+        getMockRequest().setLocale(null);
+        assertEquals("https://discuss.codelibs.org/c/FessEN/", systemHelper.getForumLink());
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getForumLink() {
+                return StringUtil.EMPTY;
+            }
+        });
+        getMockRequest().setLocale(Locale.ENGLISH);
+        assertNull(systemHelper.getForumLink());
     }
 
     public void test_getHelpLink() {
+        getMockRequest().setLocale(Locale.ENGLISH);
+        assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
+        getMockRequest().setLocale(Locale.JAPANESE);
+        assertEquals("https://fess.codelibs.org/ja/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
+        getMockRequest().setLocale(Locale.ITALIAN);
+        assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
+        getMockRequest().setLocale(null);
         assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
     }
 
@@ -128,9 +166,9 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     public void test_getLanguageItems() {
-        List<Map<String, String>> enItems = systemHelper.getLanguageItems(Locale.ENGLISH);
+        final List<Map<String, String>> enItems = systemHelper.getLanguageItems(Locale.ENGLISH);
         assertEquals(55, enItems.size());
-        List<Map<String, String>> jaItems = systemHelper.getLanguageItems(Locale.JAPANESE);
+        final List<Map<String, String>> jaItems = systemHelper.getLanguageItems(Locale.JAPANESE);
         assertEquals(55, jaItems.size());
     }
 
@@ -152,6 +190,22 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     public void test_isEoled() {
         assertEquals(systemHelper.getCurrentTimeAsLong() > systemHelper.eolTime, systemHelper.isEoled());
+        final SystemHelper helper1 = new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return systemHelper.eolTime + 1000L;
+            }
+        };
+        helper1.eolTime = systemHelper.eolTime;
+        assertTrue(helper1.isEoled());
+        final SystemHelper helper2 = new SystemHelper() {
+            @Override
+            public long getCurrentTimeAsLong() {
+                return systemHelper.eolTime - 1000L;
+            }
+        };
+        helper2.eolTime = systemHelper.eolTime;
+        assertFalse(helper2.isEoled());
     }
 
     public void test_updateConfiguration() {
@@ -228,6 +282,28 @@ public class SystemHelperTest extends UnitFessTestCase {
 
         path = "[]^$.*+?,{}|%\\";
         assertEquals(path, systemHelper.encodeUrlFilter(path));
+
+        systemHelper.filterPathEncoding = null;
+        path = "あいう";
+        assertEquals(path, systemHelper.encodeUrlFilter(path));
+
+        systemHelper.filterPathEncoding = "xxx";
+        path = "あいう";
+        assertEquals(path, systemHelper.encodeUrlFilter(path));
+    }
+
+    public void test_normalizeHtmlLang() {
+        assertEquals("ja", systemHelper.normalizeHtmlLang("ja"));
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlDefaultLang() {
+                return "en";
+            }
+        });
+        assertEquals("en", systemHelper.normalizeHtmlLang("ja"));
     }
 
     public void test_normalizeLang() {
@@ -275,6 +351,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
+            @Override
             public boolean isLdapIgnoreNetbiosName() {
                 return true;
             }
@@ -288,6 +365,7 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     public void test_normalizeConfigPath() {
         assertEquals("", systemHelper.normalizeConfigPath(""));
+        assertEquals("", systemHelper.normalizeConfigPath("#hash"));
         assertEquals(".*\\Qwww.domain.com/test\\E.*", systemHelper.normalizeConfigPath("contains:www.domain.com/test"));
         assertEquals(".*\\Q/test/\\E.*", systemHelper.normalizeConfigPath("contains:/test/"));
         assertEquals("www.domain.com/test", systemHelper.normalizeConfigPath("www.domain.com/test"));
@@ -333,5 +411,70 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("1", systemHelper.getSearchRoleByUser(""));
         assertEquals("R", systemHelper.getSearchRoleByRole(""));
         assertEquals("2", systemHelper.getSearchRoleByGroup(""));
+    }
+
+    public void test_parseProjectProperties() {
+        try {
+            new SystemHelper().parseProjectProperties(null);
+            assertTrue(false);
+        } catch (final FessSystemException e) {
+            // ok
+        }
+    }
+
+    public void test_refreshDesignJspFiles() {
+        final VirtualHostHelper virtualHostHelper = new VirtualHostHelper();
+        ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
+        final List<Tuple3<String, String, String>> virtualHostList = new ArrayList<>();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Tuple3<String, String, String>[] getVirtualHosts() {
+                return virtualHostList.toArray(n -> new Tuple3[n]);
+            }
+        });
+
+        List<Path> fileList = systemHelper.refreshDesignJspFiles();
+        assertEquals(0, fileList.size());
+
+        virtualHostList.add(new Tuple3<>("abc.example.com", "8080", "host1"));
+        fileList = systemHelper.refreshDesignJspFiles();
+        assertEquals(0, fileList.size());
+
+        systemHelper.addDesignJspFileName("xxx", "yyy.jsp");
+        final File designJspFile = systemHelper.getDesignJspFile("/WEB-INF/view/yyy.jsp");
+        designJspFile.getParentFile().mkdirs();
+        FileUtil.writeBytes(designJspFile.getAbsolutePath(), "ok".getBytes());
+        fileList = systemHelper.refreshDesignJspFiles();
+        assertEquals(1, fileList.size());
+        assertEquals("ok", FileUtil.readText(fileList.get(0).toFile()));
+    }
+
+    public void test_updateSystemProperties() {
+        final SystemHelper helper = new SystemHelper();
+        final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getAppValue() {
+                return appValue.get();
+            }
+
+            @Override
+            public String getAppEncryptPropertyPattern() {
+                return ".*password|.*key|.*token|.*secret";
+            }
+        });
+        final String now = String.valueOf(System.currentTimeMillis());
+        helper.updateSystemProperties();
+        assertNull(System.getProperty("fess." + now));
+        assertNull(System.getProperty("test." + now));
+        appValue.set("=abc\nfess." + now + "=test1\ntest." + now + "=test2");
+        helper.updateSystemProperties();
+        assertEquals("test1", System.getProperty("fess." + now));
+        assertEquals("test2", System.getProperty("test." + now));
     }
 }
