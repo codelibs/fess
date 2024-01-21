@@ -47,7 +47,8 @@ public class IndexingHelper {
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final long execTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long execTime = systemHelper.getCurrentTimeAsLong();
         if (logger.isDebugEnabled()) {
             logger.debug("Sending {} documents to a server.", docList.size());
         }
@@ -79,10 +80,10 @@ public class IndexingHelper {
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
                     logger.info("Sent {} docs (Doc:{process {}ms, send {}ms, size {}}, {})", docList.size(), docList.getProcessingTime(),
-                            (System.currentTimeMillis() - execTime), MemoryUtil.byteCountToDisplaySize(docList.getContentSize()),
+                            (systemHelper.getCurrentTimeAsLong() - execTime), MemoryUtil.byteCountToDisplaySize(docList.getContentSize()),
                             MemoryUtil.getMemoryUsageLog());
                 } else {
-                    logger.info("Sent {}  docs (Doc:{send {}ms}, {})", docList.size(), (System.currentTimeMillis() - execTime),
+                    logger.info("Sent {}  docs (Doc:{send {}ms}, {})", docList.size(), (systemHelper.getCurrentTimeAsLong() - execTime),
                             MemoryUtil.getMemoryUsageLog());
                 }
             }

@@ -184,14 +184,15 @@ public class DocumentHelper {
             throw new CrawlingAccessException("CrawlerClient is null for " + url);
         }
 
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
         try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
             if (responseData.getRedirectLocation() != null) {
                 final Set<RequestData> childUrlList = new HashSet<>();
                 childUrlList.add(RequestDataBuilder.newRequestData().get().url(responseData.getRedirectLocation()).build());
                 throw new ChildUrlsException(childUrlList, this.getClass().getName() + "#RedirectedFrom:" + url);
             }
-            responseData.setExecutionTime(System.currentTimeMillis() - startTime);
+            responseData.setExecutionTime(systemHelper.getCurrentTimeAsLong() - startTime);
             responseData.setSessionId(crawlingInfoId);
 
             final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);

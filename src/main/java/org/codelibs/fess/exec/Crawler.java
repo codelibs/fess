@@ -54,6 +54,7 @@ import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
@@ -471,8 +472,8 @@ public class Crawler {
         }
 
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
-
-        final long totalTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long totalTime = systemHelper.getCurrentTimeAsLong();
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
@@ -494,8 +495,8 @@ public class Crawler {
             }
 
             // delete expired sessions
-            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name,
-                    ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            SystemHelper systemHelper2 = ComponentUtil.getSystemHelper();
+            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name, systemHelper2.getCurrentTimeAsLong());
 
             final List<String> webConfigIdList = options.getWebConfigIdList();
             final List<String> fileConfigIdList = options.getFileConfigIdList();
@@ -544,7 +545,7 @@ public class Crawler {
                         errors.stream().map(s -> s.replace(" ", StringUtil.EMPTY)).collect(Collectors.joining(" ")));
             }
             writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_END_TIME);
-            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
+            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(systemHelper.getCurrentTimeAsLong() - totalTime));
 
         }
     }

@@ -53,6 +53,7 @@ import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -69,7 +70,8 @@ public class FessCrawlerThread extends CrawlerThread {
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
         if (ComponentUtil.getFessConfig().isIncrementalCrawling()) {
 
-            final long startTime = System.currentTimeMillis();
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final long startTime = systemHelper.getCurrentTimeAsLong();
 
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
@@ -119,7 +121,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
 
                 final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
-                if (expires != null && expires.getTime() < System.currentTimeMillis()) {
+                if (expires != null && expires.getTime() < systemHelper.getCurrentTimeAsLong()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
                     if (idValue != null && !indexingHelper.deleteDocument(searchEngineClient, idValue.toString())) {
                         logger.debug("Failed to delete expired document: {}", url);
@@ -160,7 +162,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
                     log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 
-                    responseData.setExecutionTime(System.currentTimeMillis() - startTime);
+                    responseData.setExecutionTime(systemHelper.getCurrentTimeAsLong() - startTime);
                     responseData.setParentUrl(urlQueue.getParentUrl());
                     responseData.setSessionId(crawlerContext.getSessionId());
                     responseData.setHttpStatusCode(org.codelibs.fess.crawler.Constants.NOT_MODIFIED_STATUS);

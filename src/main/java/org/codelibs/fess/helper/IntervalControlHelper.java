@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class IntervalControlHelper {
 
@@ -61,7 +62,7 @@ public class IntervalControlHelper {
 
     protected Calendar getCurrentCal() {
         final Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(System.currentTimeMillis());
+        cal.setTimeInMillis(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         return cal;
     }
 

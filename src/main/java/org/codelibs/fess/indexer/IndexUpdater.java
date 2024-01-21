@@ -188,7 +188,7 @@ public class IndexUpdater extends Thread {
             final DocList docList = new DocList();
             final List<EsAccessResult> accessResultList = new ArrayList<>();
 
-            long updateTime = System.currentTimeMillis();
+            long updateTime = systemHelper.getCurrentTimeAsLong();
             int errorCount = 0;
             int emptyListCount = 0;
             long cleanupTime = -1;
@@ -200,7 +200,7 @@ public class IndexUpdater extends Thread {
                     docList.clear();
                     accessResultList.clear();
 
-                    updateTime = System.currentTimeMillis() - updateTime;
+                    updateTime = systemHelper.getCurrentTimeAsLong() - updateTime;
 
                     final long interval = updateInterval - updateTime;
                     if (interval > 0) {
@@ -217,7 +217,7 @@ public class IndexUpdater extends Thread {
                         logger.debug("Processing documents in IndexUpdater queue.");
                     }
 
-                    updateTime = System.currentTimeMillis();
+                    updateTime = systemHelper.getCurrentTimeAsLong();
 
                     List<EsAccessResult> arList = getAccessResultList(cb, cleanupTime);
                     if (arList.isEmpty()) {
@@ -246,7 +246,7 @@ public class IndexUpdater extends Thread {
                             cleanupFinishedSessionData();
                         }
                     }
-                    executeTime += System.currentTimeMillis() - updateTime;
+                    executeTime += systemHelper.getCurrentTimeAsLong() - updateTime;
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("Processed documents in IndexUpdater queue.");
@@ -339,7 +339,7 @@ public class IndexUpdater extends Thread {
                 continue;
             }
 
-            final long startTime = System.currentTimeMillis();
+            final long startTime = systemHelper.getCurrentTimeAsLong();
             final AccessResultData<?> accessResultData = getAccessResultData(accessResult);
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
@@ -371,7 +371,7 @@ public class IndexUpdater extends Thread {
                     docList.add(ingest(accessResult, map));
                     final long contentSize = indexingHelper.calculateDocumentSize(map);
                     docList.addContentSize(contentSize);
-                    final long processingTime = System.currentTimeMillis() - startTime;
+                    final long processingTime = systemHelper.getCurrentTimeAsLong() - startTime;
                     docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
                         logger.debug("Added the document({}, {}ms). The number of a document cache is {} (size: {}).",
@@ -485,11 +485,11 @@ public class IndexUpdater extends Thread {
 
     private long cleanupAccessResults(final List<EsAccessResult> accessResultList) {
         if (!accessResultList.isEmpty()) {
-            final long execTime = System.currentTimeMillis();
+            final long execTime = systemHelper.getCurrentTimeAsLong();
             final int size = accessResultList.size();
             dataService.update(accessResultList);
             accessResultList.clear();
-            final long time = System.currentTimeMillis() - execTime;
+            final long time = systemHelper.getCurrentTimeAsLong() - execTime;
             if (logger.isDebugEnabled()) {
                 logger.debug("Updated {} access results. The execution time is {}ms.", size, time);
             }
@@ -502,7 +502,7 @@ public class IndexUpdater extends Thread {
         if (logger.isDebugEnabled()) {
             logger.debug("Getting documents in IndexUpdater queue.");
         }
-        final long execTime = System.currentTimeMillis();
+        final long execTime = systemHelper.getCurrentTimeAsLong();
         final List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!arList.isEmpty()) {
@@ -522,7 +522,7 @@ public class IndexUpdater extends Thread {
             } else {
                 buf.append("no docs in indexing queue (Doc:{access ");
             }
-            buf.append(System.currentTimeMillis() - execTime).append("ms");
+            buf.append(systemHelper.getCurrentTimeAsLong() - execTime).append("ms");
             if (cleanupTime >= 0) {
                 buf.append(", cleanup ").append(cleanupTime).append("ms");
             }
@@ -543,22 +543,23 @@ public class IndexUpdater extends Thread {
     }
 
     private void cleanupFinishedSessionData() {
-        final long execTime = System.currentTimeMillis();
+        final long execTime = systemHelper.getCurrentTimeAsLong();
         // cleanup
         for (final String sessionId : finishedSessionIdList) {
-            final long execTime2 = System.currentTimeMillis();
+            final long execTime2 = systemHelper.getCurrentTimeAsLong();
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleting document data: {}", sessionId);
             }
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted {} documents. The execution time is {}ms.", sessionId, (System.currentTimeMillis() - execTime2));
+                logger.debug("Deleted {} documents. The execution time is {}ms.", sessionId,
+                        (systemHelper.getCurrentTimeAsLong() - execTime2));
             }
         }
         finishedSessionIdList.clear();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted completed document data. The execution time is {}ms.", (System.currentTimeMillis() - execTime));
+            logger.info("Deleted completed document data. The execution time is {}ms.", (systemHelper.getCurrentTimeAsLong() - execTime));
         }
     }
 

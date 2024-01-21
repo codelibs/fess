@@ -236,7 +236,8 @@ public class ThumbnailManager {
     }
 
     protected void process(final FessConfig fessConfig, final ThumbnailQueue entity) {
-        ComponentUtil.getSystemHelper().calibrateCpuLoad();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        systemHelper.calibrateCpuLoad();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Processing thumbnail: {}", entity);
@@ -245,14 +246,14 @@ public class ThumbnailManager {
         try {
             final File outputFile = new File(baseDir, entity.getPath());
             final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
-            if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
+            if (!noImageFile.isFile() || systemHelper.getCurrentTimeAsLong() - noImageFile.lastModified() > noImageExpired) {
                 if (noImageFile.isFile() && !noImageFile.delete()) {
                     logger.warn("Failed to delete {}", noImageFile.getAbsolutePath());
                 }
                 final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
                 if (generator.isAvailable()) {
                     if (!generator.generate(entity.getThumbnailId(), outputFile)) {
-                        new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
+                        new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(systemHelper.getCurrentTimeAsLong());
                     } else {
                         final long interval = fessConfig.getThumbnailGeneratorIntervalAsInteger().longValue();
                         if (interval > 0) {
@@ -448,7 +449,7 @@ public class ThumbnailManager {
 
         @Override
         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-            if (System.currentTimeMillis() - Files.getLastModifiedTime(file).toMillis() > expiry) {
+            if (ComponentUtil.getSystemHelper().getCurrentTimeAsLong() - Files.getLastModifiedTime(file).toMillis() > expiry) {
                 deletedFileList.add(file);
                 if (deletedFileList.size() > maxPurgeSize) {
                     deleteFiles();

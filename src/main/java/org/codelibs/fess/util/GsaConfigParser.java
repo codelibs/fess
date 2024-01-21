@@ -126,7 +126,7 @@ public class GsaConfigParser extends DefaultHandler {
             throw new GsaConfigException("Invalid format.");
         }
         if (COLLECTION.equalsIgnoreCase(qName) && COLLECTIONS.equalsIgnoreCase(tagQueue.peekLast())) {
-            final long now = System.currentTimeMillis();
+            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
             final String name = attributes.getValue("Name");
             labelType = new LabelType();
             labelType.setName(name);
@@ -165,7 +165,7 @@ public class GsaConfigParser extends DefaultHandler {
         } else if (GLOBALPARAMS.equalsIgnoreCase(qName)) {
             final Object startUrls = globalParams.get(START_URLS);
             if (startUrls != null) {
-                final long now = System.currentTimeMillis();
+                final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                 final List<String> urlList = split(startUrls.toString(), "\n")
                         .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toList()));
 

@@ -116,7 +116,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         @Override
         public boolean refresh() {
-            if (authResult.getExpiresAfter() < System.currentTimeMillis()) {
+            if (authResult.getExpiresAfter() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
                 return false;
             }
             final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);

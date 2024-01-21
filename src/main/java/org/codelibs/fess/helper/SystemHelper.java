@@ -641,7 +641,7 @@ public class SystemHelper {
     }
 
     protected short getSystemCpuPercent() {
-        final long now = System.currentTimeMillis();
+        final long now = getCurrentTimeAsLong();
         if (now - systemCpuCheckTime > systemCpuCheckInterval) {
             synchronized (this) {
                 if (now - systemCpuCheckTime > systemCpuCheckInterval) {

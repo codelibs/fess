@@ -50,6 +50,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
         indexingHelper = new IndexingHelper() {
             @Override
             protected long getDocumentSizeByQuery(final SearchEngineClient searchEngineClient, final QueryBuilder queryBuilder,

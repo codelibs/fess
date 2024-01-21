@@ -66,6 +66,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
@@ -755,7 +756,8 @@ public class SearchEngineClient implements Client {
 
     protected void waitForYellowStatus(final FessConfig fessConfig) {
         Exception cause = null;
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
         for (int i = 0; i < maxEsStatusRetry; i++) {
             try {
                 final ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
@@ -784,7 +786,7 @@ public class SearchEngineClient implements Client {
         }
         final String message =
                 "Fesen (" + SystemUtil.getSearchEngineHttpAddress() + ") is not available. Check the state of your Fesen cluster ("
-                        + clusterName + ") in " + (System.currentTimeMillis() - startTime) + "ms.";
+                        + clusterName + ") in " + (systemHelper.getCurrentTimeAsLong() - startTime) + "ms.";
         throw new ContainerInitFailureException(message, cause);
     }
 
@@ -924,21 +926,23 @@ public class SearchEngineClient implements Client {
 
     protected <T> T get(final String index, final String id, final SearchCondition<GetRequestBuilder> condition,
             final SearchResult<T, GetRequestBuilder, GetResponse> searchResult) {
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
 
         GetResponse response = null;
         final GetRequestBuilder requestBuilder = client.prepareGet(index, id);
         if (condition.build(requestBuilder)) {
             response = requestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
         }
-        final long execTime = System.currentTimeMillis() - startTime;
+        final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
 
         return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {}));
     }
 
     public <T> T search(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final SearchResult<T, SearchRequestBuilder, SearchResponse> searchResult) {
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
 
         SearchResponse searchResponse = null;
         final SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index);
@@ -966,7 +970,7 @@ public class SearchEngineClient implements Client {
                         "Failed query: " + searchRequestBuilder, e);
             }
         }
-        final long execTime = System.currentTimeMillis() - startTime;
+        final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
 
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
     }

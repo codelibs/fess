@@ -1086,10 +1086,11 @@ public class LdapManager {
                 controls.setReturningAttributes(returningAttrs);
             }
 
-            final long startTime = System.currentTimeMillis();
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final long startTime = systemHelper.getCurrentTimeAsLong();
             final List<SearchResult> list = Collections.list(holder.get().search(baseDn, filter, controls));
             if (logger.isDebugEnabled()) {
-                logger.debug("LDAP search[{}ms]: {} - {}", System.currentTimeMillis() - startTime, baseDn, filter);
+                logger.debug("LDAP search[{}ms]: {} - {}", systemHelper.getCurrentTimeAsLong() - startTime, baseDn, filter);
             }
             consumer.accept(list);
         } catch (final NamingException e) {

@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.PluginHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -71,7 +72,7 @@ public class DataStoreFactory {
     }
 
     public String[] getDataStoreNames() {
-        final long now = System.currentTimeMillis();
+        final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         if (now - lastLoadedTime > 60000L) {
             final List<String> nameList = loadDataStoreNameList();
             dataStoreNames = nameList.toArray(n -> new String[nameList.size()]);
