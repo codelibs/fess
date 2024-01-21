@@ -66,7 +66,7 @@ public class AllJobScheduler implements LaJobScheduler {
 
     @Override
     public void schedule(final LaCron cron) {
-        schedulerTime = System.currentTimeMillis();
+        schedulerTime = systemHelper.getCurrentTimeAsLong();
         scheduledJobService.start(cron);
 
         final String myName = fessConfig.getSchedulerTargetName();
@@ -81,7 +81,7 @@ public class AllJobScheduler implements LaJobScheduler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Updating scheduled jobs. time:{}", schedulerTime);
             }
-            final long now = System.currentTimeMillis();
+            final long now = systemHelper.getCurrentTimeAsLong();
             scheduledJobService.getScheduledJobListAfter(schedulerTime).forEach(scheduledJob -> {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Updating job schedule:{}", scheduledJob.getName());

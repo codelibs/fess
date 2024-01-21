@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class CrawlerStatsHelperTest extends UnitFessTestCase {
 
@@ -31,6 +32,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
         crawlerStatsHelper = new CrawlerStatsHelper() {
             @Override
             protected void log(final StringBuilder buf) {

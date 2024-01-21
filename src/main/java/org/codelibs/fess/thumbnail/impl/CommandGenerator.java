@@ -57,7 +57,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         if (baseDir == null) {
             baseDir = new File(System.getProperty("java.io.tmpdir"));
         }
-        destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
+        destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + ComponentUtil.getSystemHelper().getCurrentTimeAsLong(), true);
         updateProperties();
     }
 

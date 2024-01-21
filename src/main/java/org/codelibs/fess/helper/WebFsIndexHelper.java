@@ -94,7 +94,7 @@ public class WebFsIndexHelper {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        final long startTime = System.currentTimeMillis();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
 
         final List<String> sessionIdList = new ArrayList<>();
         crawlerList.clear();
@@ -443,7 +443,7 @@ public class WebFsIndexHelper {
         // put cralwing info
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
-        final long execTime = System.currentTimeMillis() - startTime;
+        final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] crawling time: {}ms", execTime);

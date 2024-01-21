@@ -75,7 +75,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         systemHelper.calibrateCpuLoad();
 
-        final long startTime = System.currentTimeMillis();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
 
@@ -122,7 +122,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             docList.add(ingest(paramMap, dataMap));
             final long contentSize = indexingHelper.calculateDocumentSize(dataMap);
             docList.addContentSize(contentSize);
-            final long processingTime = System.currentTimeMillis() - startTime;
+            final long processingTime = systemHelper.getCurrentTimeAsLong() - startTime;
             docList.addProcessingTime(processingTime);
             if (logger.isDebugEnabled()) {
                 logger.debug("Added the document({}, {}ms). The number of a document cache is {}.",

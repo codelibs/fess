@@ -224,8 +224,8 @@ public class SuggestHelper {
             reader.setLimitOfDocumentSize(fessConfig.getSuggestUpdateContentsLimitDocSizeAsInteger());
 
             final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
-            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(
-                    ScoreFunctionBuilders.randomFunction().seed(System.currentTimeMillis()).setField(fessConfig.getIndexFieldDocId())));
+            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
+                    .seed(ComponentUtil.getSystemHelper().getCurrentTimeAsLong()).setField(fessConfig.getIndexFieldDocId())));
             reader.setQuery(QueryBuilders
                     .functionScoreQuery(QueryBuilders.matchAllQuery(),
                             flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()]))

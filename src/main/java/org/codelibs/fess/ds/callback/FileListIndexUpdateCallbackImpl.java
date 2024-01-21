@@ -54,6 +54,7 @@ import org.codelibs.fess.helper.CrawlerStatsHelper;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.helper.IndexingHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
@@ -212,14 +213,15 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected String processRequest(final DataStoreParams paramMap, final Map<String, Object> dataMap, final String url,
             final CrawlerClient client) {
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
         final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
         final StatsKeyObject keyObj = paramMap.get(Constants.CRAWLER_STATS_KEY) instanceof final StatsKeyObject sko ? sko : null;
         try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
             if (responseData.getRedirectLocation() != null) {
                 return responseData.getRedirectLocation();
             }
-            responseData.setExecutionTime(System.currentTimeMillis() - startTime);
+            responseData.setExecutionTime(systemHelper.getCurrentTimeAsLong() - startTime);
             if (dataMap.containsKey(Constants.SESSION_ID)) {
                 responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
             } else {

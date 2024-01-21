@@ -76,8 +76,9 @@ public class SearchHelper {
     //                                                                      ==============
 
     public void search(final SearchRequestParams params, final SearchRenderData data, final OptionalThing<FessUserBean> userBean) {
-        final long requestedTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
+        final long requestedTime = startTime;
 
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
@@ -112,7 +113,7 @@ public class SearchHelper {
             data.setAppendHighlightParams(buf.toString());
         }
 
-        queryResponseList.setExecTime(System.currentTimeMillis() - startTime);
+        queryResponseList.setExecTime(systemHelper.getCurrentTimeAsLong() - startTime);
         final NumberFormat nf = NumberFormat.getInstance(params.getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);

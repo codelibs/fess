@@ -168,7 +168,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             stateMap = new HashMap<>();
             session.setAttribute(STATES, stateMap);
         }
-        final StateData stateData = new StateData(nonce, System.currentTimeMillis());
+        final StateData stateData = new StateData(nonce, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         if (logger.isDebugEnabled()) {
             logger.debug("store {} in session", stateData);
         }
@@ -319,7 +319,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         @SuppressWarnings("unchecked")
         final Map<String, StateData> states = (Map<String, StateData>) session.getAttribute(STATES);
         if (states != null) {
-            final long now = System.currentTimeMillis();
+            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
             states.entrySet().stream().filter(e -> (now - e.getValue().getExpiration()) / 1000L > getStateTtl()).map(Map.Entry::getKey)
                     .collect(Collectors.toList()).forEach(s -> {
                         if (logger.isDebugEnabled()) {

@@ -104,15 +104,16 @@ public class AdminEsreqAction extends FessAdminAction {
                     }
                     throw e1;
                 }
-                return asStream("es_" + System.currentTimeMillis() + ".json").contentTypeOctetStream().stream(out -> {
-                    try (final InputStream in = new FileInputStream(tempFile)) {
-                        out.write(in);
-                    } finally {
-                        if (tempFile.exists() && !tempFile.delete()) {
-                            logger.warn("Failed to delete {}", tempFile.getAbsolutePath());
-                        }
-                    }
-                });
+                return asStream("es_" + ComponentUtil.getSystemHelper().getCurrentTimeAsLong() + ".json").contentTypeOctetStream()
+                        .stream(out -> {
+                            try (final InputStream in = new FileInputStream(tempFile)) {
+                                out.write(in);
+                            } finally {
+                                if (tempFile.exists() && !tempFile.delete()) {
+                                    logger.warn("Failed to delete {}", tempFile.getAbsolutePath());
+                                }
+                            }
+                        });
             } catch (final Exception e) {
                 logger.warn("Failed to process request file: {}", form.requestFile.getFileName(), e);
                 throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, e.getMessage()),

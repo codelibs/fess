@@ -20,10 +20,17 @@ import java.io.InputStream;
 
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.fess.es.config.exentity.LabelType;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.xml.sax.InputSource;
 
 public class GsaConfigParserTest extends UnitFessTestCase {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+    }
 
     public void test_parse() throws IOException {
         GsaConfigParser parser = new GsaConfigParser();

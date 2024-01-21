@@ -82,7 +82,8 @@ public class DataIndexHelper {
     protected void doCrawl(final String sessionId, final List<DataConfig> configList) {
         final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
-        final long startTime = System.currentTimeMillis();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long startTime = systemHelper.getCurrentTimeAsLong();
 
         final IndexUpdateCallback indexUpdateCallback = ComponentUtil.getComponent(IndexUpdateCallback.class);
 
@@ -106,8 +107,6 @@ public class DataIndexHelper {
             dataCrawlingThreadStatusList.add(Constants.READY);
 
         }
-
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         int startedCrawlerNum = 0;
         int activeCrawlerNum = 0;
@@ -160,7 +159,7 @@ public class DataIndexHelper {
         // put cralwing info
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
-        final long execTime = System.currentTimeMillis() - startTime;
+        final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
         crawlingInfoHelper.putToInfoMap(Constants.DATA_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] crawling time: {}ms", execTime);

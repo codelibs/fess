@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.taglib.FessFunctions;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
 import com.google.common.cache.CacheBuilder;
@@ -85,7 +86,7 @@ public class CrawlerStatsHelper {
             try {
                 statsCache.get(key);
             } catch (final Exception e) {
-                final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
+                final StringBuilder buf = createStringBuffer(keyObj, getCurrentTimeMillis());
                 buf.append('\t').append("action:begin");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
                 log(buf);
@@ -102,10 +103,10 @@ public class CrawlerStatsHelper {
             try {
                 final StatsObject data = statsCache.getIfPresent(key);
                 if (data != null) {
-                    data.put(escapeValue(action), System.currentTimeMillis());
+                    data.put(escapeValue(action), getCurrentTimeMillis());
                 }
             } catch (final Exception e) {
-                final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
+                final StringBuilder buf = createStringBuffer(keyObj, getCurrentTimeMillis());
                 buf.append('\t').append("action:record");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
                 log(buf);
@@ -125,7 +126,7 @@ public class CrawlerStatsHelper {
                     }
                 }
             } catch (final Exception e) {
-                final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
+                final StringBuilder buf = createStringBuffer(keyObj, getCurrentTimeMillis());
                 buf.append('\t').append("action:done");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
                 log(buf);
@@ -141,7 +142,7 @@ public class CrawlerStatsHelper {
                     statsCache.invalidate(key);
                 }
             } catch (final Exception e) {
-                final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
+                final StringBuilder buf = createStringBuffer(keyObj, getCurrentTimeMillis());
                 buf.append('\t').append("action:done");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
                 log(buf);
@@ -152,7 +153,7 @@ public class CrawlerStatsHelper {
     protected void printStats(final Object keyObj, final StatsObject data, final long begin, final boolean done) {
         final StringBuilder buf = createStringBuffer(keyObj, begin);
         if (done) {
-            buf.append('\t').append("done:").append(System.currentTimeMillis() - begin);
+            buf.append('\t').append("done:").append(getCurrentTimeMillis() - begin);
         }
         data.entrySet().stream().map(e -> escapeValue(e.getKey()) + ":" + (e.getValue().longValue() - begin)).map(s -> "\t" + s)
                 .forEach(s -> buf.append(s));
@@ -167,12 +168,16 @@ public class CrawlerStatsHelper {
                     data.increment();
                 }
             } catch (final Exception e) {
-                final StringBuilder buf = createStringBuffer(keyObj, System.currentTimeMillis());
+                final StringBuilder buf = createStringBuffer(keyObj, getCurrentTimeMillis());
                 buf.append('\t').append("action:record");
                 buf.append('\t').append("error:").append(escapeValue(e.getLocalizedMessage()).replaceAll("\\s", " "));
                 log(buf);
             }
         });
+    }
+
+    protected long getCurrentTimeMillis() {
+        return ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }
 
     private StringBuilder createStringBuffer(final Object keyObj, final long time) {
@@ -267,7 +272,7 @@ public class CrawlerStatsHelper {
         protected final AtomicInteger count;
 
         public StatsObject() {
-            put(BEGIN_KEY, System.currentTimeMillis());
+            put(BEGIN_KEY, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
             count = new AtomicInteger(1);
         }
 
