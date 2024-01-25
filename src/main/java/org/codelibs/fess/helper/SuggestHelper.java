@@ -109,18 +109,21 @@ public class SuggestHelper {
         settingsBuilder.indicesTimeout(fessConfig.getIndexIndicesTimeout());
         settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
         suggester = Suggester.builder().settings(settingsBuilder).build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
-        suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-        split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
-            try {
-                suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
-            } catch (final SuggestSettingsException e) {
-                logger.warn("Failed to add {}", field, e);
-            }
-        }));
-        suggester.createIndexIfNothing();
-
         if (ComponentUtil.hasPopularWordHelper()) {
             popularWordHelper = ComponentUtil.getPopularWordHelper();
+        }
+        try {
+            suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
+            split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
+                try {
+                    suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
+                } catch (final SuggestSettingsException e) {
+                    logger.warn("Failed to add {}", field, e);
+                }
+            }));
+            suggester.createIndexIfNothing();
+        } catch (final Exception e) {
+            logger.warn("Failed to initialize Suggester.", e);
         }
     }
 
