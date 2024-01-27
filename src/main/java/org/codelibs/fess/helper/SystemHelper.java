@@ -616,7 +616,7 @@ public class SystemHelper {
             waitingThreadNames.add(threadName);
             while (current >= percent) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Cpu Load {}% is greater than {}%. {} threads are waiting.", current, percent, waitingThreadNames.size());
+                    logger.info("Cpu Load {}% is greater than {}%. {} waiting thread(s).", current, percent, waitingThreadNames.size());
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Waiting threads: {}", waitingThreadNames);
@@ -633,7 +633,7 @@ public class SystemHelper {
         int count = waitingThreadNames.size();
         while (count > 0) {
             if (logger.isInfoEnabled()) {
-                logger.info("{} threads are waiting.", count);
+                logger.info("{} waiting thread(s).", count);
             }
             ThreadUtil.sleep(systemCpuCheckInterval);
             count = waitingThreadNames.size();
