@@ -63,14 +63,20 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
-    public void test_getAccessTokenFromRequest_ng0() {
-        final String token = accessTokenHelper.generateAccessToken();
+    public void test_getAccessTokenFromRequest_bad0() {
         MockletHttpServletRequest req = getMockRequest();
         assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
-    public void test_getAccessTokenFromRequest_ng1() {
+    public void test_getAccessTokenFromRequest_bad1() {
         final String token = "INVALID _TOKEN0";
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", token);
+        assertThrows(InvalidAccessTokenException.class, () -> accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    public void test_getAccessTokenFromRequest_bad2() {
+        final String token = "Bearer";
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", token);
         assertThrows(InvalidAccessTokenException.class, () -> accessTokenHelper.getAccessTokenFromRequest(req));
