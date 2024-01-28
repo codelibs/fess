@@ -27,6 +27,8 @@ import org.codelibs.fess.util.ComponentUtil;
 
 public class AccessTokenHelper {
 
+    protected static final String BEARER = "Bearer";
+
     protected Random random = new SecureRandom();
 
     public String generateAccessToken() {
@@ -37,10 +39,10 @@ public class AccessTokenHelper {
         final String token = request.getHeader("Authorization");
         if (token != null) {
             final String[] values = token.trim().split(" ");
-            if (values.length == 2 && "Bearer".equals(values[0])) {
+            if (values.length == 2 && BEARER.equals(values[0])) {
                 return values[1];
             }
-            if (values.length == 1) {
+            if (values.length == 1 && !BEARER.equals(values[0])) {
                 return values[0];
             }
             throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
