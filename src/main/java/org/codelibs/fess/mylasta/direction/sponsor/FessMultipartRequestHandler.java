@@ -32,6 +32,7 @@ import org.apache.commons.fileupload2.core.FileUploadException;
 import org.apache.commons.fileupload2.jakarta.JakartaServletDiskFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.helper.message.ExceptionMessageBuilder;
 import org.lastaflute.core.message.UserMessages;
@@ -45,6 +46,7 @@ import org.lastaflute.web.ruts.multipart.MultipartRequestWrapper;
 import org.lastaflute.web.ruts.multipart.exception.MultipartExceededException;
 import org.lastaflute.web.util.LaServletContextUtil;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -57,7 +59,6 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                          Definition
     //                                                                          ==========
     private static final Logger logger = LogManager.getLogger(FessMultipartRequestHandler.class);
-    protected static final String CONTEXT_TEMPDIR_KEY = "jakarta.searvlet.context.tempdir";
     protected static final String JAVA_IO_TMPDIR_KEY = "java.io.tmpdir";
 
     // ===================================================================================
@@ -326,12 +327,14 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     }
 
     protected String getRepositoryPath() {
-        final File tempDirFile = (File) LaServletContextUtil.getServletContext().getAttribute(CONTEXT_TEMPDIR_KEY);
-        String tempDir = tempDirFile.getAbsolutePath();
-        if (tempDir == null || tempDir.length() == 0) {
-            tempDir = System.getProperty(JAVA_IO_TMPDIR_KEY);
+        final File tempDirFile = (File) LaServletContextUtil.getServletContext().getAttribute(ServletContext.TEMPDIR);
+        if (tempDirFile != null) {
+            final String tempDir = tempDirFile.getAbsolutePath();
+            if (StringUtil.isNotBlank(tempDir)) {
+                return tempDir;
+            }
         }
-        return tempDir;
+        return System.getProperty(JAVA_IO_TMPDIR_KEY);
     }
 
     // ===================================================================================
