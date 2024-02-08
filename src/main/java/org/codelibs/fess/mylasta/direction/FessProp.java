@@ -723,6 +723,10 @@ public interface FessProp {
         return Constants.TRUE.equalsIgnoreCase(getSystemProperty("aad.use.ds", "true"));
     }
 
+    default String getSsoType() {
+        return getSystemProperty(Constants.SSO_TYPE_PROPERTY, Constants.NONE);
+    }
+
     //
     // fess_*.properties
     //

@@ -53,6 +53,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String STOP = "stop";
 
+    public static final String AUTO = "auto";
+
+    public static final String NONE = "none";
+
     public static final String ITEM_LABEL = "label";
 
     public static final String ITEM_VALUE = "value";
@@ -157,6 +161,8 @@ public class Constants extends CoreLibConstants {
     public static final String LTR_MODEL_NAME_PROPERTY = "ltr.model.name";
 
     public static final String LTR_WINDOW_SIZE_PROPERTY = "ltr.window.size";
+
+    public static final String SSO_TYPE_PROPERTY = "sso.type";
 
     public static final String REQUEST_QUERIES = "fess.Queries";
 

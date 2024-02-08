@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -28,10 +29,6 @@ import org.lastaflute.web.response.ActionResponse;
 public class SsoManager {
     private static final Logger logger = LogManager.getLogger(SsoManager.class);
 
-    protected static final String SSO_TYPE = "sso.type";
-
-    protected static final String NONE = "none";
-
     protected final List<SsoAuthenticator> authenticatorList = new ArrayList<>();
 
     public boolean available() {
@@ -39,7 +36,7 @@ public class SsoManager {
         if (logger.isDebugEnabled()) {
             logger.debug("sso.type: {}", ssoType);
         }
-        return !NONE.equals(ssoType);
+        return !Constants.NONE.equals(ssoType);
     }
 
     public LoginCredential getLoginCredential() {
@@ -81,7 +78,7 @@ public class SsoManager {
     }
 
     protected String getSsoType() {
-        return ComponentUtil.getFessConfig().getSystemProperty(SSO_TYPE, NONE);
+        return ComponentUtil.getFessConfig().getSsoType();
     }
 
     public SsoAuthenticator[] getAuthenticators() {
