@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -51,20 +52,44 @@ public class OsddHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
-        if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getOsddLinkEnabled())) {
-            if (StringUtil.isNotBlank(osddPath)) {
-                final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
-                osddFile = new File(path);
-                if (!osddFile.isFile()) {
-                    osddFile = null;
-                    logger.warn("{} was not found.", path);
-                }
-            } else {
-                logger.info("OSDD file is not found.");
-            }
-        } else {
+        osddFile = getOsddFile();
+    }
+
+    protected File getOsddFile() {
+        if (!isOsddLinkEnabled()) {
             logger.debug("OSDD is disabled.");
+            return null;
         }
+        if (StringUtil.isBlank(osddPath)) {
+            logger.info("OSDD file is not found.");
+            return null;
+        }
+        final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
+        if (path == null) {
+            logger.warn("{} was not found.", path);
+            return null;
+        }
+        final File osddFile = new File(path);
+        if (!osddFile.isFile()) {
+            logger.warn("{} was not a file.", path);
+            return null;
+        }
+        return osddFile;
+    }
+
+    protected boolean isOsddLinkEnabled() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String osddLinkEnabled = fessConfig.getOsddLinkEnabled();
+        if (Constants.TRUE.equalsIgnoreCase(osddLinkEnabled)) {
+            return true;
+        }
+
+        if (!Constants.AUTO.equalsIgnoreCase(osddLinkEnabled)) {
+            return false;
+        }
+
+        final String ssoType = fessConfig.getSsoType();
+        return StringUtil.isBlank(ssoType) || Constants.NONE.equalsIgnoreCase(ssoType);
     }
 
     public boolean hasOpenSearchFile() {
@@ -73,7 +98,7 @@ public class OsddHelper {
 
     public StreamResponse asStream() {
         if (osddFile == null) {
-            throw ComponentUtil.getResponseManager().new404("Unsupported OpenSearch response.");
+            throw ComponentUtil.getResponseManager().new404("Unsupported Open Search Description Document response.");
         }
 
         return new StreamResponse(osddFile.getName()).contentType(contentType + "; charset=" + encoding).stream(out -> {

@@ -1194,7 +1194,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. __TEMPLATE__ */
     String FORM_ADMIN_DEFAULT_TEMPLATE_NAME = "form.admin.default.template.name";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. auto */
     String OSDD_LINK_ENABLED = "osdd.link.enabled";
 
     /** The key of the configuration. e.g. true */
@@ -5569,17 +5569,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'osdd.link.enabled'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. auto <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOsddLinkEnabled();
-
-    /**
-     * Is the property for the key 'osdd.link.enabled' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isOsddLinkEnabled();
 
     /**
      * Get the value for the key 'clipboard.copy.icon.enabled'. <br>
@@ -9640,10 +9633,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.OSDD_LINK_ENABLED);
         }
 
-        public boolean isOsddLinkEnabled() {
-            return is(FessConfig.OSDD_LINK_ENABLED);
-        }
-
         public String getClipboardCopyIconEnabled() {
             return get(FessConfig.CLIPBOARD_COPY_ICON_ENABLED);
         }
@@ -11147,7 +11136,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
-            defaultMap.put(FessConfig.OSDD_LINK_ENABLED, "true");
+            defaultMap.put(FessConfig.OSDD_LINK_ENABLED, "auto");
             defaultMap.put(FessConfig.CLIPBOARD_COPY_ICON_ENABLED, "true");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_USERS, "admin");
             defaultMap.put(FessConfig.AUTHENTICATION_ADMIN_ROLES, "admin");
