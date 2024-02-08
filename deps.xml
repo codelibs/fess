@@ -45,11 +45,11 @@
 		</unzip>
 		<!-- fess-script-groovy -->
 		<antcall target="install.plugin.jar">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-script-groovy" />
-			<param name="jar.version" value="14.11.0" />
-			<param name="file.version" value="14.11.0" />
+			<param name="jar.version" value="15.0.0-SNAPSHOT" />
+			<param name="file.version" value="15.0.0-20240201.072053-1" />
 		</antcall>
 	</target>
 
