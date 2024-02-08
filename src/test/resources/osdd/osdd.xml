@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Fess</ShortName>
+  <Description>Full Text Search for Your Documents.</Description>
+  <Tags>Full Text Search</Tags>
+  <Contact>fess-user@lists.sourceforge.jp</Contact>
+  <SearchForm>http://localhost:8080/fess/</SearchForm>
+  <Url type="text/html" template="http://localhost:8080/fess/search?q={searchTerms}"/>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+</OpenSearchDescription>
