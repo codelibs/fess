@@ -1,26 +1,37 @@
 #!/bin/bash
+set -euo pipefail
 
-TMP_FILE=/tmp/fess-build.$$
-unzip target/releases/fess-*.zip 2>&1 > $TMP_FILE
-tail $TMP_FILE
+temp_file=/tmp/fess-build.$$
+unzip target/releases/fess-*.zip > ${temp_file} 2>&1
+tail ${temp_file}
 
-./fess-*/bin/fess 2>&1 > $TMP_FILE &
+./fess-*/bin/fess > ${temp_file} 2>&1 &
+fess_pid=$!
 
-pushd /tmp
+pushd /tmp >/dev/null
 git clone https://github.com/codelibs/fess-testdata.git
-popd
+popd >/dev/null
 
-tail $TMP_FILE
-touch `ls -d ./fess-*/logs`/fess-crawler.log
+tail ${temp_file}
+touch $(ls -d ./fess-*/logs)/fess-crawler.log
 tail -f ./fess-*/logs/*.log &
 
+response_file=/tmp/response.$$
 counter=0
 ret=1
-while [ $ret != 0 -a $counter != 180 ] ; do
+while [[ $ret != 0 && $counter -lt 180 ]]; do
   echo "Ping Fess... $counter"
-  curl -v "localhost:8080/json/?type=ping"
-  ret=$?
+  if ! curl -o ${response_file} -v "localhost:8080/api/v1/health"; then
+    ret=$?
+  else
+    ret=0
+  fi
   sleep 1
-  counter=$((counter + 1))
+  ((counter++))
 done
+
+cat ${response_file}
+if ! grep green ${response_file} >/dev/null; then
+  exit $?
+fi
 
