@@ -7,11 +7,10 @@ tail ${temp_file}
 
 ./fess-*/bin/fess > ${temp_file} 2>&1 &
 
+error_count=0
 while true ; do
   status=$(curl -w '%{http_code}\n' -s -o /dev/null "http://localhost:8080/api/v1/healt")
-  if [[ x"${status}" = x200 ]] ; then
-    error_count=0
-  else
+  if [[ x"${status}" != x200 ]] ; then
     error_count=$((error_count + 1))
   fi
   if [[ ${error_count} -ge 180 ]] ; then
