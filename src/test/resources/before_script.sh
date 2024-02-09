@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -xuo pipefail
 
 temp_file=/tmp/fess-build.$$
 unzip target/releases/fess-*.zip > ${temp_file} 2>&1
