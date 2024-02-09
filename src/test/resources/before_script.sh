@@ -7,10 +7,19 @@ tail ${temp_file}
 
 ./fess-*/bin/fess > ${temp_file} 2>&1 &
 
-counter=0
-while [[ ! -f ./fess-*/logs/fess.log  && $counter -lt 30 ]]; do
+while true ; do
+  status=$(curl -w '%{http_code}\n' -s -o /dev/null "http://localhost:8080/api/v1/healt")
+  if [[ x"${status}" = x200 ]] ; then
+    error_count=0
+  else
+    error_count=$((error_count + 1))
+  fi
+  if [[ ${error_count} -ge 180 ]] ; then
+    echo "Fess is not available."
+    cat ${temp_file} ./fess-*/logs/*.log
+    exit 1
+  fi
   sleep 1
-  ((counter++))
 done
 
 pushd /tmp >/dev/null
@@ -19,21 +28,4 @@ popd >/dev/null
 
 touch $(ls -d ./fess-*/logs)/fess-crawler.log
 tail -f ${temp_file} ./fess-*/logs/*.log &
-
-response_file=/tmp/response.$$
-touch ${response_file}
-
-counter=0
-ret=1
-while [[ $ret != 0 && $counter -lt 180 ]]; do
-  echo "Ping Fess... $counter"
-  curl -o ${response_file} -v "localhost:8080/api/v1/health"
-  cat ${response_file}
-  if grep green ${response_file} >/dev/null; then
-    ret=0
-  fi
-  sleep 1
-  ((counter++))
-done
-
 
