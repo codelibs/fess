@@ -9,7 +9,7 @@ tail ${temp_file}
 
 error_count=0
 while true ; do
-  status=$(curl -w '%{http_code}\n' -s -o /dev/null "http://localhost:8080/api/v1/healt")
+  status=$(curl -w '%{http_code}\n' -s -o /dev/null "http://localhost:8080/api/v1/health")
   if [[ x"${status}" != x200 ]] ; then
     error_count=$((error_count + 1))
   fi
