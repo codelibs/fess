@@ -31,5 +31,6 @@ git clone https://github.com/codelibs/fess-testdata.git
 popd >/dev/null
 
 cat ${temp_log_file} ./fess-*/logs/*.log
+curl -s "http://localhost:9201/_cat/indices?v"
 curl -s "http://localhost:8080/"
 
