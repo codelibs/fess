@@ -14,8 +14,7 @@ on:
     branches:
     - master
     - "*.x"
-  schedule:
-    - cron: '36 4 * * 2'
+  workflow_dispatch:
 
 jobs:
   analyze:
