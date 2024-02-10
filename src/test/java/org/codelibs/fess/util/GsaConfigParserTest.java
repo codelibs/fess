@@ -18,6 +18,8 @@ package org.codelibs.fess.util;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;
@@ -25,6 +27,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.xml.sax.InputSource;
 
 public class GsaConfigParserTest extends UnitFessTestCase {
+
+    private static final Logger logger = LogManager.getLogger(GsaConfigParserTest.class);
 
     @Override
     public void setUp() throws Exception {
@@ -38,10 +42,10 @@ public class GsaConfigParserTest extends UnitFessTestCase {
             parser.parse(new InputSource(is));
         }
         parser.getWebConfig().ifPresent(c -> {
-            System.out.println(c.toString());
+            logger.debug(c.toString());
         }).orElse(() -> fail());
         parser.getFileConfig().ifPresent(c -> {
-            System.out.println(c.toString());
+            logger.debug(c.toString());
         }).orElse(() -> fail());
         LabelType[] labelTypes = parser.getLabelTypes();
         assertEquals(3, labelTypes.length);
