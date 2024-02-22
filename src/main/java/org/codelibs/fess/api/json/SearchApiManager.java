@@ -563,7 +563,7 @@ public class SearchApiManager extends BaseApiManager {
         try {
             final List<String> popularWordList =
                     popularWordHelper.getWordList(SearchRequestType.JSON, seed, tags, null, fields, StringUtil.EMPTY_STRINGS);
-
+            buf.append("\"record_count\":").append(popularWordList.size()).append(',');
             buf.append("\"data\":[");
             boolean first1 = true;
             for (final String word : popularWordList) {
