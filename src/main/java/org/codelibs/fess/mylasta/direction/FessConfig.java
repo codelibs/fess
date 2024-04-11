@@ -187,7 +187,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. Data Crawler - {0} */
     String JOB_TEMPLATE_TITLE_DATA = "job.template.title.data";
 
-    /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); */
+    /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); */
     String JOB_TEMPLATE_SCRIPT = "job.template.script";
 
     /** The key of the configuration. e.g. 0 */
@@ -2134,7 +2134,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'job.template.script'. <br>
-     * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); <br>
+     * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateScript();
@@ -10828,7 +10828,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_FILE, "File Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_TITLE_DATA, "Data Crawler - {0}");
             defaultMap.put(FessConfig.JOB_TEMPLATE_SCRIPT,
-                    "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"{3}\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
+                    "return container.getComponent(\"crawlJob\").logLevel(\"info\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
             defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
             defaultMap.put(FessConfig.JOB_DEFAULT_SCRIPT, "groovy");
             defaultMap.put(FessConfig.PROCESSORS, "0");
