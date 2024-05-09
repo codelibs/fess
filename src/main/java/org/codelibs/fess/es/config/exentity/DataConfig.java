@@ -174,8 +174,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                 final Credentials credentials = getCredentials(webAuthName, scheme, paramMap);
                 basicAuthList.add(new AuthenticationImpl(authScope, credentials, authScheme));
             }
-            factoryParamMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY,
-                    basicAuthList.toArray(new Authentication[basicAuthList.size()]));
+            factoryParamMap.put(HcHttpClient.AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
         }
 
         // request header

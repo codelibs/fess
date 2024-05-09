@@ -26,6 +26,7 @@ import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.client.http.Authentication;
+import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
@@ -100,7 +101,7 @@ public class WebConfigTest extends UnitFessTestCase {
         assertNotNull(initParamMap);
         assertEquals(0, ((org.codelibs.fess.crawler.client.http.RequestHeader[]) initParamMap.get("requestHeaders")).length);
         assertEquals("Mozilla/5.0 (compatible; Fess/98.76; +http://fess.codelibs.org/bot.html)", initParamMap.get("userAgent"));
-        assertEquals(0, ((Authentication[]) initParamMap.get("basicAuthentications")).length);
+        assertEquals(0, ((Authentication[]) initParamMap.get(HcHttpClient.AUTHENTICATIONS_PROPERTY)).length);
         assertTrue(Boolean.valueOf(initParamMap.get("robotsTxtEnabled").toString()).booleanValue());
     }
 
@@ -173,7 +174,7 @@ public class WebConfigTest extends UnitFessTestCase {
         assertNotNull(initParamMap);
         assertEquals(0, ((org.codelibs.fess.crawler.client.http.RequestHeader[]) initParamMap.get("requestHeaders")).length);
         assertEquals(userAgent, initParamMap.get("userAgent"));
-        assertEquals(0, ((Authentication[]) initParamMap.get("basicAuthentications")).length);
+        assertEquals(0, ((Authentication[]) initParamMap.get(HcHttpClient.AUTHENTICATIONS_PROPERTY)).length);
         assertFalse(Boolean.valueOf(initParamMap.get("robotsTxtEnabled").toString()).booleanValue());
     }
 }
