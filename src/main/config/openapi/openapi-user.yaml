@@ -488,7 +488,7 @@ paths:
         - popularword
       summary: List popular words
       description: Returns available labels
-      operationId: listLPopularWords
+      operationId: listPopularWords
       parameters:
         - name: seed
           in: query
