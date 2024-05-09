@@ -187,7 +187,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         for (final WebAuthentication webAuth : webAuthList) {
             basicAuthList.add(webAuth.getAuthentication());
         }
-        paramMap.put(HcHttpClient.BASIC_AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
+        paramMap.put(HcHttpClient.AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
 
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
