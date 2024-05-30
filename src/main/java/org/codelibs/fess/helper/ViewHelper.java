@@ -636,10 +636,11 @@ public class ViewHelper {
         if (siteValue != null) {
             final String site = siteValue.toString();
             final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
-            if (size > -1) {
+            if (size > 3) {
                 return StringUtils.abbreviate(site, size);
+            } else if (size >= 0) {
+                return site;
             }
-            return site;
         }
         final Object urlLink = docMap.get(fessConfig.getResponseFieldUrlLink());
         if (urlLink != null) {
@@ -653,7 +654,7 @@ public class ViewHelper {
                 returnUrl = url.replaceFirst("^[a-zA-Z0-9]*:/+", "");
             }
             final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
-            if (size > -1) {
+            if (size > 3) {
                 return StringUtils.abbreviate(returnUrl, size);
             }
             return returnUrl;
