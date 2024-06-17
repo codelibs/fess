@@ -1190,22 +1190,26 @@ public interface FessProp {
 
     String getCrawlerWebProtocols();
 
+    @Deprecated
     default String[] getCrawlerWebProtocolsAsArray() {
         return split(getCrawlerWebProtocols(), ",")
                 .get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim() + ":").toArray(n -> new String[n]));
     }
 
+    @Deprecated
     default boolean isValidCrawlerWebProtocol(final String url) {
         return stream(getCrawlerWebProtocolsAsArray()).get(stream -> stream.anyMatch(s -> url.startsWith(s)));
     }
 
     String getCrawlerFileProtocols();
 
+    @Deprecated
     default String[] getCrawlerFileProtocolsAsArray() {
         return split(getCrawlerFileProtocols(), ",")
                 .get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim() + ":").toArray(n -> new String[n]));
     }
 
+    @Deprecated
     default boolean isValidCrawlerFileProtocol(final String url) {
         return stream(getCrawlerFileProtocolsAsArray()).get(stream -> stream.anyMatch(s -> url.startsWith(s)));
     }

@@ -36,9 +36,11 @@
 	</component>
 	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
 	</component>
+	<component name="permissionHelper" class="org.codelibs.fess.helper.PermissionHelper">
+	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
 	</component>
-	<component name="permissionHelper" class="org.codelibs.fess.helper.PermissionHelper">
+	<component name="protocolHelper" class="org.codelibs.fess.helper.ProtocolHelper">
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>

@@ -93,6 +93,7 @@ public class WebFsIndexHelper {
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final ProtocolHelper protocolHelper = ComponentUtil.getProtocolHelper();
 
         final long startTime = systemHelper.getCurrentTimeAsLong();
 
@@ -154,7 +155,7 @@ public class WebFsIndexHelper {
 
             // set urls
             split(urlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
-                if (!urlValue.startsWith("#") && fessConfig.isValidCrawlerWebProtocol(urlValue)) {
+                if (!urlValue.startsWith("#") && protocolHelper.isValidWebProtocol(urlValue)) {
                     final String u = duplicateHostHelper.convert(urlValue);
                     crawler.addUrl(u);
                     if (logger.isInfoEnabled()) {
@@ -280,7 +281,7 @@ public class WebFsIndexHelper {
             split(pathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
                 if (!urlValue.startsWith("#")) {
                     final String u;
-                    if (!fessConfig.isValidCrawlerFileProtocol(urlValue)) {
+                    if (!protocolHelper.isValidFileProtocol(urlValue)) {
                         if (urlValue.startsWith("/")) {
                             u = "file:" + urlValue;
                         } else {
