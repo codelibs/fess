@@ -55,6 +55,12 @@ public class PluginHelperTest extends UnitFessTestCase {
                     } catch (IOException e) {
                         throw new IORuntimeException(e);
                     }
+                } else if (url.contains("plugin/repo3")) {
+                    try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
+                        return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
                 } else if (url.contains("plugin/repo.yaml")) {
                     try (InputStream is = ResourceUtil.getResourceAsStream(url)) {
                         return new String(InputStreamUtil.getBytes(is), Constants.UTF_8);
@@ -86,6 +92,17 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("12.2.0-20180814.210714-10", list.get(0).getVersion());
         assertEquals("plugin/repo2/fess-ds-atlassian/12.2.0-SNAPSHOT/fess-ds-atlassian-12.2.0-20180814.210714-10.jar",
                 list.get(0).getUrl());
+    }
+
+    public void test_processRepository3() {
+        List<Artifact> list = pluginHelper.processRepository(ArtifactType.CRAWLER, "plugin/repo3/");
+        assertEquals(2, list.size());
+        assertEquals("fess-crawler-smbj", list.get(0).getName());
+        assertEquals("14.14.0", list.get(0).getVersion());
+        assertEquals("plugin/repo3/fess-crawler-smbj/14.14.0/fess-crawler-smbj-14.14.0.jar", list.get(0).getUrl());
+        assertEquals("fess-crawler-smbj", list.get(1).getName());
+        assertEquals("14.15.0", list.get(1).getVersion());
+        assertEquals("plugin/repo3/fess-crawler-smbj/14.15.0/fess-crawler-smbj-14.15.0.jar", list.get(1).getUrl());
     }
 
     public void test_getArtifactFromFileName1() {

@@ -120,6 +120,9 @@ public class PluginHelper {
         final Matcher matcher = Pattern.compile("href=\"[^\"]*(" + artifactType.getId() + "[a-zA-Z0-9\\-]+)/?\"").matcher(repoContent);
         while (matcher.find()) {
             final String name = matcher.group(1);
+            if (isExcludedName(artifactType, name)) {
+                continue;
+            }
             final String pluginUrl = url + (url.endsWith("/") ? name + "/" : "/" + name + "/");
             try {
                 final String pluginMetaContent = getRepositoryContent(pluginUrl + "maven-metadata.xml");
@@ -158,6 +161,26 @@ public class PluginHelper {
             }
         }
         return list;
+    }
+
+    protected boolean isExcludedName(final ArtifactType artifactType, final String name) {
+        if (artifactType != ArtifactType.CRAWLER) {
+            return false;
+        }
+
+        if ("fess-crawler".equals(name)//
+                || "fess-crawler-db".equals(name)//
+                || "fess-crawler-db-h2".equals(name)//
+                || "fess-crawler-db-mysql".equals(name)//
+                || "fess-crawler-es".equals(name)//
+                || "fess-crawler-lasta".equals(name)//
+                || "fess-crawler-parent".equals(name)//
+                || "fess-crawler-playwright".equals(name)//
+                || "fess-crawler-webdriver".equals(name)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected boolean isTargetPluginVersion(final String version) {
@@ -378,8 +401,14 @@ public class PluginHelper {
     }
 
     public enum ArtifactType {
-        DATA_STORE("fess-ds"), THEME("fess-theme"), INGEST("fess-ingest"), SCRIPT("fess-script"), WEBAPP("fess-webapp"), THUMBNAIL(
-                "fess-thumbnail"), UNKNOWN("jar");
+        DATA_STORE("fess-ds"), //
+        THEME("fess-theme"), //
+        INGEST("fess-ingest"), //
+        SCRIPT("fess-script"), //
+        WEBAPP("fess-webapp"), //
+        THUMBNAIL("fess-thumbnail"), //
+        CRAWLER("fess-crawler"), //
+        UNKNOWN("jar");
 
         private final String id;
 
@@ -409,6 +438,9 @@ public class PluginHelper {
             }
             if (name.startsWith(THUMBNAIL.getId())) {
                 return THUMBNAIL;
+            }
+            if (name.startsWith(CRAWLER.getId())) {
+                return CRAWLER;
             }
             return UNKNOWN;
         }
