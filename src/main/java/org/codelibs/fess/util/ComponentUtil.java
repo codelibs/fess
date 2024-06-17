@@ -58,6 +58,7 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PluginHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.ProcessHelper;
+import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
@@ -215,6 +216,8 @@ public final class ComponentUtil {
     private static final String CORS_HANDLER_FACTORY = "corsHandlerFactory";
 
     private static final String RANK_FUSION_PROCESSOR = "rankFusionProcessor";
+
+    private static final String PROTOCOL_HELPER = "protocolHelper";
 
     private static IndexingHelper indexingHelper;
 
@@ -519,6 +522,10 @@ public final class ComponentUtil {
 
     public static RankFusionProcessor getRankFusionProcessor() {
         return getComponent(RANK_FUSION_PROCESSOR);
+    }
+
+    public static ProtocolHelper getProtocolHelper() {
+        return getComponent(PROTOCOL_HELPER);
     }
 
     @SuppressWarnings("unchecked")
