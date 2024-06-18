@@ -99,4 +99,12 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(2, protocolHelper.getWebProtocols().length);
         assertEquals(3, protocolHelper.getFileProtocols().length);
     }
+
+    public void test_loadProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.loadProtocols("org.codelibs.fess.test.net.protocol");
+
+        assertEquals(1, protocolHelper.getWebProtocols().length);
+        assertEquals(1, protocolHelper.getFileProtocols().length);
+    }
 }
