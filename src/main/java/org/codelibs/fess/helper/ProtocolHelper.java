@@ -21,11 +21,14 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
 
@@ -70,12 +73,33 @@ public class ProtocolHelper {
 
             while (resources.hasMoreElements()) {
                 final URL resource = resources.nextElement();
-                final File directory = new File(resource.getFile());
-                if (directory.exists() && directory.isDirectory()) {
-                    final File[] files = directory.listFiles(File::isDirectory);
-                    if (files != null) {
-                        for (final File file : files) {
-                            subPackages.add(file.getName());
+                logger.debug("loading {}", resource);
+                if ("file".equals(resource.getProtocol())) {
+                    final File directory = new File(resource.getFile());
+                    if (directory.exists() && directory.isDirectory()) {
+                        final File[] files = directory.listFiles(File::isDirectory);
+                        if (files != null) {
+                            for (final File file : files) {
+                                final String name = file.getName();
+                                subPackages.add(name);
+                                logger.debug("found {} in {}", name, resource);
+                            }
+                        }
+                    }
+                } else if ("jar".equals(resource.getProtocol())) {
+                    final JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
+                    try (JarFile jarFile = jarURLConnection.getJarFile()) {
+                        final Enumeration<JarEntry> entries = jarFile.entries();
+                        while (entries.hasMoreElements()) {
+                            final JarEntry entry = entries.nextElement();
+                            final String entryName = entry.getName();
+                            if (entryName.endsWith("/") && entryName.startsWith(path) && entryName.length() > path.length() + 1) {
+                                final String name = entryName.substring(path.length() + 1, entryName.length() - 1);
+                                if (name.indexOf('/') == -1) {
+                                    subPackages.add(name);
+                                    logger.debug("found {} in {}", name, resource);
+                                }
+                            }
                         }
                     }
                 }
