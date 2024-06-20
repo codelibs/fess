@@ -136,15 +136,15 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 dataMap.put(mapping.getValue1(), Double.parseDouble(values[0]));
                             } else if (Constants.MAPPING_TYPE_DATE.equalsIgnoreCase(mapping.getValue2())
                                     || Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                final String dateFormate;
+                                final String dateFormat;
                                 if (StringUtil.isNotBlank(mapping.getValue3())) {
-                                    dateFormate = mapping.getValue3();
+                                    dateFormat = mapping.getValue3();
                                 } else if (Constants.MAPPING_TYPE_PDF_DATE.equalsIgnoreCase(mapping.getValue2())) {
-                                    dateFormate = mapping.getValue2();
+                                    dateFormat = Constants.MAPPING_TYPE_PDF_DATE;
                                 } else {
-                                    dateFormate = Constants.DATE_OPTIONAL_TIME;
+                                    dateFormat = Constants.DATE_OPTIONAL_TIME;
                                 }
-                                final Date dt = FessFunctions.parseDate(values[0], dateFormate);
+                                final Date dt = FessFunctions.parseDate(values[0], dateFormat);
                                 if (dt != null) {
                                     dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
                                 } else {

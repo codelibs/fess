@@ -975,6 +975,18 @@ public interface FessProp {
         return params.get(name);
     }
 
+    default void addCrawlerMetadataNameMapping(final String name, final String fieldName, final String mappingType,
+            final String dateFormat) {
+        if (getCrawlerMetadataNameMapping(name) != null) {
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+      final  Map<String, Tuple3<String, String, String>> params =
+                (Map<String, Tuple3<String, String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
+        params.put(name, new Tuple3<>(fieldName, mappingType, dateFormat));
+    }
+
     String getSuggestPopularWordFields();
 
     default String[] getSuggestPopularWordFieldsAsArray() {

@@ -391,7 +391,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. cpu */
     String CRAWLER_HOTTHREAD_TYPE = "crawler.hotthread.type";
 
-    /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.* */
+    /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
     /** The key of the configuration. e.g. title=title:string<br>
@@ -2926,7 +2926,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
-     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.* <br>
+     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.* <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataContentExcludes();
@@ -10899,7 +10899,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_TIMEOUT, "30s");
             defaultMap.put(FessConfig.CRAWLER_HOTTHREAD_TYPE, "cpu");
             defaultMap.put(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES,
-                    "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*");
+                    "resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.*");
             defaultMap.put(FessConfig.CRAWLER_METADATA_NAME_MAPPING, "title=title:string\nTitle=title:string\ndc:title=title:string\n");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH, "//BODY");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH, "//HTML/@lang");
