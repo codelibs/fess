@@ -274,6 +274,7 @@ public class CrawlJob extends ExecJob {
 
         addFessConfigProperties(cmdList);
         addFessSystemProperties(cmdList);
+        addFessCustomSystemProperties(cmdList, fessConfig.getJobSystemPropertyFilterPattern());
         addSystemProperty(cmdList, Constants.FESS_CONF_PATH, null, null);
         cmdList.add("-Dfess." + getExecuteType() + ".process=true");
         cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));

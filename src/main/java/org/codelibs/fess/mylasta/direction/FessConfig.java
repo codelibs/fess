@@ -196,6 +196,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. groovy */
     String JOB_DEFAULT_SCRIPT = "job.default.script";
 
+    /** The key of the configuration. e.g.  */
+    String JOB_SYSTEM_PROPERTY_FILTER_PATTERN = "job.system.property.filter.pattern";
+
     /** The key of the configuration. e.g. 0 */
     String PROCESSORS = "processors";
 
@@ -2160,6 +2163,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobDefaultScript();
+
+    /**
+     * Get the value for the key 'job.system.property.filter.pattern'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobSystemPropertyFilterPattern();
+
+    /**
+     * Get the value for the key 'job.system.property.filter.pattern' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getJobSystemPropertyFilterPatternAsInteger();
 
     /**
      * Get the value for the key 'processors'. <br>
@@ -7833,6 +7851,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.JOB_DEFAULT_SCRIPT);
         }
 
+        public String getJobSystemPropertyFilterPattern() {
+            return get(FessConfig.JOB_SYSTEM_PROPERTY_FILTER_PATTERN);
+        }
+
+        public Integer getJobSystemPropertyFilterPatternAsInteger() {
+            return getAsInteger(FessConfig.JOB_SYSTEM_PROPERTY_FILTER_PATTERN);
+        }
+
         public String getProcessors() {
             return get(FessConfig.PROCESSORS);
         }
@@ -10831,6 +10857,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     "return container.getComponent(\"crawlJob\").logLevel(\"info\").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute();");
             defaultMap.put(FessConfig.JOB_MAX_CRAWLER_PROCESSES, "0");
             defaultMap.put(FessConfig.JOB_DEFAULT_SCRIPT, "groovy");
+            defaultMap.put(FessConfig.JOB_SYSTEM_PROPERTY_FILTER_PATTERN, "");
             defaultMap.put(FessConfig.PROCESSORS, "0");
             defaultMap.put(FessConfig.JAVA_COMMAND_PATH, "java");
             defaultMap.put(FessConfig.PYTHON_COMMAND_PATH, "python");
