@@ -982,7 +982,7 @@ public interface FessProp {
         }
 
         @SuppressWarnings("unchecked")
-      final  Map<String, Tuple3<String, String, String>> params =
+        final Map<String, Tuple3<String, String, String>> params =
                 (Map<String, Tuple3<String, String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
         params.put(name, new Tuple3<>(fieldName, mappingType, dateFormat));
     }

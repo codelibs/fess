@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -154,6 +155,14 @@ public abstract class ExecJob {
     protected void addFessSystemProperties(final List<String> cmdList) {
         System.getProperties().keySet().stream().filter(k -> k != null && k.toString().startsWith(Constants.SYSTEM_PROP_PREFIX))
                 .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
+    }
+
+    protected void addFessCustomSystemProperties(final List<String> cmdList, final String regex) {
+        if (StringUtil.isNotBlank(regex)) {
+            final Pattern pattern = Pattern.compile(regex);
+            System.getProperties().keySet().stream().filter(k -> k != null && pattern.matcher(k.toString()).matches())
+                    .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
+        }
     }
 
     protected void deleteTempDir(final File ownTmpDir) {
