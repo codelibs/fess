@@ -128,9 +128,9 @@ public class FailureUrlService {
         });
     }
 
-    public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
+    public FailureUrl store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
         if (e instanceof ContainerNotAvailableException) {
-            return;
+            return null;
         }
 
         final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
@@ -160,6 +160,7 @@ public class FailureUrlService {
         bhv.insertOrUpdate(failureUrl, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
+        return failureUrl;
     }
 
     private String getStackTrace(final Throwable t) {
