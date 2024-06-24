@@ -20,10 +20,12 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
 import org.codelibs.fess.util.ComponentUtil;
@@ -84,25 +86,30 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
     @Override
     protected void processCrawlingAccessException(final Object... objs) {
+        String failureUrlId = "?";
+        final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
+        final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
+        final CrawlingAccessException cae = (CrawlingAccessException) objs[2];
         try {
-            final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-            final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
-            Throwable e = (Throwable) objs[2];
-            if (e instanceof MultipleCrawlingAccessException) {
-                final Throwable[] causes = ((MultipleCrawlingAccessException) e).getCauses();
+            Throwable t = cae;
+            if (t instanceof MultipleCrawlingAccessException mcae) {
+                final Throwable[] causes = mcae.getCauses();
                 if (causes.length > 0) {
-                    e = causes[causes.length - 1];
+                    t = causes[causes.length - 1];
                 }
             }
 
             String errorName;
-            final Throwable cause = e.getCause();
+            final Throwable cause = t.getCause();
             if (cause != null) {
                 errorName = cause.getClass().getCanonicalName();
             } else {
-                errorName = e.getClass().getCanonicalName();
+                errorName = t.getClass().getCanonicalName();
             }
-            storeFailureUrl(crawlerContext, urlQueue, errorName, e);
+            FailureUrl failureUrl = storeFailureUrl(crawlerContext, urlQueue, errorName, t);
+            if (failureUrl != null) {
+                failureUrlId = failureUrl.getId();
+            }
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("container was destroyed.");
@@ -118,10 +125,17 @@ public class CrawlerLogHelper extends LogHelperImpl {
             logger.warn("Failed to store a failure url.", e);
         }
 
-        super.processCrawlingAccessException(objs);
-        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
-            ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
+        if (cae.isDebugEnabled()) {
+            logger.debug("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
+        } else if (cae.isInfoEnabled()) {
+            logger.info("[{}] {}", failureUrlId, cae.getMessage());
+        } else if (cae.isWarnEnabled()) {
+            logger.warn("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
+        } else if (cae.isErrorEnabled()) {
+            logger.error("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
         }
+
+        ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
     }
 
     @Override
@@ -153,14 +167,14 @@ public class CrawlerLogHelper extends LogHelperImpl {
         }
     }
 
-    protected void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
+    protected FailureUrl storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
             final Throwable e) {
 
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();
 
         final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
-        failureUrlService.store(crawlingConfig, errorName, url, e);
+        return failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 
     protected CrawlingConfig getCrawlingConfig(final String sessionCountId) {
