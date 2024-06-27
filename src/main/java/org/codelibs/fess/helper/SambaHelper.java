@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.Locale;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -94,6 +96,9 @@ public class SambaHelper {
     }
 
     protected String createSearchRole(final int type, final String name) {
+        if (fessConfig.isLdapLowercasePermissionName()) {
+            return type + fessConfig.getCanonicalLdapName(name).toLowerCase(Locale.ROOT);
+        }
         return type + fessConfig.getCanonicalLdapName(name);
     }
 }
