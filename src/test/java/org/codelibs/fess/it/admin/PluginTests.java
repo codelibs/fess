@@ -133,7 +133,8 @@ public class PluginTests extends CrudTestBase {
     void testCRUD() throws Exception {
         List<Map<String, Object>> available =
                 checkGetMethod(Collections.emptyMap(), getAvailableEndpointSuffix() + "/").body().jsonPath().get("response.plugins");
-        final Map<String, Object> targetMap = available.get(0);
+        final Map<String, Object> targetMap =
+                available.stream().filter(map -> !map.get("name").toString().startsWith("fess-")).toList().get(0);
         final Artifact target = getArtifactFromMap(targetMap);
 
         // Install
@@ -150,11 +151,11 @@ public class PluginTests extends CrudTestBase {
                     ThreadUtil.sleep(500);
                     continue;
                 }
-                assertTrue(exists);
+                assertTrue("plugin(" + target + ") is included in " + installed, exists);
                 done = true;
                 break;
             }
-            assertTrue(done);
+            assertTrue("plugin(" + target + ") is installed.", done);
         }
         // Delete
         {
@@ -170,11 +171,11 @@ public class PluginTests extends CrudTestBase {
                     ThreadUtil.sleep(500);
                     continue;
                 }
-                assertFalse(exists);
+                assertFalse("plugin(" + target + ") is not included in " + installed, exists);
                 done = true;
                 break;
             }
-            assertTrue(done);
+            assertTrue("plugin(" + target + ") is uninstalled.", done);
         }
     }
 
