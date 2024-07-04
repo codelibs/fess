@@ -55,6 +55,7 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
@@ -153,7 +154,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         processMetaRobots(responseData, resultData, document);
         processXRobotsTag(responseData, resultData);
 
-        final Map<String, Object> dataMap = new LinkedHashMap<>();
+        Map<String, Object> dataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
             final String path = entry.getValue();
             try {
@@ -185,7 +186,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
 
-        putAdditionalData(dataMap, responseData, document);
+        dataMap = processAdditionalData(dataMap, responseData, document);
         normalizeData(responseData, dataMap);
 
         try {
@@ -337,7 +338,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return true;
     }
 
-    protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
+    protected Map<String, Object> processAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData,
+            final Document document) {
         // canonical
         final String canonicalUrl = getCanonicalUrl(responseData, document);
         if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl()) && isValidUrl(canonicalUrl)
@@ -363,7 +365,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         url = pathMappingHelper.replaceUrl(sessionId, url);
         final String mimeType = responseData.getMimeType();
 
-        final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
+        final FieldConfigs fieldConfigs = new FieldConfigs(crawlingConfig.getConfigParameterMap(ConfigName.FIELD));
         final Map<String, String> xpathConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.XPATH);
 
         String urlEncoding;
@@ -395,7 +397,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 prunedContent ? node -> pruneNode(node, crawlingConfig) : node -> node);
         final String fileName = getFileName(url, urlEncoding);
         putResultDataContent(dataMap, responseData, fessConfig, crawlingConfig, documentHelper, body, fileName);
-        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(config -> config.isCache()).orElse(false)
                 || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
@@ -500,6 +502,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final String value = e.getValue();
             putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key), scriptType);
         });
+
+        return processFieldConfigs(dataMap, fieldConfigs);
     }
 
     protected void putResultDataContent(final Map<String, Object> dataMap, final ResponseData responseData, final FessConfig fessConfig,

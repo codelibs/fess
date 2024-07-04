@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.groovy.util.Maps;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.ClassUtil;
@@ -42,6 +43,7 @@ import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -626,7 +628,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         String data = "<html><body>aaa</body></html>";
         Document document = getDocument(data);
         try {
-            transformer.putAdditionalData(dataMap, responseData, document);
+            transformer.processAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ComponentNotFoundException e) {
             // ignore
@@ -635,7 +637,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         data = "<html><head><link rel=\"canonical\" href=\"http://example.com/\"></head><body>aaa</body></html>";
         document = getDocument(data);
         try {
-            transformer.putAdditionalData(dataMap, responseData, document);
+            transformer.processAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ComponentNotFoundException e) {
             // ignore
@@ -644,7 +646,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         data = "<html><head><link rel=\"canonical\" href=\"http://example.com/foo\"></head><body>aaa</body></html>";
         document = getDocument(data);
         try {
-            transformer.putAdditionalData(dataMap, responseData, document);
+            transformer.processAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ChildUrlsException e) {
             final Set<RequestData> childUrlList = e.getChildUrlList();
@@ -655,7 +657,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         data = "<html><link rel=\"canonical\" href=\"http://example.com/foo\"><body>aaa</body></html>";
         document = getDocument(data);
         try {
-            transformer.putAdditionalData(dataMap, responseData, document);
+            transformer.processAdditionalData(dataMap, responseData, document);
             fail();
         } catch (final ChildUrlsException e) {
             final Set<RequestData> childUrlList = e.getChildUrlList();
@@ -903,5 +905,20 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(transformer.isValidUrl(" "));
         assertFalse(transformer.isValidUrl("http://"));
         assertFalse(transformer.isValidUrl("http://http://www.example.com"));
+    }
+
+    public void test_processFieldConfigs() {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final Map<String, String> params = Maps.of("foo", "cache", "bar", "overwrite", "baz", "cache|overwrite");
+        FieldConfigs fieldConfigs = new FieldConfigs(params);
+        final Map<String, Object> dataMap = Map.of(//
+                "foo", new String[] { "aaa", "bbb" }, //
+                "bar", new String[] { "ccc", "ddd" }, //
+                "baz", new String[] { "eee", "fff" });
+        final Map<String, Object> resultMap = transformer.processFieldConfigs(dataMap, fieldConfigs);
+        assertEquals("aaa", ((String[]) resultMap.get("foo"))[0]);
+        assertEquals("bbb", ((String[]) resultMap.get("foo"))[1]);
+        assertEquals("ddd", resultMap.get("bar"));
+        assertEquals("fff", resultMap.get("baz"));
     }
 }

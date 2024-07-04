@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import org.codelibs.fess.crawler.entity.AccessResult;
 import org.codelibs.fess.crawler.entity.AccessResultData;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -247,5 +249,18 @@ public interface FessTransformer {
             }
         }
         return null;
+    }
+
+    default Map<String, Object> processFieldConfigs(final Map<String, Object> dataMap, final FieldConfigs fieldConfigs) {
+        final Map<String, Object> newDataMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> e : dataMap.entrySet()) {
+            if (fieldConfigs.getConfig(e.getKey()).map(FieldConfigs.Config::isOverwrite).orElse(false)
+                    && e.getValue() instanceof Object[] values && values.length > 0) {
+                newDataMap.put(e.getKey(), values[values.length - 1]);
+            } else {
+                newDataMap.put(e.getKey(), e.getValue());
+            }
+        }
+        return newDataMap;
     }
 }
