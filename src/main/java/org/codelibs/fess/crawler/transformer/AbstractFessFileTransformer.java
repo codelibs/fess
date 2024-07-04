@@ -44,6 +44,7 @@ import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.crawler.transformer.impl.AbstractTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
@@ -181,7 +182,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
 
-        final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
+        final FieldConfigs fieldConfigs = new FieldConfigs(crawlingConfig.getConfigParameterMap(ConfigName.FIELD));
 
         String urlEncoding;
         final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
@@ -221,7 +222,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
-        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(config -> config.isCache()).orElse(false)
                 || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
@@ -334,7 +335,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key), scriptType);
         }
 
-        return dataMap;
+        return processFieldConfigs(dataMap, fieldConfigs);
     }
 
     protected Date getLastModified(final Map<String, Object> dataMap, final ResponseData responseData) {

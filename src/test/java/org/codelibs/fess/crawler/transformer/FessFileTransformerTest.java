@@ -17,8 +17,11 @@ package org.codelibs.fess.crawler.transformer;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Map;
 
+import org.apache.groovy.util.Maps;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
@@ -267,6 +270,21 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "file://///";
         exp = "\\\\\\";
         assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+    }
+
+    public void test_processFieldConfigs() {
+        final FessFileTransformer transformer = createInstance();
+        final Map<String, String> params = Maps.of("foo", "cache", "bar", "overwrite", "baz", "cache|overwrite");
+        FieldConfigs fieldConfigs = new FieldConfigs(params);
+        final Map<String, Object> dataMap = Map.of(//
+                "foo", new String[] { "aaa", "bbb" }, //
+                "bar", new String[] { "ccc", "ddd" }, //
+                "baz", new String[] { "eee", "fff" });
+        final Map<String, Object> resultMap = transformer.processFieldConfigs(dataMap, fieldConfigs);
+        assertEquals("aaa", ((String[]) resultMap.get("foo"))[0]);
+        assertEquals("bbb", ((String[]) resultMap.get("foo"))[1]);
+        assertEquals("ddd", resultMap.get("bar"));
+        assertEquals("fff", resultMap.get("baz"));
     }
 
     private FessFileTransformer createInstance() {
