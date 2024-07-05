@@ -63,12 +63,18 @@ import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.es.log.exentity.ClickLog;
+import org.codelibs.fess.es.log.exentity.FavoriteLog;
+import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.es.log.exentity.UserInfo;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -431,121 +437,157 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     public static Consumer<Writer> getSearchLogNdjsonWriteCall() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
         return writer -> {
             final SearchLogBhv bhv = ComponentUtil.getComponent(SearchLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
-            }, entity -> {
-                final StringBuilder buf = new StringBuilder();
-                buf.append('{');
-                appendJson("id", entity.getId(), buf).append(',');
-                appendJson("query-id", entity.getQueryId(), buf).append(',');
-                appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
-                appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
-                appendJson("user", entity.getUser(), buf).append(',');
-                appendJson("search-word", entity.getSearchWord(), buf).append(',');
-                appendJson("hit-count", entity.getHitCount(), buf).append(',');
-                appendJson("query-page-size", entity.getQueryPageSize(), buf).append(',');
-                appendJson("query-offset", entity.getQueryOffset(), buf).append(',');
-                appendJson("referer", entity.getReferer(), buf).append(',');
-                appendJson("languages", entity.getLanguages(), buf).append(',');
-                appendJson("roles", entity.getRoles(), buf).append(',');
-                appendJson("user-agent", entity.getUserAgent(), buf).append(',');
-                appendJson("client-ip", entity.getClientIp(), buf).append(',');
-                appendJson("access-type", entity.getAccessType(), buf).append(',');
-                appendJson("query-time", entity.getQueryTime(), buf).append(',');
-                appendJson("response-time", entity.getResponseTime(), buf).append(',');
-                appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
-                final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList().stream()
-                        .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
-                appendJson("search-field", searchFieldMap, buf).append(',');
-                final Map<String, List<String>> requestHeaderMap = entity.getRequestHeaderList().stream()
-                        .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
-                appendJson("headers", requestHeaderMap, buf);
-                buf.append('}');
-                buf.append('\n');
-                try {
-                    writer.write(buf.toString());
-                } catch (final IOException e) {
-                    throw new IORuntimeException(e);
+            }, new LogEntityRowHandler<SearchLog>() {
+                @Override
+                public void handle(final SearchLog entity) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append('{');
+                    appendJson("id", entity.getId(), buf).append(',');
+                    appendJson("query-id", entity.getQueryId(), buf).append(',');
+                    appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
+                    appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                    appendJson("user", entity.getUser(), buf).append(',');
+                    appendJson("search-word", entity.getSearchWord(), buf).append(',');
+                    appendJson("hit-count", entity.getHitCount(), buf).append(',');
+                    appendJson("query-page-size", entity.getQueryPageSize(), buf).append(',');
+                    appendJson("query-offset", entity.getQueryOffset(), buf).append(',');
+                    appendJson("referer", entity.getReferer(), buf).append(',');
+                    appendJson("languages", entity.getLanguages(), buf).append(',');
+                    appendJson("roles", entity.getRoles(), buf).append(',');
+                    appendJson("user-agent", entity.getUserAgent(), buf).append(',');
+                    appendJson("client-ip", entity.getClientIp(), buf).append(',');
+                    appendJson("access-type", entity.getAccessType(), buf).append(',');
+                    appendJson("query-time", entity.getQueryTime(), buf).append(',');
+                    appendJson("response-time", entity.getResponseTime(), buf).append(',');
+                    appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
+                    final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList().stream()
+                            .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+                    appendJson("search-field", searchFieldMap, buf).append(',');
+                    final Map<String, List<String>> requestHeaderMap = entity.getRequestHeaderList().stream()
+                            .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
+                    appendJson("headers", requestHeaderMap, buf);
+                    buf.append('}');
+                    buf.append('\n');
+                    try {
+                        writer.write(buf.toString());
+                    } catch (final IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    if (!systemHelper.calibrateCpuLoad(timeout)) {
+                        breakCursor = true;
+                    }
                 }
             });
         };
     }
 
     public static Consumer<Writer> getUserInfoNdjsonWriteCall() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
         return writer -> {
             final UserInfoBhv bhv = ComponentUtil.getComponent(UserInfoBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
-            }, entity -> {
-                final StringBuilder buf = new StringBuilder();
-                buf.append('{');
-                appendJson("id", entity.getId(), buf).append(',');
-                appendJson("created-at", entity.getCreatedAt(), buf).append(',');
-                appendJson("updated-at", entity.getUpdatedAt(), buf);
-                buf.append('}');
-                buf.append('\n');
-                try {
-                    writer.write(buf.toString());
-                } catch (final IOException e) {
-                    throw new IORuntimeException(e);
+            }, new LogEntityRowHandler<UserInfo>() {
+                @Override
+                public void handle(final UserInfo entity) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append('{');
+                    appendJson("id", entity.getId(), buf).append(',');
+                    appendJson("created-at", entity.getCreatedAt(), buf).append(',');
+                    appendJson("updated-at", entity.getUpdatedAt(), buf);
+                    buf.append('}');
+                    buf.append('\n');
+                    try {
+                        writer.write(buf.toString());
+                    } catch (final IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    if (!systemHelper.calibrateCpuLoad(timeout)) {
+                        breakCursor = true;
+                    }
                 }
             });
         };
     }
 
     public static Consumer<Writer> getFavoriteLogNdjsonWriteCall() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
         return writer -> {
             final FavoriteLogBhv bhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_CreatedAt_Asc();
-            }, entity -> {
-                final StringBuilder buf = new StringBuilder();
-                buf.append('{');
-                appendJson("id", entity.getId(), buf).append(',');
-                appendJson("created-at", entity.getCreatedAt(), buf).append(',');
-                appendJson("query-id", entity.getQueryId(), buf).append(',');
-                appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
-                appendJson("doc-id", entity.getDocId(), buf).append(',');
-                appendJson("url", entity.getUrl(), buf);
-                buf.append('}');
-                buf.append('\n');
-                try {
-                    writer.write(buf.toString());
-                } catch (final IOException e) {
-                    throw new IORuntimeException(e);
+            }, new LogEntityRowHandler<FavoriteLog>() {
+                @Override
+                public void handle(final FavoriteLog entity) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append('{');
+                    appendJson("id", entity.getId(), buf).append(',');
+                    appendJson("created-at", entity.getCreatedAt(), buf).append(',');
+                    appendJson("query-id", entity.getQueryId(), buf).append(',');
+                    appendJson("user-info-id", entity.getUserInfoId(), buf).append(',');
+                    appendJson("doc-id", entity.getDocId(), buf).append(',');
+                    appendJson("url", entity.getUrl(), buf);
+                    buf.append('}');
+                    buf.append('\n');
+                    try {
+                        writer.write(buf.toString());
+                    } catch (final IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    if (!systemHelper.calibrateCpuLoad(timeout)) {
+                        breakCursor = true;
+                    }
                 }
             });
         };
     }
 
     public static Consumer<Writer> getClickLogNdjsonWriteCall() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final long timeout = fessConfig.getIndexBackupLogLoadTimeoutAsInteger().longValue();
         return writer -> {
             final ClickLogBhv bhv = ComponentUtil.getComponent(ClickLogBhv.class);
             bhv.selectCursor(cb -> {
                 cb.query().matchAll();
                 cb.query().addOrderBy_RequestedAt_Asc();
-            }, entity -> {
-                final StringBuilder buf = new StringBuilder();
-                buf.append('{');
-                appendJson("id", entity.getId(), buf).append(',');
-                appendJson("query-id", entity.getQueryId(), buf).append(',');
-                appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
-                appendJson("doc-id", entity.getDocId(), buf).append(',');
-                appendJson("url", entity.getUrl(), buf).append(',');
-                appendJson("order", entity.getOrder(), buf).append(',');
-                appendJson("query-requested-at", entity.getQueryRequestedAt(), buf).append(',');
-                appendJson("requested-at", entity.getRequestedAt(), buf);
-                buf.append('}');
-                buf.append('\n');
-                try {
-                    writer.write(buf.toString());
-                } catch (final IOException e) {
-                    throw new IORuntimeException(e);
+            }, new LogEntityRowHandler<ClickLog>() {
+                @Override
+                public void handle(final ClickLog entity) {
+                    final StringBuilder buf = new StringBuilder();
+                    buf.append('{');
+                    appendJson("id", entity.getId(), buf).append(',');
+                    appendJson("query-id", entity.getQueryId(), buf).append(',');
+                    appendJson("user-session-id", entity.getUserSessionId(), buf).append(',');
+                    appendJson("doc-id", entity.getDocId(), buf).append(',');
+                    appendJson("url", entity.getUrl(), buf).append(',');
+                    appendJson("order", entity.getOrder(), buf).append(',');
+                    appendJson("query-requested-at", entity.getQueryRequestedAt(), buf).append(',');
+                    appendJson("requested-at", entity.getRequestedAt(), buf);
+                    buf.append('}');
+                    buf.append('\n');
+                    try {
+                        writer.write(buf.toString());
+                    } catch (final IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    if (!systemHelper.calibrateCpuLoad(timeout)) {
+                        breakCursor = true;
+                    }
                 }
             });
         };
@@ -572,4 +614,12 @@ public class AdminBackupAction extends FessAdminAction {
         }
     }
 
+    private static abstract class LogEntityRowHandler<ENTITY> implements EntityRowHandler<ENTITY> {
+        protected boolean breakCursor = false;
+
+        @Override
+        public boolean isBreakCursor() {
+            return breakCursor;
+        }
+    }
 }
