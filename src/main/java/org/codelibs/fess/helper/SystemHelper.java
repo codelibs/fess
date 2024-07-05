@@ -602,19 +602,31 @@ public class SystemHelper {
         }
     }
 
-    public void calibrateCpuLoad() {
+    public boolean calibrateCpuLoad() {
+        return calibrateCpuLoad(0L);
+    }
+
+    public boolean calibrateCpuLoad(final long timeoutInMillis) {
         final short percent = ComponentUtil.getFessConfig().getAdaptiveLoadControlAsInteger().shortValue();
         if (percent <= 0) {
-            return;
+            return true;
         }
         short current = getSystemCpuPercent();
         if (current < percent) {
-            return;
+            return true;
         }
+        final long startTime = getCurrentTimeAsLong();
         final String threadName = Thread.currentThread().getName();
         try {
             waitingThreadNames.add(threadName);
             while (current >= percent) {
+                if (timeoutInMillis > 0 && getCurrentTimeAsLong() - startTime > timeoutInMillis) {
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Cpu Load {}% is greater than {}%. {} waiting thread(s). {} thread is timed out.", current, percent,
+                                waitingThreadNames.size(), threadName);
+                    }
+                    return false;
+                }
                 if (logger.isInfoEnabled()) {
                     logger.info("Cpu Load {}% is greater than {}%. {} waiting thread(s).", current, percent, waitingThreadNames.size());
                 }
@@ -627,6 +639,7 @@ public class SystemHelper {
         } finally {
             waitingThreadNames.remove(threadName);
         }
+        return true;
     }
 
     public void waitForNoWaitingThreads() {

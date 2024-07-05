@@ -1176,6 +1176,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson */
     String INDEX_BACKUP_LOG_TARGETS = "index.backup.log.targets";
 
+    /** The key of the configuration. e.g. 60000 */
+    String INDEX_BACKUP_LOG_LOAD_TIMEOUT = "index.backup.log.load.timeout";
+
     /** The key of the configuration. e.g. true */
     String LOGGING_SEARCH_DOCS_ENABLED = "logging.search.docs.enabled";
 
@@ -5506,6 +5509,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexBackupLogTargets();
 
     /**
+     * Get the value for the key 'index.backup.log.load.timeout'. <br>
+     * The value is, e.g. 60000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexBackupLogLoadTimeout();
+
+    /**
+     * Get the value for the key 'index.backup.log.load.timeout' as {@link Integer}. <br>
+     * The value is, e.g. 60000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexBackupLogLoadTimeoutAsInteger();
+
+    /**
      * Get the value for the key 'logging.search.docs.enabled'. <br>
      * The value is, e.g. true <br>
      * comment: logging
@@ -9611,6 +9629,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_BACKUP_LOG_TARGETS);
         }
 
+        public String getIndexBackupLogLoadTimeout() {
+            return get(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT);
+        }
+
+        public Integer getIndexBackupLogLoadTimeoutAsInteger() {
+            return getAsInteger(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT);
+        }
+
         public String getLoggingSearchDocsEnabled() {
             return get(FessConfig.LOGGING_SEARCH_DOCS_ENABLED);
         }
@@ -11155,6 +11181,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_BACKUP_TARGETS,
                     "fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
+            defaultMap.put(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT, "60000");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
                     "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
