@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.lang.Character.UnicodeBlock;
 
 import org.apache.lucene.search.Query;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -27,6 +28,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.DisMaxQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.sort.SortBuilder;
@@ -72,30 +74,47 @@ public abstract class QueryCommand {
                 (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
-    protected BoolQueryBuilder buildDefaultQueryBuilder(final FessConfig fessConfig, final QueryContext context,
+    protected DefaultQueryBuilder buildDefaultQueryBuilder(final FessConfig fessConfig, final QueryContext context,
             final DefaultQueryBuilderFunction builder) {
-        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.should(builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue()));
-        boolQuery.should(builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue()));
+        final DefaultQueryBuilder defaultQuery = createDefaultQueryBuilder();
+        defaultQuery.add(builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue()));
+        defaultQuery.add(builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue()));
         final float importantContentBoost = fessConfig.getQueryBoostImportantContentAsDecimal().floatValue();
         if (importantContentBoost >= 0.0f) {
-            boolQuery.should(builder.apply(fessConfig.getIndexFieldImportantContent(), importantContentBoost));
+            defaultQuery.add(builder.apply(fessConfig.getIndexFieldImportantContent(), importantContentBoost));
         }
         final float importantContantLangBoost = fessConfig.getQueryBoostImportantContentLangAsDecimal().floatValue();
         getQueryLanguages().ifPresent(langs -> stream(langs).of(stream -> stream.forEach(lang -> {
-            boolQuery.should(
+            defaultQuery.add(
                     builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal().floatValue()));
-            boolQuery.should(builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
+            defaultQuery.add(builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
                     fessConfig.getQueryBoostContentLangAsDecimal().floatValue()));
             if (importantContantLangBoost >= 0.0f) {
-                boolQuery.should(builder.apply(fessConfig.getIndexFieldImportantContent() + "_" + lang, importantContantLangBoost));
+                defaultQuery.add(builder.apply(fessConfig.getIndexFieldImportantContent() + "_" + lang, importantContantLangBoost));
             }
         })));
         getQueryFieldConfig().additionalDefaultList.stream().forEach(f -> {
             final QueryBuilder query = builder.apply(f.getFirst(), f.getSecond());
-            boolQuery.should(query);
+            defaultQuery.add(query);
         });
-        return boolQuery;
+        return defaultQuery;
+    }
+
+    protected DefaultQueryBuilder createDefaultQueryBuilder() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if ("dismax".equals(fessConfig.getQueryDefaultQueryType())) {
+            final DisMaxQueryBuilder disMaxQuery = QueryBuilders.disMaxQuery();
+            disMaxQuery.tieBreaker(fessConfig.getQueryDismaxTieBreakerAsDecimal().floatValue());
+            return new DefaultQueryBuilder(disMaxQuery);
+        }
+
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        final String minimumShouldMatch = fessConfig.getQueryBoolMinimumShouldMatch();
+        if (StringUtil.isNotBlank(minimumShouldMatch)) {
+            boolQuery.minimumShouldMatch(minimumShouldMatch);
+        }
+        return new DefaultQueryBuilder(boolQuery);
     }
 
     protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {

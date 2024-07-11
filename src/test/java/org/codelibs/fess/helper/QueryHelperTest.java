@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.BooleanQueryCommand;
 import org.codelibs.fess.query.BoostQueryCommand;
 import org.codelibs.fess.query.FuzzyQueryCommand;
@@ -41,6 +43,7 @@ import org.codelibs.fess.query.WildcardQueryCommand;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.util.DfTypeUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
@@ -88,7 +91,54 @@ public class QueryHelperTest extends UnitFessTestCase {
         new WildcardQueryCommand().register();
     }
 
+    private void setQueryType(final String queryType) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String get(String propertyKey) {
+                return fessConfig.get(propertyKey);
+            }
+
+            @Override
+            public BigDecimal getAsDecimal(String propertyKey) {
+                return DfTypeUtil.toBigDecimal(get(propertyKey));
+            }
+
+            @Override
+            public Integer getAsInteger(String propertyKey) {
+                return DfTypeUtil.toInteger(get(propertyKey));
+            }
+
+            @Override
+            public String getQueryDefaultQueryType() {
+                return queryType;
+            }
+        });
+    }
+
     public void test_build_simple() {
+        setQueryType("bool");
+
+        float titleBoost = 0.5f;
+        float contentBoost = 0.05f;
+
+        assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), //
+                Map.of("_default", List.of("QUERY")), //
+                Set.of("QUERY"), //
+                buildQuery("QUERY"));
+        assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), //
+                Map.of("_default", List.of("QUERY")), //
+                Set.of("QUERY"), //
+                buildQuery(" QUERY"));
+        assertQuery(functionScoreQuery(simpleQuery("QUERY", titleBoost, contentBoost)), //
+                Map.of("_default", List.of("QUERY")), //
+                Set.of("QUERY"), //
+                buildQuery("QUERY "));
+    }
+
+    public void test_build_simple_dismax() {
+        setQueryType("dismax");
+
         float titleBoost = 0.5f;
         float contentBoost = 0.05f;
 
@@ -133,6 +183,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_boost() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":5.0}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"fuzzy\":{\"title\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY1")), //
@@ -153,6 +204,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_wildcard() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"wildcard\":{\"title\":{\"wildcard\":\"*\",\"boost\":0.5}}},{\"wildcard\":{\"content\":{\"wildcard\":\"*\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("*")), //
@@ -191,6 +243,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_phrase() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"QUERY1QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"QUERY1QUERY2\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY1 QUERY2")), //
@@ -207,6 +260,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_prefix() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase_prefix\":{\"title\":{\"query\":\"query\",\"slop\":0,\"max_expansions\":50,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase_prefix\":{\"content\":{\"query\":\"query\",\"slop\":0,\"max_expansions\":50,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY*")), //
@@ -229,6 +283,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_escape() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa:bbb\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"aaa:bbb\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("aaa:bbb")), //
@@ -335,6 +390,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_fuzzy() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"fuzzy\":{\"title\":{\"value\":\"QUERY1\",\"fuzziness\":\"2\",\"prefix_length\":0,\"max_expansions\":50,\"transpositions\":true,\"boost\":0.5}}},{\"fuzzy\":{\"content\":{\"value\":\"QUERY1\",\"fuzziness\":\"2\",\"prefix_length\":0,\"max_expansions\":50,\"transpositions\":true,\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("QUERY1")), //
@@ -357,6 +413,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_build_range() {
+        setQueryType("bool");
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"[aaaTObbb]\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"[aaaTObbb]\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
                 Map.of("_default", List.of("[aaa TO bbb]")), //
@@ -439,6 +496,14 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     private QueryBuilder simpleQuery(String query, float titleBoost, float contentBoost) {
+        if ("dismax".equals(ComponentUtil.getFessConfig().getQueryDefaultQueryType())) {
+            return QueryBuilders.disMaxQuery().tieBreaker(0.1f)//
+                    .add(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
+                    .add(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//
+                    .add(QueryBuilders.fuzzyQuery("title", query).boost(0.01f).maxExpansions(10))//
+                    .add(QueryBuilders.fuzzyQuery("content", query).boost(0.005f).maxExpansions(10))//
+            ;
+        }
         return QueryBuilders.boolQuery()//
                 .should(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
                 .should(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//

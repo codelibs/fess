@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.query;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,9 +24,11 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.util.DfTypeUtil;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
@@ -60,8 +63,34 @@ public class TermQueryCommandTest extends UnitFessTestCase {
         super.tearDown();
     }
 
+    private void setQueryType(final String queryType) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String get(String propertyKey) {
+                return fessConfig.get(propertyKey);
+            }
+
+            @Override
+            public BigDecimal getAsDecimal(String propertyKey) {
+                return DfTypeUtil.toBigDecimal(get(propertyKey));
+            }
+
+            @Override
+            public Integer getAsInteger(String propertyKey) {
+                return DfTypeUtil.toInteger(get(propertyKey));
+            }
+
+            @Override
+            public String getQueryDefaultQueryType() {
+                return queryType;
+            }
+        });
+    }
+
     public void test_convertTermQuery() throws Exception {
-        assertQueryBuilder(BoolQueryBuilder.class,
+        setQueryType("bool");
+        assertQueryBuilder(DefaultQueryBuilder.class,
                 "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
                 "aaa");
         assertQueryBuilder(MatchPhraseQueryBuilder.class,
@@ -70,8 +99,44 @@ public class TermQueryCommandTest extends UnitFessTestCase {
         assertQueryBuilder(MatchPhraseQueryBuilder.class,
                 "{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
                 "content:aaa");
-        assertQueryBuilder(BoolQueryBuilder.class,
+        assertQueryBuilder(DefaultQueryBuilder.class,
                 "{\"bool\":{\"should\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"adjust_pure_negative\":true,\"boost\":1.0}}",
+                "xxx:aaa");
+        assertQueryBuilder(WildcardQueryBuilder.class, //
+                "{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}}", //
+                "inurl:aaa");
+        assertQueryBuilder(TermQueryBuilder.class, //
+                "{\"term\":{\"url\":{\"value\":\"aaa\",\"boost\":1.0}}}", //
+                "url:aaa");
+        assertQueryBuilder(PrefixQueryBuilder.class, //
+                "{\"prefix\":{\"site\":{\"value\":\"aaa\",\"boost\":1.0}}}", //
+                "site:aaa");
+
+        assertQueryBuilder("{\"timestamp\":{\"order\":\"asc\"}}", "sort:timestamp");
+        assertQueryBuilder("{\"timestamp\":{\"order\":\"asc\"}}", "sort:timestamp.asc");
+        assertQueryBuilder("{\"timestamp\":{\"order\":\"desc\"}}", "sort:timestamp.desc");
+
+        try {
+            assertQueryBuilder("", "sort:xxx");
+            fail();
+        } catch (InvalidQueryException e) {
+            // nothing
+        }
+    }
+
+    public void test_convertTermQuery_dismax() throws Exception {
+        setQueryType("dismax");
+        assertQueryBuilder(DefaultQueryBuilder.class,
+                "{\"dis_max\":{\"tie_breaker\":0.1,\"queries\":[{\"match_phrase\":{\"title\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}}],\"boost\":1.0}}",
+                "aaa");
+        assertQueryBuilder(MatchPhraseQueryBuilder.class,
+                "{\"match_phrase\":{\"title\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
+                "title:aaa");
+        assertQueryBuilder(MatchPhraseQueryBuilder.class,
+                "{\"match_phrase\":{\"content\":{\"query\":\"aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":1.0}}}", //
+                "content:aaa");
+        assertQueryBuilder(DefaultQueryBuilder.class,
+                "{\"dis_max\":{\"tie_breaker\":0.1,\"queries\":[{\"match_phrase\":{\"title\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.5}}},{\"match_phrase\":{\"content\":{\"query\":\"xxx:aaa\",\"slop\":0,\"zero_terms_query\":\"NONE\",\"boost\":0.05}}},{\"fuzzy\":{\"title\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.01}}},{\"fuzzy\":{\"content\":{\"value\":\"xxx:aaa\",\"fuzziness\":\"AUTO\",\"prefix_length\":0,\"max_expansions\":10,\"transpositions\":true,\"boost\":0.005}}}],\"boost\":1.0}}",
                 "xxx:aaa");
         assertQueryBuilder(WildcardQueryBuilder.class, //
                 "{\"wildcard\":{\"url\":{\"wildcard\":\"*aaa*\",\"boost\":1.0}}}", //

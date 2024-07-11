@@ -1110,6 +1110,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS = "query.boost.fuzzy.content.transpositions";
 
+    /** The key of the configuration. e.g. bool */
+    String QUERY_DEFAULT_query_type = "query.default.query_type";
+
+    /** The key of the configuration. e.g. 0.1 */
+    String QUERY_DISMAX_tie_breaker = "query.dismax.tie_breaker";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_BOOL_minimum_should_match = "query.bool.minimum_should_match";
+
     /** The key of the configuration. e.g. 50 */
     String QUERY_PREFIX_EXPANSIONS = "query.prefix.expansions";
 
@@ -5243,6 +5252,43 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryBoostFuzzyContentTranspositions();
+
+    /**
+     * Get the value for the key 'query.default.query_type'. <br>
+     * The value is, e.g. bool <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryDefaultQueryType();
+
+    /**
+     * Get the value for the key 'query.dismax.tie_breaker'. <br>
+     * The value is, e.g. 0.1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryDismaxTieBreaker();
+
+    /**
+     * Get the value for the key 'query.dismax.tie_breaker' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 0.1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryDismaxTieBreakerAsDecimal();
+
+    /**
+     * Get the value for the key 'query.bool.minimum_should_match'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoolMinimumShouldMatch();
+
+    /**
+     * Get the value for the key 'query.bool.minimum_should_match' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryBoolMinimumShouldMatchAsInteger();
 
     /**
      * Get the value for the key 'query.prefix.expansions'. <br>
@@ -9489,6 +9535,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS);
         }
 
+        public String getQueryDefaultQueryType() {
+            return get(FessConfig.QUERY_DEFAULT_query_type);
+        }
+
+        public String getQueryDismaxTieBreaker() {
+            return get(FessConfig.QUERY_DISMAX_tie_breaker);
+        }
+
+        public java.math.BigDecimal getQueryDismaxTieBreakerAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_DISMAX_tie_breaker);
+        }
+
+        public String getQueryBoolMinimumShouldMatch() {
+            return get(FessConfig.QUERY_BOOL_minimum_should_match);
+        }
+
+        public Integer getQueryBoolMinimumShouldMatchAsInteger() {
+            return getAsInteger(FessConfig.QUERY_BOOL_minimum_should_match);
+        }
+
         public String getQueryPrefixExpansions() {
             return get(FessConfig.QUERY_PREFIX_EXPANSIONS);
         }
@@ -11158,6 +11224,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_EXPANSIONS, "10");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_prefix_length, "0");
             defaultMap.put(FessConfig.QUERY_BOOST_FUZZY_CONTENT_TRANSPOSITIONS, "true");
+            defaultMap.put(FessConfig.QUERY_DEFAULT_query_type, "bool");
+            defaultMap.put(FessConfig.QUERY_DISMAX_tie_breaker, "0.1");
+            defaultMap.put(FessConfig.QUERY_BOOL_minimum_should_match, "");
             defaultMap.put(FessConfig.QUERY_PREFIX_EXPANSIONS, "50");
             defaultMap.put(FessConfig.QUERY_PREFIX_SLOP, "0");
             defaultMap.put(FessConfig.QUERY_FUZZY_prefix_length, "0");
