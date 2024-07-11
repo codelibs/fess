@@ -34,7 +34,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.common.unit.Fuzziness;
-import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.sort.SortOrder;
@@ -161,24 +160,24 @@ public class TermQueryCommand extends QueryCommand {
             final float boost, final String field, final String text) {
         context.addFieldLog(field, text);
         context.addHighlightedQuery(text);
-        final BoolQueryBuilder boolQuery =
+        final DefaultQueryBuilder defaultQuery =
                 buildDefaultQueryBuilder(fessConfig, context, (f, b) -> buildMatchPhraseQuery(f, text).boost(b * boost));
         final Integer fuzzyMinLength = fessConfig.getQueryBoostFuzzyMinLengthAsInteger();
         if (fuzzyMinLength >= 0 && text.length() >= fuzzyMinLength) {
-            boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
+            defaultQuery.add(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldTitle(), text)
                     .boost(fessConfig.getQueryBoostFuzzyTitleAsDecimal().floatValue())
                     .prefixLength(fessConfig.getQueryBoostFuzzyTitlePrefixLengthAsInteger())
                     .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyTitleTranspositions()))
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyTitleFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyTitleExpansionsAsInteger()));
-            boolQuery.should(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldContent(), text)
+            defaultQuery.add(QueryBuilders.fuzzyQuery(fessConfig.getIndexFieldContent(), text)
                     .prefixLength(fessConfig.getQueryBoostFuzzyContentPrefixLengthAsInteger())
                     .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryBoostFuzzyContentTranspositions()))
                     .boost(fessConfig.getQueryBoostFuzzyContentAsDecimal().floatValue())
                     .fuzziness(Fuzziness.build(fessConfig.getQueryBoostFuzzyContentFuzziness()))
                     .maxExpansions(fessConfig.getQueryBoostFuzzyContentExpansionsAsInteger()));
         }
-        return boolQuery;
+        return defaultQuery;
     }
 
     protected QueryBuilder convertSiteQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
