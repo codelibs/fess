@@ -17,6 +17,7 @@ package org.codelibs.fess.rank.fusion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,6 +40,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.codelibs.core.collection.ArrayUtil;
+import org.codelibs.core.concurrent.CommonPoolUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -65,6 +70,8 @@ public class RankFusionProcessor implements AutoCloseable {
 
     protected int windowSize;
 
+    protected Set<String> availableSearcherNameSet;
+
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -76,6 +83,24 @@ public class RankFusionProcessor implements AutoCloseable {
             this.windowSize = 2 * maxPageSize;
         } else {
             this.windowSize = windowSize;
+        }
+        load();
+    }
+
+    public void update() {
+        CommonPoolUtil.execute(this::load);
+    }
+
+    protected void load() {
+        final String value = System.getProperty("rank.fusion.searchers");
+        if (StringUtil.isBlank(value)) {
+            availableSearcherNameSet = Collections.emptySet();
+        } else {
+            availableSearcherNameSet = StreamUtil.split(value, ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toUnmodifiableSet()));
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("availableSearcherNameSet={}", availableSearcherNameSet);
         }
     }
 
@@ -98,14 +123,30 @@ public class RankFusionProcessor implements AutoCloseable {
 
     public List<Map<String, Object>> search(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
-        if (searchers.length == 1) {
-            return searchWithMainSearcher(query, params, userBean);
+        final RankFusionSearcher[] availableSearchers = getAvailableSearchers();
+        if (availableSearchers.length == 1) {
+            return searchWithMainSearcher(availableSearchers[0], query, params, userBean);
         }
-        return searchWithMultipleSearchers(query, params, userBean);
+        return searchWithMultipleSearchers(availableSearchers, query, params, userBean);
     }
 
-    protected List<Map<String, Object>> searchWithMultipleSearchers(final String query, final SearchRequestParams params,
-            final OptionalThing<FessUserBean> userBean) {
+    protected RankFusionSearcher[] getAvailableSearchers() {
+        if (availableSearcherNameSet.isEmpty()) {
+            return searchers;
+        }
+        final RankFusionSearcher[] availableSearchers = Arrays.stream(searchers)
+                .filter(searcher -> availableSearcherNameSet.contains(searcher.getName())).toArray(n -> new RankFusionSearcher[n]);
+        if (availableSearchers.length == 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No available searchers from {}", availableSearcherNameSet);
+            }
+            return new RankFusionSearcher[] { searchers[0] };
+        }
+        return availableSearchers;
+    }
+
+    protected List<Map<String, Object>> searchWithMultipleSearchers(final RankFusionSearcher[] searchers, final String query,
+            final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
             logger.debug("Send {} to the searchers.", query);
         }
@@ -192,13 +233,13 @@ public class RankFusionProcessor implements AutoCloseable {
                         final Map<String, Object> baseDoc = scoreDocMap.get(id);
                         final float oldScore = toFloat(baseDoc.get(scoreField));
                         baseDoc.put(scoreField, oldScore + score);
-                        final String[] searchers = DocumentUtil.getValue(doc, Constants.SEARCHER, String[].class);
-                        if (searchers != null) {
+                        final String[] searcherNames = DocumentUtil.getValue(doc, Constants.SEARCHER, String[].class);
+                        if (searcherNames != null) {
                             final String[] baseSearchers = DocumentUtil.getValue(baseDoc, Constants.SEARCHER, String[].class);
                             if (baseSearchers != null) {
-                                baseDoc.put(Constants.SEARCHER, ArrayUtil.addAll(baseSearchers, searchers));
+                                baseDoc.put(Constants.SEARCHER, ArrayUtil.addAll(baseSearchers, searcherNames));
                             } else {
-                                baseDoc.put(Constants.SEARCHER, searchers);
+                                baseDoc.put(Constants.SEARCHER, searcherNames);
                             }
                         }
                     } else {
@@ -248,13 +289,13 @@ public class RankFusionProcessor implements AutoCloseable {
         return docs.subList(fromIndex, toIndex);
     }
 
-    protected List<Map<String, Object>> searchWithMainSearcher(final String query, final SearchRequestParams params,
-            final OptionalThing<FessUserBean> userBean) {
+    protected List<Map<String, Object>> searchWithMainSearcher(final RankFusionSearcher searcher, final String query,
+            final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
             logger.debug("Send {} to the main searcher.", query);
         }
         final int pageSize = params.getPageSize();
-        final SearchResult searchResult = searchers[0].search(query, params, userBean);
+        final SearchResult searchResult = searcher.search(query, params, userBean);
         return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
                 searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
                 searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);

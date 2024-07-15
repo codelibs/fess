@@ -516,6 +516,8 @@ public class SystemHelper {
             ComponentUtil.getJobManager().reboot();
         }
         updateSystemProperties();
+
+        ComponentUtil.getRankFusionProcessor().update();
     }
 
     public void updateSystemProperties() {
