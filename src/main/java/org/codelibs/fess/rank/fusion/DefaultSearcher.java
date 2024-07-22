@@ -184,7 +184,10 @@ public class DefaultSearcher extends RankFusionSearcher {
         }
 
         if (!docMap.containsKey(Constants.SCORE)) {
-            docMap.put(Constants.SCORE, searchHit.getScore());
+            final float score = searchHit.getScore();
+            if (Float.isFinite(score)) {
+                docMap.put(Constants.SCORE, score);
+            }
         }
 
         if (!docMap.containsKey(fessConfig.getIndexFieldId())) {

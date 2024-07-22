@@ -217,7 +217,10 @@ public class SearchHelper {
                     }
 
                     if (!docMap.containsKey(Constants.SCORE)) {
-                        docMap.put(Constants.SCORE, hit.getScore());
+                        final float score = hit.getScore();
+                        if (Float.isFinite(score)) {
+                            docMap.put(Constants.SCORE, score);
+                        }
                     }
 
                     docMap.put(fessConfig.getIndexFieldId(), hit.getId());
