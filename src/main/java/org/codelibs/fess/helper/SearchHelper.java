@@ -43,6 +43,7 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
+import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -160,7 +161,22 @@ public class SearchHelper {
 
     protected List<Map<String, Object>> searchInternal(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
-        return ComponentUtil.getRankFusionProcessor().search(query, params, userBean);
+        final RankFusionProcessor rankFusionProcessor = ComponentUtil.getRankFusionProcessor();
+        final List<Map<String, Object>> documentItems = rankFusionProcessor.search(query, params, userBean);
+        if (documentItems instanceof QueryResponseList queryResponseList) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            if (queryResponseList.getAllRecordCount() <= fessConfig.getQueryOrsearchMinHitCountAsInteger()) {
+                return LaRequestUtil.getOptionalRequest().map(request -> {
+                    request.setAttribute(Constants.DEFAULT_QUERY_OPERATOR, "OR");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("The number of hits is {}<={}. Searching again with OR operator.",
+                                queryResponseList.getAllRecordCount(), fessConfig.getQueryOrsearchMinHitCountAsInteger());
+                    }
+                    return rankFusionProcessor.search(query, params, userBean);
+                }).orElse(queryResponseList);
+            }
+        }
+        return documentItems;
     }
 
     public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,

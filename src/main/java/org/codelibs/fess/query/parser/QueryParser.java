@@ -29,6 +29,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.QueryParseException;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -58,7 +59,15 @@ public class QueryParser {
     protected org.apache.lucene.queryparser.classic.QueryParser createQueryParser() {
         final LuceneQueryParser parser = new LuceneQueryParser(defaultField, analyzer);
         parser.setAllowLeadingWildcard(allowLeadingWildcard);
-        parser.setDefaultOperator(defaultOperator);
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
+            if (req.getAttribute(Constants.DEFAULT_QUERY_OPERATOR) instanceof String op) {
+                parser.setDefaultOperator(Operator.valueOf(op));
+            } else {
+                parser.setDefaultOperator(defaultOperator);
+            }
+        }).orElse(() -> {
+            parser.setDefaultOperator(defaultOperator);
+        });
         return parser;
     }
 

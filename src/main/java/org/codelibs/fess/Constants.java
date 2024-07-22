@@ -250,6 +250,8 @@ public class Constants extends CoreLibConstants {
 
     public static final Pattern LUCENE_RANGE_FIELD_RESERVED_PATTERN = Pattern.compile("([!\\(\\){}\\[\\]\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))");
 
+    public static final String DEFAULT_QUERY_OPERATOR = "fess.DefaultQueryOperator";
+
     public static final String SEARCH_LOG_ACCESS_TYPE = "searchLogAccessType";
 
     public static final String SEARCH_LOG_ACCESS_TYPE_JSON = "json";
