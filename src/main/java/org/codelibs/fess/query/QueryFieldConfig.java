@@ -202,6 +202,7 @@ public class QueryFieldConfig {
         }
         if (apiResponseFieldSet == null) {
             setApiResponseFields(fessConfig.getQueryAdditionalApiResponseFields(//
+                    SCORE_SORT_VALUE, //
                     fessConfig.getResponseFieldContentDescription(), //
                     fessConfig.getResponseFieldContentTitle(), //
                     fessConfig.getResponseFieldSitePath(), //
