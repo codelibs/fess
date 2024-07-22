@@ -341,9 +341,17 @@ public class SearchLogHelper {
 
     protected void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-        searchLogBhv.batchUpdate(searchLogList, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        final int batchSize = ComponentUtil.getFessConfig().getSearchlogProcessBatchSizeAsInteger();
+        final int totalSize = searchLogList.size();
+        for (int i = 0; i < totalSize; i += batchSize) {
+            final int end = Math.min(totalSize, i + batchSize);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Sending {} search logs. ({}-{}/{})", end - i, i, end, totalSize);
+            }
+            searchLogBhv.batchUpdate(searchLogList.subList(i, end), op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+        }
     }
 
     protected void processClickLogQueue(final Queue<ClickLog> queue) {
@@ -416,7 +424,15 @@ public class SearchLogHelper {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             try {
                 final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
-                clickLogBhv.batchInsert(clickLogList);
+                final int batchSize = fessConfig.getSearchlogProcessBatchSizeAsInteger();
+                final int totalSize = clickLogList.size();
+                for (int i = 0; i < totalSize; i += batchSize) {
+                    final int end = Math.min(totalSize, i + batchSize);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Sending {} click logs. ({}-{}/{})", end - i, i, end, totalSize);
+                    }
+                    clickLogBhv.batchInsert(clickLogList.subList(i, end));
+                }
             } catch (final Exception e) {
                 logger.warn("Failed to insert: {}", clickLogList, e);
             }
