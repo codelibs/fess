@@ -87,7 +87,6 @@ import org.opensearch.OpenSearchException;
 import org.opensearch.OpenSearchStatusException;
 import org.opensearch.action.ActionRequest;
 import org.opensearch.action.ActionType;
-import org.opensearch.action.DocWriteRequest;
 import org.opensearch.action.DocWriteRequest.OpType;
 import org.opensearch.action.DocWriteResponse.Result;
 import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -100,8 +99,6 @@ import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.opensearch.action.admin.indices.refresh.RefreshResponse;
 import org.opensearch.action.admin.indices.segments.IndicesSegmentResponse;
 import org.opensearch.action.admin.indices.segments.PitSegmentsRequest;
-import org.opensearch.action.bulk.BulkItemResponse;
-import org.opensearch.action.bulk.BulkItemResponse.Failure;
 import org.opensearch.action.bulk.BulkRequest;
 import org.opensearch.action.bulk.BulkRequestBuilder;
 import org.opensearch.action.bulk.BulkResponse;
@@ -1186,7 +1183,7 @@ public class SearchEngineClient implements Client {
         }
     }
 
-    public String[] addAll(final String index, final List<Map<String, Object>> docList,
+    public BulkResponse addAll(final String index, final List<Map<String, Object>> docList,
             final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
@@ -1196,26 +1193,7 @@ public class SearchEngineClient implements Client {
             options.accept(doc, builder);
             bulkRequestBuilder.add(builder);
         }
-        final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
-        if (response.hasFailures()) {
-            if (logger.isDebugEnabled()) {
-                final List<DocWriteRequest<?>> requests = bulkRequestBuilder.request().requests();
-                final BulkItemResponse[] items = response.getItems();
-                if (requests.size() == items.length) {
-                    for (int i = 0; i < requests.size(); i++) {
-                        final BulkItemResponse resp = items[i];
-                        if (resp.isFailed() && resp.getFailure() != null) {
-                            final DocWriteRequest<?> req = requests.get(i);
-                            final Failure failure = resp.getFailure();
-                            logger.debug("Failed Request: {}\n=>{}", req, failure.getMessage());
-                        }
-                    }
-                }
-            }
-            throw new SearchEngineClientException(response.buildFailureMessage());
-        }
-
-        return Arrays.stream(response.getItems()).map(BulkItemResponse::getId).toArray(n -> new String[n]);
+        return bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
     }
 
     public static class SearchConditionBuilder {

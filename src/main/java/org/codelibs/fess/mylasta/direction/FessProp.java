@@ -1362,9 +1362,14 @@ public interface FessProp {
 
     default List<String> invalidIndexIntegerFields(final Map<String, Object> source) {
         final IntegerTypeValidator integerValidator = new IntegerTypeValidator();
-        return split(getIndexAdminIntegerFields(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !integerValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
+        return split(getIndexAdminIntegerFields(), ",").get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s))).filter(s -> {
+                    final Object obj = source.get(s);
+                    if (obj instanceof Number) {
+                        return false;
+                    }
+                    return !integerValidator.isValid(obj.toString(), null);
+                }).collect(Collectors.toList()));
     }
 
     String getIndexAdminLongFields();
@@ -1386,9 +1391,14 @@ public interface FessProp {
 
     default List<String> invalidIndexLongFields(final Map<String, Object> source) {
         final LongTypeValidator longValidator = new LongTypeValidator();
-        return split(getIndexAdminLongFields(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !longValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
+        return split(getIndexAdminLongFields(), ",").get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s))).filter(s -> {
+                    final Object obj = source.get(s);
+                    if (obj instanceof Number) {
+                        return false;
+                    }
+                    return !longValidator.isValid(obj.toString(), null);
+                }).collect(Collectors.toList()));
     }
 
     String getIndexAdminFloatFields();
@@ -1410,9 +1420,13 @@ public interface FessProp {
 
     default List<String> invalidIndexFloatFields(final Map<String, Object> source) {
         final FloatTypeValidator floatValidator = new FloatTypeValidator();
-        return split(getIndexAdminFloatFields(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !floatValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
+        return split(getIndexAdminFloatFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> {
+            final Object obj = source.get(s);
+            if (obj instanceof Number) {
+                return false;
+            }
+            return !floatValidator.isValid(obj.toString(), null);
+        }).collect(Collectors.toList()));
     }
 
     String getIndexAdminDoubleFields();
@@ -1434,9 +1448,13 @@ public interface FessProp {
 
     default List<String> invalidIndexDoubleFields(final Map<String, Object> source) {
         final DoubleTypeValidator doubleValidator = new DoubleTypeValidator();
-        return split(getIndexAdminDoubleFields(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !doubleValidator.isValid(source.get(s).toString(), null)).collect(Collectors.toList()));
+        return split(getIndexAdminDoubleFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> {
+            final Object obj = source.get(s);
+            if (obj instanceof Number) {
+                return false;
+            }
+            return !doubleValidator.isValid(obj.toString(), null);
+        }).collect(Collectors.toList()));
     }
 
     default Map<String, Object> convertToEditableDoc(final Map<String, Object> source) {
@@ -1488,19 +1506,41 @@ public interface FessProp {
             final String key = e.getKey();
             Object value = e.getValue();
             if (arrayFieldSet.contains(key)) {
-                value = split(value.toString(), "\n")
-                        .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+                if (value instanceof String[]) {
+                    value = Arrays.stream((String[]) value).toList();
+                } else if (value instanceof List<?>) {
+                    // nothing
+                } else {
+                    value = split(value.toString(), "\n")
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.toList()));
+                }
             } else if (dateFieldSet.contains(key)) {
                 // TODO time zone
                 value = FessFunctions.parseDate(value.toString());
             } else if (integerFieldSet.contains(key)) {
-                value = DfTypeUtil.toInteger(value.toString());
+                if (value instanceof Number num) {
+                    value = num.intValue();
+                } else {
+                    value = DfTypeUtil.toInteger(value.toString());
+                }
             } else if (longFieldSet.contains(key)) {
-                value = DfTypeUtil.toLong(value.toString());
+                if (value instanceof Number num) {
+                    value = num.longValue();
+                } else {
+                    value = DfTypeUtil.toLong(value.toString());
+                }
             } else if (floatFieldSet.contains(key)) {
-                value = DfTypeUtil.toFloat(value.toString());
+                if (value instanceof Number num) {
+                    value = num.floatValue();
+                } else {
+                    value = DfTypeUtil.toFloat(value.toString());
+                }
             } else if (doubleFieldSet.contains(key)) {
-                value = DfTypeUtil.toDouble(value.toString());
+                if (value instanceof Number num) {
+                    value = num.doubleValue();
+                } else {
+                    value = DfTypeUtil.toDouble(value.toString());
+                }
             }
             return new Pair<>(key, value);
         }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));

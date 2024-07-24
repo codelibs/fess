@@ -271,7 +271,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, this::asEditHtml);
-        validateFields(form, v -> throwValidationError(v, this::asEditHtml));
+        validateFields(form.doc, v -> throwValidationError(v, this::asEditHtml));
         verifyToken(this::asEditHtml);
         getDoc(form).ifPresent(entity -> {
             try {
@@ -299,7 +299,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, this::asEditHtml);
-        validateFields(form, v -> throwValidationError(v, this::asEditHtml));
+        validateFields(form.doc, v -> throwValidationError(v, this::asEditHtml));
         verifyToken(this::asEditHtml);
         getDoc(form).ifPresent(entity -> {
             final String index = fessConfig.getIndexDocumentUpdateIndex();
@@ -334,37 +334,37 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     //                                                                       Validation
     //                                                                           =========
-    public static void validateFields(final CreateForm form, final Consumer<VaMessenger<FessMessages>> throwError) {
+    public static void validateFields(final Map<String, Object> doc, final Consumer<VaMessenger<FessMessages>> throwError) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         try {
-            if (!fessConfig.validateIndexRequiredFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexRequiredFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
             }
 
-            if (!fessConfig.validateIndexArrayFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexArrayFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexArrayFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexArrayFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
             }
-            if (!fessConfig.validateIndexDateFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexDateFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexDateFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexDateFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeDate(s, s)));
             }
-            if (!fessConfig.validateIndexIntegerFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexIntegerFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeInteger(s, s)));
             }
-            if (!fessConfig.validateIndexLongFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexLongFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexLongFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexLongFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeLong(s, s)));
             }
-            if (!fessConfig.validateIndexFloatFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexFloatFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexFloatFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexFloatFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeFloat(s, s)));
             }
-            if (!fessConfig.validateIndexDoubleFields(form.doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(form.doc).stream().map(s -> "doc." + s)
+            if (!fessConfig.validateIndexDoubleFields(doc)) {
+                throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(doc).stream().map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeDouble(s, s)));
             }
         } catch (final Exception e) {

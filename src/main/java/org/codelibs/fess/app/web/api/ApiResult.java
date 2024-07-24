@@ -39,7 +39,7 @@ public class ApiResult {
     }
 
     public enum Status {
-        OK(0), BAD_REQUEST(1), SYSTEM_ERROR(2), UNAUTHORIZED(3);
+        OK(0), BAD_REQUEST(1), SYSTEM_ERROR(2), UNAUTHORIZED(3), FAILED(9);
 
         private final int id;
 
@@ -383,6 +383,20 @@ public class ApiResult {
 
         public ApiStatsResponse stats(final Map<String, Object> stats) {
             this.stats = stats;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    public static class ApiBulkResponse extends ApiResponse {
+        protected List<Map<String, Object>> items;
+
+        public ApiBulkResponse items(final List<Map<String, Object>> items) {
+            this.items = items;
             return this;
         }
 
