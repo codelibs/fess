@@ -23,12 +23,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
 import org.codelibs.fess.es.client.SearchEngineClient;
+import org.codelibs.fess.es.client.SearchEngineClientException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
 import org.opensearch.action.admin.indices.refresh.RefreshResponse;
+import org.opensearch.action.bulk.BulkItemResponse;
+import org.opensearch.action.bulk.BulkItemResponse.Failure;
+import org.opensearch.action.bulk.BulkResponse;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
@@ -72,10 +76,27 @@ public class IndexingHelper {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Deleted {} old docs", deletedDocCount);
                 }
-                searchEngineClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
-                    final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
-                    crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
-                });
+                final BulkResponse response =
+                        searchEngineClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
+                            final String configId = (String) doc.get(fessConfig.getIndexFieldConfigId());
+                            crawlingConfigHelper.getPipeline(configId).ifPresent(s -> builder.setPipeline(s));
+                        });
+                if (response.hasFailures()) {
+                    if (logger.isDebugEnabled()) {
+                        final BulkItemResponse[] items = response.getItems();
+                        if (docList.size() == items.length) {
+                            for (int i = 0; i < docList.size(); i++) {
+                                final BulkItemResponse resp = items[i];
+                                if (resp.isFailed() && resp.getFailure() != null) {
+                                    final Map<String, Object> req = docList.get(i);
+                                    final Failure failure = resp.getFailure();
+                                    logger.debug("Failed Request: {}\n=>{}", req, failure.getMessage());
+                                }
+                            }
+                        }
+                    }
+                    throw new SearchEngineClientException(response.buildFailureMessage());
+                }
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {

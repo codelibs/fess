@@ -33,6 +33,8 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.dbflute.optional.OptionalEntity;
+import org.opensearch.action.bulk.BulkItemResponse;
+import org.opensearch.action.bulk.BulkResponse;
 import org.opensearch.action.index.IndexAction;
 import org.opensearch.action.index.IndexRequestBuilder;
 import org.opensearch.action.search.SearchAction;
@@ -87,12 +89,12 @@ public class IndexingHelperTest extends UnitFessTestCase {
         final List<Map<String, Object>> sentDocList = new ArrayList<>();
         final SearchEngineClient client = new SearchEngineClient() {
             @Override
-            public String[] addAll(final String index, final List<Map<String, Object>> docList,
+            public BulkResponse addAll(final String index, final List<Map<String, Object>> docList,
                     final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
                 sentIndex.set(index);
                 docList.forEach(x -> options.accept(x, new IndexRequestBuilder(this, IndexAction.INSTANCE)));
                 sentDocList.addAll(docList);
-                return docList.stream().map(x -> (String) x.get("id")).toArray(n -> new String[n]);
+                return new BulkResponse(new BulkItemResponse[0], documentSizeByQuery);
             }
 
             @Override
