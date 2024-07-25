@@ -135,7 +135,7 @@ public class RoleQueryHelper {
                                 throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
                             }
                             if (!hasAccessToken || roleSet.isEmpty()) {
-                                roleSet.addAll(fessConfig.getSearchGuestPermissionList());
+                                roleSet.addAll(fessConfig.getSearchGuestRoleList());
                             }
                         });
             } catch (final RuntimeException e) {
