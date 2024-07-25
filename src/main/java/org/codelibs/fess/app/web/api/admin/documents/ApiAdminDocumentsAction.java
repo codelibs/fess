@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.api.admin.documents;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.codelibs.fess.app.web.api.admin.searchlist.ApiAdminSearchlistAction;
 import org.codelibs.fess.es.client.SearchEngineClient;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
@@ -66,12 +68,60 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "documents is empty."));
         }
         final String indexFieldId = fessConfig.getIndexFieldId();
+        final String indexFieldDocId = fessConfig.getIndexFieldDocId();
+        final String indexFieldContentLength = fessConfig.getIndexFieldContentLength();
+        final String indexFieldTitle = fessConfig.getIndexFieldTitle();
+        final String indexFieldContent = fessConfig.getIndexFieldContent();
+        final String indexFieldFavoriteCount = fessConfig.getIndexFieldFavoriteCount();
+        final String indexFieldClickCount = fessConfig.getIndexFieldClickCount();
+        final String indexFieldBoost = fessConfig.getIndexFieldBoost();
+        final String indexFieldRole = fessConfig.getIndexFieldRole();
+        final String indexFieldLastModified = fessConfig.getIndexFieldLastModified();
+        final String indexFieldTimestamp = fessConfig.getIndexFieldTimestamp();
+        final String indexFieldLang = fessConfig.getIndexFieldLang();
+        final List<String> guestRoleList = fessConfig.getSearchGuestRoleList();
+        final Date now = systemHelper.getCurrentTime();
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
+        final LanguageHelper languageHelper = ComponentUtil.getLanguageHelper();
         final List<Map<String, Object>> docList = body.documents.stream().map(doc -> {
+            if (!doc.containsKey(indexFieldContentLength)) {
+                long contentLength = 0;
+                if (doc.get(indexFieldTitle) instanceof final String title) {
+                    contentLength += title.length();
+                }
+                if (doc.get(indexFieldContent) instanceof final String content) {
+                    contentLength += content.length();
+                }
+                doc.put(indexFieldContentLength, contentLength);
+            }
+            if (!doc.containsKey(indexFieldFavoriteCount)) {
+                doc.put(indexFieldFavoriteCount, 0L);
+            }
+            if (!doc.containsKey(indexFieldClickCount)) {
+                doc.put(indexFieldClickCount, 0L);
+            }
+            if (!doc.containsKey(indexFieldBoost)) {
+                doc.put(indexFieldBoost, 1.0f);
+            }
+            if (!doc.containsKey(indexFieldRole)) {
+                doc.put(indexFieldRole, guestRoleList);
+            }
+            if (!doc.containsKey(indexFieldLastModified)) {
+                doc.put(indexFieldLastModified, now);
+            }
+            if (!doc.containsKey(indexFieldTimestamp)) {
+                doc.put(indexFieldTimestamp, now);
+            }
             AdminSearchlistAction.validateFields(doc, this::throwValidationErrorApi);
             final Map<String, Object> newDoc = fessConfig.convertToStorableDoc(doc);
-            final String newId = crawlingInfoHelper.generateId(newDoc);
-            newDoc.put(indexFieldId, newId);
+            newDoc.put(indexFieldId, crawlingInfoHelper.generateId(newDoc));
+            newDoc.put(indexFieldDocId, systemHelper.generateDocId(newDoc));
+            if (newDoc.get(indexFieldLang) instanceof final List<?> langList) {
+                if (langList.contains("auto")) {
+                    newDoc.remove(indexFieldLang);
+                }
+                languageHelper.updateDocument(newDoc);
+            }
             return newDoc;
         }).toList();
         if (fessConfig.isThumbnailCrawlerEnabled()) {
@@ -96,7 +146,7 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
         });
         return asJson(new ApiBulkResponse().items(Arrays.stream(response.getItems()).map(item -> {
             final Map<String, Object> itemMap = new HashMap<>();
-            itemMap.put("status", item.status().name());
+            itemMap.put("result", item.status().name());
             if (item.isFailed()) {
                 itemMap.put("message", item.getFailureMessage());
             } else {

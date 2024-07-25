@@ -132,7 +132,7 @@ public interface FessProp {
 
     String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
 
-    String SEARCH_GUEST_PERMISSION_LIST = "searchGuestPermissionList";
+    String SEARCH_GUEST_ROLE_LIST = "searchGuestPermissionList";
 
     String SUGGEST_SEARCH_LOG_PERMISSIONS = "suggestSearchLogPermissions";
 
@@ -1276,15 +1276,15 @@ public interface FessProp {
 
     String getRoleSearchGuestPermissions();
 
-    default List<String> getSearchGuestPermissionList() {
+    default List<String> getSearchGuestRoleList() {
         @SuppressWarnings("unchecked")
-        List<String> list = (List<String>) propMap.get(SEARCH_GUEST_PERMISSION_LIST);
+        List<String> list = (List<String>) propMap.get(SEARCH_GUEST_ROLE_LIST);
         if (list == null) {
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
             list = split(getRoleSearchGuestPermissions(), ",")
                     .get(stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).collect(Collectors.toList()));
             list.add(getRoleSearchUserPrefix() + Constants.GUEST_USER);
-            propMap.put(SEARCH_GUEST_PERMISSION_LIST, list);
+            propMap.put(SEARCH_GUEST_ROLE_LIST, list);
         }
         return list;
     }
@@ -1331,9 +1331,14 @@ public interface FessProp {
     }
 
     default List<String> invalidIndexDateFields(final Map<String, Object> source) {
-        return split(getIndexAdminDateFields(), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !validateDateTimeString(source.get(s))).collect(Collectors.toList()));
+        return split(getIndexAdminDateFields(), ",").get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).filter(s -> isNonEmptyValue(source.get(s))).filter(s -> {
+                    final Object obj = source.get(s);
+                    if (obj instanceof Date) {
+                        return false;
+                    }
+                    return !validateDateTimeString(source.get(s));
+                }).collect(Collectors.toList()));
     }
 
     default boolean validateDateTimeString(final Object obj) {
@@ -1516,7 +1521,11 @@ public interface FessProp {
                 }
             } else if (dateFieldSet.contains(key)) {
                 // TODO time zone
-                value = FessFunctions.parseDate(value.toString());
+                if (value instanceof Date) {
+                    // nothing
+                } else {
+                    value = FessFunctions.parseDate(value.toString());
+                }
             } else if (integerFieldSet.contains(key)) {
                 if (value instanceof Number num) {
                     value = num.intValue();
