@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,13 +74,22 @@ public class SearchHelper {
     private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
     // ===================================================================================
+    //                                                                            Variable
+    //
+
+    protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = new SearchRequestParamsRewriter[0];
+
+    // ===================================================================================
     //                                                                              Method
     //                                                                      ==============
 
-    public void search(final SearchRequestParams params, final SearchRenderData data, final OptionalThing<FessUserBean> userBean) {
+    public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
+            final OptionalThing<FessUserBean> userBean) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final long startTime = systemHelper.getCurrentTimeAsLong();
         final long requestedTime = startTime;
+
+        final SearchRequestParams params = rewrite(searchRequestParams);
 
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.REQUEST_LANGUAGES, params.getLanguages());
@@ -353,5 +363,22 @@ public class SearchHelper {
         } catch (final ExecutionException e) {
             throw new SearchEngineClientException("Failed to update bulk data.", e);
         }
+    }
+
+    protected SearchRequestParams rewrite(final SearchRequestParams params) {
+        SearchRequestParams newParams = params;
+        for (final SearchRequestParamsRewriter rewriter : searchRequestParamsRewriters) {
+            newParams = rewriter.rewrite(newParams);
+        }
+        return newParams;
+    }
+
+    public void addRewriter(final SearchRequestParamsRewriter rewriter) {
+        searchRequestParamsRewriters = Arrays.copyOf(searchRequestParamsRewriters, searchRequestParamsRewriters.length + 1);
+        searchRequestParamsRewriters[searchRequestParamsRewriters.length - 1] = rewriter;
+    }
+
+    public interface SearchRequestParamsRewriter {
+        SearchRequestParams rewrite(SearchRequestParams params);
     }
 }
