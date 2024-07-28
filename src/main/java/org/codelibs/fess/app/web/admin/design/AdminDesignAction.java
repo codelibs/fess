@@ -22,6 +22,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +47,10 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author jflute
  */
 public class AdminDesignAction extends FessAdminAction {
+
+    private static final String CACHE_AND_SESSION_INVALIDATE_STATEMENT = "<!--CACHE_AND_SESSION_INVALIDATE-->";
+
+    private static final String TRY_STATEMENT = "<!--TRY-->";
 
     public static final String ROLE = "admin-design";
 
@@ -237,7 +242,7 @@ public class AdminDesignAction extends FessAdminAction {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
-            form.content = new String(FileUtil.readBytes(jspFile), Constants.UTF_8);
+            form.content = encodeJsp(new String(FileUtil.readBytes(jspFile), Constants.UTF_8));
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
@@ -251,7 +256,7 @@ public class AdminDesignAction extends FessAdminAction {
         final String jspType = "orig/view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
-            form.content = new String(FileUtil.readBytes(jspFile), Constants.UTF_8);
+            form.content = encodeJsp(new String(FileUtil.readBytes(jspFile), Constants.UTF_8));
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
@@ -272,7 +277,7 @@ public class AdminDesignAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asEditHtml(form));
         verifyToken(() -> asEditHtml(form));
         try {
-            write(jspFile.getAbsolutePath(), form.content.getBytes(Constants.UTF_8));
+            write(jspFile.getAbsolutePath(), decodeJsp(form.content).getBytes(Constants.UTF_8));
             saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, jspFile.getAbsolutePath()));
         } catch (final Exception e) {
             logger.warn("Failed to update {}", form.fileName, e);
@@ -350,5 +355,16 @@ public class AdminDesignAction extends FessAdminAction {
         return asHtml(path_AdminDesign_AdminDesignEditJsp).renderWith(data -> {
             data.register("displayFileName", getJspFile(form.fileName, "view").getAbsolutePath());
         });
+    }
+
+    public static String decodeJsp(final String value) {
+        return value.replaceAll("<%(?![@-])([\\s\\S]*?)%>", "&lt;%$1%&gt;").replaceAll("<%=([\\s\\S]*?)%>", "&lt;%=$1%&gt;")
+                .replaceAll(TRY_STATEMENT, "<% try{ %>")
+                .replaceAll(CACHE_AND_SESSION_INVALIDATE_STATEMENT, "<% }catch(Exception e){session.invalidate();} %>");
+    }
+
+    public static String encodeJsp(final String value) {
+        return value.replaceAll(Pattern.quote("<% try{ %>"), TRY_STATEMENT)
+                .replaceAll(Pattern.quote("<% }catch(Exception e){session.invalidate();} %>"), CACHE_AND_SESSION_INVALIDATE_STATEMENT);
     }
 }
