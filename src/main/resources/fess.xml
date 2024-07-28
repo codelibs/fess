@@ -96,10 +96,6 @@
 			<arg>"error/system.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
-			<arg>"errorRedirect"</arg>
-			<arg>"error/redirect.jsp"</arg>
-		</postConstruct>
-		<postConstruct name="addDesignJspFileName">
 			<arg>"errorBadRequest"</arg>
 			<arg>"error/badRequest.jsp"</arg>
 		</postConstruct>
