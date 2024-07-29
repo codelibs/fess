@@ -29,7 +29,7 @@ import org.apache.commons.fileupload2.core.DiskFileItem;
 import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.core.FileUploadByteCountLimitException;
 import org.apache.commons.fileupload2.core.FileUploadException;
-import org.apache.commons.fileupload2.jakarta.JakartaServletDiskFileUpload;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletDiskFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;

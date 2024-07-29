@@ -17,7 +17,7 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
-                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+                             web-app_6_0.xsd"
          version="6.0">
 
   <!-- ================================================================================= -->
@@ -119,7 +119,7 @@
   <!--                                                                  Servlet Listener -->
   <!--                                                                  ================ -->
   <listener>
-    <listener-class>org.apache.commons.fileupload2.jakarta.JakartaFileCleaner</listener-class>
+    <listener-class>org.apache.commons.fileupload2.jakarta.servlet6.JakartaFileCleaner</listener-class>
   </listener>
 
   <!-- ================================================================================= -->

@@ -1360,7 +1360,7 @@
 		<!-- fileupload -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-fileupload2-jakarta</artifactId>
+			<artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
 			<version>${commons.fileupload.version}</version>
 		</dependency>
 
@@ -1548,7 +1548,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.dbflute.utflute</groupId>
-			<artifactId>utflute-lastaflute-jakarta</artifactId>
+			<artifactId>utflute-lastaflute</artifactId>
 			<version>${utflute.version}</version>
 			<scope>test</scope>
 		</dependency>
