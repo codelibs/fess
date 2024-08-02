@@ -947,7 +947,6 @@
 			<groupId>jakarta.servlet.jsp.jstl</groupId>
 			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
 			<version>${jakarta.jstl.api.version}</version>
-			<!-- contains taglibs.standard -->
 			<!-- <scope>provided</scope> -->
 			<exclusions>
 				<exclusion>
@@ -963,6 +962,7 @@
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
+			<!-- contains taglibs.standard -->
 			<version>${jakarta.jstl.version}</version>
 		</dependency>
 		<dependency>
