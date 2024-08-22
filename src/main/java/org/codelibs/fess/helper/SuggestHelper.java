@@ -108,6 +108,7 @@ public class SuggestHelper {
         settingsBuilder.indexTimeout(fessConfig.getIndexIndexTimeout());
         settingsBuilder.indicesTimeout(fessConfig.getIndexIndicesTimeout());
         settingsBuilder.searchTimeout(fessConfig.getIndexSearchTimeout());
+        settingsBuilder.setSettingsIndexName(fessConfig.getIndexDocumentSuggestIndex() + "_suggest");
         suggester = Suggester.builder().settings(settingsBuilder).build(searchEngineClient, fessConfig.getIndexDocumentSuggestIndex());
         if (ComponentUtil.hasPopularWordHelper()) {
             popularWordHelper = ComponentUtil.getPopularWordHelper();

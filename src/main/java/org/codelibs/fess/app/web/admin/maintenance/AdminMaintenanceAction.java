@@ -300,7 +300,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
             final String autoExpandReplicas) {
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
-        final String toIndex = docIndex + "." + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+        final String toIndex = docIndex + "." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
         if (searchEngineClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
             searchEngineClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 searchEngineClient.addMapping(docIndex, "doc", toIndex);
