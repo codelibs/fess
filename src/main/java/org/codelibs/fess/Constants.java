@@ -87,6 +87,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String CRAWLING_USER_AGENT_SUFFIX = "; +http://fess.codelibs.org/bot.html)";
 
+    public static final String DOCUMENT_INDEX_SUFFIX_PATTERN = "yyyyMMddHHmmssSSS";
+
     // fess properties
     public static final String USER_INFO_PROPERTY = "user.info";
 

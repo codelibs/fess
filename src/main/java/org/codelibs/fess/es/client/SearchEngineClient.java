@@ -184,6 +184,8 @@ public class SearchEngineClient implements Client {
 
     private static final Logger logger = LogManager.getLogger(SearchEngineClient.class);
 
+    private static final String DOC_INDEX = "fess";
+
     private static final String LOG_INDEX_PREFIX = "fess_log";
 
     private static final String USER_INDEX_PREFIX = "fess_user";
@@ -268,6 +270,18 @@ public class SearchEngineClient implements Client {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
+        if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
+            String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+            if (StringUtil.isBlank(dictionaryPath)) {
+                System.setProperty("fess.dictionary.path", fessConfig.getIndexDictionaryPrefix() + "/");
+            } else {
+                if (!dictionaryPath.endsWith("/")) {
+                    dictionaryPath = dictionaryPath + "/";
+                }
+                System.setProperty("fess.dictionary.path", dictionaryPath + fessConfig.getIndexDictionaryPrefix() + "/");
+            }
+        }
+
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
         if (StringUtil.isBlank(httpAddress) && (runner == null)) {
             switch (fessConfig.getFesenType()) {
@@ -322,7 +336,7 @@ public class SearchEngineClient implements Client {
                 final String configIndex = values[0];
                 final String configType = values[1];
 
-                final boolean isFessIndex = "fess".equals(configIndex);
+                final boolean isFessIndex = DOC_INDEX.equals(configIndex);
                 final String indexName;
                 if (isFessIndex) {
                     final boolean exists = existsIndex(fessConfig.getIndexDocumentUpdateIndex());
@@ -349,10 +363,10 @@ public class SearchEngineClient implements Client {
                         indexName = configIndex.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
                     } else if (configIndex.startsWith(USER_INDEX_PREFIX)) {
                         final String name = fessConfig.getIndexUserIndex();
-                        indexName = configIndex.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                        indexName = configIndex.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), name);
                     } else if (configIndex.startsWith(LOG_INDEX_PREFIX)) {
                         final String name = fessConfig.getIndexLogIndex();
-                        indexName = configIndex.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                        indexName = configIndex.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), name);
                     } else {
                         throw new FessSystemException("Unknown config index: " + configIndex);
                     }
@@ -553,7 +567,7 @@ public class SearchEngineClient implements Client {
             final String mappingFile = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".json");
             try {
                 source = FileUtil.readUTF8(mappingFile);
-                if ("fess".equals(index)) {
+                if (DOC_INDEX.equals(index)) {
                     for (final UnaryOperator<String> rule : docMappingRewriteRuleList) {
                         source = rule.apply(source);
                     }
@@ -624,7 +638,23 @@ public class SearchEngineClient implements Client {
             final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
             if (aliasConfigDir.isDirectory()) {
                 stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.forEach(f -> {
-                    final String aliasName = f.getName().replaceFirst(".json$", "");
+                    String aliasName = f.getName().replaceFirst(".json$", "");
+                    if (index.equals(DOC_INDEX)) {
+                        if ("fess.search".equals(aliasName)) {
+                            aliasName = fessConfig.getIndexDocumentSearchIndex();
+                        } else if ("fess.update".equals(aliasName)) {
+                            aliasName = fessConfig.getIndexDocumentUpdateIndex();
+                        }
+                    } else if (index.startsWith(CONFIG_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexConfigIndex();
+                        aliasName = aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                    } else if (index.startsWith(USER_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexUserIndex();
+                        aliasName = aliasName.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), name);
+                    } else if (index.startsWith(LOG_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexLogIndex();
+                        aliasName = aliasName.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), name);
+                    }
                     String source = FileUtil.readUTF8(f);
                     if ("{}".equals(source.trim())) {
                         source = null;
@@ -646,13 +676,20 @@ public class SearchEngineClient implements Client {
     }
 
     protected void sendConfigFiles(final String index) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         configListMap.getOrDefault(index, Collections.emptyList()).forEach(path -> {
             String source = null;
             final String filePath = indexConfigPath + "/" + index + "/" + path;
+            final String dictionaryPath;
+            if (StringUtil.isNotBlank(fessConfig.getIndexDictionaryPrefix())) {
+                dictionaryPath = fessConfig.getIndexDictionaryPrefix() + "/" + path;
+            } else {
+                dictionaryPath = path;
+            }
             try {
                 source = FileUtil.readUTF8(filePath);
                 try (CurlResponse response =
-                        ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", path).body(source).execute()) {
+                        ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictionaryPath).body(source).execute()) {
                     if (response.getHttpStatusCode() == 200) {
                         logger.info("Register {} to {}", path, index);
                     } else if (response.getContentException() != null) {
@@ -703,14 +740,20 @@ public class SearchEngineClient implements Client {
     }
 
     protected String generateNewIndexName(final String configIndex) {
-        return configIndex + "." + new SimpleDateFormat("yyyyMMdd").format(new Date());
+        return configIndex + "." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
     }
 
     protected void insertBulkData(final FessConfig fessConfig, final String configIndex, final String dataPath) {
         try {
             final BulkRequestBuilder builder = client.prepareBulk();
             final ObjectMapper mapper = new ObjectMapper();
-            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).reduce((prev, line) -> {
+            final String userIndex = fessConfig.getIndexUserIndex() + ".user";
+            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).map(line -> {
+                return line//
+                        .replace("\"_index\":\"fess_config.", "\"_index\":\"" + fessConfig.getIndexConfigIndex() + ".")//
+                        .replace("\"_index\":\"fess_user.", "\"_index\":\"" + fessConfig.getIndexUserIndex() + ".")//
+                        .replace("\"_index\":\"fess_log.", "\"_index\":\"" + fessConfig.getIndexLogIndex() + ".");
+            }).reduce((prev, line) -> {
                 try {
                     if (StringUtil.isBlank(prev)) {
                         final Map<String, Map<String, String>> result =
@@ -728,7 +771,7 @@ public class SearchEngineClient implements Client {
                                 });
                         if (result.containsKey("index")) {
                             String source = line;
-                            if ("fess_user.user".equals(configIndex)) {
+                            if (userIndex.equals(configIndex)) {
                                 source = source.replace("${fess.index.initial_password}", ComponentUtil.getComponent(FessLoginAssist.class)
                                         .encryptPassword(fessConfig.getIndexUserInitialPassword()));
                             }

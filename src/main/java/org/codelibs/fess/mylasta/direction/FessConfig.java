@@ -718,6 +718,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess_log */
     String INDEX_LOG_INDEX = "index.log.index";
 
+    /** The key of the configuration. e.g.  */
+    String INDEX_DICTIONARY_PREFIX = "index.dictionary.prefix";
+
     /** The key of the configuration. e.g. lang,role,label,anchor,virtual_host */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
@@ -4066,6 +4069,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexLogIndex();
+
+    /**
+     * Get the value for the key 'index.dictionary.prefix'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDictionaryPrefix();
+
+    /**
+     * Get the value for the key 'index.dictionary.prefix' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexDictionaryPrefixAsInteger();
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
@@ -8983,6 +9001,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_LOG_INDEX);
         }
 
+        public String getIndexDictionaryPrefix() {
+            return get(FessConfig.INDEX_DICTIONARY_PREFIX);
+        }
+
+        public Integer getIndexDictionaryPrefixAsInteger() {
+            return getAsInteger(FessConfig.INDEX_DICTIONARY_PREFIX);
+        }
+
         public String getIndexAdminArrayFields() {
             return get(FessConfig.INDEX_ADMIN_ARRAY_FIELDS);
         }
@@ -11178,6 +11204,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_CONFIG_INDEX, "fess_config");
             defaultMap.put(FessConfig.INDEX_USER_INDEX, "fess_user");
             defaultMap.put(FessConfig.INDEX_LOG_INDEX, "fess_log");
+            defaultMap.put(FessConfig.INDEX_DICTIONARY_PREFIX, "");
             defaultMap.put(FessConfig.INDEX_ADMIN_ARRAY_FIELDS, "lang,role,label,anchor,virtual_host");
             defaultMap.put(FessConfig.INDEX_ADMIN_DATE_FIELDS, "expires,created,timestamp,last_modified");
             defaultMap.put(FessConfig.INDEX_ADMIN_INTEGER_FIELDS, "");
