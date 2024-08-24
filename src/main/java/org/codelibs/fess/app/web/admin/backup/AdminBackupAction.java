@@ -346,7 +346,7 @@ public class AdminBackupAction extends FessAdminAction {
                     }
                 });
             } else {
-                final String index;
+                String index;
                 final String filename;
                 if (id.endsWith(".bulk")) {
                     index = id.substring(0, id.length() - 5);
@@ -355,9 +355,17 @@ public class AdminBackupAction extends FessAdminAction {
                     index = id;
                     filename = id + ".bulk";
                 }
+                if ("fess_config".equals(index)) {
+                    index = fessConfig.getIndexConfigIndex();
+                } else if ("fess_user".equals(index)) {
+                    index = fessConfig.getIndexUserIndex();
+                } else if ("fess_basic_config".equals(index) && !"fess_config".equals(fessConfig.getIndexConfigIndex())) {
+                    index = "basic_" + fessConfig.getIndexConfigIndex();
+                }
+                final String alias = index;
                 return asStream(filename).contentTypeOctetStream().stream(out -> {
                     try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out.stream(), Constants.CHARSET_UTF_8))) {
-                        SearchEngineUtil.scroll(index, hit -> {
+                        SearchEngineUtil.scroll(alias, hit -> {
                             try {
                                 writer.write("{\"index\":{\"_index\":\"" + hit.getIndex() + "\",\"_id\":\""
                                         + StringEscapeUtils.escapeJson(hit.getId()) + "\"}}\n");
