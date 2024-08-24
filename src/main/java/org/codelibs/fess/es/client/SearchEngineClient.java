@@ -647,7 +647,11 @@ public class SearchEngineClient implements Client {
                         }
                     } else if (index.startsWith(CONFIG_INDEX_PREFIX)) {
                         final String name = fessConfig.getIndexConfigIndex();
-                        aliasName = aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                        if ("fess_basic_config".equals(aliasName) && !CONFIG_INDEX_PREFIX.equals(name)) {
+                            aliasName = aliasName.replaceFirst("fess_basic_config", "basic_" + name);
+                        } else {
+                            aliasName = aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                        }
                     } else if (index.startsWith(USER_INDEX_PREFIX)) {
                         final String name = fessConfig.getIndexUserIndex();
                         aliasName = aliasName.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), name);
