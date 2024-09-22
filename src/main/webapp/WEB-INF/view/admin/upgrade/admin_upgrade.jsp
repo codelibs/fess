@@ -84,6 +84,7 @@
 											<la:option value="14.13">14.13</la:option>
 											<la:option value="14.14">14.14</la:option>
 											<la:option value="14.15">14.15</la:option>
+											<la:option value="14.15">14.16</la:option>
 										</la:select>
 									</div>
 								</div>
