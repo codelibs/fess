@@ -48,8 +48,8 @@
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="jar.groupId" value="org/codelibs/fess" />
 			<param name="jar.artifactId" value="fess-script-groovy" />
-			<param name="jar.version" value="14.16.0" />
-			<param name="file.version" value="14.16.0" />
+			<param name="jar.version" value="14.17.0" />
+			<param name="file.version" value="14.17.0" />
 		</antcall>
 	</target>
 
