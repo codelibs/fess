@@ -105,7 +105,6 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                     if (sesState.equals(reqState) && StringUtil.isNotBlank(code)) {
                         return processCallback(request, code);
                     }
-                    return null;
                 }
             }
 
@@ -171,52 +170,72 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 if (name != null) {
                     jsonParser.nextToken();
 
-                    // TODO other parameters
-                    switch (name) {
-                    case "iss":
-                        attributes.put("iss", jsonParser.getText());
-                        break;
-                    case "sub":
-                        attributes.put("sub", jsonParser.getText());
-                        break;
-                    case "azp":
-                        attributes.put("azp", jsonParser.getText());
-                        break;
-                    case "email":
-                        attributes.put("email", jsonParser.getText());
-                        break;
-                    case "at_hash":
-                        attributes.put("at_hash", jsonParser.getText());
-                        break;
-                    case "email_verified":
-                        attributes.put("email_verified", jsonParser.getText());
-                        break;
-                    case "aud":
-                        attributes.put("aud", jsonParser.getText());
-                        break;
-                    case "iat":
-                        attributes.put("iat", jsonParser.getText());
-                        break;
-                    case "exp":
-                        attributes.put("exp", jsonParser.getText());
-                        break;
-                    case "groups":
-                        final List<String> list = new ArrayList<>();
-                        while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                            final String group = jsonParser.getText();
-                            list.add(group);
-                        }
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("groups: {}", list);
-                        }
-                        attributes.put("groups", list.toArray(new String[list.size()]));
-                        break;
-                    default:
-                        break;
+                    if (jsonParser.getCurrentToken() == JsonToken.START_ARRAY) {
+                        // Handle array type
+                        attributes.put(name, parseArray(jsonParser));
+                    } else if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
+                        // Handle nested object type
+                        attributes.put(name, parseObject(jsonParser));
+                    } else {
+                        // Handle primitive types (string, number, boolean, etc.)
+                        attributes.put(name, parsePrimitive(jsonParser));
                     }
                 }
             }
         }
+    }
+
+    private Object parsePrimitive(JsonParser jsonParser) throws IOException {
+        JsonToken token = jsonParser.getCurrentToken();
+        switch (token) {
+        case VALUE_STRING:
+            return jsonParser.getText();
+        case VALUE_NUMBER_INT:
+            return jsonParser.getLongValue();
+        case VALUE_NUMBER_FLOAT:
+            return jsonParser.getDoubleValue();
+        case VALUE_TRUE:
+            return true;
+        case VALUE_FALSE:
+            return false;
+        case VALUE_NULL:
+            return null;
+        default:
+            return null; // Or throw an exception if unexpected token
+        }
+    }
+
+    private Object parseArray(JsonParser jsonParser) throws IOException {
+        List<Object> list = new ArrayList<>();
+        while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+            if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
+                list.add(parseObject(jsonParser));
+            } else if (jsonParser.getCurrentToken() == JsonToken.START_ARRAY) {
+                list.add(parseArray(jsonParser)); // Nested array
+            } else {
+                list.add(parsePrimitive(jsonParser));
+            }
+        }
+        return list;
+    }
+
+    private Map<String, Object> parseObject(JsonParser jsonParser) throws IOException {
+        Map<String, Object> nestedMap = new HashMap<>();
+        while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+            String fieldName = jsonParser.getCurrentName();
+            if (fieldName != null) {
+                jsonParser.nextToken(); // Move to the value of the current field
+
+                if (jsonParser.getCurrentToken() == JsonToken.START_ARRAY) {
+                    nestedMap.put(fieldName, parseArray(jsonParser));
+                } else if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
+                    nestedMap.put(fieldName, parseObject(jsonParser));
+                } else {
+                    nestedMap.put(fieldName, parsePrimitive(jsonParser));
+                }
+            }
+        }
+        return nestedMap;
     }
 
     protected TokenResponse getTokenUrl(final String code) throws IOException {
