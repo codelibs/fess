@@ -216,6 +216,11 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 list.add(parsePrimitive(jsonParser));
             }
         }
+
+        if (list.stream().allMatch(String.class::isInstance)) {
+            return list.toArray(new String[list.size()]);
+        }
+
         return list;
     }
 
