@@ -909,14 +909,15 @@ public interface FessProp {
     String getJobTemplateTitleData();
 
     default String getJobTemplateTitle(final String type) {
-        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+        switch (type) {
+        case Constants.WEB_CRAWLER_TYPE:
             return getJobTemplateTitleWeb();
-        }
-        if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+        case Constants.FILE_CRAWLER_TYPE:
             return getJobTemplateTitleFile();
-        }
-        if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+        case Constants.DATA_CRAWLER_TYPE:
             return getJobTemplateTitleData();
+        default:
+            break;
         }
         return "None";
     }
@@ -1527,25 +1528,25 @@ public interface FessProp {
                     value = FessFunctions.parseDate(value.toString());
                 }
             } else if (integerFieldSet.contains(key)) {
-                if (value instanceof Number num) {
+                if (value instanceof final Number num) {
                     value = num.intValue();
                 } else {
                     value = DfTypeUtil.toInteger(value.toString());
                 }
             } else if (longFieldSet.contains(key)) {
-                if (value instanceof Number num) {
+                if (value instanceof final Number num) {
                     value = num.longValue();
                 } else {
                     value = DfTypeUtil.toLong(value.toString());
                 }
             } else if (floatFieldSet.contains(key)) {
-                if (value instanceof Number num) {
+                if (value instanceof final Number num) {
                     value = num.floatValue();
                 } else {
                     value = DfTypeUtil.toFloat(value.toString());
                 }
             } else if (doubleFieldSet.contains(key)) {
-                if (value instanceof Number num) {
+                if (value instanceof final Number num) {
                     value = num.doubleValue();
                 } else {
                     value = DfTypeUtil.toDouble(value.toString());
@@ -1855,7 +1856,7 @@ public interface FessProp {
         }
 
         final float ratio = getThumbnailHtmlImageMaxAspectRatioAsDecimal().floatValue();
-        if (((float) width) / ((float) height) > ratio || ((float) height) / ((float) width) > ratio) {
+        if ((float) width / (float) height > ratio || (float) height / (float) width > ratio) {
             return false;
         }
 

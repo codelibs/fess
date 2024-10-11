@@ -495,8 +495,7 @@ public class Crawler {
             }
 
             // delete expired sessions
-            SystemHelper systemHelper2 = ComponentUtil.getSystemHelper();
-            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name, systemHelper2.getCurrentTimeAsLong());
+            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name, systemHelper.getCurrentTimeAsLong());
 
             final List<String> webConfigIdList = options.getWebConfigIdList();
             final List<String> fileConfigIdList = options.getFileConfigIdList();

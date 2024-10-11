@@ -553,13 +553,13 @@ public class IndexUpdater extends Thread {
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted {} documents. The execution time is {}ms.", sessionId,
-                        (systemHelper.getCurrentTimeAsLong() - execTime2));
+                        systemHelper.getCurrentTimeAsLong() - execTime2);
             }
         }
         finishedSessionIdList.clear();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted completed document data. The execution time is {}ms.", (systemHelper.getCurrentTimeAsLong() - execTime));
+            logger.info("Deleted completed document data. The execution time is {}ms.", systemHelper.getCurrentTimeAsLong() - execTime);
         }
     }
 

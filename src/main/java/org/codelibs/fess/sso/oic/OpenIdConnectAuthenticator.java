@@ -53,12 +53,17 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.JsonToken;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Base64;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.BaseEncoding.DecodingException;
 
 public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     private static final Logger logger = LogManager.getLogger(OpenIdConnectAuthenticator.class);
+
+    private static final BaseEncoding BASE64_DECODER = BaseEncoding.base64().withSeparator("\n", 64);
+
+    private static final BaseEncoding BASE64URL_DECODER = BaseEncoding.base64Url().withSeparator("\n", 64);
 
     protected static final String OIC_AUTH_SERVER_URL = "oic.auth.server.url";
 
@@ -76,7 +81,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     protected final HttpTransport httpTransport = new NetHttpTransport();
 
-    protected final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    protected final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
     @PostConstruct
     public void init() {
@@ -123,14 +128,28 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 .build();
     }
 
+    protected byte[] decodeBase64(String base64String) {
+        if (base64String == null) {
+            return null;
+        }
+        try {
+            return BASE64_DECODER.decode(base64String);
+        } catch (IllegalArgumentException e) {
+            if (e.getCause() instanceof DecodingException) {
+                return BASE64URL_DECODER.decode(base64String.trim());
+            }
+            throw e;
+        }
+    }
+
     protected LoginCredential processCallback(final HttpServletRequest request, final String code) {
         try {
             final TokenResponse tr = getTokenUrl(code);
 
             final String[] jwt = ((String) tr.get("id_token")).split("\\.");
-            final String jwtHeader = new String(Base64.decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
-            final String jwtClaim = new String(Base64.decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
-            final String jwtSigniture = new String(Base64.decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
+            final String jwtHeader = new String(decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
+            final String jwtClaim = new String(decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
+            final String jwtSigniture = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("jwtHeader: {}", jwtHeader);
@@ -185,28 +204,21 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         }
     }
 
-    private Object parsePrimitive(JsonParser jsonParser) throws IOException {
-        JsonToken token = jsonParser.getCurrentToken();
-        switch (token) {
-        case VALUE_STRING:
-            return jsonParser.getText();
-        case VALUE_NUMBER_INT:
-            return jsonParser.getLongValue();
-        case VALUE_NUMBER_FLOAT:
-            return jsonParser.getDoubleValue();
-        case VALUE_TRUE:
-            return true;
-        case VALUE_FALSE:
-            return false;
-        case VALUE_NULL:
-            return null;
-        default:
-            return null; // Or throw an exception if unexpected token
-        }
+    protected Object parsePrimitive(final JsonParser jsonParser) throws IOException {
+        final JsonToken token = jsonParser.getCurrentToken();
+        return switch (token) {
+        case VALUE_STRING -> jsonParser.getText();
+        case VALUE_NUMBER_INT -> jsonParser.getLongValue();
+        case VALUE_NUMBER_FLOAT -> jsonParser.getDoubleValue();
+        case VALUE_TRUE -> true;
+        case VALUE_FALSE -> false;
+        case VALUE_NULL -> null;
+        default -> null; // Or throw an exception if unexpected token
+        };
     }
 
-    private Object parseArray(JsonParser jsonParser) throws IOException {
-        List<Object> list = new ArrayList<>();
+    protected Object parseArray(final JsonParser jsonParser) throws IOException {
+        final List<Object> list = new ArrayList<>();
         while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
             if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
                 list.add(parseObject(jsonParser));
@@ -217,17 +229,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             }
         }
 
-        if (list.stream().allMatch(String.class::isInstance)) {
-            return list.toArray(new String[list.size()]);
-        }
-
         return list;
     }
 
-    private Map<String, Object> parseObject(JsonParser jsonParser) throws IOException {
-        Map<String, Object> nestedMap = new HashMap<>();
+    protected Map<String, Object> parseObject(final JsonParser jsonParser) throws IOException {
+        final Map<String, Object> nestedMap = new HashMap<>();
         while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-            String fieldName = jsonParser.getCurrentName();
+            final String fieldName = jsonParser.getCurrentName();
             if (fieldName != null) {
                 jsonParser.nextToken(); // Move to the value of the current field
 

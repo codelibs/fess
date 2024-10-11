@@ -32,7 +32,7 @@ public class ContainerNotAvailableException extends FessSystemException {
 
     public ContainerNotAvailableException(final Throwable cause) {
         super("Container is not avaiable.");
-        this.componentName = "container";
+        componentName = "container";
     }
 
     public String getComponentName() {

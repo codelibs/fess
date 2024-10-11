@@ -120,7 +120,7 @@ public abstract class QueryCommand {
     protected QueryBuilder buildMatchPhraseQuery(final String f, final String text) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (text == null || text.length() != 1
-                || (!fessConfig.getIndexFieldTitle().equals(f) && !fessConfig.getIndexFieldContent().equals(f))) {
+                || !fessConfig.getIndexFieldTitle().equals(f) && !fessConfig.getIndexFieldContent().equals(f)) {
             return QueryBuilders.matchPhraseQuery(f, text);
         }
 

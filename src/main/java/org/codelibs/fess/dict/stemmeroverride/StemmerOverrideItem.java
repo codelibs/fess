@@ -54,7 +54,7 @@ public class StemmerOverrideItem extends DictionaryItem {
     }
 
     public void setNewOutput(final String newOutputs) {
-        this.newOutput = newOutputs;
+        newOutput = newOutputs;
     }
 
     public String getInput() {
@@ -83,7 +83,7 @@ public class StemmerOverrideItem extends DictionaryItem {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final StemmerOverrideItem other = (StemmerOverrideItem) obj;

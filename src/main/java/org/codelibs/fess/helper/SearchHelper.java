@@ -77,7 +77,7 @@ public class SearchHelper {
     //                                                                            Variable
     //
 
-    protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = new SearchRequestParamsRewriter[0];
+    protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
 
     // ===================================================================================
     //                                                                              Method
@@ -173,7 +173,7 @@ public class SearchHelper {
             final OptionalThing<FessUserBean> userBean) {
         final RankFusionProcessor rankFusionProcessor = ComponentUtil.getRankFusionProcessor();
         final List<Map<String, Object>> documentItems = rankFusionProcessor.search(query, params, userBean);
-        if (documentItems instanceof QueryResponseList queryResponseList) {
+        if (documentItems instanceof final QueryResponseList queryResponseList) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             if (queryResponseList.getAllRecordCount() <= fessConfig.getQueryOrsearchMinHitCountAsInteger()) {
                 return LaRequestUtil.getOptionalRequest().map(request -> {

@@ -173,7 +173,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
         @Override
         public String getInitParameter(final String name) {
-            if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
+            switch (name) {
+            case SpnegoHttpFilter.Constants.LOGGER_LEVEL: {
                 final String logLevel = getProperty(SPNEGO_LOGGER_LEVEL, StringUtil.EMPTY);
                 if (StringUtil.isNotBlank(logLevel)) {
                     return logLevel;
@@ -192,41 +193,32 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 }
                 return "0";
             }
-            if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
+            case SpnegoHttpFilter.Constants.LOGIN_CONF:
                 return getResourcePath(getProperty(SPNEGO_LOGIN_CONF, "auth_login.conf"));
-            }
-            if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
+            case SpnegoHttpFilter.Constants.KRB5_CONF:
                 return getResourcePath(getProperty(SPNEGO_KRB5_CONF, "krb5.conf"));
-            }
-            if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
+            case SpnegoHttpFilter.Constants.CLIENT_MODULE:
                 return getProperty(SPNEGO_LOGIN_CLIENT_MODULE, "spnego-client");
-            }
-            if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
+            case SpnegoHttpFilter.Constants.SERVER_MODULE:
                 return getProperty(SPNEGO_LOGIN_SERVER_MODULE, "spnego-server");
-            }
-            if (SpnegoHttpFilter.Constants.PREAUTH_USERNAME.equals(name)) {
+            case SpnegoHttpFilter.Constants.PREAUTH_USERNAME:
                 return getProperty(SPNEGO_PREAUTH_USERNAME, "username");
-            }
-            if (SpnegoHttpFilter.Constants.PREAUTH_PASSWORD.equals(name)) {
+            case SpnegoHttpFilter.Constants.PREAUTH_PASSWORD:
                 return getProperty(SPNEGO_PREAUTH_PASSWORD, "password");
-            }
-            if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
+            case SpnegoHttpFilter.Constants.ALLOW_BASIC:
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
-            }
-            if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
+            case SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC:
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
-            }
-            if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {
+            case SpnegoHttpFilter.Constants.PROMPT_NTLM:
                 return getProperty(SPNEGO_PROMPT_NTLM, "true");
-            }
-            if (SpnegoHttpFilter.Constants.ALLOW_LOCALHOST.equals(name)) {
+            case SpnegoHttpFilter.Constants.ALLOW_LOCALHOST:
                 return getProperty(SPNEGO_ALLOW_LOCALHOST, "true");
-            }
-            if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
+            case SpnegoHttpFilter.Constants.ALLOW_DELEGATION:
                 return getProperty(SPNEGO_ALLOW_DELEGATION, "false");
-            }
-            if (SpnegoHttpFilter.Constants.EXCLUDE_DIRS.equals(name)) {
+            case SpnegoHttpFilter.Constants.EXCLUDE_DIRS:
                 return getProperty(SPNEGO_EXCLUDE_DIRS, StringUtil.EMPTY);
+            default:
+                break;
             }
             return null;
         }

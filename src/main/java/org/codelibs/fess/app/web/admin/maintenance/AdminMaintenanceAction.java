@@ -304,8 +304,8 @@ public class AdminMaintenanceAction extends FessAdminAction {
         if (searchEngineClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
             searchEngineClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
                 searchEngineClient.addMapping(docIndex, "doc", toIndex);
-                if (searchEngineClient.copyDocIndex(fromIndex, toIndex, replaceAliases)
-                        && (replaceAliases && !searchEngineClient.updateAlias(toIndex))) {
+                if (searchEngineClient.copyDocIndex(fromIndex, toIndex, replaceAliases) && replaceAliases
+                        && !searchEngineClient.updateAlias(toIndex)) {
                     logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
                 }
             }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));

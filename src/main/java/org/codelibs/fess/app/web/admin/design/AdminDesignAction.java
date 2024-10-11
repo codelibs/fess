@@ -22,7 +22,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -359,12 +358,12 @@ public class AdminDesignAction extends FessAdminAction {
 
     public static String decodeJsp(final String value) {
         return value.replaceAll("<%(?![@-])([\\s\\S]*?)%>", "&lt;%$1%&gt;").replaceAll("<%=([\\s\\S]*?)%>", "&lt;%=$1%&gt;")
-                .replaceAll(TRY_STATEMENT, "<% try{ %>")
-                .replaceAll(CACHE_AND_SESSION_INVALIDATE_STATEMENT, "<% }catch(Exception e){session.invalidate();} %>");
+                .replace(TRY_STATEMENT, "<% try{ %>")
+                .replace(CACHE_AND_SESSION_INVALIDATE_STATEMENT, "<% }catch(Exception e){session.invalidate();} %>");
     }
 
     public static String encodeJsp(final String value) {
-        return value.replaceAll(Pattern.quote("<% try{ %>"), TRY_STATEMENT)
-                .replaceAll(Pattern.quote("<% }catch(Exception e){session.invalidate();} %>"), CACHE_AND_SESSION_INVALIDATE_STATEMENT);
+        return value.replace("<% try{ %>", TRY_STATEMENT).replace("<% }catch(Exception e){session.invalidate();} %>",
+                CACHE_AND_SESSION_INVALIDATE_STATEMENT);
     }
 }

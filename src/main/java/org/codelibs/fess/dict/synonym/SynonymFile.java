@@ -297,7 +297,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
         public SynonymItem write(final SynonymItem oldItem) {
             try {
-                if ((item == null) || (item.getId() != oldItem.getId()) || !item.isUpdated()) {
+                if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
                     writer.write(oldItem.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;

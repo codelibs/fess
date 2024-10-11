@@ -313,7 +313,7 @@ public class ViewHelper {
 
     protected void updateHighlightInfo(final HighlightInfo highlightInfo, final int width) {
         if (width < TABLET_WIDTH) {
-            float ratio = ((float) width) / ((float) TABLET_WIDTH);
+            float ratio = (float) width / (float) TABLET_WIDTH;
             if (ratio < 0.5) {
                 ratio = 0.5f;
             }
@@ -638,7 +638,8 @@ public class ViewHelper {
             final int size = fessConfig.getResponseMaxSitePathLengthAsInteger();
             if (size > 3) {
                 return StringUtils.abbreviate(site, size);
-            } else if (size >= 0) {
+            }
+            if (size >= 0) {
                 return site;
             }
         }

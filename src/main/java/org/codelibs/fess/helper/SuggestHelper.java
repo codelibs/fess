@@ -171,8 +171,8 @@ public class SuggestHelper {
             }
 
             final LocalDateTime requestedAt = searchLog.getRequestedAt();
-            if ((sessionId == null) || (duplicateSessionMap.containsKey(sessionId)
-                    && duplicateSessionMap.get(sessionId).plusMinutes(searchStoreInterval).isAfter(requestedAt))) {
+            if (sessionId == null || duplicateSessionMap.containsKey(sessionId)
+                    && duplicateSessionMap.get(sessionId).plusMinutes(searchStoreInterval).isAfter(requestedAt)) {
                 return;
             }
 

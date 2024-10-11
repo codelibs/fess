@@ -26,6 +26,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
 public class OpenIdConnectCredential implements LoginCredential, FessCredential {
@@ -43,15 +44,15 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
 
     @Override
     public String getUserId() {
-        return (String) attributes.get("email");
+        return DocumentUtil.getValue(attributes, "email", String.class);
     }
 
     public String[] getUserGroups() {
-        String[] userGroups = (String[]) attributes.get("groups");
+        String[] userGroups = DocumentUtil.getValue(attributes, "groups", String[].class);
         if (userGroups == null) {
             userGroups = getDefaultGroupsAsArray();
         }
-        return (userGroups);
+        return userGroups;
     }
 
     public OpenIdUser getUser() {

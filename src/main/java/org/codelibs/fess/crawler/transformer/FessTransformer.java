@@ -88,8 +88,8 @@ public interface FessTransformer {
         if (encoding != null) {
             String enc;
             if (StringUtil.isNotBlank(getFessConfig().getCrawlerDocumentSiteEncoding())
-                    && (!getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()
-                            || ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding)))) {
+                    && (!getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish() || "ISO-8859-1".equalsIgnoreCase(encoding)
+                            || "US-ASCII".equalsIgnoreCase(encoding))) {
                 enc = getFessConfig().getCrawlerDocumentSiteEncoding();
             } else {
                 enc = encoding;
@@ -253,9 +253,9 @@ public interface FessTransformer {
 
     default Map<String, Object> processFieldConfigs(final Map<String, Object> dataMap, final FieldConfigs fieldConfigs) {
         final Map<String, Object> newDataMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> e : dataMap.entrySet()) {
+        for (final Map.Entry<String, Object> e : dataMap.entrySet()) {
             if (fieldConfigs.getConfig(e.getKey()).map(FieldConfigs.Config::isOverwrite).orElse(false)
-                    && e.getValue() instanceof Object[] values && values.length > 0) {
+                    && e.getValue() instanceof final Object[] values && values.length > 0) {
                 newDataMap.put(e.getKey(), values[values.length - 1]);
             } else {
                 newDataMap.put(e.getKey(), e.getValue());

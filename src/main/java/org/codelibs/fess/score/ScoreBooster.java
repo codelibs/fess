@@ -110,7 +110,7 @@ public abstract class ScoreBooster {
     }
 
     public int getPriority() {
-        return this.priority;
+        return priority;
     }
 
     public void setPriority(final int priority) {
@@ -118,7 +118,7 @@ public abstract class ScoreBooster {
     }
 
     public void setRequestTimeout(final String bulkRequestTimeout) {
-        this.requestTimeout = bulkRequestTimeout;
+        requestTimeout = bulkRequestTimeout;
     }
 
     public void setRequestCacheSize(final int requestCacheSize) {

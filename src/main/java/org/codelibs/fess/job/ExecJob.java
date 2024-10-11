@@ -124,12 +124,12 @@ public abstract class ExecJob {
     }
 
     public ExecJob jvmOptions(final String... options) {
-        Collections.addAll(this.jvmOptions, options);
+        Collections.addAll(jvmOptions, options);
         return this;
     }
 
     public ExecJob lastaEnv(final String env) {
-        this.lastaEnv = env;
+        lastaEnv = env;
         return this;
     }
 

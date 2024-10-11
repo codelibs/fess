@@ -181,8 +181,8 @@ public class FessBoot extends TomcatBoot {
             });
             doSetupServerConfig(logger, props, "sameSiteCookies", value -> {
                 for (final Container container : server.getHost().findChildren()) {
-                    if ((container instanceof final Context context)
-                            && (context.getCookieProcessor() instanceof final CookieProcessorBase cookieProcessor)) {
+                    if (container instanceof final Context context
+                            && context.getCookieProcessor() instanceof final CookieProcessorBase cookieProcessor) {
                         cookieProcessor.setSameSiteCookies(value);
                     }
                 }

@@ -222,8 +222,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
-        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(config -> config.isCache()).orElse(false)
-                || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
+                .orElse(false) || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
 
@@ -348,7 +348,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (lastModified != null) {
                 return lastModified;
             }
-        } else if ((lastModifiedObj instanceof final String[] lastModifieds) && (lastModifieds.length > 0)) {
+        } else if (lastModifiedObj instanceof final String[] lastModifieds && lastModifieds.length > 0) {
             final Date lastModified = FessFunctions.parseDate(lastModifieds[0]);
             if (lastModified != null) {
                 return lastModified;

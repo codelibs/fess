@@ -450,7 +450,7 @@ public class RankFusionProcessor implements AutoCloseable {
     }
 
     public void setSeacher(final RankFusionSearcher searcher) {
-        this.searchers[0] = searcher;
+        searchers[0] = searcher;
     }
 
     public void register(final RankFusionSearcher searcher) {
@@ -464,7 +464,7 @@ public class RankFusionProcessor implements AutoCloseable {
             if (executorService == null) {
                 int numThreads = ComponentUtil.getFessConfig().getRankFusionThreadsAsInteger();
                 if (numThreads <= 0) {
-                    numThreads = (Runtime.getRuntime().availableProcessors() * 3) / 2 + 1;
+                    numThreads = Runtime.getRuntime().availableProcessors() * 3 / 2 + 1;
                 }
                 executorService = Executors.newFixedThreadPool(numThreads);
             }

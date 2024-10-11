@@ -65,11 +65,11 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String commandTimeoutStr = fessConfig.getSystemProperty("thumbnail.command.timeout");
         if (commandTimeoutStr != null) {
-            commandTimeout = Long.valueOf(commandTimeoutStr);
+            commandTimeout = Long.parseLong(commandTimeoutStr);
         }
         final String commandDestroyTimeoutStr = fessConfig.getSystemProperty("thumbnail.command.destroy.timeout");
         if (commandDestroyTimeoutStr != null) {
-            commandDestroyTimeout = Long.valueOf(commandDestroyTimeoutStr);
+            commandDestroyTimeout = Long.parseLong(commandDestroyTimeoutStr);
         }
     }
 

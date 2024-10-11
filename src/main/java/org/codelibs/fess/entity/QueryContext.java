@@ -61,10 +61,10 @@ public class QueryContext {
     public QueryContext(final String queryString, final boolean isQuery) {
         if (queryString != null) {
             if (queryString.startsWith(ALLINURL_FIELD_PREFIX)) {
-                this.defaultField = ComponentUtil.getFessConfig().getIndexFieldUrl();
+                defaultField = ComponentUtil.getFessConfig().getIndexFieldUrl();
                 this.queryString = queryString.substring(ALLINURL_FIELD_PREFIX.length());
             } else if (queryString.startsWith(ALLINTITLE_FIELD_PREFIX)) {
-                this.defaultField = ComponentUtil.getFessConfig().getIndexFieldTitle();
+                defaultField = ComponentUtil.getFessConfig().getIndexFieldTitle();
                 this.queryString = queryString.substring(ALLINTITLE_FIELD_PREFIX.length());
             } else {
                 this.queryString = queryString;

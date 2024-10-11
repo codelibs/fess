@@ -72,17 +72,18 @@ public class TermQueryCommand extends QueryCommand {
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(fessConfig, context, termQuery, boost, field, text);
         }
-        if (DEFAULT_FIELD.equals(field)) {
+        switch (field) {
+        case DEFAULT_FIELD:
             return convertDefaultTermQuery(fessConfig, context, termQuery, boost, field, text);
-        }
-        if (SORT_FIELD.equals(field)) {
+        case SORT_FIELD:
             return convertSortQuery(fessConfig, context, termQuery, boost, field, text);
-        }
-        if (SITE_FIELD.equals(field)) {
+        case SITE_FIELD:
             return convertSiteQuery(fessConfig, context, termQuery, boost, field, text);
+        default:
+            break;
         }
-        if (INURL_FIELD.equals(field) || (StringUtil.equals(field, context.getDefaultField())
-                && fessConfig.getIndexFieldUrl().equals(context.getDefaultField()))) {
+        if (INURL_FIELD.equals(field)
+                || StringUtil.equals(field, context.getDefaultField()) && fessConfig.getIndexFieldUrl().equals(context.getDefaultField())) {
             return convertWildcardQuery(fessConfig, context, termQuery, boost, field, text);
         }
         if (!isSearchField(field)) {

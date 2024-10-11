@@ -43,7 +43,6 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class WebFsIndexHelper {
@@ -92,7 +91,7 @@ public class WebFsIndexHelper {
         final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        ComponentUtil.getFessConfig();
         final ProtocolHelper protocolHelper = ComponentUtil.getProtocolHelper();
 
         final long startTime = systemHelper.getCurrentTimeAsLong();

@@ -59,13 +59,12 @@ public class WebAuthentication extends BsWebAuthentication {
 
     private AuthScheme getAuthScheme() {
         final String scheme = getProtocolScheme();
-        if (Constants.BASIC.equals(scheme)) {
+        switch (scheme) {
+        case Constants.BASIC:
             return new BasicScheme();
-        }
-        if (Constants.DIGEST.equals(scheme)) {
+        case Constants.DIGEST:
             return new DigestScheme();
-        }
-        if (Constants.NTLM.equals(scheme)) {
+        case Constants.NTLM: {
             final Properties props = new Properties();
             getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream()
                     .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX)).forEach(e -> {
@@ -73,9 +72,12 @@ public class WebAuthentication extends BsWebAuthentication {
                     });
             return new NTLMScheme(new JcifsEngine(props));
         }
-        if (Constants.FORM.equals(scheme)) {
+        case Constants.FORM: {
             final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
             return new FormScheme(parameterMap);
+        }
+        default:
+            break;
         }
         return null;
     }

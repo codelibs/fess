@@ -21,14 +21,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.DocumentUtil;
 
 public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     public void test_parseJwtClaim() throws IOException {
         // Setup
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"sub\":\"1234567890\",\"name\":\"John Doe\",\"groups\":[\"group1\",\"group2\"]}";
+        String jwtClaim =
+                "{\"email\":\"test@codelibs.org\",\"sub\":\"1234567890\",\"name\":\"John Doe\",\"groups\":[\"group1\",\"group2\"]}";
 
         // Execute
         authenticator.parseJwtClaim(jwtClaim, attributes);
@@ -38,9 +41,11 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals("John Doe", attributes.get("name"));
 
         // Check groups array
-        assertTrue(attributes.get("groups") instanceof String[]);
-        String[] groupArray = (String[]) attributes.get("groups");
-        assertArrayEquals(new String[] { "group1", "group2" }, groupArray);
+        final String[] groups = DocumentUtil.getValue(attributes, "groups", String[].class);
+        assertArrayEquals(new String[] { "group1", "group2" }, groups);
 
+        OpenIdConnectCredential credential = new OpenIdConnectCredential(attributes);
+        assertEquals("test@codelibs.org", credential.getUserId());
+        assertArrayEquals(new String[] { "group1", "group2" }, credential.getUserGroups());
     }
 }

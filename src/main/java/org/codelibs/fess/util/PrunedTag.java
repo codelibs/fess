@@ -78,7 +78,7 @@ public class PrunedTag {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final PrunedTag other = (PrunedTag) obj;
@@ -98,8 +98,8 @@ public class PrunedTag {
     }
 
     public void setAttr(final String name, final String value) {
-        this.attrName = name;
-        this.attrValue = value;
+        attrName = name;
+        attrValue = value;
     }
 
     @Override

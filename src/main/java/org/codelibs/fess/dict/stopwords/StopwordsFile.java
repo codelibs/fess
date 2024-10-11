@@ -221,7 +221,7 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
 
         public StopwordsItem write(final StopwordsItem oldItem) {
             try {
-                if ((item == null) || (item.getId() != oldItem.getId()) || !item.isUpdated()) {
+                if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
                     writer.write(oldItem.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;

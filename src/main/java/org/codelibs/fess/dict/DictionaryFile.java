@@ -94,7 +94,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         protected int pageRangeSize;
 
         public PagingList(final List<E> list, final int offset, final int size, final int allRecordCount) {
-            this.parent = list;
+            parent = list;
             this.allRecordCount = allRecordCount;
             pageSize = size;
             currentPageNumber = offset / size + 1;
