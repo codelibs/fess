@@ -73,7 +73,7 @@ public class StopwordsItem extends DictionaryItem {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final StopwordsItem other = (StopwordsItem) obj;

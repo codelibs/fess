@@ -53,7 +53,7 @@ public class GenerateThumbnailJob extends ExecJob {
     }
 
     public GenerateThumbnailJob cleanup() {
-        this.cleanup = true;
+        cleanup = true;
         return this;
     }
 

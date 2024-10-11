@@ -248,11 +248,11 @@ public class SearchEngineClient implements Client {
     }
 
     public boolean isEmbedded() {
-        return this.runner != null;
+        return runner != null;
     }
 
     public void usePipeline() {
-        this.usePipeline = true;
+        usePipeline = true;
     }
 
     protected InetAddress getInetAddressByName(final String host) {
@@ -283,7 +283,7 @@ public class SearchEngineClient implements Client {
         }
 
         String httpAddress = SystemUtil.getSearchEngineHttpAddress();
-        if (StringUtil.isBlank(httpAddress) && (runner == null)) {
+        if (StringUtil.isBlank(httpAddress) && runner == null) {
             switch (fessConfig.getFesenType()) {
             case Constants.FESEN_TYPE_CLOUD:
             case Constants.FESEN_TYPE_AWS:
@@ -752,43 +752,42 @@ public class SearchEngineClient implements Client {
             final BulkRequestBuilder builder = client.prepareBulk();
             final ObjectMapper mapper = new ObjectMapper();
             final String userIndex = fessConfig.getIndexUserIndex() + ".user";
-            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).map(line -> {
-                return line//
-                        .replace("\"_index\":\"fess_config.", "\"_index\":\"" + fessConfig.getIndexConfigIndex() + ".")//
-                        .replace("\"_index\":\"fess_user.", "\"_index\":\"" + fessConfig.getIndexUserIndex() + ".")//
-                        .replace("\"_index\":\"fess_log.", "\"_index\":\"" + fessConfig.getIndexLogIndex() + ".");
-            }).reduce((prev, line) -> {
-                try {
-                    if (StringUtil.isBlank(prev)) {
-                        final Map<String, Map<String, String>> result =
-                                mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
-                                });
-                        if (result.containsKey("index") || result.containsKey("update")) {
-                            return line;
-                        }
-                        if (result.containsKey("delete")) {
-                            return StringUtil.EMPTY;
-                        }
-                    } else {
-                        final Map<String, Map<String, String>> result =
-                                mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
-                                });
-                        if (result.containsKey("index")) {
-                            String source = line;
-                            if (userIndex.equals(configIndex)) {
-                                source = source.replace("${fess.index.initial_password}", ComponentUtil.getComponent(FessLoginAssist.class)
-                                        .encryptPassword(fessConfig.getIndexUserInitialPassword()));
+            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).map(line -> line//
+                    .replace("\"_index\":\"fess_config.", "\"_index\":\"" + fessConfig.getIndexConfigIndex() + ".")//
+                    .replace("\"_index\":\"fess_user.", "\"_index\":\"" + fessConfig.getIndexUserIndex() + ".")//
+                    .replace("\"_index\":\"fess_log.", "\"_index\":\"" + fessConfig.getIndexLogIndex() + ".")).reduce((prev, line) -> {
+                        try {
+                            if (StringUtil.isBlank(prev)) {
+                                final Map<String, Map<String, String>> result =
+                                        mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
+                                        });
+                                if (result.containsKey("index") || result.containsKey("update")) {
+                                    return line;
+                                }
+                                if (result.containsKey("delete")) {
+                                    return StringUtil.EMPTY;
+                                }
+                            } else {
+                                final Map<String, Map<String, String>> result =
+                                        mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
+                                        });
+                                if (result.containsKey("index")) {
+                                    String source = line;
+                                    if (userIndex.equals(configIndex)) {
+                                        source = source.replace("${fess.index.initial_password}",
+                                                ComponentUtil.getComponent(FessLoginAssist.class)
+                                                        .encryptPassword(fessConfig.getIndexUserInitialPassword()));
+                                    }
+                                    final IndexRequestBuilder requestBuilder = client.prepareIndex().setIndex(configIndex)
+                                            .setId(result.get("index").get("_id")).setSource(source, XContentType.JSON);
+                                    builder.add(requestBuilder);
+                                }
                             }
-                            final IndexRequestBuilder requestBuilder = client.prepareIndex().setIndex(configIndex)
-                                    .setId(result.get("index").get("_id")).setSource(source, XContentType.JSON);
-                            builder.add(requestBuilder);
+                        } catch (final Exception e) {
+                            logger.warn("Failed to parse {}", dataPath);
                         }
-                    }
-                } catch (final Exception e) {
-                    logger.warn("Failed to parse {}", dataPath);
-                }
-                return StringUtil.EMPTY;
-            });
+                        return StringUtil.EMPTY;
+                    });
             final BulkResponse response = builder.execute().actionGet(fessConfig.getIndexBulkTimeout());
             if (response.hasFailures()) {
                 logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
@@ -1327,7 +1326,7 @@ public class SearchEngineClient implements Client {
         }
 
         public SearchConditionBuilder scroll() {
-            this.isScroll = true;
+            isScroll = true;
             return this;
         }
 

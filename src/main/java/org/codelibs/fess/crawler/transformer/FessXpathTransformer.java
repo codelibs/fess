@@ -397,8 +397,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 prunedContent ? node -> pruneNode(node, crawlingConfig) : node -> node);
         final String fileName = getFileName(url, urlEncoding);
         putResultDataContent(dataMap, responseData, fessConfig, crawlingConfig, documentHelper, body, fileName);
-        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(config -> config.isCache()).orElse(false)
-                || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
+                .orElse(false) || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
                 String charSet = responseData.getCharSet();
@@ -978,6 +978,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     public void addConvertUrl(final String regex, final String replacement) {
-        this.convertUrlMap.put(regex, replacement);
+        convertUrlMap.put(regex, replacement);
     }
 }

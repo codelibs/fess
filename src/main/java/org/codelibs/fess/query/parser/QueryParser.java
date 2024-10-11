@@ -60,7 +60,7 @@ public class QueryParser {
         final LuceneQueryParser parser = new LuceneQueryParser(defaultField, analyzer);
         parser.setAllowLeadingWildcard(allowLeadingWildcard);
         LaRequestUtil.getOptionalRequest().ifPresent(req -> {
-            if (req.getAttribute(Constants.DEFAULT_QUERY_OPERATOR) instanceof String op) {
+            if (req.getAttribute(Constants.DEFAULT_QUERY_OPERATOR) instanceof final String op) {
                 parser.setDefaultOperator(Operator.valueOf(op));
             } else {
                 parser.setDefaultOperator(defaultOperator);
@@ -134,13 +134,13 @@ public class QueryParser {
          */
         public LuceneQueryParser(final String f, final Analyzer a) {
             super(f, a);
-            this.defaultField = f;
+            defaultField = f;
         }
 
         @Override
-        protected Query getFieldQuery(final String field, final String queryText, boolean quoted) throws ParseException {
+        protected Query getFieldQuery(final String field, final String queryText, final boolean quoted) throws ParseException {
             final org.apache.lucene.search.Query query = super.getFieldQuery(field, queryText, quoted);
-            if (quoted && query instanceof TermQuery termQuery) {
+            if (quoted && query instanceof final TermQuery termQuery) {
                 final Pair<String, String> splitField = splitField(defaultField, field);
                 if (defaultField.equals(splitField.cur)) {
                     final PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -151,10 +151,11 @@ public class QueryParser {
             return query;
         }
 
-        protected Pair<String, String> splitField(String defaultField, String field) {
-            int indexOf = field.indexOf(':');
-            if (indexOf < 0)
+        protected Pair<String, String> splitField(final String defaultField, final String field) {
+            final int indexOf = field.indexOf(':');
+            if (indexOf < 0) {
                 return new Pair<>(field, null);
+            }
             final String indexField = indexOf == 0 ? defaultField : field.substring(0, indexOf);
             final String extensionKey = field.substring(indexOf + 1);
             return new Pair<>(indexField, extensionKey);

@@ -120,7 +120,8 @@ public class SearchApiManager extends BaseApiManager {
             return FormatType.SEARCH;
         }
         final String type = value.toLowerCase(Locale.ROOT);
-        if ("documents".equals(type)) {
+        switch (type) {
+        case "documents":
             if (values.length > 5 && "favorite".equals(values[5])) {
                 request.setAttribute(DOC_ID_FIELD, values[4]);
                 return FormatType.FAVORITE;
@@ -129,21 +130,18 @@ public class SearchApiManager extends BaseApiManager {
                 return FormatType.SCROLL;
             }
             return FormatType.SEARCH;
-        }
-        if ("labels".equals(type)) {
+        case "labels":
             return FormatType.LABEL;
-        }
-        if ("popular-words".equals(type)) {
+        case "popular-words":
             return FormatType.POPULARWORD;
-        }
-        if ("favorites".equals(type)) {
+        case "favorites":
             return FormatType.FAVORITES;
-        }
-        if ("health".equals(type)) {
+        case "health":
             return FormatType.PING;
-        }
-        if ("suggest-words".equals(type)) {
+        case "suggest-words":
             return FormatType.SUGGEST;
+        default:
+            break;
         }
         // default
         return FormatType.OTHER;
@@ -1247,8 +1245,8 @@ public class SearchApiManager extends BaseApiManager {
                 buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
             }
             buf.append('}');
-        } else if ((obj instanceof Integer) || (obj instanceof Long) || (obj instanceof Float) || (obj instanceof Double)) {
-            buf.append((obj));
+        } else if (obj instanceof Integer || obj instanceof Long || obj instanceof Float || obj instanceof Double) {
+            buf.append(obj);
         } else if (obj instanceof Boolean) {
             buf.append(obj.toString());
         } else if (obj instanceof Date) {

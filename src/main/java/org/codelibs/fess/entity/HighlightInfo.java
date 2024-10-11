@@ -26,10 +26,10 @@ public class HighlightInfo {
 
     public HighlightInfo() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        this.type = fessConfig.getQueryHighlightType();
-        this.fragmentSize = fessConfig.getQueryHighlightFragmentSizeAsInteger();
-        this.numOfFragments = fessConfig.getQueryHighlightNumberOfFragmentsAsInteger();
-        this.fragmentOffset = fessConfig.getQueryHighlightFragmentOffsetAsInteger();
+        type = fessConfig.getQueryHighlightType();
+        fragmentSize = fessConfig.getQueryHighlightFragmentSizeAsInteger();
+        numOfFragments = fessConfig.getQueryHighlightNumberOfFragmentsAsInteger();
+        fragmentOffset = fessConfig.getQueryHighlightFragmentOffsetAsInteger();
     }
 
     public String getType() {

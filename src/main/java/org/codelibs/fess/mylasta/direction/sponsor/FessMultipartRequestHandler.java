@@ -122,7 +122,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     }
 
     protected int getSizeThreshold() {
-        return ComponentUtil.getFessConfig().getHttpFileuploadThresholdSizeAsInteger().intValue();
+        return ComponentUtil.getFessConfig().getHttpFileuploadThresholdSizeAsInteger();
     }
 
     protected File createRepositoryFile() {
@@ -307,9 +307,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             final InputStream is = request.getInputStream();
             try {
                 final byte[] buf = new byte[1024];
-                @SuppressWarnings("unused")
-                int len = 0;
-                while ((len = is.read(buf)) != -1) {}
+                while ((is.read(buf)) != -1) {}
             } catch (final Exception ignored) {} finally {
                 try {
                     is.close();

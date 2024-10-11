@@ -92,7 +92,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         final CrawlingAccessException cae = (CrawlingAccessException) objs[2];
         try {
             Throwable t = cae;
-            if (t instanceof MultipleCrawlingAccessException mcae) {
+            if (t instanceof final MultipleCrawlingAccessException mcae) {
                 final Throwable[] causes = mcae.getCauses();
                 if (causes.length > 0) {
                     t = causes[causes.length - 1];
@@ -106,7 +106,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
             } else {
                 errorName = t.getClass().getCanonicalName();
             }
-            FailureUrl failureUrl = storeFailureUrl(crawlerContext, urlQueue, errorName, t);
+            final FailureUrl failureUrl = storeFailureUrl(crawlerContext, urlQueue, errorName, t);
             if (failureUrl != null) {
                 failureUrlId = failureUrl.getId();
             }

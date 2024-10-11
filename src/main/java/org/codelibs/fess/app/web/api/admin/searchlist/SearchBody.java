@@ -28,7 +28,7 @@ public class SearchBody extends ListForm {
     @Override
     public void initialize() {
         if (size != null) {
-            num = (num == null || num < size) ? size : num;
+            num = num == null || num < size ? size : num;
         }
         super.initialize();
     }

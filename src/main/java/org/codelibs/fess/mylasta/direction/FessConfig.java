@@ -862,7 +862,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
-    /** The key of the configuration. e.g. 0 */
+    /** The key of the configuration. e.g. -1 */
     String QUERY_ORSEARCH_MIN_HIT_COUNT = "query.orsearch.min.hit.count";
 
     /** The key of the configuration. e.g. u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61 */
@@ -4441,14 +4441,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.orsearch.min.hit.count'. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g. -1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryOrsearchMinHitCount();
 
     /**
      * Get the value for the key 'query.orsearch.min.hit.count' as {@link Integer}. <br>
-     * The value is, e.g. 0 <br>
+     * The value is, e.g. -1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -11263,7 +11263,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.QUERY_GEO_FIELDS, "location");
             defaultMap.put(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME, "browser_lang");
             defaultMap.put(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY, "true");
-            defaultMap.put(FessConfig.QUERY_ORSEARCH_MIN_HIT_COUNT, "0");
+            defaultMap.put(FessConfig.QUERY_ORSEARCH_MIN_HIT_COUNT, "-1");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_TERMINAL_CHARS,
                     "u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61");
             defaultMap.put(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE, "60");

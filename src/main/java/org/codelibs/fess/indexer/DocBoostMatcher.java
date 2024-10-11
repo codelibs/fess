@@ -47,7 +47,7 @@ public class DocBoostMatcher {
 
         final Object value = ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(matchExpression, map);
         if (value instanceof Boolean) {
-            return ((Boolean) value);
+            return (Boolean) value;
         }
 
         return false;
@@ -66,7 +66,7 @@ public class DocBoostMatcher {
             return ((Long) value).floatValue();
         }
         if (value instanceof Float) {
-            return ((Float) value);
+            return (Float) value;
         }
         if (value instanceof Double) {
             return ((Double) value).floatValue();

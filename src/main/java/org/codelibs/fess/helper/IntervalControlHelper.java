@@ -124,8 +124,8 @@ public class IntervalControlHelper {
                 return compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && compareTime(hours, minutes, toHours, toMinutes) >= 0
                         && isInDays(day);
             }
-            if ((compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1))
-                    || (compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day))) {
+            if (compareTime(hours, minutes, toHours, toMinutes) >= 0 && isInDays(day + 1)
+                    || compareTime(fromHours, fromMinutes, hours, minutes) >= 0 && isInDays(day)) {
                 return true;
             }
             return false;

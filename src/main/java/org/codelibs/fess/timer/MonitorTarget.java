@@ -37,8 +37,8 @@ public abstract class MonitorTarget implements TimeoutTarget {
             final Object value = supplier.get();
             if (value == null) {
                 tempBuf.append("null");
-            } else if ((value instanceof Integer) || (value instanceof Long)) {
-                tempBuf.append((value));
+            } else if (value instanceof Integer || value instanceof Long) {
+                tempBuf.append(value);
             } else if (value instanceof Short) {
                 tempBuf.append(((Short) value).shortValue());
             } else if (value instanceof double[]) {

@@ -289,7 +289,7 @@ public class ThumbnailManager {
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Thumbnail generator is not found: {}", (docMap != null ? docMap.get("url") : docMap));
+            logger.debug("Thumbnail generator is not found: {}", docMap != null ? docMap.get("url") : docMap);
         }
         return false;
     }
@@ -370,9 +370,9 @@ public class ThumbnailManager {
             this.basePath = basePath;
             this.imageExtention = imageExtention;
             this.expiry = expiry;
-            this.fessConfig = ComponentUtil.getFessConfig();
-            this.maxPurgeSize = fessConfig.getPageThumbnailPurgeMaxFetchSizeAsInteger();
-            this.searchEngineClient = ComponentUtil.getSearchEngineClient();
+            fessConfig = ComponentUtil.getFessConfig();
+            maxPurgeSize = fessConfig.getPageThumbnailPurgeMaxFetchSizeAsInteger();
+            searchEngineClient = ComponentUtil.getSearchEngineClient();
         }
 
         protected void deleteFiles() {

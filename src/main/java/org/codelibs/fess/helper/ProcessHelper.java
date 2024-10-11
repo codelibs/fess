@@ -49,7 +49,7 @@ public class ProcessHelper {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopping process {}", sessionId);
             }
-            if ((destroyProcess(sessionId) == 0) && logger.isInfoEnabled()) {
+            if (destroyProcess(sessionId) == 0 && logger.isInfoEnabled()) {
                 logger.info("Stopped process {}", sessionId);
             }
         }

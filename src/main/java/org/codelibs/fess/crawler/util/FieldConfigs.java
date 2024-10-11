@@ -27,12 +27,12 @@ public class FieldConfigs {
 
     private final Map<String, String> params;
 
-    public FieldConfigs(Map<String, String> params) {
+    public FieldConfigs(final Map<String, String> params) {
         this.params = params;
     }
 
-    public OptionalThing<Config> getConfig(String fieldName) {
-        String value = params.get(fieldName);
+    public OptionalThing<Config> getConfig(final String fieldName) {
+        final String value = params.get(fieldName);
         if (StringUtil.isNotBlank(value)) {
             return OptionalThing.of(new Config(value));
         }
@@ -43,8 +43,8 @@ public class FieldConfigs {
 
         private final String[] values;
 
-        public Config(String value) {
-            values = StreamUtil.split(value, Pattern.quote("|")).get(stream -> stream.map(s -> s.trim()).toArray(n -> new String[n]));
+        public Config(final String value) {
+            values = StreamUtil.split(value, Pattern.quote("|")).get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
         }
 
         public boolean isCache() {

@@ -233,7 +233,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
 
         public StemmerOverrideItem write(final StemmerOverrideItem oldItem) {
             try {
-                if ((item == null) || (item.getId() != oldItem.getId()) || !item.isUpdated()) {
+                if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
                     writer.write(oldItem.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
                     return oldItem;

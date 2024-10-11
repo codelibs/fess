@@ -59,10 +59,10 @@ public class TermRangeQueryCommand extends QueryCommand {
             final StringBuilder queryBuf = new StringBuilder();
             queryBuf.append(termRangeQuery.includesLower() ? '[' : '{');
             final BytesRef lowerTerm = termRangeQuery.getLowerTerm();
-            queryBuf.append(lowerTerm != null ? ("*".equals(Term.toString(lowerTerm)) ? "\\*" : Term.toString(lowerTerm)) : "*");
+            queryBuf.append(lowerTerm != null ? "*".equals(Term.toString(lowerTerm)) ? "\\*" : Term.toString(lowerTerm) : "*");
             queryBuf.append(" TO ");
             final BytesRef upperTerm = termRangeQuery.getUpperTerm();
-            queryBuf.append(upperTerm != null ? ("*".equals(Term.toString(upperTerm)) ? "\\*" : Term.toString(upperTerm)) : "*");
+            queryBuf.append(upperTerm != null ? "*".equals(Term.toString(upperTerm)) ? "\\*" : Term.toString(upperTerm) : "*");
             queryBuf.append(termRangeQuery.includesUpper() ? ']' : '}');
             final String origQuery = queryBuf.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);

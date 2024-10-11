@@ -64,7 +64,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     // for testing
     protected QueryResponseList(final List<Map<String, Object>> documentList, final int start, final int pageSize, final int offset) {
-        this.parent = documentList;
+        parent = documentList;
         this.offset = offset;
         this.start = start;
         this.pageSize = pageSize;
