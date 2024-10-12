@@ -120,8 +120,7 @@ public class SearchApiManager extends BaseApiManager {
             return FormatType.SEARCH;
         }
         final String type = value.toLowerCase(Locale.ROOT);
-        switch (type) {
-        case "documents":
+        if ("documents".equals(type)) {
             if (values.length > 5 && "favorite".equals(values[5])) {
                 request.setAttribute(DOC_ID_FIELD, values[4]);
                 return FormatType.FAVORITE;
@@ -130,18 +129,21 @@ public class SearchApiManager extends BaseApiManager {
                 return FormatType.SCROLL;
             }
             return FormatType.SEARCH;
-        case "labels":
+        }
+        if ("labels".equals(type)) {
             return FormatType.LABEL;
-        case "popular-words":
+        }
+        if ("popular-words".equals(type)) {
             return FormatType.POPULARWORD;
-        case "favorites":
+        }
+        if ("favorites".equals(type)) {
             return FormatType.FAVORITES;
-        case "health":
+        }
+        if ("health".equals(type)) {
             return FormatType.PING;
-        case "suggest-words":
+        }
+        if ("suggest-words".equals(type)) {
             return FormatType.SUGGEST;
-        default:
-            break;
         }
         // default
         return FormatType.OTHER;

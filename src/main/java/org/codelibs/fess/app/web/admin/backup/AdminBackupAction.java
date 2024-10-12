@@ -319,17 +319,17 @@ public class AdminBackupAction extends FessAdminAction {
             }
             if (id.endsWith(NDJSON_EXTENTION)) {
                 final String name = id.substring(0, id.length() - NDJSON_EXTENTION.length());
-                switch (name) {
-                case "search_log":
+                if ("search_log".equals(name)) {
                     return writeNdjsonResponse(id, getSearchLogNdjsonWriteCall());
-                case "user_info":
+                }
+                if ("user_info".equals(name)) {
                     return writeNdjsonResponse(id, getUserInfoNdjsonWriteCall());
-                case "click_log":
+                }
+                if ("click_log".equals(name)) {
                     return writeNdjsonResponse(id, getClickLogNdjsonWriteCall());
-                case "favorite_log":
+                }
+                if ("favorite_log".equals(name)) {
                     return writeNdjsonResponse(id, getFavoriteLogNdjsonWriteCall());
-                default:
-                    break;
                 }
             } else if ("fess.json".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {

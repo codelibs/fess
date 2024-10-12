@@ -909,15 +909,14 @@ public interface FessProp {
     String getJobTemplateTitleData();
 
     default String getJobTemplateTitle(final String type) {
-        switch (type) {
-        case Constants.WEB_CRAWLER_TYPE:
+        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleWeb();
-        case Constants.FILE_CRAWLER_TYPE:
+        }
+        if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleFile();
-        case Constants.DATA_CRAWLER_TYPE:
+        }
+        if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleData();
-        default:
-            break;
         }
         return "None";
     }

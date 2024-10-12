@@ -144,18 +144,12 @@ public class AdminSchedulerAction extends FessAdminAction {
                 final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
                 scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
                 final String[] ids = { "", "", "" };
-                switch (type) {
-                case Constants.WEB_CRAWLER_TYPE:
+                if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
                     ids[0] = "\"" + id + "\"";
-                    break;
-                case Constants.FILE_CRAWLER_TYPE:
+                } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
                     ids[1] = "\"" + id + "\"";
-                    break;
-                case Constants.DATA_CRAWLER_TYPE:
+                } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
                     ids[2] = "\"" + id + "\"";
-                    break;
-                default:
-                    break;
                 }
                 scheduledJobForm.scriptData =
                         MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id.replace('-', '_'));

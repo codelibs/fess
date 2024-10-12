@@ -299,30 +299,21 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private AuthScheme getAuthScheme(final Map<String, String> paramMap, final String webAuthName, final String scheme) {
         AuthScheme authScheme = null;
-        switch (scheme) {
-        case Constants.BASIC:
+        if (Constants.BASIC.equals(scheme)) {
             authScheme = new BasicScheme();
-            break;
-        case Constants.DIGEST:
+        } else if (Constants.DIGEST.equals(scheme)) {
             authScheme = new DigestScheme();
-            break;
-        case Constants.NTLM: {
+        } else if (Constants.NTLM.equals(scheme)) {
             final Properties props = new Properties();
             paramMap.entrySet().stream().filter(e -> e.getKey().startsWith("jcifs.")).forEach(e -> {
                 props.setProperty(e.getKey(), e.getValue());
             });
             authScheme = new NTLMScheme(new JcifsEngine(props));
-            break;
-        }
-        case Constants.FORM: {
+        } else if (Constants.FORM.equals(scheme)) {
             final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
             final Map<String, String> parameterMap = paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
                     .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
             authScheme = new FormScheme(parameterMap);
-            break;
-        }
-        default:
-            break;
         }
         return authScheme;
     }
