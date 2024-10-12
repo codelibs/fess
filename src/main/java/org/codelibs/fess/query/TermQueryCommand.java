@@ -72,15 +72,14 @@ public class TermQueryCommand extends QueryCommand {
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
             return convertPrefixQuery(fessConfig, context, termQuery, boost, field, text);
         }
-        switch (field) {
-        case DEFAULT_FIELD:
+        if (DEFAULT_FIELD.equals(field)) {
             return convertDefaultTermQuery(fessConfig, context, termQuery, boost, field, text);
-        case SORT_FIELD:
+        }
+        if (SORT_FIELD.equals(field)) {
             return convertSortQuery(fessConfig, context, termQuery, boost, field, text);
-        case SITE_FIELD:
+        }
+        if (SITE_FIELD.equals(field)) {
             return convertSiteQuery(fessConfig, context, termQuery, boost, field, text);
-        default:
-            break;
         }
         if (INURL_FIELD.equals(field)
                 || StringUtil.equals(field, context.getDefaultField()) && fessConfig.getIndexFieldUrl().equals(context.getDefaultField())) {
