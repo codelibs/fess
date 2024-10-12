@@ -1,5 +1,4 @@
-Fess Enterprise Search Server [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Fess+is+very+powerful+and+easily+deployable+Enterprise+Search+Server.&url=https://github.com/codelibs/fess)
-====
+# Fess: Enterprise Search Server
 [![Java CI with Maven](https://github.com/codelibs/fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess/actions/workflows/maven.yml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
@@ -92,16 +91,6 @@ Currently, Fess supports crawling the following [storage locations and APIs](htt
  - [Groovy](https://github.com/codelibs/fess-script-groovy)
  - [OGNL](https://github.com/codelibs/fess-script-ognl)
 
-## Localization
-
-### Japanese
-
- - [Website](https://fess.codelibs.org/ja/)
-
-### Korean
-
- - [Forum](https://github.com/nocode2k/fess-kr-forum)
-
 ## Development Information
 
 ### Get Source Code
@@ -160,6 +149,16 @@ If you want to add labels/messages for your language, please translate propertie
 For search/index analyzer, if [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contains lang\_[lang] for your language, please modify the analyzer for your language. For more details about Analyzers, see the [OpenSearch documentation](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
 
 We welcome pull requests for your language.
+
+### Translations
+
+- [日本語 (Japanese)](docs/ja/README.md)
+- [简体中文 (Simplified Chinese)](docs/zh-CN/README.md)
+- [Español (Spanish)](docs/es/README.md)
+- [Português (Brazilian Portuguese)](docs/pt-BR/README.md)
+- [Français (French)](docs/fr/README.md)
+- [Deutsch (German)](docs/de/README.md)
+- [한국어 (Korean)](docs/ko/README.md)
 
 ## Powered By
 
