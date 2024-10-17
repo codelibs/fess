@@ -24,8 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.ServletContext;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,6 +42,8 @@ import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.util.SystemUtil;
+
+import jakarta.servlet.ServletContext;
 
 public class CrawlJob extends ExecJob {
 

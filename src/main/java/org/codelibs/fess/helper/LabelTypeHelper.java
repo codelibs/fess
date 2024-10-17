@@ -28,8 +28,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -38,6 +36,8 @@ import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class LabelTypeHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(LabelTypeHelper.class);

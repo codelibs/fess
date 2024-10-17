@@ -33,9 +33,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -55,6 +52,9 @@ import org.codelibs.fess.util.ResourceUtil;
 import org.opensearch.index.query.QueryBuilders;
 
 import com.google.common.collect.Lists;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 public class ThumbnailManager {
     private static final String NOIMAGE_FILE_SUFFIX = ".txt";

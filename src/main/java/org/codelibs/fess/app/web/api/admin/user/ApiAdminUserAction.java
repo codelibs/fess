@@ -21,8 +21,6 @@ import static org.codelibs.fess.app.web.admin.user.AdminUserAction.validateAttri
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.UserPager;
@@ -33,6 +31,8 @@ import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminUserAction extends FessApiAdminAction {
 

@@ -18,12 +18,12 @@ package org.codelibs.fess.helper;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class AccessTokenHelper {
 

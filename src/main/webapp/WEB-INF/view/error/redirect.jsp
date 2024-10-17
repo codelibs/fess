@@ -1,10 +1,10 @@
 <% 
-Integer statusCode = (Integer)request.getAttribute("javax.servlet.error.status_code");
-String servletName = (String)request.getAttribute("javax.servlet.error.servlet_name");
-String requestUri = (String)request.getAttribute("javax.servlet.error.request_uri");
+Integer statusCode = (Integer)request.getAttribute("jakarta.servlet.error.status_code");
+String servletName = (String)request.getAttribute("jakarta.servlet.error.servlet_name");
+String requestUri = (String)request.getAttribute("jakarta.servlet.error.request_uri");
 String type = request.getParameter("type");
 StringBuilder redirectPage = new StringBuilder();
-redirectPage.append(((javax.servlet.http.HttpServletRequest)request).getContextPath());
+redirectPage.append(((jakarta.servlet.http.HttpServletRequest)request).getContextPath());
 if("systemError".equals(type)) {
 	if(requestUri != null && !requestUri.endsWith("systemError")) {
 		redirectPage.append("/error/systemerror/");

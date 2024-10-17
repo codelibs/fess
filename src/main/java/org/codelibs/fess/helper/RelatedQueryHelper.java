@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.es.config.exentity.RelatedQuery;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class RelatedQueryHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(RelatedQueryHelper.class);

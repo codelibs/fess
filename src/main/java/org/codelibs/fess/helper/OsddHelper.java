@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -29,6 +27,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Helper class for Open Search Description Document.

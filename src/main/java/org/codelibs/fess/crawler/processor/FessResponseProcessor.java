@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.crawler.processor;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.AccessResult;
@@ -26,6 +24,8 @@ import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.ingest.IngestFactory;
 import org.codelibs.fess.ingest.Ingester;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class FessResponseProcessor extends DefaultResponseProcessor {
     private static final Logger logger = LogManager.getLogger(FessResponseProcessor.class);

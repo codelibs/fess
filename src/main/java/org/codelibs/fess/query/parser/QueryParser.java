@@ -18,8 +18,6 @@ package org.codelibs.fess.query.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -32,6 +30,8 @@ import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.QueryParseException;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class QueryParser {
 

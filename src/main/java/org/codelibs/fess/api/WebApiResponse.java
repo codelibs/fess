@@ -18,10 +18,10 @@ package org.codelibs.fess.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.apache.commons.io.output.ByteArrayOutputStream;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 public class WebApiResponse extends HttpServletResponseWrapper {
 

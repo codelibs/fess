@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.admin.searchlist.AdminSearchlistAction;
@@ -40,6 +38,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.opensearch.action.bulk.BulkResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminDocumentsAction extends FessApiAdminAction {
     // ===================================================================================

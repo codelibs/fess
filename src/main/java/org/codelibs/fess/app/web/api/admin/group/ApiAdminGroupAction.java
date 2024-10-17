@@ -21,8 +21,6 @@ import static org.codelibs.fess.app.web.admin.group.AdminGroupAction.validateAtt
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.GroupPager;
@@ -34,6 +32,8 @@ import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.es.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminGroupAction extends FessApiAdminAction {
 

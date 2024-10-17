@@ -15,9 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.storage;
 
-import javax.validation.constraints.Size;
-
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+
+import jakarta.validation.constraints.Size;
 
 public class ItemForm {
 

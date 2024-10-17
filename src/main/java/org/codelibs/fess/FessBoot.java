@@ -30,6 +30,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.http.CookieProcessorBase;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.tomcat.valve.SuppressErrorReportValve;
 import org.codelibs.fess.tomcat.webresources.FessWebResourceRoot;
@@ -171,12 +172,16 @@ public class FessBoot extends TomcatBoot {
                     connector.setProperty("SSLEnabled", "true");
                     final SSLHostConfig sslHostConfig = new SSLHostConfig();
                     sslHostConfig.setHostName("_default_");
-                    doSetupServerConfig(logger, props, "certificateKeystoreFile", v -> sslHostConfig.setCertificateKeystoreFile(v));
-                    doSetupServerConfig(logger, props, "certificateKeystorePassword", v -> sslHostConfig.setCertificateKeystorePassword(v));
-                    doSetupServerConfig(logger, props, "certificateKeyAlias", v -> sslHostConfig.setCertificateKeyAlias(v));
+                    final SSLHostConfigCertificate certificate =
+                            new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.UNDEFINED);
+                    doSetupServerConfig(logger, props, "certificateKeystoreFile", v -> certificate.setCertificateKeystoreFile(v));
+                    doSetupServerConfig(logger, props, "certificateKeystorePassword", v -> certificate.setCertificateKeystorePassword(v));
+                    doSetupServerConfig(logger, props, "certificateKeyAlias", v -> certificate.setCertificateKeyAlias(v));
                     doSetupServerConfig(logger, props, "sslProtocol", v -> sslHostConfig.setSslProtocol(v));
                     doSetupServerConfig(logger, props, "enabledProtocols", v -> sslHostConfig.setEnabledProtocols(v.trim().split(",")));
+                    sslHostConfig.addCertificate(certificate);
                     connector.addSslHostConfig(sslHostConfig);
+
                 }
             });
             doSetupServerConfig(logger, props, "sameSiteCookies", value -> {

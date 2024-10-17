@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.app.service;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.helper.SystemHelper;
+
+import jakarta.annotation.Resource;
 
 public class UserInfoService {
 

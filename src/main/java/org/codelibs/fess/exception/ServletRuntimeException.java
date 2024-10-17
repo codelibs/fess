@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.exception;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 public class ServletRuntimeException extends RuntimeException {
 

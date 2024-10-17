@@ -17,13 +17,12 @@ package org.codelibs.fess.helper;
 
 import java.util.Locale;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
+import jakarta.annotation.PostConstruct;
 import jcifs.SID;
 
 public class SambaHelper {

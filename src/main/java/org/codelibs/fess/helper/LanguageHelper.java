@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.language.detect.LanguageDetector;
@@ -30,6 +28,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.opensearch.script.Script;
+
+import jakarta.annotation.PostConstruct;
 
 public class LanguageHelper {
     private static final Logger logger = LogManager.getLogger(LanguageHelper.class);

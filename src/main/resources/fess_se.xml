@@ -2,6 +2,11 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-	<component name="scriptEngineFactory" class="org.codelibs.fess.script.ScriptEngineFactory">
+	<component name="scriptEngineFactory"
+		class="org.codelibs.fess.script.ScriptEngineFactory">
+	</component>
+	<component name="groovyEngine"
+		class="org.codelibs.fess.script.groovy.GroovyEngine">
+		<postConstruct name="register"></postConstruct>
 	</component>
 </components>

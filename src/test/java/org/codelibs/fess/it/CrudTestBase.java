@@ -101,6 +101,7 @@ public abstract class CrudTestBase extends ITBase {
     // Bodies
     // ================
     protected void testCreate() {
+        logger.info("[BEGIN] testCreate");
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = createTestParam(i);
@@ -114,9 +115,11 @@ public abstract class CrudTestBase extends ITBase {
         // Test: number of settings.
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(NUM));
+        logger.info("[END] testCreate");
     }
 
     protected void testRead() {
+        logger.info("[BEGIN] testRead");
         // Test: get settings api.
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
         List<String> nameList = getPropList(searchBody, getKeyProperty());
@@ -141,10 +144,11 @@ public abstract class CrudTestBase extends ITBase {
             searchBody.put("page", i + 1);
             checkGetMethod(searchBody, getListEndpointSuffix()).then().body("response." + getListEndpointSuffix() + ".size()", equalTo(1));
         }
-
+        logger.info("[END] testRead");
     }
 
     protected void testUpdate() {
+        logger.info("[BEGIN] testUpdate");
         // Test: update settings api
         final Set<String> keySet = createTestParam(0).keySet();
         final Map<String, Object> updateMap = getUpdateMap();
@@ -169,6 +173,7 @@ public abstract class CrudTestBase extends ITBase {
         }
 
         checkUpdate();
+        logger.info("[END] testUpdate");
     }
 
     protected void checkUpdate() {
@@ -184,6 +189,7 @@ public abstract class CrudTestBase extends ITBase {
     }
 
     protected void testDelete() {
+        logger.info("[BEGIN] testDelete");
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
 
         for (int count = 0; count < NUM; count++) {
@@ -194,6 +200,7 @@ public abstract class CrudTestBase extends ITBase {
 
         // Test: number of settings.
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(0));
+        logger.info("[END] testDelete");
     }
 
     // ================

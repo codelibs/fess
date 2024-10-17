@@ -19,19 +19,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileUploadByteCountLimitException;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletDiskFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.util.ComponentUtil;
@@ -44,10 +41,13 @@ import org.lastaflute.web.ruts.multipart.MultipartRequestWrapper;
 import org.lastaflute.web.ruts.multipart.exception.MultipartExceededException;
 import org.lastaflute.web.util.LaServletContextUtil;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * The handler of multipart request (fileupload request). <br>
  * This instance is created per one multipart request.
- *
  * @author modified by jflute (originated in Seasar)
  */
 public class FessMultipartRequestHandler implements MultipartRequestHandler {
@@ -78,12 +78,12 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                      ==============
     @Override
     public void handleRequest(final HttpServletRequest request) throws ServletException {
-        final ServletFileUpload upload = createServletFileUpload(request);
+        final JakartaServletDiskFileUpload upload = createDiskFileUpload(request);
         prepareElementsHash();
         try {
-            final List<FileItem> items = parseRequest(request, upload);
+            final List<DiskFileItem> items = parseRequest(request, upload);
             mappingParameter(request, items);
-        } catch (final SizeLimitExceededException e) { // special handling
+        } catch (final FileUploadByteCountLimitException e) { // special handling
             handleSizeLimitExceededException(request, e);
         } catch (final FileUploadException e) { // contains fileCount exceeded
             handleFileUploadException(e);
@@ -91,23 +91,23 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     }
 
     protected void prepareElementsHash() { // traditional name
-        // #thinking jflute might lazy-loaded be unneeded? because created per request
-        // (2024/09/08)
+        // #thinking jflute might lazy-loaded be unneeded? because created per request (2024/09/08)
         elementsAll = new HashMap<>();
         elementsText = new HashMap<>();
         elementsFile = new HashMap<>();
     }
 
-    protected List<FileItem> parseRequest(final HttpServletRequest request, final ServletFileUpload upload) throws FileUploadException {
+    protected List<DiskFileItem> parseRequest(final HttpServletRequest request, final JakartaServletDiskFileUpload upload)
+            throws FileUploadException {
         return upload.parseRequest(request);
     }
 
     // ===================================================================================
     //                                                                   ServletFileUpload
     //                                                                   =================
-    protected ServletFileUpload createServletFileUpload(final HttpServletRequest request) {
+    protected JakartaServletDiskFileUpload createDiskFileUpload(final HttpServletRequest request) {
         final DiskFileItemFactory fileItemFactory = createDiskFileItemFactory();
-        final ServletFileUpload upload = newServletFileUpload(fileItemFactory);
+        final JakartaServletDiskFileUpload upload = newServletFileUpload(fileItemFactory);
         setupServletFileUpload(upload, request);
         return upload;
     }
@@ -118,7 +118,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     protected DiskFileItemFactory createDiskFileItemFactory() {
         final int sizeThreshold = getSizeThreshold();
         final File repository = createRepositoryFile();
-        return new DiskFileItemFactory(sizeThreshold, repository);
+        return DiskFileItemFactory.builder().setBufferSize(sizeThreshold).setFile(repository).get();
     }
 
     protected int getSizeThreshold() {
@@ -142,10 +142,10 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // -----------------------------------------------------
     //                            ServletFileUpload Settings
     //                            --------------------------
-    protected ServletFileUpload newServletFileUpload(final DiskFileItemFactory fileItemFactory) {
-        return new ServletFileUpload(fileItemFactory) {
+    protected JakartaServletDiskFileUpload newServletFileUpload(final DiskFileItemFactory fileItemFactory) {
+        return new JakartaServletDiskFileUpload(fileItemFactory) {
             @Override
-            protected byte[] getBoundary(final String contentType) { // for security
+            public byte[] getBoundary(final String contentType) { // for security
                 final byte[] boundary = super.getBoundary(contentType);
                 checkBoundarySize(contentType, boundary);
                 return boundary;
@@ -153,10 +153,8 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         };
     }
 
-    // #for_now jflute to suppress CVE-2014-0050 even if commons-fileupload is older
-    // than safety version (2024/09/08)
-    // but if you use safety version, this extension is basically unneeded (or you
-    // can use it as double check)
+    // #for_now jflute to suppress CVE-2014-0050 even if commons-fileupload is older than safety version (2024/09/08)
+    // but if you use safety version, this extension is basically unneeded (or you can use it as double check)
     protected void checkBoundarySize(final String contentType, final byte[] boundary) {
         final int boundarySize = boundary.length;
         final int limitSize = getBoundaryLimitSize();
@@ -188,12 +186,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         br.addItem("Limit Size");
         br.addElement(limitSize);
         final String msg = br.buildExceptionMessage();
-        throw new Forced404NotFoundException(msg, UserMessages.empty()); // heavy attack!? so give no page to tell
-                                                                         // wasted action
+        throw new Forced404NotFoundException(msg, UserMessages.empty()); // heavy attack!? so give no page to tell wasted action
     }
 
-    protected void setupServletFileUpload(final ServletFileUpload upload, final HttpServletRequest request) {
-        upload.setHeaderEncoding(request.getCharacterEncoding());
+    protected void setupServletFileUpload(final JakartaServletDiskFileUpload upload, final HttpServletRequest request) {
+        upload.setHeaderCharset(Charset.forName(request.getCharacterEncoding()));
         upload.setSizeMax(getSizeMax());
         upload.setFileCountMax(getFileCountMax()); // since commons-fileupload-1.5
     }
@@ -209,9 +206,9 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                                   Parameter Mapping
     //                                                                   =================
-    protected void mappingParameter(final HttpServletRequest request, final List<FileItem> items) {
+    protected void mappingParameter(final HttpServletRequest request, final List<DiskFileItem> items) {
         showFieldLoggingTitle();
-        for (final FileItem item : items) {
+        for (DiskFileItem item : items) {
             if (item.isFormField()) {
                 showFormFieldParameter(item);
                 addTextParameter(request, item);
@@ -235,13 +232,13 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         }
     }
 
-    protected void showFormFieldParameter(final FileItem item) {
+    protected void showFormFieldParameter(final DiskFileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}={}", item.getFieldName(), item.getString());
         }
     }
 
-    protected void showFileFieldParameter(final FileItem item) {
+    protected void showFileFieldParameter(final DiskFileItem item) {
         if (logger.isDebugEnabled()) {
             logger.debug("[param] {}:{name={}, size={}}", item.getFieldName(), item.getName(), item.getSize());
         }
@@ -250,9 +247,9 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     // ===================================================================================
     //                                                                       Add Parameter
     //                                                                       =============
-    protected void addTextParameter(final HttpServletRequest request, final FileItem item) {
+    protected void addTextParameter(final HttpServletRequest request, final DiskFileItem item) {
         final String fieldName = item.getFieldName();
-        final String encoding = request.getCharacterEncoding();
+        final Charset encoding = Charset.forName(request.getCharacterEncoding());
         String value = null;
         boolean haveValue = false;
         if (encoding != null) {
@@ -263,9 +260,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         }
         if (!haveValue) {
             try {
-                value = item.getString("ISO-8859-1");
+                value = item.getString(Charset.forName("ISO-8859-1"));
             } catch (final java.io.UnsupportedEncodingException uee) {
                 value = item.getString();
+            } catch (final IOException e) {
+                throw new IllegalStateException("Failed to get string from the item: " + item, e);
             }
             haveValue = true;
         }
@@ -285,23 +284,23 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
         elementsText.put(fieldName, newArray);
     }
 
-    protected void addFileParameter(final FileItem item) {
+    protected void addFileParameter(final DiskFileItem item) {
         final String fieldName = item.getFieldName();
         final MultipartFormFile formFile = newActionMultipartFormFile(item);
         elementsAll.put(fieldName, formFile);
         elementsFile.put(fieldName, formFile);
     }
 
-    protected ActionMultipartFormFile newActionMultipartFormFile(final FileItem item) {
+    protected ActionMultipartFormFile newActionMultipartFormFile(final DiskFileItem item) {
         return new ActionMultipartFormFile(item);
     }
 
     // ===================================================================================
     //                                                                  Exception Handling
     //                                                                  ==================
-    protected void handleSizeLimitExceededException(final HttpServletRequest request, final SizeLimitExceededException e) {
+    protected void handleSizeLimitExceededException(final HttpServletRequest request, final FileUploadByteCountLimitException e) {
         final long actual = e.getActualSize();
-        final long permitted = e.getPermittedSize();
+        final long permitted = e.getPermitted();
         final String msg = "Exceeded size of the multipart request: actual=" + actual + " permitted=" + permitted;
         request.setAttribute(MAX_LENGTH_EXCEEDED_KEY, new MultipartExceededException(msg, actual, permitted, e));
         try {
@@ -319,7 +318,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected void handleFileUploadException(final FileUploadException e) throws ServletException {
         // suppress logging because it can be caught by logging filter
-        // log.error("Failed to parse multipart request", e);
+        //log.error("Failed to parse multipart request", e);
         throw new ServletException("Failed to upload the file.", e);
     }
 
@@ -328,7 +327,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                           =========
     @Override
     public void rollback() {
-        for (final MultipartFormFile formFile : elementsFile.values()) {
+        for (MultipartFormFile formFile : elementsFile.values()) {
             formFile.destroy();
         }
     }
@@ -348,9 +347,9 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         private static final long serialVersionUID = 1L;
 
-        protected final FileItem fileItem;
+        protected final DiskFileItem fileItem;
 
-        public ActionMultipartFormFile(final FileItem fileItem) {
+        public ActionMultipartFormFile(final DiskFileItem fileItem) {
             this.fileItem = fileItem;
         }
 
@@ -394,7 +393,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         @Override
         public void destroy() {
-            fileItem.delete();
+            try {
+                fileItem.delete();
+            } catch (final IOException e) {
+                throw new IllegalStateException("Failed to delete the fileItem: " + fileItem, e);
+            }
         }
 
         @Override

@@ -23,12 +23,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public final class DocumentUtil {
 

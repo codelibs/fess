@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.base.login;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -42,6 +40,8 @@ import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginRequiredException;
 import org.lastaflute.web.login.option.LoginSpecifiedOption;
 import org.lastaflute.web.servlet.session.SessionManager;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author jflute

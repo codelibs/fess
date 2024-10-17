@@ -18,11 +18,11 @@ package org.codelibs.fess.helper;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.fess.unit.UnitFessTestCase;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class RoleQueryHelperTest extends UnitFessTestCase {
     public CachedCipher cipher;

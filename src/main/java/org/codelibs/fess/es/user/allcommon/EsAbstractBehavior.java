@@ -25,8 +25,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.DocMeta;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.dbflute.Entity;
@@ -58,6 +56,8 @@ import org.opensearch.core.action.ActionListener;
 import org.opensearch.index.seqno.SequenceNumbers;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
+
+import jakarta.annotation.Resource;
 
 /**
  * @param <ENTITY> The type of entity.

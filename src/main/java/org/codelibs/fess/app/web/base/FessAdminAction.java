@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -27,6 +24,9 @@ import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
+
+import jakarta.annotation.Resource;
+import jakarta.servlet.ServletContext;
 
 /**
  * @author codelibs

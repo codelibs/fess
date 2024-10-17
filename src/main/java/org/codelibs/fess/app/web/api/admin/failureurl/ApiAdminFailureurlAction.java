@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.api.admin.failureurl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.pager.FailureUrlPager;
@@ -33,6 +31,8 @@ import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author Keiichi Watanabe

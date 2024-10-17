@@ -15,12 +15,12 @@
  */
 package org.codelibs.fess.validation;
 
-import javax.validation.ConstraintDefinitionException;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.validation.ConstraintDefinitionException;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class UriTypeValidator implements ConstraintValidator<UriType, String> {
     private String[] protocols;

@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.stream.StreamUtil;
@@ -39,6 +37,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.MemoryUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LogManager.getLogger(IndexUpdateCallbackImpl.class);

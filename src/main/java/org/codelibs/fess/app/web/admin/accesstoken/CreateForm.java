@@ -15,14 +15,14 @@
  */
 package org.codelibs.fess.app.web.admin.accesstoken;
 
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.validation.CustomSize;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
+
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class CreateForm {
 

@@ -29,8 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.InterruptedRuntimeException;
@@ -64,6 +62,8 @@ import org.opensearch.action.update.UpdateResponse;
 import org.opensearch.common.document.DocumentField;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class SearchHelper {
 

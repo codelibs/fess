@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -44,6 +39,11 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.saml2.Auth;
+import org.codelibs.saml2.core.authn.AuthnRequestParams;
+import org.codelibs.saml2.core.logout.LogoutRequestParams;
+import org.codelibs.saml2.core.settings.Saml2Settings;
+import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.login.credential.LoginCredential;
@@ -53,11 +53,10 @@ import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
-import com.onelogin.saml2.Auth;
-import com.onelogin.saml2.authn.AuthnRequestParams;
-import com.onelogin.saml2.logout.LogoutRequestParams;
-import com.onelogin.saml2.settings.Saml2Settings;
-import com.onelogin.saml2.settings.SettingsBuilder;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class SamlAuthenticator implements SsoAuthenticator {
 

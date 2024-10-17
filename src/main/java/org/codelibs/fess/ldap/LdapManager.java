@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -62,6 +61,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.OptionalUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class LdapManager {
     private static final Logger logger = LogManager.getLogger(LdapManager.class);

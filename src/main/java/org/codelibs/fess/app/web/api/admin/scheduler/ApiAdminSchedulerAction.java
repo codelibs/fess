@@ -20,8 +20,6 @@ import static org.codelibs.fess.app.web.admin.scheduler.AdminSchedulerAction.get
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
@@ -36,6 +34,8 @@ import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminSchedulerAction extends FessApiAdminAction {
 

@@ -20,14 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
+
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ThumbnailAction extends FessSearchAction {
 

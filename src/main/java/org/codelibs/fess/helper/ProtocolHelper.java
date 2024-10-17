@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
@@ -40,6 +38,8 @@ import org.codelibs.core.lang.ClassUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
 
 public class ProtocolHelper {
     private static final Logger logger = LogManager.getLogger(ProtocolHelper.class);

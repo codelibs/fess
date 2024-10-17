@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.app.web.api.admin.suggest;
 
-import javax.annotation.Resource;
-
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
+
+import jakarta.annotation.Resource;
 
 public class ApiAdminSuggestAction extends FessApiAdminAction {
 

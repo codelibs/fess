@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CustomSizeValidator implements ConstraintValidator<CustomSize, CharSequence> {
     private int min = 0;

@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.app.web.admin.accesstoken;
 
-import javax.validation.constraints.Size;
-
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
+
+import jakarta.validation.constraints.Size;
 
 /**
  * @author shinsuke
