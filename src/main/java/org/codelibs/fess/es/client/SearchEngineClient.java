@@ -784,7 +784,7 @@ public class SearchEngineClient implements Client {
                                 }
                             }
                         } catch (final Exception e) {
-                            logger.warn("Failed to parse {}", dataPath);
+                            logger.warn("Failed to parse {}", dataPath, e);
                         }
                         return StringUtil.EMPTY;
                     });
@@ -793,7 +793,7 @@ public class SearchEngineClient implements Client {
                 logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
             }
         } catch (final Exception e) {
-            logger.warn("Failed to create {} mapping.", configIndex);
+            logger.warn("Failed to create {} mapping.", configIndex, e);
         }
     }
 
