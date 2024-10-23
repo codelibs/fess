@@ -61,7 +61,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                   Temporary Directory
     //                                   -------------------
     // used as repository for requested parameters
-    protected static final String CONTEXT_TEMPDIR_KEY = "jakarta.servlet.context.tempdir";
+    protected static final String CONTEXT_TEMPDIR_KEY = "javax.servlet.context.tempdir"; // prior
     protected static final String JAVA_IO_TMPDIR_KEY = "java.io.tmpdir"; // secondary
 
     // ===================================================================================
@@ -131,12 +131,13 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected String getRepositoryPath() {
         final ServletContext servletContext = LaServletContextUtil.getServletContext();
-        final File tempDirFile = (File) servletContext.getAttribute(CONTEXT_TEMPDIR_KEY);
-        String tempDir = tempDirFile.getAbsolutePath();
-        if (tempDir == null || tempDir.length() == 0) {
-            tempDir = System.getProperty(JAVA_IO_TMPDIR_KEY);
+        if (servletContext.getAttribute(CONTEXT_TEMPDIR_KEY) instanceof final File tempDirFile) {
+            final String tempDir = tempDirFile.getAbsolutePath();
+            if (tempDir != null && tempDir.length() > 0) {
+                return tempDir;
+            }
         }
-        return tempDir; // must be not null
+        return System.getProperty(JAVA_IO_TMPDIR_KEY);
     }
 
     // -----------------------------------------------------
