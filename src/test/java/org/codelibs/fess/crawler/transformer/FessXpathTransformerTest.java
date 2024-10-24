@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerFactory;
@@ -45,6 +46,7 @@ import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -552,7 +554,29 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         transformer.transform(source, result);
 
         return writer.toString();
+    }
 
+    public void test_getChildUrlRules() {
+        assertEquals("", new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Map.of();
+            }
+        }.getChildUrlRules(null, null).map(v -> v.getFirst() + ":" + v.getSecond()).collect(Collectors.joining(",")));
+        assertEquals("//A:href", new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Map.of(Config.HTML_CHILD_URL_RULES, "//A:href");
+            }
+        }.getChildUrlRules(null, null).map(v -> v.getFirst() + ":" + v.getSecond()).collect(Collectors.joining(",")));
+        assertEquals("//A:href,//AREA:href", new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Map.of(Config.HTML_CHILD_URL_RULES, "//A:href,//AREA:href");
+            }
+        }.getChildUrlRules(null, null).map(v -> v.getFirst() + ":" + v.getSecond()).collect(Collectors.joining(",")));
+        assertEquals("//A:href,//AREA:href", new FessXpathTransformer() {
+            protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
+                return Map.of(Config.HTML_CHILD_URL_RULES, " //A : href , //AREA : href ");
+            }
+        }.getChildUrlRules(null, null).map(v -> v.getFirst() + ":" + v.getSecond()).collect(Collectors.joining(",")));
     }
 
     public void test_convertChildUrlList() {

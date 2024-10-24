@@ -21,6 +21,7 @@ import java.io.BufferedInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.xpath.XPathEvaluationResult;
 import javax.xml.xpath.XPathExpressionException;
@@ -42,7 +44,9 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.ValueHolder;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.AccessResultData;
@@ -775,6 +779,17 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             return getURL(currentUrl, baseHref);
         }
         return new URL(currentUrl);
+    }
+
+    @Override
+    protected Stream<Pair<String, String>> getChildUrlRules(final ResponseData responseData, final ResultData resultData) {
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
+        final String ruleString = configMap.get(Config.HTML_CHILD_URL_RULES);
+        if (StringUtil.isBlank(ruleString)) {
+            return childUrlRuleMap.entrySet().stream().map(e -> new Pair<>(e.getKey(), e.getValue()));
+        }
+        return Arrays.stream(ruleString.split(",")).map(s -> s.split(":")).filter(v -> v.length == 2)
+                .map(v -> new Pair<String, String>(v[0].trim(), v[1].trim()));
     }
 
     @Override
