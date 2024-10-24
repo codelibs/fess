@@ -16,8 +16,6 @@
 		<mkdir dir="${target.dir}" />
 		<delete dir="${webinf.dir}/lib" />
 		<mkdir dir="${webinf.dir}/lib" />
-		<delete dir="${webinf.dir}/plugin" />
-		<mkdir dir="${webinf.dir}/plugin" />
 		<delete dir="${crawler.dir}/lib" />
 		<mkdir dir="${crawler.dir}/lib" />
 		<delete dir="${suggest.dir}/lib" />
@@ -43,15 +41,11 @@
 			</patternset>
 			<cutdirsmapper dirs="2" />
 		</unzip>
-    <!-- 
-		<antcall target="install.plugin.jar">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
-			<param name="jar.groupId" value="org/codelibs/fess" />
-			<param name="jar.artifactId" value="fess-script-ognl" />
-			<param name="jar.version" value="15.0.0" />
-			<param name="file.version" value="15.0.0" />
-		</antcall>
-    -->
+		<delete>
+			<fileset dir="${webinf.dir}/plugin">
+				<include name="**/*.jar" />
+			</fileset>
+		</delete>
 	</target>
 
 	<target name="install.env.jar">
@@ -64,13 +58,5 @@
 			todir="${suggest.dir}/lib"/>
 		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
 			todir="${thumbnail.dir}/lib"/>
-	</target>
-
-	<target name="install.plugin.jar">
-		<get dest="${target.dir}">
-			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
-		</get>
-		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
-			todir="${webinf.dir}/plugin"/>
 	</target>
 </project>

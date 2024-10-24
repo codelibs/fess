@@ -190,15 +190,7 @@ public class ResourceUtil {
     }
 
     public static File[] getPluginJarFiles(final FilenameFilter filter) {
-        final ServletContext context = LaServletContextUtil.getServletContext();
-        if (context == null) {
-            return new File[0];
-        }
-        final String libPath = context.getRealPath("/WEB-INF/plugin");
-        if (StringUtil.isBlank(libPath)) {
-            return new File[0];
-        }
-        final File libDir = new File(libPath);
+        final File libDir =getPluginPath().toFile();
         if (!libDir.exists()) {
             return new File[0];
         }
