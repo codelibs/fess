@@ -190,7 +190,7 @@ public class ResourceUtil {
     }
 
     public static File[] getPluginJarFiles(final FilenameFilter filter) {
-        final File libDir =getPluginPath().toFile();
+        final File libDir = getPluginPath().toFile();
         if (!libDir.exists()) {
             return new File[0];
         }
