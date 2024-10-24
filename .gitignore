@@ -6,7 +6,8 @@
 /src/main/webapp/WEB-INF/classes/
 /src/main/webapp/WEB-INF/lib/
 /src/main/webapp/WEB-INF/site/
-/src/main/webapp/WEB-INF/plugin/
+/src/main/webapp/WEB-INF/plugin/*
+!/src/main/webapp/WEB-INF/plugin/.keep
 /src/main/webapp/WEB-INF/env/crawler/lib/
 /src/main/webapp/WEB-INF/env/suggest/lib/
 /src/main/webapp/WEB-INF/env/thumbnail/lib/

@@ -232,7 +232,7 @@ public class PluginHelper {
                         return false;
                     }
                 }
-                return true;
+                return n.endsWith(".jar");
             });
             final List<Artifact> list = new ArrayList<>(jarFiles.length);
             for (final File file : jarFiles) {
