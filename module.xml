@@ -6,7 +6,7 @@
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://maven.codelibs.org/" />
 	<property name="maven.release.repo.url" value="https://maven.codelibs.org/" />
-	<property name="opensearch.plugin.version" value="2.17.0" />
+	<property name="opensearch.version" value="2.17.1" />
 
 	<target name="install.modules">
 		<mkdir dir="${target.dir}" />
@@ -19,8 +19,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="analysis-common" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- geo -->
 		<antcall target="install.module">
@@ -28,8 +28,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="geo" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- lang-expression -->
 		<antcall target="install.module">
@@ -37,8 +37,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="lang-expression" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- lang-painless -->
 		<antcall target="install.module">
@@ -46,8 +46,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="lang-painless" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- mapper-extras -->
 		<antcall target="install.module">
@@ -55,8 +55,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="mapper-extras" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- reindex -->
 		<antcall target="install.module">
@@ -64,8 +64,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="reindex" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 		<!-- transport-netty4 -->
 		<antcall target="install.module">
@@ -73,8 +73,8 @@
 			<param name="module.groupId" value="org/codelibs/opensearch/module" />
 			<param name="module.name.prefix" value="" />
 			<param name="module.name" value="transport-netty4" />
-			<param name="module.version" value="${opensearch.plugin.version}" />
-			<param name="module.zip.version" value="${opensearch.plugin.version}" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
 
 		<antcall target="remove.jars" />
