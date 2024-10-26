@@ -28,7 +28,7 @@
 	<jsp:include page="footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
-		src="${fe:url('/js/jquery-3.6.3.min.js')}"></script>
+		src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
 	<script src="${fe:url('/js/admin/popper.min.js')}" type="text/javascript"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
