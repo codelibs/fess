@@ -109,6 +109,7 @@
 							<directory>${project.build.directory}/${project.build.finalName}-compress</directory>
 						</resource>
 					</webResources>
+					<packagingExcludes>**/*.min.map,**/*.min.css.map,**/*.min.js.map</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
