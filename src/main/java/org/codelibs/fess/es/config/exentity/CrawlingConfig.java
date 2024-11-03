@@ -133,6 +133,7 @@ public interface CrawlingConfig {
             public static final String IGNORE_ROBOTS_TAGS = "ignore.robots.tags";
             public static final String SCRIPT_TYPE = "script.type";
             public static final String HTML_CHILD_URL_RULES = "html.child.url.rules";
+            public static final String CRAWL_ORDER = "crawl.order";
         }
 
         // meta.*
