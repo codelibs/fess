@@ -55,6 +55,6 @@ public class FessUrlQueueService extends EsUrlQueueService {
         } else if (!"sequential".equals(crawlOrder)) {
             logger.warn("Invalid crawl order specified: {}. Falling back to sequential.", crawlOrder);
         }
-        return getList(EsUrlQueue.class, sessionId, null, 0, pollingFetchSize, SortBuilders.fieldSort(CREATE_TIME).order(SortOrder.ASC));
+        return super.fetchUrlQueueList(sessionId);
     }
 }
