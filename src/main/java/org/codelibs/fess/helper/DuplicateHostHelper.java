@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.DuplicateHostService;
-import org.codelibs.fess.es.config.exentity.DuplicateHost;
+import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;

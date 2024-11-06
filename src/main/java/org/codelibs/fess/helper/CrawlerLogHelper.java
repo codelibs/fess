@@ -24,10 +24,10 @@ import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig;
-import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsAction;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
+import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class CrawlerLogHelper extends LogHelperImpl {

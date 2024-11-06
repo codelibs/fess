@@ -24,7 +24,7 @@ import java.util.Locale;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiStatsResponse;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;

@@ -18,7 +18,7 @@ package org.codelibs.fess.indexer;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class DocBoostMatcher {

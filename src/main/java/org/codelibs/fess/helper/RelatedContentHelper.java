@@ -27,8 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.fess.es.config.exbhv.RelatedContentBhv;
-import org.codelibs.fess.es.config.exentity.RelatedContent;
+import org.codelibs.fess.opensearch.config.exbhv.RelatedContentBhv;
+import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;

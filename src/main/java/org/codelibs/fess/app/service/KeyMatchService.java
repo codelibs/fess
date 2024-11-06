@@ -21,10 +21,10 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KeyMatchPager;
-import org.codelibs.fess.es.config.cbean.KeyMatchCB;
-import org.codelibs.fess.es.config.exbhv.KeyMatchBhv;
-import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.cbean.KeyMatchCB;
+import org.codelibs.fess.opensearch.config.exbhv.KeyMatchBhv;
+import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

@@ -21,10 +21,10 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BoostDocPager;
-import org.codelibs.fess.es.config.cbean.BoostDocumentRuleCB;
-import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
-import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.cbean.BoostDocumentRuleCB;
+import org.codelibs.fess.opensearch.config.exbhv.BoostDocumentRuleBhv;
+import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

@@ -18,7 +18,7 @@ package org.codelibs.fess.helper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class PathMappingHelperTest extends UnitFessTestCase {

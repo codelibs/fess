@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
-import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
 
 import jakarta.annotation.Resource;
 

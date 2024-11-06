@@ -21,8 +21,8 @@ import java.io.InputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ResourceUtil;
-import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.xml.sax.InputSource;
 

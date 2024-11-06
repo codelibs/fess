@@ -22,7 +22,7 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.es.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.opensearch.core.xcontent.MediaType;
 import org.opensearch.core.xcontent.ToXContent;

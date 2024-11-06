@@ -25,7 +25,7 @@ import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;

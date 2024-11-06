@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.auth.chain;
 
-import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.opensearch.user.exentity.User;
 
 public interface AuthenticationChain {
 

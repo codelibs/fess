@@ -20,7 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.codelibs.core.stream.StreamUtil.StreamOf;
 import org.codelibs.fess.auth.chain.AuthenticationChain;
-import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.opensearch.user.exentity.User;
 
 public class AuthenticationManager {
 

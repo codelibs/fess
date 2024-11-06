@@ -18,8 +18,8 @@ package org.codelibs.fess.score;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.es.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.query.StoredLtrQueryBuilder;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.search.rescore.QueryRescorerBuilder;
 import org.opensearch.search.rescore.RescorerBuilder;

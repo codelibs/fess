@@ -17,7 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 
-import org.codelibs.fess.es.config.exentity.DuplicateHost;
+import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class DuplicateHostHelperTest extends UnitFessTestCase {

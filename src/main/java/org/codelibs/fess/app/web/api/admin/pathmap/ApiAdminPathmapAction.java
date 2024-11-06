@@ -28,7 +28,7 @@ import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 

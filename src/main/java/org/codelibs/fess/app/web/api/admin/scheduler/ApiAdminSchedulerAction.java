@@ -30,7 +30,7 @@ import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.JsonResponse;

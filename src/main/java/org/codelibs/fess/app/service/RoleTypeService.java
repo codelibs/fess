@@ -20,10 +20,10 @@ import java.util.List;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RoleTypePager;
-import org.codelibs.fess.es.config.cbean.RoleTypeCB;
-import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
-import org.codelibs.fess.es.config.exentity.RoleType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.cbean.RoleTypeCB;
+import org.codelibs.fess.opensearch.config.exbhv.RoleTypeBhv;
+import org.codelibs.fess.opensearch.config.exentity.RoleType;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

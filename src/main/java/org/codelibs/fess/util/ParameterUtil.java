@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.lastaflute.core.security.PrimaryCipher;
 
 public class ParameterUtil {

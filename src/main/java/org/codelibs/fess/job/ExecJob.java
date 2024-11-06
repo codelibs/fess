@@ -32,7 +32,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.job.LaJobRuntime;

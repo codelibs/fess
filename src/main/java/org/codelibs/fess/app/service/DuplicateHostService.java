@@ -21,10 +21,10 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DuplicateHostPager;
-import org.codelibs.fess.es.config.cbean.DuplicateHostCB;
-import org.codelibs.fess.es.config.exbhv.DuplicateHostBhv;
-import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.cbean.DuplicateHostCB;
+import org.codelibs.fess.opensearch.config.exbhv.DuplicateHostBhv;
+import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

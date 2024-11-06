@@ -20,10 +20,10 @@ import java.util.List;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ReqHeaderPager;
-import org.codelibs.fess.es.config.cbean.RequestHeaderCB;
-import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
-import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.config.cbean.RequestHeaderCB;
+import org.codelibs.fess.opensearch.config.exbhv.RequestHeaderBhv;
+import org.codelibs.fess.opensearch.config.exentity.RequestHeader;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

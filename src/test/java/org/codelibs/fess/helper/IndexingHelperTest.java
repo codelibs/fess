@@ -25,9 +25,9 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.codelibs.fess.app.service.WebConfigService;
-import org.codelibs.fess.es.client.SearchEngineClient;
-import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;

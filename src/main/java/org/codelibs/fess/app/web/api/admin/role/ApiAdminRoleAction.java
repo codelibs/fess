@@ -27,7 +27,7 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.opensearch.user.exentity.Role;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 

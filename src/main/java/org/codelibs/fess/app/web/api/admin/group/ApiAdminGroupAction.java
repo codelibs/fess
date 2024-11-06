@@ -28,8 +28,8 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.api.ApiResult;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.user.exentity.Group;
-import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.opensearch.user.exentity.Group;
+import org.codelibs.fess.opensearch.user.exentity.User;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 

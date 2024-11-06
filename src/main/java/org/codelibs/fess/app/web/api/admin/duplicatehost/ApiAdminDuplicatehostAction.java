@@ -31,7 +31,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiUpdateResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.config.exentity.DuplicateHost;
+import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 

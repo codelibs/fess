@@ -1,6 +1,6 @@
 map:{
     # base package of generated classes
-    ; basePackage = org.codelibs.fess.es
+    ; basePackage = org.codelibs.fess.opensearch
 
     # base path to JSON resource, URL or relative path
     ; basePath = ../src/main/config/es

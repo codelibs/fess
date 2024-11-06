@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.exception;
 
-import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 
 public class JobNotFoundException extends FessSystemException {
 

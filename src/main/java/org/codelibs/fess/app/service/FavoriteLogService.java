@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
-import org.codelibs.fess.es.log.exentity.FavoriteLog;
-import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.log.exbhv.FavoriteLogBhv;
+import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.opensearch.log.exentity.FavoriteLog;
+import org.codelibs.fess.opensearch.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 

@@ -27,7 +27,7 @@ import org.codelibs.fess.app.web.api.ApiResult.ApiLogResponse;
 import org.codelibs.fess.app.web.api.ApiResult.ApiResponse;
 import org.codelibs.fess.app.web.api.ApiResult.Status;
 import org.codelibs.fess.app.web.api.admin.FessApiAdminAction;
-import org.codelibs.fess.es.config.exentity.JobLog;
+import org.codelibs.fess.opensearch.config.exentity.JobLog;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 

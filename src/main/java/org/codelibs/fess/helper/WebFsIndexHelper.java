@@ -36,13 +36,13 @@ import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.crawler.service.impl.EsDataService;
 import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
 import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
-import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
-import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
-import org.codelibs.fess.es.config.exentity.CrawlingConfig.Param.Config;
-import org.codelibs.fess.es.config.exentity.FileConfig;
-import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
+import org.codelibs.fess.opensearch.config.exbhv.BoostDocumentRuleBhv;
+import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
+import org.codelibs.fess.opensearch.config.exentity.FileConfig;
+import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class WebFsIndexHelper {

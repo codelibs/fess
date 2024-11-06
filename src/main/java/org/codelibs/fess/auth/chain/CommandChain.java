@@ -34,8 +34,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
-import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.exception.CommandExecutionException;
+import org.codelibs.fess.opensearch.user.exentity.User;
 
 public class CommandChain implements AuthenticationChain {
 
