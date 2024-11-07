@@ -2866,16 +2866,16 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_target_version = "{labels.target_version}";
 
     /** The key of the message: Request to OpenSearch */
-    public static final String LABELS_esreq_configuration = "{labels.esreq_configuration}";
+    public static final String LABELS_sereq_configuration = "{labels.sereq_configuration}";
 
     /** The key of the message: Request File */
-    public static final String LABELS_esreq_request_file = "{labels.esreq_request_file}";
+    public static final String LABELS_sereq_request_file = "{labels.sereq_request_file}";
 
     /** The key of the message: Request File */
     public static final String LABELS_REQUEST_FILE = "{labels.requestFile}";
 
     /** The key of the message: Send */
-    public static final String LABELS_esreq_button_upload = "{labels.esreq_button_upload}";
+    public static final String LABELS_sereq_button_upload = "{labels.sereq_button_upload}";
 
     /** The key of the message: No match */
     public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";

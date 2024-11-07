@@ -30,7 +30,7 @@ import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.crawler.client.CrawlerClientCreator;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
-import org.codelibs.fess.crawler.entity.EsAccessResult;
+import org.codelibs.fess.crawler.entity.OpenSearchAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.dict.DictionaryManager;
@@ -380,7 +380,7 @@ public final class ComponentUtil {
         return getComponent(DICTIONARY_MANAGER);
     }
 
-    public static DataService<EsAccessResult> getDataService() {
+    public static DataService<OpenSearchAccessResult> getDataService() {
         return getComponent(DATA_SERVICE);
     }
 

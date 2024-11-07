@@ -33,9 +33,9 @@ import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.CrawlerStatus;
 import org.codelibs.fess.crawler.interval.FessIntervalController;
-import org.codelibs.fess.crawler.service.impl.EsDataService;
-import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
-import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
+import org.codelibs.fess.crawler.service.impl.OpenSearchDataService;
+import org.codelibs.fess.crawler.service.impl.OpenSearchUrlFilterService;
+import org.codelibs.fess.crawler.service.impl.OpenSearchUrlQueueService;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.opensearch.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
@@ -142,7 +142,7 @@ public class WebFsIndexHelper {
             if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
                 deleteCrawlData(sid);
             } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
-                final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+                final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
@@ -268,7 +268,7 @@ public class WebFsIndexHelper {
             if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
                 deleteCrawlData(sid);
             } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
-                final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+                final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
@@ -479,9 +479,9 @@ public class WebFsIndexHelper {
     }
 
     protected void deleteCrawlData(final String sid) {
-        final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
-        final EsUrlQueueService urlQueueService = ComponentUtil.getComponent(EsUrlQueueService.class);
-        final EsDataService dataService = ComponentUtil.getComponent(EsDataService.class);
+        final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
+        final OpenSearchUrlQueueService urlQueueService = ComponentUtil.getComponent(OpenSearchUrlQueueService.class);
+        final OpenSearchDataService dataService = ComponentUtil.getComponent(OpenSearchDataService.class);
 
         try {
             // clear url filter

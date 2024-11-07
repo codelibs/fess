@@ -173,6 +173,7 @@ public class PluginHelper {
                 || "fess-crawler-db-h2".equals(name)//
                 || "fess-crawler-db-mysql".equals(name)//
                 || "fess-crawler-es".equals(name)//
+                || "fess-crawler-opensearch".equals(name)//
                 || "fess-crawler-lasta".equals(name)//
                 || "fess-crawler-parent".equals(name)//
                 || "fess-crawler-playwright".equals(name)//

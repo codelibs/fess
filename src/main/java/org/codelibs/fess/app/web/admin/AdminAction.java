@@ -27,7 +27,6 @@ import org.codelibs.fess.app.web.admin.design.AdminDesignAction;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.admin.duplicatehost.AdminDuplicatehostAction;
 import org.codelibs.fess.app.web.admin.elevateword.AdminElevatewordAction;
-import org.codelibs.fess.app.web.admin.esreq.AdminEsreqAction;
 import org.codelibs.fess.app.web.admin.failureurl.AdminFailureurlAction;
 import org.codelibs.fess.app.web.admin.fileauth.AdminFileauthAction;
 import org.codelibs.fess.app.web.admin.fileconfig.AdminFileconfigAction;
@@ -46,6 +45,7 @@ import org.codelibs.fess.app.web.admin.reqheader.AdminReqheaderAction;
 import org.codelibs.fess.app.web.admin.role.AdminRoleAction;
 import org.codelibs.fess.app.web.admin.scheduler.AdminSchedulerAction;
 import org.codelibs.fess.app.web.admin.searchlog.AdminSearchlogAction;
+import org.codelibs.fess.app.web.admin.sereq.AdminSereqAction;
 import org.codelibs.fess.app.web.admin.storage.AdminStorageAction;
 import org.codelibs.fess.app.web.admin.suggest.AdminSuggestAction;
 import org.codelibs.fess.app.web.admin.systeminfo.AdminSysteminfoAction;
@@ -142,8 +142,8 @@ public class AdminAction extends FessAdminAction {
             AdminBackupAction.ROLE + VIEW, //
             AdminMaintenanceAction.ROLE, //
             AdminMaintenanceAction.ROLE + VIEW, //
-            AdminEsreqAction.ROLE, //
-            AdminEsreqAction.ROLE + VIEW, //
+            AdminSereqAction.ROLE, //
+            AdminSereqAction.ROLE + VIEW, //
             AdminDashboardAction.ROLE, //
             AdminDashboardAction.ROLE + VIEW, //
             AdminWizardAction.ROLE, //
@@ -216,8 +216,8 @@ public class AdminAction extends FessAdminAction {
             AdminBackupAction.ROLE + VIEW, //
             AdminMaintenanceAction.ROLE, //
             AdminMaintenanceAction.ROLE + VIEW, //
-            AdminEsreqAction.ROLE, //
-            AdminEsreqAction.ROLE + VIEW, //
+            AdminSereqAction.ROLE, //
+            AdminSereqAction.ROLE + VIEW, //
             AdminDashboardAction.ROLE, //
             AdminDashboardAction.ROLE + VIEW, //
             AdminWizardAction.ROLE, //
@@ -290,8 +290,8 @@ public class AdminAction extends FessAdminAction {
             AdminBackupAction.ROLE + VIEW, //
             AdminMaintenanceAction.ROLE, //
             AdminMaintenanceAction.ROLE + VIEW, //
-            AdminEsreqAction.ROLE, //
-            AdminEsreqAction.ROLE + VIEW,//
+            AdminSereqAction.ROLE, //
+            AdminSereqAction.ROLE + VIEW,//
 
     })
     public HtmlResponse index() {
@@ -413,8 +413,8 @@ public class AdminAction extends FessAdminAction {
         if (user.hasRoles(getActionRoles(AdminMaintenanceAction.ROLE))) {
             return AdminMaintenanceAction.class;
         }
-        if (user.hasRoles(getActionRoles(AdminEsreqAction.ROLE))) {
-            return AdminEsreqAction.class;
+        if (user.hasRoles(getActionRoles(AdminSereqAction.ROLE))) {
+            return AdminSereqAction.class;
         }
         return null;
     }

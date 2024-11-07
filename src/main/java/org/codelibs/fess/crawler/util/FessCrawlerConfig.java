@@ -17,7 +17,7 @@ package org.codelibs.fess.crawler.util;
 
 import org.codelibs.fess.util.ComponentUtil;
 
-public class FessCrawlerConfig extends EsCrawlerConfig {
+public class FessCrawlerConfig extends OpenSearchCrawlerConfig {
 
     @Override
     public String getQueueIndex() {

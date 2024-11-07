@@ -6,7 +6,7 @@
 	<include path="lastaflute_core.xml"/>
 	<include path="fess.xml" />
 
-	<include path="crawler_es.xml" />
+	<include path="crawler_opensearch.xml" />
 	<include path="fess_thumbnail.xml" />
 	<include path="fess_ingest.xml" />
 

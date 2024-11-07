@@ -20,9 +20,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.fess.crawler.entity.EsUrlQueue;
-import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
-import org.codelibs.fess.crawler.util.EsCrawlerConfig;
+import org.codelibs.fess.crawler.entity.OpenSearchUrlQueue;
+import org.codelibs.fess.crawler.service.impl.OpenSearchUrlQueueService;
+import org.codelibs.fess.crawler.util.OpenSearchCrawlerConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
@@ -33,21 +33,21 @@ import org.opensearch.index.query.functionscore.RandomScoreFunctionBuilder;
 import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.search.sort.SortOrder;
 
-public class FessUrlQueueService extends EsUrlQueueService {
+public class FessUrlQueueService extends OpenSearchUrlQueueService {
     private static final Logger logger = LogManager.getLogger(FessUrlQueueService.class);
 
-    public FessUrlQueueService(final EsCrawlerConfig crawlerConfig) {
+    public FessUrlQueueService(final OpenSearchCrawlerConfig crawlerConfig) {
         super(crawlerConfig);
     }
 
     @Override
-    protected List<EsUrlQueue> fetchUrlQueueList(final String sessionId) {
+    protected List<OpenSearchUrlQueue> fetchUrlQueueList(final String sessionId) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(sessionId);
         final Map<String, String> configParams = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
         final String crawlOrder = configParams.getOrDefault(CrawlingConfig.Param.Config.CRAWL_ORDER, "sequential");
         if ("random".equals(crawlOrder)) {
-            return getList(EsUrlQueue.class, sessionId,
+            return getList(OpenSearchUrlQueue.class, sessionId,
                     QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
                             new FunctionScoreQueryBuilder.FilterFunctionBuilder[] { new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                                     new RandomScoreFunctionBuilder().seed(sessionId.hashCode())) }),

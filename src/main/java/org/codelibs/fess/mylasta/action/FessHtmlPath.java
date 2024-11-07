@@ -210,9 +210,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/error/admin_error.jsp */
     HtmlNext path_AdminError_AdminErrorJsp = new HtmlNext("/admin/error/admin_error.jsp");
 
-    /** The path of the HTML: /admin/esreq/admin_esreq.jsp */
-    HtmlNext path_AdminEsreq_AdminEsreqJsp = new HtmlNext("/admin/esreq/admin_esreq.jsp");
-
     /** The path of the HTML: /admin/failureurl/admin_failureurl.jsp */
     HtmlNext path_AdminFailureurl_AdminFailureurlJsp = new HtmlNext("/admin/failureurl/admin_failureurl.jsp");
 
@@ -351,6 +348,9 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/searchlog/admin_searchlog_details.jsp */
     HtmlNext path_AdminSearchlog_AdminSearchlogDetailsJsp = new HtmlNext("/admin/searchlog/admin_searchlog_details.jsp");
+
+    /** The path of the HTML: /admin/sereq/admin_sereq.jsp */
+    HtmlNext path_AdminSereq_AdminSereqJsp = new HtmlNext("/admin/sereq/admin_sereq.jsp");
 
     /** The path of the HTML: /admin/storage/admin_storage.jsp */
     HtmlNext path_AdminStorage_AdminStorageJsp = new HtmlNext("/admin/storage/admin_storage.jsp");

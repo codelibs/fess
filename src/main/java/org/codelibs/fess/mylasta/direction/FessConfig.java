@@ -1569,8 +1569,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. upgrade */
     String ONLINE_HELP_NAME_UPGRADE = "online.help.name.upgrade";
 
-    /** The key of the configuration. e.g. esreq */
-    String ONLINE_HELP_NAME_ESREQ = "online.help.name.esreq";
+    /** The key of the configuration. e.g. sereq */
+    String ONLINE_HELP_NAME_SEREQ = "online.help.name.sereq";
 
     /** The key of the configuration. e.g. accesstoken */
     String ONLINE_HELP_NAME_ACCESSTOKEN = "online.help.name.accesstoken";
@@ -6993,11 +6993,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameUpgrade();
 
     /**
-     * Get the value for the key 'online.help.name.esreq'. <br>
-     * The value is, e.g. esreq <br>
+     * Get the value for the key 'online.help.name.sereq'. <br>
+     * The value is, e.g. sereq <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getOnlineHelpNameEsreq();
+    String getOnlineHelpNameSereq();
 
     /**
      * Get the value for the key 'online.help.name.accesstoken'. <br>
@@ -10539,8 +10539,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_UPGRADE);
         }
 
-        public String getOnlineHelpNameEsreq() {
-            return get(FessConfig.ONLINE_HELP_NAME_ESREQ);
+        public String getOnlineHelpNameSereq() {
+            return get(FessConfig.ONLINE_HELP_NAME_SEREQ);
         }
 
         public String getOnlineHelpNameAccesstoken() {
@@ -11483,7 +11483,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO, "crawlinginfo");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_BACKUP, "backup");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_UPGRADE, "upgrade");
-            defaultMap.put(FessConfig.ONLINE_HELP_NAME_ESREQ, "esreq");
+            defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEREQ, "sereq");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_ACCESSTOKEN, "accesstoken");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SUGGEST, "suggest");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_SEARCHLOG, "searchlog");

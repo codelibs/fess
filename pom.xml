@@ -1441,7 +1441,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs.fess</groupId>
-			<artifactId>fess-crawler-es</artifactId>
+			<artifactId>fess-crawler-opensearch</artifactId>
 			<version>${crawler.version}</version>
 		</dependency>
 		<dependency>

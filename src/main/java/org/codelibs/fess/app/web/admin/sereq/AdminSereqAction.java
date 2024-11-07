@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.esreq;
+package org.codelibs.fess.app.web.admin.sereq;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,16 +42,16 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 /**
  * @author shinsuke
  */
-public class AdminEsreqAction extends FessAdminAction {
+public class AdminSereqAction extends FessAdminAction {
 
-    public static final String ROLE = "admin-esreq";
+    public static final String ROLE = "admin-sereq";
 
-    private static final Logger logger = LogManager.getLogger(AdminEsreqAction.class);
+    private static final Logger logger = LogManager.getLogger(AdminSereqAction.class);
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameEsreq()));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameSereq()));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class AdminEsreqAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, msg), () -> asListHtml(this::saveToken));
         } else {
             try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
-                final File tempFile = ComponentUtil.getSystemHelper().createTempFile("esreq_", ".json");
+                final File tempFile = ComponentUtil.getSystemHelper().createTempFile("sereq_", ".json");
                 try (final InputStream in = response.getContentAsStream()) {
                     CopyUtil.copy(in, tempFile);
                 } catch (final Exception e1) {
@@ -160,7 +160,7 @@ public class AdminEsreqAction extends FessAdminAction {
         if (runnable != null) {
             runnable.run();
         }
-        return asHtml(path_AdminEsreq_AdminEsreqJsp).useForm(UploadForm.class);
+        return asHtml(path_AdminSereq_AdminSereqJsp).useForm(UploadForm.class);
     }
 
 }
