@@ -50,41 +50,7 @@
 									<div class="col-sm-9">
 										<la:errors property="targetVersion" />
 										<la:select styleId="targetVersion" property="targetVersion" styleClass="form-control">
-											<la:option value="13.0">13.0</la:option>
-											<la:option value="13.1">13.1</la:option>
-											<la:option value="13.2">13.2</la:option>
-											<la:option value="13.3">13.3</la:option>
-											<la:option value="13.4">13.4</la:option>
-											<la:option value="13.5">13.5</la:option>
-											<la:option value="13.6">13.6</la:option>
-											<la:option value="13.7">13.7</la:option>
-											<la:option value="13.8">13.8</la:option>
-											<la:option value="13.9">13.9</la:option>
-											<la:option value="13.10">13.10</la:option>
-											<la:option value="13.11">13.11</la:option>
-											<la:option value="13.12">13.12</la:option>
-											<la:option value="13.13">13.13</la:option>
-											<la:option value="13.14">13.14</la:option>
-											<la:option value="13.15">13.15</la:option>
-											<la:option value="13.16">13.16</la:option>
-											<la:option value="13.17">13.17</la:option>
-											<la:option value="14.0">14.0</la:option>
-											<la:option value="14.1">14.1</la:option>
-											<la:option value="14.2">14.2</la:option>
-											<la:option value="14.3">14.3</la:option>
-											<la:option value="14.4">14.4</la:option>
-											<la:option value="14.5">14.5</la:option>
-											<la:option value="14.6">14.6</la:option>
-											<la:option value="14.7">14.7</la:option>
-											<la:option value="14.8">14.8</la:option>
-											<la:option value="14.9">14.9</la:option>
-											<la:option value="14.10">14.10</la:option>
-											<la:option value="14.11">14.11</la:option>
-											<la:option value="14.12">14.12</la:option>
-											<la:option value="14.13">14.13</la:option>
-											<la:option value="14.14">14.14</la:option>
-											<la:option value="14.15">14.15</la:option>
-											<la:option value="14.15">14.16</la:option>
+											<la:option value="14.18">14.18</la:option>
 										</la:select>
 									</div>
 								</div>
