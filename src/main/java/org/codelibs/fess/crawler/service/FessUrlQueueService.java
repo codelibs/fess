@@ -34,7 +34,12 @@ import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.search.sort.SortOrder;
 
 public class FessUrlQueueService extends OpenSearchUrlQueueService {
+
     private static final Logger logger = LogManager.getLogger(FessUrlQueueService.class);
+
+    protected static final String ORDER_SEQUENTIAL = "sequential";
+
+    protected static final String ORDER_RANDOM = "random";
 
     public FessUrlQueueService(final OpenSearchCrawlerConfig crawlerConfig) {
         super(crawlerConfig);
@@ -45,14 +50,14 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(sessionId);
         final Map<String, String> configParams = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
-        final String crawlOrder = configParams.getOrDefault(CrawlingConfig.Param.Config.CRAWL_ORDER, "sequential");
-        if ("random".equals(crawlOrder)) {
+        final String crawlOrder = configParams.getOrDefault(CrawlingConfig.Param.Config.CRAWL_ORDER, ORDER_SEQUENTIAL);
+        if (ORDER_RANDOM.equals(crawlOrder)) {
             return getList(OpenSearchUrlQueue.class, sessionId,
                     QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
                             new FunctionScoreQueryBuilder.FilterFunctionBuilder[] { new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                                     new RandomScoreFunctionBuilder().seed(sessionId.hashCode())) }),
-                    0, pollingFetchSize, SortBuilders.scoreSort().order(SortOrder.ASC));
-        } else if (!"sequential".equals(crawlOrder)) {
+                    0, pollingFetchSize, SortBuilders.scoreSort().order(SortOrder.DESC));
+        } else if (!ORDER_SEQUENTIAL.equals(crawlOrder)) {
             logger.warn("Invalid crawl order specified: {}. Falling back to sequential.", crawlOrder);
         }
         return super.fetchUrlQueueList(sessionId);

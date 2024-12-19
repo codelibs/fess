@@ -95,7 +95,8 @@ public class FessCrawlerThread extends CrawlerThread {
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     if (fessConfig.isSmbRoleFromFile() || fessConfig.isFileRoleFromFile() || fessConfig.isFtpRoleFromFile()) {
                         // head method
-                        responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
+                        responseData =
+                                client.execute(RequestDataBuilder.newRequestData().head().url(url).weight(urlQueue.getWeight()).build());
                         if (responseData == null) {
                             return true;
                         }
@@ -202,14 +203,12 @@ public class FessCrawlerThread extends CrawlerThread {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<RequestData> getAnchorSet(final Object obj) {
         List<String> anchorList;
-        if (obj instanceof String) {
-            anchorList = new ArrayList<>();
-            anchorList.add(obj.toString());
-        } else if (obj instanceof List<?>) {
-            anchorList = (List<String>) obj;
+        if (obj instanceof final String s) {
+            anchorList = List.of(s);
+        } else if (obj instanceof final List<?> l) {
+            anchorList = l.stream().map(String::valueOf).toList();
         } else {
             return null;
         }
@@ -263,11 +262,11 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     @Override
-    protected void storeChildUrl(final String childUrl, final String parentUrl, final String metaData, final int depth) {
+    protected void storeChildUrl(final String childUrl, final String parentUrl, final float weight, final int depth) {
         if (StringUtil.isNotBlank(childUrl)) {
             final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
             final String url = duplicateHostHelper.convert(childUrl);
-            super.storeChildUrl(url, parentUrl, metaData, depth);
+            super.storeChildUrl(url, parentUrl, weight, depth);
         }
     }
 
