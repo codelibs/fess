@@ -42,7 +42,6 @@ import javax.xml.xpath.XPathNodes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.InputStreamUtil;
-import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.ValueHolder;
@@ -56,6 +55,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.crawler.util.FieldConfigs;
@@ -109,6 +109,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected FessConfig fessConfig;
 
+    protected DataSerializer dataSerializer;
+
     protected boolean useGoogleOffOn = true;
 
     protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
@@ -121,6 +123,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
+        dataSerializer = ComponentUtil.getComponent("dataSerializer");
     }
 
     @Override
@@ -193,7 +196,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         normalizeData(responseData, dataMap);
 
         try {
-            resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
+            resultData.setData(dataSerializer.fromObjectToBinary(dataMap));
         } catch (final Exception e) {
             throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
         }
@@ -816,7 +819,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final byte[] data = accessResultData.getData();
         if (data != null) {
             try {
-                return SerializeUtil.fromBinaryToObject(data);
+                return dataSerializer.fromBinaryToObject(data);
             } catch (final Exception e) {
                 throw new CrawlerSystemException("Could not create an instanced from bytes.", e);
             }

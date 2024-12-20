@@ -319,6 +319,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0 */
     String CRAWLER_HTTP_thread_pool_SIZE = "crawler.http.thread_pool.size";
 
+    /** The key of the configuration. e.g. kryo */
+    String CRAWLER_DATA_SERIALIZER = "crawler.data.serializer";
+
     /** The key of the configuration. e.g. 100 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -2686,6 +2689,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerHttpThreadPoolSizeAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.data.serializer'. <br>
+     * The value is, e.g. kryo <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDataSerializer();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -8259,6 +8269,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_HTTP_thread_pool_SIZE);
         }
 
+        public String getCrawlerDataSerializer() {
+            return get(FessConfig.CRAWLER_DATA_SERIALIZER);
+        }
+
         public String getCrawlerDocumentMaxSiteLength() {
             return get(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
         }
@@ -11095,6 +11109,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.HTTP_FILEUPLOAD_MAX_FILE_COUNT, "10");
             defaultMap.put(FessConfig.CRAWLER_DEFAULT_SCRIPT, "groovy");
             defaultMap.put(FessConfig.CRAWLER_HTTP_thread_pool_SIZE, "0");
+            defaultMap.put(FessConfig.CRAWLER_DATA_SERIALIZER, "kryo");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH, "100");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING, "UTF-8");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME, "unknown");

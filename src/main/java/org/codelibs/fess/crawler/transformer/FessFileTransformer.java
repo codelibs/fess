@@ -35,6 +35,7 @@ public class FessFileTransformer extends AbstractFessFileTransformer {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
+        dataSerializer = ComponentUtil.getComponent("dataSerializer");
     }
 
     @Override

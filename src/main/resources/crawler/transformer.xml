@@ -35,4 +35,7 @@
 	<component name="fessStandardTransformer" class="org.codelibs.fess.crawler.transformer.FessStandardTransformer" instance="singleton">
 		<property name="name">"fessStandardTransformer"</property>
 	</component>
+
+	<component name="dataSerializer" class="org.codelibs.fess.crawler.serializer.DataSerializer" instance="singleton">
+	</component>
 </components>

@@ -1355,6 +1355,11 @@
 			<artifactId>bcprov-jdk18on</artifactId>
 			<version>${bouncycastle.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<version>${kryo.version}</version>
+		</dependency>
 
 		<!-- suggest library -->
 		<dependency>

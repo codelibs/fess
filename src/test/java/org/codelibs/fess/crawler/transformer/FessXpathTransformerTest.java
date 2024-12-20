@@ -44,6 +44,7 @@ import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -69,6 +70,18 @@ import org.xml.sax.InputSource;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(FessXpathTransformerTest.class);
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ComponentUtil.register(new DataSerializer(), "dataSerializer");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
 
     public void test_transform() throws Exception {
         String data = "<html><head><title>Test</title></head><body><h1>Header1</h1><p>This is a pen.</p></body></html>";

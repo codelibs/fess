@@ -21,11 +21,25 @@ import java.util.Map;
 
 import org.apache.groovy.util.Maps;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class FessFileTransformerTest extends UnitFessTestCase {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ComponentUtil.register(new DataSerializer(), "dataSerializer");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
 
     private String encodeUrl(final String url) {
         try {
@@ -292,4 +306,5 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         transformer.init();
         return transformer;
     }
+
 }

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
@@ -42,6 +41,7 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.transformer.impl.AbstractTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.crawler.util.FieldConfigs;
@@ -68,6 +68,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     protected FessConfig fessConfig;
 
+    protected DataSerializer dataSerializer;
+
     protected abstract Extractor getExtractor(ResponseData responseData);
 
     @Override
@@ -79,7 +81,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
         try {
-            resultData.setData(SerializeUtil.fromObjectToBinary(generateData(responseData)));
+            resultData.setData(dataSerializer.fromObjectToBinary(generateData(responseData)));
         } catch (final Exception e) {
             throw new CrawlingAccessException("Could not serialize object", e);
         }
@@ -485,7 +487,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final byte[] data = accessResultData.getData();
         if (data != null) {
             try {
-                return SerializeUtil.fromBinaryToObject(data);
+                return dataSerializer.fromBinaryToObject(data);
             } catch (final Exception e) {
                 throw new CrawlerSystemException("Could not create an instanced from bytes.", e);
             }
