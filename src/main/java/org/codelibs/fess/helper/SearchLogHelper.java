@@ -105,12 +105,16 @@ public class SearchLogHelper {
 
     public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
             final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (searchLogQueue.size() > fessConfig.getLoggingSearchMaxQueueSizeAsInteger()) {
+            logger.warn("[{}] The search log queue size is too large. Skipped the search log: {}", queryId, query);
+            return;
+        }
 
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final SearchLog searchLog = new SearchLog();
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isUserInfo()) {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
@@ -199,6 +203,11 @@ public class SearchLogHelper {
     }
 
     public void addClickLog(final ClickLog clickLog) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (clickLogQueue.size() > fessConfig.getLoggingClickMaxQueueSizeAsInteger()) {
+            logger.warn("[{}] The click log queue size is too large. Skipped the click log: {} {}", clickLog);
+            return;
+        }
         clickLogQueue.add(clickLog);
     }
 

@@ -1197,6 +1197,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60000 */
     String INDEX_BACKUP_LOG_LOAD_TIMEOUT = "index.backup.log.load.timeout";
 
+    /** The key of the configuration. e.g. org.codelibs,org.dbflute,org.lastaflute */
+    String LOGGING_APP_PACKAGES = "logging.app.packages";
+
     /** The key of the configuration. e.g. true */
     String LOGGING_SEARCH_DOCS_ENABLED = "logging.search.docs.enabled";
 
@@ -1206,8 +1209,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LOGGING_SEARCH_USE_LOGFILE = "logging.search.use.logfile";
 
-    /** The key of the configuration. e.g. org.codelibs,org.dbflute,org.lastaflute */
-    String LOGGING_APP_PACKAGES = "logging.app.packages";
+    /** The key of the configuration. e.g. 10000 */
+    String LOGGING_SEARCH_MAX_QUEUE_SIZE = "logging.search.max.queue.size";
+
+    /** The key of the configuration. e.g. 10000 */
+    String LOGGING_CLICK_MAX_QUEUE_SIZE = "logging.click.max.queue.size";
 
     /** The key of the configuration. e.g. 10000 */
     String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
@@ -5627,9 +5633,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getIndexBackupLogLoadTimeoutAsInteger();
 
     /**
+     * Get the value for the key 'logging.app.packages'. <br>
+     * The value is, e.g. org.codelibs,org.dbflute,org.lastaflute <br>
+     * comment: logging
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoggingAppPackages();
+
+    /**
      * Get the value for the key 'logging.search.docs.enabled'. <br>
      * The value is, e.g. true <br>
-     * comment: logging
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchDocsEnabled();
@@ -5637,7 +5650,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'logging.search.docs.enabled' true? <br>
      * The value is, e.g. true <br>
-     * comment: logging
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLoggingSearchDocsEnabled();
@@ -5664,11 +5676,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLoggingSearchUseLogfile();
 
     /**
-     * Get the value for the key 'logging.app.packages'. <br>
-     * The value is, e.g. org.codelibs,org.dbflute,org.lastaflute <br>
+     * Get the value for the key 'logging.search.max.queue.size'. <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLoggingAppPackages();
+    String getLoggingSearchMaxQueueSize();
+
+    /**
+     * Get the value for the key 'logging.search.max.queue.size' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLoggingSearchMaxQueueSizeAsInteger();
+
+    /**
+     * Get the value for the key 'logging.click.max.queue.size'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoggingClickMaxQueueSize();
+
+    /**
+     * Get the value for the key 'logging.click.max.queue.size' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLoggingClickMaxQueueSizeAsInteger();
 
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
@@ -9799,6 +9834,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT);
         }
 
+        public String getLoggingAppPackages() {
+            return get(FessConfig.LOGGING_APP_PACKAGES);
+        }
+
         public String getLoggingSearchDocsEnabled() {
             return get(FessConfig.LOGGING_SEARCH_DOCS_ENABLED);
         }
@@ -9819,8 +9858,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.LOGGING_SEARCH_USE_LOGFILE);
         }
 
-        public String getLoggingAppPackages() {
-            return get(FessConfig.LOGGING_APP_PACKAGES);
+        public String getLoggingSearchMaxQueueSize() {
+            return get(FessConfig.LOGGING_SEARCH_MAX_QUEUE_SIZE);
+        }
+
+        public Integer getLoggingSearchMaxQueueSizeAsInteger() {
+            return getAsInteger(FessConfig.LOGGING_SEARCH_MAX_QUEUE_SIZE);
+        }
+
+        public String getLoggingClickMaxQueueSize() {
+            return get(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE);
+        }
+
+        public Integer getLoggingClickMaxQueueSizeAsInteger() {
+            return getAsInteger(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE);
         }
 
         public String getFormAdminMaxInputSize() {
@@ -11358,11 +11409,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
                     "fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_TARGETS, "click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson");
             defaultMap.put(FessConfig.INDEX_BACKUP_LOG_LOAD_TIMEOUT, "60000");
+            defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_ENABLED, "true");
             defaultMap.put(FessConfig.LOGGING_SEARCH_DOCS_FIELDS,
                     "filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp");
             defaultMap.put(FessConfig.LOGGING_SEARCH_USE_LOGFILE, "true");
-            defaultMap.put(FessConfig.LOGGING_APP_PACKAGES, "org.codelibs,org.dbflute,org.lastaflute");
+            defaultMap.put(FessConfig.LOGGING_SEARCH_MAX_QUEUE_SIZE, "10000");
+            defaultMap.put(FessConfig.LOGGING_CLICK_MAX_QUEUE_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE, "10000");
             defaultMap.put(FessConfig.FORM_ADMIN_LABEL_IN_CONFIG_ENABLED, "false");
             defaultMap.put(FessConfig.FORM_ADMIN_DEFAULT_TEMPLATE_NAME, "__TEMPLATE__");
