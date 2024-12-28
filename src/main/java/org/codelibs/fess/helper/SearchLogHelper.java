@@ -67,25 +67,39 @@ import com.google.common.cache.LoadingCache;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing search logs.
+ */
 public class SearchLogHelper {
     private static final Logger logger = LogManager.getLogger(SearchLogHelper.class);
 
-    protected long userCheckInterval = 10 * 60 * 1000L;// 10 min
+    /** Interval for checking user information in milliseconds (default: 10 minutes). */
+    protected long userCheckInterval = 10 * 60 * 1000L; // 10 min
 
+    /** Maximum size of the user information cache. */
     protected int userInfoCacheSize = 10000;
 
+    /** Queue for storing search logs. */
     protected Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<>();
 
+    /** Queue for storing click logs. */
     protected Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<>();
 
+    /** Cache for storing user information. */
     protected LoadingCache<String, UserInfo> userInfoCache;
 
+    /** Name of the logger for search logs. */
     protected String loggerName = "fess.log.searchlog";
 
+    /** Logger for search logs. */
     protected Logger searchLogLogger = null;
 
+    /** ObjectMapper for JSON processing. */
     protected ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Initializes the SearchLogHelper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -103,6 +117,17 @@ public class SearchLogHelper {
         searchLogLogger = LogManager.getLogger(loggerName);
     }
 
+    /**
+     * Adds a search log to the queue.
+     *
+     * @param params The search request parameters.
+     * @param requestedTime The time the search was requested.
+     * @param queryId The ID of the search query.
+     * @param query The search query.
+     * @param pageStart The starting page number.
+     * @param pageSize The size of the page.
+     * @param queryResponseList The list of query responses.
+     */
     public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
             final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
 
@@ -188,6 +213,12 @@ public class SearchLogHelper {
         searchLogQueue.add(searchLog);
     }
 
+    /**
+     * Adds documents in the response to the search log.
+     *
+     * @param queryResponseList The list of query responses.
+     * @param searchLog The search log.
+     */
     protected void addDocumentsInResponse(final QueryResponseList queryResponseList, final SearchLog searchLog) {
         if (ComponentUtil.getFessConfig().isLoggingSearchDocsEnabled()) {
             queryResponseList.stream().forEach(res -> {
@@ -198,27 +229,47 @@ public class SearchLogHelper {
         }
     }
 
+    /**
+     * Adds a click log to the queue.
+     *
+     * @param clickLog The click log.
+     */
     public void addClickLog(final ClickLog clickLog) {
         clickLogQueue.add(clickLog);
     }
 
+    /**
+     * Stores search logs from the queue.
+     */
     public void storeSearchLog() {
         storeSearchLogFromQueue();
         storeClickLogFromQueue();
     }
 
+    /**
+     * Stores click logs from the queue.
+     */
     protected void storeClickLogFromQueue() {
         if (!clickLogQueue.isEmpty()) {
             processClickLogQueue(clickLogQueue);
         }
     }
 
+    /**
+     * Stores search logs from the queue.
+     */
     protected void storeSearchLogFromQueue() {
         if (!searchLogQueue.isEmpty()) {
             processSearchLogQueue(searchLogQueue);
         }
     }
 
+    /**
+    * Gets the click count for a URL.
+    *
+    * @param url The URL.
+    * @return The click count.
+    */
     public int getClickCount(final String url) {
         final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
         return clickLogBhv.selectCount(cb -> {
@@ -226,6 +277,12 @@ public class SearchLogHelper {
         });
     }
 
+    /**
+     * Gets the favorite count for a URL.
+     *
+     * @param url The URL.
+     * @return The favorite count.
+     */
     public long getFavoriteCount(final String url) {
         final FavoriteLogBhv favoriteLogBhv = ComponentUtil.getComponent(FavoriteLogBhv.class);
         return favoriteLogBhv.selectCount(cb -> {
@@ -233,6 +290,12 @@ public class SearchLogHelper {
         });
     }
 
+    /**
+     * Stores user information.
+     *
+     * @param userCode The user code.
+     * @return The user information.
+     */
     protected UserInfo storeUserInfo(final String userCode) {
         final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
 
@@ -251,6 +314,12 @@ public class SearchLogHelper {
         return userInfo;
     }
 
+    /**
+     * Gets user information.
+     *
+     * @param userCode The user code.
+     * @return The user information.
+     */
     public OptionalEntity<UserInfo> getUserInfo(final String userCode) {
         if (StringUtil.isNotBlank(userCode)) {
             try {
@@ -264,6 +333,11 @@ public class SearchLogHelper {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Processes the search log queue.
+     *
+     * @param queue The search log queue.
+     */
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String value = fessConfig.getPurgeByBots();
@@ -274,7 +348,7 @@ public class SearchLogHelper {
             botNames = value.split(",");
         }
 
-        final int batchSize = ComponentUtil.getFessConfig().getSearchlogProcessBatchSizeAsInteger();
+        final int batchSize = fessConfig.getSearchlogProcessBatchSizeAsInteger();
 
         final List<SearchLog> searchLogList = new ArrayList<>();
         final Map<String, UserInfo> userInfoMap = new HashMap<>();
@@ -310,20 +384,34 @@ public class SearchLogHelper {
         }
     }
 
-    private void processSearchLog(final List<SearchLog> searchLogList) {
+    /**
+     * Processes the search log list.
+     *
+     * @param searchLogList The search log list.
+     */
+    protected void processSearchLog(final List<SearchLog> searchLogList) {
         if (!searchLogList.isEmpty()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            // write log
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                searchLogList.forEach(this::writeSearchLogEvent);
+            }
+            // insert search log
             storeSearchLogList(searchLogList);
+            // update suggest index
             if (fessConfig.isSuggestSearchLog()) {
                 final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
                 suggestHelper.indexFromSearchLog(searchLogList);
             }
-            if (fessConfig.isLoggingSearchUseLogfile()) {
-                searchLogList.forEach(this::writeSearchLogEvent);
-            }
         }
     }
 
+    /**
+     * Processes user information logs.
+     *
+     * @param searchLogList The search log list.
+     * @param userInfoMap The user information map.
+     */
     protected void processUserInfoLog(final List<SearchLog> searchLogList, final Map<String, UserInfo> userInfoMap) {
         if (!userInfoMap.isEmpty()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -341,20 +429,28 @@ public class SearchLogHelper {
                 updateList.add(entity);
                 insertList.remove(entity);
             });
+            // write log
+            if (fessConfig.isLoggingSearchUseLogfile()) {
+                insertList.forEach(this::writeSearchLogEvent);
+                updateList.forEach(this::writeSearchLogEvent);
+            }
+            // insert/update user info
             userInfoBhv.batchInsert(insertList);
             userInfoBhv.batchUpdate(updateList);
+            // update search log
             searchLogList.stream().forEach(searchLog -> {
                 searchLog.getUserInfo().ifPresent(userInfo -> {
                     searchLog.setUserInfoId(userInfo.getId());
                 });
             });
-            if (fessConfig.isLoggingSearchUseLogfile()) {
-                insertList.forEach(this::writeSearchLogEvent);
-                updateList.forEach(this::writeSearchLogEvent);
-            }
         }
     }
 
+    /**
+    * Stores a list of search logs.
+    *
+    * @param searchLogList The search log list.
+    */
     protected void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
         searchLogBhv.batchUpdate(searchLogList, op -> {
@@ -362,6 +458,11 @@ public class SearchLogHelper {
         });
     }
 
+    /**
+     * Processes the click log queue.
+     *
+     * @param queue The click log queue.
+     */
     protected void processClickLogQueue(final Queue<ClickLog> queue) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int batchSize = fessConfig.getSearchlogProcessBatchSizeAsInteger();
@@ -405,6 +506,11 @@ public class SearchLogHelper {
         }
     }
 
+    /**
+     * Updates the click field in the index.
+     *
+     * @param clickCountMap The click count map.
+     */
     protected void updateClickFieldInIndex(final Map<String, Integer> clickCountMap) {
         if (!clickCountMap.isEmpty()) {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
@@ -440,21 +546,30 @@ public class SearchLogHelper {
         }
     }
 
+    /**
+     * Processes a list of click logs.
+     *
+     * @param clickLogList The click log list.
+     */
     protected void processClickLog(final List<ClickLog> clickLogList) {
         if (!clickLogList.isEmpty()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            try {
-                final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
-                clickLogBhv.batchInsert(clickLogList);
-            } catch (final Exception e) {
-                logger.warn("Failed to insert: {}", clickLogList, e);
-            }
             if (fessConfig.isLoggingSearchUseLogfile()) {
                 clickLogList.forEach(this::writeSearchLogEvent);
+            }
+            try {
+                ComponentUtil.getComponent(ClickLogBhv.class).batchInsert(clickLogList);
+            } catch (final Exception e) {
+                logger.warn("Failed to insert: {}", clickLogList, e);
             }
         }
     }
 
+    /**
+     * Writes a search log event.
+     *
+     * @param event The search log event.
+     */
     public void writeSearchLogEvent(final SearchLogEvent event) {
         try {
             final Map<String, Object> source = toSource(event);
@@ -464,6 +579,12 @@ public class SearchLogHelper {
         }
     }
 
+    /**
+    * Converts a search log event to a source map.
+    *
+    * @param searchLogEvent The search log event.
+    * @return The source map.
+    */
     protected Map<String, Object> toSource(final SearchLogEvent searchLogEvent) {
         final Map<String, Object> source = toLowerHyphen(searchLogEvent.toSource());
         source.put("_id", searchLogEvent.getId());
@@ -472,6 +593,12 @@ public class SearchLogHelper {
         return source;
     }
 
+    /**
+     * Converts a map to lower hyphen case.
+     *
+     * @param source The source map.
+     * @return The converted map.
+     */
     protected Map<String, Object> toLowerHyphen(final Map<String, Object> source) {
         return source.entrySet().stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, e.getKey()), e -> {
@@ -485,14 +612,29 @@ public class SearchLogHelper {
                 }));
     }
 
+    /**
+     * Sets the user check interval.
+     *
+     * @param userCheckInterval The user check interval.
+     */
     public void setUserCheckInterval(final long userCheckInterval) {
         this.userCheckInterval = userCheckInterval;
     }
 
+    /**
+     * Sets the user information cache size.
+     *
+     * @param userInfoCacheSize The user information cache size.
+     */
     public void setUserInfoCacheSize(final int userInfoCacheSize) {
         this.userInfoCacheSize = userInfoCacheSize;
     }
 
+    /**
+     * Sets the logger name.
+     *
+     * @param loggerName The logger name.
+     */
     public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
     }
