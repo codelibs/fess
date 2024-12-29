@@ -36,7 +36,11 @@ public abstract class Ingester {
     }
 
     public void register() {
-        ComponentUtil.getIngestFactory().add(this);
+        getIngestFactory().add(this);
+    }
+
+    protected IngestFactory getIngestFactory() {
+        return ComponentUtil.getIngestFactory();
     }
 
     // web/file
