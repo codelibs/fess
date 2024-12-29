@@ -196,7 +196,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         normalizeData(responseData, dataMap);
 
         try {
-            resultData.setData(dataSerializer.fromObjectToBinary(dataMap));
+            resultData.setRawData(dataMap);
+            resultData.setSerializer(dataSerializer::fromObjectToBinary);
         } catch (final Exception e) {
             throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
         }

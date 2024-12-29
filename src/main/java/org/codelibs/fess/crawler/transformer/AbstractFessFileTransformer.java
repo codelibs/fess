@@ -81,7 +81,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
         try {
-            resultData.setData(dataSerializer.fromObjectToBinary(generateData(responseData)));
+            resultData.setRawData(generateData(responseData));
+            resultData.setSerializer(dataSerializer::fromObjectToBinary);
         } catch (final Exception e) {
             throw new CrawlingAccessException("Could not serialize object", e);
         }
