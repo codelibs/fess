@@ -187,7 +187,9 @@ public interface FessTransformer {
                 u = u.substring(0, idx);
             }
         }
-        u = decodeUrlAsName(u, u.startsWith("file:"));
+        if (!u.startsWith("smb:") && !u.startsWith("smb1:") && !u.startsWith("ftp:")) {
+            u = decodeUrlAsName(u, u.startsWith("file:"));
+        }
         idx = u.lastIndexOf('/');
         if (idx >= 0) {
             if (u.length() > idx + 1) {

@@ -95,6 +95,30 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "smb://example.com/test?.txt";
         exp = "test?.txt";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "https://example.com/test%E3%81%82.txt";
+        exp = "testあ.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "file://example.com/test%E3%81%82.txt";
+        exp = "testあ.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "storage://example.com/test%E3%81%82.txt";
+        exp = "testあ.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "smb://example.com/test%E3%81%82.txt";
+        exp = "test%E3%81%82.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "smb1://example.com/test%E3%81%82.txt";
+        exp = "test%E3%81%82.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "ftp://example.com/test%E3%81%82.txt";
+        exp = "test%E3%81%82.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 
     public void test_decodeUrl_null() throws Exception {
