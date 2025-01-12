@@ -23,20 +23,20 @@
 			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
 				<div id="content" class="container">
 					<div class="navbar-brand"></div>
-					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
 							aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
 					</button>
 					<div class="collapse navbar-collapse" id="navbar">
-						<div class="mr-auto"></div>
+						<div class="me-auto"></div>
 						<ul class="nav navbar-nav">
 							<c:if test="${eoled}">
-								<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
+								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
 									<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
-								<li class="nav-item" data-toggle="tooltip" data-placement="left"
+								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
 									title="<la:message key="labels.development_mode_warning" />"
 								><a class="nav-link active" href="${installationLink}" target="_olh"><em
 										class="fa fa-exclamation-triangle text-warning"
@@ -46,7 +46,7 @@
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
 										<div class="dropdown">
-											<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+											<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
 												href="#" role="button" aria-haspopup="true"
 												aria-expanded="false"> <em class="fa fa-fw fa-user"></em>${username}
 											</a>
@@ -87,7 +87,7 @@
 				</div>
 			</nav>
 		</header>
-		<div id="searchOptions" class="control-options">
+		<div id="searchOptions" class="collapse">
 			<div class="container">
 				<jsp:include page="searchOptions.jsp" />
 				<div>
@@ -125,7 +125,7 @@
 						<legend><la:message key="labels.search" /></legend>
 						<div class="clearfix">
 							<div class="mx-auto col-10 col-sm-8 col-md-8 col-lg-6">
-								<la:text styleClass="query form-control center-block"
+								<la:text styleClass="query form-control"
 									property="q" size="50" maxlength="1000" styleId="contentQuery"
 									autocomplete="off" />
 							</div>
@@ -140,7 +140,7 @@
 												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 										<c:if test="${3 <= s.index}">
-											<la:link styleClass="d-none d-sm-inline"
+											<la:link styleClass="d-none d-sm-inline-block"
 												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 									</c:forEach>
@@ -154,7 +154,7 @@
 								<la:message key="labels.index_form_search_btn" />
 							</button>
 							<button type="button" class="btn btn-outline-secondary"
-								data-toggle="control-options" data-target="#searchOptions"
+								data-bs-toggle="collapse" data-bs-target="#searchOptions"
 								id="searchOptionsButton">
 								<em class="fa fa-cog"></em>
 								<la:message key="labels.index_form_option_btn" />
@@ -167,8 +167,8 @@
 		<jsp:include page="footer.jsp" />
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript"
-		src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>

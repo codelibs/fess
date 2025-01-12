@@ -23,8 +23,8 @@
 	<main id="content" class="container">
 		<ul class="list-inline">
 			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_sort" /> <a
-				href="#searchOptions" class="badge badge-primary"
-				data-toggle="control-options"> <c:if test="${empty sort}">
+				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
+				data-bs-toggle="collapse"> <c:if test="${empty sort}">
 						<la:message key="labels.searchoptions_score" />
 					</c:if> <c:if test="${sort=='score.desc'}">
 						<la:message key="labels.searchoptions_score" />
@@ -57,13 +57,13 @@
 					</c:if>
 			</a></li>
 			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_num" /> <a
-				href="#searchOptions" class="badge badge-primary"
-				data-toggle="control-options"> <la:message
+				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
+				data-bs-toggle="collapse"> <la:message
 						key="labels.searchoptions_num" arg0="${f:h(num)}" />
 			</a></li>
 			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_lang" /> <a
-				href="#searchOptions" class="badge badge-primary"
-				data-toggle="control-options"> <c:if test="${empty lang}">
+				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
+				data-bs-toggle="collapse"> <c:if test="${empty lang}">
 						<la:message key="labels.searchoptions_all" />
 					</c:if> <c:if test="${!empty lang}">
 						<c:forEach var="sLang" items="${lang}">
@@ -75,8 +75,8 @@
 			</a></li>
 			<c:if test="${displayLabelTypeItems}">
 				<li class="list-inline-item"><la:message key="labels.searchoptions_menu_labels" /> <a
-					href="#searchOptions" class="badge badge-primary"
-					data-toggle="control-options"> <c:if
+					href="#searchOptions" class="badge text-bg-primary text-decoration-none"
+					data-bs-toggle="collapse"> <c:if
 							test="${empty fields.label}">
 							<la:message key="labels.searchoptions_all" />
 						</c:if> <c:if test="${!empty fields.label}">
@@ -100,7 +100,7 @@
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 							<c:if test="${3 <= s.index}">
-								<la:link styleClass="d-none d-sm-inline"
+								<la:link styleClass="d-none d-sm-inline-block"
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 						</c:forEach>
@@ -119,7 +119,7 @@
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 							<c:if test="${3 <= s.index}">
-								<la:link styleClass="d-none d-sm-inline"
+								<la:link styleClass="d-none d-sm-inline-block"
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 						</c:forEach>
@@ -137,7 +137,7 @@
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />
-				<div class="text-right">
+				<div class="text-end">
 					<a href="#"><la:message key="labels.footer_back_to_top" /></a>
 				</div>
 			</c:when>
@@ -148,9 +148,9 @@
 	</main>
 	<jsp:include page="footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript"
-		src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>

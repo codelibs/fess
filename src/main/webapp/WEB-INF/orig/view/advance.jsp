@@ -25,20 +25,20 @@
 							alt="<la:message key="labels.header_brand_name" />"
 							class="align-items-center" />
 					</la:link>
-					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar"
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar"
 						aria-expanded="false" aria-label="Toggle navigation">
 						<span class="navbar-toggler-icon"></span>
 					</button>
 					<div class="collapse navbar-collapse" id="navbar">
-						<div class="mr-auto"></div>
+						<div class="me-auto"></div>
 						<ul class="nav navbar-nav">
 							<c:if test="${eoled}">
-								<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
+								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
 									<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
-								<li class="nav-item" data-toggle="tooltip" data-placement="left"
+								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
 									title="<la:message key="labels.development_mode_warning" />"
 								><a class="nav-link active" href="${installationLink}" target="_olh"><em
 										class="fa fa-exclamation-triangle text-warning"
@@ -48,7 +48,7 @@
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
 										<div class="dropdown">
-											<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+											<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true"
 												aria-expanded="false"
 											> <em class="fa fa-fw fa-user"></em>${username}
 											</a>
@@ -102,51 +102,43 @@
 					suffix="errors.front_suffix"
 				/>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_q" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_must_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<input class="form-control" type="text" id="as_q" name="as.q" value="${f:h(fe:join(as.q))}">
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_epq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_phrase_query"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<input class="form-control" type="text" id="as_epq" name="as.epq" value="${f:h(fe:join(as.epq))}">
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_oq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_should_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<input class="form-control" type="text" id="as_oq" name="as.oq" value="${f:h(fe:join(as.oq))}">
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_nq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_not_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<input class="form-control" type="text" id="as_nq" name="as.nq" value="${f:h(fe:join(as.nq))}">
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="contentNum" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_num"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<la:select property="num" styleId="numSearchOption" styleClass="form-control">
 						<option value="">
 							<la:message key="labels.search_result_select_num" />
@@ -159,14 +151,12 @@
 						<la:option value="100">100</la:option>
 					</la:select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="contentSort" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_sort"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<la:select property="sort" styleId="sortSearchOption" styleClass="form-control">
 						<option value="">
 							<la:message key="labels.search_result_select_sort" />
@@ -216,44 +206,38 @@
 						</c:if>
 					</la:select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="contentLang" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_lang"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="form-control">
 						<c:forEach var="item" items="${langItems}">
 							<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 						</c:forEach>
 					</la:select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
 			<c:if test="${displayLabelTypeItems}">
-				<div class="form-group row">
+				<div class="mb-3 row">
 					<label for="contentLabelType" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 							key="labels.index_label"
 						/></label>
-					<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+					<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 						<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="form-control">
 							<c:forEach var="item" items="${labelTypeItems}">
 								<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 							</c:forEach>
 						</la:select>
 					</div>
-					<div class="col-lg-4 d-none d-lg-flex align-items-center">
-					</div>
 				</div>
 			</c:if>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_timestamp" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_timestamp"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<select id="as_timestamp" name="as.timestamp" class="form-control">
 						<option value=""><la:message key="labels.advance_search_timestamp_default" /></option>
 						<option value="[now-1d/d TO *]"
@@ -270,14 +254,12 @@
 						><la:message key="labels.advance_search_timestamp_pastyear" /></option>
 					</select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_filetype"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<select id="as_filetype" name="as.filetype" class="form-control">
 						<option value=""><la:message key="labels.advance_search_filetype_default" /></option>
 						<option value="html" <c:if test="${as.filetype.contains('html')}">selected</c:if>><la:message
@@ -297,14 +279,12 @@
 							/></option>
 					</select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_occt" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_occt"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<select id="as_occt" name="as.occt" class="form-control">
 						<option value=""><la:message key="labels.advance_search_occt_default" /></option>
 						<option value="allintitle" <c:if test="${as.occt.contains('allintitle')}">selected</c:if>><la:message
@@ -315,25 +295,24 @@
 							/></option>
 					</select>
 				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
-				</div>
 			</div>
-			<div class="form-group row">
+			<div class="mb-3 row">
 				<label for="as_sitesearch" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.advance_search_sitesearch"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-xs-6">
+				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
 					<input class="form-control" type="text" id="as_sitesearch" name="as.sitesearch" value="${f:h(fe:join(as.sitesearch))}">
-				</div>
-				<div class="col-lg-4 d-none d-lg-flex align-items-center">
 				</div>
 			</div>
 
-			<div class="row">
-				<button type="submit" name="search" id="searchButton" class="btn btn-primary mx-auto">
-					<em class="fa fa-search"></em>
-					<la:message key="labels.index_form_search_btn" />
-				</button>
+			<div class="row justify-content-center">
+				<div class="col-auto">
+					<button type="submit" name="search" id="searchButton"
+						class="btn btn-primary mx-auto">
+						<em class="fa fa-search"></em>
+						<la:message key="labels.index_form_search_btn" />
+					</button>
+				</div>
 			</div>
 		</main>
 		<jsp:include page="footer.jsp" />

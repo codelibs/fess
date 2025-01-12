@@ -11,33 +11,31 @@
 						class="align-items-center" />
 				</la:link>
 				<div
-					class="navbar-form col-md-6 col-sm-8 col-7 mr-auto p-0"
+					class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0"
 					role="search">
 					<div class="input-group">
 						<la:text property="q" maxlength="1000" styleId="query"
 							styleClass="form-control" autocomplete="off" />
-						<span class="input-group-append">
-							<button type="submit" name="search" id="searchButton"
-								class="btn btn-primary">
-								<em class="fa fa-search"></em>
-							</button>
-							<button type="button" class="btn btn-light"
-								data-toggle="control-options" data-target="#searchOptions"
-								id="searchOptionsButton">
-								<em class="fa fa-cog"></em> <span class="sr-only"><la:message
-										key="labels.header_form_option_btn" /></span>
-							</button>
-						</span>
+						<button type="submit" name="search" id="searchButton"
+							class="btn btn-primary">
+							<em class="fa fa-search"></em>
+						</button>
+						<button type="button" class="btn btn-light"
+							data-bs-toggle="collapse" data-bs-target="#searchOptions"
+							id="searchOptionsButton">
+							<em class="fa fa-cog"></em> <span class="visually-hidden"><la:message
+									key="labels.header_form_option_btn" /></span>
+						</button>
 					</div>
 				</div>
 				<ul class="nav navbar-nav d-none d-md-flex">
 					<c:if test="${eoled}">
-						<li class="nav-item" data-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
+						<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
 							<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
 						</li>
 					</c:if>
 					<c:if test="${developmentMode}">
-						<li class="nav-item" data-toggle="tooltip" data-placement="left"
+						<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
 							title="<la:message key="labels.development_mode_warning" />"
 						><a class="nav-link active" href="${installationLink}" target="_olh"><em
 								class="fa fa-exclamation-triangle text-warning"
@@ -47,7 +45,7 @@
 						<c:when test="${!empty username && username != 'guest'}">
 							<li class="nav-item">
 								<div class="dropdown">
-									<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+									<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
 										href="#" role="button" aria-haspopup="true"
 										aria-expanded="false"> <em class="fa fa-fw fa-user"></em>
 										<span>${username}</span>
@@ -88,7 +86,7 @@
 			</div>
 		</nav>
 	</header>
-	<div id="searchOptions" class="control-options">
+	<div id="searchOptions" class="collapse">
 		<div class="container">
 			<jsp:include page="/WEB-INF/view/searchOptions.jsp" />
 			<div>

@@ -68,7 +68,7 @@ legend{
 	transition: all .4s ease 0s;
 }
 
-#searchOptions.active .container {
+#searchOptions.show .container {
 	right: 0;
 }
 
