@@ -13,6 +13,18 @@
   
   <function>
     <description>
+      Print HTML tag.
+    </description>
+    <name>html</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String html(boolean)</function-signature>
+    <example>
+      ${fe:html(true)}...${fe:html(false)}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns a label name.
     </description>
     <name>labelexists</name>

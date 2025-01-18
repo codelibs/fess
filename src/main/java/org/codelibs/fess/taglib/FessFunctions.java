@@ -56,6 +56,7 @@ import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
+import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -97,6 +98,18 @@ public class FessFunctions {
 
     protected FessFunctions() {
         // nothing
+    }
+
+    public static String html(final boolean isOpen) {
+        if (isOpen) {
+            return "<html lang=\"" + LaRequestUtil.getOptionalRequest().map(req -> {
+                if (req.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof Locale locale) {
+                    return locale;
+                }
+                return Locale.ENGLISH;
+            }).orElse(Locale.ENGLISH).getLanguage() + "\">";
+        }
+        return "</html>";
     }
 
     public static Boolean labelExists(final String value) {
