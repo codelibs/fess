@@ -46,7 +46,7 @@ ${fe:html(true)}
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
 										<div class="dropdown">
-											<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
 												href="#" role="button" aria-haspopup="true"
 												aria-expanded="false"> <em class="fa fa-fw fa-user"></em>${username}
 											</a>
