@@ -48,8 +48,8 @@ ${fe:html(true)}
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
 										<div class="dropdown">
-											<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-												aria-expanded="false"
+											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+												href="#" role="button" aria-haspopup="true" aria-expanded="false"
 											> <em class="fa fa-fw fa-user"></em>${username}
 											</a>
 											<div class="dropdown-menu" aria-labelledby="userMenu">
@@ -319,6 +319,7 @@ ${fe:html(true)}
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/advance.js')}"></script>
