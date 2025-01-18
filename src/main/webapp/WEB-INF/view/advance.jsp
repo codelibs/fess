@@ -135,7 +135,7 @@
 				</div>
 			</div>
 			<div class="mb-3 row">
-				<label for="contentNum" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+				<label for="numSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_num"
 					/></label>
 				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
@@ -153,7 +153,7 @@
 				</div>
 			</div>
 			<div class="mb-3 row">
-				<label for="contentSort" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+				<label for="sortSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_sort"
 					/></label>
 				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
@@ -208,7 +208,7 @@
 				</div>
 			</div>
 			<div class="mb-3 row">
-				<label for="contentLang" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+				<label for="langSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 						key="labels.index_lang"
 					/></label>
 				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
@@ -221,7 +221,7 @@
 			</div>
 			<c:if test="${displayLabelTypeItems}">
 				<div class="mb-3 row">
-					<label for="contentLabelType" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+					<label for="labelTypeSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
 							key="labels.index_label"
 						/></label>
 					<div class="col-lg-5 col-md-8 col-sm-7 col-6">

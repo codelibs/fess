@@ -5,7 +5,7 @@
 <div>
 	<fieldset class="mb-3">
 		<legend><la:message key="labels.index_num" /></legend>
-		<label for="contentNum"><la:message key="labels.index_num" /></label>
+		<label for="numSearchOption"><la:message key="labels.index_num" /></label>
 		<la:select property="num" styleId="numSearchOption"
 			styleClass="form-control">
 			<option value="10">
@@ -21,7 +21,7 @@
 	</fieldset>
 	<fieldset class="mb-3">
 		<legend><la:message key="labels.index_sort" /></legend>
-		<label for="contentSort"><la:message key="labels.index_sort" /></label>
+		<label for="sortSearchOption"><la:message key="labels.index_sort" /></label>
 		<la:select property="sort" styleId="sortSearchOption"
 			styleClass="form-control">
 			<option value="">
@@ -74,7 +74,7 @@
 	</fieldset>
 	<fieldset class="mb-3">
 		<legend><la:message key="labels.index_lang" /></legend>
-		<label for="contentLang"><la:message key="labels.index_lang" /></label>
+		<label for="langSearchOption"><la:message key="labels.index_lang" /></label>
 		<la:select property="lang" styleId="langSearchOption" multiple="true"
 			styleClass="form-control">
 			<c:forEach var="item" items="${langItems}">
@@ -85,7 +85,7 @@
 	<c:if test="${displayLabelTypeItems}">
 		<fieldset class="mb-3">
 			<legend><la:message key="labels.index_label" /></legend>
-			<label for="contentLabelType"><la:message
+			<label for="labelTypeSearchOption"><la:message
 					key="labels.index_label" /></label>
 			<la:select property="fields.label" styleId="labelTypeSearchOption"
 				multiple="true" styleClass="form-control">
