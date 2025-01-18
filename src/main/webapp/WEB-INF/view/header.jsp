@@ -3,7 +3,7 @@
 	role="search">
 	${fe:facetForm()}${fe:geoForm()}
 	<header>
-		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark d-print-none">
 			<div id="content" class="container">
 				<la:link styleClass="navbar-brand d-inline-flex" href="/">
 					<img src="${fe:url('/images/logo-head.png')}"

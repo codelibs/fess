@@ -56,7 +56,7 @@
 					<div class="description">${doc.content_description}</div>
 				</div>
 				<div class="site text-truncate">
-					<c:if test="${clipboardCopyIcon}"><i class="far fa-copy url-copy" data-clipboard-text="${doc.url_link}"></i></c:if>
+					<c:if test="${clipboardCopyIcon}"><i class="far fa-copy url-copy d-print-none" data-clipboard-text="${doc.url_link}"></i></c:if>
 					<cite>${f:h(doc.site_path)}</cite>
 				</div>
 				<div class="more">
@@ -84,7 +84,7 @@
 						<div class="d-sm-none"></div>
 						<span class="d-none d-sm-inline-block">&nbsp;</span>
 						<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
-								class="cache">
+								styleClass="cache d-print-none">
 							<la:message key="labels.search_result_cache" />
 						</la:link>
 					</c:if>

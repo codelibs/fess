@@ -137,7 +137,7 @@
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />
-				<div class="text-end">
+				<div class="text-end d-print-none">
 					<a href="#"><la:message key="labels.footer_back_to_top" /></a>
 				</div>
 			</c:when>
