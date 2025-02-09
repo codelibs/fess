@@ -39,11 +39,6 @@ public class InputStreamThread extends Thread {
 
     private final Consumer<String> outputCallback;
 
-    @Deprecated
-    public InputStreamThread(final InputStream is, final String charset) {
-        this(is, Charset.forName(charset), MAX_BUFFER_SIZE, null);
-    }
-
     public InputStreamThread(final InputStream is, final Charset charset, final int bufferSize, final Consumer<String> outputCallback) {
         super("InputStreamThread");
         this.bufferSize = bufferSize;

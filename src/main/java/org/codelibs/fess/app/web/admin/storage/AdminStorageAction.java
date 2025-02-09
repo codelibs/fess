@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.storage;
 import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.InputStream;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -395,22 +394,6 @@ public class AdminStorageAction extends FessAdminAction {
 
     public static String getObjectName(final String path, final String name) {
         return getPathPrefix(path) + name;
-    }
-
-    @Deprecated
-    protected static String urlEncode(final String str) {
-        if (str == null) {
-            return StringUtil.EMPTY;
-        }
-        return URLEncoder.encode(str, Constants.UTF_8_CHARSET);
-    }
-
-    @Deprecated
-    protected static String urlDecode(final String str) {
-        if (str == null) {
-            return StringUtil.EMPTY;
-        }
-        return URLDecoder.decode(str, Constants.UTF_8_CHARSET);
     }
 
     protected static String encodeId(final String objectName) {

@@ -21,12 +21,7 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
     private SystemUtil() {
     }
 
-    @SuppressWarnings("deprecation")
     public static String getSearchEngineHttpAddress() {
-        final String value = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
-        if (value != null) {
-            return value;
-        }
-        return System.getProperty(Constants.FESS_ES_HTTP_ADDRESS);
+        return System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
     }
 }
