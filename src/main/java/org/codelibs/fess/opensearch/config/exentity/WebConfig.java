@@ -192,7 +192,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         for (final RequestHeader requestHeader : requestHeaderList) {
             rhList.add(requestHeader.getCrawlerRequestHeader());
         }
-        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
+        paramMap.put(HcHttpClient.REQUEST_HEADERS_PROPERTY,
                 rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
         final String proxyHost = (String) paramMap.get(Param.Client.PROXY_HOST);

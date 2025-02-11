@@ -188,7 +188,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             headerName = paramMap.get(CRAWLER_WEB_HEADER_PREFIX + count + ".name");
         }
         if (!rhList.isEmpty()) {
-            factoryParamMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
+            factoryParamMap.put(HcHttpClient.REQUEST_HEADERS_PROPERTY,
                     rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
         }
 
