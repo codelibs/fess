@@ -6,7 +6,7 @@
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://maven.codelibs.org/" />
 	<property name="maven.release.repo.url" value="https://maven.codelibs.org/" />
-	<property name="opensearch.version" value="2.18.0" />
+	<property name="opensearch.version" value="2.19.1" />
 
 	<target name="install.modules">
 		<mkdir dir="${target.dir}" />
