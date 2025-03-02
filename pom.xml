@@ -1116,6 +1116,10 @@
 					<groupId>org.opensearch.plugin</groupId>
 					<artifactId>opensearch-scripting-painless-spi</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.opensearch.plugin</groupId>
+					<artifactId>geo</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
