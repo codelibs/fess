@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
@@ -225,15 +226,19 @@ public class LdapManager {
 
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
-        final String filter = String.format(accountFilter, ldapUser.getName());
+        final String filter = String.format(accountFilter, escapeLDAPSearchFilter(ldapUser.getName()));
         if (logger.isDebugEnabled()) {
             logger.debug("Account Filter: {}", filter);
         }
         final Set<String> subRoleSet = new HashSet<>();
+        final Set<String> sAMAccountGroupNameSet = new HashSet<>();
         search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
             processSearchRoles(result, entryDn -> {
-                updateSearchRoles(roleSet, entryDn);
-
+                final String roleName = getSearchRoleName(entryDn);
+                final String roleType = updateSearchRoles(roleSet, entryDn, roleName);
+                if (fessConfig.getRoleSearchGroupPrefix().equals(roleType) && fessConfig.isLdapSamaccountnameGroup()) {
+                    sAMAccountGroupNameSet.add(roleName);
+                }
                 if (StringUtil.isNotBlank(groupFilter)) {
                     subRoleSet.add(entryDn);
                 }
@@ -247,6 +252,11 @@ public class LdapManager {
 
         if (!subRoleSet.isEmpty()) {
             TimeoutManager.getInstance().addTimeoutTarget(() -> {
+                sAMAccountGroupNameSet.stream().forEach(groupName -> {
+                    getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
+                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                    });
+                });
                 processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
                 if (logger.isDebugEnabled()) {
                     logger.debug("role(lazy loading): {}", roleSet);
@@ -256,6 +266,33 @@ public class LdapManager {
         }
 
         return roles;
+    }
+
+    protected OptionalEntity<String> getSAMAccountGroupName(final String bindDn, final String groupName) {
+        final Hashtable<String, String> env = createSearchEnv();
+        try (DirContextHolder holder = getDirContext(() -> env)) {
+            final DirContext context = holder.get();
+            final SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Searching for sAMAccountName of group: {} on {}", groupName, bindDn);
+            }
+            final NamingEnumeration<SearchResult> results =
+                    context.search(bindDn, "(name=" + escapeLDAPSearchFilter(groupName) + ")", searchControls);
+            if (results.hasMore()) {
+                final SearchResult searchResult = results.next();
+                final Attribute attribute = searchResult.getAttributes().get("sAMAccountName");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("sAMAccountName: {}", attribute);
+                }
+                if (attribute != null && attribute.get() instanceof String sAMAccountName) {
+                    return OptionalEntity.of(sAMAccountName);
+                }
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to get sAMAccountName: {}", groupName, e);
+        }
+        return OptionalEntity.empty();
     }
 
     protected void processSubRoles(final LdapUser ldapUser, final String bindDn, final Set<String> subRoleSet, final String groupFilter,
@@ -272,32 +309,66 @@ public class LdapManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Group Filter: {}", filter);
         }
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
             for (final SearchResult srcrslt : result) {
                 final String groupDn = srcrslt.getNameInNamespace();
                 if (logger.isDebugEnabled()) {
                     logger.debug("groupDn: {}", groupDn);
                 }
-                updateSearchRoles(roleSet, groupDn);
+                final String groupName = getSearchRoleName(groupDn);
+                final String roleType = updateSearchRoles(roleSet, groupDn, groupName);
+                if (fessConfig.getRoleSearchGroupPrefix().equals(roleType) && fessConfig.isLdapSamaccountnameGroup()) {
+                    getSAMAccountGroupName(bindDn, groupName).ifPresent(sAMAccountGroupName -> {
+                        roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(sAMAccountGroupName)));
+                    });
+                }
             }
         });
     }
 
-    protected void updateSearchRoles(final Set<String> roleSet, final String entryDn) {
-        final String name = getSearchRoleName(entryDn);
-        if (StringUtil.isBlank(name)) {
-            return;
-        }
-
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
-        if (isRole) {
-            if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                roleSet.add(systemHelper.getSearchRoleByRole(normalizePermissionName(name)));
+    protected String updateSearchRoles(final Set<String> roleSet, final String entryDn, final String name) {
+        if (StringUtil.isNotBlank(name)) {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+            if (isRole) {
+                if (fessConfig.isLdapRoleSearchRoleEnabled()) {
+                    roleSet.add(systemHelper.getSearchRoleByRole(normalizePermissionName(name)));
+                    return fessConfig.getRoleSearchRolePrefix();
+                }
+            } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
+                roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(name)));
+                return fessConfig.getRoleSearchGroupPrefix();
             }
-        } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-            roleSet.add(systemHelper.getSearchRoleByGroup(normalizePermissionName(name)));
         }
+        return null;
+    }
+
+    protected String escapeLDAPSearchFilter(String filter) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < filter.length(); i++) {
+            char curChar = filter.charAt(i);
+            switch (curChar) {
+            case '\\':
+                sb.append("\\5c");
+                break;
+            case '*':
+                sb.append("\\2a");
+                break;
+            case '(':
+                sb.append("\\28");
+                break;
+            case ')':
+                sb.append("\\29");
+                break;
+            case '\0':
+                sb.append("\\00");
+                break;
+            default:
+                sb.append(curChar);
+            }
+        }
+        return sb.toString();
     }
 
     public String normalizePermissionName(final String name) {
