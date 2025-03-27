@@ -32,6 +32,7 @@ REM heap in memory on startup to prevent any of it from being swapped
 REM out.
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Xms%FESS_MIN_MEM% -Xmx%FESS_MAX_MEM%
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -XX:MaxMetaspaceSize=256m -XX:CompressedClassSpaceSize=32m
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% --add-opens=java.base/java.io=ALL-UNNAMED
 
 REM new generation
 if NOT "%FESS_HEAP_NEWSIZE%" == "" (
