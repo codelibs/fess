@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FileAuthenticationService;
@@ -39,6 +41,8 @@ import org.codelibs.fess.util.ParameterUtil;
  * @author FreeGen
  */
 public class FileConfig extends BsFileConfig implements CrawlingConfig {
+
+    private static final Logger logger = LogManager.getLogger(FileConfig.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -167,6 +171,10 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         final List<org.codelibs.fess.crawler.client.smb1.SmbAuthentication> smb1AuthList = new ArrayList<>();
         final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
         for (final FileAuthentication fileAuth : fileAuthList) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("FileAuthentication: " + fileAuth.getProtocolScheme() + " " + fileAuth.getHostname() + ":" + fileAuth.getPort()
+                        + " " + fileAuth.getUsername());
+            }
             if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
                 final SmbAuthentication smbAuth = new SmbAuthentication();
                 final Map<String, String> map = ParameterUtil.parse(fileAuth.getParameters());
@@ -196,9 +204,21 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
             }
         }
         paramMap.put(Param.Client.SMB_AUTHENTICATIONS, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+        if (logger.isDebugEnabled()) {
+            smbAuthList.forEach(smbAuth -> logger
+                    .debug("SmbAuthentication: " + smbAuth.getServer() + ":" + smbAuth.getPort() + " " + smbAuth.getUsername()));
+        }
         paramMap.put(Param.Client.SMB1_AUTHENTICATIONS,
                 smb1AuthList.toArray(new org.codelibs.fess.crawler.client.smb1.SmbAuthentication[smb1AuthList.size()]));
+        if (logger.isDebugEnabled()) {
+            smb1AuthList.forEach(smb1Auth -> logger
+                    .debug("Smb1Authentication: " + smb1Auth.getServer() + ":" + smb1Auth.getPort() + " " + smb1Auth.getUsername()));
+        }
         paramMap.put(Param.Client.FTP_AUTHENTICATIONS, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
+        if (logger.isDebugEnabled()) {
+            ftpAuthList.forEach(ftpAuth -> logger
+                    .debug("FtpAuthentication: " + ftpAuth.getServer() + ":" + ftpAuth.getPort() + " " + ftpAuth.getUsername()));
+        }
 
         crawlerClientFactory = factory;
         return factory;
