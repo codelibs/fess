@@ -17,6 +17,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PARENT_BRANCH: ${{ github.ref_name == 'master' && 'main' || github.ref_name }}
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
@@ -31,6 +33,16 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    - name: Checkout fess-parent
+      uses: actions/checkout@v4
+      with:
+        repository: codelibs/fess-parent
+        ref: ${{ env.PARENT_BRANCH }}
+        path: fess-parent
+    - name: Install fess-parent
+      run: |
+        cd fess-parent
+        mvn install -Dgpg.skip=true
     - name: Download Plugins with Maven
       run: mvn -B antrun:run --file pom.xml
     - name: Build with Maven
