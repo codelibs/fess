@@ -908,8 +908,8 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>snapshots.oss.sonatype.org</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>snapshots.central.sonatype.com</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
