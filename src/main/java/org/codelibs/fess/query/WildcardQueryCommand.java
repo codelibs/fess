@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
@@ -59,7 +60,10 @@ public class WildcardQueryCommand extends QueryCommand {
         if (Constants.DEFAULT_FIELD.equals(field)) {
             final String text = wildcardQuery.getTerm().text();
             context.addFieldLog(field, text);
-            context.addHighlightedQuery(StringUtils.strip(text, "*"));
+            final String highlightText = StringUtils.strip(text, "*");
+            if (StringUtil.isNotBlank(highlightText)) {
+                context.addHighlightedQuery(highlightText);
+            }
             return buildDefaultQueryBuilder(fessConfig, context,
                     (f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(text)).boost(b * boost));
         }
@@ -67,7 +71,10 @@ public class WildcardQueryCommand extends QueryCommand {
         if (isSearchField(field)) {
             final String text = wildcardQuery.getTerm().text();
             context.addFieldLog(field, text);
-            context.addHighlightedQuery(StringUtils.strip(text, "*"));
+            final String highlightText = StringUtils.strip(text, "*");
+            if (StringUtil.isNotBlank(highlightText)) {
+                context.addHighlightedQuery(highlightText);
+            }
             return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(text)).boost(boost);
         }
 
@@ -82,7 +89,10 @@ public class WildcardQueryCommand extends QueryCommand {
         }
         final String origQuery = queryBuf.toString();
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
-        context.addHighlightedQuery(StringUtils.strip(query, "*"));
+        final String highlightText = StringUtils.strip(query, "*");
+        if (StringUtil.isNotBlank(highlightText)) {
+            context.addHighlightedQuery(highlightText);
+        }
         return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 
