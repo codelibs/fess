@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: macos-14
     env:
-      PARENT_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || (github.ref_name == 'master' && 'main') || github.ref_name }}
+      PARENT_BRANCH: ${{ github.event_name == 'pull_request' && ( github.event.pull_request.base.ref == 'master' && 'main' || github.event.pull_request.base.ref ) || (github.ref_name == 'master' && 'main') || github.ref_name }}
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
