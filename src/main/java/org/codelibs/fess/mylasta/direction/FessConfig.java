@@ -253,19 +253,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String API_SEARCH_SCROLL = "api.search.scroll";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. Referrer-Policy:strict-origin-when-cross-origin */
     String API_JSON_RESPONSE_HEADERS = "api.json.response.headers";
 
     /** The key of the configuration. e.g. false */
     String API_JSON_RESPONSE_EXCEPTION_INCLUDED = "api.json.response.exception.included";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. Referrer-Policy:strict-origin-when-cross-origin */
     String API_GSA_RESPONSE_HEADERS = "api.gsa.response.headers";
 
     /** The key of the configuration. e.g. false */
     String API_GSA_RESPONSE_EXCEPTION_INCLUDED = "api.gsa.response.exception.included";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. Referrer-Policy:strict-origin-when-cross-origin */
     String API_DASHBOARD_RESPONSE_HEADERS = "api.dashboard.response.headers";
 
     /** The key of the configuration. e.g. * */
@@ -684,6 +684,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. application/pdf,text/plain */
     String RESPONSE_INLINE_MIMETYPES = "response.inline.mimetypes";
+
+    /** The key of the configuration. e.g. text/html=X-XSS-Protection: 1; mode=block<br>
+     * text/html=Content-Security-Policy: reflected-xss block<br>
+     * text/html=X-Frame-Options: SAMEORIGIN<br>
+     *  */
+    String RESPONSE_HEADERS = "response.headers";
 
     /** The key of the configuration. e.g. fess.search */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
@@ -2412,18 +2418,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.json.response.headers'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonResponseHeaders();
-
-    /**
-     * Get the value for the key 'api.json.response.headers' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getApiJsonResponseHeadersAsInteger();
 
     /**
      * Get the value for the key 'api.json.response.exception.included'. <br>
@@ -2441,18 +2439,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.gsa.response.headers'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiGsaResponseHeaders();
-
-    /**
-     * Get the value for the key 'api.gsa.response.headers' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getApiGsaResponseHeadersAsInteger();
 
     /**
      * Get the value for the key 'api.gsa.response.exception.included'. <br>
@@ -2470,18 +2460,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'api.dashboard.response.headers'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiDashboardResponseHeaders();
-
-    /**
-     * Get the value for the key 'api.dashboard.response.headers' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getApiDashboardResponseHeadersAsInteger();
 
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
@@ -3966,6 +3948,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseInlineMimetypes();
+
+    /**
+     * Get the value for the key 'response.headers'. <br>
+     * The value is, e.g. text/html=X-XSS-Protection: 1; mode=block<br>
+     * text/html=Content-Security-Policy: reflected-xss block<br>
+     * text/html=X-Frame-Options: SAMEORIGIN<br>
+     *  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseHeaders();
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
@@ -8169,10 +8161,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_JSON_RESPONSE_HEADERS);
         }
 
-        public Integer getApiJsonResponseHeadersAsInteger() {
-            return getAsInteger(FessConfig.API_JSON_RESPONSE_HEADERS);
-        }
-
         public String getApiJsonResponseExceptionIncluded() {
             return get(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED);
         }
@@ -8185,10 +8173,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_GSA_RESPONSE_HEADERS);
         }
 
-        public Integer getApiGsaResponseHeadersAsInteger() {
-            return getAsInteger(FessConfig.API_GSA_RESPONSE_HEADERS);
-        }
-
         public String getApiGsaResponseExceptionIncluded() {
             return get(FessConfig.API_GSA_RESPONSE_EXCEPTION_INCLUDED);
         }
@@ -8199,10 +8183,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getApiDashboardResponseHeaders() {
             return get(FessConfig.API_DASHBOARD_RESPONSE_HEADERS);
-        }
-
-        public Integer getApiDashboardResponseHeadersAsInteger() {
-            return getAsInteger(FessConfig.API_DASHBOARD_RESPONSE_HEADERS);
         }
 
         public String getApiCorsAllowOrigin() {
@@ -9015,6 +8995,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getResponseInlineMimetypes() {
             return get(FessConfig.RESPONSE_INLINE_MIMETYPES);
+        }
+
+        public String getResponseHeaders() {
+            return get(FessConfig.RESPONSE_HEADERS);
         }
 
         public String getIndexDocumentSearchIndex() {
@@ -11163,11 +11147,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_ADMIN_ACCESS_PERMISSIONS, "Radmin-api");
             defaultMap.put(FessConfig.API_SEARCH_ACCEPT_REFERERS, "");
             defaultMap.put(FessConfig.API_SEARCH_SCROLL, "false");
-            defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_JSON_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");
             defaultMap.put(FessConfig.API_JSON_RESPONSE_EXCEPTION_INCLUDED, "false");
-            defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_GSA_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");
             defaultMap.put(FessConfig.API_GSA_RESPONSE_EXCEPTION_INCLUDED, "false");
-            defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "");
+            defaultMap.put(FessConfig.API_DASHBOARD_RESPONSE_HEADERS, "Referrer-Policy:strict-origin-when-cross-origin");
             defaultMap.put(FessConfig.API_CORS_ALLOW_ORIGIN, "*");
             defaultMap.put(FessConfig.API_CORS_ALLOW_METHODS, "GET, POST, OPTIONS, DELETE, PUT");
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
@@ -11309,6 +11293,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RESPONSE_MAX_SITE_PATH_LENGTH, "100");
             defaultMap.put(FessConfig.RESPONSE_HIGHLIGHT_content_title_ENABLED, "true");
             defaultMap.put(FessConfig.RESPONSE_INLINE_MIMETYPES, "application/pdf,text/plain");
+            defaultMap.put(FessConfig.RESPONSE_HEADERS,
+                    "text/html=X-XSS-Protection: 1; mode=block\ntext/html=Content-Security-Policy: reflected-xss block\ntext/html=X-Frame-Options: SAMEORIGIN\n");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SEARCH_INDEX, "fess.search");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_UPDATE_INDEX, "fess.update");
             defaultMap.put(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX, "fess");

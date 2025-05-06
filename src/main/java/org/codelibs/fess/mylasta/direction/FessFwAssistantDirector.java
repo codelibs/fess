@@ -187,7 +187,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
     }
 
     protected FessActionAdjustmentProvider createActionAdjustmentProvider() {
-        return new FessActionAdjustmentProvider();
+        return new FessActionAdjustmentProvider(fessConfig);
     }
 
     protected FessApiFailureHook createApiFailureHook() {
