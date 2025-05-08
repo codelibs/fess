@@ -156,7 +156,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             requestQueue.offer(new CrawlRequest(url, 0));
             while (!requestQueue.isEmpty() && (maxAccessCount < 0 || counter < maxAccessCount)) {
                 final CrawlRequest crawlRequest = requestQueue.poll();
-                if (maxDepth != -1 && crawlRequest.getDepth() > maxDepth || processedUrls.contains(crawlRequest.getUrl())) {
+                if ((maxDepth != -1 && crawlRequest.getDepth() > maxDepth) || processedUrls.contains(crawlRequest.getUrl())) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Skipping crawl request for url='{}' at depth={} (maxDepth={}, alreadyProcessed={})",
                                 crawlRequest.getUrl(), crawlRequest.getDepth(), maxDepth, processedUrls.contains(crawlRequest.getUrl()));
