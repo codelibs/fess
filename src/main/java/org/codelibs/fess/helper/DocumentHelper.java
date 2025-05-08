@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.io.ReaderUtil;
-import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -51,6 +50,7 @@ import org.codelibs.fess.crawler.processor.ResponseProcessor;
 import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
+import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.transformer.Transformer;
 import org.codelibs.fess.crawler.util.TextUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -208,12 +208,22 @@ public class DocumentHelper {
             }
             final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
             final ResultData resultData = transformer.transform(responseData);
-            final byte[] data = resultData.getData();
-            if (data != null) {
-                try {
-                    return (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
-                } catch (final Exception e) {
-                    throw new CrawlerSystemException("Could not create an instance from bytes.", e);
+            final Object rawData = resultData.getRawData();
+            if (rawData != null) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> responseDataMap = (Map<String, Object>) rawData;
+                return responseDataMap;
+            } else {
+                final byte[] data = resultData.getData();
+                if (data != null) {
+                    try {
+                        final DataSerializer dataSerializer = ComponentUtil.getComponent("dataSerializer");
+                        @SuppressWarnings("unchecked")
+                        final Map<String, Object> responseDataMap = (Map<String, Object>) dataSerializer.fromBinaryToObject(data);
+                        return responseDataMap;
+                    } catch (final Exception e) {
+                        throw new CrawlerSystemException("Could not create an instance from bytes.", e);
+                    }
                 }
             }
             return null;
