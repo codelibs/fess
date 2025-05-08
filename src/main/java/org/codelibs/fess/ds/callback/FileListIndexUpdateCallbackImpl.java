@@ -271,11 +271,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         if (Constants.TRUE.equalsIgnoreCase(recursive.toString())) {
             return -1L;
         }
-        try {
-            return Long.parseLong(recursive.toString()); // TODO remove this line and return 1L
-        } catch (final NumberFormatException e) {
-            return 1L;
-        }
+
+        return 1L;
     }
 
     protected int getMaxDepth(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
