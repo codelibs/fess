@@ -50,9 +50,9 @@ public class BooleanQueryCommand extends QueryCommand {
     protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery, final float boost) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (final BooleanClause clause : booleanQuery.clauses()) {
-            final QueryBuilder queryBuilder = getQueryProcessor().execute(context, clause.getQuery(), boost);
+            final QueryBuilder queryBuilder = getQueryProcessor().execute(context, clause.query(), boost);
             if (queryBuilder != null) {
-                switch (clause.getOccur()) {
+                switch (clause.occur()) {
                 case MUST:
                     boolQuery.must(queryBuilder);
                     break;

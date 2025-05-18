@@ -99,6 +99,11 @@ public class DefaultQueryBuilder implements QueryBuilder {
     }
 
     @Override
+    public QueryBuilder filter(QueryBuilder filter) {
+        return queryBuilder.filter(filter);
+    }
+
+    @Override
     public String getName() {
         return queryBuilder.getName();
     }

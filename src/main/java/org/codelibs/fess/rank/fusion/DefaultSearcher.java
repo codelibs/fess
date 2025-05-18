@@ -63,8 +63,8 @@ public class DefaultSearcher extends RankFusionSearcher {
         final SearchResultBuilder builder = SearchResult.create();
         searchResponseOpt.ifPresent(searchResponse -> {
             final SearchHits searchHits = searchResponse.getHits();
-            builder.allRecordCount(searchHits.getTotalHits().value);
-            builder.allRecordCountRelation(searchHits.getTotalHits().relation.toString());
+            builder.allRecordCount(searchHits.getTotalHits().value());
+            builder.allRecordCountRelation(searchHits.getTotalHits().relation().toString());
             builder.queryTime(searchResponse.getTook().millis());
 
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
@@ -81,7 +81,7 @@ public class DefaultSearcher extends RankFusionSearcher {
                     if (innerHits != null) {
                         final SearchHits innerSearchHits = innerHits.get(fessConfig.getQueryCollapseInnerHitsName());
                         if (innerSearchHits != null) {
-                            final long totalHits = innerSearchHits.getTotalHits().value;
+                            final long totalHits = innerSearchHits.getTotalHits().value();
                             if (totalHits > 1) {
                                 docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_count", totalHits);
                                 final DocumentField bitsField = searchHit.getFields().get(fessConfig.getIndexFieldContentMinhashBits());

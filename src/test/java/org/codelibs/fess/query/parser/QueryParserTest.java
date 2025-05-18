@@ -60,8 +60,8 @@ public class QueryParserTest extends UnitFessTestCase {
         assertEquals(10.0f, ((BoostQuery) query).getBoost());
 
         query = queryParser.createDefaultFilterChain().parse("\"fess\"");
-        assertEquals(PhraseQuery.class, query.getClass());
-        assertEquals("_default:fess", ((PhraseQuery) query).getTerms()[0].toString());
+        assertEquals(TermQuery.class, query.getClass());
+        assertEquals("_default:fess", ((TermQuery) query).toString());
 
         query = queryParser.createDefaultFilterChain().parse("\"fess codelibs\"");
         assertEquals(PhraseQuery.class, query.getClass());
@@ -71,42 +71,42 @@ public class QueryParserTest extends UnitFessTestCase {
         query = queryParser.createDefaultFilterChain().parse("fess codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
         List<BooleanClause> clauses = ((BooleanQuery) query).clauses();
-        assertEquals(TermQuery.class, clauses.get(0).getQuery().getClass());
-        assertEquals("_default:fess", clauses.get(0).getQuery().toString());
-        assertEquals(Occur.MUST, clauses.get(0).getOccur());
-        assertEquals(TermQuery.class, clauses.get(1).getQuery().getClass());
-        assertEquals("_default:codelibs", clauses.get(1).getQuery().toString());
-        assertEquals(Occur.MUST, clauses.get(1).getOccur());
+        assertEquals(TermQuery.class, clauses.get(0).query().getClass());
+        assertEquals("_default:fess", clauses.get(0).query().toString());
+        assertEquals(Occur.MUST, clauses.get(0).occur());
+        assertEquals(TermQuery.class, clauses.get(1).query().getClass());
+        assertEquals("_default:codelibs", clauses.get(1).query().toString());
+        assertEquals(Occur.MUST, clauses.get(1).occur());
 
         query = queryParser.createDefaultFilterChain().parse("fess AND codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
         clauses = ((BooleanQuery) query).clauses();
-        assertEquals(TermQuery.class, clauses.get(0).getQuery().getClass());
-        assertEquals("_default:fess", clauses.get(0).getQuery().toString());
-        assertEquals(Occur.MUST, clauses.get(0).getOccur());
-        assertEquals(TermQuery.class, clauses.get(1).getQuery().getClass());
-        assertEquals("_default:codelibs", clauses.get(1).getQuery().toString());
-        assertEquals(Occur.MUST, clauses.get(1).getOccur());
+        assertEquals(TermQuery.class, clauses.get(0).query().getClass());
+        assertEquals("_default:fess", clauses.get(0).query().toString());
+        assertEquals(Occur.MUST, clauses.get(0).occur());
+        assertEquals(TermQuery.class, clauses.get(1).query().getClass());
+        assertEquals("_default:codelibs", clauses.get(1).query().toString());
+        assertEquals(Occur.MUST, clauses.get(1).occur());
 
         query = queryParser.createDefaultFilterChain().parse("fess OR codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
         clauses = ((BooleanQuery) query).clauses();
-        assertEquals(TermQuery.class, clauses.get(0).getQuery().getClass());
-        assertEquals("_default:fess", clauses.get(0).getQuery().toString());
-        assertEquals(Occur.SHOULD, clauses.get(0).getOccur());
-        assertEquals(TermQuery.class, clauses.get(1).getQuery().getClass());
-        assertEquals("_default:codelibs", clauses.get(1).getQuery().toString());
-        assertEquals(Occur.SHOULD, clauses.get(1).getOccur());
+        assertEquals(TermQuery.class, clauses.get(0).query().getClass());
+        assertEquals("_default:fess", clauses.get(0).query().toString());
+        assertEquals(Occur.SHOULD, clauses.get(0).occur());
+        assertEquals(TermQuery.class, clauses.get(1).query().getClass());
+        assertEquals("_default:codelibs", clauses.get(1).query().toString());
+        assertEquals(Occur.SHOULD, clauses.get(1).occur());
 
         query = queryParser.createDefaultFilterChain().parse("\"fess\" codelibs");
         assertEquals(BooleanQuery.class, query.getClass());
         clauses = ((BooleanQuery) query).clauses();
-        assertEquals(PhraseQuery.class, clauses.get(0).getQuery().getClass());
-        assertEquals("_default:fess", ((PhraseQuery) clauses.get(0).getQuery()).getTerms()[0].toString());
-        assertEquals(Occur.MUST, clauses.get(0).getOccur());
-        assertEquals(TermQuery.class, clauses.get(1).getQuery().getClass());
-        assertEquals("_default:codelibs", clauses.get(1).getQuery().toString());
-        assertEquals(Occur.MUST, clauses.get(1).getOccur());
+        assertEquals(TermQuery.class, clauses.get(0).query().getClass());
+        assertEquals("_default:fess", ((TermQuery) clauses.get(0).query()).toString());
+        assertEquals(Occur.MUST, clauses.get(0).occur());
+        assertEquals(TermQuery.class, clauses.get(1).query().getClass());
+        assertEquals("_default:codelibs", clauses.get(1).query().toString());
+        assertEquals(Occur.MUST, clauses.get(1).occur());
 
     }
 

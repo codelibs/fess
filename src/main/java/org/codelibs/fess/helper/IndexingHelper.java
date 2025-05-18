@@ -254,7 +254,7 @@ public class IndexingHelper {
                 .setQuery(queryBuilder).setSize(0).setTrackTotalHits(true).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final TotalHits totalHits = countResponse.getHits().getTotalHits();
         if (totalHits != null) {
-            return totalHits.value;
+            return totalHits.value();
         }
         return 0;
     }
