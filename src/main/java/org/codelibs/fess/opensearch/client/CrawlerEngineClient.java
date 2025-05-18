@@ -23,9 +23,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.FesenClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.client.Client;
 import org.opensearch.common.settings.Settings;
 import org.opensearch.common.settings.Settings.Builder;
+import org.opensearch.transport.client.Client;
 
 public class CrawlerEngineClient extends FesenClient {
     @Override

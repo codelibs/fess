@@ -127,15 +127,9 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     }
 
     protected boolean isImageMimeType(final ResponseData responseData) {
-        final String mimeType = responseData.getMimeType();
-        if (mimeType == null) {
-            return true;
-        }
+        final String mimeType=responseData.getMimeType();if(mimeType==null){return true;}
 
-        return switch (mimeType) {
-        case "image/png", "image/gif", "image/jpeg", "image/bmp" -> true;
-        default -> false;
-        };
+        return switch(mimeType){case"image/png","image/gif","image/jpeg","image/bmp"->true;default->false;};
     }
 
     protected Result saveImage(final ImageInputStream input, final File outputFile) throws IOException {

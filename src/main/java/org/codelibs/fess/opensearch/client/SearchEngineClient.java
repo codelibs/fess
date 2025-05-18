@@ -136,7 +136,7 @@ import org.opensearch.action.search.SearchResponse;
 import org.opensearch.action.search.SearchScrollRequest;
 import org.opensearch.action.search.SearchScrollRequestBuilder;
 import org.opensearch.action.support.WriteRequest.RefreshPolicy;
-import org.opensearch.action.support.master.AcknowledgedResponse;
+import org.opensearch.action.support.clustermanager.AcknowledgedResponse;
 import org.opensearch.action.termvectors.MultiTermVectorsRequest;
 import org.opensearch.action.termvectors.MultiTermVectorsRequestBuilder;
 import org.opensearch.action.termvectors.MultiTermVectorsResponse;
@@ -146,8 +146,6 @@ import org.opensearch.action.termvectors.TermVectorsResponse;
 import org.opensearch.action.update.UpdateRequest;
 import org.opensearch.action.update.UpdateRequestBuilder;
 import org.opensearch.action.update.UpdateResponse;
-import org.opensearch.client.AdminClient;
-import org.opensearch.client.Client;
 import org.opensearch.cluster.metadata.MappingMetadata;
 import org.opensearch.common.action.ActionFuture;
 import org.opensearch.common.document.DocumentField;
@@ -172,6 +170,8 @@ import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.opensearch.search.collapse.CollapseBuilder;
 import org.opensearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.opensearch.threadpool.ThreadPool;
+import org.opensearch.transport.client.AdminClient;
+import org.opensearch.transport.client.Client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1915,5 +1915,28 @@ public class SearchEngineClient implements Client {
     @Override
     public void pitSegments(final PitSegmentsRequest pitSegmentsRequest, final ActionListener<IndicesSegmentResponse> listener) {
         client.pitSegments(pitSegmentsRequest, listener);
+    }
+
+    @Override
+    public void searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request,
+            ActionListener<SearchResponse> listener) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public ActionFuture<SearchResponse> searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public void listViewNames(org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request,
+            ActionListener<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listener) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public ActionFuture<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listViewNames(
+            org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

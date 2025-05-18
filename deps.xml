@@ -6,10 +6,10 @@
 	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
 	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
-	<property name="kopf.branch" value="fess-14" />
+	<property name="kopf.branch" value="fess-15" />
 
 	<!-- Maven Repository -->
-	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
 	<property name="maven.release.repo.url" value="https://repo1.maven.org/maven2" />
 
 	<target name="install.jars">

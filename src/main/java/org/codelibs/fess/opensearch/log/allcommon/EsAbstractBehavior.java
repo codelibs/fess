@@ -51,11 +51,11 @@ import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.SearchRequestBuilder;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.action.update.UpdateRequestBuilder;
-import org.opensearch.client.Client;
 import org.opensearch.core.action.ActionListener;
 import org.opensearch.index.seqno.SequenceNumbers;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
+import org.opensearch.transport.client.Client;
 
 import jakarta.annotation.Resource;
 
@@ -89,7 +89,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
 
     // ===================================================================================
-    //                                                                       Elasticsearch
+    //                                                                       OpenSearch
     //                                                                              ======
     public RefreshResponse refresh() {
         return client.admin().indices().prepareRefresh(asEsIndex()).execute().actionGet(refreshTimeout);
@@ -106,7 +106,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         if (esCb.getPreference() != null) {
             builder.setPreference(esCb.getPreference());
         }
-        return (int) getSearchHits(esCb.build(builder).execute().actionGet(searchTimeout)).getTotalHits().value;
+        return (int) getSearchHits(esCb.build(builder).execute().actionGet(searchTimeout)).getTotalHits().value();
     }
 
     @Override
@@ -158,7 +158,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         });
 
         list.setPageSize(size);
-        list.setAllRecordCount((int) searchHits.getTotalHits().value);
+        list.setAllRecordCount((int) searchHits.getTotalHits().value());
         list.setCurrentPageNumber(cb.getFetchPageNumber());
 
         list.setTook(response.getTook().getMillis());

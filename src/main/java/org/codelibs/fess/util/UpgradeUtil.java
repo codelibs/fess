@@ -31,12 +31,12 @@ import org.opensearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.
 import org.opensearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.opensearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
 import org.opensearch.action.index.IndexRequest;
-import org.opensearch.action.support.master.AcknowledgedResponse;
-import org.opensearch.client.Client;
-import org.opensearch.client.IndicesAdminClient;
+import org.opensearch.action.support.clustermanager.AcknowledgedResponse;
 import org.opensearch.cluster.metadata.MappingMetadata;
 import org.opensearch.common.xcontent.XContentType;
 import org.opensearch.core.action.ActionListener;
+import org.opensearch.transport.client.Client;
+import org.opensearch.transport.client.IndicesAdminClient;
 
 public final class UpgradeUtil {
     private static final Logger logger = LogManager.getLogger(UpgradeUtil.class);
