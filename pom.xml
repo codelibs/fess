@@ -19,6 +19,15 @@
 		<name>CodeLibs</name>
 		<url>https://fess.codelibs.org/</url>
 	</organization>
+	<developers>
+		<developer>
+			<id>shinsuke</id>
+			<name>Shinsuke Sugaya</name>
+			<email>shinsuke.sugaya@codelibs.co</email>
+			<organization>CodeLibs Inc.</organization>
+			<organizationUrl>https://codelibs.co</organizationUrl>
+		</developer>
+	</developers>
 	<issueManagement>
 		<url>https://github.com/codelibs/fess/issues</url>
 	</issueManagement>
