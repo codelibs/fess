@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      PARENT_BRANCH: ${{ github.ref_name == 'master' && 'main' || github.ref_name }}
+      PARENT_BRANCH: 14.19.x
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
