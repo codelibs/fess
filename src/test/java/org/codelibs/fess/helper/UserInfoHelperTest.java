@@ -81,4 +81,31 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertNull(userInfoHelper
                 .createUserCodeFromUserId("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"));
     }
+
+    public void test_isSecureCookie_cookieSecureNotNull() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+
+        userInfoHelper.setCookieSecure(Boolean.TRUE);
+        assertTrue(userInfoHelper.isSecureCookie());
+
+        userInfoHelper.setCookieSecure(Boolean.FALSE);
+        assertFalse(userInfoHelper.isSecureCookie());
+    }
+
+    public void test_isSecureCookie_cookieSecureNull_xForwardedProto_https() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        MockletHttpServletRequest request = getMockRequest();
+        request.addHeader("X-Forwarded-Proto", "https");
+
+        assertTrue(userInfoHelper.isSecureCookie());
+    }
+
+    public void test_isSecureCookie_noRequest() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        assertFalse(userInfoHelper.isSecureCookie());
+    }
 }

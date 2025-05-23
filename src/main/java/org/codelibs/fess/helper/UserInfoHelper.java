@@ -150,10 +150,22 @@ public class UserInfoHelper {
         if (StringUtil.isNotBlank(cookiePath)) {
             cookie.setPath(cookiePath);
         }
-        if (cookieSecure != null) {
-            cookie.setSecure(cookieSecure);
-        }
+        cookie.setSecure(isSecureCookie());
         LaResponseUtil.getResponse().addCookie(cookie);
+    }
+
+    protected boolean isSecureCookie() {
+        if (cookieSecure != null) {
+            return cookieSecure;
+        }
+
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            String forwardedProto = req.getHeader("X-Forwarded-Proto");
+            if ("https".equalsIgnoreCase(forwardedProto)) {
+                return true;
+            }
+            return req.isSecure();
+        }).orElse(false);
     }
 
     protected String getUserCodeFromCookie(final HttpServletRequest request) {
