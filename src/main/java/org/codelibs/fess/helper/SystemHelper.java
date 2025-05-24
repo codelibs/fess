@@ -594,6 +594,10 @@ public class SystemHelper {
     public File createTempFile(final String prefix, final String suffix) {
         try {
             final File file = File.createTempFile(prefix, suffix);
+            file.setReadable(false, false);
+            file.setReadable(true, true);
+            file.setWritable(false, false);
+            file.setWritable(true, true);
             if (logger.isDebugEnabled()) {
                 logger.debug("Create {} as a temp file.", file.getAbsolutePath());
             }
