@@ -166,7 +166,7 @@
 					<locale>en_US</locale>
 					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
 					<header>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
-					<footer>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Open Source Enterprise Search Server: Fess&lt;/a&gt;</footer>
+					<doclint>none</doclint>
 				</configuration>
 			</plugin>
 			<plugin>
