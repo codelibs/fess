@@ -657,11 +657,10 @@
       },
       "tokenizer": {
         "japanese_tokenizer": {
-          "type": "fess_japanese_reloadable_tokenizer",
+          "type": "fess_japanese_tokenizer",
           "mode": "normal",
           "user_dictionary": "${fess.dictionary.path}ja/kuromoji.txt",
-          "discard_punctuation": false,
-          "reload_interval":"1m"
+          "discard_punctuation": false
         },
         "korean_tokenizer": {
             "type": "fess_korean_tokenizer",
