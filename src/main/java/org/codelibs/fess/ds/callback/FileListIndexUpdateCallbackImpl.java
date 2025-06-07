@@ -366,7 +366,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     protected void mergeResponseData(final Map<String, Object> dataMap, final Map<String, Object> responseDataMap) {
         dataMap.putAll(responseDataMap);
         dataMap.keySet().stream().filter(key -> key.endsWith(".overwrite")) //
-                .collect(Collectors.toList()).stream().forEach(key -> {
+                .collect(Collectors.toList()).forEach(key -> {
                     final String baseKey = key.substring(0, key.length() - ".overwrite".length());
                     final Object value = dataMap.remove(key);
                     dataMap.put(baseKey, value);
