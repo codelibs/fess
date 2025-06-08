@@ -323,7 +323,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     if (rawData != null) {
                         @SuppressWarnings("unchecked")
                         final Map<String, Object> responseDataMap = (Map<String, Object>) rawData;
-                        dataMap.putAll(responseDataMap);
+                        mergeResponseData(dataMap, responseDataMap);
                     } else {
                         final byte[] data = resultData.getData();
                         if (data != null) {
@@ -331,7 +331,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                                 final DataSerializer dataSerializer = ComponentUtil.getComponent("dataSerializer");
                                 @SuppressWarnings("unchecked")
                                 final Map<String, Object> responseDataMap = (Map<String, Object>) dataSerializer.fromBinaryToObject(data);
-                                dataMap.putAll(responseDataMap);
+                                mergeResponseData(dataMap, responseDataMap);
                             } catch (final Exception e) {
                                 throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                             }
@@ -361,6 +361,16 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         } catch (final Exception e) {
             throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
         }
+    }
+
+    protected void mergeResponseData(final Map<String, Object> dataMap, final Map<String, Object> responseDataMap) {
+        dataMap.putAll(responseDataMap);
+        dataMap.keySet().stream().filter(key -> key.endsWith(".overwrite")) //
+                .collect(Collectors.toList()).forEach(key -> {
+                    final String baseKey = key.substring(0, key.length() - ".overwrite".length());
+                    final Object value = dataMap.remove(key);
+                    dataMap.put(baseKey, value);
+                });
     }
 
     protected boolean deleteDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
