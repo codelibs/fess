@@ -415,7 +415,7 @@ public class SearchApiTests extends CrawlTestBase {
         labelBody.put("name", TEST_LABEL);
         labelBody.put("value", TEST_LABEL);
         labelBody.put("included_paths", ".*tools.*");
-        Response response = checkMethodBase(labelBody).put("/api/admin/labeltype/setting");
+        Response response = checkMethodBase(labelBody).post("/api/admin/labeltype/setting");
         JsonPath jsonPath = JsonPath.from(response.asString());
         assertTrue(jsonPath.getBoolean("response.created"));
         assertEquals(0, jsonPath.getInt("response.status"));
@@ -427,7 +427,7 @@ public class SearchApiTests extends CrawlTestBase {
         labelBody.put("name", CRAWL_LABEL);
         labelBody.put("value", CRAWL_LABEL);
         labelBody.put("included_paths", ".*");
-        Response response = checkMethodBase(labelBody).put("/api/admin/labeltype/setting");
+        Response response = checkMethodBase(labelBody).post("/api/admin/labeltype/setting");
         JsonPath jsonPath = JsonPath.from(response.asString());
         assertTrue(jsonPath.getBoolean("response.created"));
         assertEquals(0, jsonPath.getInt("response.status"));
