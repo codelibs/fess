@@ -52,9 +52,9 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
         return asJson(new ApiConfigResponse().setting(form).status(Status.OK).result());
     }
 
-    // POST /api/admin/general
+    // PUT /api/admin/general
     @Execute
-    public JsonResponse<ApiResult> post$index(final EditBody body) {
+    public JsonResponse<ApiResult> put$index(final EditBody body) {
         validateApi(body, messages -> {});
         final EditBody newBody = new EditBody();
         AdminGeneralAction.updateForm(fessConfig, newBody);

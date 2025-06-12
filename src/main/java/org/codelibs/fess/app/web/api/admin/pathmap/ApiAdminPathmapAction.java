@@ -42,7 +42,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     private PathMappingService pathMappingService;
 
     // GET /api/admin/pathmap
-    // POST /api/admin/pathmap
+    // PUT /api/admin/pathmap
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -63,9 +63,9 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/pathmap/setting
+    // POST /api/admin/pathmap/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final PathMapping entity = getPathMapping(body).orElseGet(() -> {
@@ -84,9 +84,9 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/pathmap/setting
+    // PUT /api/admin/pathmap/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final PathMapping entity = getPathMapping(body).orElseGet(() -> {

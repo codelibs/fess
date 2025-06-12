@@ -60,7 +60,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/webconfig/settings
-    // POST /api/admin/webconfig/settings
+    // PUT /api/admin/webconfig/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -80,9 +80,9 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/webconfig/setting
+    // POST /api/admin/webconfig/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final WebConfig webConfig = getWebConfig(body).map(entity -> {
@@ -101,9 +101,9 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webConfig.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/webconfig/setting
+    // PUT /api/admin/webconfig/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final WebConfig webConfig = getWebConfig(body).map(entity -> {

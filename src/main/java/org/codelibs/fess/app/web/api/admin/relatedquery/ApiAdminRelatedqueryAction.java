@@ -55,7 +55,7 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/relatedquery/settings
-    // POST /api/admin/relatedquery/settings
+    // PUT /api/admin/relatedquery/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -75,9 +75,9 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/relatedquery/setting
+    // POST /api/admin/relatedquery/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final RelatedQuery relatedQuery = getRelatedQuery(body).map(entity -> {
@@ -96,9 +96,9 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(relatedQuery.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/relatedquery/setting
+    // PUT /api/admin/relatedquery/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final RelatedQuery relatedQuery = getRelatedQuery(body).map(entity -> {

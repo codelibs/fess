@@ -59,7 +59,7 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/fileauth/settings
-    // POST /api/admin/fileauth/settings
+    // PUT /api/admin/fileauth/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -79,9 +79,9 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/fileauth/setting
+    // POST /api/admin/fileauth/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         if (!isValidFileConfigId(body.fileConfigId)) {
             return asJson(new ApiErrorResponse().message("invalid fileConfigId").status(Status.BAD_REQUEST).result());
@@ -104,9 +104,9 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(fileAuth.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/fileauth/setting
+    // PUT /api/admin/fileauth/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final FileAuthentication fileAuth = getFileAuthentication(body).map(entity -> {

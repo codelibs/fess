@@ -65,7 +65,7 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     protected SuggestHelper suggestHelper;
 
     // GET /api/admin/elevateword
-    // POST /api/admin/elevateword
+    // PUT /api/admin/elevateword
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -92,9 +92,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigResponse().setting(body).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/elevateword/setting
+    // POST /api/admin/elevateword/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final ElevateWord entity = getElevateWord(body).orElseGet(() -> {
@@ -114,9 +114,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/elevateword/setting
+    // PUT /api/admin/elevateword/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final ElevateWord elevateWord = getElevateWord(body).map(entity -> {
@@ -160,9 +160,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/elevateword/upload
+    // PUT /api/admin/elevateword/upload
     @Execute
-    public JsonResponse<ApiResult> post$upload(final UploadForm body) {
+    public JsonResponse<ApiResult> put$upload(final UploadForm body) {
         validateApi(body, messages -> {});
         CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.elevateWordFile.getInputStream(), getCsvEncoding()))) {

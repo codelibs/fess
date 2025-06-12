@@ -94,7 +94,7 @@ public class AccessTokenTests extends CrudTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("name", name);
         requestBody.put("permissions", "Radmin-api");
-        String response = checkPutMethod(requestBody, ITEM_ENDPOINT_SUFFIX).asString();
+        String response = checkPostMethod(requestBody, ITEM_ENDPOINT_SUFFIX).asString();
 
         // Test: access admin api using a new token
         String id = JsonPath.from(response).get("response.id");

@@ -57,9 +57,9 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
     // Search Execute
     //
 
-    // POST /api/admin/documents/bulk
+    // PUT /api/admin/documents/bulk
     @Execute
-    public JsonResponse<ApiResult> post$bulk(final BulkBody body) {
+    public JsonResponse<ApiResult> put$bulk(final BulkBody body) {
         validateApi(body, messages -> {});
         if (body.documents == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "documents is required."));

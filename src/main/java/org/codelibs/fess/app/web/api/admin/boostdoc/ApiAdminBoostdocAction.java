@@ -57,7 +57,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/boostdoc
-    // POST /api/admin/boostdoc
+    // PUT /api/admin/boostdoc
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -77,9 +77,9 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
                 })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/boostdoc/setting
+    // POST /api/admin/boostdoc/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final BoostDocumentRule boostDoc = getBoostDocumentRule(body).map(entity -> {
@@ -97,9 +97,9 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(boostDoc.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/boostdoc/setting
+    // PUT /api/admin/boostdoc/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final BoostDocumentRule boostDoc = getBoostDocumentRule(body).map(entity -> {

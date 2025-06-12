@@ -123,7 +123,7 @@ public class SearchListTests extends CrudTestBase {
             //            doc.put("click_count", 100);  // Validation Error
             requestBody.put("doc", doc);
 
-            checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
             refresh();
         }
 

@@ -43,7 +43,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     private GroupService groupService;
 
     // GET /api/admin/group
-    // POST /api/admin/group
+    // PUT /api/admin/group
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -63,9 +63,9 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
         })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/group/setting
+    // POST /api/admin/group/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.CREATE;
@@ -85,9 +85,9 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/group/setting
+    // PUT /api/admin/group/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;

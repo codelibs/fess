@@ -60,7 +60,7 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/labeltype/settings
-    // POST /api/admin/labeltype/settings
+    // PUT /api/admin/labeltype/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -80,9 +80,9 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/labeltype/setting
+    // POST /api/admin/labeltype/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final LabelType labelType = getLabelType(body).map(entity -> {
@@ -101,9 +101,9 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(labelType.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/labeltype/setting
+    // PUT /api/admin/labeltype/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final LabelType labelType = getLabelType(body).map(entity -> {

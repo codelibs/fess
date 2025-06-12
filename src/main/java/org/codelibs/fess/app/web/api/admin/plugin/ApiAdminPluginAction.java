@@ -46,9 +46,9 @@ public class ApiAdminPluginAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiPluginResponse().plugins(list).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/plugin
+    // POST /api/admin/plugin
     @Execute
-    public JsonResponse<ApiResult> put$index(final InstallBody body) {
+    public JsonResponse<ApiResult> post$index(final InstallBody body) {
         validateApi(body, messages -> {});
         final Artifact artifact = ComponentUtil.getPluginHelper().getArtifact(body.name, body.version);
         if (artifact == null) {

@@ -70,7 +70,7 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/searchlist/docs
-    // POST /api/admin/searchlist/docs
+    // PUT /api/admin/searchlist/docs
     @Execute
     public JsonResponse<ApiResult> docs(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -113,9 +113,9 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/searchlist/doc
+    // POST /api/admin/searchlist/doc
     @Execute
-    public JsonResponse<ApiResult> put$doc(final CreateBody body) {
+    public JsonResponse<ApiResult> post$doc(final CreateBody body) {
         validateApi(body, messages -> {});
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));
@@ -145,9 +145,9 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/searchlist/doc
+    // PUT /api/admin/searchlist/doc
     @Execute
-    public JsonResponse<ApiResult> post$doc(final EditBody body) {
+    public JsonResponse<ApiResult> put$doc(final EditBody body) {
         validateApi(body, messages -> {});
         if (body.doc == null) {
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, "doc is required"));

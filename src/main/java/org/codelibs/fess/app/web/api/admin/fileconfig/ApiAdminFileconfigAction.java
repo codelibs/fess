@@ -60,7 +60,7 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/fileconfig/settings
-    // POST /api/admin/fileconfig/settings
+    // PUT /api/admin/fileconfig/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -80,9 +80,9 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/fileconfig/setting
+    // POST /api/admin/fileconfig/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final FileConfig fileConfig = getFileConfig(body).map(entity -> {
@@ -101,9 +101,9 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(fileConfig.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/fileconfig/setting
+    // PUT /api/admin/fileconfig/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final FileConfig fileConfig = getFileConfig(body).map(entity -> {

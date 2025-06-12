@@ -61,7 +61,7 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     protected SuggestHelper suggestHelper;
 
     // GET /api/admin/badword/settings
-    // POST /api/admin/badword/settings
+    // PUT /api/admin/badword/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -85,9 +85,9 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigResponse().setting(body).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/badword/setting
+    // POST /api/admin/badword/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final BadWord entity = getBadWord(body).orElseGet(() -> {
@@ -106,9 +106,9 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/user/setting
+    // PUT /api/admin/user/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final BadWord badWord = getBadWord(body).map(entity -> {
@@ -151,9 +151,9 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/badword/upload
+    // PUT /api/admin/badword/upload
     @Execute
-    public JsonResponse<ApiResult> post$upload(final UploadForm body) {
+    public JsonResponse<ApiResult> put$upload(final UploadForm body) {
         validateApi(body, messages -> {});
         CommonPoolUtil.execute(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(body.badWordFile.getInputStream(), getCsvEncoding()))) {
