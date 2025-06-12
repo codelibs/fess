@@ -26,4 +26,7 @@
 	</component>
 	<component name="pythonJob" class="org.codelibs.fess.job.PythonJob" instance="prototype">
 	</component>
+	<!-- Backward Compatibility  -->
+	<component name="pingEsJob" class="org.codelibs.fess.job.PingSearchEngineJob" instance="prototype">
+	</component>
 </components>
