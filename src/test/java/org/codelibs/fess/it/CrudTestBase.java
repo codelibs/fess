@@ -105,7 +105,7 @@ public abstract class CrudTestBase extends ITBase {
         // Test: create setting api.
         for (int i = 0; i < NUM; i++) {
             final Map<String, Object> requestBody = createTestParam(i);
-            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true)).body("response.status",
+            checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.created", equalTo(true)).body("response.status",
                     equalTo(0));
 
             //logger.info("create {}{}", i, checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
@@ -168,7 +168,7 @@ public abstract class CrudTestBase extends ITBase {
                 }
             }
 
-            checkPostMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
             refresh();
         }
 
@@ -212,14 +212,14 @@ public abstract class CrudTestBase extends ITBase {
         return response;
     }
 
-    protected Response checkPutMethod(final Map<String, Object> body, final String path) {
-        Response response = checkMethodBase(body).put(getApiPath() + "/" + path);
+    protected Response checkPostMethod(final Map<String, Object> body, final String path) {
+        Response response = checkMethodBase(body).post(getApiPath() + "/" + path);
         // logger.debug(response.asString());
         return response;
     }
 
-    protected Response checkPostMethod(final Map<String, Object> body, final String path) {
-        Response response = checkMethodBase(body).post(getApiPath() + "/" + path);
+    protected Response checkPutMethod(final Map<String, Object> body, final String path) {
+        Response response = checkMethodBase(body).put(getApiPath() + "/" + path);
         // logger.debug(response.asString());
         return response;
     }

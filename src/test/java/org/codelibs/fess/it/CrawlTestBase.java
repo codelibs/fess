@@ -39,7 +39,7 @@ public class CrawlTestBase extends ITBase {
     private static final String DOC_INDEX_NAME = "fess.search";
 
     protected static void createJob(final Map<String, Object> requestBody) {
-        checkMethodBase(requestBody).put("/api/admin/scheduler/setting").then().body("response.created", equalTo(true))
+        checkMethodBase(requestBody).post("/api/admin/scheduler/setting").then().body("response.created", equalTo(true))
                 .body("response.status", equalTo(0));
     }
 
@@ -47,7 +47,7 @@ public class CrawlTestBase extends ITBase {
         for (int i = 0; i < 30; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
             final String schedulerId = getSchedulerIds(namePrefix).get(0);
-            final Response response = checkMethodBase(requestBody).post("/api/admin/scheduler/" + schedulerId + "/start");
+            final Response response = checkMethodBase(requestBody).put("/api/admin/scheduler/" + schedulerId + "/start");
             if (response.getBody().jsonPath().getInt("response.status") == 0) {
                 logger.info("Start scheduler \"{}\"", schedulerId);
                 return;
@@ -93,7 +93,7 @@ public class CrawlTestBase extends ITBase {
     }
 
     protected static String createWebConfig(final Map<String, Object> requestBody) {
-        String response = checkMethodBase(requestBody).put("/api/admin/webconfig/setting").asString();
+        String response = checkMethodBase(requestBody).post("/api/admin/webconfig/setting").asString();
         JsonPath jsonPath = JsonPath.from(response);
         assertTrue(jsonPath.getBoolean("response.created"));
         assertEquals(0, jsonPath.getInt("response.status"));
@@ -107,7 +107,7 @@ public class CrawlTestBase extends ITBase {
     }
 
     protected static String createFileConfig(final Map<String, Object> requestBody) {
-        String response = checkMethodBase(requestBody).put("/api/admin/fileconfig/setting").asString();
+        String response = checkMethodBase(requestBody).post("/api/admin/fileconfig/setting").asString();
         JsonPath jsonPath = JsonPath.from(response);
         assertTrue(jsonPath.getBoolean("response.created"));
         assertEquals(0, jsonPath.getInt("response.status"));

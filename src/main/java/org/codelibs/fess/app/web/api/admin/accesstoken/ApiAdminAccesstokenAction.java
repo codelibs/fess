@@ -57,7 +57,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/accesstoken
-    // POST /api/admin/accesstoken
+    // PUT /api/admin/accesstoken
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -76,9 +76,9 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/accesstoken/setting
+    // POST /api/admin/accesstoken/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {
@@ -97,9 +97,9 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(accessToken.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/accesstoken/setting
+    // PUT /api/admin/accesstoken/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final AccessToken accessToken = getAccessToken(body).map(entity -> {

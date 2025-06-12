@@ -59,7 +59,7 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/webauth/settings
-    // POST /api/admin/webauth/settings
+    // PUT /api/admin/webauth/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -79,9 +79,9 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/webauth/setting
+    // POST /api/admin/webauth/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         if (!isValidWebConfigId(body.webConfigId)) {
             return asJson(new ApiErrorResponse().message("invalid webConfigId").status(Status.BAD_REQUEST).result());
@@ -104,9 +104,9 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webAuth.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/webauth/setting
+    // PUT /api/admin/webauth/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final WebAuthentication webAuth = getWebAuthentication(body).map(entity -> {

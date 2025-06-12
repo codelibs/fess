@@ -56,7 +56,7 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/failureurl/logs
-    // POST /api/admin/failureurl/logs
+    // PUT /api/admin/failureurl/logs
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});

@@ -121,7 +121,7 @@ public class PluginTests extends CrudTestBase {
 
     @Test
     void testInstall_ng() {
-        checkPutMethod(Collections.emptyMap(), getInstallEndpointSuffix()).then().body("response.status", equalTo(1));
+        checkPostMethod(Collections.emptyMap(), getInstallEndpointSuffix()).then().body("response.status", equalTo(1));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class PluginTests extends CrudTestBase {
 
         // Install
         {
-            checkPutMethod(targetMap, getInstallEndpointSuffix()).then().body("response.status", equalTo(0));
+            checkPostMethod(targetMap, getInstallEndpointSuffix()).then().body("response.status", equalTo(0));
 
             boolean done = false;
             for (int i = 0; i < 60; i++) {

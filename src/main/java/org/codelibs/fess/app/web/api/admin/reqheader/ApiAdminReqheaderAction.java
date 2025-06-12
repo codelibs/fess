@@ -59,7 +59,7 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/reqheader/settings
-    // POST /api/admin/reqheader/settings
+    // PUT /api/admin/reqheader/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -79,9 +79,9 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/reqheader/setting
+    // POST /api/admin/reqheader/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         if (!isValidWebConfigId(body.webConfigId)) {
             return asJson(new ApiErrorResponse().message("invalid webConfigId").status(Status.BAD_REQUEST).result());
@@ -104,9 +104,9 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(reqHeader.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/reqheader/setting
+    // PUT /api/admin/reqheader/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final RequestHeader reqHeader = getRequestHeader(body).map(entity -> {

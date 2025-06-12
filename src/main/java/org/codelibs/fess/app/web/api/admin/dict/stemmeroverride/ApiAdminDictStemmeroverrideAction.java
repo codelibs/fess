@@ -67,9 +67,9 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/dict/stemmerOverride/setting/{dictId}
+    // POST /api/admin/dict/stemmerOverride/setting/{dictId}
     @Execute
-    public JsonResponse<ApiResult> put$setting(final String dictId, final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
@@ -85,9 +85,9 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/dict/stemmerOverride/setting/{dictId}
+    // PUT /api/admin/dict/stemmerOverride/setting/{dictId}
     @Execute
-    public JsonResponse<ApiResult> post$setting(final String dictId, final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
@@ -115,9 +115,9 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(id)).created(false).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/dict/stemmerOverride/upload/{dictId}
+    // PUT /api/admin/dict/stemmerOverride/upload/{dictId}
     @Execute
-    public JsonResponse<ApiResult> post$upload(final String dictId, final UploadForm form) {
+    public JsonResponse<ApiResult> put$upload(final String dictId, final UploadForm form) {
         form.dictId = dictId;
         validateApi(form, messages -> {});
         final StemmerOverrideFile file = stemmerOverrideService.getStemmerOverrideFile(form.dictId).orElseGet(() -> {

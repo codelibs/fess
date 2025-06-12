@@ -55,7 +55,7 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/keymatch/settings
-    // POST /api/admin/keymatch/settings
+    // PUT /api/admin/keymatch/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -75,9 +75,9 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/keymatch/setting
+    // POST /api/admin/keymatch/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final KeyMatch keyMatch = getKeyMatch(body).map(entity -> {
@@ -96,9 +96,9 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(keyMatch.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/keymatch/setting
+    // PUT /api/admin/keymatch/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final KeyMatch keyMatch = getKeyMatch(body).map(entity -> {

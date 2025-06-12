@@ -41,7 +41,7 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
     private RoleService roleService;
 
     // GET /api/admin/role/settings
-    // POST /api/admin/role/settings
+    // PUT /api/admin/role/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -61,9 +61,9 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/role/setting
+    // POST /api/admin/role/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final Role entity = getRole(body).orElseGet(() -> {
@@ -81,9 +81,9 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/role/setting
+    // PUT /api/admin/role/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final Role entity = getRole(body).orElseGet(() -> {

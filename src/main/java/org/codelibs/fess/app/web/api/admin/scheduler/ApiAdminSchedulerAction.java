@@ -49,9 +49,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         throw new UnsupportedOperationException();
     }
 
-    // POST /api/admin/scheduler/{id}/start
+    // PUT /api/admin/scheduler/{id}/start
     @Execute(urlPattern = "{}/@word")
-    public JsonResponse<ApiResult> post$start(final String id) {
+    public JsonResponse<ApiResult> put$start(final String id) {
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             if (!entity.isEnabled() || entity.isRunning()) {
                 throwValidationErrorApi(messages -> {
@@ -73,9 +73,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
-    // POST /api/admin/scheduler/{id}/stop
+    // PUT /api/admin/scheduler/{id}/stop
     @Execute(urlPattern = "{}/@word")
-    public JsonResponse<ApiResult> post$stop(final String id) {
+    public JsonResponse<ApiResult> put$stop(final String id) {
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
                 entity.stop();
@@ -94,7 +94,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/scheduler
-    // POST /api/admin/scheduler
+    // PUT /api/admin/scheduler
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -115,9 +115,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/scheduler/setting
+    // POST /api/admin/scheduler/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final ScheduledJob entity = getScheduledJob(body).orElseGet(() -> {
@@ -136,9 +136,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/scheduler/setting
+    // PUT /api/admin/scheduler/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final ScheduledJob entity = getScheduledJob(body).orElseGet(() -> {

@@ -55,7 +55,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/duplicatehost/settings
-    // POST /api/admin/duplicatehost/settings
+    // PUT /api/admin/duplicatehost/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -75,9 +75,9 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
-    // PUT /api/admin/duplicatehost/setting
+    // POST /api/admin/duplicatehost/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final DuplicateHost duplicateHost = getDuplicateHost(body).map(entity -> {
@@ -96,9 +96,9 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(duplicateHost.getId()).created(true).status(Status.OK).result());
     }
 
-    // POST /api/admin/duplicatehost/setting
+    // PUT /api/admin/duplicatehost/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.EDIT;
         final DuplicateHost duplicateHost = getDuplicateHost(body).map(entity -> {

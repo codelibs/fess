@@ -42,7 +42,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
     private UserService userService;
 
     // GET /api/admin/user/settings
-    // POST /api/admin/user/settings
+    // PUT /api/admin/user/settings
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -62,9 +62,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         })).status(ApiResult.Status.OK).result());
     }
 
-    // PUT /api/admin/user/setting
+    // POST /api/admin/user/setting
     @Execute
-    public JsonResponse<ApiResult> put$setting(final CreateBody body) {
+    public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
         body.crudMode = CrudMode.CREATE;
         final User entity = getUser(body).orElseGet(() -> {
@@ -83,9 +83,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
-    // POST /api/admin/user/setting
+    // PUT /api/admin/user/setting
     @Execute
-    public JsonResponse<ApiResult> post$setting(final EditBody body) {
+    public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
         validateAttributes(body.attributes, this::throwValidationErrorApi);
         body.crudMode = CrudMode.EDIT;

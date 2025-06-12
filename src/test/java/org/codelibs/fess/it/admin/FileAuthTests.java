@@ -74,7 +74,7 @@ public class FileAuthTests extends CrudTestBase {
         requestBody.put("boost", 100.0);
         requestBody.put("available", true);
         requestBody.put("sort_order", 1);
-        checkMethodBase(requestBody).put("/api/admin/fileconfig/setting").then().body("response.created", equalTo(true))
+        checkMethodBase(requestBody).post("/api/admin/fileconfig/setting").then().body("response.created", equalTo(true))
                 .body("response.status", equalTo(0));
     }
 

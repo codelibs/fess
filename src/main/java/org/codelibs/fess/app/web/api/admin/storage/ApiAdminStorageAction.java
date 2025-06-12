@@ -44,7 +44,7 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     private static final Logger logger = LogManager.getLogger(ApiAdminStorageAction.class);
 
     // GET /api/admin/storage/list/{id}
-    // POST /api/admin/storage/list/{id}
+    // PUT /api/admin/storage/list/{id}
     @Execute
     public JsonResponse<ApiResult> list(final OptionalThing<String> id) {
         final List<Map<String, Object>> list = getFileItems(id.isPresent() ? decodePath(id.get()) : null);
@@ -97,9 +97,9 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     }
 
     // curl -XPOST -H "Authorization: CHANGEME" localhost:8080/api/admin/storage/upload/ -F path=/ -F file=@...
-    // POST /api/admin/storage/upload/{pathId}/
+    // PUT /api/admin/storage/upload/{pathId}/
     @Execute
-    public JsonResponse<ApiResult> post$upload(final UploadForm form) {
+    public JsonResponse<ApiResult> put$upload(final UploadForm form) {
         validateApi(form, messages -> {});
         if (form.file == null) {
             throwValidationErrorApi(messages -> messages.addErrorsStorageNoUploadFile(GLOBAL));

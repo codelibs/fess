@@ -54,7 +54,7 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/crawlinginfo/logs
-    // POST /api/admin/crawlinginfo/logs
+    // PUT /api/admin/crawlinginfo/logs
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
