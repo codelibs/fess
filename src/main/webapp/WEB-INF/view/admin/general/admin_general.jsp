@@ -78,6 +78,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <c:if test="${fesenType!='cloud' and fesenType!='aws'}">
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.result_collapsed"/></span>
@@ -91,6 +92,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                </c:if>
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.thumbnail"/></span>
