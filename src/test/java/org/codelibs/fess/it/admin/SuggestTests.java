@@ -83,7 +83,7 @@ public class SuggestTests extends CrudTestBase {
         assertTrue(res.containsKey("total_words_num"));
         assertTrue(res.containsKey("document_words_num"));
         assertTrue(res.containsKey("query_words_num"));
-        assertEquals(new Integer(0), JsonPath.from(response).get("response.status"));
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
     }
 
     @Override

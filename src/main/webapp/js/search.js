@@ -4,7 +4,10 @@ $(function() {
       $favorites = $(".favorite", $result),
       $searchButton = $("#searchButton"),
       contextPath = $("#contextPath").val(),
-      loadImage;
+      loadImage,
+      IMG_LOADING_DELAY = 200,
+      IMG_LOADING_MAX = 0,
+      clipboard;
 
   $("#searchForm").on("submit", function(e) {
     $searchButton.attr("disabled", true);
@@ -38,13 +41,13 @@ $(function() {
 
   $result.on("mousedown", "a.link", function(e) {
     var docId = $(this).attr("data-id"),
-      rt = $("#rt").val(),
-      queryId = $("#queryId").val(),
-      order = $(this).attr("data-order"),
-      url = $(this).attr("href"),
-      buf = [],
-      hashIndex,
-      hashStr;
+        rt = $("#rt").val(),
+        queryId = $("#queryId").val(),
+        order = $(this).attr("data-order"),
+        url = $(this).attr("href"),
+        buf = [],
+        hashIndex,
+        hashStr;
     buf.push(contextPath);
     buf.push("/go/?rt=");
     buf.push(rt);
@@ -67,11 +70,11 @@ $(function() {
 
   $result.on("mouseover", "a.link", function(e) {
     var docId = $(this).attr("data-id"),
-      rt = $("#rt").val(),
-      url = $(this).attr("href"),
-      buf = [],
-      hashIndex,
-      hashStr;
+        rt = $("#rt").val(),
+        url = $(this).attr("href"),
+        buf = [],
+        hashIndex,
+        hashStr;
     buf.push(contextPath);
     buf.push("/go/?rt=");
     buf.push(rt);
@@ -217,8 +220,6 @@ $(function() {
     });
   }
 
-  var IMG_LOADING_DELAY = 200;
-  var IMG_LOADING_MAX = 0;
   loadImage = function(img, url, limit) {
     var imgData = new Image();
     $(imgData).on("load", function() {
@@ -250,7 +251,7 @@ $(function() {
     loadImage(this, $(this).attr("data-src"), IMG_LOADING_MAX);
   });
   
-  var clipboard = new ClipboardJS(".url-copy");
+  clipboard = new ClipboardJS(".url-copy");
   clipboard.on("success", function(e) {
     e.trigger.classList.remove("url-copy");
     e.trigger.classList.remove("far");

@@ -62,7 +62,7 @@ public class DuplicateHostTests extends CrudTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
-        requestBody.put("duplicate_host_name", "duplicate_" + new Integer(id).toString());
+        requestBody.put("duplicate_host_name", "duplicate_" + Integer.valueOf(id).toString());
         requestBody.put("sort_order", id);
         return requestBody;
     }

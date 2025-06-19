@@ -62,7 +62,7 @@ public class BoostDocTests extends CrudTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
-        requestBody.put("boost_expr", new Integer(id).toString());
+        requestBody.put("boost_expr", Integer.valueOf(id).toString());
         requestBody.put("sort_order", id);
         return requestBody;
     }
