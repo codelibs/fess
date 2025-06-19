@@ -84,7 +84,7 @@ public class SystemInfoTests extends CrudTestBase {
         assertTrue(res.containsKey("system_props"));
         assertTrue(res.containsKey("fess_props"));
         assertTrue(res.containsKey("bug_report_props"));
-        assertEquals(new Integer(0), JsonPath.from(response).get("response.status"));
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
     }
 
     @Override

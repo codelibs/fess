@@ -81,7 +81,7 @@ public class GeneralTests extends CrudTestBase {
         String response = checkGetMethod(searchBody, "").asString();
         final Map<String, Object> res = JsonPath.from(response).getMap("response.setting");
         assertTrue(!res.isEmpty());
-        assertEquals(new Integer(0), JsonPath.from(response).get("response.status"));
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
     }
 
     @Override

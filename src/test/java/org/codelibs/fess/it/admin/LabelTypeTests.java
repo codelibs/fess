@@ -62,7 +62,7 @@ public class LabelTypeTests extends CrudTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
-        requestBody.put("value", new Integer(id).toString());
+        requestBody.put("value", Integer.valueOf(id).toString());
         return requestBody;
     }
 

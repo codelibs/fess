@@ -78,7 +78,7 @@ public class BackupTests extends CrudTestBase {
     protected void testRead() {
         final Map<String, Object> searchBody = new HashMap<>();
         final String response = checkMethodBase(searchBody).get(API_PATH + "/" + LIST_ENDPOINT_SUFFIX).asString();
-        assertEquals(new Integer(0), JsonPath.from(response).get("response.status"));
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
     }
 
     @Override

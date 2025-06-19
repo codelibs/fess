@@ -62,9 +62,8 @@ public class KeyMatchTests extends CrudTestBase {
         final Map<String, Object> requestBody = new HashMap<>();
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
-        requestBody.put(KEY_PROPERTY, keyProp);
         requestBody.put("query", "query" + id);
-        requestBody.put("max_size", new Integer(id).toString());
+        requestBody.put("max_size", Integer.valueOf(id).toString());
         requestBody.put("boost", 100);
         return requestBody;
     }

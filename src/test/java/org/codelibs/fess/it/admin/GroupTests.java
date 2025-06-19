@@ -69,7 +69,7 @@ public class GroupTests extends CrudTestBase {
         final String keyProp = NAME_PREFIX + id;
         requestBody.put(KEY_PROPERTY, keyProp);
         final Map<String, String> attributes = new HashMap<>();
-        attributes.put("gidNumber", new Integer(id).toString());
+        attributes.put("gidNumber", Integer.valueOf(id).toString());
         requestBody.put("attributes", attributes);
 
         return requestBody;
