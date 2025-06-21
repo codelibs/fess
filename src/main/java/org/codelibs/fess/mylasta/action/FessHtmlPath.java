@@ -364,9 +364,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/systeminfo/admin_systeminfo.jsp */
     HtmlNext path_AdminSysteminfo_AdminSysteminfoJsp = new HtmlNext("/admin/systeminfo/admin_systeminfo.jsp");
 
-    /** The path of the HTML: /admin/upgrade/admin_upgrade.jsp */
-    HtmlNext path_AdminUpgrade_AdminUpgradeJsp = new HtmlNext("/admin/upgrade/admin_upgrade.jsp");
-
     /** The path of the HTML: /admin/user/admin_user.jsp */
     HtmlNext path_AdminUser_AdminUserJsp = new HtmlNext("/admin/user/admin_user.jsp");
 

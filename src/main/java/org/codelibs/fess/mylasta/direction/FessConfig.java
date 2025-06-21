@@ -1882,7 +1882,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'domain.title'. <br>
      * The value is, e.g. Fess <br>
-     * comment: The title of domain the application for logging
+     * comment: The title of the domain for logging and display.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getDomainTitle();
@@ -1890,7 +1890,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.type'. <br>
      * The value is, e.g. default <br>
-     * comment: Search Engine
+     * comment: The type of search engine backend (e.g., default, opensearch).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineType();
@@ -1898,6 +1898,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.http.url'. <br>
      * The value is, e.g. http://localhost:9201 <br>
+     * comment: The URL of the search engine HTTP endpoint.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineHttpUrl();
@@ -1905,6 +1906,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.http.ssl.certificate_authorities'. <br>
      * The value is, e.g.  <br>
+     * comment: Path to SSL certificate authorities for secure HTTP connections.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineHttpSslCertificateAuthorities();
@@ -1912,6 +1914,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.http.ssl.certificate_authorities' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Path to SSL certificate authorities for secure HTTP connections.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1920,6 +1923,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.username'. <br>
      * The value is, e.g.  <br>
+     * comment: Username for authenticating to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineUsername();
@@ -1927,6 +1931,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.username' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Username for authenticating to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1935,6 +1940,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.password'. <br>
      * The value is, e.g.  <br>
+     * comment: Password for authenticating to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEnginePassword();
@@ -1942,6 +1948,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.password' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Password for authenticating to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1950,6 +1957,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.heartbeat_interval'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Interval (ms) for heartbeat checks to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineHeartbeatInterval();
@@ -1957,6 +1965,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.heartbeat_interval' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Interval (ms) for heartbeat checks to the search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1965,7 +1974,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
      * The value is, e.g. aes <br>
-     * comment: Cryptographer
+     * comment: Cipher algorithm used for encryption.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppCipherAlgorism();
@@ -1973,6 +1982,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.cipher.key'. <br>
      * The value is, e.g. ___change__me___ <br>
+     * comment: Secret key for encryption (change this value for production).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppCipherKey();
@@ -1980,6 +1990,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.digest.algorism'. <br>
      * The value is, e.g. sha256 <br>
+     * comment: Algorithm for digest calculation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppDigestAlgorism();
@@ -1987,6 +1998,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.encrypt.property.pattern'. <br>
      * The value is, e.g. .*password|.*key|.*token|.*secret <br>
+     * comment: Regex pattern for properties to encrypt.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppEncryptPropertyPattern();
@@ -1994,6 +2006,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.extension.names'. <br>
      * The value is, e.g.  <br>
+     * comment: Extension names for application customization.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppExtensionNames();
@@ -2001,6 +2014,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.extension.names' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Extension names for application customization.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2009,6 +2023,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.audit.log.format'. <br>
      * The value is, e.g.  <br>
+     * comment: Audit log format.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppAuditLogFormat();
@@ -2016,6 +2031,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'app.audit.log.format' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Audit log format.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2063,7 +2079,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
      * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
      *  <br>
-     * comment: JVM options
+     * comment: JVM options for the crawler process.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmCrawlerOptions();
@@ -2144,6 +2160,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * -Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider<br>
      * -Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true<br>
      *  <br>
+     * comment: JVM options for the thumbnail process.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmThumbnailOptions();
@@ -2151,7 +2168,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.system.job.ids'. <br>
      * The value is, e.g. default_crawler <br>
-     * comment: job
+     * comment: System job IDs for scheduled jobs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobSystemJobIds();
@@ -2159,6 +2176,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.template.title.web'. <br>
      * The value is, e.g. Web Crawler - {0} <br>
+     * comment: Template for web crawler job title.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateTitleWeb();
@@ -2166,6 +2184,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.template.title.file'. <br>
      * The value is, e.g. File Crawler - {0} <br>
+     * comment: Template for file crawler job title.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateTitleFile();
@@ -2173,6 +2192,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.template.title.data'. <br>
      * The value is, e.g. Data Crawler - {0} <br>
+     * comment: Template for data crawler job title.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateTitleData();
@@ -2180,6 +2200,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.template.script'. <br>
      * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); <br>
+     * comment: Script template for job execution.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateScript();
@@ -2187,6 +2208,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.max.crawler.processes'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Maximum number of crawler processes.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobMaxCrawlerProcesses();
@@ -2194,6 +2216,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.max.crawler.processes' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Maximum number of crawler processes.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2202,6 +2225,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.default.script'. <br>
      * The value is, e.g. groovy <br>
+     * comment: Default script language for jobs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobDefaultScript();
@@ -2209,6 +2233,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.system.property.filter.pattern'. <br>
      * The value is, e.g.  <br>
+     * comment: Pattern to filter system properties for jobs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobSystemPropertyFilterPattern();
@@ -2216,6 +2241,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'job.system.property.filter.pattern' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Pattern to filter system properties for jobs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2224,6 +2250,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'processors'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Number of processors to use.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getProcessors();
@@ -2231,6 +2258,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'processors' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Number of processors to use.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2239,6 +2267,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'java.command.path'. <br>
      * The value is, e.g. java <br>
+     * comment: Path to Java command.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJavaCommandPath();
@@ -2246,6 +2275,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'python.command.path'. <br>
      * The value is, e.g. python <br>
+     * comment: Path to Python command.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPythonCommandPath();
@@ -2253,6 +2283,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'path.encoding'. <br>
      * The value is, e.g. UTF-8 <br>
+     * comment: Encoding for file paths.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPathEncoding();
@@ -2260,6 +2291,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'use.own.tmp.dir'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to use a dedicated temporary directory.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUseOwnTmpDir();
@@ -2267,6 +2299,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'use.own.tmp.dir' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to use a dedicated temporary directory.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isUseOwnTmpDir();
@@ -2274,6 +2307,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'max.log.output.length'. <br>
      * The value is, e.g. 4000 <br>
+     * comment: Maximum length of log output.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getMaxLogOutputLength();
@@ -2281,6 +2315,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'max.log.output.length' as {@link Integer}. <br>
      * The value is, e.g. 4000 <br>
+     * comment: Maximum length of log output.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2289,6 +2324,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'adaptive.load.control'. <br>
      * The value is, e.g. 50 <br>
+     * comment: Adaptive load control value.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAdaptiveLoadControl();
@@ -2296,6 +2332,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'adaptive.load.control' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
+     * comment: Adaptive load control value.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2304,6 +2341,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'supported.uploaded.js.extentions'. <br>
      * The value is, e.g. js <br>
+     * comment: Supported JavaScript file extensions for upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedUploadedJsExtentions();
@@ -2311,6 +2349,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'supported.uploaded.css.extentions'. <br>
      * The value is, e.g. css <br>
+     * comment: Supported CSS file extensions for upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedUploadedCssExtentions();
@@ -2318,6 +2357,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'supported.uploaded.media.extentions'. <br>
      * The value is, e.g. jpg,jpeg,gif,png,swf <br>
+     * comment: Supported media file extensions for upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedUploadedMediaExtentions();
@@ -2325,6 +2365,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'supported.uploaded.files'. <br>
      * The value is, e.g. license.properties <br>
+     * comment: Supported files for upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedUploadedFiles();
@@ -2332,6 +2373,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'supported.languages'. <br>
      * The value is, e.g. ar,bg,bn,ca,ckb_IQ,cs,da,de,el,en_IE,en,es,et,eu,fa,fi,fr,gl,gu,he,hi,hr,hu,hy,id,it,ja,ko,lt,lv,mk,ml,nl,no,pa,pl,pt_BR,pt,ro,ru,si,sq,sv,ta,te,th,tl,tr,uk,ur,vi,zh_CN,zh_TW,zh <br>
+     * comment: Supported languages.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedLanguages();
@@ -2339,6 +2381,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.access.token.length'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Length of API access token.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiAccessTokenLength();
@@ -2346,6 +2389,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.access.token.length' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Length of API access token.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2354,6 +2398,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.access.token.required'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether API access token is required.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiAccessTokenRequired();
@@ -2361,6 +2406,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.access.token.required' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether API access token is required.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiAccessTokenRequired();
@@ -2368,6 +2414,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.access.token.request.parameter'. <br>
      * The value is, e.g.  <br>
+     * comment: API access token request parameter.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiAccessTokenRequestParameter();
@@ -2375,6 +2422,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.access.token.request.parameter' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: API access token request parameter.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2383,6 +2431,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.admin.access.permissions'. <br>
      * The value is, e.g. Radmin-api <br>
+     * comment: Permissions for API admin access.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiAdminAccessPermissions();
@@ -2390,6 +2439,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.search.accept.referers'. <br>
      * The value is, e.g.  <br>
+     * comment: Accepted referers for API search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiSearchAcceptReferers();
@@ -2397,6 +2447,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.search.accept.referers' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Accepted referers for API search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2405,6 +2456,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.search.scroll'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable scroll for API search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiSearchScroll();
@@ -2412,6 +2464,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.search.scroll' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable scroll for API search.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiSearchScroll();
@@ -2419,6 +2472,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.json.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
+     * comment: Headers for API JSON response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonResponseHeaders();
@@ -2426,6 +2480,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.json.response.exception.included'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to include exceptions in API JSON response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonResponseExceptionIncluded();
@@ -2433,6 +2488,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.json.response.exception.included' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to include exceptions in API JSON response.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiJsonResponseExceptionIncluded();
@@ -2440,6 +2496,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.gsa.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
+     * comment: Headers for API GSA response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiGsaResponseHeaders();
@@ -2447,6 +2504,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.gsa.response.exception.included'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to include exceptions in API GSA response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiGsaResponseExceptionIncluded();
@@ -2454,6 +2512,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.gsa.response.exception.included' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to include exceptions in API GSA response.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiGsaResponseExceptionIncluded();
@@ -2461,6 +2520,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.dashboard.response.headers'. <br>
      * The value is, e.g. Referrer-Policy:strict-origin-when-cross-origin <br>
+     * comment: Headers for API dashboard response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiDashboardResponseHeaders();
@@ -2468,6 +2528,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.origin'. <br>
      * The value is, e.g. * <br>
+     * comment: Allowed origins for CORS.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowOrigin();
@@ -2475,6 +2536,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.methods'. <br>
      * The value is, e.g. GET, POST, OPTIONS, DELETE, PUT <br>
+     * comment: Allowed HTTP methods for CORS.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowMethods();
@@ -2482,6 +2544,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.max.age'. <br>
      * The value is, e.g. 3600 <br>
+     * comment: Max age for CORS preflight requests.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsMaxAge();
@@ -2489,6 +2552,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.max.age' as {@link Integer}. <br>
      * The value is, e.g. 3600 <br>
+     * comment: Max age for CORS preflight requests.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2497,6 +2561,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.headers'. <br>
      * The value is, e.g. Origin, Content-Type, Accept, Authorization, X-Requested-With <br>
+     * comment: Allowed headers for CORS.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowHeaders();
@@ -2504,6 +2569,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.cors.allow.credentials'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow credentials for CORS.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiCorsAllowCredentials();
@@ -2511,6 +2577,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.cors.allow.credentials' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow credentials for CORS.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiCorsAllowCredentials();
@@ -2518,6 +2585,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.jsonp.enabled'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable JSONP for API.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiJsonpEnabled();
@@ -2525,6 +2593,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'api.jsonp.enabled' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable JSONP for API.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiJsonpEnabled();
@@ -2532,6 +2601,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'api.ping.search_engine.fields'. <br>
      * The value is, e.g. status,timed_out <br>
+     * comment: Fields for API ping to search engine.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiPingSearchEngineFields();
@@ -2556,6 +2626,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.host'. <br>
      * The value is, e.g.  <br>
+     * comment: Hostname for the HTTP proxy server.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpProxyHost();
@@ -2563,6 +2634,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.host' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Hostname for the HTTP proxy server.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2571,6 +2643,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.port'. <br>
      * The value is, e.g. 8080 <br>
+     * comment: Port number for the HTTP proxy server (e.g., 8080).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpProxyPort();
@@ -2578,6 +2651,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.port' as {@link Integer}. <br>
      * The value is, e.g. 8080 <br>
+     * comment: Port number for the HTTP proxy server (e.g., 8080).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2586,6 +2660,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.username'. <br>
      * The value is, e.g.  <br>
+     * comment: Username for HTTP proxy authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpProxyUsername();
@@ -2593,6 +2668,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.username' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Username for HTTP proxy authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2601,6 +2677,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.password'. <br>
      * The value is, e.g.  <br>
+     * comment: Password for HTTP proxy authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpProxyPassword();
@@ -2608,6 +2685,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.proxy.password' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Password for HTTP proxy authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2616,6 +2694,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.max.size'. <br>
      * The value is, e.g. 262144000 <br>
+     * comment: Maximum size (bytes) for HTTP file uploads.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpFileuploadMaxSize();
@@ -2623,6 +2702,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.max.size' as {@link Integer}. <br>
      * The value is, e.g. 262144000 <br>
+     * comment: Maximum size (bytes) for HTTP file uploads.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2631,6 +2711,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.threshold.size'. <br>
      * The value is, e.g. 262144 <br>
+     * comment: Threshold size (bytes) for HTTP file upload buffering.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpFileuploadThresholdSize();
@@ -2638,6 +2719,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.threshold.size' as {@link Integer}. <br>
      * The value is, e.g. 262144 <br>
+     * comment: Threshold size (bytes) for HTTP file upload buffering.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2646,6 +2728,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.max.file.count'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum number of files allowed per HTTP upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getHttpFileuploadMaxFileCount();
@@ -2653,6 +2736,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'http.fileupload.max.file.count' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum number of files allowed per HTTP upload.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2661,7 +2745,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.default.script'. <br>
      * The value is, e.g. groovy <br>
-     * comment: common
+     * comment: Default script for the crawler (e.g., groovy).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDefaultScript();
@@ -2669,6 +2753,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.http.thread_pool.size'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Number of threads for HTTP crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHttpThreadPoolSize();
@@ -2676,6 +2761,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.http.thread_pool.size' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Number of threads for HTTP crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2684,6 +2770,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.data.serializer'. <br>
      * The value is, e.g. kryo <br>
+     * comment: Serializer type for crawler data (e.g., kryo).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDataSerializer();
@@ -2691,6 +2778,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of site name in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentMaxSiteLength();
@@ -2698,6 +2786,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.site.length' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of site name in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2706,6 +2795,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.site.encoding'. <br>
      * The value is, e.g. UTF-8 <br>
+     * comment: Encoding for site names in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentSiteEncoding();
@@ -2713,6 +2803,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.unknown.hostname'. <br>
      * The value is, e.g. unknown <br>
+     * comment: Hostname to use when unknown in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentUnknownHostname();
@@ -2720,6 +2811,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.use.site.encoding.on.english'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use site encoding for English documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentUseSiteEncodingOnEnglish();
@@ -2727,6 +2819,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.use.site.encoding.on.english' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use site encoding for English documents.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentUseSiteEncodingOnEnglish();
@@ -2734,6 +2827,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.append.data'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append data to documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentAppendData();
@@ -2741,6 +2835,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.append.data' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append data to documents.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentAppendData();
@@ -2748,6 +2843,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.append.filename'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to append filename to documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentAppendFilename();
@@ -2755,6 +2851,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.append.filename' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to append filename to documents.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentAppendFilename();
@@ -2762,6 +2859,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.alphanum.term.size'. <br>
      * The value is, e.g. 20 <br>
+     * comment: Maximum size of alphanumeric terms in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentMaxAlphanumTermSize();
@@ -2769,6 +2867,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.alphanum.term.size' as {@link Integer}. <br>
      * The value is, e.g. 20 <br>
+     * comment: Maximum size of alphanumeric terms in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2777,6 +2876,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.symbol.term.size'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum size of symbol terms in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentMaxSymbolTermSize();
@@ -2784,6 +2884,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.max.symbol.term.size' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum size of symbol terms in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2792,6 +2893,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.duplicate.term.removed'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to remove duplicate terms in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentDuplicateTermRemoved();
@@ -2799,6 +2901,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.duplicate.term.removed' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to remove duplicate terms in documents.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentDuplicateTermRemoved();
@@ -2806,6 +2909,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.space.chars'. <br>
      * The value is, e.g. u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu200Cu202Fu205Fu3000uFEFFuFFFDu00B6 <br>
+     * comment: Unicode space characters for document parsing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentSpaceChars();
@@ -2813,6 +2917,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.fullstop.chars'. <br>
      * The value is, e.g. u002eu06d4u2e3cu3002 <br>
+     * comment: Unicode full stop characters for document parsing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFullstopChars();
@@ -2820,6 +2925,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
      * The value is, e.g. UTF-8 <br>
+     * comment: Encoding for crawling data.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerCrawlingDataEncoding();
@@ -2827,6 +2933,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.web.protocols'. <br>
      * The value is, e.g. http,https <br>
+     * comment: Supported web protocols for crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerWebProtocols();
@@ -2834,6 +2941,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.file.protocols'. <br>
      * The value is, e.g. file,smb,smb1,ftp,storage <br>
+     * comment: Supported file protocols for crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFileProtocols();
@@ -2841,6 +2949,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.data.env.param.key.pattern'. <br>
      * The value is, e.g. ^FESS_ENV_.* <br>
+     * comment: Pattern for environment variable keys in crawling data.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDataEnvParamKeyPattern();
@@ -2848,6 +2957,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.ignore.robots.txt'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore robots.txt during crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerIgnoreRobotsTxt();
@@ -2855,6 +2965,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.ignore.robots.txt' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore robots.txt during crawling.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreRobotsTxt();
@@ -2862,6 +2973,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.ignore.robots.tags'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore robots meta tags during crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerIgnoreRobotsTags();
@@ -2869,6 +2981,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.ignore.robots.tags' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore robots meta tags during crawling.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreRobotsTags();
@@ -2876,6 +2989,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.ignore.content.exception'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore content exceptions during crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerIgnoreContentException();
@@ -2883,6 +2997,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.ignore.content.exception' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore content exceptions during crawling.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreContentException();
@@ -2890,6 +3005,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.failure.url.status.codes'. <br>
      * The value is, e.g. 404 <br>
+     * comment: HTTP status codes considered as failure URLs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFailureUrlStatusCodes();
@@ -2897,6 +3013,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.failure.url.status.codes' as {@link Integer}. <br>
      * The value is, e.g. 404 <br>
+     * comment: HTTP status codes considered as failure URLs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2905,6 +3022,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.system.monitor.interval'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval (seconds) for system monitor during crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerSystemMonitorInterval();
@@ -2912,6 +3030,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.system.monitor.interval' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval (seconds) for system monitor during crawling.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2920,6 +3039,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.ignore_idle_threads'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore idle threads in hot thread monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadIgnoreIdleThreads();
@@ -2927,6 +3047,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.hotthread.ignore_idle_threads' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore idle threads in hot thread monitoring.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerHotthreadIgnoreIdleThreads();
@@ -2934,6 +3055,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.interval'. <br>
      * The value is, e.g. 500ms <br>
+     * comment: Interval for hot thread monitoring (e.g., 500ms).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadInterval();
@@ -2941,6 +3063,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.snapshots'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of snapshots for hot thread monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadSnapshots();
@@ -2948,6 +3071,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.snapshots' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of snapshots for hot thread monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2956,6 +3080,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.threads'. <br>
      * The value is, e.g. 3 <br>
+     * comment: Number of threads for hot thread monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadThreads();
@@ -2963,6 +3088,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.threads' as {@link Integer}. <br>
      * The value is, e.g. 3 <br>
+     * comment: Number of threads for hot thread monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -2971,6 +3097,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.timeout'. <br>
      * The value is, e.g. 30s <br>
+     * comment: Timeout for hot thread monitoring (e.g., 30s).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadTimeout();
@@ -2978,6 +3105,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.hotthread.type'. <br>
      * The value is, e.g. cpu <br>
+     * comment: Type of hot thread monitoring (e.g., cpu).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerHotthreadType();
@@ -2985,6 +3113,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
      * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.*,X-TIKA.*,X-FESS.* <br>
+     * comment: Metadata fields to exclude from document content.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataContentExcludes();
@@ -2995,6 +3124,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Title=title:string<br>
      * dc:title=title:string<br>
      *  <br>
+     * comment: Mapping for document metadata names.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataNameMapping();
@@ -3002,7 +3132,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.content.xpath'. <br>
      * The value is, e.g. //BODY <br>
-     * comment: html
+     * comment: XPath to extract main content from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlContentXpath();
@@ -3010,6 +3140,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.lang.xpath'. <br>
      * The value is, e.g. //HTML/@lang <br>
+     * comment: XPath to extract language attribute from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlLangXpath();
@@ -3017,6 +3148,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.digest.xpath'. <br>
      * The value is, e.g. //META[@name='description']/@content <br>
+     * comment: XPath to extract digest (description) from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDigestXpath();
@@ -3024,6 +3156,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.canonical.xpath'. <br>
      * The value is, e.g. //LINK[@rel='canonical'][1]/@href <br>
+     * comment: XPath to extract canonical URL from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlCanonicalXpath();
@@ -3031,6 +3164,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
      * The value is, e.g. noscript,script,style,header,footer,aside,nav,a[rel=nofollow] <br>
+     * comment: HTML tags to prune (remove) during document processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlPrunedTags();
@@ -3038,6 +3172,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.max.digest.length'. <br>
      * The value is, e.g. 120 <br>
+     * comment: Maximum length of digest extracted from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlMaxDigestLength();
@@ -3045,6 +3180,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.max.digest.length' as {@link Integer}. <br>
      * The value is, e.g. 120 <br>
+     * comment: Maximum length of digest extracted from HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3053,6 +3189,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.lang'. <br>
      * The value is, e.g.  <br>
+     * comment: Default language for HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDefaultLang();
@@ -3060,6 +3197,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.lang' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Default language for HTML documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3068,6 +3206,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.include.index.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for HTML index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDefaultIncludeIndexPatterns();
@@ -3075,6 +3214,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.include.index.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for HTML index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3083,6 +3223,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.exclude.index.patterns'. <br>
      * The value is, e.g. (?i).*(css|js|jpeg|jpg|gif|png|bmp|wmv|xml|ico|exe) <br>
+     * comment: Patterns to exclude for HTML index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDefaultExcludeIndexPatterns();
@@ -3090,6 +3231,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.include.search.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for HTML search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDefaultIncludeSearchPatterns();
@@ -3097,6 +3239,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.include.search.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for HTML search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3105,6 +3248,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.exclude.search.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for HTML search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlDefaultExcludeSearchPatterns();
@@ -3112,6 +3256,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.html.default.exclude.search.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for HTML search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3120,7 +3265,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.name.encoding'. <br>
      * The value is, e.g.  <br>
-     * comment: file
+     * comment: Encoding for file names in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileNameEncoding();
@@ -3128,7 +3273,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.name.encoding' as {@link Integer}. <br>
      * The value is, e.g.  <br>
-     * comment: file
+     * comment: Encoding for file names in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3137,6 +3282,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.no.title.label'. <br>
      * The value is, e.g. No title. <br>
+     * comment: Label to use when a file has no title.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileNoTitleLabel();
@@ -3144,6 +3290,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.ignore.empty.content'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore files with empty content.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileIgnoreEmptyContent();
@@ -3151,6 +3298,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.file.ignore.empty.content' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to ignore files with empty content.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentFileIgnoreEmptyContent();
@@ -3158,6 +3306,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.max.title.length'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of file title in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileMaxTitleLength();
@@ -3165,6 +3314,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.max.title.length' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of file title in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3173,6 +3323,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.max.digest.length'. <br>
      * The value is, e.g. 200 <br>
+     * comment: Maximum length of file digest in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileMaxDigestLength();
@@ -3180,6 +3331,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.max.digest.length' as {@link Integer}. <br>
      * The value is, e.g. 200 <br>
+     * comment: Maximum length of file digest in documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3188,6 +3340,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.append.meta.content'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append meta content from files.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileAppendMetaContent();
@@ -3195,6 +3348,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.file.append.meta.content' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append meta content from files.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentFileAppendMetaContent();
@@ -3202,6 +3356,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.append.body.content'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append body content from files.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileAppendBodyContent();
@@ -3209,6 +3364,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.file.append.body.content' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to append body content from files.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentFileAppendBodyContent();
@@ -3216,6 +3372,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.lang'. <br>
      * The value is, e.g.  <br>
+     * comment: Default language for file documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileDefaultLang();
@@ -3223,6 +3380,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.lang' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Default language for file documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3231,6 +3389,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.include.index.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for file index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileDefaultIncludeIndexPatterns();
@@ -3238,6 +3397,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.include.index.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for file index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3246,6 +3406,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.exclude.index.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for file index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileDefaultExcludeIndexPatterns();
@@ -3253,6 +3414,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.exclude.index.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for file index processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3261,6 +3423,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.include.search.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for file search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileDefaultIncludeSearchPatterns();
@@ -3268,6 +3431,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.include.search.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to include for file search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3276,6 +3440,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.exclude.search.patterns'. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for file search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileDefaultExcludeSearchPatterns();
@@ -3283,6 +3448,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.file.default.exclude.search.patterns' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Patterns to exclude for file search processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3291,7 +3457,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.cache.enabled'. <br>
      * The value is, e.g. true <br>
-     * comment: cache
+     * comment: Whether document cache is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheEnabled();
@@ -3299,7 +3465,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'crawler.document.cache.enabled' true? <br>
      * The value is, e.g. true <br>
-     * comment: cache
+     * comment: Whether document cache is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentCacheEnabled();
@@ -3307,6 +3473,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.cache.max.size'. <br>
      * The value is, e.g. 2621440 <br>
+     * comment: Maximum size (bytes) for document cache.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheMaxSize();
@@ -3314,6 +3481,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.cache.max.size' as {@link Integer}. <br>
      * The value is, e.g. 2621440 <br>
+     * comment: Maximum size (bytes) for document cache.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3322,6 +3490,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.cache.supported.mimetypes'. <br>
      * The value is, e.g. text/html <br>
+     * comment: Supported MIME types for document cache.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheSupportedMimetypes();
@@ -3329,7 +3498,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.document.cache.html.mimetypes'. <br>
      * The value is, e.g. text/html <br>
-     * comment: ,text/plain,application/xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation
+     * comment: <br>
+     * ,text/plain,application/xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation<br>
+     * MIME types for HTML document cache.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheHtmlMimetypes();
@@ -3337,7 +3508,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.thread.dump.enabled'. <br>
      * The value is, e.g. true <br>
-     * comment: indexer
+     * comment: Whether to enable thread dump for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerThreadDumpEnabled();
@@ -3345,7 +3516,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'indexer.thread.dump.enabled' true? <br>
      * The value is, e.g. true <br>
-     * comment: indexer
+     * comment: Whether to enable thread dump for the indexer.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isIndexerThreadDumpEnabled();
@@ -3353,6 +3524,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.unprocessed.document.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of unprocessed documents for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerUnprocessedDocumentSize();
@@ -3360,6 +3532,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.unprocessed.document.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of unprocessed documents for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3368,6 +3541,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.click.count.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable click count tracking in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerClickCountEnabled();
@@ -3375,6 +3549,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'indexer.click.count.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable click count tracking in the indexer.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isIndexerClickCountEnabled();
@@ -3382,6 +3557,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.favorite.count.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable favorite count tracking in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerFavoriteCountEnabled();
@@ -3389,6 +3565,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'indexer.favorite.count.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable favorite count tracking in the indexer.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isIndexerFavoriteCountEnabled();
@@ -3396,6 +3573,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time'. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Commit margin time (ms) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsCommitMarginTime();
@@ -3403,6 +3581,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time' as {@link Integer}. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Commit margin time (ms) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3411,6 +3590,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.empty.list.count'. <br>
      * The value is, e.g. 3600 <br>
+     * comment: Maximum number of empty lists for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxEmptyListCount();
@@ -3418,6 +3598,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.empty.list.count' as {@link Integer}. <br>
      * The value is, e.g. 3600 <br>
+     * comment: Maximum number of empty lists for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3426,6 +3607,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.update.interval'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Update interval (ms) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsUpdateInterval();
@@ -3433,6 +3615,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.update.interval' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Update interval (ms) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3441,6 +3624,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum document cache size for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentCacheSize();
@@ -3448,6 +3632,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum document cache size for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3456,6 +3641,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size'. <br>
      * The value is, e.g. 1048576 <br>
+     * comment: Maximum document request size (bytes) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentRequestSize();
@@ -3463,6 +3649,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.webfs.max.document.request.size' as {@link Integer}. <br>
      * The value is, e.g. 1048576 <br>
+     * comment: Maximum document request size (bytes) for webfs in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3471,6 +3658,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.document.cache.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum document cache size for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDocumentCacheSize();
@@ -3478,6 +3666,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.document.cache.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum document cache size for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3486,6 +3675,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.document.request.size'. <br>
      * The value is, e.g. 1048576 <br>
+     * comment: Maximum document request size (bytes) for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDocumentRequestSize();
@@ -3493,6 +3683,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.document.request.size' as {@link Integer}. <br>
      * The value is, e.g. 1048576 <br>
+     * comment: Maximum document request size (bytes) for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3501,6 +3692,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.delete.cache.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum delete cache size for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxDeleteCacheSize();
@@ -3508,6 +3700,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.delete.cache.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum delete cache size for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3516,6 +3709,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.redirect.count'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum redirect count for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerDataMaxRedirectCount();
@@ -3523,6 +3717,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.data.max.redirect.count' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Maximum redirect count for data in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3531,6 +3726,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.language.fields'. <br>
      * The value is, e.g. content,important_content,title <br>
+     * comment: Fields used for language detection in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerLanguageFields();
@@ -3538,6 +3734,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.language.detect.length'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Length of text for language detection in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerLanguageDetectLength();
@@ -3545,6 +3742,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.language.detect.length' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Length of text for language detection in the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3553,6 +3751,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.max.result.window.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum result window size for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerMaxResultWindowSize();
@@ -3560,6 +3759,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.max.result.window.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum result window size for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3568,6 +3768,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.max.search.doc.size'. <br>
      * The value is, e.g. 50000 <br>
+     * comment: Maximum number of search documents for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerMaxSearchDocSize();
@@ -3575,6 +3776,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'indexer.max.search.doc.size' as {@link Integer}. <br>
      * The value is, e.g. 50000 <br>
+     * comment: Maximum number of search documents for the indexer.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3583,7 +3785,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.codec'. <br>
      * The value is, e.g. default <br>
-     * comment: index setting
+     * comment: Codec type for the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexCodec();
@@ -3591,6 +3793,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.number_of_shards'. <br>
      * The value is, e.g. 5 <br>
+     * comment: Number of primary shards for the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexNumberOfShards();
@@ -3598,6 +3801,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.number_of_shards' as {@link Integer}. <br>
      * The value is, e.g. 5 <br>
+     * comment: Number of primary shards for the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3606,6 +3810,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.auto_expand_replicas'. <br>
      * The value is, e.g. 0-1 <br>
+     * comment: Auto expand replicas setting for the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAutoExpandReplicas();
@@ -3613,6 +3818,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.id.digest.algorithm'. <br>
      * The value is, e.g. SHA-512 <br>
+     * comment: Digest algorithm for index IDs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexIdDigestAlgorithm();
@@ -3620,6 +3826,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.user.initial_password'. <br>
      * The value is, e.g. admin <br>
+     * comment: Initial password for the index user.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexUserInitialPassword();
@@ -3627,7 +3834,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
      * The value is, e.g. favorite_count <br>
-     * comment: field names
+     * comment: Field name for favorite count in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldFavoriteCount();
@@ -3635,6 +3842,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.click_count'. <br>
      * The value is, e.g. click_count <br>
+     * comment: Field name for click count in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldClickCount();
@@ -3642,6 +3850,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.config_id'. <br>
      * The value is, e.g. config_id <br>
+     * comment: Field name for config ID in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldConfigId();
@@ -3649,6 +3858,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.expires'. <br>
      * The value is, e.g. expires <br>
+     * comment: Field name for expiration date in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldExpires();
@@ -3656,6 +3866,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.url'. <br>
      * The value is, e.g. url <br>
+     * comment: Field name for URL in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldUrl();
@@ -3663,6 +3874,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.doc_id'. <br>
      * The value is, e.g. doc_id <br>
+     * comment: Field name for document ID in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldDocId();
@@ -3670,6 +3882,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.id'. <br>
      * The value is, e.g. _id <br>
+     * comment: Field name for internal ID in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldId();
@@ -3677,6 +3890,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.version'. <br>
      * The value is, e.g. _version <br>
+     * comment: Field name for version in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldVersion();
@@ -3684,6 +3898,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.seq_no'. <br>
      * The value is, e.g. _seq_no <br>
+     * comment: Field name for sequence number in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldSeqNo();
@@ -3691,6 +3906,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.primary_term'. <br>
      * The value is, e.g. _primary_term <br>
+     * comment: Field name for primary term in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldPrimaryTerm();
@@ -3698,6 +3914,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.lang'. <br>
      * The value is, e.g. lang <br>
+     * comment: Field name for language in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldLang();
@@ -3705,6 +3922,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.has_cache'. <br>
      * The value is, e.g. has_cache <br>
+     * comment: Field name for cache status in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldHasCache();
@@ -3712,6 +3930,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.last_modified'. <br>
      * The value is, e.g. last_modified <br>
+     * comment: Field name for last modified date in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldLastModified();
@@ -3719,6 +3938,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.anchor'. <br>
      * The value is, e.g. anchor <br>
+     * comment: Field name for anchor in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldAnchor();
@@ -3726,6 +3946,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.segment'. <br>
      * The value is, e.g. segment <br>
+     * comment: Field name for segment in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldSegment();
@@ -3733,6 +3954,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.role'. <br>
      * The value is, e.g. role <br>
+     * comment: Field name for role in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldRole();
@@ -3740,6 +3962,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.boost'. <br>
      * The value is, e.g. boost <br>
+     * comment: Field name for boost value in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldBoost();
@@ -3747,6 +3970,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.created'. <br>
      * The value is, e.g. created <br>
+     * comment: Field name for creation date in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldCreated();
@@ -3754,6 +3978,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.timestamp'. <br>
      * The value is, e.g. timestamp <br>
+     * comment: Field name for timestamp in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldTimestamp();
@@ -3761,6 +3986,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.label'. <br>
      * The value is, e.g. label <br>
+     * comment: Field name for label in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldLabel();
@@ -3768,6 +3994,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.mimetype'. <br>
      * The value is, e.g. mimetype <br>
+     * comment: Field name for MIME type in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldMimetype();
@@ -3775,6 +4002,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.parent_id'. <br>
      * The value is, e.g. parent_id <br>
+     * comment: Field name for parent ID in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldParentId();
@@ -3782,6 +4010,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.important_content'. <br>
      * The value is, e.g. important_content <br>
+     * comment: Field name for important content in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldImportantContent();
@@ -3789,6 +4018,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.content'. <br>
      * The value is, e.g. content <br>
+     * comment: Field name for content in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldContent();
@@ -3796,6 +4026,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.content_minhash_bits'. <br>
      * The value is, e.g. content_minhash_bits <br>
+     * comment: Field name for content minhash bits in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldContentMinhashBits();
@@ -3803,6 +4034,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.cache'. <br>
      * The value is, e.g. cache <br>
+     * comment: Field name for cache in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldCache();
@@ -3810,6 +4042,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.digest'. <br>
      * The value is, e.g. digest <br>
+     * comment: Field name for digest in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldDigest();
@@ -3817,6 +4050,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.title'. <br>
      * The value is, e.g. title <br>
+     * comment: Field name for title in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldTitle();
@@ -3824,6 +4058,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.host'. <br>
      * The value is, e.g. host <br>
+     * comment: Field name for host in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldHost();
@@ -3831,6 +4066,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.site'. <br>
      * The value is, e.g. site <br>
+     * comment: Field name for site in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldSite();
@@ -3838,6 +4074,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.content_length'. <br>
      * The value is, e.g. content_length <br>
+     * comment: Field name for content length in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldContentLength();
@@ -3845,6 +4082,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.filetype'. <br>
      * The value is, e.g. filetype <br>
+     * comment: Field name for file type in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldFiletype();
@@ -3852,6 +4090,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.filename'. <br>
      * The value is, e.g. filename <br>
+     * comment: Field name for file name in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldFilename();
@@ -3859,6 +4098,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.thumbnail'. <br>
      * The value is, e.g. thumbnail <br>
+     * comment: Field name for thumbnail in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldThumbnail();
@@ -3866,6 +4106,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.field.virtual_host'. <br>
      * The value is, e.g. virtual_host <br>
+     * comment: Field name for virtual host in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldVirtualHost();
@@ -3873,6 +4114,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.field.content_title'. <br>
      * The value is, e.g. content_title <br>
+     * comment: Field name for content title in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseFieldContentTitle();
@@ -3880,6 +4122,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.field.content_description'. <br>
      * The value is, e.g. content_description <br>
+     * comment: Field name for content description in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseFieldContentDescription();
@@ -3887,6 +4130,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.field.url_link'. <br>
      * The value is, e.g. url_link <br>
+     * comment: Field name for URL link in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseFieldUrlLink();
@@ -3894,6 +4138,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.field.site_path'. <br>
      * The value is, e.g. site_path <br>
+     * comment: Field name for site path in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseFieldSitePath();
@@ -3901,6 +4146,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.max.title.length'. <br>
      * The value is, e.g. 50 <br>
+     * comment: Maximum length of content title in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseMaxTitleLength();
@@ -3908,6 +4154,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.max.title.length' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
+     * comment: Maximum length of content title in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3916,6 +4163,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.max.site.path.length'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of site path in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseMaxSitePathLength();
@@ -3923,6 +4171,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.max.site.path.length' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum length of site path in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3931,6 +4180,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.highlight.content_title.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable content title highlighting in the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseHighlightContentTitleEnabled();
@@ -3938,6 +4188,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'response.highlight.content_title.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable content title highlighting in the response.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isResponseHighlightContentTitleEnabled();
@@ -3945,6 +4196,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'response.inline.mimetypes'. <br>
      * The value is, e.g. application/pdf,text/plain <br>
+     * comment: Inline MIME types for the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseInlineMimetypes();
@@ -3955,6 +4207,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * text/html=Content-Security-Policy: reflected-xss block<br>
      * text/html=X-Frame-Options: SAMEORIGIN<br>
      *  <br>
+     * comment: HTTP headers for the response.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getResponseHeaders();
@@ -3962,7 +4215,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.search.index'. <br>
      * The value is, e.g. fess.search <br>
-     * comment: document index
+     * comment: Index name for search documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentSearchIndex();
@@ -3970,6 +4223,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.update.index'. <br>
      * The value is, e.g. fess.update <br>
+     * comment: Index name for update documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentUpdateIndex();
@@ -3977,6 +4231,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.suggest.index'. <br>
      * The value is, e.g. fess <br>
+     * comment: Index name for suggest documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentSuggestIndex();
@@ -3984,6 +4239,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.index'. <br>
      * The value is, e.g. fess_crawler <br>
+     * comment: Index name for crawler documents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerIndex();
@@ -3991,6 +4247,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.queue.number_of_shards'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler queue index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerQueueNumberOfShards();
@@ -3998,6 +4255,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.queue.number_of_shards' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler queue index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4006,6 +4264,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.data.number_of_shards'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler data index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerDataNumberOfShards();
@@ -4013,6 +4272,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.data.number_of_shards' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler data index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4021,6 +4281,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.filter.number_of_shards'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler filter index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerFilterNumberOfShards();
@@ -4028,6 +4289,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.filter.number_of_shards' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of primary shards for crawler filter index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4036,6 +4298,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.queue.number_of_replicas'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler queue index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerQueueNumberOfReplicas();
@@ -4043,6 +4306,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.queue.number_of_replicas' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler queue index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4051,6 +4315,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.data.number_of_replicas'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler data index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerDataNumberOfReplicas();
@@ -4058,6 +4323,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.data.number_of_replicas' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler data index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4066,6 +4332,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.filter.number_of_replicas'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler filter index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentCrawlerFilterNumberOfReplicas();
@@ -4073,6 +4340,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.document.crawler.filter.number_of_replicas' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Number of replicas for crawler filter index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4081,6 +4349,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.config.index'. <br>
      * The value is, e.g. fess_config <br>
+     * comment: Index name for configuration data.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexConfigIndex();
@@ -4088,6 +4357,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.user.index'. <br>
      * The value is, e.g. fess_user <br>
+     * comment: Index name for user data.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexUserIndex();
@@ -4095,6 +4365,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.log.index'. <br>
      * The value is, e.g. fess_log <br>
+     * comment: Index name for log data.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexLogIndex();
@@ -4102,6 +4373,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.dictionary.prefix'. <br>
      * The value is, e.g.  <br>
+     * comment: Prefix for dictionary index names.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDictionaryPrefix();
@@ -4109,6 +4381,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.dictionary.prefix' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Prefix for dictionary index names.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4117,7 +4390,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
      * The value is, e.g. lang,role,label,anchor,virtual_host <br>
-     * comment: doc management
+     * comment: Array-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminArrayFields();
@@ -4125,6 +4398,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.date.fields'. <br>
      * The value is, e.g. expires,created,timestamp,last_modified <br>
+     * comment: Date-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminDateFields();
@@ -4132,6 +4406,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.integer.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Integer-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminIntegerFields();
@@ -4139,6 +4414,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.integer.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Integer-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4147,6 +4423,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.long.fields'. <br>
      * The value is, e.g. content_length,favorite_count,click_count <br>
+     * comment: Long-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminLongFields();
@@ -4154,6 +4431,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.float.fields'. <br>
      * The value is, e.g. boost <br>
+     * comment: Float-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminFloatFields();
@@ -4161,6 +4439,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.double.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Double-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminDoubleFields();
@@ -4168,6 +4447,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.double.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Double-type fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4176,6 +4456,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.admin.required.fields'. <br>
      * The value is, e.g. url,title,role,boost <br>
+     * comment: Required fields for admin in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminRequiredFields();
@@ -4183,7 +4464,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.search.timeout'. <br>
      * The value is, e.g. 3m <br>
-     * comment: timeout
+     * comment: Timeout for index search operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexSearchTimeout();
@@ -4191,6 +4472,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.scroll.search.timeout'. <br>
      * The value is, e.g. 3m <br>
+     * comment: Timeout for scroll search operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexScrollSearchTimeout();
@@ -4198,6 +4480,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.index.timeout'. <br>
      * The value is, e.g. 3m <br>
+     * comment: Timeout for index operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexIndexTimeout();
@@ -4205,6 +4488,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.bulk.timeout'. <br>
      * The value is, e.g. 3m <br>
+     * comment: Timeout for bulk index operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBulkTimeout();
@@ -4212,6 +4496,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.delete.timeout'. <br>
      * The value is, e.g. 3m <br>
+     * comment: Timeout for delete operations in the index.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDeleteTimeout();
@@ -4219,6 +4504,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.health.timeout'. <br>
      * The value is, e.g. 10m <br>
+     * comment: Timeout for index health checks.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexHealthTimeout();
@@ -4226,6 +4512,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.indices.timeout'. <br>
      * The value is, e.g. 1m <br>
+     * comment: Timeout for index indices operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexIndicesTimeout();
@@ -4284,7 +4571,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * image/tiff=tiff<br>
      * image/jpeg=jpg<br>
      *  <br>
-     * comment: filetype
+     * comment: Mapping of MIME types to filetype labels for indexing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFiletype();
@@ -4292,6 +4579,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Number of documents to process per reindex operation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexSize();
@@ -4299,6 +4587,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Number of documents to process per reindex operation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4307,6 +4596,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.body'. <br>
      * The value is, e.g. {"source":{"index":"__SOURCE_INDEX__","size":__SIZE__},"dest":{"index":"__DEST_INDEX__"},"script":{"source":"__SCRIPT_SOURCE__"}} <br>
+     * comment: Request body template for reindex operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexBody();
@@ -4314,6 +4604,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.requests_per_second'. <br>
      * The value is, e.g. adaptive <br>
+     * comment: Requests per second for reindex operations ("adaptive" for auto).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexRequestsPerSecond();
@@ -4321,6 +4612,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.refresh'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to refresh the index after reindexing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexRefresh();
@@ -4328,6 +4620,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'index.reindex.refresh' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to refresh the index after reindexing.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isIndexReindexRefresh();
@@ -4335,6 +4628,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.timeout'. <br>
      * The value is, e.g. 1m <br>
+     * comment: Timeout for reindex operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexTimeout();
@@ -4342,6 +4636,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.scroll'. <br>
      * The value is, e.g. 5m <br>
+     * comment: Scroll timeout for reindex operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexScroll();
@@ -4349,6 +4644,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.max_docs'. <br>
      * The value is, e.g.  <br>
+     * comment: Maximum number of documents for reindex operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexReindexMaxDocs();
@@ -4356,6 +4652,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.reindex.max_docs' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Maximum number of documents for reindex operations.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4364,7 +4661,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.max.length'. <br>
      * The value is, e.g. 1000 <br>
-     * comment: query
+     * comment: Maximum length of search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryMaxLength();
@@ -4372,7 +4669,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.max.length' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
-     * comment: query
+     * comment: Maximum length of search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4381,6 +4678,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.timeout'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Timeout (ms) for search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryTimeout();
@@ -4388,6 +4686,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.timeout' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Timeout (ms) for search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4396,6 +4695,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.timeout.logging'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable logging for query timeouts.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryTimeoutLogging();
@@ -4403,6 +4703,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.timeout.logging' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable logging for query timeouts.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryTimeoutLogging();
@@ -4410,6 +4711,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.track.total.hits'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of total hits to track in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryTrackTotalHits();
@@ -4417,6 +4719,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.track.total.hits' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of total hits to track in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4425,6 +4728,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.geo.fields'. <br>
      * The value is, e.g. location <br>
+     * comment: Fields used for geo search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGeoFields();
@@ -4432,6 +4736,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.browser.lang.parameter.name'. <br>
      * The value is, e.g. browser_lang <br>
+     * comment: Parameter name for browser language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBrowserLangParameterName();
@@ -4439,6 +4744,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.replace.term.with.prefix.query'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to replace term with prefix query.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryReplaceTermWithPrefixQuery();
@@ -4446,6 +4752,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.replace.term.with.prefix.query' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to replace term with prefix query.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryReplaceTermWithPrefixQuery();
@@ -4453,6 +4760,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.orsearch.min.hit.count'. <br>
      * The value is, e.g. -1 <br>
+     * comment: Minimum hit count for OR search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryOrsearchMinHitCount();
@@ -4460,6 +4768,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.orsearch.min.hit.count' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
+     * comment: Minimum hit count for OR search queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4468,6 +4777,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.terminal.chars'. <br>
      * The value is, e.g. u0021u002Cu002Eu003Fu0589u061Fu06D4u0700u0701u0702u0964u104Au104Bu1362u1367u1368u166Eu1803u1809u203Cu203Du2047u2048u2049u3002uFE52uFE57uFF01uFF0EuFF1FuFF61 <br>
+     * comment: Unicode terminal characters for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTerminalChars();
@@ -4475,6 +4785,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.fragment.size'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Fragment size for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmentSize();
@@ -4482,6 +4793,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.fragment.size' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Fragment size for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4490,6 +4802,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.number.of.fragments'. <br>
      * The value is, e.g. 2 <br>
+     * comment: Number of fragments for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightNumberOfFragments();
@@ -4497,6 +4810,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.number.of.fragments' as {@link Integer}. <br>
      * The value is, e.g. 2 <br>
+     * comment: Number of fragments for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4505,6 +4819,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.type'. <br>
      * The value is, e.g. fvh <br>
+     * comment: Type of query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightType();
@@ -4512,6 +4827,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.tag.pre'. <br>
      * The value is, e.g. &lt;strong&gt; <br>
+     * comment: Tag to use before highlighted text.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTagPre();
@@ -4519,6 +4835,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.tag.post'. <br>
      * The value is, e.g. &lt;/strong&gt; <br>
+     * comment: Tag to use after highlighted text.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTagPost();
@@ -4526,6 +4843,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.boundary.chars'. <br>
      * The value is, e.g. u0009u000Au0013u0020 <br>
+     * comment: Boundary characters for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryChars();
@@ -4533,6 +4851,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.boundary.max.scan'. <br>
      * The value is, e.g. 20 <br>
+     * comment: Maximum scan for query highlight boundaries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryMaxScan();
@@ -4540,6 +4859,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.boundary.max.scan' as {@link Integer}. <br>
      * The value is, e.g. 20 <br>
+     * comment: Maximum scan for query highlight boundaries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4548,6 +4868,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.boundary.scanner'. <br>
      * The value is, e.g. chars <br>
+     * comment: Scanner type for query highlight boundaries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryScanner();
@@ -4555,6 +4876,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.encoder'. <br>
      * The value is, e.g. default <br>
+     * comment: Encoder type for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightEncoder();
@@ -4562,6 +4884,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.force.source'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to force source for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightForceSource();
@@ -4569,6 +4892,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.highlight.force.source' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to force source for query highlighting.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryHighlightForceSource();
@@ -4576,6 +4900,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.fragmenter'. <br>
      * The value is, e.g. span <br>
+     * comment: Fragmenter type for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmenter();
@@ -4583,6 +4908,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.fragment.offset'. <br>
      * The value is, e.g. -1 <br>
+     * comment: Offset for query highlight fragments.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightFragmentOffset();
@@ -4590,6 +4916,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.fragment.offset' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
+     * comment: Offset for query highlight fragments.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4598,6 +4925,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.no.match.size'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Size for no-match query highlight.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightNoMatchSize();
@@ -4605,6 +4933,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.no.match.size' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Size for no-match query highlight.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4613,6 +4942,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.order'. <br>
      * The value is, e.g. score <br>
+     * comment: Order for query highlight fragments.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightOrder();
@@ -4620,6 +4950,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.phrase.limit'. <br>
      * The value is, e.g. 256 <br>
+     * comment: Phrase limit for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightPhraseLimit();
@@ -4627,6 +4958,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.phrase.limit' as {@link Integer}. <br>
      * The value is, e.g. 256 <br>
+     * comment: Phrase limit for query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4635,6 +4967,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.content.description.fields'. <br>
      * The value is, e.g. hl_content,digest <br>
+     * comment: Fields for content description in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightContentDescriptionFields();
@@ -4642,6 +4975,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.boundary.position.detect'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to detect boundary position in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightBoundaryPositionDetect();
@@ -4649,6 +4983,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.highlight.boundary.position.detect' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to detect boundary position in query highlighting.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryHighlightBoundaryPositionDetect();
@@ -4656,6 +4991,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.type'. <br>
      * The value is, e.g. query <br>
+     * comment: Type for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTextFragmentType();
@@ -4663,6 +4999,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.size'. <br>
      * The value is, e.g. 3 <br>
+     * comment: Size for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTextFragmentSize();
@@ -4670,6 +5007,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.size' as {@link Integer}. <br>
      * The value is, e.g. 3 <br>
+     * comment: Size for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4678,6 +5016,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.prefix.length'. <br>
      * The value is, e.g. 5 <br>
+     * comment: Prefix length for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTextFragmentPrefixLength();
@@ -4685,6 +5024,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.prefix.length' as {@link Integer}. <br>
      * The value is, e.g. 5 <br>
+     * comment: Prefix length for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4693,6 +5033,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.suffix.length'. <br>
      * The value is, e.g. 5 <br>
+     * comment: Suffix length for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryHighlightTextFragmentSuffixLength();
@@ -4700,6 +5041,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.highlight.text.fragment.suffix.length' as {@link Integer}. <br>
      * The value is, e.g. 5 <br>
+     * comment: Suffix length for text fragment in query highlighting.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4708,6 +5050,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.max.search.result.offset'. <br>
      * The value is, e.g. 100000 <br>
+     * comment: Maximum search result offset for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryMaxSearchResultOffset();
@@ -4715,6 +5058,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.max.search.result.offset' as {@link Integer}. <br>
      * The value is, e.g. 100000 <br>
+     * comment: Maximum search result offset for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4723,6 +5067,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.default.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional default fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalDefaultFields();
@@ -4730,6 +5075,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.default.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional default fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4738,6 +5084,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.response.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalResponseFields();
@@ -4745,6 +5092,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4753,6 +5101,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.api.response.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional API response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalApiResponseFields();
@@ -4760,6 +5109,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.api.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional API response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4768,6 +5118,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.scroll.response.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional scroll response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalScrollResponseFields();
@@ -4775,6 +5126,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.scroll.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional scroll response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4783,6 +5135,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.cache.response.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional cache response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalCacheResponseFields();
@@ -4790,6 +5143,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.cache.response.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional cache response fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4798,6 +5152,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.highlighted.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional highlighted fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalHighlightedFields();
@@ -4805,6 +5160,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.highlighted.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional highlighted fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4813,6 +5169,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.search.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional search fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalSearchFields();
@@ -4820,6 +5177,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.search.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional search fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4828,6 +5186,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.facet.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional facet fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalFacetFields();
@@ -4835,6 +5194,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.facet.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional facet fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4843,6 +5203,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.sort.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional sort fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalSortFields();
@@ -4850,6 +5211,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.sort.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional sort fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4858,6 +5220,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.analyzed.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional analyzed fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalAnalyzedFields();
@@ -4865,6 +5228,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.analyzed.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional analyzed fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4873,6 +5237,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.not.analyzed.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Additional not-analyzed fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryAdditionalNotAnalyzedFields();
@@ -4880,6 +5245,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.additional.not.analyzed.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Additional not-analyzed fields for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4888,6 +5254,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.response.fields'. <br>
      * The value is, e.g. UE,U,T,RK,S,LANG <br>
+     * comment: Fields for GSA response in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaResponseFields();
@@ -4895,6 +5262,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.default.lang'. <br>
      * The value is, e.g. en <br>
+     * comment: Default language for GSA queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaDefaultLang();
@@ -4902,6 +5270,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.default.sort'. <br>
      * The value is, e.g.  <br>
+     * comment: Default sort for GSA queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaDefaultSort();
@@ -4909,6 +5278,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.default.sort' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Default sort for GSA queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4917,6 +5287,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.meta.prefix'. <br>
      * The value is, e.g. MT_ <br>
+     * comment: Meta prefix for GSA queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaMetaPrefix();
@@ -4924,6 +5295,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.index.field.charset'. <br>
      * The value is, e.g. charset <br>
+     * comment: Charset field for GSA index queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaIndexFieldCharset();
@@ -4931,6 +5303,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.index.field.content_type.'. <br>
      * The value is, e.g. content_type <br>
+     * comment: Content type field for GSA index queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaIndexFieldContentType();
@@ -4938,6 +5311,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results'. <br>
      * The value is, e.g. 4 <br>
+     * comment: Maximum concurrent group results for collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryCollapseMaxConcurrentGroupResults();
@@ -4945,6 +5319,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.max.concurrent.group.results' as {@link Integer}. <br>
      * The value is, e.g. 4 <br>
+     * comment: Maximum concurrent group results for collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4953,6 +5328,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.inner.hits.name'. <br>
      * The value is, e.g. similar_docs <br>
+     * comment: Inner hits name for collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryCollapseInnerHitsName();
@@ -4960,6 +5336,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.inner.hits.size'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Inner hits size for collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryCollapseInnerHitsSize();
@@ -4967,6 +5344,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.inner.hits.size' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Inner hits size for collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4975,6 +5353,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.inner.hits.sorts'. <br>
      * The value is, e.g.  <br>
+     * comment: Sorts for inner hits in collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryCollapseInnerHitsSorts();
@@ -4982,6 +5361,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.collapse.inner.hits.sorts' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Sorts for inner hits in collapse queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -4990,6 +5370,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.default.languages'. <br>
      * The value is, e.g.  <br>
+     * comment: Default languages for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryDefaultLanguages();
@@ -4997,6 +5378,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.default.languages' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Default languages for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5005,6 +5387,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.json.default.preference'. <br>
      * The value is, e.g. _query <br>
+     * comment: Default preference for JSON queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryJsonDefaultPreference();
@@ -5012,6 +5395,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.gsa.default.preference'. <br>
      * The value is, e.g. _query <br>
+     * comment: Default preference for GSA queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGsaDefaultPreference();
@@ -5078,6 +5462,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * zh_TW=zh-tw<br>
      * zh=zh<br>
      *  <br>
+     * comment: Language mapping for queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryLanguageMapping();
@@ -5085,7 +5470,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.title'. <br>
      * The value is, e.g. 0.5 <br>
-     * comment: boost
+     * comment: Boost value for title field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostTitle();
@@ -5093,7 +5478,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.title' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.5 <br>
-     * comment: boost
+     * comment: Boost value for title field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5102,6 +5487,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.title.lang'. <br>
      * The value is, e.g. 1.0 <br>
+     * comment: Boost value for title field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostTitleLang();
@@ -5109,6 +5495,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.title.lang' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 1.0 <br>
+     * comment: Boost value for title field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5117,6 +5504,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.content'. <br>
      * The value is, e.g. 0.05 <br>
+     * comment: Boost value for content field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContent();
@@ -5124,6 +5512,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.content' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.05 <br>
+     * comment: Boost value for content field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5132,6 +5521,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.content.lang'. <br>
      * The value is, e.g. 0.1 <br>
+     * comment: Boost value for content field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContentLang();
@@ -5139,6 +5529,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.content.lang' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.1 <br>
+     * comment: Boost value for content field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5147,6 +5538,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.important_content'. <br>
      * The value is, e.g. -1.0 <br>
+     * comment: Boost value for important content field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostImportantContent();
@@ -5154,6 +5546,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.important_content' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. -1.0 <br>
+     * comment: Boost value for important content field in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5162,6 +5555,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.important_content.lang'. <br>
      * The value is, e.g. -1.0 <br>
+     * comment: Boost value for important content field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostImportantContentLang();
@@ -5169,6 +5563,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.important_content.lang' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. -1.0 <br>
+     * comment: Boost value for important content field with language in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5177,6 +5572,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.min.length'. <br>
      * The value is, e.g. 4 <br>
+     * comment: Minimum length for fuzzy boosting in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyMinLength();
@@ -5184,6 +5580,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.min.length' as {@link Integer}. <br>
      * The value is, e.g. 4 <br>
+     * comment: Minimum length for fuzzy boosting in queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5192,6 +5589,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title'. <br>
      * The value is, e.g. 0.01 <br>
+     * comment: Boost value for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyTitle();
@@ -5199,6 +5597,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.01 <br>
+     * comment: Boost value for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5207,6 +5606,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.fuzziness'. <br>
      * The value is, e.g. AUTO <br>
+     * comment: Fuzziness for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyTitleFuzziness();
@@ -5214,6 +5614,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.expansions'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of expansions for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyTitleExpansions();
@@ -5221,6 +5622,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.expansions' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of expansions for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5229,6 +5631,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.prefix_length'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyTitlePrefixLength();
@@ -5236,6 +5639,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.prefix_length' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5244,6 +5648,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.title.transpositions'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy title queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyTitleTranspositions();
@@ -5251,6 +5656,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.boost.fuzzy.title.transpositions' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy title queries.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryBoostFuzzyTitleTranspositions();
@@ -5258,6 +5664,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content'. <br>
      * The value is, e.g. 0.005 <br>
+     * comment: Boost value for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyContent();
@@ -5265,6 +5672,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.005 <br>
+     * comment: Boost value for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5273,6 +5681,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.fuzziness'. <br>
      * The value is, e.g. AUTO <br>
+     * comment: Fuzziness for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyContentFuzziness();
@@ -5280,6 +5689,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.expansions'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of expansions for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyContentExpansions();
@@ -5287,6 +5697,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.expansions' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of expansions for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5295,6 +5706,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.prefix_length'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyContentPrefixLength();
@@ -5302,6 +5714,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.prefix_length' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5310,6 +5723,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.boost.fuzzy.content.transpositions'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy content queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostFuzzyContentTranspositions();
@@ -5317,6 +5731,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.boost.fuzzy.content.transpositions' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy content queries.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryBoostFuzzyContentTranspositions();
@@ -5324,6 +5739,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.default.query_type'. <br>
      * The value is, e.g. bool <br>
+     * comment: Default query type.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryDefaultQueryType();
@@ -5331,6 +5747,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.dismax.tie_breaker'. <br>
      * The value is, e.g. 0.1 <br>
+     * comment: Tie breaker value for dismax queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryDismaxTieBreaker();
@@ -5338,6 +5755,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.dismax.tie_breaker' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 0.1 <br>
+     * comment: Tie breaker value for dismax queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -5346,6 +5764,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.bool.minimum_should_match'. <br>
      * The value is, e.g.  <br>
+     * comment: Minimum should match value for boolean queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoolMinimumShouldMatch();
@@ -5353,6 +5772,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.bool.minimum_should_match' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Minimum should match value for boolean queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5361,6 +5781,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.prefix.expansions'. <br>
      * The value is, e.g. 50 <br>
+     * comment: Number of expansions for prefix queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryPrefixExpansions();
@@ -5368,6 +5789,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.prefix.expansions' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
+     * comment: Number of expansions for prefix queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5376,6 +5798,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.prefix.slop'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Slop value for prefix queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryPrefixSlop();
@@ -5383,6 +5806,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.prefix.slop' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Slop value for prefix queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5391,6 +5815,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.fuzzy.prefix_length'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFuzzyPrefixLength();
@@ -5398,6 +5823,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.fuzzy.prefix_length' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Prefix length for fuzzy queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5406,6 +5832,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.fuzzy.expansions'. <br>
      * The value is, e.g. 50 <br>
+     * comment: Number of expansions for fuzzy queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFuzzyExpansions();
@@ -5413,6 +5840,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.fuzzy.expansions' as {@link Integer}. <br>
      * The value is, e.g. 50 <br>
+     * comment: Number of expansions for fuzzy queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5421,6 +5849,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.fuzzy.transpositions'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFuzzyTranspositions();
@@ -5428,6 +5857,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'query.fuzzy.transpositions' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow transpositions in fuzzy queries.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryFuzzyTranspositions();
@@ -5435,7 +5865,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields'. <br>
      * The value is, e.g. label <br>
-     * comment: facet
+     * comment: Fields for facet queries.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetFields();
@@ -5443,6 +5873,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Size of facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetFieldsSize();
@@ -5450,6 +5881,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Size of facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5458,6 +5890,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.min_doc_count'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Minimum document count for facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetFieldsMinDocCount();
@@ -5465,6 +5898,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.min_doc_count' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Minimum document count for facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5473,6 +5907,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.sort'. <br>
      * The value is, e.g. count.desc <br>
+     * comment: Sort order for facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetFieldsSort();
@@ -5480,6 +5915,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.missing'. <br>
      * The value is, e.g.  <br>
+     * comment: Value for missing facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetFieldsMissing();
@@ -5487,6 +5923,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.facet.fields.missing' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Value for missing facet fields.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5498,6 +5935,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * labels.facet_contentLength_title:labels.facet_contentLength_10k=content_length:[0 TO 9999]	labels.facet_contentLength_10kto100k=content_length:[10000 TO 99999]	labels.facet_contentLength_100kto500k=content_length:[100000 TO 499999]	labels.facet_contentLength_500kto1m=content_length:[500000 TO 999999]	labels.facet_contentLength_1m=content_length:[1000000 TO *]<br>
      * labels.facet_filetype_title:labels.facet_filetype_html=filetype:html	labels.facet_filetype_word=filetype:word	labels.facet_filetype_excel=filetype:excel	labels.facet_filetype_powerpoint=filetype:powerpoint	labels.facet_filetype_odt=filetype:odt	labels.facet_filetype_ods=filetype:ods	labels.facet_filetype_odp=filetype:odp	labels.facet_filetype_pdf=filetype:pdf	labels.facet_filetype_txt=filetype:txt	labels.facet_filetype_others=filetype:others<br>
      *  <br>
+     * comment: Facet queries definition.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryFacetQueries();
@@ -5505,7 +5943,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.window_size'. <br>
      * The value is, e.g. 200 <br>
-     * comment: ranking
+     * comment: Window size for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRankFusionWindowSize();
@@ -5513,7 +5951,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.window_size' as {@link Integer}. <br>
      * The value is, e.g. 200 <br>
-     * comment: ranking
+     * comment: Window size for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5522,6 +5960,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.rank_constant'. <br>
      * The value is, e.g. 20 <br>
+     * comment: Rank constant for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRankFusionRankConstant();
@@ -5529,6 +5968,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.rank_constant' as {@link Integer}. <br>
      * The value is, e.g. 20 <br>
+     * comment: Rank constant for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5537,6 +5977,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.threads'. <br>
      * The value is, e.g. -1 <br>
+     * comment: Number of threads for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRankFusionThreads();
@@ -5544,6 +5985,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.threads' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
+     * comment: Number of threads for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5552,6 +5994,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rank.fusion.score_field'. <br>
      * The value is, e.g. rf_score <br>
+     * comment: Score field for rank fusion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRankFusionScoreField();
@@ -5559,7 +6002,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'smb.role.from.file'. <br>
      * The value is, e.g. true <br>
-     * comment: acl
+     * comment: Whether to get SMB roles from a file.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSmbRoleFromFile();
@@ -5567,7 +6010,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'smb.role.from.file' true? <br>
      * The value is, e.g. true <br>
-     * comment: acl
+     * comment: Whether to get SMB roles from a file.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isSmbRoleFromFile();
@@ -5575,6 +6018,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'smb.available.sid.types'. <br>
      * The value is, e.g. 1,2,4:2,5:1 <br>
+     * comment: Available SID types for SMB.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSmbAvailableSidTypes();
@@ -5582,6 +6026,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'file.role.from.file'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to get file roles from a file.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFileRoleFromFile();
@@ -5589,6 +6034,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'file.role.from.file' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to get file roles from a file.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isFileRoleFromFile();
@@ -5596,6 +6042,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ftp.role.from.file'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to get FTP roles from a file.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFtpRoleFromFile();
@@ -5603,6 +6050,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ftp.role.from.file' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to get FTP roles from a file.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isFtpRoleFromFile();
@@ -5610,7 +6058,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.backup.targets'. <br>
      * The value is, e.g. fess_basic_config.bulk,fess_config.bulk,fess_user.bulk,system.properties,fess.json,doc.json <br>
-     * comment: backup
+     * comment: Target files for index backup.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupTargets();
@@ -5618,6 +6066,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.backup.log.targets'. <br>
      * The value is, e.g. click_log.ndjson,favorite_log.ndjson,search_log.ndjson,user_info.ndjson <br>
+     * comment: Target log files for index backup.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupLogTargets();
@@ -5625,6 +6074,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.backup.log.load.timeout'. <br>
      * The value is, e.g. 60000 <br>
+     * comment: Timeout for loading index backup logs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexBackupLogLoadTimeout();
@@ -5632,6 +6082,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'index.backup.log.load.timeout' as {@link Integer}. <br>
      * The value is, e.g. 60000 <br>
+     * comment: Timeout for loading index backup logs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5640,7 +6091,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.app.packages'. <br>
      * The value is, e.g. org.codelibs,org.dbflute,org.lastaflute <br>
-     * comment: logging
+     * comment: Application packages for logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingAppPackages();
@@ -5648,6 +6099,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.search.docs.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable search docs logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchDocsEnabled();
@@ -5655,6 +6107,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'logging.search.docs.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable search docs logging.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLoggingSearchDocsEnabled();
@@ -5662,6 +6115,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.search.docs.fields'. <br>
      * The value is, e.g. filetype,created,click_count,title,doc_id,url,score,site,filename,host,digest,boost,mimetype,favorite_count,_id,lang,last_modified,content_length,timestamp <br>
+     * comment: Fields to log for search docs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchDocsFields();
@@ -5669,6 +6123,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.search.use.logfile'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to use a log file for search logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchUseLogfile();
@@ -5676,6 +6131,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'logging.search.use.logfile' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to use a log file for search logging.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLoggingSearchUseLogfile();
@@ -5683,6 +6139,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.search.max.queue.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for search logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingSearchMaxQueueSize();
@@ -5690,6 +6147,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.search.max.queue.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for search logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5698,6 +6156,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.click.max.queue.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for click logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLoggingClickMaxQueueSize();
@@ -5705,6 +6164,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'logging.click.max.queue.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum queue size for click logging.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5713,6 +6173,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'form.admin.max.input.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum input size for admin forms.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFormAdminMaxInputSize();
@@ -5720,6 +6181,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'form.admin.max.input.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum input size for admin forms.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5728,6 +6190,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'form.admin.label.in.config.enabled'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable label in admin config forms.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFormAdminLabelInConfigEnabled();
@@ -5735,6 +6198,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'form.admin.label.in.config.enabled' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to enable label in admin config forms.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isFormAdminLabelInConfigEnabled();
@@ -5742,6 +6206,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'form.admin.default.template.name'. <br>
      * The value is, e.g. __TEMPLATE__ <br>
+     * comment: Default template name for admin forms.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getFormAdminDefaultTemplateName();
@@ -5749,6 +6214,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'osdd.link.enabled'. <br>
      * The value is, e.g. auto <br>
+     * comment: Whether to enable OSDD link (OpenSearch Description Document).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOsddLinkEnabled();
@@ -5756,6 +6222,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'clipboard.copy.icon.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable the clipboard copy icon.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getClipboardCopyIconEnabled();
@@ -5763,6 +6230,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'clipboard.copy.icon.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to enable the clipboard copy icon.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isClipboardCopyIconEnabled();
@@ -5770,6 +6238,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'authentication.admin.users'. <br>
      * The value is, e.g. admin <br>
+     * comment: Admin user names for authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminUsers();
@@ -5777,6 +6246,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
      * The value is, e.g. admin <br>
+     * comment: Admin role names for authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminRoles();
@@ -5784,6 +6254,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.default.permissions'. <br>
      * The value is, e.g.  <br>
+     * comment: Default permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchDefaultPermissions();
@@ -5791,6 +6262,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.default.permissions' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Default permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5799,6 +6271,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.default.display.permissions'. <br>
      * The value is, e.g. {role}guest <br>
+     * comment: Default display permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchDefaultDisplayPermissions();
@@ -5806,6 +6279,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.guest.permissions'. <br>
      * The value is, e.g. {role}guest <br>
+     * comment: Guest permissions for search roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchGuestPermissions();
@@ -5813,6 +6287,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.user.prefix'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Prefix for user roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchUserPrefix();
@@ -5820,6 +6295,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.user.prefix' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Prefix for user roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5828,6 +6304,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.group.prefix'. <br>
      * The value is, e.g. 2 <br>
+     * comment: Prefix for group roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchGroupPrefix();
@@ -5835,6 +6312,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.group.prefix' as {@link Integer}. <br>
      * The value is, e.g. 2 <br>
+     * comment: Prefix for group roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5843,6 +6321,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.role.prefix'. <br>
      * The value is, e.g. R <br>
+     * comment: Prefix for role roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchRolePrefix();
@@ -5850,6 +6329,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'role.search.denied.prefix'. <br>
      * The value is, e.g. D <br>
+     * comment: Prefix for denied roles in search.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchDeniedPrefix();
@@ -5882,6 +6362,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'session.tracking.modes'. <br>
      * The value is, e.g. cookie <br>
+     * comment: Session tracking modes
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSessionTrackingModes();
@@ -5939,7 +6420,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.docboost.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
-     * comment: fetch page size
+     * comment: Maximum number of docboost records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDocboostMaxFetchSize();
@@ -5947,7 +6428,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.docboost.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
-     * comment: fetch page size
+     * comment: Maximum number of docboost records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5956,6 +6437,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.keymatch.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of keymatch records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageKeymatchMaxFetchSize();
@@ -5963,6 +6445,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.keymatch.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of keymatch records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5971,6 +6454,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.labeltype.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of labeltype records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageLabeltypeMaxFetchSize();
@@ -5978,6 +6462,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.labeltype.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of labeltype records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -5986,6 +6471,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.roletype.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of roletype records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageRoletypeMaxFetchSize();
@@ -5993,6 +6479,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.roletype.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of roletype records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6001,6 +6488,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.user.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of user records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageUserMaxFetchSize();
@@ -6008,6 +6496,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.user.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of user records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6016,6 +6505,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.role.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of role records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageRoleMaxFetchSize();
@@ -6023,6 +6513,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.role.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of role records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6031,6 +6522,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.group.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of group records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageGroupMaxFetchSize();
@@ -6038,6 +6530,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.group.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of group records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6046,6 +6539,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.crawling.info.param.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of crawling info parameters to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageCrawlingInfoParamMaxFetchSize();
@@ -6053,6 +6547,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.crawling.info.param.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of crawling info parameters to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6061,6 +6556,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.crawling.info.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of crawling info records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageCrawlingInfoMaxFetchSize();
@@ -6068,6 +6564,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.crawling.info.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of crawling info records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6076,6 +6573,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.data.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of data config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDataConfigMaxFetchSize();
@@ -6083,6 +6581,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.data.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of data config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6091,6 +6590,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of web config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageWebConfigMaxFetchSize();
@@ -6098,6 +6598,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of web config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6106,6 +6607,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.config.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of file config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageFileConfigMaxFetchSize();
@@ -6113,6 +6615,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.config.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of file config records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6121,6 +6624,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.duplicate.host.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of duplicate host records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDuplicateHostMaxFetchSize();
@@ -6128,6 +6632,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.duplicate.host.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of duplicate host records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6136,6 +6641,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.failure.url.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of failure URL records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageFailureUrlMaxFetchSize();
@@ -6143,6 +6649,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.failure.url.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of failure URL records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6151,6 +6658,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.favorite.log.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of favorite log records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageFavoriteLogMaxFetchSize();
@@ -6158,6 +6666,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.favorite.log.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of favorite log records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6166,6 +6675,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.auth.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of file auth records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageFileAuthMaxFetchSize();
@@ -6173,6 +6683,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.file.auth.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of file auth records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6181,6 +6692,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.auth.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of web auth records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageWebAuthMaxFetchSize();
@@ -6188,6 +6700,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.web.auth.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of web auth records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6196,6 +6709,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.path.mapping.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of path mapping records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPagePathMappingMaxFetchSize();
@@ -6203,6 +6717,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.path.mapping.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of path mapping records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6211,6 +6726,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.request.header.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of request header records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageRequestHeaderMaxFetchSize();
@@ -6218,6 +6734,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.request.header.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of request header records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6226,6 +6743,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.scheduled.job.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of scheduled job records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageScheduledJobMaxFetchSize();
@@ -6233,6 +6751,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.scheduled.job.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of scheduled job records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6241,6 +6760,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.elevate.word.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of elevate word records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageElevateWordMaxFetchSize();
@@ -6248,6 +6768,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.elevate.word.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of elevate word records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6256,6 +6777,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.bad.word.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of bad word records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageBadWordMaxFetchSize();
@@ -6263,6 +6785,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.bad.word.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of bad word records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6271,6 +6794,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.dictionary.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of dictionary records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDictionaryMaxFetchSize();
@@ -6278,6 +6802,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.dictionary.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of dictionary records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6286,6 +6811,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.relatedcontent.max.fetch.size'. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Maximum number of related content records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageRelatedcontentMaxFetchSize();
@@ -6293,6 +6819,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.relatedcontent.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Maximum number of related content records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6301,6 +6828,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.relatedquery.max.fetch.size'. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Maximum number of related query records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageRelatedqueryMaxFetchSize();
@@ -6308,6 +6836,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.relatedquery.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 5000 <br>
+     * comment: Maximum number of related query records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6316,6 +6845,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.thumbnail.queue.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of thumbnail queue records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageThumbnailQueueMaxFetchSize();
@@ -6323,6 +6853,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.thumbnail.queue.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of thumbnail queue records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6331,6 +6862,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.thumbnail.purge.max.fetch.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of thumbnail purge records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageThumbnailPurgeMaxFetchSize();
@@ -6338,6 +6870,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.thumbnail.purge.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum number of thumbnail purge records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6346,6 +6879,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.score.booster.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of score booster records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageScoreBoosterMaxFetchSize();
@@ -6353,6 +6887,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.score.booster.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of score booster records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6361,6 +6896,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.searchlog.max.fetch.size'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of search log records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageSearchlogMaxFetchSize();
@@ -6368,6 +6904,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.searchlog.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of search log records to fetch per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6376,6 +6913,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.searchlist.track.total.hits'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to track total hits in search list page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageSearchlistTrackTotalHits();
@@ -6383,6 +6921,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'page.searchlist.track.total.hits' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to track total hits in search list page.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPageSearchlistTrackTotalHits();
@@ -6390,7 +6929,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
-     * comment: search page
+     * comment: Default start page for search results.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPagingSearchPageStart();
@@ -6398,7 +6937,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.start' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
-     * comment: search page
+     * comment: Default start page for search results.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6407,6 +6946,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.size'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Default size of search results per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPagingSearchPageSize();
@@ -6414,6 +6954,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.size' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Default size of search results per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6422,6 +6963,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.max.size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum size of search results per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPagingSearchPageMaxSize();
@@ -6429,6 +6971,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'paging.search.page.max.size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Maximum size of search results per page.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6437,6 +6980,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.agg.shard.size'. <br>
      * The value is, e.g. -1 <br>
+     * comment: searchlog
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchlogAggShardSize();
@@ -6444,6 +6988,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.agg.shard.size' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
+     * comment: searchlog
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6452,6 +6997,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.request.headers'. <br>
      * The value is, e.g.  <br>
+     * comment: Request headers to include in search log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchlogRequestHeaders();
@@ -6459,6 +7005,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.request.headers' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Request headers to include in search log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6467,6 +7014,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.process.batch_size'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Batch size for search log processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchlogProcessBatchSize();
@@ -6474,6 +7022,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'searchlog.process.batch_size' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Batch size for search log processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6482,6 +7031,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.min.width'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Minimum width for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageMinWidth();
@@ -6489,6 +7039,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.min.width' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Minimum width for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6497,6 +7048,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.min.height'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Minimum height for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageMinHeight();
@@ -6504,6 +7056,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.min.height' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Minimum height for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6512,6 +7065,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.max.aspect.ratio'. <br>
      * The value is, e.g. 3.0 <br>
+     * comment: Maximum aspect ratio for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageMaxAspectRatio();
@@ -6519,6 +7073,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.max.aspect.ratio' as {@link java.math.BigDecimal}. <br>
      * The value is, e.g. 3.0 <br>
+     * comment: Maximum aspect ratio for HTML images in thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -6527,6 +7082,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.width'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Width of generated thumbnail images.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageThumbnailWidth();
@@ -6534,6 +7090,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.width' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Width of generated thumbnail images.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6542,6 +7099,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.height'. <br>
      * The value is, e.g. 100 <br>
+     * comment: Height of generated thumbnail images.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageThumbnailHeight();
@@ -6549,6 +7107,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.thumbnail.height' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: Height of generated thumbnail images.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6557,6 +7116,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.format'. <br>
      * The value is, e.g. png <br>
+     * comment: Format of generated thumbnail images.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageFormat();
@@ -6564,6 +7124,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.xpath'. <br>
      * The value is, e.g. //IMG <br>
+     * comment: XPath to select images for thumbnails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageXpath();
@@ -6571,6 +7132,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.html.image.exclude.extensions'. <br>
      * The value is, e.g. svg,html,css,js <br>
+     * comment: File extensions to exclude from thumbnail generation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailHtmlImageExcludeExtensions();
@@ -6578,6 +7140,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.generator.interval'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Interval for thumbnail generator.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailGeneratorInterval();
@@ -6585,6 +7148,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.generator.interval' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Interval for thumbnail generator.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6593,6 +7157,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.generator.targets'. <br>
      * The value is, e.g. all <br>
+     * comment: Targets for thumbnail generator (e.g., all).
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailGeneratorTargets();
@@ -6600,6 +7165,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.crawler.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether the thumbnail crawler is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailCrawlerEnabled();
@@ -6607,6 +7173,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'thumbnail.crawler.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether the thumbnail crawler is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isThumbnailCrawlerEnabled();
@@ -6614,6 +7181,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.system.monitor.interval'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval for system monitor in thumbnail processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getThumbnailSystemMonitorInterval();
@@ -6621,6 +7189,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'thumbnail.system.monitor.interval' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval for system monitor in thumbnail processing.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6629,7 +7198,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.request.parameter'. <br>
      * The value is, e.g. userCode <br>
-     * comment: user
+     * comment: User code settings
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserCodeRequestParameter();
@@ -6637,6 +7206,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.min.length'. <br>
      * The value is, e.g. 20 <br>
+     * comment: User code minimum length.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserCodeMinLength();
@@ -6644,6 +7214,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.min.length' as {@link Integer}. <br>
      * The value is, e.g. 20 <br>
+     * comment: User code minimum length.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6652,6 +7223,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.max.length'. <br>
      * The value is, e.g. 100 <br>
+     * comment: User code maximum length.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserCodeMaxLength();
@@ -6659,6 +7231,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.max.length' as {@link Integer}. <br>
      * The value is, e.g. 100 <br>
+     * comment: User code maximum length.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6667,6 +7240,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'user.code.pattern'. <br>
      * The value is, e.g. [a-zA-Z0-9_]+ <br>
+     * comment: User code pattern for validation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getUserCodePattern();
@@ -6674,7 +7248,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'mail.from.name'. <br>
      * The value is, e.g. Administrator <br>
-     * comment: From
+     * comment: Name to display in the From field of emails.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getMailFromName();
@@ -6682,6 +7256,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'mail.from.address'. <br>
      * The value is, e.g. root@localhost <br>
+     * comment: Email address to use in the From field.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getMailFromAddress();
@@ -6689,6 +7264,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'mail.hostname'. <br>
      * The value is, e.g.  <br>
+     * comment: Hostname for the mail server.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getMailHostname();
@@ -6696,6 +7272,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'mail.hostname' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Hostname for the mail server.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6704,6 +7281,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.target.name'. <br>
      * The value is, e.g.  <br>
+     * comment: Target name for the scheduler.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSchedulerTargetName();
@@ -6711,6 +7289,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.target.name' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Target name for the scheduler.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6719,6 +7298,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.job.class'. <br>
      * The value is, e.g. org.codelibs.fess.app.job.ScriptExecutorJob <br>
+     * comment: Job class for the scheduler.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSchedulerJobClass();
@@ -6726,6 +7306,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.concurrent.exec.mode'. <br>
      * The value is, e.g. QUIT <br>
+     * comment: Mode for concurrent execution in the scheduler.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSchedulerConcurrentExecMode();
@@ -6733,6 +7314,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.monitor.interval'. <br>
      * The value is, e.g. 30 <br>
+     * comment: Interval for scheduler monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSchedulerMonitorInterval();
@@ -6740,6 +7322,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'scheduler.monitor.interval' as {@link Integer}. <br>
      * The value is, e.g. 30 <br>
+     * comment: Interval for scheduler monitoring.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -6748,6 +7331,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.base.link'. <br>
      * The value is, e.g. https://fess.codelibs.org/{lang}/{version}/admin/ <br>
+     * comment: Base link for online help.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpBaseLink();
@@ -6755,6 +7339,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.installation'. <br>
      * The value is, e.g. https://fess.codelibs.org/{lang}/{version}/install/install.html <br>
+     * comment: Installation guide link for online help.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpInstallation();
@@ -6762,6 +7347,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.eol'. <br>
      * The value is, e.g. https://fess.codelibs.org/{lang}/eol.html <br>
+     * comment: End-of-life information link for online help.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpEol();
@@ -6769,6 +7355,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.failureurl'. <br>
      * The value is, e.g. failureurl <br>
+     * comment: Online help key for failure URL.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameFailureurl();
@@ -6776,6 +7363,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.elevateword'. <br>
      * The value is, e.g. elevateword <br>
+     * comment: Online help key for elevate word.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameElevateword();
@@ -6783,6 +7371,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.reqheader'. <br>
      * The value is, e.g. reqheader <br>
+     * comment: Online help key for request header.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameReqheader();
@@ -6790,6 +7379,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.synonym'. <br>
      * The value is, e.g. synonym <br>
+     * comment: Online help key for synonym dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictSynonym();
@@ -6797,6 +7387,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict'. <br>
      * The value is, e.g. dict <br>
+     * comment: Online help key for dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDict();
@@ -6804,6 +7395,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.kuromoji'. <br>
      * The value is, e.g. kuromoji <br>
+     * comment: Online help key for Kuromoji dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictKuromoji();
@@ -6811,6 +7403,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.protwords'. <br>
      * The value is, e.g. protwords <br>
+     * comment: Online help key for protected words dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictProtwords();
@@ -6818,6 +7411,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.stopwords'. <br>
      * The value is, e.g. stopwords <br>
+     * comment: Online help key for stopwords dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictStopwords();
@@ -6825,6 +7419,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.stemmeroverride'. <br>
      * The value is, e.g. stemmeroverride <br>
+     * comment: Online help key for stemmer override dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictStemmeroverride();
@@ -6832,6 +7427,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dict.mapping'. <br>
      * The value is, e.g. mapping <br>
+     * comment: Online help key for mapping dictionary.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictMapping();
@@ -6839,6 +7435,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.webconfig'. <br>
      * The value is, e.g. webconfig <br>
+     * comment: Online help key for web config.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameWebconfig();
@@ -6846,6 +7443,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.searchlist'. <br>
      * The value is, e.g. searchlist <br>
+     * comment: Online help key for search list.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameSearchlist();
@@ -6853,6 +7451,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.log'. <br>
      * The value is, e.g. log <br>
+     * comment: Online help key for log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameLog();
@@ -6860,6 +7459,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.general'. <br>
      * The value is, e.g. general <br>
+     * comment: Online help key for general settings.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameGeneral();
@@ -6867,6 +7467,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.role'. <br>
      * The value is, e.g. role <br>
+     * comment: Online help key for role.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameRole();
@@ -6874,6 +7475,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.joblog'. <br>
      * The value is, e.g. joblog <br>
+     * comment: Online help key for job log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameJoblog();
@@ -6881,6 +7483,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.keymatch'. <br>
      * The value is, e.g. keymatch <br>
+     * comment: Online help key for keymatch.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameKeymatch();
@@ -6888,6 +7491,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.relatedquery'. <br>
      * The value is, e.g. relatedquery <br>
+     * comment: Online help key for related query.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameRelatedquery();
@@ -6895,6 +7499,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.relatedcontent'. <br>
      * The value is, e.g. relatedcontent <br>
+     * comment: Online help key for related content.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameRelatedcontent();
@@ -6902,6 +7507,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.wizard'. <br>
      * The value is, e.g. wizard <br>
+     * comment: Online help key for wizard.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameWizard();
@@ -6909,6 +7515,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.badword'. <br>
      * The value is, e.g. badword <br>
+     * comment: Online help key for bad word.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameBadword();
@@ -6916,6 +7523,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.pathmap'. <br>
      * The value is, e.g. pathmap <br>
+     * comment: Online help key for path mapping.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNamePathmap();
@@ -6923,6 +7531,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.boostdoc'. <br>
      * The value is, e.g. boostdoc <br>
+     * comment: Online help key for boost document.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameBoostdoc();
@@ -6930,6 +7539,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dataconfig'. <br>
      * The value is, e.g. dataconfig <br>
+     * comment: Online help key for data config.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDataconfig();
@@ -6937,6 +7547,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.systeminfo'. <br>
      * The value is, e.g. systeminfo <br>
+     * comment: Online help key for system info.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameSysteminfo();
@@ -6944,6 +7555,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.user'. <br>
      * The value is, e.g. user <br>
+     * comment: Online help key for user.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameUser();
@@ -6951,6 +7563,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.group'. <br>
      * The value is, e.g. group <br>
+     * comment: Online help key for group.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameGroup();
@@ -6958,6 +7571,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.design'. <br>
      * The value is, e.g. design <br>
+     * comment: Online help key for design.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDesign();
@@ -6965,6 +7579,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.dashboard'. <br>
      * The value is, e.g. dashboard <br>
+     * comment: Online help key for dashboard.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDashboard();
@@ -6972,6 +7587,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.webauth'. <br>
      * The value is, e.g. webauth <br>
+     * comment: Online help key for web authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameWebauth();
@@ -6979,6 +7595,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.fileconfig'. <br>
      * The value is, e.g. fileconfig <br>
+     * comment: Online help key for file config.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameFileconfig();
@@ -6986,6 +7603,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.fileauth'. <br>
      * The value is, e.g. fileauth <br>
+     * comment: Online help key for file authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameFileauth();
@@ -6993,6 +7611,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.labeltype'. <br>
      * The value is, e.g. labeltype <br>
+     * comment: Online help key for label type.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameLabeltype();
@@ -7000,6 +7619,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.duplicatehost'. <br>
      * The value is, e.g. duplicatehost <br>
+     * comment: Online help key for duplicate host.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDuplicatehost();
@@ -7007,6 +7627,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.scheduler'. <br>
      * The value is, e.g. scheduler <br>
+     * comment: Online help key for scheduler.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameScheduler();
@@ -7014,6 +7635,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.crawlinginfo'. <br>
      * The value is, e.g. crawlinginfo <br>
+     * comment: Online help key for crawling info.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameCrawlinginfo();
@@ -7021,6 +7643,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.backup'. <br>
      * The value is, e.g. backup <br>
+     * comment: Online help key for backup.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameBackup();
@@ -7028,6 +7651,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.upgrade'. <br>
      * The value is, e.g. upgrade <br>
+     * comment: Online help key for upgrade.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameUpgrade();
@@ -7035,6 +7659,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.sereq'. <br>
      * The value is, e.g. sereq <br>
+     * comment: Online help key for search request.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameSereq();
@@ -7042,6 +7667,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.accesstoken'. <br>
      * The value is, e.g. accesstoken <br>
+     * comment: Online help key for access token.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameAccesstoken();
@@ -7049,6 +7675,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.suggest'. <br>
      * The value is, e.g. suggest <br>
+     * comment: Online help key for suggest.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameSuggest();
@@ -7056,6 +7683,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.searchlog'. <br>
      * The value is, e.g. searchlog <br>
+     * comment: Online help key for search log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameSearchlog();
@@ -7063,6 +7691,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.maintenance'. <br>
      * The value is, e.g. maintenance <br>
+     * comment: Online help key for maintenance.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameMaintenance();
@@ -7070,6 +7699,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.plugin'. <br>
      * The value is, e.g. plugin <br>
+     * comment: Online help key for plugin.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNamePlugin();
@@ -7077,6 +7707,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.name.storage'. <br>
      * The value is, e.g. storage <br>
+     * comment: Online help key for storage.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameStorage();
@@ -7084,6 +7715,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
+     * comment: Supported languages for online help.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpSupportedLangs();
@@ -7091,6 +7723,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'forum.link'. <br>
      * The value is, e.g. https://discuss.codelibs.org/c/Fess{lang}/ <br>
+     * comment: Forum link for user support.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getForumLink();
@@ -7098,6 +7731,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'forum.supported.langs'. <br>
      * The value is, e.g. en,ja <br>
+     * comment: Supported languages for the forum.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getForumSupportedLangs();
@@ -7105,6 +7739,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Seed value for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordSeed();
@@ -7112,6 +7747,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.seed' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Seed value for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7120,6 +7756,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.tags'. <br>
      * The value is, e.g.  <br>
+     * comment: Tags for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordTags();
@@ -7127,6 +7764,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.tags' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Tags for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7135,6 +7773,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.fields'. <br>
      * The value is, e.g.  <br>
+     * comment: Fields for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordFields();
@@ -7142,6 +7781,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.fields' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Fields for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7150,6 +7790,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.excludes'. <br>
      * The value is, e.g.  <br>
+     * comment: Excluded words for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordExcludes();
@@ -7157,6 +7798,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.excludes' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Excluded words for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7165,6 +7807,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.size'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of popular words to suggest.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordSize();
@@ -7172,6 +7815,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.size' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Number of popular words to suggest.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7180,6 +7824,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.window.size'. <br>
      * The value is, e.g. 30 <br>
+     * comment: Window size for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordWindowSize();
@@ -7187,6 +7832,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.window.size' as {@link Integer}. <br>
      * The value is, e.g. 30 <br>
+     * comment: Window size for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7195,6 +7841,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.query.freq'. <br>
      * The value is, e.g. 10 <br>
+     * comment: Query frequency for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordQueryFreq();
@@ -7202,6 +7849,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.query.freq' as {@link Integer}. <br>
      * The value is, e.g. 10 <br>
+     * comment: Query frequency for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7210,6 +7858,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.min.hit.count'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Minimum hit count for suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestMinHitCount();
@@ -7217,6 +7866,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.min.hit.count' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Minimum hit count for suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7225,6 +7875,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.field.contents'. <br>
      * The value is, e.g. _default <br>
+     * comment: Field for suggestion contents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestFieldContents();
@@ -7232,6 +7883,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.field.tags'. <br>
      * The value is, e.g. label <br>
+     * comment: Field for suggestion tags.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestFieldTags();
@@ -7239,6 +7891,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.field.roles'. <br>
      * The value is, e.g. role <br>
+     * comment: Field for suggestion roles.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestFieldRoles();
@@ -7246,6 +7899,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.field.index.contents'. <br>
      * The value is, e.g. content,title <br>
+     * comment: Index contents for suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestFieldIndexContents();
@@ -7253,6 +7907,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.request.interval'. <br>
      * The value is, e.g. 0 <br>
+     * comment: Interval for suggestion update requests.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestUpdateRequestInterval();
@@ -7260,6 +7915,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.request.interval' as {@link Integer}. <br>
      * The value is, e.g. 0 <br>
+     * comment: Interval for suggestion update requests.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7268,6 +7924,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.doc.per.request'. <br>
      * The value is, e.g. 2 <br>
+     * comment: Number of documents per suggestion update request.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestUpdateDocPerRequest();
@@ -7275,6 +7932,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.doc.per.request' as {@link Integer}. <br>
      * The value is, e.g. 2 <br>
+     * comment: Number of documents per suggestion update request.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7283,6 +7941,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.contents.limit.num.percentage'. <br>
      * The value is, e.g. 50% <br>
+     * comment: Percentage limit for suggestion update contents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestUpdateContentsLimitNumPercentage();
@@ -7290,6 +7949,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.contents.limit.num'. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of suggestion update contents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestUpdateContentsLimitNum();
@@ -7297,6 +7957,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.contents.limit.num' as {@link Integer}. <br>
      * The value is, e.g. 10000 <br>
+     * comment: Maximum number of suggestion update contents.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7305,6 +7966,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.contents.limit.doc.size'. <br>
      * The value is, e.g. 50000 <br>
+     * comment: Maximum document size for suggestion update.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestUpdateContentsLimitDocSize();
@@ -7312,6 +7974,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.update.contents.limit.doc.size' as {@link Integer}. <br>
      * The value is, e.g. 50000 <br>
+     * comment: Maximum document size for suggestion update.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7320,6 +7983,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.source.reader.scroll.size'. <br>
      * The value is, e.g. 1 <br>
+     * comment: Scroll size for suggestion source reader.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestSourceReaderScrollSize();
@@ -7327,6 +7991,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.source.reader.scroll.size' as {@link Integer}. <br>
      * The value is, e.g. 1 <br>
+     * comment: Scroll size for suggestion source reader.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7335,6 +8000,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.cache.size'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Cache size for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordCacheSize();
@@ -7342,6 +8008,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.cache.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Cache size for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7350,6 +8017,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.cache.expire'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Cache expiration (seconds) for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestPopularWordCacheExpire();
@@ -7357,6 +8025,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.popular.word.cache.expire' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Cache expiration (seconds) for popular word suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7365,6 +8034,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.search.log.permissions'. <br>
      * The value is, e.g. {user}guest,{role}guest <br>
+     * comment: Permissions for suggestion search log.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestSearchLogPermissions();
@@ -7372,6 +8042,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.system.monitor.interval'. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval for system monitor in suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestSystemMonitorInterval();
@@ -7379,6 +8050,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'suggest.system.monitor.interval' as {@link Integer}. <br>
      * The value is, e.g. 60 <br>
+     * comment: Interval for system monitor in suggestion.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7387,6 +8059,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.enabled'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether LDAP admin is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminEnabled();
@@ -7394,6 +8067,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.admin.enabled' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether LDAP admin is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapAdminEnabled();
@@ -7401,6 +8075,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.user.filter'. <br>
      * The value is, e.g. uid=%s <br>
+     * comment: User filter for LDAP admin.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminUserFilter();
@@ -7408,6 +8083,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.user.base.dn'. <br>
      * The value is, e.g. ou=People,dc=fess,dc=codelibs,dc=org <br>
+     * comment: Base DN for LDAP admin user.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminUserBaseDn();
@@ -7415,6 +8091,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.user.object.classes'. <br>
      * The value is, e.g. organizationalPerson,top,person,inetOrgPerson <br>
+     * comment: Object classes for LDAP admin user.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminUserObjectClasses();
@@ -7422,6 +8099,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.role.filter'. <br>
      * The value is, e.g. cn=%s <br>
+     * comment: Role filter for LDAP admin.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminRoleFilter();
@@ -7429,6 +8107,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.role.base.dn'. <br>
      * The value is, e.g. ou=Role,dc=fess,dc=codelibs,dc=org <br>
+     * comment: Base DN for LDAP admin role.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminRoleBaseDn();
@@ -7436,6 +8115,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.role.object.classes'. <br>
      * The value is, e.g. groupOfNames <br>
+     * comment: Object classes for LDAP admin role.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminRoleObjectClasses();
@@ -7443,6 +8123,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.group.filter'. <br>
      * The value is, e.g. cn=%s <br>
+     * comment: Group filter for LDAP admin.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminGroupFilter();
@@ -7450,6 +8131,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.group.base.dn'. <br>
      * The value is, e.g. ou=Group,dc=fess,dc=codelibs,dc=org <br>
+     * comment: Base DN for LDAP admin group.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminGroupBaseDn();
@@ -7457,6 +8139,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.group.object.classes'. <br>
      * The value is, e.g. groupOfNames <br>
+     * comment: Object classes for LDAP admin group.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminGroupObjectClasses();
@@ -7464,6 +8147,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.admin.sync.password'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to sync password for LDAP admin.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminSyncPassword();
@@ -7471,6 +8155,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.admin.sync.password' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to sync password for LDAP admin.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapAdminSyncPassword();
@@ -7478,6 +8163,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.auth.validation'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to validate LDAP authentication.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAuthValidation();
@@ -7485,6 +8171,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.auth.validation' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to validate LDAP authentication.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapAuthValidation();
@@ -7492,6 +8179,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.max.username.length'. <br>
      * The value is, e.g. -1 <br>
+     * comment: Maximum username length for LDAP.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapMaxUsernameLength();
@@ -7499,6 +8187,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.max.username.length' as {@link Integer}. <br>
      * The value is, e.g. -1 <br>
+     * comment: Maximum username length for LDAP.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7507,6 +8196,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.ignore.netbios.name'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore NetBIOS name in LDAP.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapIgnoreNetbiosName();
@@ -7514,6 +8204,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.ignore.netbios.name' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to ignore NetBIOS name in LDAP.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapIgnoreNetbiosName();
@@ -7521,6 +8212,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.group.name.with.underscores'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to allow underscores in LDAP group names.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapGroupNameWithUnderscores();
@@ -7528,6 +8220,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.group.name.with.underscores' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to allow underscores in LDAP group names.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapGroupNameWithUnderscores();
@@ -7535,6 +8228,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.lowercase.permission.name'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use lowercase for LDAP permission names.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapLowercasePermissionName();
@@ -7542,6 +8236,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.lowercase.permission.name' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use lowercase for LDAP permission names.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapLowercasePermissionName();
@@ -7549,6 +8244,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.allow.empty.permission'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow empty permissions in LDAP.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAllowEmptyPermission();
@@ -7556,6 +8252,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.allow.empty.permission' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether to allow empty permissions in LDAP.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapAllowEmptyPermission();
@@ -7563,6 +8260,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.samaccountname.group'. <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use samAccountName for LDAP group.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapSamaccountnameGroup();
@@ -7570,6 +8268,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.samaccountname.group' true? <br>
      * The value is, e.g. false <br>
+     * comment: Whether to use samAccountName for LDAP group.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapSamaccountnameGroup();
@@ -7577,6 +8276,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for user is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapRoleSearchUserEnabled();
@@ -7584,6 +8284,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.role.search.user.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for user is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapRoleSearchUserEnabled();
@@ -7591,6 +8292,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.role.search.group.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for group is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapRoleSearchGroupEnabled();
@@ -7598,6 +8300,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.role.search.group.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for group is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapRoleSearchGroupEnabled();
@@ -7605,6 +8308,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.role.search.role.enabled'. <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for role is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapRoleSearchRoleEnabled();
@@ -7612,6 +8316,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Is the property for the key 'ldap.role.search.role.enabled' true? <br>
      * The value is, e.g. true <br>
+     * comment: Whether LDAP role search for role is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapRoleSearchRoleEnabled();
@@ -7619,6 +8324,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.surname'. <br>
      * The value is, e.g. sn <br>
+     * comment: LDAP attribute for surname.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrSurname();
@@ -7626,6 +8332,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.givenName'. <br>
      * The value is, e.g. givenName <br>
+     * comment: LDAP attribute for given name.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrGivenName();
@@ -7633,6 +8340,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.employeeNumber'. <br>
      * The value is, e.g. employeeNumber <br>
+     * comment: LDAP attribute for employee number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrEmployeeNumber();
@@ -7640,6 +8348,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.mail'. <br>
      * The value is, e.g. mail <br>
+     * comment: LDAP attribute for mail.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrMail();
@@ -7647,6 +8356,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.telephoneNumber'. <br>
      * The value is, e.g. telephoneNumber <br>
+     * comment: LDAP attribute for telephone number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrTelephoneNumber();
@@ -7654,6 +8364,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.homePhone'. <br>
      * The value is, e.g. homePhone <br>
+     * comment: LDAP attribute for home phone.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrHomePhone();
@@ -7661,6 +8372,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.homePostalAddress'. <br>
      * The value is, e.g. homePostalAddress <br>
+     * comment: LDAP attribute for home postal address.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrHomePostalAddress();
@@ -7668,6 +8380,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.labeledURI'. <br>
      * The value is, e.g. labeledURI <br>
+     * comment: LDAP attribute for labeled URI.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrLabeledURI();
@@ -7675,6 +8388,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.roomNumber'. <br>
      * The value is, e.g. roomNumber <br>
+     * comment: LDAP attribute for room number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrRoomNumber();
@@ -7682,6 +8396,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.description'. <br>
      * The value is, e.g. description <br>
+     * comment: LDAP attribute for description.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrDescription();
@@ -7689,6 +8404,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.title'. <br>
      * The value is, e.g. title <br>
+     * comment: LDAP attribute for title.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrTitle();
@@ -7696,6 +8412,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.pager'. <br>
      * The value is, e.g. pager <br>
+     * comment: LDAP attribute for pager.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPager();
@@ -7703,6 +8420,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.street'. <br>
      * The value is, e.g. street <br>
+     * comment: LDAP attribute for street.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrStreet();
@@ -7710,6 +8428,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.postalCode'. <br>
      * The value is, e.g. postalCode <br>
+     * comment: LDAP attribute for postal code.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPostalCode();
@@ -7717,6 +8436,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.physicalDeliveryOfficeName'. <br>
      * The value is, e.g. physicalDeliveryOfficeName <br>
+     * comment: LDAP attribute for physical delivery office name.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPhysicalDeliveryOfficeName();
@@ -7724,6 +8444,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.destinationIndicator'. <br>
      * The value is, e.g. destinationIndicator <br>
+     * comment: LDAP attribute for destination indicator.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrDestinationIndicator();
@@ -7731,6 +8452,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.internationaliSDNNumber'. <br>
      * The value is, e.g. internationaliSDNNumber <br>
+     * comment: LDAP attribute for international ISDN number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrInternationaliSDNNumber();
@@ -7738,6 +8460,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.state'. <br>
      * The value is, e.g. st <br>
+     * comment: LDAP attribute for state.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrState();
@@ -7745,6 +8468,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.employeeType'. <br>
      * The value is, e.g. employeeType <br>
+     * comment: LDAP attribute for employee type.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrEmployeeType();
@@ -7752,6 +8476,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.facsimileTelephoneNumber'. <br>
      * The value is, e.g. facsimileTelephoneNumber <br>
+     * comment: LDAP attribute for facsimile telephone number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrFacsimileTelephoneNumber();
@@ -7759,6 +8484,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.postOfficeBox'. <br>
      * The value is, e.g. postOfficeBox <br>
+     * comment: LDAP attribute for post office box.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPostOfficeBox();
@@ -7766,6 +8492,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.initials'. <br>
      * The value is, e.g. initials <br>
+     * comment: LDAP attribute for initials.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrInitials();
@@ -7773,6 +8500,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.carLicense'. <br>
      * The value is, e.g. carLicense <br>
+     * comment: LDAP attribute for car license.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrCarLicense();
@@ -7780,6 +8508,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.mobile'. <br>
      * The value is, e.g. mobile <br>
+     * comment: LDAP attribute for mobile.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrMobile();
@@ -7787,6 +8516,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.postalAddress'. <br>
      * The value is, e.g. postalAddress <br>
+     * comment: LDAP attribute for postal address.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPostalAddress();
@@ -7794,6 +8524,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.city'. <br>
      * The value is, e.g. l <br>
+     * comment: LDAP attribute for city.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrCity();
@@ -7801,6 +8532,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.teletexTerminalIdentifier'. <br>
      * The value is, e.g. teletexTerminalIdentifier <br>
+     * comment: LDAP attribute for teletex terminal identifier.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrTeletexTerminalIdentifier();
@@ -7808,6 +8540,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.x121Address'. <br>
      * The value is, e.g. x121Address <br>
+     * comment: LDAP attribute for X.121 address.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrX121Address();
@@ -7815,6 +8548,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.businessCategory'. <br>
      * The value is, e.g. businessCategory <br>
+     * comment: LDAP attribute for business category.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrBusinessCategory();
@@ -7822,6 +8556,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.registeredAddress'. <br>
      * The value is, e.g. registeredAddress <br>
+     * comment: LDAP attribute for registered address.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrRegisteredAddress();
@@ -7829,6 +8564,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.displayName'. <br>
      * The value is, e.g. displayName <br>
+     * comment: LDAP attribute for display name.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrDisplayName();
@@ -7836,6 +8572,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.preferredLanguage'. <br>
      * The value is, e.g. preferredLanguage <br>
+     * comment: LDAP attribute for preferred language.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrPreferredLanguage();
@@ -7843,6 +8580,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.departmentNumber'. <br>
      * The value is, e.g. departmentNumber <br>
+     * comment: LDAP attribute for department number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrDepartmentNumber();
@@ -7850,6 +8588,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.uidNumber'. <br>
      * The value is, e.g. uidNumber <br>
+     * comment: LDAP attribute for UID number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrUidNumber();
@@ -7857,6 +8596,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.gidNumber'. <br>
      * The value is, e.g. gidNumber <br>
+     * comment: LDAP attribute for GID number.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrGidNumber();
@@ -7864,6 +8604,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.attr.homeDirectory'. <br>
      * The value is, e.g. homeDirectory <br>
+     * comment: LDAP attribute for home directory.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAttrHomeDirectory();
@@ -7871,6 +8612,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'plugin.repositories'. <br>
      * The value is, e.g. https://repo.maven.apache.org/maven2/org/codelibs/fess/,https://fess.codelibs.org/plugin/artifacts.yaml <br>
+     * comment: Plugin repository URLs.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPluginRepositories();
@@ -7878,6 +8620,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'plugin.version.filter'. <br>
      * The value is, e.g.  <br>
+     * comment: Version filter for plugins.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPluginVersionFilter();
@@ -7885,6 +8628,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'plugin.version.filter' as {@link Integer}. <br>
      * The value is, e.g.  <br>
+     * comment: Version filter for plugins.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7893,6 +8637,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'storage.max.items.in.page'. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of items per page in storage.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getStorageMaxItemsInPage();
@@ -7900,6 +8645,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'storage.max.items.in.page' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
+     * comment: Maximum number of items per page in storage.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -7908,6 +8654,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'password.invalid.admin.passwords'. <br>
      * The value is, e.g. admin <br>
+     * comment: List of invalid admin passwords.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPasswordInvalidAdminPasswords();
