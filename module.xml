@@ -6,7 +6,7 @@
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
 	<property name="maven.release.repo.url" value="https://maven.codelibs.org" />
-	<property name="opensearch.version" value="3.0.0" />
+	<property name="opensearch.version" value="3.1.0" />
 
 	<target name="install.modules">
 		<mkdir dir="${target.dir}" />
