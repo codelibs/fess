@@ -21,12 +21,15 @@ import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.app.web.search.SearchAction;
+import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.exception.SsoMessageException;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.UrlChain;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
@@ -44,6 +47,17 @@ public class SsoAction extends FessLoginAction {
     @Execute
     public ActionResponse index() {
         if (fessLoginAssist.getSavedUserBean().isPresent()) {
+            final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
+            if (searchParameters.length > 0) {
+                final UrlChain chain = new UrlChain(this);
+                for (final RequestParameter param : searchParameters) {
+                    for (final String value : param.getValues()) {
+                        chain.params(param.getName(), value);
+                    }
+                }
+                return redirectWith(SearchAction.class, chain);
+
+            }
             return redirect(RootAction.class);
         }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();

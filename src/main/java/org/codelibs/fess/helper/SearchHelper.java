@@ -15,8 +15,14 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,17 +34,23 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.exception.InterruptedRuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.RequestParameter;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient.SearchConditionBuilder;
@@ -53,6 +65,7 @@ import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.opensearch.OpenSearchException;
 import org.opensearch.action.DocWriteResponse.Result;
 import org.opensearch.action.bulk.BulkRequestBuilder;
@@ -63,6 +76,9 @@ import org.opensearch.common.document.DocumentField;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class SearchHelper {
@@ -78,6 +94,8 @@ public class SearchHelper {
     //
 
     protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
+
+    protected ObjectMapper mapper = new ObjectMapper();;
 
     // ===================================================================================
     //                                                                              Method
@@ -376,6 +394,173 @@ public class SearchHelper {
     public void addRewriter(final SearchRequestParamsRewriter rewriter) {
         searchRequestParamsRewriters = Arrays.copyOf(searchRequestParamsRewriters, searchRequestParamsRewriters.length + 1);
         searchRequestParamsRewriters[searchRequestParamsRewriters.length - 1] = rewriter;
+    }
+
+    public void storeSearchParameters() {
+        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final String requiredKeysStr = fessConfig.getCookieSearchParameterRequiredKeys();
+            if (StringUtil.isNotBlank(requiredKeysStr) && StreamUtil.split(requiredKeysStr, ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(name -> {
+                        final String[] values = req.getParameterValues(name);
+                        if (values == null || values.length == 0 || StringUtil.isEmpty(values[0])) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Required parameter '{}' is missing or empty. Skip storing search parameters.", name);
+                            }
+                            return true;
+                        }
+                        return false;
+                    }))) {
+                return;
+            }
+            final String keysStr = fessConfig.getCookieSearchParameterKeys();
+            if (StringUtil.isNotBlank(keysStr)) {
+                final RequestParameter[] parameters = StreamUtil.split(keysStr, ",").get(stream -> stream.map(String::trim).map(s -> {
+                    if (StringUtil.isEmpty(s)) {
+                        return null;
+                    }
+                    final String[] values = req.getParameterValues(s);
+                    if (values == null || values.length == 0) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Parameter '{}' is not present or has no value.", s);
+                        }
+                        return null;
+                    }
+                    return new RequestParameter(s, values);
+                }).filter(o -> o != null).toArray(n -> new RequestParameter[n]));
+                if (parameters.length == 0) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No valid parameters found in request. Nothing to store.");
+                    }
+                    return;
+                }
+                try {
+                    final String encoded = serializeParameters(parameters);
+                    if (encoded.length() > fessConfig.getCookieSearchParameterMaxLengthAsInteger()) {
+                        logger.warn("Encoded search parameters exceed the maximum cookie length: {} > {}. Skipping cookie storage.",
+                                encoded.length(), fessConfig.getCookieSearchParameterMaxLengthAsInteger());
+                        return;
+                    }
+                    LaResponseUtil.getOptionalResponse().ifPresent(res -> {
+                        final Cookie cookie = new Cookie(fessConfig.getCookieSearchParameterName(), encoded);
+                        cookie.setHttpOnly(Constants.TRUE.equalsIgnoreCase(fessConfig.getCookieSearchParameterHttpOnly()));
+                        final String secure = fessConfig.getCookieSearchParameterSecure();
+                        if (StringUtil.isBlank(secure)) {
+                            final String forwardedProto = req.getHeader("X-Forwarded-Proto");
+                            if ("https".equalsIgnoreCase(forwardedProto)) {
+                                cookie.setSecure(true);
+                            } else {
+                                cookie.setSecure(req.isSecure());
+                            }
+                        } else {
+                            cookie.setSecure(Constants.TRUE.equalsIgnoreCase(secure));
+                        }
+                        final String domain = fessConfig.getCookieSearchParameterDomain();
+                        if (StringUtil.isNotBlank(domain)) {
+                            cookie.setDomain(domain);
+                        }
+                        final String path = fessConfig.getCookieSearchParameterPath();
+                        if (StringUtil.isNotBlank(path)) {
+                            cookie.setPath(path);
+                        }
+                        cookie.setMaxAge(fessConfig.getCookieSearchParameterMaxAgeAsInteger());
+                        cookie.setAttribute("SameSite", fessConfig.getCookieSearchParameterSameSite());
+                        res.addCookie(cookie);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "Stored search parameters in cookie: name={}, size={}, maxAge={}, path={}, domain={}, secure={}, httpOnly={}, sameSite={}",
+                                    cookie.getName(), encoded.length(), cookie.getMaxAge(), cookie.getPath(), cookie.getDomain(),
+                                    cookie.getSecure(), cookie.isHttpOnly(), fessConfig.getCookieSearchParameterSameSite());
+                        }
+                    });
+                } catch (final Exception e) {
+                    logger.warn("Failed to store search parameters in cookie.", e);
+                }
+            }
+        });
+    }
+
+    protected String serializeParameters(final RequestParameter[] parameters) {
+        final List<Object[]> compactList = new ArrayList<>();
+        for (final RequestParameter p : parameters) {
+            compactList.add(new Object[] { p.getName(), p.getValues() });
+        }
+        try {
+            final String json = mapper.writeValueAsString(compactList);
+            final byte[] compressed = gzipCompress(json.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(compressed);
+        } catch (final Exception e) {
+            throw new SearchQueryException("Failed to serialize a query: " + Arrays.toString(parameters), e);
+        }
+    }
+
+    protected byte[] gzipCompress(final byte[] data) {
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            try (final GZIPOutputStream gzipOut = new GZIPOutputStream(bos)) {
+                gzipOut.write(data);
+            }
+            return bos.toByteArray();
+        } catch (final IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    public RequestParameter[] getSearchParameters() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final String cookieName = fessConfig.getCookieSearchParameterName();
+            final Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (final Cookie cookie : cookies) {
+                    if (cookieName.equals(cookie.getName())) {
+                        try {
+                            final String encoded = cookie.getValue();
+                            final byte[] compressed = Base64.getUrlDecoder().decode(encoded);
+                            final byte[] jsonBytes = gzipDecompress(compressed);
+                            final List<?> list = mapper.readValue(jsonBytes, List.class);
+
+                            final List<RequestParameter> result = new ArrayList<>();
+                            for (Object item : list) {
+                                if (item instanceof List<?> pair) {
+                                    if (pair.size() == 2 && pair.get(0) instanceof String name
+                                            && pair.get(1) instanceof List<?> valueList) {
+                                        final String[] values =
+                                                valueList.stream().filter(v -> v instanceof String).toArray(n -> new String[n]);
+                                        result.add(new RequestParameter(name, values));
+                                    }
+                                }
+                            }
+                            LaResponseUtil.getOptionalResponse().ifPresent(res -> {
+                                final Cookie invalidCookie = new Cookie(fessConfig.getCookieSearchParameterName(), StringUtil.EMPTY);
+                                invalidCookie.setPath(fessConfig.getCookieSearchParameterPath());
+                                invalidCookie.setMaxAge(0);
+                                res.addCookie(invalidCookie);
+                            });
+                            return result.toArray(n -> new RequestParameter[n]);
+                        } catch (final Exception e) {
+                            logger.warn("Failed to deserialize search parameters from cookie.", e);
+                            return new RequestParameter[0];
+                        }
+                    }
+                }
+            }
+            return new RequestParameter[0];
+        }).orElse(new RequestParameter[0]);
+    }
+
+    protected byte[] gzipDecompress(final byte[] compressed) {
+        try (final ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
+                final GZIPInputStream gzipIn = new GZIPInputStream(bis);
+                final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            final byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzipIn.read(buffer)) > 0) {
+                bos.write(buffer, 0, len);
+            }
+            return bos.toByteArray();
+        } catch (final IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     public interface SearchRequestParamsRewriter {
