@@ -111,7 +111,6 @@ public class SearchHelperTest extends UnitFessTestCase {
             }
         }
         assertTrue(found);
-        // CookieをリクエストにセットしてgetSearchParametersをテスト
         getMockRequest().addCookie(cookies[0]);
         RequestParameter[] result = searchHelper.getSearchParameters();
         assertEquals(2, result.length);
