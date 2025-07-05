@@ -95,6 +95,8 @@ public class SearchHelper {
 
     protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
 
+    protected ObjectMapper mapper = new ObjectMapper();;
+
     // ===================================================================================
     //                                                                              Method
     //                                                                      ==============
@@ -479,7 +481,6 @@ public class SearchHelper {
     }
 
     protected String serializeParameters(final RequestParameter[] parameters) {
-        final ObjectMapper mapper = new ObjectMapper();
         final List<Object[]> compactList = new ArrayList<>();
         for (final RequestParameter p : parameters) {
             compactList.add(new Object[] { p.getName(), p.getValues() });
@@ -516,7 +517,6 @@ public class SearchHelper {
                             final String encoded = cookie.getValue();
                             final byte[] compressed = Base64.getUrlDecoder().decode(encoded);
                             final byte[] jsonBytes = gzipDecompress(compressed);
-                            final ObjectMapper mapper = new ObjectMapper();
                             final List<?> list = mapper.readValue(jsonBytes, List.class);
 
                             final List<RequestParameter> result = new ArrayList<>();
