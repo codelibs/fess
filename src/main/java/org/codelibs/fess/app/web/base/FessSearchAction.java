@@ -233,6 +233,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlResponse redirectToLogin() {
+        searchHelper.storeSearchParameters();
         return systemHelper.getRedirectResponseToLogin(redirect(SsoAction.class));
     }
 

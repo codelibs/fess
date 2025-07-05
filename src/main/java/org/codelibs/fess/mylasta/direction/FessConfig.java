@@ -1275,6 +1275,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. cookie */
     String SESSION_TRACKING_MODES = "session.tracking.modes";
 
+    /** The key of the configuration. e.g. q,num,sort */
+    String COOKIE_SEARCH_PARAMETER_KEYS = "cookie.search.parameter.keys";
+
+    /** The key of the configuration. e.g. q */
+    String COOKIE_SEARCH_PARAMETER_required_keys = "cookie.search.parameter.required_keys";
+
+    /** The key of the configuration. e.g. 1000 */
+    String COOKIE_SEARCH_PARAMETER_MAX_LENGTH = "cookie.search.parameter.max.length";
+
+    /** The key of the configuration. e.g. fsrp */
+    String COOKIE_SEARCH_PARAMETER_NAME = "cookie.search.parameter.name";
+
+    /** The key of the configuration. e.g. true */
+    String COOKIE_SEARCH_PARAMETER_http_only = "cookie.search.parameter.http_only";
+
+    /** The key of the configuration. e.g.  */
+    String COOKIE_SEARCH_PARAMETER_SECURE = "cookie.search.parameter.secure";
+
+    /** The key of the configuration. e.g. 60 */
+    String COOKIE_SEARCH_PARAMETER_max_age = "cookie.search.parameter.max_age";
+
+    /** The key of the configuration. e.g.  */
+    String COOKIE_SEARCH_PARAMETER_DOMAIN = "cookie.search.parameter.domain";
+
+    /** The key of the configuration. e.g. / */
+    String COOKIE_SEARCH_PARAMETER_PATH = "cookie.search.parameter.path";
+
+    /** The key of the configuration. e.g. Lax */
+    String COOKIE_SEARCH_PARAMETER_same_site = "cookie.search.parameter.same_site";
+
     /** The key of the configuration. e.g. 25 */
     String PAGING_PAGE_SIZE = "paging.page.size";
 
@@ -6368,6 +6398,130 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSessionTrackingModes();
 
     /**
+     * Get the value for the key 'cookie.search.parameter.keys'. <br>
+     * The value is, e.g. q,num,sort <br>
+     * comment: Comma-separated list of request parameter keys to store in cookies before SSO login.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterKeys();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.required_keys'. <br>
+     * The value is, e.g. q <br>
+     * comment: Comma-separated list of required parameter keys that must be present to store in cookies.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterRequiredKeys();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max.length'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum length of the encoded search parameters stored in cookies.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterMaxLength();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum length of the encoded search parameters stored in cookies.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.name'. <br>
+     * The value is, e.g. fsrp <br>
+     * comment: Cookie name used to store encoded search parameters before SSO login.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterName();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.http_only'. <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to set HttpOnly attribute to the search parameter cookie.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterHttpOnly();
+
+    /**
+     * Is the property for the key 'cookie.search.parameter.http_only' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Whether to set HttpOnly attribute to the search parameter cookie.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCookieSearchParameterHttpOnly();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.secure'. <br>
+     * The value is, e.g.  <br>
+     * comment: Whether to set Secure attribute to the search parameter cookie. Should be true in production environments using HTTPS.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterSecure();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.secure' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: Whether to set Secure attribute to the search parameter cookie. Should be true in production environments using HTTPS.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterSecureAsInteger();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max_age'. <br>
+     * The value is, e.g. 60 <br>
+     * comment: Max-Age (in seconds) for the search parameter cookie. Use -1 for session-only cookies.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterMaxAge();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.max_age' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * comment: Max-Age (in seconds) for the search parameter cookie. Use -1 for session-only cookies.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterMaxAgeAsInteger();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.domain'. <br>
+     * The value is, e.g.  <br>
+     * comment: Domain attribute for the search parameter cookie. Set to the domain scope you want the cookie to be available on (e.g., example.com).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterDomain();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.domain' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: Domain attribute for the search parameter cookie. Set to the domain scope you want the cookie to be available on (e.g., example.com).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCookieSearchParameterDomainAsInteger();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.path'. <br>
+     * The value is, e.g. / <br>
+     * comment: Path attribute for the search parameter cookie. Typically set to "/" or the context path of the app.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterPath();
+
+    /**
+     * Get the value for the key 'cookie.search.parameter.same_site'. <br>
+     * The value is, e.g. Lax <br>
+     * comment: SameSite attribute for the search parameter cookie. Valid values: Lax, Strict, None
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCookieSearchParameterSameSite();
+
+    /**
      * Get the value for the key 'paging.page.size'. <br>
      * The value is, e.g. 25 <br>
      * comment: The size of one page for paging
@@ -10732,6 +10886,66 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SESSION_TRACKING_MODES);
         }
 
+        public String getCookieSearchParameterKeys() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS);
+        }
+
+        public String getCookieSearchParameterRequiredKeys() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_required_keys);
+        }
+
+        public String getCookieSearchParameterMaxLength() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH);
+        }
+
+        public Integer getCookieSearchParameterMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH);
+        }
+
+        public String getCookieSearchParameterName() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_NAME);
+        }
+
+        public String getCookieSearchParameterHttpOnly() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_http_only);
+        }
+
+        public boolean isCookieSearchParameterHttpOnly() {
+            return is(FessConfig.COOKIE_SEARCH_PARAMETER_http_only);
+        }
+
+        public String getCookieSearchParameterSecure() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_SECURE);
+        }
+
+        public Integer getCookieSearchParameterSecureAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_SECURE);
+        }
+
+        public String getCookieSearchParameterMaxAge() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_max_age);
+        }
+
+        public Integer getCookieSearchParameterMaxAgeAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_max_age);
+        }
+
+        public String getCookieSearchParameterDomain() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_DOMAIN);
+        }
+
+        public Integer getCookieSearchParameterDomainAsInteger() {
+            return getAsInteger(FessConfig.COOKIE_SEARCH_PARAMETER_DOMAIN);
+        }
+
+        public String getCookieSearchParameterPath() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_PATH);
+        }
+
+        public String getCookieSearchParameterSameSite() {
+            return get(FessConfig.COOKIE_SEARCH_PARAMETER_same_site);
+        }
+
         public String getPagingPageSize() {
             return get(FessConfig.PAGING_PAGE_SIZE);
         }
@@ -12206,6 +12420,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COOKIE_DEFAULT_PATH, "/");
             defaultMap.put(FessConfig.COOKIE_DEFAULT_EXPIRE, "3600");
             defaultMap.put(FessConfig.SESSION_TRACKING_MODES, "cookie");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_KEYS, "q,num,sort");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_required_keys, "q");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_MAX_LENGTH, "1000");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_NAME, "fsrp");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_http_only, "true");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_SECURE, "");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_max_age, "60");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_DOMAIN, "");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_PATH, "/");
+            defaultMap.put(FessConfig.COOKIE_SEARCH_PARAMETER_same_site, "Lax");
             defaultMap.put(FessConfig.PAGING_PAGE_SIZE, "25");
             defaultMap.put(FessConfig.PAGING_PAGE_RANGE_SIZE, "5");
             defaultMap.put(FessConfig.PAGING_PAGE_RANGE_FILL_LIMIT, "true");
