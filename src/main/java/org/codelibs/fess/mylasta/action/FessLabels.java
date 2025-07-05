@@ -32,7 +32,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Status */
     public static final String LABELS_AVAILABLE = "{labels.available}";
 
-    /** The key of the message: Created by */
+    /** The key of the message: Created By */
     public static final String LABELS_CREATED_BY = "{labels.createdBy}";
 
     /** The key of the message: Created Time */
@@ -41,16 +41,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Depth */
     public static final String LABELS_DEPTH = "{labels.depth}";
 
-    /** The key of the message: Excluded Paths For Crawling */
+    /** The key of the message: Excluded Paths for Crawling */
     public static final String LABELS_EXCLUDED_PATHS = "{labels.excludedPaths}";
 
-    /** The key of the message: Excluded URLs For Crawling */
+    /** The key of the message: Excluded URLs for Crawling */
     public static final String LABELS_EXCLUDED_URLS = "{labels.excludedUrls}";
 
-    /** The key of the message: Excluded Paths For Indexing */
+    /** The key of the message: Excluded Paths for Searching */
     public static final String LABELS_EXCLUDED_DOC_PATHS = "{labels.excludedDocPaths}";
 
-    /** The key of the message: Excluded URLs For Indexing */
+    /** The key of the message: Excluded URLs for Searching */
     public static final String LABELS_EXCLUDED_DOC_URLS = "{labels.excludedDocUrls}";
 
     /** The key of the message: Hostname */
@@ -59,16 +59,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: ID */
     public static final String LABELS_ID = "{labels.id}";
 
-    /** The key of the message: Included Paths For Crawling */
+    /** The key of the message: Included Paths for Crawling */
     public static final String LABELS_INCLUDED_PATHS = "{labels.includedPaths}";
 
-    /** The key of the message: Included URLs For Crawling */
+    /** The key of the message: Included URLs for Crawling */
     public static final String LABELS_INCLUDED_URLS = "{labels.includedUrls}";
 
-    /** The key of the message: Included Paths For Indexing */
+    /** The key of the message: Included Paths for Searching */
     public static final String LABELS_INCLUDED_DOC_PATHS = "{labels.includedDocPaths}";
 
-    /** The key of the message: Included URLs For Indexing */
+    /** The key of the message: Included URLs for Searching */
     public static final String LABELS_INCLUDED_DOC_URLS = "{labels.includedDocUrls}";
 
     /** The key of the message: Max Access Count */
@@ -77,10 +77,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Name */
     public static final String LABELS_NAME = "{labels.name}";
 
-    /** The key of the message: Num of Thread */
+    /** The key of the message: Number of Threads */
     public static final String LABELS_NUM_OF_THREAD = "{labels.numOfThread}";
 
-    /** The key of the message: Duplicate Name */
+    /** The key of the message: Duplicate Host Name */
     public static final String LABELS_DUPLICATE_HOST_NAME = "{labels.duplicateHostName}";
 
     /** The key of the message: Page Number */
@@ -95,7 +95,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Port */
     public static final String LABELS_PORT = "{labels.port}";
 
-    /** The key of the message: Regular Expression */
+    /** The key of the message: Regex */
     public static final String LABELS_REGEX = "{labels.regex}";
 
     /** The key of the message: Regular Name */
@@ -107,10 +107,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Session ID */
     public static final String LABELS_SESSION_ID = "{labels.sessionId}";
 
-    /** The key of the message: Display Order */
+    /** The key of the message: Sort Order */
     public static final String LABELS_SORT_ORDER = "{labels.sortOrder}";
 
-    /** The key of the message: Updated by */
+    /** The key of the message: Updated By */
     public static final String LABELS_UPDATED_BY = "{labels.updatedBy}";
 
     /** The key of the message: Updated Time */
@@ -128,16 +128,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Value */
     public static final String LABELS_VALUE = "{labels.value}";
 
-    /** The key of the message: Version No. */
+    /** The key of the message: Version No */
     public static final String LABELS_VERSION_NO = "{labels.versionNo}";
 
     /** The key of the message: Schedule */
     public static final String LABELS_CRON_EXPRESSION = "{labels.cronExpression}";
 
-    /** The key of the message: Remove Documents Before Days */
+    /** The key of the message: Delete documents older than specified days */
     public static final String LABELS_DAY_FOR_CLEANUP = "{labels.dayForCleanup}";
 
-    /** The key of the message: Simultaneous Crawler Config */
+    /** The key of the message: Concurrent Crawling Count */
     public static final String LABELS_CRAWLING_THREAD_COUNT = "{labels.crawlingThreadCount}";
 
     /** The key of the message: Boost */
@@ -146,7 +146,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Name */
     public static final String LABELS_CRAWLING_CONFIG_NAME = "{labels.crawlingConfigName}";
 
-    /** The key of the message: Crawling Path */
+    /** The key of the message: Path to Crawl */
     public static final String LABELS_CRAWLING_CONFIG_PATH = "{labels.crawlingConfigPath}";
 
     /** The key of the message: Process Type */
@@ -155,19 +155,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Parameters */
     public static final String LABELS_PARAMETERS = "{labels.parameters}";
 
-    /** The key of the message: Upload File */
+    /** The key of the message: File to Upload */
     public static final String LABELS_DESIGN_FILE = "{labels.designFile}";
 
     /** The key of the message: Bulk File */
     public static final String LABELS_BULK_FILE = "{labels.bulkFile}";
 
-    /** The key of the message: Additional Query Parameters */
+    /** The key of the message: Append Search Parameters */
     public static final String LABELS_APPEND_QUERY_PARAMETER = "{labels.appendQueryParameter}";
 
     /** The key of the message: Config ID */
     public static final String LABELS_CONFIG_ID = "{labels.configId}";
 
-    /** The key of the message: Config Parameters */
+    /** The key of the message: Config Parameter */
     public static final String LABELS_CONFIG_PARAMETER = "{labels.configParameter}";
 
     /** The key of the message: Content */
@@ -194,37 +194,37 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Error Name */
     public static final String LABELS_ERROR_NAME = "{labels.errorName}";
 
-    /** The key of the message: Expired */
+    /** The key of the message: Expired Time */
     public static final String LABELS_EXPIRED_TIME = "{labels.expiredTime}";
 
-    /** The key of the message: Expired */
+    /** The key of the message: Expires */
     public static final String LABELS_EXPIRES = "{labels.expires}";
 
     /** The key of the message: Failure Count */
     public static final String LABELS_FAILURE_COUNT_THRESHOLD = "{labels.failureCountThreshold}";
 
-    /** The key of the message: File System Config Name */
+    /** The key of the message: File Crawl Config Name */
     public static final String LABELS_FILE_CONFIG_NAME = "{labels.fileConfigName}";
 
-    /** The key of the message: File name */
+    /** The key of the message: File Name */
     public static final String LABELS_FILE_NAME = "{labels.fileName}";
 
     /** The key of the message: Handler Name */
     public static final String LABELS_HANDLER_NAME = "{labels.handlerName}";
 
-    /** The key of the message: Parameters */
+    /** The key of the message: Parameter */
     public static final String LABELS_HANDLER_PARAMETER = "{labels.handlerParameter}";
 
-    /** The key of the message: Scripts */
+    /** The key of the message: Script */
     public static final String LABELS_HANDLER_SCRIPT = "{labels.handlerScript}";
 
-    /** The key of the message: Popular words */
+    /** The key of the message: Popular Word */
     public static final String LABELS_POPULAR_WORD = "{labels.popularWord}";
 
     /** The key of the message: Ignored Failure Type */
     public static final String LABELS_IGNORE_FAILURE_TYPE = "{labels.ignoreFailureType}";
 
-    /** The key of the message: Last Accessed */
+    /** The key of the message: Last Access Time */
     public static final String LABELS_LAST_ACCESS_TIME = "{labels.lastAccessTime}";
 
     /** The key of the message: Notification To */
@@ -239,7 +239,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Scheme */
     public static final String LABELS_PROTOCOL_SCHEME = "{labels.protocolScheme}";
 
-    /** The key of the message: Purge By Bots */
+    /** The key of the message: Purge Bots */
     public static final String LABELS_PURGE_BY_BOTS = "{labels.purgeByBots}";
 
     /** The key of the message: Log Level */
@@ -263,13 +263,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Sort */
     public static final String LABELS_SORT = "{labels.sort}";
 
-    /** The key of the message: Start Pos */
+    /** The key of the message: Start */
     public static final String LABELS_START = "{labels.start}";
 
     /** The key of the message: Login Required */
     public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
 
-    /** The key of the message: Login Link */
+    /** The key of the message: Show Login Link */
     public static final String LABELS_LOGIN_LINK = "{labels.loginLink}";
 
     /** The key of the message: Thread Name */
@@ -287,7 +287,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: JSON Response */
     public static final String LABELS_WEB_API_JSON = "{labels.webApiJson}";
 
-    /** The key of the message: Web Config Name */
+    /** The key of the message: Web Crawl Config Name */
     public static final String LABELS_WEB_CONFIG_NAME = "{labels.webConfigName}";
 
     /** The key of the message: All Languages */
@@ -305,7 +305,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: hq */
     public static final String LABELS_HQ = "{labels.hq}";
 
-    /** The key of the message: Source */
+    /** The key of the message: Inputs */
     public static final String LABELS_INPUTS = "{labels.inputs}";
 
     /** The key of the message: Logging */
@@ -320,25 +320,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Labels */
     public static final String LABELS_LABEL_TYPE_IDS = "{labels.labelTypeIds}";
 
-    /** The key of the message: lang */
+    /** The key of the message: Language */
     public static final String LABELS_LANG = "{labels.lang}";
 
-    /** The key of the message: Target */
+    /** The key of the message: Outputs */
     public static final String LABELS_OUTPUTS = "{labels.outputs}";
 
-    /** The key of the message: POS */
+    /** The key of the message: Part-of-speech */
     public static final String LABELS_POS = "{labels.pos}";
 
-    /** The key of the message: Purge Job Log Before */
+    /** The key of the message: Delete old job logs */
     public static final String LABELS_PURGE_JOB_LOG_DAY = "{labels.purgeJobLogDay}";
 
-    /** The key of the message: Purge User Before */
+    /** The key of the message: Delete old user logs */
     public static final String LABELS_PURGE_USER_INFO_DAY = "{labels.purgeUserInfoDay}";
 
     /** The key of the message: Reading */
     public static final String LABELS_READING = "{labels.reading}";
 
-    /** The key of the message: Role ID */
+    /** The key of the message: Role IDs */
     public static final String LABELS_ROLE_TYPE_IDS = "{labels.roleTypeIds}";
 
     /** The key of the message: Script */
@@ -347,7 +347,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Result */
     public static final String LABELS_SCRIPT_RESULT = "{labels.scriptResult}";
 
-    /** The key of the message: Executor */
+    /** The key of the message: Execution Method */
     public static final String LABELS_SCRIPT_TYPE = "{labels.scriptType}";
 
     /** The key of the message: Segmentation */
@@ -377,7 +377,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Protwords File */
     public static final String LABELS_PROTWORDS_FILE = "{labels.protwordsFile}";
 
-    /** The key of the message: Additional Word File */
+    /** The key of the message: Elevate Word File */
     public static final String LABELS_ELEVATE_WORD_FILE = "{labels.elevateWordFile}";
 
     /** The key of the message: Bad Word File */
@@ -386,7 +386,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Condition */
     public static final String LABELS_URL_EXPR = "{labels.urlExpr}";
 
-    /** The key of the message: Boost Expr */
+    /** The key of the message: Boost Expression */
     public static final String LABELS_BOOST_EXPR = "{labels.boostExpr}";
 
     /** The key of the message: Confirm */
@@ -395,7 +395,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawler */
     public static final String LABELS_CRAWLER = "{labels.crawler}";
 
-    /** The key of the message: mode */
+    /** The key of the message: Mode */
     public static final String LABELS_CRUD_MODE = "{labels.crudMode}";
 
     /** The key of the message: Max Error Count */
@@ -425,7 +425,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Order */
     public static final String LABELS_ORDER = "{labels.order}";
 
-    /** The key of the message: Purge Suggest Documents Before */
+    /** The key of the message: Delete old suggest info */
     public static final String LABELS_PURGE_SUGGEST_SEARCH_LOG_DAY = "{labels.purgeSuggestSearchLogDay}";
 
     /** The key of the message: Query */
@@ -452,37 +452,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Extended Query */
     public static final String LABELS_ex_q = "{labels.ex_q}";
 
-    /** The key of the message: LDAP URL */
-    public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
-
-    /** The key of the message: User DN */
-    public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
-
-    /** The key of the message: Bind DN */
-    public static final String LABELS_LDAP_ADMIN_SECURITY_PRINCIPAL = "{labels.ldapAdminSecurityPrincipal}";
-
-    /** The key of the message: Password */
-    public static final String LABELS_LDAP_ADMIN_SECURITY_CREDENTIALS = "{labels.ldapAdminSecurityCredentials}";
-
-    /** The key of the message: Base DN */
-    public static final String LABELS_LDAP_BASE_DN = "{labels.ldapBaseDn}";
-
-    /** The key of the message: Account Filter */
-    public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
-
-    /** The key of the message: Group Filter */
-    public static final String LABELS_LDAP_GROUP_FILTER = "{labels.ldapGroupFilter}";
-
-    /** The key of the message: memberOf Attribute */
-    public static final String LABELS_LDAP_MEMBEROF_ATTRIBUTE = "{labels.ldapMemberofAttribute}";
-
     /** The key of the message: Current Password */
     public static final String LABELS_OLD_PASSWORD = "{labels.oldPassword}";
 
     /** The key of the message: New Password */
     public static final String LABELS_NEW_PASSWORD = "{labels.newPassword}";
 
-    /** The key of the message: New Password(Confirm) */
+    /** The key of the message: New Password (Confirm) */
     public static final String LABELS_CONFIRM_NEW_PASSWORD = "{labels.confirmNewPassword}";
 
     /** The key of the message: System */
@@ -527,7 +503,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Key Match */
     public static final String LABELS_menu_key_match = "{labels.menu_key_match}";
 
-    /** The key of the message: Doc Boost */
+    /** The key of the message: Document Boost */
     public static final String LABELS_menu_boost_document_rule = "{labels.menu_boost_document_rule}";
 
     /** The key of the message: Path Mapping */
@@ -560,7 +536,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Suggest Word */
     public static final String LABELS_menu_suggest_word = "{labels.menu_suggest_word}";
 
-    /** The key of the message: Additional Word */
+    /** The key of the message: Elevate Word */
     public static final String LABELS_menu_elevate_word = "{labels.menu_elevate_word}";
 
     /** The key of the message: Bad Word */
@@ -575,7 +551,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawling Info */
     public static final String LABELS_menu_crawling_info = "{labels.menu_crawling_info}";
 
-    /** The key of the message: Log Files */
+    /** The key of the message: Log File */
     public static final String LABELS_menu_log = "{labels.menu_log}";
 
     /** The key of the message: Job Log */
@@ -590,7 +566,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search */
     public static final String LABELS_menu_search_list = "{labels.menu_search_list}";
 
-    /** The key of the message: Back Up */
+    /** The key of the message: Backup */
     public static final String LABELS_menu_backup = "{labels.menu_backup}";
 
     /** The key of the message: Access Token */
@@ -605,16 +581,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Related Query */
     public static final String LABELS_menu_related_query = "{labels.menu_related_query}";
 
+    /** The key of the message: Search... */
+    public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
+
     /** The key of the message: Plugin */
     public static final String LABELS_menu_plugin = "{labels.menu_plugin}";
 
     /** The key of the message: Storage */
     public static final String LABELS_menu_storage = "{labels.menu_storage}";
 
-    /** The key of the message: Search... */
-    public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
-
-    /** The key of the message: MENU */
+    /** The key of the message: Menu */
     public static final String LABELS_SIDEBAR_MENU = "{labels.sidebar.menu}";
 
     /** The key of the message: &amp;copy;2024 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. */
@@ -623,16 +599,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Search */
     public static final String LABELS_SEARCH = "{labels.search}";
 
-    /** The key of the message: Similar results are displayed. */
+    /** The key of the message: Showing similar results. */
     public static final String LABELS_similar_doc_result_status = "{labels.similar_doc_result_status}";
 
-    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt;&lt;span class="hidden-phone"&gt; -&lt;/span&gt; &lt;b&gt;{3}&lt;/b&gt; of &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
+    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt; - &lt;b&gt;{3}&lt;/b&gt; of &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
-    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt;&lt;span class="hidden-phone"&gt; -&lt;/span&gt; &lt;b&gt;{3}&lt;/b&gt; of about &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
+    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt; - &lt;b&gt;{3}&lt;/b&gt; of over &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
     public static final String LABELS_search_result_status_over = "{labels.search_result_status_over}";
 
-    /** The key of the message: ({0} sec) */
+    /** The key of the message: ({0} seconds) */
     public static final String LABELS_search_result_time = "{labels.search_result_time}";
 
     /** The key of the message: Prev */
@@ -650,52 +626,52 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Popular Words: */
     public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
 
-    /** The key of the message: Related Words: */
+    /** The key of the message: Related Queries: */
     public static final String LABELS_search_related_queries = "{labels.search_related_queries}";
 
-    /** The key of the message: -- Sort -- */
+    /** The key of the message: -  Sort  - */
     public static final String LABELS_search_result_select_sort = "{labels.search_result_select_sort}";
 
-    /** The key of the message: -- Results per page -- */
+    /** The key of the message: - Display Count - */
     public static final String LABELS_search_result_select_num = "{labels.search_result_select_num}";
 
-    /** The key of the message: Score */
+    /** The key of the message: by Score */
     public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
 
-    /** The key of the message: File Name (ascending) */
+    /** The key of the message: by Filename (asc) */
     public static final String LABELS_search_result_sort_filename_asc = "{labels.search_result_sort_filename_asc}";
 
-    /** The key of the message: File Name (descending) */
+    /** The key of the message: by Filename (desc) */
     public static final String LABELS_search_result_sort_filename_desc = "{labels.search_result_sort_filename_desc}";
 
-    /** The key of the message: Date (ascending) */
+    /** The key of the message: by Date (asc) */
     public static final String LABELS_search_result_sort_created_asc = "{labels.search_result_sort_created_asc}";
 
-    /** The key of the message: Date (descending) */
+    /** The key of the message: by Date (desc) */
     public static final String LABELS_search_result_sort_created_desc = "{labels.search_result_sort_created_desc}";
 
-    /** The key of the message: Size (ascending) */
+    /** The key of the message: by Size (asc) */
     public static final String LABELS_search_result_sort_content_length_asc = "{labels.search_result_sort_content_length_asc}";
 
-    /** The key of the message: Size (descending) */
+    /** The key of the message: by Size (desc) */
     public static final String LABELS_search_result_sort_content_length_desc = "{labels.search_result_sort_content_length_desc}";
 
-    /** The key of the message: Last Modified (ascending) */
+    /** The key of the message: by Last Modified (asc) */
     public static final String LABELS_search_result_sort_last_modified_asc = "{labels.search_result_sort_last_modified_asc}";
 
-    /** The key of the message: Last Modified (descending) */
+    /** The key of the message: by Last Modified (desc) */
     public static final String LABELS_search_result_sort_last_modified_desc = "{labels.search_result_sort_last_modified_desc}";
 
-    /** The key of the message: Click (ascending) */
+    /** The key of the message: by Click Count (asc) */
     public static final String LABELS_search_result_sort_click_count_asc = "{labels.search_result_sort_click_count_asc}";
 
-    /** The key of the message: Click (descending) */
+    /** The key of the message: by Click Count (desc) */
     public static final String LABELS_search_result_sort_click_count_desc = "{labels.search_result_sort_click_count_desc}";
 
-    /** The key of the message: Favorite (ascending) */
+    /** The key of the message: by Favorite Count (asc) */
     public static final String LABELS_search_result_sort_favorite_count_asc = "{labels.search_result_sort_favorite_count_asc}";
 
-    /** The key of the message: Favorite (descending) */
+    /** The key of the message: by Favorite Count (desc) */
     public static final String LABELS_search_result_sort_favorite_count_desc = "{labels.search_result_sort_favorite_count_desc}";
 
     /** The key of the message: Multiple */
@@ -704,7 +680,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: {0} bytes */
     public static final String LABELS_search_result_size = "{labels.search_result_size}";
 
-    /** The key of the message: Registered: */
+    /** The key of the message: Created: */
     public static final String LABELS_search_result_created = "{labels.search_result_created}";
 
     /** The key of the message: Last Modified: */
@@ -716,13 +692,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Liked */
     public static final String LABELS_search_result_favorited = "{labels.search_result_favorited}";
 
-    /** The key of the message: Viewed ({0}) */
+    /** The key of the message: Click Count ({0}) */
     public static final String LABELS_search_click_count = "{labels.search_click_count}";
 
     /** The key of the message: {0} views */
     public static final String LABELS_search_click_views = "{labels.search_click_views}";
 
-    /** The key of the message: more.. */
+    /** The key of the message: More.. */
     public static final String LABELS_search_result_more = "{labels.search_result_more}";
 
     /** The key of the message: Cache */
@@ -734,67 +710,67 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Label */
     public static final String LABELS_facet_label_title = "{labels.facet_label_title}";
 
-    /** The key of the message: Date Range */
+    /** The key of the message: Time */
     public static final String LABELS_facet_timestamp_title = "{labels.facet_timestamp_title}";
 
-    /** The key of the message: Past 24 Hours */
+    /** The key of the message: Within 24 hours */
     public static final String LABELS_facet_timestamp_1day = "{labels.facet_timestamp_1day}";
 
-    /** The key of the message: Past Week */
+    /** The key of the message: Within a week */
     public static final String LABELS_facet_timestamp_1week = "{labels.facet_timestamp_1week}";
 
-    /** The key of the message: Past Month */
+    /** The key of the message: Within a month */
     public static final String LABELS_facet_timestamp_1month = "{labels.facet_timestamp_1month}";
 
-    /** The key of the message: Past Year */
+    /** The key of the message: Within a year */
     public static final String LABELS_facet_timestamp_1year = "{labels.facet_timestamp_1year}";
 
-    /** The key of the message: Past 3 Months */
+    /** The key of the message: Within 3 months */
     public static final String LABELS_facet_timestamp_3month = "{labels.facet_timestamp_3month}";
 
-    /** The key of the message: Past 6 Months */
+    /** The key of the message: Within 6 months */
     public static final String LABELS_facet_timestamp_6month = "{labels.facet_timestamp_6month}";
 
-    /** The key of the message: Past 2 Years */
+    /** The key of the message: Within 2 years */
     public static final String LABELS_facet_timestamp_2year = "{labels.facet_timestamp_2year}";
 
-    /** The key of the message: Past 3 Years */
+    /** The key of the message: Within 3 years */
     public static final String LABELS_facet_timestamp_3year = "{labels.facet_timestamp_3year}";
 
     /** The key of the message: Size */
     public static final String LABELS_facet_contentLength_title = "{labels.facet_contentLength_title}";
 
-    /** The key of the message: &amp;nbsp; - 10kb */
+    /** The key of the message: &amp;nbsp; - 10KB */
     public static final String LABELS_facet_contentLength_10k = "{labels.facet_contentLength_10k}";
 
-    /** The key of the message: 10kb - 100kb */
+    /** The key of the message: 10KB - 100KB */
     public static final String LABELS_facet_contentLength_10kto100k = "{labels.facet_contentLength_10kto100k}";
 
-    /** The key of the message: 100kb - 500kb */
+    /** The key of the message: 100KB - 500KB */
     public static final String LABELS_facet_contentLength_100kto500k = "{labels.facet_contentLength_100kto500k}";
 
-    /** The key of the message: 500kb - 1mb */
+    /** The key of the message: 500KB - 1MB */
     public static final String LABELS_facet_contentLength_500kto1m = "{labels.facet_contentLength_500kto1m}";
 
-    /** The key of the message: 1mb - &amp;nbsp; */
+    /** The key of the message: 1MB - &amp;nbsp; */
     public static final String LABELS_facet_contentLength_1m = "{labels.facet_contentLength_1m}";
 
-    /** The key of the message: 10kb - 50kb */
+    /** The key of the message: 10KB - 50KB */
     public static final String LABELS_facet_contentLength_10kto50k = "{labels.facet_contentLength_10kto50k}";
 
-    /** The key of the message: 50kb - 100kb */
+    /** The key of the message: 50KB - 100KB */
     public static final String LABELS_facet_contentLength_50kto100k = "{labels.facet_contentLength_50kto100k}";
 
-    /** The key of the message: 100kb - 250kb */
+    /** The key of the message: 100KB - 250KB */
     public static final String LABELS_facet_contentLength_100kto250k = "{labels.facet_contentLength_100kto250k}";
 
-    /** The key of the message: 250kb - 500kb */
+    /** The key of the message: 250KB - 500KB */
     public static final String LABELS_facet_contentLength_250kto500k = "{labels.facet_contentLength_250kto500k}";
 
-    /** The key of the message: 1mb - 5mb */
+    /** The key of the message: 1MB - 5MB */
     public static final String LABELS_facet_contentLength_1mto5m = "{labels.facet_contentLength_1mto5m}";
 
-    /** The key of the message: 5mb - &amp;nbsp; */
+    /** The key of the message: 5MB - &amp;nbsp; */
     public static final String LABELS_facet_contentLength_5m = "{labels.facet_contentLength_5m}";
 
     /** The key of the message: File Type */
@@ -833,10 +809,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: iBooks */
     public static final String LABELS_facet_filetype_ibooks = "{labels.facet_filetype_ibooks}";
 
-    /** The key of the message: Plain Text */
+    /** The key of the message: Text */
     public static final String LABELS_facet_filetype_txt = "{labels.facet_filetype_txt}";
 
-    /** The key of the message: Rich Text Format */
+    /** The key of the message: Rich Text */
     public static final String LABELS_facet_filetype_rtf = "{labels.facet_filetype_rtf}";
 
     /** The key of the message: Compiled HTML Help */
@@ -848,10 +824,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: 7z Archive */
     public static final String LABELS_facet_filetype_7z = "{labels.facet_filetype_7z}";
 
-    /** The key of the message: Bz Archive */
+    /** The key of the message: BZIP Archive */
     public static final String LABELS_facet_filetype_bz = "{labels.facet_filetype_bz}";
 
-    /** The key of the message: Bz2 Archive */
+    /** The key of the message: BZIP2 Archive */
     public static final String LABELS_facet_filetype_bz2 = "{labels.facet_filetype_bz2}";
 
     /** The key of the message: TAR Archive */
@@ -980,7 +956,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: PHP */
     public static final String LABELS_facet_filetype_php = "{labels.facet_filetype_php}";
 
-    /** The key of the message: Properties */
+    /** The key of the message: Properties File */
     public static final String LABELS_facet_filetype_properties = "{labels.facet_filetype_properties}";
 
     /** The key of the message: Python */
@@ -1013,13 +989,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Sort */
     public static final String LABELS_searchoptions_menu_sort = "{labels.searchoptions_menu_sort}";
 
-    /** The key of the message: Result */
+    /** The key of the message: Num */
     public static final String LABELS_searchoptions_menu_num = "{labels.searchoptions_menu_num}";
 
     /** The key of the message: {0} results */
     public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
 
-    /** The key of the message: Languages */
+    /** The key of the message: Language */
     public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
 
     /** The key of the message: Labels */
@@ -1031,19 +1007,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: System Error */
     public static final String LABELS_system_error_title = "{labels.system_error_title}";
 
-    /** The key of the message: Contact the Site Administrator. */
+    /** The key of the message: Please contact your site administrator. */
     public static final String LABELS_contact_site_admin = "{labels.contact_site_admin}";
 
-    /** The key of the message: Bad Request */
+    /** The key of the message: Invalid Request Format. */
     public static final String LABELS_request_error_title = "{labels.request_error_title}";
 
-    /** The key of the message: Invalid request for the url. */
+    /** The key of the message: Your request to the URL is invalid. */
     public static final String LABELS_bad_request = "{labels.bad_request}";
 
-    /** The key of the message: Page Not Found */
+    /** The key of the message: Page Not Found. */
     public static final String LABELS_page_not_found_title = "{labels.page_not_found_title}";
 
-    /** The key of the message: Check the url. */
+    /** The key of the message: Please check the URL. */
     public static final String LABELS_check_url = "{labels.check_url}";
 
     /** The key of the message: Username */
@@ -1061,16 +1037,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Login */
     public static final String LABELS_LOGIN_TITLE = "{labels.login.title}";
 
-    /** The key of the message: Labels */
+    /** The key of the message: Label */
     public static final String LABELS_index_label = "{labels.index_label}";
 
-    /** The key of the message: Preferred Languages */
+    /** The key of the message: Preferred Language */
     public static final String LABELS_index_lang = "{labels.index_lang}";
 
     /** The key of the message: Sort */
     public static final String LABELS_index_sort = "{labels.index_sort}";
 
-    /** The key of the message: Results per page */
+    /** The key of the message: Display Count */
     public static final String LABELS_index_num = "{labels.index_num}";
 
     /** The key of the message: Logout */
@@ -1091,10 +1067,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Administration */
     public static final String LABELS_ADMINISTRATION = "{labels.administration}";
 
-    /** The key of the message: Profile */
+    /** The key of the message: Settings */
     public static final String LABELS_profile_button = "{labels.profile_button}";
 
-    /** The key of the message: Profile */
+    /** The key of the message: Settings */
     public static final String LABELS_PROFILE_TITLE = "{labels.profile.title}";
 
     /** The key of the message: Update */
@@ -1139,13 +1115,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Clear */
     public static final String LABELS_search_options_clear = "{labels.search_options_clear}";
 
-    /** The key of the message: This is a cache of {0}. It is a snapshot of the page at {1}. */
+    /** The key of the message: This is a cache of {0}. It is a snapshot of the page as it appeared on {1}. */
     public static final String LABELS_search_cache_msg = "{labels.search_cache_msg}";
 
     /** The key of the message: Unknown */
     public static final String LABELS_search_unknown = "{labels.search_unknown}";
 
-    /** The key of the message: Back to top */
+    /** The key of the message: Back to Top */
     public static final String LABELS_footer_back_to_top = "{labels.footer_back_to_top}";
 
     /** The key of the message: Fess */
@@ -1157,19 +1133,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: File Crawling */
     public static final String LABELS_file_crawling_configuration = "{labels.file_crawling_configuration}";
 
-    /** The key of the message: File Crawling Configuration */
+    /** The key of the message: File Crawling Config */
     public static final String LABELS_file_crawling_title_details = "{labels.file_crawling_title_details}";
 
-    /** The key of the message: Included Paths For Crawling */
+    /** The key of the message: Included Paths */
     public static final String LABELS_included_paths = "{labels.included_paths}";
 
-    /** The key of the message: Excluded Paths For Crawling */
+    /** The key of the message: Excluded Paths */
     public static final String LABELS_excluded_paths = "{labels.excluded_paths}";
 
-    /** The key of the message: Included Paths For Indexing */
+    /** The key of the message: Included Doc Paths */
     public static final String LABELS_included_doc_paths = "{labels.included_doc_paths}";
 
-    /** The key of the message: Excluded Paths For Indexing */
+    /** The key of the message: Excluded Doc Paths */
     public static final String LABELS_excluded_doc_paths = "{labels.excluded_doc_paths}";
 
     /** The key of the message: Config Parameters */
@@ -1178,13 +1154,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Max Access Count */
     public static final String LABELS_max_access_count = "{labels.max_access_count}";
 
-    /** The key of the message: The number of Thread */
+    /** The key of the message: Number of Threads */
     public static final String LABELS_number_of_thread = "{labels.number_of_thread}";
 
-    /** The key of the message: Interval time */
+    /** The key of the message: Interval */
     public static final String LABELS_interval_time = "{labels.interval_time}";
 
-    /** The key of the message: ms */
+    /** The key of the message: msec */
     public static final String LABELS_MILLISEC = "{labels.millisec}";
 
     /** The key of the message: Permissions */
@@ -1202,25 +1178,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Create */
     public static final String LABELS_file_crawling_button_create = "{labels.file_crawling_button_create}";
 
-    /** The key of the message: Create new job */
+    /** The key of the message: Create New Job */
     public static final String LABELS_file_crawling_button_create_job = "{labels.file_crawling_button_create_job}";
 
     /** The key of the message: Web Crawling */
     public static final String LABELS_web_crawling_configuration = "{labels.web_crawling_configuration}";
 
-    /** The key of the message: Web Crawling Configuration */
+    /** The key of the message: Web Crawling Config */
     public static final String LABELS_web_crawling_title_details = "{labels.web_crawling_title_details}";
 
-    /** The key of the message: Included URLs For Crawling */
+    /** The key of the message: Included URLs */
     public static final String LABELS_included_urls = "{labels.included_urls}";
 
-    /** The key of the message: Excluded URLs For Crawling */
+    /** The key of the message: Excluded URLs */
     public static final String LABELS_excluded_urls = "{labels.excluded_urls}";
 
-    /** The key of the message: Included URLs For Indexing */
+    /** The key of the message: Included Doc URLs */
     public static final String LABELS_included_doc_urls = "{labels.included_doc_urls}";
 
-    /** The key of the message: Excluded URLs For Indexing */
+    /** The key of the message: Excluded Doc URLs */
     public static final String LABELS_excluded_doc_urls = "{labels.excluded_doc_urls}";
 
     /** The key of the message: User Agent */
@@ -1229,13 +1205,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Create */
     public static final String LABELS_web_crawling_button_create = "{labels.web_crawling_button_create}";
 
-    /** The key of the message: Create new job */
+    /** The key of the message: Create New Job */
     public static final String LABELS_web_crawling_button_create_job = "{labels.web_crawling_button_create_job}";
 
-    /** The key of the message: General Configuration */
+    /** The key of the message: General Config */
     public static final String LABELS_crawler_configuration = "{labels.crawler_configuration}";
 
-    /** The key of the message: General Configuration */
+    /** The key of the message: General Config */
     public static final String LABELS_crawler_title_edit = "{labels.crawler_title_edit}";
 
     /** The key of the message: Schedule */
@@ -1244,10 +1220,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Enabled */
     public static final String LABELS_ENABLED = "{labels.enabled}";
 
-    /** The key of the message: Remove Documents Before */
+    /** The key of the message: Delete old documents */
     public static final String LABELS_day_for_cleanup = "{labels.day_for_cleanup}";
 
-    /** The key of the message: Day(s) */
+    /** The key of the message: days */
     public static final String LABELS_DAY = "{labels.day}";
 
     /** The key of the message: Update */
@@ -1256,25 +1232,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: None */
     public static final String LABELS_NONE = "{labels.none}";
 
-    /** The key of the message: Simultaneous Crawler Config */
+    /** The key of the message: Concurrent Crawler Config */
     public static final String LABELS_crawling_thread_count = "{labels.crawling_thread_count}";
 
     /** The key of the message: Check Last Modified */
     public static final String LABELS_incremental_crawling = "{labels.incremental_crawling}";
 
-    /** The key of the message: Search Logging */
+    /** The key of the message: Search Log */
     public static final String LABELS_search_log_enabled = "{labels.search_log_enabled}";
 
-    /** The key of the message: User Logging */
+    /** The key of the message: User Log */
     public static final String LABELS_user_info_enabled = "{labels.user_info_enabled}";
 
-    /** The key of the message: Favorite Logging */
+    /** The key of the message: Favorite Log */
     public static final String LABELS_user_favorite_enabled = "{labels.user_favorite_enabled}";
 
     /** The key of the message: JSON Response */
     public static final String LABELS_web_api_json_enabled = "{labels.web_api_json_enabled}";
 
-    /** The key of the message: System Properties */
+    /** The key of the message: System Property */
     public static final String LABELS_app_value = "{labels.app_value}";
 
     /** The key of the message: Default Label Value */
@@ -1283,25 +1259,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Default Sort Value */
     public static final String LABELS_default_sort_value = "{labels.default_sort_value}";
 
-    /** The key of the message: Virtual Hosts */
+    /** The key of the message: Virtual Host */
     public static final String LABELS_virtual_host_value = "{labels.virtual_host_value}";
 
-    /** The key of the message: Append Params to URL */
+    /** The key of the message: Append Search Parameters */
     public static final String LABELS_append_query_param_enabled = "{labels.append_query_param_enabled}";
 
     /** The key of the message: Login Required */
     public static final String LABELS_login_required = "{labels.login_required}";
 
-    /** The key of the message: Similar Result Collapsed */
+    /** The key of the message: Collapse Duplicate Results */
     public static final String LABELS_result_collapsed = "{labels.result_collapsed}";
 
-    /** The key of the message: Login Link */
+    /** The key of the message: Show Login Link */
     public static final String LABELS_login_link = "{labels.login_link}";
 
-    /** The key of the message: Thumbnail View */
+    /** The key of the message: Show Thumbnail */
     public static final String LABELS_THUMBNAIL = "{labels.thumbnail}";
 
-    /** The key of the message: Excluded Failure Type */
+    /** The key of the message: Ignore Failure Types */
     public static final String LABELS_ignore_failure_type = "{labels.ignore_failure_type}";
 
     /** The key of the message: Failure Count Threshold */
@@ -1313,28 +1289,28 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Web */
     public static final String LABELS_supported_search_web = "{labels.supported_search_web}";
 
-    /** The key of the message: Not Available */
+    /** The key of the message: Unavailable */
     public static final String LABELS_supported_search_none = "{labels.supported_search_none}";
 
-    /** The key of the message: Purge Search Log Before */
+    /** The key of the message: Delete old search logs */
     public static final String LABELS_purge_search_log_day = "{labels.purge_search_log_day}";
 
-    /** The key of the message: Purge Job Log Before */
+    /** The key of the message: Delete old job logs */
     public static final String LABELS_purge_job_log_day = "{labels.purge_job_log_day}";
 
-    /** The key of the message: Purge User Before */
+    /** The key of the message: Delete old user logs */
     public static final String LABELS_purge_user_info_day = "{labels.purge_user_info_day}";
 
-    /** The key of the message: Bots Name For Purge */
+    /** The key of the message: Bot names to delete logs */
     public static final String LABELS_purge_by_bots = "{labels.purge_by_bots}";
 
     /** The key of the message: Log Level */
     public static final String LABELS_log_level = "{labels.log_level}";
 
-    /** The key of the message: Encoding for CSV */
+    /** The key of the message: CSV File Encoding */
     public static final String LABELS_csv_file_encoding = "{labels.csv_file_encoding}";
 
-    /** The key of the message: Notification Email */
+    /** The key of the message: Notification Mail */
     public static final String LABELS_notification_to = "{labels.notification_to}";
 
     /** The key of the message: Path Mapping */
@@ -1355,7 +1331,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawling/Displaying */
     public static final String LABELS_pathmap_pt_both = "{labels.pathmap_pt_both}";
 
-    /** The key of the message: Stored URLs */
+    /** The key of the message: Stored URL */
     public static final String LABELS_pathmap_pt_stored = "{labels.pathmap_pt_stored}";
 
     /** The key of the message: Regular Name */
@@ -1370,22 +1346,22 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Duplicate Host */
     public static final String LABELS_duplicate_host_title_details = "{labels.duplicate_host_title_details}";
 
-    /** The key of the message: System Configuration */
+    /** The key of the message: System Config */
     public static final String LABELS_dashboard_title_configuration = "{labels.dashboard_title_configuration}";
 
-    /** The key of the message: Suggest from Search Words */
+    /** The key of the message: Suggest from Search Terms */
     public static final String LABELS_suggest_search_log_enabled = "{labels.suggest_search_log_enabled}";
 
     /** The key of the message: Suggest from Documents */
     public static final String LABELS_suggest_documents_enabled = "{labels.suggest_documents_enabled}";
 
-    /** The key of the message: Purge Suggest Documents Before */
+    /** The key of the message: Delete old suggest info */
     public static final String LABELS_purge_suggest_search_log_day = "{labels.purge_suggest_search_log_day}";
 
-    /** The key of the message: Crawling Information */
+    /** The key of the message: Crawling Info */
     public static final String LABELS_crawling_info_title = "{labels.crawling_info_title}";
 
-    /** The key of the message: Crawling Information */
+    /** The key of the message: Crawling Info */
     public static final String LABELS_crawling_info_title_confirm = "{labels.crawling_info_title_confirm}";
 
     /** The key of the message: Back */
@@ -1403,7 +1379,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Reset */
     public static final String LABELS_crawling_info_reset = "{labels.crawling_info_reset}";
 
-    /** The key of the message: Crawling Information */
+    /** The key of the message: Crawling Info */
     public static final String LABELS_crawling_info_link_top = "{labels.crawling_info_link_top}";
 
     /** The key of the message: Details */
@@ -1421,7 +1397,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_crawling_info_delete_all_link = "{labels.crawling_info_delete_all_link}";
 
-    /** The key of the message: Do you really want to delete all? */
+    /** The key of the message: Are you sure you want to delete all? */
     public static final String LABELS_crawling_info_delete_all_confirmation = "{labels.crawling_info_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
@@ -1430,46 +1406,46 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Thread Dump */
     public static final String LABELS_crawling_info_thread_dump = "{labels.crawling_info_thread_dump}";
 
-    /** The key of the message: Crawler start time */
+    /** The key of the message: Crawler Start Time */
     public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
 
-    /** The key of the message: Crawler end time */
+    /** The key of the message: Crawler End Time */
     public static final String LABELS_crawling_info_CrawlerEndTime = "{labels.crawling_info_CrawlerEndTime}";
 
-    /** The key of the message: Crawler exec time */
+    /** The key of the message: Crawler Execution Time */
     public static final String LABELS_crawling_info_CrawlerExecTime = "{labels.crawling_info_CrawlerExecTime}";
 
-    /** The key of the message: Crawler status */
+    /** The key of the message: Crawler Status */
     public static final String LABELS_crawling_info_CrawlerStatus = "{labels.crawling_info_CrawlerStatus}";
 
-    /** The key of the message: Crawl exec time (Web/File system) */
+    /** The key of the message: Crawl Execution Time (Web/File) */
     public static final String LABELS_crawling_info_WebFsCrawlExecTime = "{labels.crawling_info_WebFsCrawlExecTime}";
 
-    /** The key of the message: Crawl start time (Web/File system) */
+    /** The key of the message: Crawl Start Time (Web/File) */
     public static final String LABELS_crawling_info_WebFsCrawlStartTime = "{labels.crawling_info_WebFsCrawlStartTime}";
 
-    /** The key of the message: Crawl end time (Web/File system) */
+    /** The key of the message: Crawl End Time (Web/File) */
     public static final String LABELS_crawling_info_WebFsCrawlEndTime = "{labels.crawling_info_WebFsCrawlEndTime}";
 
-    /** The key of the message: Indexing exec time (Web/File system) */
+    /** The key of the message: Indexing Execution Time (Web/File) */
     public static final String LABELS_crawling_info_WebFsIndexExecTime = "{labels.crawling_info_WebFsIndexExecTime}";
 
-    /** The key of the message: Index size (Web/File system) */
+    /** The key of the message: Index Size (Web/File) */
     public static final String LABELS_crawling_info_WebFsIndexSize = "{labels.crawling_info_WebFsIndexSize}";
 
-    /** The key of the message: Crawl exec time (Data store) */
+    /** The key of the message: Crawl Execution Time (Data Store) */
     public static final String LABELS_crawling_info_DataCrawlExecTime = "{labels.crawling_info_DataCrawlExecTime}";
 
-    /** The key of the message: Crawl start time (Data store) */
+    /** The key of the message: Crawl Start Time (Data Store) */
     public static final String LABELS_crawling_info_DataCrawlStartTime = "{labels.crawling_info_DataCrawlStartTime}";
 
-    /** The key of the message: Crawl end time (Data store) */
+    /** The key of the message: Crawl End Time (Data Store) */
     public static final String LABELS_crawling_info_DataCrawlEndTime = "{labels.crawling_info_DataCrawlEndTime}";
 
-    /** The key of the message: Indexing exec time (Data store) */
+    /** The key of the message: Indexing Execution Time (Data Store) */
     public static final String LABELS_crawling_info_DataIndexExecTime = "{labels.crawling_info_DataIndexExecTime}";
 
-    /** The key of the message: Index size (Data store) */
+    /** The key of the message: Index Size (Data Store) */
     public static final String LABELS_crawling_info_DataIndexSize = "{labels.crawling_info_DataIndexSize}";
 
     /** The key of the message: Web Authentication */
@@ -1610,7 +1586,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Boost */
     public static final String LABELS_key_match_boost = "{labels.key_match_boost}";
 
-    /** The key of the message: Urls */
+    /** The key of the message: URLs */
     public static final String LABELS_key_match_urls = "{labels.key_match_urls}";
 
     /** The key of the message: Key Match */
@@ -1619,7 +1595,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Page Design */
     public static final String LABELS_design_configuration = "{labels.design_configuration}";
 
-    /** The key of the message: File Upload */
+    /** The key of the message: File to Upload */
     public static final String LABELS_design_title_file_upload = "{labels.design_title_file_upload}";
 
     /** The key of the message: File Manager */
@@ -1628,13 +1604,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload File */
     public static final String LABELS_design_file = "{labels.design_file}";
 
-    /** The key of the message: File Name (Optional) */
+    /** The key of the message: File Name (optional) */
     public static final String LABELS_design_file_name = "{labels.design_file_name}";
 
     /** The key of the message: Upload */
     public static final String LABELS_design_button_upload = "{labels.design_button_upload}";
 
-    /** The key of the message: JSP Files */
+    /** The key of the message: View Page File */
     public static final String LABELS_design_file_title_edit = "{labels.design_file_title_edit}";
 
     /** The key of the message: Edit */
@@ -1649,7 +1625,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Use Default */
     public static final String LABELS_design_use_default_button = "{labels.design_use_default_button}";
 
-    /** The key of the message: Edit JSP File */
+    /** The key of the message: View Edit Page File */
     public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";
 
     /** The key of the message: Update */
@@ -1661,13 +1637,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Data Store Crawling */
     public static final String LABELS_data_crawling_configuration = "{labels.data_crawling_configuration}";
 
-    /** The key of the message: Data Store Crawling Configuration */
+    /** The key of the message: Data Store Crawling Config */
     public static final String LABELS_data_crawling_title_details = "{labels.data_crawling_title_details}";
 
     /** The key of the message: Handler Name */
     public static final String LABELS_handler_name = "{labels.handler_name}";
 
-    /** The key of the message: Parameter */
+    /** The key of the message: Parameters */
     public static final String LABELS_handler_parameter = "{labels.handler_parameter}";
 
     /** The key of the message: Script */
@@ -1676,40 +1652,40 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Create */
     public static final String LABELS_data_crawling_button_create = "{labels.data_crawling_button_create}";
 
-    /** The key of the message: Create new job */
+    /** The key of the message: Create New Job */
     public static final String LABELS_data_crawling_button_create_job = "{labels.data_crawling_button_create_job}";
 
     /** The key of the message: Configuration Wizard */
     public static final String LABELS_wizard_title_configuration = "{labels.wizard_title_configuration}";
 
-    /** The key of the message: Quick Setup */
+    /** The key of the message: Easy Setup */
     public static final String LABELS_wizard_start_title = "{labels.wizard_start_title}";
 
-    /** The key of the message: Using Configuration Wizard, you can create crawling settings easily. */
+    /** The key of the message: You can create a crawl setting easily by using Configuration Wizard. */
     public static final String LABELS_wizard_start_desc = "{labels.wizard_start_desc}";
 
-    /** The key of the message: Start Configuration */
+    /** The key of the message: Start Setup */
     public static final String LABELS_wizard_start_button = "{labels.wizard_start_button}";
 
     /** The key of the message: Cancel */
     public static final String LABELS_wizard_button_cancel = "{labels.wizard_button_cancel}";
 
-    /** The key of the message: Crawling Configuration */
+    /** The key of the message: Crawl Config */
     public static final String LABELS_wizard_crawling_config_title = "{labels.wizard_crawling_config_title}";
 
-    /** The key of the message: Crawling Settings */
+    /** The key of the message: Crawl Setting */
     public static final String LABELS_wizard_crawling_setting_title = "{labels.wizard_crawling_setting_title}";
 
     /** The key of the message: Name */
     public static final String LABELS_wizard_crawling_config_name = "{labels.wizard_crawling_config_name}";
 
-    /** The key of the message: Crawling Path */
+    /** The key of the message: Crawl Path */
     public static final String LABELS_wizard_crawling_config_path = "{labels.wizard_crawling_config_path}";
 
-    /** The key of the message: Create again */
+    /** The key of the message: Create Continuously */
     public static final String LABELS_wizard_button_register_again = "{labels.wizard_button_register_again}";
 
-    /** The key of the message: Create and Next */
+    /** The key of the message: Create */
     public static final String LABELS_wizard_button_register_next = "{labels.wizard_button_register_next}";
 
     /** The key of the message: Start Crawling */
@@ -1718,7 +1694,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Crawler */
     public static final String LABELS_wizard_start_crawler_title = "{labels.wizard_start_crawler_title}";
 
-    /** The key of the message: To click "Start Crawling" button, you can start a crawling now. */
+    /** The key of the message: You can start crawling now by clicking "Start Crawling" button. */
     public static final String LABELS_wizard_start_crawling_desc = "{labels.wizard_start_crawling_desc}";
 
     /** The key of the message: Start Crawling */
@@ -1733,13 +1709,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Delete */
     public static final String LABELS_search_list_button_delete = "{labels.search_list_button_delete}";
 
-    /** The key of the message: Do you really want to delete? */
+    /** The key of the message: Are you sure you want to delete? */
     public static final String LABELS_search_list_delete_confirmation = "{labels.search_list_delete_confirmation}";
 
-    /** The key of the message: Delete all with this query */
+    /** The key of the message: Delete All by this Query */
     public static final String LABELS_search_list_button_delete_all = "{labels.search_list_button_delete_all}";
 
-    /** The key of the message: Do you really want to delete all with this query? */
+    /** The key of the message: Are you sure you want to delete all by this query? */
     public static final String LABELS_search_list_delete_all_confirmation = "{labels.search_list_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
@@ -1760,7 +1736,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: URL */
     public static final String LABELS_failure_url_url = "{labels.failure_url_url}";
 
-    /** The key of the message: Last Access */
+    /** The key of the message: Last Access Time */
     public static final String LABELS_failure_url_last_access_time = "{labels.failure_url_last_access_time}";
 
     /** The key of the message: List */
@@ -1775,7 +1751,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_failure_url_delete_all_link = "{labels.failure_url_delete_all_link}";
 
-    /** The key of the message: Do you really want to delete all? */
+    /** The key of the message: Are you sure you want to delete all? */
     public static final String LABELS_failure_url_delete_all_confirmation = "{labels.failure_url_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
@@ -1799,25 +1775,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Log */
     public static final String LABELS_failure_url_error_log = "{labels.failure_url_error_log}";
 
-    /** The key of the message: Web Crawling Configuration */
+    /** The key of the message: Web Crawl Config */
     public static final String LABELS_failure_url_web_config_name = "{labels.failure_url_web_config_name}";
 
-    /** The key of the message: File Crawling Configuration */
+    /** The key of the message: File Crawl Config */
     public static final String LABELS_failure_url_file_config_name = "{labels.failure_url_file_config_name}";
 
     /** The key of the message: System Info */
     public static final String LABELS_system_info_configuration = "{labels.system_info_configuration}";
 
-    /** The key of the message: Env Properties */
+    /** The key of the message: Environment Variable Properties */
     public static final String LABELS_system_info_env_title = "{labels.system_info_env_title}";
 
     /** The key of the message: System Properties */
     public static final String LABELS_system_info_prop_title = "{labels.system_info_prop_title}";
 
-    /** The key of the message: Fess Properties */
+    /** The key of the message: App Properties */
     public static final String LABELS_system_info_fess_prop_title = "{labels.system_info_fess_prop_title}";
 
-    /** The key of the message: Properties for Bug Report */
+    /** The key of the message: Bug Report Properties */
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: system.properties does not exist. Default values are applied. */
@@ -1836,7 +1812,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Any */
     public static final String LABELS_file_auth_any = "{labels.file_auth_any}";
 
-    /** The key of the message: Create New File Config */
+    /** The key of the message: Create New File Crawl Config */
     public static final String LABELS_file_auth_create_file_config = "{labels.file_auth_create_file_config}";
 
     /** The key of the message: File Authentication */
@@ -1860,7 +1836,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Parameters */
     public static final String LABELS_file_auth_parameters = "{labels.file_auth_parameters}";
 
-    /** The key of the message: File System Config */
+    /** The key of the message: File Crawl Config */
     public static final String LABELS_file_auth_file_crawling_config = "{labels.file_auth_file_crawling_config}";
 
     /** The key of the message: Samba */
@@ -1872,13 +1848,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: {0}/{1} ({2} items) */
     public static final String LABELS_pagination_page_guide_msg = "{labels.pagination_page_guide_msg}";
 
-    /** The key of the message: No data. */
+    /** The key of the message: Not registered. */
     public static final String LABELS_list_could_not_find_crud_table = "{labels.list_could_not_find_crud_table}";
 
     /** The key of the message: Job Scheduler */
     public static final String LABELS_scheduledjob_configuration = "{labels.scheduledjob_configuration}";
 
-    /** The key of the message: Jobs */
+    /** The key of the message: Job */
     public static final String LABELS_scheduledjob_title_details = "{labels.scheduledjob_title_details}";
 
     /** The key of the message: Name */
@@ -1893,7 +1869,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Schedule */
     public static final String LABELS_scheduledjob_cronExpression = "{labels.scheduledjob_cronExpression}";
 
-    /** The key of the message: Executor */
+    /** The key of the message: Execution Method */
     public static final String LABELS_scheduledjob_scriptType = "{labels.scheduledjob_scriptType}";
 
     /** The key of the message: Script */
@@ -1911,10 +1887,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Active */
     public static final String LABELS_scheduledjob_active = "{labels.scheduledjob_active}";
 
-    /** The key of the message: Inactive */
+    /** The key of the message: Disabled */
     public static final String LABELS_scheduledjob_nojob = "{labels.scheduledjob_nojob}";
 
-    /** The key of the message: Start now */
+    /** The key of the message: Start Now */
     public static final String LABELS_scheduledjob_button_start = "{labels.scheduledjob_button_start}";
 
     /** The key of the message: Stop */
@@ -1938,10 +1914,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Status */
     public static final String LABELS_joblog_jobStatus = "{labels.joblog_jobStatus}";
 
-    /** The key of the message: Ok */
+    /** The key of the message: OK */
     public static final String LABELS_joblog_status_ok = "{labels.joblog_status_ok}";
 
-    /** The key of the message: Failed */
+    /** The key of the message: Fail */
     public static final String LABELS_joblog_status_fail = "{labels.joblog_status_fail}";
 
     /** The key of the message: Running */
@@ -1959,7 +1935,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Result */
     public static final String LABELS_joblog_scriptResult = "{labels.joblog_scriptResult}";
 
-    /** The key of the message: Executor */
+    /** The key of the message: Execution Method */
     public static final String LABELS_joblog_scriptType = "{labels.joblog_scriptType}";
 
     /** The key of the message: Start Time */
@@ -1974,7 +1950,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_joblog_delete_all_link = "{labels.joblog_delete_all_link}";
 
-    /** The key of the message: Do you really want to delete all? */
+    /** The key of the message: Are you sure you want to delete all? */
     public static final String LABELS_joblog_delete_all_confirmation = "{labels.joblog_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
@@ -1986,7 +1962,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Dictionary List */
     public static final String LABELS_dict_list_title = "{labels.dict_list_title}";
 
-    /** The key of the message: Dictionaries */
+    /** The key of the message: Dictionary */
     public static final String LABELS_dict_list_link = "{labels.dict_list_link}";
 
     /** The key of the message: Name */
@@ -2079,10 +2055,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Stemmer Override File */
     public static final String LABELS_dict_stemmeroverride_file = "{labels.dict_stemmeroverride_file}";
 
-    /** The key of the message: Mapping List */
+    /** The key of the message: Mapping Dictionary */
     public static final String LABELS_dict_mapping_configuration = "{labels.dict_mapping_configuration}";
 
-    /** The key of the message: Mapping List */
+    /** The key of the message: Mapping Dictionary */
     public static final String LABELS_dict_mapping_title = "{labels.dict_mapping_title}";
 
     /** The key of the message: List */
@@ -2121,10 +2097,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Mapping File */
     public static final String LABELS_dict_mapping_file = "{labels.dict_mapping_file}";
 
-    /** The key of the message: Kuromoji List */
+    /** The key of the message: Kuromoji Word List */
     public static final String LABELS_dict_kuromoji_configuration = "{labels.dict_kuromoji_configuration}";
 
-    /** The key of the message: Kuromoji List */
+    /** The key of the message: Kuromoji Word List */
     public static final String LABELS_dict_kuromoji_title = "{labels.dict_kuromoji_title}";
 
     /** The key of the message: List */
@@ -2157,7 +2133,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Reading */
     public static final String LABELS_dict_kuromoji_reading = "{labels.dict_kuromoji_reading}";
 
-    /** The key of the message: POS */
+    /** The key of the message: Part-of-speech */
     public static final String LABELS_dict_kuromoji_pos = "{labels.dict_kuromoji_pos}";
 
     /** The key of the message: Download */
@@ -2169,10 +2145,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Kuromoji File */
     public static final String LABELS_dict_kuromoji_file = "{labels.dict_kuromoji_file}";
 
-    /** The key of the message: Protwords List */
+    /** The key of the message: Protwords Word List */
     public static final String LABELS_dict_protwords_configuration = "{labels.dict_protwords_configuration}";
 
-    /** The key of the message: Protwords List */
+    /** The key of the message: Protwords Word List */
     public static final String LABELS_dict_protwords_title = "{labels.dict_protwords_title}";
 
     /** The key of the message: List */
@@ -2196,7 +2172,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_dict_protwords_link_upload = "{labels.dict_protwords_link_upload}";
 
-    /** The key of the message: Source */
+    /** The key of the message: Word Info */
     public static final String LABELS_dict_protwords_source = "{labels.dict_protwords_source}";
 
     /** The key of the message: Download */
@@ -2208,10 +2184,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Protwords File */
     public static final String LABELS_dict_protwords_file = "{labels.dict_protwords_file}";
 
-    /** The key of the message: Stopwords List */
+    /** The key of the message: Stopwords Word List */
     public static final String LABELS_dict_stopwords_configuration = "{labels.dict_stopwords_configuration}";
 
-    /** The key of the message: Stopwords List */
+    /** The key of the message: Stopwords Word List */
     public static final String LABELS_dict_stopwords_title = "{labels.dict_stopwords_title}";
 
     /** The key of the message: List */
@@ -2235,7 +2211,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_dict_stopwords_link_upload = "{labels.dict_stopwords_link_upload}";
 
-    /** The key of the message: Source */
+    /** The key of the message: Word Info */
     public static final String LABELS_dict_stopwords_source = "{labels.dict_stopwords_source}";
 
     /** The key of the message: Download */
@@ -2247,10 +2223,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Stopwords File */
     public static final String LABELS_dict_stopwords_file = "{labels.dict_stopwords_file}";
 
-    /** The key of the message: Doc Boost */
+    /** The key of the message: Document Boost */
     public static final String LABELS_boost_document_rule_configuration = "{labels.boost_document_rule_configuration}";
 
-    /** The key of the message: Doc Boost */
+    /** The key of the message: Document Boost */
     public static final String LABELS_boost_document_rule_title_details = "{labels.boost_document_rule_title_details}";
 
     /** The key of the message: Condition */
@@ -2259,7 +2235,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Condition */
     public static final String LABELS_boost_document_rule_url_expr = "{labels.boost_document_rule_url_expr}";
 
-    /** The key of the message: Boost Expr */
+    /** The key of the message: Boost Expression */
     public static final String LABELS_boost_document_rule_boost_expr = "{labels.boost_document_rule_boost_expr}";
 
     /** The key of the message: Sort Order */
@@ -2280,13 +2256,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Token */
     public static final String LABELS_access_token_token = "{labels.access_token_token}";
 
-    /** The key of the message: Expired */
+    /** The key of the message: Expires */
     public static final String LABELS_access_token_expires = "{labels.access_token_expires}";
 
     /** The key of the message: Parameter Name */
     public static final String LABELS_access_token_parameter_name = "{labels.access_token_parameter_name}";
 
-    /** The key of the message: Created */
+    /** The key of the message: Created Date */
     public static final String LABELS_access_token_updated_time = "{labels.access_token_updated_time}";
 
     /** The key of the message: Suggest Word */
@@ -2298,7 +2274,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Word Type */
     public static final String LABELS_suggest_word_type = "{labels.suggest_word_type}";
 
-    /** The key of the message: Word Count */
+    /** The key of the message: Number of Words */
     public static final String LABELS_suggest_word_number = "{labels.suggest_word_number}";
 
     /** The key of the message: All */
@@ -2310,10 +2286,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Query */
     public static final String LABELS_suggest_word_type_query = "{labels.suggest_word_type_query}";
 
-    /** The key of the message: Additional Word */
+    /** The key of the message: Elevate Word */
     public static final String LABELS_elevate_word_configuration = "{labels.elevate_word_configuration}";
 
-    /** The key of the message: Additional Word */
+    /** The key of the message: Elevate Word */
     public static final String LABELS_elevate_word_title_details = "{labels.elevate_word_title_details}";
 
     /** The key of the message: List */
@@ -2358,7 +2334,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Boost */
     public static final String LABELS_elevate_word_boost = "{labels.elevate_word_boost}";
 
-    /** The key of the message: Additional Word File */
+    /** The key of the message: Elevate Word File */
     public static final String LABELS_elevate_word_file = "{labels.elevate_word_file}";
 
     /** The key of the message: Bad Word */
@@ -2412,7 +2388,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Password */
     public static final String LABELS_user_password = "{labels.user_password}";
 
-    /** The key of the message: Confirm */
+    /** The key of the message: Password (Confirm) */
     public static final String LABELS_user_confirm_password = "{labels.user_confirm_password}";
 
     /** The key of the message: User */
@@ -2520,13 +2496,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Edit */
     public static final String LABELS_crud_title_edit = "{labels.crud_title_edit}";
 
-    /** The key of the message: Confirm to delete */
+    /** The key of the message: Confirm Delete */
     public static final String LABELS_crud_title_delete = "{labels.crud_title_delete}";
 
     /** The key of the message: Details */
     public static final String LABELS_crud_title_details = "{labels.crud_title_details}";
 
-    /** The key of the message: Do you really want to delete it? */
+    /** The key of the message: Are you sure you want to delete? */
     public static final String LABELS_crud_delete_confirmation = "{labels.crud_delete_confirmation}";
 
     /** The key of the message: Fess */
@@ -2535,7 +2511,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Dashboard */
     public static final String LABELS_admin_dashboard_title = "{labels.admin_dashboard_title}";
 
-    /** The key of the message: Toggle navigation */
+    /** The key of the message: Toggle Navigation */
     public static final String LABELS_admin_toggle_navi = "{labels.admin_toggle_navi}";
 
     /** The key of the message: System */
@@ -2560,6 +2536,21 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_general_storage = "{labels.general_storage}";
 
     /** The key of the message: LDAP URL */
+    public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
+
+    /** The key of the message: User DN */
+    public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
+
+    /** The key of the message: Bind DN */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_PRINCIPAL = "{labels.ldapAdminSecurityPrincipal}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_CREDENTIALS = "{labels.ldapAdminSecurityCredentials}";
+
+    /** The key of the message: Base DN */
+    public static final String LABELS_LDAP_BASE_DN = "{labels.ldapBaseDn}";
+
+    /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
     /** The key of the message: User DN */
@@ -2575,6 +2566,15 @@ public class FessLabels extends UserMessages {
     public static final String LABELS_ldap_base_dn = "{labels.ldap_base_dn}";
 
     /** The key of the message: Account Filter */
+    public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
+
+    /** The key of the message: Group Filter */
+    public static final String LABELS_LDAP_GROUP_FILTER = "{labels.ldapGroupFilter}";
+
+    /** The key of the message: memberOf Attribute */
+    public static final String LABELS_LDAP_MEMBEROF_ATTRIBUTE = "{labels.ldapMemberofAttribute}";
+
+    /** The key of the message: Account Filter */
     public static final String LABELS_ldap_account_filter = "{labels.ldap_account_filter}";
 
     /** The key of the message: Group Filter */
@@ -2583,10 +2583,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: memberOf Attribute */
     public static final String LABELS_ldap_memberof_attribute = "{labels.ldap_memberof_attribute}";
 
-    /** The key of the message: Login page */
+    /** The key of the message: Login Page */
     public static final String LABELS_notification_login = "{labels.notification_login}";
 
-    /** The key of the message: Search top page */
+    /** The key of the message: Search Top Page */
     public static final String LABELS_notification_search_top = "{labels.notification_search_top}";
 
     /** The key of the message: Endpoint */
@@ -2601,10 +2601,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Bucket */
     public static final String LABELS_storage_bucket = "{labels.storage_bucket}";
 
-    /** The key of the message: Send TestMail */
+    /** The key of the message: Send Test Mail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
 
-    /** The key of the message: Back Up */
+    /** The key of the message: Backup */
     public static final String LABELS_backup_configuration = "{labels.backup_configuration}";
 
     /** The key of the message: Name */
@@ -2616,25 +2616,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Upload */
     public static final String LABELS_backup_button_upload = "{labels.backup_button_upload}";
 
-    /** The key of the message: The limit of a search time was exceeded. The partial result might be displayed. */
+    /** The key of the message: The search processing time has exceeded the limit. The displayed results may be partial. */
     public static final String LABELS_process_time_is_exceeded = "{labels.process_time_is_exceeded}";
 
-    /** The key of the message: First Name */
+    /** The key of the message: Given Name */
     public static final String LABELS_user_given_name = "{labels.user_given_name}";
 
-    /** The key of the message: First Name */
+    /** The key of the message: Given Name */
     public static final String LABELS_GIVEN_NAME = "{labels.givenName}";
 
-    /** The key of the message: Last Name */
+    /** The key of the message: Surname */
     public static final String LABELS_user_surname = "{labels.user_surname}";
 
-    /** The key of the message: Last Name */
+    /** The key of the message: Surname */
     public static final String LABELS_SURAME = "{labels.surame}";
 
-    /** The key of the message: E-mail */
+    /** The key of the message: Mail */
     public static final String LABELS_user_mail = "{labels.user_mail}";
 
-    /** The key of the message: E-mail */
+    /** The key of the message: Mail */
     public static final String LABELS_MAIL = "{labels.mail}";
 
     /** The key of the message: Employee Number */
@@ -2703,10 +2703,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Postal Code */
     public static final String LABELS_POSTAL_CODE = "{labels.postalCode}";
 
-    /** The key of the message: Physical Delivery Office Name */
+    /** The key of the message: Office */
     public static final String LABELS_user_physicalDeliveryOfficeName = "{labels.user_physicalDeliveryOfficeName}";
 
-    /** The key of the message: Physical Delivery Office Name */
+    /** The key of the message: Office */
     public static final String LABELS_PHYSICAL_DELIVERY_OFFICE_NAME = "{labels.physicalDeliveryOfficeName}";
 
     /** The key of the message: Destination Indicator */
@@ -2781,10 +2781,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Teletex Terminal Identifier */
     public static final String LABELS_TELETEX_TERMINAL_IDENTIFIER = "{labels.teletexTerminalIdentifier}";
 
-    /** The key of the message: X121 Address */
+    /** The key of the message: x121Address */
     public static final String LABELS_user_x121Address = "{labels.user_x121Address}";
 
-    /** The key of the message: X121 Address */
+    /** The key of the message: x121Address */
     public static final String LABELS_X121_ADDRESS = "{labels.x121Address}";
 
     /** The key of the message: Business Category */
@@ -2844,13 +2844,13 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Data Migration */
     public static final String LABELS_upgrade_data_migration = "{labels.upgrade_data_migration}";
 
-    /** The key of the message: Reindex */
+    /** The key of the message: Re-indexing */
     public static final String LABELS_upgrade_reindex = "{labels.upgrade_reindex}";
 
     /** The key of the message: Start */
     public static final String LABELS_upgrade_start_button = "{labels.upgrade_start_button}";
 
-    /** The key of the message: Update Aliases */
+    /** The key of the message: Replace Aliases */
     public static final String LABELS_replace_aliases = "{labels.replace_aliases}";
 
     /** The key of the message: Reset Dictionaries */
@@ -2859,10 +2859,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Start */
     public static final String LABELS_reindex_start_button = "{labels.reindex_start_button}";
 
-    /** The key of the message: Version */
+    /** The key of the message: Target Version */
     public static final String LABELS_TARGET_VERSION = "{labels.targetVersion}";
 
-    /** The key of the message: Version From */
+    /** The key of the message: Target Version */
     public static final String LABELS_target_version = "{labels.target_version}";
 
     /** The key of the message: Request to OpenSearch */
@@ -2877,19 +2877,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Send */
     public static final String LABELS_sereq_button_upload = "{labels.sereq_button_upload}";
 
-    /** The key of the message: No match */
+    /** The key of the message: Not found */
     public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";
 
     /** The key of the message: Score: */
     public static final String LABELS_doc_score = "{labels.doc_score}";
 
-    /** The key of the message: Running as Development mode. For production use, please install a standalone OpenSearch server. */
+    /** The key of the message: Fess is running in development mode. Please install OpenSearch separately in a production environment. */
     public static final String LABELS_development_mode_warning = "{labels.development_mode_warning}";
 
-    /** The key of the message: Your system is out of support. See EOL page. */
+    /** The key of the message: The system you are using is no longer supported. Please refer to the product support lifecycle page and upgrade. */
     public static final String LABELS_eol_error = "{labels.eol_error}";
 
-    /** The key of the message: Search View */
+    /** The key of the message: Search Screen */
     public static final String LABELS_tooltip_search_view = "{labels.tooltip_search_view}";
 
     /** The key of the message: Run Crawler */
@@ -2904,28 +2904,28 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Logout */
     public static final String LABELS_tooltip_logout = "{labels.tooltip_logout}";
 
-    /** The key of the message: Advance */
+    /** The key of the message: Advanced Search */
     public static final String LABELS_ADVANCE = "{labels.advance}";
 
     /** The key of the message: Advanced Search */
     public static final String LABELS_advance_search_title = "{labels.advance_search_title}";
 
-    /** The key of the message: All these words */
+    /** The key of the message: with all of the words */
     public static final String LABELS_advance_search_must_queries = "{labels.advance_search_must_queries}";
 
-    /** The key of the message: Phrase search of these words */
+    /** The key of the message: with the exact phrase */
     public static final String LABELS_advance_search_phrase_query = "{labels.advance_search_phrase_query}";
 
-    /** The key of the message: Any of these words */
+    /** The key of the message: with at least one of the words */
     public static final String LABELS_advance_search_should_queries = "{labels.advance_search_should_queries}";
 
-    /** The key of the message: None of these words */
+    /** The key of the message: without the words */
     public static final String LABELS_advance_search_not_queries = "{labels.advance_search_not_queries}";
 
-    /** The key of the message: File Type */
+    /** The key of the message: File type */
     public static final String LABELS_advance_search_filetype = "{labels.advance_search_filetype}";
 
-    /** The key of the message: All Type */
+    /** The key of the message: Any format */
     public static final String LABELS_advance_search_filetype_default = "{labels.advance_search_filetype_default}";
 
     /** The key of the message: HTML */
@@ -2943,16 +2943,16 @@ public class FessLabels extends UserMessages {
     /** The key of the message: MS PowerPoint */
     public static final String LABELS_advance_search_filetype_powerpoint = "{labels.advance_search_filetype_powerpoint}";
 
-    /** The key of the message: Terms appearing */
+    /** The key of the message: Occurence */
     public static final String LABELS_advance_search_occt = "{labels.advance_search_occt}";
 
-    /** The key of the message: anywhere in the page */
+    /** The key of the message: Anywhere in the page */
     public static final String LABELS_advance_search_occt_default = "{labels.advance_search_occt_default}";
 
     /** The key of the message: in the title of the page */
     public static final String LABELS_advance_search_occt_allintitle = "{labels.advance_search_occt_allintitle}";
 
-    /** The key of the message: in the url of the page */
+    /** The key of the message: in the URL of the page */
     public static final String LABELS_advance_search_occt_allinurl = "{labels.advance_search_occt_allinurl}";
 
     /** The key of the message: Site or domain */
@@ -2961,19 +2961,19 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Last update */
     public static final String LABELS_advance_search_timestamp = "{labels.advance_search_timestamp}";
 
-    /** The key of the message: anytime */
+    /** The key of the message: Anytime */
     public static final String LABELS_advance_search_timestamp_default = "{labels.advance_search_timestamp_default}";
 
-    /** The key of the message: past 24 hours */
+    /** The key of the message: Past 24 hours */
     public static final String LABELS_advance_search_timestamp_pastday = "{labels.advance_search_timestamp_pastday}";
 
-    /** The key of the message: past week */
+    /** The key of the message: Past week */
     public static final String LABELS_advance_search_timestamp_pastweek = "{labels.advance_search_timestamp_pastweek}";
 
-    /** The key of the message: past month */
+    /** The key of the message: Past month */
     public static final String LABELS_advance_search_timestamp_pastmonth = "{labels.advance_search_timestamp_pastmonth}";
 
-    /** The key of the message: past year */
+    /** The key of the message: Past year */
     public static final String LABELS_advance_search_timestamp_pastyear = "{labels.advance_search_timestamp_pastyear}";
 
     /** The key of the message: Search Log */
@@ -2994,34 +2994,34 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Favorite Log */
     public static final String LABELS_searchlog_log_type_favorite = "{labels.searchlog_log_type_favorite}";
 
-    /** The key of the message: User Information */
+    /** The key of the message: User Log */
     public static final String LABELS_searchlog_log_type_user_info = "{labels.searchlog_log_type_user_info}";
 
-    /** The key of the message: Keywords */
+    /** The key of the message: Keyword Count */
     public static final String LABELS_searchlog_log_type_search_keyword = "{labels.searchlog_log_type_search_keyword}";
 
-    /** The key of the message: Zero Hits */
+    /** The key of the message: Zero Hit Count */
     public static final String LABELS_searchlog_log_type_search_zerohit = "{labels.searchlog_log_type_search_zerohit}";
 
-    /** The key of the message: Zero Clicks */
+    /** The key of the message: Zero Click Count */
     public static final String LABELS_searchlog_log_type_search_zeroclick = "{labels.searchlog_log_type_search_zeroclick}";
 
-    /** The key of the message: Keyword by Hour */
+    /** The key of the message: Search Count/Hour */
     public static final String LABELS_searchlog_log_type_search_count_hour = "{labels.searchlog_log_type_search_count_hour}";
 
-    /** The key of the message: Keyword by Day */
+    /** The key of the message: Search Count/Day */
     public static final String LABELS_searchlog_log_type_search_count_day = "{labels.searchlog_log_type_search_count_day}";
 
-    /** The key of the message: User by Hour */
+    /** The key of the message: User Count/Hour */
     public static final String LABELS_searchlog_log_type_search_user_hour = "{labels.searchlog_log_type_search_user_hour}";
 
-    /** The key of the message: User by Day */
+    /** The key of the message: User Count/Day */
     public static final String LABELS_searchlog_log_type_search_user_day = "{labels.searchlog_log_type_search_user_day}";
 
-    /** The key of the message: Request Time Avg. by Hour */
+    /** The key of the message: Request Average Time/Hour */
     public static final String LABELS_searchlog_log_type_search_reqtimeavg_hour = "{labels.searchlog_log_type_search_reqtimeavg_hour}";
 
-    /** The key of the message: Request Time Avg. by Day */
+    /** The key of the message: Request Average Time/Day */
     public static final String LABELS_searchlog_log_type_search_reqtimeavg_day = "{labels.searchlog_log_type_search_reqtimeavg_day}";
 
     /** The key of the message: Click Count */
@@ -3075,25 +3075,25 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Maintenance */
     public static final String LABELS_maintenance_title_configuration = "{labels.maintenance_title_configuration}";
 
-    /** The key of the message: The number of shards */
+    /** The key of the message: Number of Shards */
     public static final String LABELS_number_of_shards_for_doc = "{labels.number_of_shards_for_doc}";
 
-    /** The key of the message: Auto expand replicas */
+    /** The key of the message: Auto-expand Replicas */
     public static final String LABELS_auto_expand_replicas_for_doc = "{labels.auto_expand_replicas_for_doc}";
 
-    /** The key of the message: Crawler Indices */
+    /** The key of the message: Crawler Index */
     public static final String LABELS_clear_crawler_index = "{labels.clear_crawler_index}";
 
-    /** The key of the message: Clear Crawler Indices */
+    /** The key of the message: Delete Crawler Index */
     public static final String LABELS_clear_crawler_index_button = "{labels.clear_crawler_index_button}";
 
-    /** The key of the message: Diagnostic */
+    /** The key of the message: Diagnostics */
     public static final String LABELS_diagnostic_logs = "{labels.diagnostic_logs}";
 
     /** The key of the message: Download Logs */
     public static final String LABELS_download_diagnostic_logs_button = "{labels.download_diagnostic_logs_button}";
 
-    /** The key of the message: Reload Doc Index */
+    /** The key of the message: Reload Document Index */
     public static final String LABELS_reload_doc_index = "{labels.reload_doc_index}";
 
     /** The key of the message: Reload */
@@ -3177,7 +3177,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Tag Value */
     public static final String LABELS_storage_tag_value = "{labels.storage_tag_value}";
 
-    /** The key of the message: Your password needs to be updated. */
+    /** The key of the message: You need to update your password */
     public static final String LABELS_LOGIN_NEWPASSWORD = "{labels.login.newpassword}";
 
     /** The key of the message: New Password */
