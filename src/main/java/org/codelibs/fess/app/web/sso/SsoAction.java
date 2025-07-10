@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.sso;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.RootAction;
@@ -33,6 +36,7 @@ import org.lastaflute.web.UrlChain;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 
 public class SsoAction extends FessLoginAction {
     // ===================================================================================
@@ -47,45 +51,56 @@ public class SsoAction extends FessLoginAction {
     @Execute
     public ActionResponse index() {
         if (fessLoginAssist.getSavedUserBean().isPresent()) {
-            final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
-            if (searchParameters.length > 0) {
-                final UrlChain chain = new UrlChain(this);
-                for (final RequestParameter param : searchParameters) {
-                    for (final String value : param.getValues()) {
-                        chain.params(param.getName(), value);
-                    }
+            return redirectToSearchPage().orElseGet(() -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("User is already logged in, redirecting to root.");
                 }
-                return redirectWith(SearchAction.class, chain);
-
-            }
-            return redirect(RootAction.class);
+                return redirect(RootAction.class);
+            });
         }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
         final LoginCredential loginCredential = ssoManager.getLoginCredential();
         if (loginCredential == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("No user in SSO request.");
-            }
             if (ssoManager.available()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SSO is available but no user found.");
+                }
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Redirecting to login page.");
             }
             return redirect(LoginAction.class);
         }
         if (loginCredential instanceof ActionResponseCredential) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Login credential is an ActionResponseCredential, executing it.");
+            }
             return ((ActionResponseCredential) loginCredential).execute();
         }
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Logging in user: {}", loginCredential);
+                }
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
-                return getHtmlResponse();
+                return redirectToSearchPage().orElseGet(() -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No search parameters found, redirecting to root.");
+                    }
+                    return getHtmlResponse();
+                });
             });
         } catch (final LoginFailureException lfe) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SSO login failure.", lfe);
-            }
             if (ssoManager.available()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SSO is available but login failed.", lfe);
+                }
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Redirecting to login page after failure.", lfe);
             }
             activityHelper.loginFailure(OptionalThing.of(loginCredential));
             return redirect(LoginAction.class);
@@ -113,6 +128,24 @@ public class SsoAction extends FessLoginAction {
             }
             return redirect(LoginAction.class);
         }
+    }
+
+    protected OptionalThing<HtmlResponse> redirectToSearchPage() {
+        final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
+        if (searchParameters.length > 0) {
+            final List<String> paramList = new ArrayList<>();
+            for (final RequestParameter param : searchParameters) {
+                for (final String value : param.getValues()) {
+                    paramList.add(param.getName());
+                    paramList.add(value);
+                }
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Redirecting to SearchAction with parameters: {}", paramList);
+            }
+            return OptionalThing.of(redirectWith(SearchAction.class, new UrlChain(this).params(paramList.toArray(n -> new Object[n]))));
+        }
+        return OptionalThing.empty();
     }
 
     @Execute
