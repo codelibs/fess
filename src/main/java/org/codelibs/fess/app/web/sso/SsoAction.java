@@ -48,17 +48,12 @@ public class SsoAction extends FessLoginAction {
     @Execute
     public ActionResponse index() {
         if (fessLoginAssist.getSavedUserBean().isPresent()) {
-            final HtmlResponse searchPageRedirect = redirectToSearchPage();
-            if (searchPageRedirect != null) {
+            return redirectToSearchPage().orElseGet(() -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("User is already logged in, redirecting to search page.");
+                    logger.debug("User is already logged in, redirecting to root.");
                 }
-                return searchPageRedirect;
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("User is already logged in, redirecting to root.");
-            }
-            return redirect(RootAction.class);
+                return redirect(RootAction.class);
+            });
         }
         final SsoManager ssoManager = ComponentUtil.getSsoManager();
         final LoginCredential loginCredential = ssoManager.getLoginCredential();
@@ -87,14 +82,12 @@ public class SsoAction extends FessLoginAction {
                 }
                 activityHelper.login(getUserBean());
                 userInfoHelper.deleteUserCodeFromCookie(request);
-                final HtmlResponse searchPageRedirect = redirectToSearchPage();
-                if (searchPageRedirect != null) {
+                return redirectToSearchPage().orElseGet(() -> {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Redirecting to search page after successful login.");
+                        logger.debug("No search parameters found, redirecting to root.");
                     }
-                    return searchPageRedirect;
-                }
-                return getHtmlResponse();
+                    return getHtmlResponse();
+                });
             });
         } catch (final LoginFailureException lfe) {
             if (ssoManager.available()) {
@@ -134,19 +127,21 @@ public class SsoAction extends FessLoginAction {
         }
     }
 
-    protected HtmlResponse redirectToSearchPage() {
+    protected OptionalThing<HtmlResponse> redirectToSearchPage() {
         final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
         if (searchParameters.length > 0) {
             final UrlChain chain = new UrlChain(this);
             for (final RequestParameter param : searchParameters) {
                 for (final String value : param.getValues()) {
-                    logger.debug("Adding search parameter: {}={}", param.getName(), value);
                     chain.params(param.getName(), value);
                 }
             }
-            return redirectWith(SearchAction.class, chain);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Redirecting to SearchAction with parameters: {}", chain);
+            }
+            return OptionalThing.of(redirectWith(SearchAction.class, chain));
         }
-        return null;
+        return OptionalThing.empty();
     }
 
     @Execute
