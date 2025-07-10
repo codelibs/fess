@@ -533,4 +533,146 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(118, indexingHelper.calculateDocumentSize(Map.of("id", "test")));
         assertEquals(249, indexingHelper.calculateDocumentSize(Map.of("id", "test", "url", "http://test.com/")));
     }
+
+    public void test_setMaxRetryCount() {
+        indexingHelper.setMaxRetryCount(10);
+        assertEquals(10, indexingHelper.maxRetryCount);
+
+        indexingHelper.setMaxRetryCount(0);
+        assertEquals(0, indexingHelper.maxRetryCount);
+    }
+
+    public void test_setDefaultRowSize() {
+        indexingHelper.setDefaultRowSize(50);
+        assertEquals(50, indexingHelper.defaultRowSize);
+
+        indexingHelper.setDefaultRowSize(1000);
+        assertEquals(1000, indexingHelper.defaultRowSize);
+    }
+
+    public void test_setRequestInterval() {
+        indexingHelper.setRequestInterval(1000L);
+        assertEquals(1000L, indexingHelper.requestInterval);
+
+        indexingHelper.setRequestInterval(0L);
+        assertEquals(0L, indexingHelper.requestInterval);
+    }
+
+    public void test_deleteBySessionId_withClient() {
+        final Map<String, String> resultMap = new HashMap<>();
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
+                if (queryBuilder instanceof final TermQueryBuilder termQueryBuilder) {
+                    resultMap.put("index", index);
+                    resultMap.put("field", termQueryBuilder.fieldName());
+                    resultMap.put("value", termQueryBuilder.value().toString());
+                    return 1;
+                }
+                return 0;
+            }
+        };
+
+        final String sessionId = "session1";
+        final String index = "test.index";
+
+        assertEquals(1, indexingHelper.deleteBySessionId(client, index, sessionId));
+        assertEquals(index, resultMap.get("index"));
+        assertEquals("segment", resultMap.get("field"));
+        assertEquals(sessionId, resultMap.get("value"));
+    }
+
+    public void test_deleteByConfigId_withClient() {
+        final Map<String, String> resultMap = new HashMap<>();
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
+                if (queryBuilder instanceof final TermQueryBuilder termQueryBuilder) {
+                    resultMap.put("index", index);
+                    resultMap.put("field", termQueryBuilder.fieldName());
+                    resultMap.put("value", termQueryBuilder.value().toString());
+                    return 1;
+                }
+                return 0;
+            }
+        };
+
+        final String configId = "W01";
+        final String index = "test.index";
+
+        assertEquals(1, indexingHelper.deleteByConfigId(client, index, configId));
+        assertEquals(index, resultMap.get("index"));
+        assertEquals("config_id", resultMap.get("field"));
+        assertEquals(configId, resultMap.get("value"));
+    }
+
+    public void test_deleteByVirtualHost_withClient() {
+        final Map<String, String> resultMap = new HashMap<>();
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
+                if (queryBuilder instanceof final TermQueryBuilder termQueryBuilder) {
+                    resultMap.put("index", index);
+                    resultMap.put("field", termQueryBuilder.fieldName());
+                    resultMap.put("value", termQueryBuilder.value().toString());
+                    return 1;
+                }
+                return 0;
+            }
+        };
+
+        final String virtualHost = "aaa";
+        final String index = "test.index";
+
+        assertEquals(1, indexingHelper.deleteByVirtualHost(client, index, virtualHost));
+        assertEquals(index, resultMap.get("index"));
+        assertEquals("virtual_host", resultMap.get("field"));
+        assertEquals(virtualHost, resultMap.get("value"));
+    }
+
+    public void test_getDocument_notFound() {
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocument(final String index,
+                    final SearchCondition<SearchRequestBuilder> condition) {
+                return OptionalEntity.empty();
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+
+        final Map<String, Object> document = indexingHelper.getDocument(client, "999", new String[] { "title" });
+        assertNull(document);
+    }
+
+    public void test_getDocumentListByQuery_withNullFields() {
+        documentSizeByQuery = 1L;
+        final Map<String, String> resultMap = new HashMap<>();
+        final SearchEngineClient client = new SearchEngineClient() {
+            @Override
+            public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
+                final SearchRequestBuilder builder = new SearchRequestBuilder(this, SearchAction.INSTANCE);
+                condition.build(builder);
+                resultMap.put("index", index);
+                resultMap.put("query", builder.toString());
+                final List<Map<String, Object>> docList = new ArrayList<>();
+                docList.add(Map.of("_id", "001", "title", "test1", "content", "test2"));
+                return docList;
+            }
+        };
+        ComponentUtil.register(client, "searchEngineClient");
+
+        final List<Map<String, Object>> documents = indexingHelper.getDocumentListByQuery(client, QueryBuilders.matchAllQuery(), null);
+        assertEquals("fess.update", resultMap.get("index"));
+        assertEquals("{\"size\":1,\"query\":{\"match_all\":{\"boost\":1.0}}}", resultMap.get("query"));
+        assertEquals(1, documents.size());
+    }
+
+    public void test_calculateDocumentSize_withNullValue() {
+        final Map<String, Object> docMap = new HashMap<>();
+        docMap.put("id", "test");
+        docMap.put("nullField", null);
+
+        long size = indexingHelper.calculateDocumentSize(docMap);
+        assertTrue(size > 0);
+    }
 }

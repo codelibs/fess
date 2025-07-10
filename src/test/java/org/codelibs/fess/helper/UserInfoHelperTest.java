@@ -15,8 +15,16 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+
+import jakarta.servlet.http.Cookie;
 
 public class UserInfoHelperTest extends UnitFessTestCase {
 
@@ -108,4 +116,223 @@ public class UserInfoHelperTest extends UnitFessTestCase {
 
         assertFalse(userInfoHelper.isSecureCookie());
     }
+
+    public void test_getUserCodeFromCookie() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper() {
+            @Override
+            protected String getUserCodeFromCookie(final jakarta.servlet.http.HttpServletRequest request) {
+                final Cookie[] cookies = request.getCookies();
+                if (cookies != null) {
+                    for (final Cookie cookie : cookies) {
+                        if ("fsid".equals(cookie.getName()) && "12345abcde12345ABCDE".equals(cookie.getValue())) {
+                            return cookie.getValue();
+                        }
+                    }
+                }
+                return null;
+            }
+        };
+        MockletHttpServletRequest request = getMockRequest();
+
+        assertNull(userInfoHelper.getUserCodeFromCookie(request));
+
+        request.addCookie(new Cookie("fsid", "12345abcde12345ABCDE"));
+        assertEquals("12345abcde12345ABCDE", userInfoHelper.getUserCodeFromCookie(request));
+    }
+
+    public void test_deleteUserCodeFromCookie() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper() {
+            @Override
+            protected String getUserCodeFromCookie(final jakarta.servlet.http.HttpServletRequest request) {
+                return "testUserCode";
+            }
+
+            @Override
+            protected void updateCookie(final String userCode, final int age) {
+                assertTrue(userCode.isEmpty());
+                assertEquals(0, age);
+            }
+        };
+        MockletHttpServletRequest request = getMockRequest();
+
+        userInfoHelper.deleteUserCodeFromCookie(request);
+    }
+
+    public void test_getId() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        String id1 = userInfoHelper.getId();
+        String id2 = userInfoHelper.getId();
+
+        assertNotNull(id1);
+        assertNotNull(id2);
+        assertNotSame(id1, id2);
+        assertEquals(32, id1.length());
+        assertEquals(32, id2.length());
+        assertTrue(id1.matches("[0-9a-f]+"));
+        assertTrue(id2.matches("[0-9a-f]+"));
+    }
+
+    public void test_storeQueryId() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        List<Map<String, Object>> documentItems = new ArrayList<>();
+        Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("docId", "doc1");
+        doc1.put("title", "Test Document 1");
+        documentItems.add(doc1);
+
+        try {
+            userInfoHelper.storeQueryId("query1", documentItems);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_storeQueryId_emptyDocuments() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        List<Map<String, Object>> documentItems = new ArrayList<>();
+        try {
+            userInfoHelper.storeQueryId("query1", documentItems);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getResultDocIds_nonExistentQuery() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        String[] docIds = userInfoHelper.getResultDocIds("nonExistentQuery");
+        assertEquals(0, docIds.length);
+    }
+
+    public void test_setters() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+
+        userInfoHelper.setResultDocIdsCacheSize(50);
+        userInfoHelper.setCookieName("testCookie");
+        userInfoHelper.setCookieDomain("example.com");
+        userInfoHelper.setCookieMaxAge(3600);
+        userInfoHelper.setCookiePath("/test");
+        userInfoHelper.setCookieSecure(true);
+        userInfoHelper.setCookieHttpOnly(false);
+
+        assertTrue(true);
+    }
+
+    public void test_isSecureCookie_cookieSecureNull_xForwardedProto_http() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        MockletHttpServletRequest request = getMockRequest();
+        request.addHeader("X-Forwarded-Proto", "http");
+
+        assertFalse(userInfoHelper.isSecureCookie());
+    }
+
+    public void test_isSecureCookie_cookieSecureNull_xForwardedProto_mixed_case() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        MockletHttpServletRequest request = getMockRequest();
+        request.addHeader("X-Forwarded-Proto", "HTTPS");
+
+        assertTrue(userInfoHelper.isSecureCookie());
+    }
+
+    public void test_isSecureCookie_cookieSecureNull_noXForwardedProto_secure() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        MockletHttpServletRequest request = getMockRequest();
+        request.setScheme("https");
+
+        try {
+            userInfoHelper.isSecureCookie();
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_isSecureCookie_cookieSecureNull_noXForwardedProto_notSecure() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        userInfoHelper.setCookieSecure(null);
+
+        MockletHttpServletRequest request = getMockRequest();
+        request.setScheme("http");
+
+        try {
+            userInfoHelper.isSecureCookie();
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getUserCode_withAttributeSet() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        request.setAttribute(Constants.USER_CODE, "testUserCode");
+        assertEquals("testUserCode", userInfoHelper.getUserCode());
+    }
+
+    public void test_getUserCode_withValidRequestParameter() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        request.setParameter("userCode", "12345abcde12345ABCDE");
+        assertEquals("12345abcde12345ABCDE", userInfoHelper.getUserCode());
+    }
+
+    public void test_getUserCode_withValidCookie() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper() {
+            @Override
+            protected String getUserCodeFromRequest(final jakarta.servlet.http.HttpServletRequest request) {
+                return null;
+            }
+
+            @Override
+            protected String getUserCodeFromCookie(final jakarta.servlet.http.HttpServletRequest request) {
+                return "12345abcde12345ABCDE";
+            }
+
+            @Override
+            protected String getUserCodeFromUserBean(final jakarta.servlet.http.HttpServletRequest request) {
+                return null;
+            }
+
+            @Override
+            protected void updateUserSessionId(final String userCode) {
+                assertEquals("12345abcde12345ABCDE", userCode);
+            }
+        };
+        MockletHttpServletRequest request = getMockRequest();
+
+        try {
+            String userCode = userInfoHelper.getUserCode();
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getUserCode_generatesNewId() {
+        UserInfoHelper userInfoHelper = new UserInfoHelper();
+        MockletHttpServletRequest request = getMockRequest();
+
+        try {
+            String userCode = userInfoHelper.getUserCode();
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
 }

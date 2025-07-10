@@ -15,13 +15,16 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.base.login.FessCredential;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 public class ActivityHelperTest extends UnitFessTestCase {
 
@@ -261,5 +264,118 @@ public class ActivityHelperTest extends UnitFessTestCase {
             return permissions;
         }
 
+    }
+
+    public void test_setLoggerName() {
+        String originalLoggerName = activityHelper.loggerName;
+        activityHelper.setLoggerName("test.logger");
+        assertEquals("test.logger", activityHelper.loggerName);
+        activityHelper.setLoggerName(originalLoggerName);
+    }
+
+    public void test_setPermissionSeparator() {
+        activityHelper.setPermissionSeparator(",");
+        activityHelper.useEcsFormat = false;
+        activityHelper.login(createUser("testuser", new String[] { "111", "222" }));
+        assertEquals("action:LOGIN\tuser:testuser\tpermissions:111,222", localLogMsg.get());
+    }
+
+    public void test_setEcsVersion() {
+        activityHelper.setEcsVersion("2.0.0");
+        activityHelper.useEcsFormat = true;
+        activityHelper.login(OptionalThing.empty());
+        assertTrue(localLogMsg.get().contains("\"ecs.version\":\"2.0.0\""));
+    }
+
+    public void test_setEcsServiceName() {
+        activityHelper.setEcsServiceName("test-service");
+        activityHelper.useEcsFormat = true;
+        activityHelper.login(OptionalThing.empty());
+        assertTrue(localLogMsg.get().contains("\"service.name\":\"test-service\""));
+    }
+
+    public void test_setEcsEventDataset() {
+        activityHelper.setEcsEventDataset("test-dataset");
+        activityHelper.useEcsFormat = true;
+        activityHelper.login(OptionalThing.empty());
+        assertTrue(localLogMsg.get().contains("\"event.dataset\":\"test-dataset\""));
+    }
+
+    public void test_setEnvMap() {
+        Map<String, String> testEnv = new HashMap<>();
+        testEnv.put("TEST_KEY", "TEST_VALUE");
+        activityHelper.setEnvMap(testEnv);
+        assertEquals(testEnv, activityHelper.getEnvMap());
+    }
+
+    public void test_getEnvMap_withoutCustomMap() {
+        activityHelper.setEnvMap(null);
+        Map<String, String> envMap = activityHelper.getEnvMap();
+        assertNotNull(envMap);
+    }
+
+    public void test_init_withDockerEnvironment() {
+        Map<String, String> dockerEnv = new HashMap<>();
+        dockerEnv.put("FESS_APP_TYPE", "docker");
+        activityHelper.setEnvMap(dockerEnv);
+        activityHelper.init();
+        assertTrue(activityHelper.useEcsFormat);
+    }
+
+    public void test_init_withNonDockerEnvironment() {
+        Map<String, String> nonDockerEnv = new HashMap<>();
+        nonDockerEnv.put("FESS_APP_TYPE", "standalone");
+        activityHelper.setEnvMap(nonDockerEnv);
+        activityHelper.init();
+        assertFalse(activityHelper.useEcsFormat);
+    }
+
+    public void test_loginFailure_withCredential() {
+        activityHelper.useEcsFormat = false;
+        LoginCredential credential = new TestLoginCredential();
+        activityHelper.loginFailure(OptionalThing.of(credential));
+        String result = localLogMsg.get();
+        assertTrue(result.contains("action:LOGIN_FAILURE"));
+        assertTrue(result.contains("class:TestLoginCredential"));
+    }
+
+    public void test_print_withTabReplacement() {
+        activityHelper.useEcsFormat = false;
+        Map<String, String> params = new HashMap<>();
+        params.put("key\twith\ttabs", "value\twith\ttabs");
+        activityHelper.print("test\taction", OptionalThing.empty(), params);
+        String result = localLogMsg.get();
+        assertTrue(result.contains("action:TEST_ACTION"));
+        assertTrue(result.contains("key\twith\ttabs:value_with_tabs"));
+    }
+
+    public void test_print_parameterSorting() {
+        activityHelper.useEcsFormat = false;
+        Map<String, String> params = new HashMap<>();
+        params.put("z_param", "z_value");
+        params.put("a_param", "a_value");
+        params.put("m_param", "m_value");
+        activityHelper.print("test", OptionalThing.empty(), params);
+        String result = localLogMsg.get();
+        assertTrue(result.indexOf("a_param") < result.indexOf("m_param"));
+        assertTrue(result.indexOf("m_param") < result.indexOf("z_param"));
+    }
+
+    public void test_printByEcs_escaping() {
+        activityHelper.useEcsFormat = true;
+        Map<String, String> params = new HashMap<>();
+        params.put("quotes", "text with \"quotes\"");
+        params.put("backslash", "text\\with\\backslash");
+        activityHelper.print("test", OptionalThing.empty(), params);
+        String result = localLogMsg.get();
+        assertTrue(result.contains("\\\"quotes\\\""));
+        assertTrue(result.contains("text\\\\with\\\\backslash"));
+    }
+
+    static class TestLoginCredential implements LoginCredential {
+        @Override
+        public String toString() {
+            return "TestLoginCredential";
+        }
     }
 }

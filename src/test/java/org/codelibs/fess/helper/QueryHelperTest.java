@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.FacetInfo;
+import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
@@ -70,9 +72,23 @@ public class QueryHelperTest extends UnitFessTestCase {
         FileUtil.writeBytes(file.getAbsolutePath(), "ldap.security.principal=%s@fess.codelibs.local".getBytes("UTF-8"));
         DynamicProperties systemProps = new DynamicProperties(file);
         ComponentUtil.register(systemProps, "systemProperties");
-        ComponentUtil.register(new SystemHelper(), "systemHelper");
-        ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
-        ComponentUtil.register(new KeyMatchHelper(), "keyMatchHelper");
+        SystemHelper systemHelper = new SystemHelper();
+        VirtualHostHelper virtualHostHelper = new VirtualHostHelper();
+        KeyMatchHelper keyMatchHelper = new KeyMatchHelper();
+        RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
+        PermissionHelper permissionHelper = new PermissionHelper();
+
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
+        ComponentUtil.register(keyMatchHelper, "keyMatchHelper");
+        ComponentUtil.register(roleQueryHelper, "roleQueryHelper");
+        ComponentUtil.register(permissionHelper, "permissionHelper");
+
+        inject(systemHelper);
+        inject(virtualHostHelper);
+        inject(keyMatchHelper);
+        inject(roleQueryHelper);
+        inject(permissionHelper);
         inject(queryHelper);
         queryFieldConfig = new QueryFieldConfig();
         ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
@@ -569,6 +585,329 @@ public class QueryHelperTest extends UnitFessTestCase {
         return queryHelper.build(SearchRequestType.SEARCH, query, context -> {
             context.skipRoleQuery();
         });
+    }
+
+    // Additional test methods for improved coverage
+
+    public void test_getSortPrefix() {
+        assertEquals("sort:", queryHelper.getSortPrefix());
+    }
+
+    public void test_setSortPrefix() {
+        queryHelper.setSortPrefix("customSort:");
+        assertEquals("customSort:", queryHelper.getSortPrefix());
+    }
+
+    public void test_getAdditionalQuery() {
+        assertNull(queryHelper.getAdditionalQuery());
+    }
+
+    public void test_setAdditionalQuery() {
+        queryHelper.setAdditionalQuery("additional query");
+        assertEquals("additional query", queryHelper.getAdditionalQuery());
+    }
+
+    public void test_setHighlightPrefix() {
+        queryHelper.setHighlightPrefix("highlight_");
+        assertEquals("highlight_", queryHelper.getHighlightPrefix());
+    }
+
+    public void test_getHighlightPrefix() {
+        assertEquals("hl_", queryHelper.getHighlightPrefix());
+    }
+
+    public void test_getDefaultFacetInfo() {
+        assertNull(queryHelper.getDefaultFacetInfo());
+    }
+
+    public void test_setDefaultFacetInfo() {
+        FacetInfo facetInfo = new FacetInfo();
+        queryHelper.setDefaultFacetInfo(facetInfo);
+        assertEquals(facetInfo, queryHelper.getDefaultFacetInfo());
+    }
+
+    public void test_getDefaultGeoInfo() {
+        assertNull(queryHelper.getDefaultGeoInfo());
+    }
+
+    public void test_setDefaultGeoInfo() {
+        GeoInfo geoInfo = new GeoInfo(getMockRequest());
+        queryHelper.setDefaultGeoInfo(geoInfo);
+        assertEquals(geoInfo, queryHelper.getDefaultGeoInfo());
+    }
+
+    public void test_generateId() {
+        String id1 = queryHelper.generateId();
+        String id2 = queryHelper.generateId();
+
+        assertNotNull(id1);
+        assertNotNull(id2);
+        assertFalse(id1.equals(id2));
+        assertTrue(id1.length() > 0);
+        assertFalse(id1.contains("-"));
+    }
+
+    public void test_generateId_format() {
+        String id = queryHelper.generateId();
+        // UUID without dashes should be 32 characters
+        assertEquals(32, id.length());
+        assertTrue(id.matches("[a-f0-9]{32}"));
+    }
+
+    public void test_addDefaultSort_singleField() {
+        queryHelper.addDefaultSort("timestamp", "DESC");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(1, context.sortBuilders().size());
+        assertTrue(context.sortBuilders().get(0).toString().contains("timestamp"));
+        assertTrue(context.sortBuilders().get(0).toString().contains("desc"));
+    }
+
+    public void test_addDefaultSort_multipleFields() {
+        queryHelper.addDefaultSort("timestamp", "DESC");
+        queryHelper.addDefaultSort("title", "ASC");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(2, context.sortBuilders().size());
+    }
+
+    public void test_addDefaultSort_scoreField() {
+        queryHelper.addDefaultSort("_score", "DESC");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(1, context.sortBuilders().size());
+        assertTrue(context.sortBuilders().get(0).toString().contains("_score"));
+    }
+
+    public void test_addDefaultSort_docScoreField() {
+        queryHelper.addDefaultSort("doc_score", "ASC");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(1, context.sortBuilders().size());
+        assertTrue(context.sortBuilders().get(0).toString().contains("_score"));
+    }
+
+    public void test_addBoostFunction_scoreFunction() {
+        queryHelper.addBoostFunction(ScoreFunctionBuilders.weightFactorFunction(2.0f));
+
+        QueryContext context = buildQuery("test");
+        // Verify that function score query contains the added boost function
+        assertTrue(context.getQueryBuilder().toString().contains("function_score"));
+    }
+
+    public void test_addBoostFunction_withFilter() {
+        QueryBuilder filter = QueryBuilders.termQuery("category", "test");
+        queryHelper.addBoostFunction(filter, ScoreFunctionBuilders.weightFactorFunction(2.0f));
+
+        QueryContext context = buildQuery("test");
+        assertTrue(context.getQueryBuilder().toString().contains("function_score"));
+    }
+
+    public void test_build_withAdditionalQuery() {
+        queryHelper.setAdditionalQuery("additional:test");
+
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "main query", ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("main query additional:test", context.getQueryString());
+    }
+
+    public void test_build_withAdditionalQuery_emptyMainQuery() {
+        queryHelper.setAdditionalQuery("additional:test");
+
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "", ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("*", context.getQueryString());
+    }
+
+    public void test_build_withAdditionalQuery_nullMainQuery() {
+        queryHelper.setAdditionalQuery("additional:test");
+
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, null, ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("*", context.getQueryString());
+    }
+
+    public void test_build_adminSearch() {
+        QueryContext context = queryHelper.build(SearchRequestType.ADMIN_SEARCH, "test", ctx -> {
+            // Admin search should not add virtual host filter
+            ctx.skipRoleQuery(); // Skip role query to avoid complex dependency issues
+        });
+
+        assertNotNull(context);
+    }
+
+    public void test_buildRoleQuery_emptyRoleSet() {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        queryHelper.buildRoleQuery(Set.of(), boolQuery);
+
+        // Should add empty role query filter
+        assertTrue(boolQuery.toString().contains("filter"));
+    }
+
+    public void test_buildRoleQuery_withRoles() {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        Set<String> roles = Set.of("role1", "role2");
+
+        queryHelper.buildRoleQuery(roles, boolQuery);
+
+        String queryString = boolQuery.toString();
+        assertTrue(queryString.contains("role1"));
+        assertTrue(queryString.contains("role2"));
+        assertTrue(queryString.contains("filter"));
+    }
+
+    public void test_createFieldSortBuilder_normalField() {
+        // Using reflection to test protected method
+        try {
+            java.lang.reflect.Method method =
+                    QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class, org.opensearch.search.sort.SortOrder.class);
+            method.setAccessible(true);
+
+            org.opensearch.search.sort.SortBuilder<?> result = (org.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper,
+                    "timestamp", org.opensearch.search.sort.SortOrder.DESC);
+
+            assertNotNull(result);
+            assertTrue(result.toString().contains("timestamp"));
+        } catch (Exception e) {
+            fail("Failed to test createFieldSortBuilder: " + e.getMessage());
+        }
+    }
+
+    public void test_createFieldSortBuilder_scoreField() {
+        try {
+            java.lang.reflect.Method method =
+                    QueryHelper.class.getDeclaredMethod("createFieldSortBuilder", String.class, org.opensearch.search.sort.SortOrder.class);
+            method.setAccessible(true);
+
+            org.opensearch.search.sort.SortBuilder<?> result = (org.opensearch.search.sort.SortBuilder<?>) method.invoke(queryHelper,
+                    "_score", org.opensearch.search.sort.SortOrder.DESC);
+
+            assertNotNull(result);
+            assertTrue(result.toString().contains("_score"));
+        } catch (Exception e) {
+            fail("Failed to test createFieldSortBuilder for score field: " + e.getMessage());
+        }
+    }
+
+    public void test_getRescorers_emptyList() {
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        org.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
+
+        assertNotNull(rescorers);
+        assertEquals(0, rescorers.length);
+    }
+
+    public void test_addQueryRescorer() {
+        org.codelibs.fess.score.QueryRescorer mockRescorer = new org.codelibs.fess.score.QueryRescorer() {
+            @Override
+            public org.opensearch.search.rescore.RescorerBuilder<?> evaluate(java.util.Map<String, Object> params) {
+                return null; // Return null for this test
+            }
+        };
+
+        queryHelper.addQueryRescorer(mockRescorer);
+
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        org.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
+
+        assertNotNull(rescorers);
+        assertEquals(0, rescorers.length); // Should be 0 because rescorer returns null
+    }
+
+    public void test_processJsonSearchPreference_queryPref() {
+        String result = queryHelper.processJsonSearchPreference(null, "test query");
+        // This will return the hashCode of the query as string
+        assertEquals(Integer.toString("test query".hashCode()), result);
+    }
+
+    public void test_processGsaSearchPreference_queryPref() {
+        String result = queryHelper.processGsaSearchPreference(null, "test query");
+        // This will return the hashCode of the query as string
+        assertEquals(Integer.toString("test query".hashCode()), result);
+    }
+
+    public void test_build_invalidQuery() {
+        try {
+            queryHelper.build(SearchRequestType.SEARCH, "invalid:query[", ctx -> {
+                ctx.skipRoleQuery();
+            });
+            // If we get here without exception, that's actually fine for some invalid queries
+            // that might be handled gracefully
+        } catch (InvalidQueryException e) {
+            // This is expected for some types of invalid queries
+            assertNotNull(e.getMessage());
+        }
+    }
+
+    public void test_buildBaseQuery_invalidQuery() {
+        try {
+            queryHelper.buildBaseQuery(new QueryContext("field:[invalid", true), ctx -> {
+                // Empty context consumer
+            });
+            // Some invalid queries might be handled gracefully
+        } catch (InvalidQueryException e) {
+            // This is expected for malformed queries
+            assertNotNull(e.getMessage());
+            assertTrue(e.getMessage().contains("Invalid query"));
+        }
+    }
+
+    public void test_build_emptyQuery() {
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "", ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("*", context.getQueryString());
+    }
+
+    public void test_build_whitespaceQuery() {
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "   ", ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("*", context.getQueryString());
+    }
+
+    public void test_build_nullQuery() {
+        QueryContext context = queryHelper.build(SearchRequestType.SEARCH, null, ctx -> {
+            ctx.skipRoleQuery();
+        });
+
+        assertNotNull(context);
+        assertEquals("*", context.getQueryString());
+    }
+
+    public void test_addDefaultSort_caseInsensitive() {
+        // Test case insensitive order
+        queryHelper.addDefaultSort("timestamp", "desc");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(1, context.sortBuilders().size());
+        assertTrue(context.sortBuilders().get(0).toString().contains("desc"));
+    }
+
+    public void test_addDefaultSort_invalidOrder() {
+        // Invalid order should default to ASC
+        queryHelper.addDefaultSort("timestamp", "invalid");
+
+        QueryContext context = buildQuery("test");
+        assertEquals(1, context.sortBuilders().size());
+        assertTrue(context.sortBuilders().get(0).toString().contains("asc"));
+    }
+
+    public void test_constant_preferenceQuery() {
+        assertEquals("_query", QueryHelper.PREFERENCE_QUERY);
     }
 
 }

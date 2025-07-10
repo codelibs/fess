@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class DocumentHelperTest extends UnitFessTestCase {
@@ -187,4 +188,45 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("L1:aaa\nL2:bbb", documentHelper.appendLineNumber("L", "aaa\nbbb"));
         assertEquals("L1:aaa\nL2:bbb\nL3:ccc", documentHelper.appendLineNumber("L", "aaa\nbbb\nccc"));
     }
+
+    public void test_init() {
+        DocumentHelper documentHelper = new DocumentHelper();
+
+        try {
+            documentHelper.init();
+        } catch (Exception e) {
+            fail("init() should not throw an exception: " + e.getMessage());
+        }
+    }
+
+    public void test_getTitle() {
+        DocumentHelper documentHelper = new DocumentHelper();
+        ResponseData responseData = new ResponseData();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        assertEquals("", documentHelper.getTitle(responseData, null, dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, "", dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, " ", dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getTitle(responseData, "\t \t", dataMap));
+        assertEquals("Test Title", documentHelper.getTitle(responseData, " Test Title ", dataMap));
+        assertEquals("Test Title", documentHelper.getTitle(responseData, "Test Title", dataMap));
+        assertEquals("Test Title", documentHelper.getTitle(responseData, "Test\nTitle", dataMap));
+        assertEquals("Test Title", documentHelper.getTitle(responseData, "Test\tTitle", dataMap));
+        assertEquals("１２３ タイトル", documentHelper.getTitle(responseData, "　１２３　タイトル　", dataMap));
+    }
+
+    public void test_getContent_withTikaExtractor() {
+        DocumentHelper documentHelper = new DocumentHelper();
+        ResponseData responseData = new ResponseData();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        responseData.getMetaDataMap().put(TikaExtractor.class.getSimpleName(), new TikaExtractor());
+
+        String content = " Test Content ";
+        assertEquals("Test Content", documentHelper.getContent(null, responseData, content, dataMap));
+    }
+
 }

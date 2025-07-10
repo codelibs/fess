@@ -16,6 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -92,6 +93,107 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         url = "http://www.bar.com:8080/";
         result = "http://www.bar.com:8080/";
         assertEquals(result, duplicateHostHelper.convert(url));
+    }
+
+    public void test_init() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+
+        try {
+            helper.init();
+            assertNotNull(helper.duplicateHostList);
+        } catch (Exception e) {
+            fail("init() should not throw an exception: " + e.getMessage());
+        }
+    }
+
+    public void test_setDuplicateHostList() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+        List<DuplicateHost> testList = new ArrayList<>();
+
+        DuplicateHost testHost = new DuplicateHost();
+        testHost.setRegularName("www.test.com");
+        testHost.setDuplicateHostName("test.com");
+        testList.add(testHost);
+
+        helper.setDuplicateHostList(testList);
+
+        assertEquals(testList, helper.duplicateHostList);
+        assertEquals(1, helper.duplicateHostList.size());
+        assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
+    }
+
+    public void test_add() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+
+        DuplicateHost testHost = new DuplicateHost();
+        testHost.setRegularName("www.test.com");
+        testHost.setDuplicateHostName("test.com");
+
+        helper.add(testHost);
+
+        assertNotNull(helper.duplicateHostList);
+        assertEquals(1, helper.duplicateHostList.size());
+        assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
+    }
+
+    public void test_add_withNullList() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+        helper.duplicateHostList = null;
+
+        DuplicateHost testHost = new DuplicateHost();
+        testHost.setRegularName("www.test.com");
+        testHost.setDuplicateHostName("test.com");
+
+        helper.add(testHost);
+
+        assertNotNull(helper.duplicateHostList);
+        assertEquals(1, helper.duplicateHostList.size());
+        assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
+    }
+
+    public void test_convert_nullUrl() {
+        assertNull(duplicateHostHelper.convert(null));
+    }
+
+    public void test_convert_withNullList() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+        helper.duplicateHostList = null;
+
+        String url = "http://test.com";
+        String result = helper.convert(url);
+
+        assertNotNull(result);
+        assertNotNull(helper.duplicateHostList);
+    }
+
+    public void test_convert_emptyList() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+        helper.duplicateHostList = new ArrayList<>();
+
+        String url = "http://test.com";
+        String result = helper.convert(url);
+
+        assertEquals(url, result);
+    }
+
+    public void test_convert_multipleTransformations() {
+        DuplicateHostHelper helper = new DuplicateHostHelper();
+        helper.duplicateHostList = new ArrayList<>();
+
+        DuplicateHost host1 = new DuplicateHost();
+        host1.setRegularName("www.example.com");
+        host1.setDuplicateHostName("example.com");
+        helper.duplicateHostList.add(host1);
+
+        DuplicateHost host2 = new DuplicateHost();
+        host2.setRegularName("secure.example.com");
+        host2.setDuplicateHostName("www.example.com");
+        helper.duplicateHostList.add(host2);
+
+        String url = "http://example.com/test";
+        String result = helper.convert(url);
+
+        assertEquals("http://secure.example.com/test", result);
     }
 
 }

@@ -70,4 +70,87 @@ public class UserAgentHelperTest extends UnitFessTestCase {
         assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
     }
 
+    public void test_getUserAgentType_nullUserAgent() {
+        getMockRequest().addHeader("user-agent", null);
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_emptyUserAgent() {
+        getMockRequest().addHeader("user-agent", "");
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_noUserAgentHeader() {
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_multipleDetections() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_safariWithoutChrome() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1");
+        assertEquals(UserAgentType.SAFARI, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_operaModern() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.203");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_operaClassic() {
+        getMockRequest().addHeader("user-agent", "Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14");
+        assertEquals(UserAgentType.OPERA, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_edgeWithChrome() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_firefoxMobile() {
+        getMockRequest().addHeader("user-agent", "Mozilla/5.0 (Mobile; rv:40.0) Gecko/40.0 Firefox/40.0");
+        assertEquals(UserAgentType.FIREFOX, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_caseInsensitive() {
+        getMockRequest().addHeader("user-agent", "Mozilla/5.0 (compatible; msie 9.0; Windows NT 6.1; Trident/5.0)");
+        assertEquals(UserAgentType.IE, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_caching() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+
+        getMockRequest().addHeader("user-agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:42.0) Gecko/20100101 Firefox/42.0");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_bot() {
+        getMockRequest().addHeader("user-agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)");
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_curl() {
+        getMockRequest().addHeader("user-agent", "curl/7.68.0");
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_wget() {
+        getMockRequest().addHeader("user-agent", "Wget/1.20.3 (linux-gnu)");
+        assertEquals(UserAgentType.OTHER, userAgentHelper.getUserAgentType());
+    }
+
+    public void test_getUserAgentType_mobile() {
+        getMockRequest().addHeader("user-agent",
+                "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36");
+        assertEquals(UserAgentType.CHROME, userAgentHelper.getUserAgentType());
+    }
+
 }
