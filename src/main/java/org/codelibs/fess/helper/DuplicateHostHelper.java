@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.core.exception.AutoBindingFailureException;
 
 import jakarta.annotation.PostConstruct;
 
@@ -39,8 +40,12 @@ public class DuplicateHostHelper {
         if (duplicateHostList == null) {
             duplicateHostList = new ArrayList<>();
         }
-        final DuplicateHostService duplicateHostService = ComponentUtil.getComponent(DuplicateHostService.class);
-        duplicateHostList.addAll(duplicateHostService.getDuplicateHostList());
+        try {
+            final DuplicateHostService duplicateHostService = ComponentUtil.getComponent(DuplicateHostService.class);
+            duplicateHostList.addAll(duplicateHostService.getDuplicateHostList());
+        } catch (final AutoBindingFailureException e) {
+            logger.warn("DuplicateHostService is not found.", e);
+        }
     }
 
     public void setDuplicateHostList(final List<DuplicateHost> duplicateHostList) {
@@ -55,6 +60,10 @@ public class DuplicateHostHelper {
     }
 
     public String convert(final String url) {
+        if (url == null) {
+            return null;
+        }
+
         if (duplicateHostList == null) {
             init();
         }

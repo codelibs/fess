@@ -43,6 +43,7 @@ import jakarta.annotation.PostConstruct;
  *
  */
 public class ActivityHelper {
+
     protected Logger logger = null;
 
     protected String loggerName = "fess.log.audit";
@@ -57,15 +58,28 @@ public class ActivityHelper {
 
     protected String ecsEventDataset = "app";
 
+    protected Map<String, String> envMap;
+
     @PostConstruct
     public void init() {
         logger = LogManager.getLogger(loggerName);
         final String logFormat = ComponentUtil.getFessConfig().getAppAuditLogFormat();
         if (StringUtil.isBlank(logFormat)) {
-            useEcsFormat = "docker".equals(System.getenv("FESS_APP_TYPE"));
+            useEcsFormat = "docker".equals(getEnvMap().get("FESS_APP_TYPE"));
         } else if ("ecs".equals(logFormat)) {
             useEcsFormat = true;
         }
+    }
+
+    protected Map<String, String> getEnvMap() {
+        if (envMap != null) {
+            return envMap;
+        }
+        return System.getenv();
+    }
+
+    public void setEnvMap(final Map<String, String> envMap) {
+        this.envMap = envMap;
     }
 
     public void login(final OptionalThing<FessUserBean> user) {

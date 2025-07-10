@@ -431,4 +431,269 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("11T", crawlingConfigHelper.getDefaultConfig(ConfigType.FILE).get().getId());
         assertEquals("21T", crawlingConfigHelper.getDefaultConfig(ConfigType.DATA).get().getId());
     }
+
+    public void test_getId() {
+        // Test getId method through reflection since it's protected
+        try {
+            java.lang.reflect.Method getIdMethod = CrawlingConfigHelper.class.getDeclaredMethod("getId", String.class);
+            getIdMethod.setAccessible(true);
+
+            assertNull(getIdMethod.invoke(crawlingConfigHelper, (String) null));
+            assertNull(getIdMethod.invoke(crawlingConfigHelper, ""));
+            assertNull(getIdMethod.invoke(crawlingConfigHelper, "W"));
+            assertEquals("123", getIdMethod.invoke(crawlingConfigHelper, "W123"));
+            assertEquals("abc", getIdMethod.invoke(crawlingConfigHelper, "Fabc"));
+            assertEquals("xyz", getIdMethod.invoke(crawlingConfigHelper, "Dxyz"));
+        } catch (Exception e) {
+            fail("Failed to test getId method: " + e.getMessage());
+        }
+    }
+
+    public void test_getCrawlingConfig_cacheExceptionHandling() {
+        // Register a service that throws exception
+        ComponentUtil.register(new WebConfigService() {
+            @Override
+            public OptionalEntity<WebConfig> getWebConfig(final String id) {
+                throw new RuntimeException("Test exception");
+            }
+
+            @Override
+            public OptionalEntity<WebConfig> getWebConfigByName(String name) {
+                return OptionalEntity.empty();
+            }
+        }, WebConfigService.class.getCanonicalName());
+
+        // Should return null when exception occurs
+        assertNull(crawlingConfigHelper.getCrawlingConfig("W123"));
+    }
+
+    public void test_store_counterIncrement() {
+        final String sessionId = "testSession";
+
+        // Test counter increment
+        String sessionCountId1 = crawlingConfigHelper.store(sessionId, crawlingConfigHelper.getCrawlingConfig("W1"));
+        assertEquals("testSession-1", sessionCountId1);
+
+        String sessionCountId2 = crawlingConfigHelper.store(sessionId, crawlingConfigHelper.getCrawlingConfig("W2"));
+        assertEquals("testSession-2", sessionCountId2);
+
+        String sessionCountId3 = crawlingConfigHelper.store(sessionId, crawlingConfigHelper.getCrawlingConfig("W3"));
+        assertEquals("testSession-3", sessionCountId3);
+
+        // Verify stored configs
+        assertEquals("1", crawlingConfigHelper.get(sessionCountId1).getId());
+        assertEquals("2", crawlingConfigHelper.get(sessionCountId2).getId());
+        assertEquals("3", crawlingConfigHelper.get(sessionCountId3).getId());
+    }
+
+    public void test_getAllWebConfigList_withDifferentFlags() {
+        final WebConfigCB cb = new WebConfigCB();
+        ComponentUtil.register(new WebConfigBhv() {
+            @Override
+            public ListResultBean<WebConfig> selectList(final CBCall<WebConfigCB> cbLambda) {
+                cbLambda.callback(cb);
+                final ListResultBean<WebConfig> list = new ListResultBean<>();
+                list.add((WebConfig) crawlingConfigHelper.getCrawlingConfig("W1"));
+                return list;
+            }
+        }, WebConfigBhv.class.getCanonicalName());
+
+        // Test with available=false (should not add available query)
+        List<WebConfig> configList = crawlingConfigHelper.getAllWebConfigList(true, true, false, null);
+        assertEquals(1, configList.size());
+
+        // Test with idList parameter
+        List<String> idList = List.of("W1", "W2");
+        configList = crawlingConfigHelper.getAllWebConfigList(true, true, true, idList);
+        assertEquals(1, configList.size());
+    }
+
+    public void test_getAllFileConfigList_withDifferentFlags() {
+        final FileConfigCB cb = new FileConfigCB();
+        ComponentUtil.register(new FileConfigBhv() {
+            @Override
+            public ListResultBean<FileConfig> selectList(final CBCall<FileConfigCB> cbLambda) {
+                cbLambda.callback(cb);
+                final ListResultBean<FileConfig> list = new ListResultBean<>();
+                list.add((FileConfig) crawlingConfigHelper.getCrawlingConfig("F1"));
+                return list;
+            }
+        }, FileConfigBhv.class.getCanonicalName());
+
+        // Test with available=false
+        List<FileConfig> configList = crawlingConfigHelper.getAllFileConfigList(true, true, false, null);
+        assertEquals(1, configList.size());
+
+        // Test with idList parameter
+        List<String> idList = List.of("F1", "F2");
+        configList = crawlingConfigHelper.getAllFileConfigList(true, true, true, idList);
+        assertEquals(1, configList.size());
+    }
+
+    public void test_getAllDataConfigList_withDifferentFlags() {
+        final DataConfigCB cb = new DataConfigCB();
+        ComponentUtil.register(new DataConfigBhv() {
+            @Override
+            public ListResultBean<DataConfig> selectList(final CBCall<DataConfigCB> cbLambda) {
+                cbLambda.callback(cb);
+                final ListResultBean<DataConfig> list = new ListResultBean<>();
+                list.add((DataConfig) crawlingConfigHelper.getCrawlingConfig("D1"));
+                return list;
+            }
+        }, DataConfigBhv.class.getCanonicalName());
+
+        // Test with available=false
+        List<DataConfig> configList = crawlingConfigHelper.getAllDataConfigList(true, true, false, null);
+        assertEquals(1, configList.size());
+
+        // Test with idList parameter
+        List<String> idList = List.of("D1", "D2");
+        configList = crawlingConfigHelper.getAllDataConfigList(true, true, true, idList);
+        assertEquals(1, configList.size());
+    }
+
+    public void test_getExcludedUrlList_withNegativeFailureCount() {
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        systemProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, "-1");
+
+        List<String> excludedUrls = crawlingConfigHelper.getExcludedUrlList("123");
+        assertEquals(0, excludedUrls.size());
+    }
+
+    public void test_getExcludedUrlList_withIgnoreFailureTypePattern() {
+        final AtomicInteger errorCount = new AtomicInteger(3);
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final FailureUrlCB cb = new FailureUrlCB();
+
+        ComponentUtil.register(new FailureUrlBhv() {
+            @Override
+            public ListResultBean<FailureUrl> selectList(final CBCall<FailureUrlCB> cbLambda) {
+                cbLambda.callback(cb);
+                final ListResultBean<FailureUrl> list = new ListResultBean<>();
+                for (int i = 0; i < errorCount.get(); i++) {
+                    FailureUrl failureUrl = new FailureUrl();
+                    failureUrl.setId("E" + i);
+                    failureUrl.setUrl("http://test.com/" + i + ".html");
+                    failureUrl.setErrorCount(i + 1);
+                    // Mix different error names
+                    if (i == 0) {
+                        failureUrl.setErrorName("java.net.ConnectException");
+                    } else if (i == 1) {
+                        failureUrl.setErrorName("java.net.SocketTimeoutException");
+                    } else {
+                        failureUrl.setErrorName("java.io.IOException");
+                    }
+                    list.add(failureUrl);
+                }
+                return list;
+            }
+        }, FailureUrlBhv.class.getCanonicalName());
+
+        systemProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, "1");
+        systemProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, ".*ConnectException.*");
+
+        List<String> excludedUrls = crawlingConfigHelper.getExcludedUrlList("123");
+        // Should exclude ConnectException but include the other 2
+        assertEquals(2, excludedUrls.size());
+        assertTrue(excludedUrls.contains("http://test.com/1.html"));
+        assertTrue(excludedUrls.contains("http://test.com/2.html"));
+        assertFalse(excludedUrls.contains("http://test.com/0.html"));
+    }
+
+    public void test_getExcludedUrlList_emptyList() {
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        final FailureUrlCB cb = new FailureUrlCB();
+
+        ComponentUtil.register(new FailureUrlBhv() {
+            @Override
+            public ListResultBean<FailureUrl> selectList(final CBCall<FailureUrlCB> cbLambda) {
+                cbLambda.callback(cb);
+                return new ListResultBean<>(); // Empty list
+            }
+        }, FailureUrlBhv.class.getCanonicalName());
+
+        systemProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, "1");
+
+        List<String> excludedUrls = crawlingConfigHelper.getExcludedUrlList("123");
+        assertEquals(0, excludedUrls.size());
+    }
+
+    public void test_refresh_clearsCache() {
+        // First get a config to cache it
+        CrawlingConfig config1 = crawlingConfigHelper.getCrawlingConfig("W01");
+        assertNotNull(config1);
+
+        // Change the service to return different data
+        ComponentUtil.register(new WebConfigService() {
+            @Override
+            public OptionalEntity<WebConfig> getWebConfig(final String id) {
+                final WebConfig webConfig = new WebConfig();
+                webConfig.setId(id + "_refreshed");
+                return OptionalEntity.of(webConfig);
+            }
+
+            @Override
+            public OptionalEntity<WebConfig> getWebConfigByName(String name) {
+                return OptionalEntity.empty();
+            }
+        }, WebConfigService.class.getCanonicalName());
+
+        // Without refresh, should still get cached version
+        CrawlingConfig config2 = crawlingConfigHelper.getCrawlingConfig("W01");
+        assertEquals("01", config2.getId());
+
+        // After refresh, should get new version
+        crawlingConfigHelper.refresh();
+        CrawlingConfig config3 = crawlingConfigHelper.getCrawlingConfig("W01");
+        assertEquals("01_refreshed", config3.getId());
+    }
+
+    public void test_init_cacheConfiguration() {
+        // Test that init properly configures the cache
+        CrawlingConfigHelper newHelper = new CrawlingConfigHelper();
+        newHelper.init();
+        assertNotNull(newHelper);
+        // Cache should be initialized and functional
+        assertNull(newHelper.getCrawlingConfig("invalid"));
+    }
+
+    public void test_getPipeline_withBlankPipeline() {
+        // Register service that returns blank pipeline
+        ComponentUtil.register(new WebConfigService() {
+            @Override
+            public OptionalEntity<WebConfig> getWebConfig(final String id) {
+                final WebConfig webConfig = new WebConfig();
+                webConfig.setId(id);
+                webConfig.setConfigParameter("config.pipeline= "); // Blank space
+                return OptionalEntity.of(webConfig);
+            }
+
+            @Override
+            public OptionalEntity<WebConfig> getWebConfigByName(String name) {
+                return OptionalEntity.empty();
+            }
+        }, WebConfigService.class.getCanonicalName());
+
+        assertTrue(crawlingConfigHelper.getPipeline("W1").isEmpty());
+    }
+
+    public void test_getPipeline_withEmptyStringPipeline() {
+        // Register service that returns empty string pipeline
+        ComponentUtil.register(new WebConfigService() {
+            @Override
+            public OptionalEntity<WebConfig> getWebConfig(final String id) {
+                final WebConfig webConfig = new WebConfig();
+                webConfig.setId(id);
+                webConfig.setConfigParameter("config.pipeline="); // Empty string
+                return OptionalEntity.of(webConfig);
+            }
+
+            @Override
+            public OptionalEntity<WebConfig> getWebConfigByName(String name) {
+                return OptionalEntity.empty();
+            }
+        }, WebConfigService.class.getCanonicalName());
+
+        assertTrue(crawlingConfigHelper.getPipeline("W1").isEmpty());
+    }
 }

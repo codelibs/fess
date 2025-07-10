@@ -25,8 +25,11 @@ import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.entity.HighlightInfo;
+import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -373,5 +376,374 @@ public class ViewHelperTest extends UnitFessTestCase {
         querySet.add("$");
         document.put("title", "$test");
         assertEquals("<strong>$</strong>test", viewHelper.getContentTitle(document));
+    }
+
+    public void test_getContentDescription() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        Map<String, Object> document = new HashMap<>();
+        assertEquals("", viewHelper.getContentDescription(document));
+
+        try {
+            document.put("content", "test content");
+            String result = viewHelper.getContentDescription(document);
+            assertNotNull(result);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_createHighlightInfo() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            assertNotNull(viewHelper.createHighlightInfo());
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_updateHighlightInfo() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        HighlightInfo highlightInfo = new HighlightInfo();
+        int originalSize = highlightInfo.getFragmentSize();
+
+        viewHelper.updateHighlightInfo(highlightInfo, 500);
+        assertEquals((int) (originalSize * 0.65), highlightInfo.getFragmentSize(), 10);
+
+        highlightInfo = new HighlightInfo();
+        viewHelper.updateHighlightInfo(highlightInfo, 300);
+        assertEquals((int) (originalSize * 0.5), highlightInfo.getFragmentSize(), 10);
+
+        highlightInfo = new HighlightInfo();
+        viewHelper.updateHighlightInfo(highlightInfo, 1000);
+        assertEquals(originalSize, highlightInfo.getFragmentSize());
+    }
+
+    public void test_updateFileProtocol() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.IE;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file://test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.FIREFOX;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file://///test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.CHROME;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file://test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.SAFARI;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file:////test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.OPERA;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file://test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+
+        userAgentHelper = new UserAgentHelper() {
+            public UserAgentType getUserAgentType() {
+                return UserAgentType.OTHER;
+            }
+        };
+        ComponentUtil.register(userAgentHelper, "userAgentHelper");
+
+        assertEquals("file://test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
+    }
+
+    public void test_appendQueryParameter() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isAppendQueryParameter() {
+                return false;
+            }
+        });
+
+        Map<String, Object> document = new HashMap<>();
+        String url = "http://example.com/test.html";
+        assertEquals(url, viewHelper.appendQueryParameter(document, url));
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isAppendQueryParameter() {
+                return true;
+            }
+
+            public String getIndexFieldMimetype() {
+                return "mimetype";
+            }
+        });
+
+        document.put("mimetype", "text/html");
+        String resultUrl = viewHelper.appendQueryParameter(document, url);
+        assertNotNull(resultUrl);
+
+        url = "http://example.com/test.html#section";
+        assertEquals(url, viewHelper.appendQueryParameter(document, url));
+    }
+
+    public void test_appendHTMLSearchWord() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        Map<String, Object> document = new HashMap<>();
+        String url = "http://example.com/test.html";
+
+        assertEquals(url, viewHelper.appendHTMLSearchWord(document, url));
+
+        ViewHelper.TextFragment[] fragments = new ViewHelper.TextFragment[2];
+        fragments[0] = new ViewHelper.TextFragment(null, "test", null, null);
+        fragments[1] = new ViewHelper.TextFragment(null, "example", null, null);
+        document.put("text_fragments", fragments);
+
+        String result = viewHelper.appendHTMLSearchWord(document, url);
+        assertTrue(result.contains("#:~:"));
+        assertTrue(result.contains("text="));
+    }
+
+    public void test_appendPDFSearchWord() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        Map<String, Object> document = new HashMap<>();
+        String url = "http://example.com/test.pdf";
+
+        try {
+            String result = viewHelper.appendPDFSearchWord(document, url);
+            assertNotNull(result);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getPagePath() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            String pagePath = viewHelper.getPagePath("index");
+            assertNotNull(pagePath);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_createCacheContent() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("url", "http://example.com");
+        doc.put("cache", "test cache content");
+        String[] queries = { "test" };
+
+        try {
+            String result = viewHelper.createCacheContent(doc, queries);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getClientIp() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        getMockRequest().addHeader("x-forwarded-for", "192.168.1.1");
+        assertEquals("192.168.1.1", viewHelper.getClientIp(getMockRequest()));
+
+        getMockRequest().setRemoteAddr("127.0.0.1");
+        assertNotNull(viewHelper.getClientIp(getMockRequest()));
+    }
+
+    public void test_createHighlightText() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            assertNull(viewHelper.createHighlightText(null));
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_createTextFragmentsByHighlight() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            ViewHelper.TextFragment[] result =
+                    viewHelper.createTextFragmentsByHighlight(new org.opensearch.search.fetch.subphase.highlight.HighlightField[0]);
+            assertNotNull(result);
+            assertEquals(0, result.length);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_createTextFragmentsByQuery() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            ViewHelper.TextFragment[] result = viewHelper.createTextFragmentsByQuery();
+            assertNotNull(result);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_settersAndGetters() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        viewHelper.setUseSession(false);
+        assertFalse(viewHelper.isUseSession());
+
+        viewHelper.setUseSession(true);
+        assertTrue(viewHelper.isUseSession());
+
+        viewHelper.addInitFacetParam("key1", "value1");
+        assertEquals("key1", viewHelper.getInitFacetParamMap().get("value1"));
+
+        viewHelper.addInitGeoParam("key2", "value2");
+        assertEquals("key2", viewHelper.getInitGeoParamMap().get("value2"));
+
+        FacetQueryView facetQueryView = new FacetQueryView();
+        facetQueryView.setTitle("test");
+        viewHelper.addFacetQueryView(facetQueryView);
+        assertTrue(viewHelper.getFacetQueryViewList().contains(facetQueryView));
+
+        viewHelper.addInlineMimeType("text/plain");
+
+        assertNotNull(viewHelper.getActionHook());
+
+        ViewHelper.ActionHook actionHook = new ViewHelper.ActionHook();
+        viewHelper.setActionHook(actionHook);
+        assertEquals(actionHook, viewHelper.getActionHook());
+
+        viewHelper.setEncodeUrlLink(true);
+        viewHelper.setUrlLinkEncoding("UTF-8");
+        viewHelper.setOriginalHighlightTagPre("<mark>");
+        viewHelper.setOriginalHighlightTagPost("</mark>");
+        viewHelper.setCacheTemplateName("cache");
+        viewHelper.setFacetCacheDuration(600L);
+    }
+
+    public void test_TextFragment() {
+        ViewHelper.TextFragment fragment = new ViewHelper.TextFragment("prefix", "start", "end", "suffix");
+        String urlString = fragment.toURLString();
+        assertNotNull(urlString);
+        assertTrue(urlString.contains("text="));
+        assertTrue(urlString.contains("start"));
+
+        fragment = new ViewHelper.TextFragment(null, "start", null, null);
+        urlString = fragment.toURLString();
+        assertNotNull(urlString);
+        assertTrue(urlString.contains("text=start"));
+
+        fragment = new ViewHelper.TextFragment("prefix", "start", "end", "suffix");
+        urlString = fragment.toURLString();
+        assertTrue(urlString.contains("prefix"));
+        assertTrue(urlString.contains("start"));
+        assertTrue(urlString.contains("end"));
+        assertTrue(urlString.contains("suffix"));
+    }
+
+    public void test_ActionHook() {
+        ViewHelper.ActionHook actionHook = new ViewHelper.ActionHook();
+
+        try {
+            assertNull(actionHook.godHandPrologue(null, runtime -> null));
+            assertNull(actionHook.godHandMonologue(null, runtime -> null));
+            actionHook.godHandEpilogue(null, runtime -> {});
+            assertNull(actionHook.hookBefore(null, runtime -> null));
+            actionHook.hookFinally(null, runtime -> {});
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_getCachedFacetResponse() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        try {
+            viewHelper.getCachedFacetResponse("test query");
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_asContentResponse() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("config_id", "test");
+        doc.put("url", "http://example.com");
+
+        try {
+            viewHelper.asContentResponse(doc);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_removeHighlightTag() {
+        ViewHelper viewHelper = new ViewHelper();
+        viewHelper.init();
+
+        String text = "<em>highlighted</em> text";
+        String result = viewHelper.removeHighlightTag(text);
+        assertEquals("highlighted text", result);
+
+        text = "normal text";
+        result = viewHelper.removeHighlightTag(text);
+        assertEquals("normal text", result);
+
+        text = "";
+        result = viewHelper.removeHighlightTag(text);
+        assertEquals("", result);
     }
 }

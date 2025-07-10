@@ -15,10 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -72,13 +71,114 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         final String token = "INVALID _TOKEN0";
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", token);
-        assertThrows(InvalidAccessTokenException.class, () -> accessTokenHelper.getAccessTokenFromRequest(req));
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
     }
 
     public void test_getAccessTokenFromRequest_bad2() {
         final String token = "Bearer";
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", token);
-        assertThrows(InvalidAccessTokenException.class, () -> accessTokenHelper.getAccessTokenFromRequest(req));
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
+    }
+
+    public void test_getAccessTokenFromRequest_emptyHeader() {
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "");
+        assertEquals("", accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    public void test_getAccessTokenFromRequest_whitespaceHeader() {
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "   ");
+        assertEquals("", accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    public void test_getAccessTokenFromRequest_multipleSpaces() {
+        final String token = accessTokenHelper.generateAccessToken();
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "Bearer  " + token);
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
+    }
+
+    public void test_getAccessTokenFromRequest_threeElements() {
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "Bearer token extra");
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
+    }
+
+    public void test_getAccessTokenFromRequest_bearerWithTrailingSpaces() {
+        final String token = accessTokenHelper.generateAccessToken();
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "Bearer " + token + "   ");
+        assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    public void test_getAccessTokenFromRequest_noHeaderNoParameter() {
+        MockletHttpServletRequest req = getMockRequest();
+        assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
+    }
+
+    public void test_setRandom() {
+        final Random customRandom = new Random(12345L);
+        accessTokenHelper.setRandom(customRandom);
+
+        final String token1 = accessTokenHelper.generateAccessToken();
+
+        accessTokenHelper.setRandom(new Random(12345L));
+        final String token2 = accessTokenHelper.generateAccessToken();
+
+        assertEquals(token1, token2);
+    }
+
+    public void test_generateAccessToken_withCustomRandom() {
+        final Random customRandom = new Random(0L);
+        accessTokenHelper.setRandom(customRandom);
+
+        final String token = accessTokenHelper.generateAccessToken();
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
+    }
+
+    public void test_getAccessTokenFromRequest_caseInsensitiveBearer() {
+        final String token = accessTokenHelper.generateAccessToken();
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "bearer " + token);
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
+    }
+
+    public void test_getAccessTokenFromRequest_invalidBearerFormat() {
+        MockletHttpServletRequest req = getMockRequest();
+        req.addHeader("Authorization", "InvalidBearer token");
+        try {
+            accessTokenHelper.getAccessTokenFromRequest(req);
+            fail();
+        } catch (InvalidAccessTokenException e) {
+            // ok
+        }
     }
 }
