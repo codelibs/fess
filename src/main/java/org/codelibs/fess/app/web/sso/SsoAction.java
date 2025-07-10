@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.sso;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.RootAction;
@@ -130,16 +133,17 @@ public class SsoAction extends FessLoginAction {
     protected OptionalThing<HtmlResponse> redirectToSearchPage() {
         final RequestParameter[] searchParameters = searchHelper.getSearchParameters();
         if (searchParameters.length > 0) {
-            final UrlChain chain = new UrlChain(this);
+            final List<String> paramList = new ArrayList<>();
             for (final RequestParameter param : searchParameters) {
                 for (final String value : param.getValues()) {
-                    chain.params(param.getName(), value);
+                    paramList.add(param.getName());
+                    paramList.add(value);
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Redirecting to SearchAction with parameters: {}", chain);
+                logger.debug("Redirecting to SearchAction with parameters: {}", paramList);
             }
-            return OptionalThing.of(redirectWith(SearchAction.class, chain));
+            return OptionalThing.of(redirectWith(SearchAction.class, new UrlChain(this).params(paramList.toArray(n -> new Object[n]))));
         }
         return OptionalThing.empty();
     }
