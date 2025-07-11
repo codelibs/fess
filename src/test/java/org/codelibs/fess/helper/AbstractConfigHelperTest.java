@@ -54,7 +54,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         long elapsed = endTime - startTime;
         assertTrue("Expected at least 15ms sleep, got " + elapsed + "ms", elapsed >= 15);
         // Generous tolerance for CI environments like GitHub Actions
-        assertTrue("Expected less than 100ms sleep, got " + elapsed + "ms", elapsed < 100);
+        assertTrue("Expected less than 200ms sleep, got " + elapsed + "ms", elapsed < 200);
     }
 
     public void test_waitForNext_withZeroInterval() {
