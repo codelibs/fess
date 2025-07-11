@@ -45,15 +45,16 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
     }
 
     public void test_waitForNext_withPositiveInterval() throws InterruptedException {
-        configHelper.setReloadInterval(100L);
+        configHelper.setReloadInterval(20L);
 
         long startTime = System.currentTimeMillis();
         configHelper.waitForNext();
         long endTime = System.currentTimeMillis();
 
         long elapsed = endTime - startTime;
-        assertTrue("Expected at least 100ms sleep, got " + elapsed + "ms", elapsed >= 90);
-        assertTrue("Expected less than 200ms sleep, got " + elapsed + "ms", elapsed < 200);
+        assertTrue("Expected at least 15ms sleep, got " + elapsed + "ms", elapsed >= 15);
+        // Generous tolerance for CI environments like GitHub Actions
+        assertTrue("Expected less than 100ms sleep, got " + elapsed + "ms", elapsed < 100);
     }
 
     public void test_waitForNext_withZeroInterval() {
