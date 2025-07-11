@@ -45,7 +45,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         super.setUp();
         dataIndexHelper = new DataIndexHelper();
         setupMockComponents();
-        // CRITICAL FIX: Set very short intervals to avoid 5-second sleeps
+        // Reduce default interval to minimize test execution time
         dataIndexHelper.setCrawlingExecutionInterval(1L); // 1ms instead of 5000ms
     }
 
