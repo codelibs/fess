@@ -15,11 +15,13 @@
  */
 package org.codelibs.fess.app.web.sso;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
@@ -137,7 +139,7 @@ public class SsoAction extends FessLoginAction {
             for (final RequestParameter param : searchParameters) {
                 for (final String value : param.getValues()) {
                     paramList.add(param.getName());
-                    paramList.add(value);
+                    paramList.add(URLEncoder.encode(value, Constants.CHARSET_UTF_8));
                 }
             }
             if (logger.isDebugEnabled()) {
