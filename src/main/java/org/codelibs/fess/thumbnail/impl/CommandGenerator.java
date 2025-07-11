@@ -143,6 +143,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
     protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
         ProcessDestroyer task = null;
+        Process p = null;
+        InputStreamThread ist = null;
         try {
             final ProcessBuilder pb = new ProcessBuilder(cmdList);
             pb.directory(baseDir);
@@ -152,9 +154,8 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 logger.debug("Thumbnail Command: {}", cmdList);
             }
 
-            final Process p = pb.start();
-
-            final InputStreamThread ist = new InputStreamThread(p.getInputStream(), Charset.defaultCharset(), 0, s -> {
+            p = pb.start();
+            ist = new InputStreamThread(p.getInputStream(), Charset.defaultCharset(), 0, s -> {
                 if (logger.isDebugEnabled()) {
                     logger.debug(s);
                 }
@@ -166,24 +167,50 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             if (logger.isDebugEnabled()) {
                 logger.debug("Waiting for {}.", getName());
             }
-            if (!p.waitFor(commandTimeout + commandDestroyTimeout, TimeUnit.MILLISECONDS)) {
-                logger.warn("Destroying {} because of the process timeout.", getName());
-                p.destroy();
-            }
 
-            final int exitValue = p.exitValue();
-            if (exitValue != 0) {
-                logger.warn("{} is failed (exit code:{}, timeout:{}): {}", getName(), exitValue, task.isExecuted(), commandList);
-            }
+            if (p.waitFor(commandTimeout + commandDestroyTimeout, TimeUnit.MILLISECONDS)) {
+                if (task.isExecuted()) {
+                    // Process was killed by the timer.
+                    logger.warn("{} was timed out and destroyed.", getName());
+                } else {
+                    // Process finished normally.
+                    final int exitValue = p.exitValue();
+                    if (exitValue != 0) {
+                        logger.warn("{} failed (exit code:{}): {}", getName(), exitValue, commandList);
+                    }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("{} is finished with exit code {}.", getName(), exitValue);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("{} is finished with exit code {}.", getName(), exitValue);
+                    }
+                }
+            } else {
+                // This is a secondary timeout, a safety net.
+                logger.warn("{} is unresponsive and could not be terminated within the safety timeout.", getName());
+                if (!task.isExecuted()) {
+                    task.run();
+                }
             }
+        } catch (final InterruptedException e) {
+            logger.warn("Interrupted to generate a thumbnail of {}: {}", thumbnailId, cmdList, e);
+            Thread.currentThread().interrupt();
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of {}: {}", thumbnailId, commandList, e);
-        }
-        if (task != null && !task.isExecuted()) {
-            task.cancel();
+            logger.warn("Failed to generate a thumbnail of {}: {}", thumbnailId, cmdList, e);
+        } finally {
+            if (task != null) {
+                task.cancel();
+            }
+            if (p != null && p.isAlive()) {
+                logger.warn("Process {} is still alive in finally block. Forcing destruction.", p);
+                if (task == null) {
+                    task = new ProcessDestroyer(p, ist, commandDestroyTimeout);
+                }
+                if (!task.isExecuted()) {
+                    task.run();
+                }
+            }
+            if (ist != null) {
+                ist.interrupt();
+            }
         }
     }
 
@@ -206,49 +233,56 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         @Override
         public void run() {
             if (!p.isAlive()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Process {} is not alive.", p);
+                }
                 return;
             }
 
-            executed.set(true);
+            if (executed.compareAndSet(false, true)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupting a stream thread.");
+                }
+                ist.interrupt();
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Interrupting a stream thread.");
-            }
-            ist.interrupt();
+                CommonPoolUtil.execute(() -> {
+                    try {
+                        CloseableUtil.closeQuietly(p.getInputStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process input stream.", e);
+                    }
+                });
+                CommonPoolUtil.execute(() -> {
+                    try {
+                        CloseableUtil.closeQuietly(p.getErrorStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process error stream.", e);
+                    }
+                });
+                CommonPoolUtil.execute(() -> {
+                    try {
+                        CloseableUtil.closeQuietly(p.getOutputStream());
+                    } catch (final Exception e) {
+                        logger.warn("Could not close a process output stream.", e);
+                    }
+                });
 
-            CommonPoolUtil.execute(() -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Terminating process {}.", p);
+                }
                 try {
-                    CloseableUtil.closeQuietly(p.getInputStream());
+                    if (!p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS)) {
+                        logger.warn("Terminating process {} is timed out.", p);
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("Terminated process {}.", p);
+                    }
                 } catch (final Exception e) {
-                    logger.warn("Could not close a process input stream.", e);
+                    logger.warn("Failed to stop destroyer.", e);
                 }
-            });
-            CommonPoolUtil.execute(() -> {
-                try {
-                    CloseableUtil.closeQuietly(p.getErrorStream());
-                } catch (final Exception e) {
-                    logger.warn("Could not close a process error stream.", e);
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Process {} is already executed.", p);
                 }
-            });
-            CommonPoolUtil.execute(() -> {
-                try {
-                    CloseableUtil.closeQuietly(p.getOutputStream());
-                } catch (final Exception e) {
-                    logger.warn("Could not close a process output stream.", e);
-                }
-            });
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Terminating process {}.", p);
-            }
-            try {
-                if (!p.destroyForcibly().waitFor(timeout, TimeUnit.MILLISECONDS)) {
-                    logger.warn("Terminating process {} is timed out.", p);
-                } else if (logger.isDebugEnabled()) {
-                    logger.debug("Terminated process {}.", p);
-                }
-            } catch (final Exception e) {
-                logger.warn("Failed to stop destroyer.", e);
             }
         }
 
