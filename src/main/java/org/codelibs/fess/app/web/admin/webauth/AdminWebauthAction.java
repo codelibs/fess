@@ -52,6 +52,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminWebauthAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWebauthAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin web auth operations */
     public static final String ROLE = "admin-webauth";
 
     private static final Logger logger = LogManager.getLogger(AdminWebauthAction.class);
@@ -60,10 +68,13 @@ public class AdminWebauthAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
+    /** Service for managing web authentication configurations */
     private WebAuthenticationService webAuthenticationService;
     @Resource
+    /** Pager for paginating web authentication results */
     private WebAuthPager webAuthPager;
     @Resource
+    /** Service for managing web crawler configurations */
     protected WebConfigService webConfigService;
 
     // ===================================================================================
@@ -83,12 +94,25 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the web authentication management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the web authentication list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of web authentication configurations.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the web authentication list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -102,6 +126,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for web authentication configurations based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered web authentication results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -111,6 +141,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all web authentication configurations.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset web authentication list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -133,6 +169,11 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new web authentication configuration.
+     *
+     * @return HTML response for the web authentication creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -148,6 +189,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing web authentication configuration.
+     *
+     * @param form the edit form containing web authentication ID
+     * @return HTML response for the web authentication edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -171,6 +218,13 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a web authentication configuration.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the web authentication to display
+     * @return HTML response for the web authentication details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -196,6 +250,12 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new web authentication configuration.
+     *
+     * @param form the create form containing the new web authentication data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -217,6 +277,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing web authentication configuration.
+     *
+     * @param form the edit form containing the updated web authentication data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -238,6 +304,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a web authentication configuration.
+     *
+     * @param form the edit form containing the ID of the web authentication to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {

@@ -51,30 +51,53 @@ import jakarta.annotation.Resource;
  */
 public class AdminFileauthAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminFileauthAction() {
+        // Default constructor
+    }
+
+    /** The role name for file authentication administration. */
     public static final String ROLE = "admin-fileauth";
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(AdminFileauthAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for file authentication operations. */
     @Resource
     private FileAuthenticationService fileAuthenticationService;
+
+    /** Pager for file authentication list pagination. */
     @Resource
     private FileAuthPager fileAuthenticationPager;
 
+    /** Service for file configuration operations. */
     @Resource
     protected FileConfigService fileConfigService;
 
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Sets up HTML data for rendering, including help link.
+     *
+     * @param runtime the action runtime
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameFileauth()));
     }
 
+    /**
+     * Returns the action role for this admin action.
+     *
+     * @return the role name
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
@@ -83,12 +106,24 @@ public class AdminFileauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the file authentication list page.
+     *
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays the file authentication list with pagination.
+     *
+     * @param pageNumber the page number
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -102,6 +137,12 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches file authentications based on the form criteria.
+     *
+     * @param form the search form
+     * @return HTML response for the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -111,6 +152,12 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays the default list.
+     *
+     * @param form the search form
+     * @return HTML response for the reset list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -120,6 +167,12 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up data for search result pagination.
+     *
+     * @param data the render data
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "fileAuthenticationItems",
                 fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
@@ -134,6 +187,11 @@ public class AdminFileauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the create new file authentication page.
+     *
+     * @return HTML response for the create page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -149,6 +207,12 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the edit file authentication page.
+     *
+     * @param form the edit form
+     * @return HTML response for the edit page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -172,6 +236,13 @@ public class AdminFileauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the file authentication details page.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the file authentication ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -194,6 +265,12 @@ public class AdminFileauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new file authentication.
+     *
+     * @param form the create form
+     * @return HTML response after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -215,6 +292,12 @@ public class AdminFileauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing file authentication.
+     *
+     * @param form the edit form
+     * @return HTML response after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -236,6 +319,12 @@ public class AdminFileauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a file authentication.
+     *
+     * @param form the edit form
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -261,6 +350,14 @@ public class AdminFileauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Gets a file authentication entity based on the form and current user info.
+     *
+     * @param form the create form
+     * @param username the current username
+     * @param currentTime the current time
+     * @return optional file authentication entity
+     */
     public static OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -280,6 +377,12 @@ public class AdminFileauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Gets a file authentication entity from the form with system info.
+     *
+     * @param form the create form
+     * @return optional file authentication entity
+     */
     public static OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -292,6 +395,11 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers protocol scheme items for the dropdown list.
+     *
+     * @param data the render data
+     */
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
@@ -300,6 +408,11 @@ public class AdminFileauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 
+    /**
+     * Registers file configuration items for the dropdown list.
+     *
+     * @param data the render data
+     */
     protected void registerFileConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final List<FileConfig> fileConfigList = crawlingConfigHelper.getAllFileConfigList(false, false, false, null);
@@ -309,6 +422,13 @@ public class AdminFileauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "fileConfigItems", itemList);
     }
 
+    /**
+     * Creates a dropdown item with label and value.
+     *
+     * @param label the item label
+     * @param value the item value
+     * @return map containing the item
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -319,6 +439,12 @@ public class AdminFileauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -331,6 +457,11 @@ public class AdminFileauthAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Returns HTML response for the list page.
+     *
+     * @return HTML response for the list page
+     */
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFileauth_AdminFileauthJsp).renderWith(data -> {
             RenderDataUtil.register(data, "fileAuthenticationItems",
@@ -344,6 +475,11 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the edit page.
+     *
+     * @return HTML response for the edit page
+     */
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminFileauth_AdminFileauthEditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -351,6 +487,11 @@ public class AdminFileauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the details page.
+     *
+     * @return HTML response for the details page
+     */
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminFileauth_AdminFileauthDetailsJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);

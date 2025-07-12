@@ -44,8 +44,21 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Admin action for configuration wizard.
+ *
+ * @author shinsuke
+ */
 public class AdminWizardAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWizardAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin wizard operations */
     public static final String ROLE = "admin-wizard";
 
     // ===================================================================================
@@ -57,18 +70,23 @@ public class AdminWizardAction extends FessAdminAction {
     //                                                                           Attribute
     //
     @Resource
+    /** System properties for configuration management */
     protected DynamicProperties systemProperties;
 
     @Resource
+    /** Service for managing web crawler configurations */
     protected WebConfigService webConfigService;
 
     @Resource
+    /** Service for managing file crawler configurations */
     protected FileConfigService fileConfigService;
 
     @Resource
+    /** Helper for managing crawler processes */
     protected ProcessHelper processHelper;
 
     @Resource
+    /** Service for managing scheduled jobs */
     protected ScheduledJobService scheduledJobService;
 
     // ===================================================================================
@@ -89,6 +107,11 @@ public class AdminWizardAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Displays the wizard index page.
+     *
+     * @return HTML response for the wizard main page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -99,6 +122,11 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardJsp).useForm(IndexForm.class);
     }
 
+    /**
+     * Displays the crawling configuration form.
+     *
+     * @return HTML response for the crawling config form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigForm() {
@@ -106,6 +134,12 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
+    /**
+     * Creates a crawling configuration and returns to the config form.
+     *
+     * @param form the form containing crawling configuration data
+     * @return HTML response redirecting to the config form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
@@ -116,6 +150,12 @@ public class AdminWizardAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
     }
 
+    /**
+     * Creates a crawling configuration and proceeds to the start crawling form.
+     *
+     * @param form the form containing crawling configuration data
+     * @return HTML response redirecting to the start crawling form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
@@ -280,6 +320,11 @@ public class AdminWizardAction extends FessAdminAction {
         return path;
     }
 
+    /**
+     * Displays the start crawling form.
+     *
+     * @return HTML response for the start crawling form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse startCrawlingForm() {
@@ -287,6 +332,12 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardStartJsp).useForm(StartCrawlingForm.class);
     }
 
+    /**
+     * Starts the crawling process for all configured crawlers.
+     *
+     * @param form the start crawling form
+     * @return HTML response redirecting to the wizard index
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse startCrawling(final StartCrawlingForm form) {

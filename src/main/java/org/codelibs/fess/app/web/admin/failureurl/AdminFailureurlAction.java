@@ -36,6 +36,16 @@ import jakarta.annotation.Resource;
  */
 public class AdminFailureurlAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminFailureurlAction() {
+        // default constructor
+    }
+
+    /**
+     * Role name for failure URL administration.
+     */
     public static final String ROLE = "admin-failureurl";
 
     // ===================================================================================
@@ -63,6 +73,11 @@ public class AdminFailureurlAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the main failure URL management page.
+     *
+     * @return HTML response for the failure URL list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -70,6 +85,13 @@ public class AdminFailureurlAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Displays the failure URL list page with pagination support.
+     *
+     * @param pageNumber the page number to display
+     * @param form the search form containing filter criteria
+     * @return HTML response for the failure URL list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
@@ -79,6 +101,12 @@ public class AdminFailureurlAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Performs a search for failure URLs based on the provided criteria.
+     *
+     * @param form the search form containing filter criteria
+     * @return HTML response for the failure URL list page with search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -88,6 +116,12 @@ public class AdminFailureurlAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and pagination state.
+     *
+     * @param form the search form to reset
+     * @return HTML response for the failure URL list page with cleared search
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -97,6 +131,12 @@ public class AdminFailureurlAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns to the failure URL list page with the current search form.
+     *
+     * @param form the search form containing current search parameters
+     * @return HTML response for the failure URL list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
@@ -105,6 +145,12 @@ public class AdminFailureurlAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data and restores search form values from the pager.
+     *
+     * @param data the render data to populate with failure URL items
+     * @param form the search form to restore values into
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
 
@@ -115,6 +161,13 @@ public class AdminFailureurlAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a specific failure URL record.
+     *
+     * @param crudMode the CRUD operation mode (should be DETAILS)
+     * @param id the ID of the failure URL record to display
+     * @return HTML response for the failure URL details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -137,6 +190,12 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                            Actually Crud (only Delete)
     //                                         -------------
 
+    /**
+     * Deletes a specific failure URL record.
+     *
+     * @param form the edit form containing the ID of the failure URL to delete
+     * @return HTML response redirecting to the failure URL list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -151,6 +210,11 @@ public class AdminFailureurlAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes all failure URL records that match the current search criteria.
+     *
+     * @return HTML response redirecting to the failure URL list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteall() {
@@ -164,6 +228,12 @@ public class AdminFailureurlAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode provided
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

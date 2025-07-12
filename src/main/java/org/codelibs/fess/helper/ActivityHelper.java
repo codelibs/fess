@@ -48,6 +48,13 @@ import jakarta.annotation.PostConstruct;
 public class ActivityHelper {
 
     /**
+     * Default constructor.
+     */
+    public ActivityHelper() {
+        // Default constructor
+    }
+
+    /**
      * The logger.
      */
     protected Logger logger = null;

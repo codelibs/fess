@@ -93,6 +93,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Display the main index page for stemmer override dictionary management.
+     * Clears the pager and shows the initial search form.
+     *
+     * @param form The search form containing filter criteria
+     * @return HTML response for the stemmer override index page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -103,6 +110,14 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Display a paginated list of stemmer override items.
+     * Sets the current page number and shows the list with pagination.
+     *
+     * @param pageNumber Optional page number to display (0-based)
+     * @param form The search form containing filter criteria
+     * @return HTML response showing the stemmer override list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -117,6 +132,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Perform a search operation for stemmer override items.
+     * Updates the pager with search criteria and displays filtered results.
+     *
+     * @param form The search form containing search criteria
+     * @return HTML response showing search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -127,6 +149,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search criteria and pager to default state.
+     * Clears all filters and returns to the initial page view.
+     *
+     * @param form The search form to reset
+     * @return HTML response showing the reset stemmer override list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -137,6 +166,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Populate render data with stemmer override items for pagination display.
+     * Retrieves items based on search criteria and restores form data from pager.
+     *
+     * @param data The render data to populate
+     * @param form The search form containing criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "stemmerOverrideItemItems",
@@ -172,6 +208,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Display the edit form for an existing stemmer override item.
+     * Loads the item data and switches to edit mode or details view based on current state.
+     *
+     * @param form The edit form containing item ID and CRUD mode
+     * @return HTML response for the edit page or details page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -196,6 +239,15 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Display detailed view of a specific stemmer override item.
+     * Shows read-only details of the selected item.
+     *
+     * @param dictId The dictionary ID
+     * @param crudMode The CRUD mode (should be DETAILS)
+     * @param id The ID of the stemmer override item to display
+     * @return HTML response showing item details
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -220,6 +272,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Display the download page for stemmer override dictionary file.
+     * Shows the file path and provides download interface.
+     *
+     * @param dictId The dictionary ID to download
+     * @return HTML response for the download page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -237,6 +296,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Download the stemmer override dictionary file.
+     * Streams the dictionary file as an octet-stream download.
+     *
+     * @param form The download form containing dictionary ID
+     * @return Action response with file stream for download
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -255,6 +321,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Display the upload page for stemmer override dictionary file.
+     * Shows the current file path and provides upload interface.
+     *
+     * @param dictId The dictionary ID to upload to
+     * @return HTML response for the upload page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -272,6 +345,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Upload a new stemmer override dictionary file.
+     * Processes the uploaded file and updates the dictionary.
+     *
+     * @param form The upload form containing the file and dictionary ID
+     * @return HTML response redirecting to the list page on success
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -323,6 +403,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Update an existing stemmer override item.
+     * Validates the form data and updates the item in the dictionary.
+     *
+     * @param form The edit form containing updated item data
+     * @return HTML response redirecting to the list page on success
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -345,6 +432,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Delete a stemmer override item from the dictionary.
+     * Removes the specified item and redirects to the list page.
+     *
+     * @param form The edit form containing the item ID to delete
+     * @return HTML response redirecting to the list page on success
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -420,6 +514,14 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify that the CRUD mode matches the expected mode.
+     * Throws validation error if modes don't match.
+     *
+     * @param crudMode The current CRUD mode
+     * @param expectedMode The expected CRUD mode
+     * @param dictId The dictionary ID for error context
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

@@ -31,12 +31,21 @@ import jakarta.annotation.Resource;
  */
 public class AdminSuggestAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSuggestAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin suggest operations */
     public static final String ROLE = "admin-suggest";
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
+    /** Helper for managing suggest functionality */
     protected SuggestHelper suggestHelper;
 
     // ===================================================================================
@@ -59,6 +68,11 @@ public class AdminSuggestAction extends FessAdminAction {
     // ===================================================================================
     //                                                                             Execute
     //                                                                            ========
+    /**
+     * Displays the suggest management index page.
+     *
+     * @return HTML response for the suggest management page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -66,6 +80,11 @@ public class AdminSuggestAction extends FessAdminAction {
         return asHtml(path_AdminSuggest_AdminSuggestJsp).useForm(SuggestForm.class);
     }
 
+    /**
+     * Deletes all suggest words from the suggest index.
+     *
+     * @return HTML response redirecting to the index page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteAllWords() {
@@ -78,6 +97,11 @@ public class AdminSuggestAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes document-based suggest words from the suggest index.
+     *
+     * @return HTML response redirecting to the index page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteDocumentWords() {
@@ -90,6 +114,11 @@ public class AdminSuggestAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes query-based suggest words from the suggest index.
+     *
+     * @return HTML response redirecting to the index page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteQueryWords() {

@@ -66,6 +66,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminElevatewordAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminElevatewordAction() {
+        // Default constructor
+    }
+
+    /** Role constant for admin elevate word management access control. */
     public static final String ROLE = "admin-elevateword";
 
     private static final Logger logger = LogManager.getLogger(AdminElevatewordAction.class);
@@ -77,6 +85,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     private ElevateWordService elevateWordService;
     @Resource
     private ElevateWordPager elevateWordPager;
+    /** Helper for managing search suggestions and elevate words. */
     @Resource
     protected SuggestHelper suggestHelper;
     @Resource
@@ -99,12 +108,24 @@ public class AdminElevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Shows the main elevate word management page.
+     *
+     * @return HTML response for the elevate word list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Lists elevate words with pagination support.
+     *
+     * @param pageNumber optional page number for pagination
+     * @param form search form containing filter criteria
+     * @return HTML response with elevate word list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -118,6 +139,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches elevate words based on form criteria.
+     *
+     * @param form search form containing search parameters
+     * @return HTML response with filtered elevate word list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -127,6 +154,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and shows all elevate words.
+     *
+     * @param form search form to be reset
+     * @return HTML response with all elevate words
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -136,6 +169,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Handles search pagination and data preparation for rendering.
+     *
+     * @param data render data to populate with search results
+     * @param form search form containing current search state
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
 
@@ -149,6 +188,11 @@ public class AdminElevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Shows the form for creating a new elevate word.
+     *
+     * @return HTML response for the create elevate word form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -163,6 +207,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Shows the form for editing an existing elevate word.
+     *
+     * @param form edit form containing the elevate word ID
+     * @return HTML response for the edit elevate word form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -192,6 +242,13 @@ public class AdminElevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Shows detailed information for a specific elevate word.
+     *
+     * @param crudMode CRUD operation mode
+     * @param id unique identifier of the elevate word
+     * @return HTML response with elevate word details
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -214,6 +271,11 @@ public class AdminElevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Shows the download page for exporting elevate words.
+     *
+     * @return HTML response for the download page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage() {
@@ -221,6 +283,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         return asDownloadHtml();
     }
 
+    /**
+     * Downloads elevate words data as a CSV file.
+     *
+     * @param form download form with export options
+     * @return streaming response containing CSV data
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -247,6 +315,11 @@ public class AdminElevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Shows the upload page for importing elevate words.
+     *
+     * @return HTML response for the upload page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage() {
@@ -257,6 +330,12 @@ public class AdminElevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new elevate word entry.
+     *
+     * @param form create form containing new elevate word data
+     * @return redirect response to the main elevate word page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -280,6 +359,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing elevate word entry.
+     *
+     * @param form edit form containing updated elevate word data
+     * @return redirect response to the main elevate word page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -303,6 +388,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes an existing elevate word entry.
+     *
+     * @param form edit form containing the elevate word ID to delete
+     * @return redirect response to the main elevate word page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -324,6 +415,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Uploads and imports elevate words from a CSV file.
+     *
+     * @param form upload form containing the CSV file
+     * @return redirect response to the main elevate word page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -345,6 +442,14 @@ public class AdminElevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Creates an ElevateWord entity based on the form and operation mode.
+     *
+     * @param form create form containing elevate word data
+     * @param username current user's username
+     * @param currentTime current timestamp
+     * @return optional ElevateWord entity
+     */
     public static OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -364,6 +469,12 @@ public class AdminElevatewordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates and populates an ElevateWord entity from form data.
+     *
+     * @param form create form containing elevate word data
+     * @return optional ElevateWord entity with populated data
+     */
     public static OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -381,6 +492,11 @@ public class AdminElevatewordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers label type data for rendering in the view.
+     *
+     * @param data render data to populate with label information
+     */
     protected void registerLabels(final RenderData data) {
         RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
@@ -388,6 +504,12 @@ public class AdminElevatewordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode actual CRUD mode
+     * @param expectedMode expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

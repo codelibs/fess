@@ -51,6 +51,13 @@ import jakarta.annotation.Resource;
  */
 public class AdminDictStopwordsAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictStopwordsAction() {
+        // Default constructor
+    }
+
     /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
@@ -81,6 +88,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Display the stopwords index page.
+     *
+     * @param form the search form
+     * @return HTML response for the index page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -91,6 +104,13 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Display the stopwords list with pagination.
+     *
+     * @param pageNumber the page number to display
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -105,6 +125,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Perform search for stopwords.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -115,6 +141,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset search criteria and return to default view.
+     *
+     * @param form the search form to reset
+     * @return HTML response for the reset page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -125,6 +157,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Set up pagination data for search results.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing pagination parameters
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "stopwordsItemItems", stopwordsService.getStopwordsList(form.dictId, stopwordsPager));
@@ -141,6 +179,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Display the form for creating a new stopwords entry.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the create form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -154,6 +198,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Display the edit form for an existing stopwords entry.
+     *
+     * @param form the edit form containing the entry ID and dictionary ID
+     * @return HTML response for the edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -177,6 +227,14 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Display details of a specific stopwords entry.
+     *
+     * @param dictId the dictionary ID
+     * @param crudMode the CRUD mode for the operation
+     * @param id the entry ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -200,6 +258,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Display the download page for stopwords file.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the download page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -217,6 +281,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Download the stopwords file.
+     *
+     * @param form the download form containing dictionary ID
+     * @return action response with the file download stream
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -235,6 +305,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Display the upload page for stopwords file.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the upload page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -252,6 +328,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Upload a stopwords file.
+     *
+     * @param form the upload form containing the file and dictionary ID
+     * @return HTML response redirecting to the list page after successful upload
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -277,6 +359,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a new stopwords entry.
+     *
+     * @param form the create form containing the new entry data
+     * @return HTML response redirecting to the list page after successful creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -290,6 +378,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Update an existing stopwords entry.
+     *
+     * @param form the edit form containing the updated entry data
+     * @return HTML response redirecting to the list page after successful update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -304,6 +398,12 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Delete a stopwords entry.
+     *
+     * @param form the edit form containing the entry ID to delete
+     * @return HTML response redirecting to the list page after successful deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -339,6 +439,13 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Create a StopwordsItem from the form data.
+     *
+     * @param form the create form containing the item data
+     * @param hook the validation error hook
+     * @return optional entity containing the created stopwords item
+     */
     public static OptionalEntity<StopwordsItem> createStopwordsItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String newInput = form.input;
@@ -351,6 +458,13 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     * @param dictId the dictionary ID for error redirection
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -367,6 +481,11 @@ public class AdminDictStopwordsAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Redirect to the dictionary index page.
+     *
+     * @return HTML response redirecting to the dictionary index
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }

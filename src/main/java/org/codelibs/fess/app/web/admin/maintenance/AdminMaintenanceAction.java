@@ -49,8 +49,22 @@ import org.opensearch.core.action.ActionListener;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Admin action for maintenance operations including reindexing, log management,
+ * and system diagnostics.
+ */
 public class AdminMaintenanceAction extends FessAdminAction {
 
+    /**
+     * Default constructor for AdminMaintenanceAction.
+     */
+    public AdminMaintenanceAction() {
+        super();
+    }
+
+    /**
+     * Role identifier for admin maintenance operations.
+     */
     public static final String ROLE = "admin-maintenance";
 
     // ===================================================================================
@@ -66,6 +80,9 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //                                                                           Attribute
     //
 
+    /**
+     * Search engine client for performing maintenance operations on indices.
+     */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
@@ -87,6 +104,11 @@ public class AdminMaintenanceAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Displays the main maintenance page.
+     *
+     * @return HTML response for the maintenance index page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -101,6 +123,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }));
     }
 
+    /**
+     * Starts a reindex operation based on the provided form parameters.
+     *
+     * @param form the action form containing reindex configuration
+     * @return HTML response redirecting to the maintenance page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse reindexOnly(final ActionForm form) {
@@ -113,6 +141,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Reloads the document index by closing and reopening it.
+     *
+     * @param form the action form (validated but not used for configuration)
+     * @return HTML response redirecting to the maintenance page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse reloadDocIndex(final ActionForm form) {
@@ -130,6 +164,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Clears all crawler indices including queue, data, and filter indices.
+     *
+     * @param form the action form (validated but not used for configuration)
+     * @return HTML response redirecting to the maintenance page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
@@ -145,6 +185,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Downloads diagnostic logs and system information as a ZIP file.
+     *
+     * @param form the action form (validated but not used for configuration)
+     * @return streaming response containing the diagnostic ZIP file
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse downloadLogs(final ActionForm form) {
@@ -164,6 +210,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Writes OpenSearch/Elasticsearch JSON API responses to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeFesenJson(final ZipOutputStream zos, final String id) {
         writeElastisearchJsonApi(zos, id, "cluster", "health");
         writeElastisearchJsonApi(zos, id, "cluster", "state");
@@ -177,6 +229,14 @@ public class AdminMaintenanceAction extends FessAdminAction {
         writeElastisearchJsonApi(zos, id, "nodes", "hot_threads");
     }
 
+    /**
+     * Writes a specific OpenSearch/Elasticsearch API response to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     * @param v1 the first part of the API path (e.g., "cluster", "nodes")
+     * @param v2 the second part of the API path (e.g., "health", "stats")
+     */
     protected void writeElastisearchJsonApi(final ZipOutputStream zos, final String id, final String v1, final String v2) {
         final ZipEntry entry = new ZipEntry(id + "/es_" + v1 + "_" + v2 + ".json");
         try {
@@ -189,6 +249,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Writes OpenSearch/Elasticsearch CAT API responses to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeFesenCat(final ZipOutputStream zos, final String id) {
         Arrays.stream(CAT_NAMES).forEach(name -> {
             final ZipEntry entry = new ZipEntry(id + "/es_cat_" + name + ".txt");
@@ -203,6 +269,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Writes Fess configuration properties to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeFessConfig(final ZipOutputStream zos, final String id) {
         if (fessConfig instanceof SimpleImpl) {
             final Properties prop = new Properties();
@@ -218,6 +290,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Writes Fess basic configuration data in bulk format to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeFessBasicConfig(final ZipOutputStream zos, final String id) {
         final String index = "fess_basic_config";
         final ZipEntry entry = new ZipEntry(id + "/fess_basic_config.bulk");
@@ -238,6 +316,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Writes system properties to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeSystemProperties(final ZipOutputStream zos, final String id) {
         final ZipEntry entry = new ZipEntry(id + "/system.properties");
         try {
@@ -248,6 +332,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Writes log files from the log directory to the ZIP output stream.
+     *
+     * @param zos the ZIP output stream to write to
+     * @param id the diagnostic ID for organizing files in the ZIP
+     */
     protected void writeLogFiles(final ZipOutputStream zos, final String id) {
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
@@ -271,6 +361,11 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Gets host information including hostname and IP address.
+     *
+     * @return formatted string containing hostname and IP address
+     */
     protected String getHostInfo() {
         final StringBuilder buf = new StringBuilder();
         try {
@@ -292,10 +387,25 @@ public class AdminMaintenanceAction extends FessAdminAction {
         return buf.toString();
     }
 
+    /**
+     * Checks if the given filename is a log file based on its extension.
+     *
+     * @param name the filename to check
+     * @return true if the file is a log file (.log or .log.gz), false otherwise
+     */
     protected boolean isLogFilename(final String name) {
         return name.endsWith(".log") || name.endsWith(".log.gz");
     }
 
+    /**
+     * Starts a reindex operation with the specified parameters.
+     *
+     * @param replaceAliases whether to replace aliases after reindexing
+     * @param resetDictionaries whether to reset dictionaries during reindexing
+     * @param numberOfShards the number of shards for the new index
+     * @param autoExpandReplicas the auto expand replicas setting for the new index
+     * @return true if the reindex operation started successfully, false otherwise
+     */
     protected boolean startReindex(final boolean replaceAliases, final boolean resetDictionaries, final String numberOfShards,
             final String autoExpandReplicas) {
         final String docIndex = "fess";

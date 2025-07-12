@@ -43,6 +43,16 @@ import jakarta.annotation.Resource;
  */
 public class AdminDuplicatehostAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDuplicatehostAction() {
+        // Default constructor
+    }
+
+    /**
+     * Role name for duplicate host administration.
+     */
     public static final String ROLE = "admin-duplicatehost";
 
     private static final Logger logger = LogManager.getLogger(AdminDuplicatehostAction.class);
@@ -72,12 +82,25 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the initial duplicate host management page.
+     *
+     * @param form the search form
+     * @return HTML response for the duplicate host list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays the duplicate host list with pagination.
+     *
+     * @param pageNumber the page number to display
+     * @param form the search form
+     * @return HTML response for the duplicate host list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -91,6 +114,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Performs search for duplicate hosts based on form criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response for the duplicate host list page with search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -100,6 +129,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and pager state.
+     *
+     * @param form the search form
+     * @return HTML response for the duplicate host list page with cleared search
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -109,6 +144,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search pagination data for rendering.
+     *
+     * @param data the render data to populate
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
 
@@ -122,6 +163,11 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new duplicate host configuration.
+     *
+     * @return HTML response for the duplicate host creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -134,6 +180,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing duplicate host configuration.
+     *
+     * @param form the edit form containing the duplicate host ID
+     * @return HTML response for the duplicate host edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -157,6 +209,13 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a duplicate host configuration.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the duplicate host ID
+     * @return HTML response for the duplicate host details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -179,6 +238,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new duplicate host configuration.
+     *
+     * @param form the creation form containing duplicate host data
+     * @return HTML response redirecting to the duplicate host list
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -200,6 +265,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing duplicate host configuration.
+     *
+     * @param form the edit form containing updated duplicate host data
+     * @return HTML response redirecting to the duplicate host list
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -221,6 +292,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a duplicate host configuration.
+     *
+     * @param form the edit form containing the duplicate host ID to delete
+     * @return HTML response redirecting to the duplicate host list
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -246,6 +323,14 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Creates a duplicate host entity based on the form and current user context.
+     *
+     * @param form the form containing duplicate host data
+     * @param username the current username
+     * @param currentTime the current timestamp
+     * @return optional duplicate host entity
+     */
     public static OptionalEntity<DuplicateHost> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -265,6 +350,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Gets a duplicate host entity from the form, setting audit fields.
+     *
+     * @param form the form containing duplicate host data
+     * @return optional duplicate host entity with audit fields set
+     */
     public static OptionalEntity<DuplicateHost> getDuplicateHost(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -280,6 +371,12 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

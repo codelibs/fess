@@ -36,6 +36,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminSearchlogAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSearchlogAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin search log operations */
     public static final String ROLE = "admin-searchlog";
 
     private static final String[] CONDITION_FIELDS =
@@ -45,8 +53,10 @@ public class AdminSearchlogAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
+    /** Service for managing search log data */
     private SearchLogService searchLogService;
     @Resource
+    /** Pager for paginating search log results */
     private SearchLogPager searchLogPager;
 
     // ===================================================================================
@@ -66,6 +76,11 @@ public class AdminSearchlogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the search log management index page.
+     *
+     * @return HTML response for the search log list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -73,6 +88,13 @@ public class AdminSearchlogAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of search log entries.
+     *
+     * @param pageNumber the page number to display
+     * @param form the search form containing filter criteria
+     * @return HTML response with the search log list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
@@ -83,6 +105,12 @@ public class AdminSearchlogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for search log entries based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered search log results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -95,6 +123,12 @@ public class AdminSearchlogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all search log entries.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset search log list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -105,6 +139,12 @@ public class AdminSearchlogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns to the search log list from a detail view.
+     *
+     * @param form the search form containing current state
+     * @return HTML response for the search log list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
@@ -114,6 +154,12 @@ public class AdminSearchlogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search paging data for rendering the search log list.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "searchLogItems", searchLogService.getSearchLogList(searchLogPager)); // page navi
 
@@ -128,6 +174,14 @@ public class AdminSearchlogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a specific search log entry.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param logType the type of log entry
+     * @param id the ID of the search log entry to display
+     * @return HTML response for the search log details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String logType, final String id) {
@@ -147,6 +201,12 @@ public class AdminSearchlogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Deletes a specific search log entry.
+     *
+     * @param form the edit form containing the log entry information
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -160,6 +220,11 @@ public class AdminSearchlogAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes all search log entries.
+     *
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteall() {
@@ -177,6 +242,12 @@ public class AdminSearchlogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

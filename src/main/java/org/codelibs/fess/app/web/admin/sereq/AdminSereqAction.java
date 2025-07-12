@@ -46,6 +46,14 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  */
 public class AdminSereqAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSereqAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin search request operations */
     public static final String ROLE = "admin-sereq";
 
     private static final Logger logger = LogManager.getLogger(AdminSereqAction.class);
@@ -61,12 +69,23 @@ public class AdminSereqAction extends FessAdminAction {
         return ROLE;
     }
 
+    /**
+     * Displays the search request management index page.
+     *
+     * @return HTML response for the search request page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml(this::saveToken);
     }
 
+    /**
+     * Processes uploaded search request files and executes them against the search engine.
+     *
+     * @param form the upload form containing the request file
+     * @return action response with the search results or error page
+     */
     @Execute
     @Secured({ ROLE })
     public ActionResponse upload(final UploadForm form) {
@@ -125,6 +144,12 @@ public class AdminSereqAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
+    /**
+     * Creates a CURL request from the provided header string.
+     *
+     * @param header the header string containing HTTP method and path
+     * @return CURL request object or null if header is invalid
+     */
     private CurlRequest getCurlRequest(final String header) {
         if (StringUtil.isBlank(header)) {
             return null;
@@ -158,6 +183,12 @@ public class AdminSereqAction extends FessAdminAction {
         return null;
     }
 
+    /**
+     * Creates an HTML response for the list page with optional pre-processing.
+     *
+     * @param runnable optional runnable to execute before rendering (can be null)
+     * @return HTML response for the search request list page
+     */
     private HtmlResponse asListHtml(final Runnable runnable) {
         if (runnable != null) {
             runnable.run();

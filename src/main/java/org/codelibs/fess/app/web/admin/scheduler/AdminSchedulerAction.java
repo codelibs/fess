@@ -48,6 +48,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminSchedulerAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSchedulerAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin scheduler operations */
     public static final String ROLE = "admin-scheduler";
 
     private static final Logger logger = LogManager.getLogger(AdminSchedulerAction.class);
@@ -56,10 +64,13 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
+    /** Service for managing scheduled jobs */
     private ScheduledJobService scheduledJobService;
     @Resource
+    /** Pager for paginating scheduled job results */
     private SchedulerPager schedulerPager;
     @Resource
+    /** Helper for processing scheduled jobs */
     protected ProcessHelper processHelper;
 
     // ===================================================================================
@@ -79,12 +90,25 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the scheduler management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the scheduler list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of scheduled jobs.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the scheduled job list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -98,6 +122,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for scheduled jobs based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered scheduled job results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -107,6 +137,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all scheduled jobs.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset scheduled job list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -116,6 +152,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search paging data for rendering the scheduled job list.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
 
@@ -130,6 +172,14 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
 
+    /**
+     * Creates a new scheduled job from a crawler configuration.
+     *
+     * @param type the crawler type (web, file, or data)
+     * @param id the crawler configuration ID
+     * @param name the name for the new job (base64 encoded)
+     * @return HTML response for the job creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnewjob(final String type, final String id, final String name) {
@@ -158,6 +208,11 @@ public class AdminSchedulerAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for creating a new scheduled job.
+     *
+     * @return HTML response for the job creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -170,6 +225,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing scheduled job.
+     *
+     * @param form the edit form containing the ID of the job to edit
+     * @return HTML response for the job edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -193,6 +254,13 @@ public class AdminSchedulerAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a scheduled job.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the scheduled job to display
+     * @return HTML response for the job details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -219,6 +287,12 @@ public class AdminSchedulerAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new scheduled job.
+     *
+     * @param form the create form containing the new job data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -240,6 +314,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing scheduled job.
+     *
+     * @param form the edit form containing the updated job data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -261,6 +341,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a scheduled job.
+     *
+     * @param form the edit form containing the ID of the job to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -283,6 +369,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Starts a scheduled job.
+     *
+     * @param form the edit form containing the ID of the job to start
+     * @return HTML response redirecting to the list page after starting
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse start(final EditForm form) {
@@ -313,6 +405,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Stops a running scheduled job.
+     *
+     * @param form the edit form containing the ID of the job to stop
+     * @return HTML response redirecting to the list page after stopping
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse stop(final EditForm form) {
@@ -341,6 +439,12 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Loads scheduled job data into the edit form.
+     *
+     * @param form the edit form to populate
+     * @param entity the scheduled job entity to load from
+     */
     protected void loadScheduledJob(final EditForm form, final ScheduledJob entity) {
         copyBeanToBean(entity, form, op -> op.exclude("crudMode").excludeNull());
         form.jobLogging = entity.isLoggingEnabled() ? Constants.ON : null;
@@ -348,6 +452,14 @@ public class AdminSchedulerAction extends FessAdminAction {
         form.available = entity.isEnabled() ? Constants.ON : null;
     }
 
+    /**
+     * Creates a ScheduledJob entity from form data with user and timestamp information.
+     *
+     * @param form the form containing the scheduled job data
+     * @param username the username of the user performing the operation
+     * @param currentTime the current timestamp
+     * @return optional entity containing the scheduled job data, or empty if creation fails
+     */
     private static OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -367,6 +479,12 @@ public class AdminSchedulerAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a ScheduledJob entity from the provided form data.
+     *
+     * @param form the form containing the scheduled job data
+     * @return optional entity containing the scheduled job data, or empty if creation fails
+     */
     public static OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -385,6 +503,12 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

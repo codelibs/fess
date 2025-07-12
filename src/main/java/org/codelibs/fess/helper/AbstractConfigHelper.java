@@ -27,6 +27,13 @@ import org.codelibs.core.lang.ThreadUtil;
 public abstract class AbstractConfigHelper {
 
     /**
+     * Default constructor.
+     */
+    public AbstractConfigHelper() {
+        // Default constructor
+    }
+
+    /**
      * The interval for reloading.
      */
     protected long reloadInterval = 1000L;

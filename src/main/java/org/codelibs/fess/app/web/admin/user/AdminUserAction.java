@@ -55,6 +55,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminUserAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminUserAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin user operations */
     public static final String ROLE = "admin-user";
 
     private static final Logger logger = LogManager.getLogger(AdminUserAction.class);
@@ -89,12 +97,24 @@ public class AdminUserAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the user management index page.
+     *
+     * @return HTML response for the user list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of users.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the user list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -108,6 +128,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for users based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered user results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -117,6 +143,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all users.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset user list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -143,6 +175,11 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new user.
+     *
+     * @return HTML response for the user creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -157,6 +194,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing user.
+     *
+     * @param form the edit form containing user ID
+     * @return HTML response for the user edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -181,6 +224,13 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a user.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the user to display
+     * @return HTML response for the user details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -206,6 +256,12 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new user.
+     *
+     * @param form the create form containing the new user data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -229,6 +285,12 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param form the edit form containing the updated user data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -252,6 +314,12 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a user.
+     *
+     * @param form the edit form containing the ID of the user to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {

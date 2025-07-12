@@ -52,6 +52,13 @@ import jakarta.annotation.Resource;
  */
 public class AdminAccesstokenAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminAccesstokenAction() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(AdminAccesstokenAction.class);
 
     /**

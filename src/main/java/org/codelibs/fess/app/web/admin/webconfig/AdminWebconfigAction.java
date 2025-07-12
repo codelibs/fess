@@ -57,6 +57,14 @@ import jakarta.annotation.Resource;
  */
 public class AdminWebconfigAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWebconfigAction() {
+        // Default constructor
+    }
+
+    /** Role name for admin web config operations */
     public static final String ROLE = "admin-webconfig";
 
     private static final Logger logger = LogManager.getLogger(AdminWebconfigAction.class);
@@ -92,12 +100,25 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the web config management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the web config list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of web crawler configurations.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the web config list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -111,6 +132,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for web crawler configurations based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered web config results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -120,6 +147,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all web crawler configurations.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset web config list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -142,6 +175,11 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new web crawler configuration.
+     *
+     * @return HTML response for the web config creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -167,6 +205,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing web crawler configuration.
+     *
+     * @param form the edit form containing web config ID
+     * @return HTML response for the web config edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -198,6 +242,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a web crawler configuration.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the web config to display
+     * @return HTML response for the web config details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -226,6 +277,12 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new web crawler configuration.
+     *
+     * @param form the create form containing the new web config data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -247,6 +304,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing web crawler configuration.
+     *
+     * @param form the edit form containing the updated web config data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -268,6 +331,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a web crawler configuration.
+     *
+     * @param form the edit form containing the ID of the web config to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
