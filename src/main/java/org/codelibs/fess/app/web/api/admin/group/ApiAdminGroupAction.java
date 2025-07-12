@@ -35,15 +35,42 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin group management.
+ * Provides RESTful API endpoints for managing user group settings in the Fess search engine.
+ * Groups define user permissions and access controls for search and administrative functions.
+ */
 public class ApiAdminGroupAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminGroupAction.class);
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminGroupAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+
+    /** Service for managing group configurations */
     @Resource
     private GroupService groupService;
 
     // GET /api/admin/group
     // PUT /api/admin/group
+    /**
+     * Returns list of group settings.
+     * Supports both GET and PUT requests for retrieving paginated group configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing group settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -55,6 +82,12 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/group/setting/{id}
+    /**
+     * Returns specific group setting by ID.
+     *
+     * @param id the group setting ID
+     * @return JSON response containing the group setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiResult.ApiConfigResponse().setting(groupService.getGroup(id).map(this::createEditBody).orElseGet(() -> {
@@ -64,6 +97,12 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/group/setting
+    /**
+     * Creates a new group setting.
+     *
+     * @param body group setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -86,6 +125,12 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/group/setting
+    /**
+     * Updates an existing group setting.
+     *
+     * @param body group setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -106,6 +151,13 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/group/setting/{id}
+    /**
+     * Deletes a specific group setting.
+     * Prevents deletion of the currently logged-in user's group for security.
+     *
+     * @param id the group setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         final Group entity = groupService.getGroup(id).orElseGet(() -> {
@@ -127,6 +179,12 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a group entity for API responses.
+     *
+     * @param entity the group entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final Group entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

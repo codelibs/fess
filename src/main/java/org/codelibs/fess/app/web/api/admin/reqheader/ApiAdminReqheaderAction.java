@@ -40,19 +40,36 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * API action for admin request header.
+ * API action for admin request header management.
  *
  * @author Keiichi Watanabe
  */
 public class ApiAdminReqheaderAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminReqheaderAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminReqheaderAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    /** The request header service for managing request header settings. */
     @Resource
     private RequestHeaderService reqHeaderService;
+    /** The web config service for validating web configuration references. */
     @Resource
     private WebConfigService webConfigService;
 
@@ -60,6 +77,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves request header settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing request header settings list
+     */
     // GET /api/admin/reqheader/settings
     // PUT /api/admin/reqheader/settings
     @Execute
@@ -72,6 +95,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific request header setting by ID.
+     *
+     * @param id the ID of the request header setting to retrieve
+     * @return JSON response containing the request header setting
+     */
     // GET /api/admin/reqheader/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -81,6 +110,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new request header setting.
+     *
+     * @param body the request header data to create
+     * @return JSON response containing the created request header setting ID
+     */
     // POST /api/admin/reqheader/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -106,6 +141,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(reqHeader.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing request header setting.
+     *
+     * @param body the request header data to update
+     * @return JSON response containing the updated request header setting ID
+     */
     // PUT /api/admin/reqheader/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -126,6 +167,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(reqHeader.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a request header setting by ID.
+     *
+     * @param id the ID of the request header setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/reqheader/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -143,6 +190,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a RequestHeader entity.
+     *
+     * @param entity the request header entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final RequestHeader entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
@@ -151,6 +204,12 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         return body;
     }
 
+    /**
+     * Validates if the given web configuration ID exists.
+     *
+     * @param webconfigId the web configuration ID to validate
+     * @return true if the web configuration exists, false otherwise
+     */
     protected Boolean isValidWebConfigId(final String webconfigId) {
         return webConfigService.getWebConfig(webconfigId).isPresent();
     }

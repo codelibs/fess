@@ -40,13 +40,29 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin related query management.
+ * Provides REST endpoints for managing related search queries.
+ */
 public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminRelatedqueryAction.class);
 
     // ===================================================================================
+    //                                                                           Constructor
+    //                                                                           ===========
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminRelatedqueryAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing related query operations. */
     @Resource
     private RelatedQueryService relatedQueryService;
 
@@ -54,6 +70,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves a list of related query settings.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing related query configurations
+     */
     // GET /api/admin/relatedquery/settings
     // PUT /api/admin/relatedquery/settings
     @Execute
@@ -66,6 +88,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific related query setting by ID.
+     *
+     * @param id the ID of the related query to retrieve
+     * @return JSON response containing the related query configuration
+     */
     // GET /api/admin/relatedquery/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -75,6 +103,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new related query setting.
+     *
+     * @param body the related query configuration data to create
+     * @return JSON response containing the created related query ID and status
+     */
     // POST /api/admin/relatedquery/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -96,6 +130,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(relatedQuery.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing related query setting.
+     *
+     * @param body the related query configuration data to update
+     * @return JSON response containing the updated related query ID and status
+     */
     // PUT /api/admin/relatedquery/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -116,6 +156,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(relatedQuery.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a related query setting by ID.
+     *
+     * @param id the ID of the related query to delete
+     * @return JSON response confirming deletion status
+     */
     // DELETE /api/admin/relatedquery/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -133,6 +179,12 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a RelatedQuery entity for API responses.
+     *
+     * @param entity the RelatedQuery entity to convert
+     * @return EditBody containing the entity data formatted for editing
+     */
     protected EditBody createEditBody(final RelatedQuery entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

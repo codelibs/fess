@@ -156,6 +156,13 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data for the web authentication search results.
+     * Registers web authentication items and determines if the create link should be displayed.
+     *
+     * @param data the render data to populate with search results
+     * @param form the search form containing filter criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
         RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
@@ -335,6 +342,14 @@ public class AdminWebauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Retrieves or creates a WebAuthentication entity based on the form's CRUD mode.
+     *
+     * @param form the form containing the web authentication data
+     * @param username the username of the current user
+     * @param currentTime the current timestamp
+     * @return an optional WebAuthentication entity
+     */
     public static OptionalEntity<WebAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -354,6 +369,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Converts a form to a WebAuthentication entity with proper user and timestamp information.
+     *
+     * @param form the form containing the web authentication data
+     * @return an optional WebAuthentication entity with updated metadata
+     */
     public static OptionalEntity<WebAuthentication> getWebAuthentication(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -366,6 +387,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers available protocol scheme items for web authentication forms.
+     * Includes Basic, Digest, NTLM, and Form authentication schemes.
+     *
+     * @param data the render data to register the protocol scheme items with
+     */
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
@@ -376,6 +403,12 @@ public class AdminWebauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 
+    /**
+     * Registers available web configuration items for use in web authentication forms.
+     * Retrieves all web configurations and creates form items from them.
+     *
+     * @param data the render data to register the web configuration items with
+     */
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
@@ -385,6 +418,13 @@ public class AdminWebauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "webConfigItems", itemList);
     }
 
+    /**
+     * Creates a map item with label and value for use in dropdown lists and form options.
+     *
+     * @param label the display label for the item
+     * @param value the value associated with the item
+     * @return a map containing the label and value
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -395,6 +435,13 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     * Throws a validation error if the modes do not match.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

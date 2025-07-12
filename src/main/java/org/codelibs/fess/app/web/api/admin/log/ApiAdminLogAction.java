@@ -35,16 +35,31 @@ import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 /**
- * API action for admin log.
+ * API action for admin log management.
  *
  * @author Keiichi Watanabe
  */
 public class ApiAdminLogAction extends FessApiAdminAction {
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminLogAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves the list of available log files.
+     *
+     * @return JSON response containing log file list
+     */
     // GET /api/admin/log/files
     @Execute
     public JsonResponse<ApiResult> files() {
@@ -52,6 +67,12 @@ public class ApiAdminLogAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiLogFilesResponse().files(list).total(list.size()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads a specific log file by ID.
+     *
+     * @param id the base64-encoded filename of the log file to download
+     * @return stream response containing the log file content
+     */
     // GET /api/admin/log/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {

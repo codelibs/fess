@@ -47,7 +47,7 @@ import org.opensearch.index.query.QueryBuilders;
 import jakarta.annotation.Resource;
 
 /**
- * API action for admin search list.
+ * API action for admin search list management.
  *
  * @author shinsuke
  */
@@ -56,14 +56,31 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     // ===================================================================================
     // Constant
     //
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminSearchlistAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminSearchlistAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
 
     // ===================================================================================
     // Attribute
     // =========
+    /** The search helper for performing search operations. */
     @Resource
     protected SearchHelper searchHelper;
 
+    /** The search engine client for interacting with OpenSearch. */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
@@ -71,6 +88,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Searches for documents in the search index.
+     *
+     * @param body the search parameters for querying documents
+     * @return JSON response containing search results
+     */
     // GET /api/admin/searchlist/docs
     // PUT /api/admin/searchlist/docs
     @Execute
@@ -103,6 +126,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         return null; // ignore
     }
 
+    /**
+     * Retrieves a specific document by ID.
+     *
+     * @param id the document ID to retrieve
+     * @return JSON response containing the document
+     */
     // GET /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> get$doc(final String id) {
@@ -115,6 +144,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new document in the search index.
+     *
+     * @param body the document data to create
+     * @return JSON response containing the created document ID
+     */
     // POST /api/admin/searchlist/doc
     @Execute
     public JsonResponse<ApiResult> post$doc(final CreateBody body) {
@@ -147,6 +182,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing document in the search index.
+     *
+     * @param body the document data to update
+     * @return JSON response containing the updated document ID
+     */
     // PUT /api/admin/searchlist/doc
     @Execute
     public JsonResponse<ApiResult> put$doc(final EditBody body) {
@@ -188,6 +229,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
                 new ApiUpdateResponse().id(doc.get(fessConfig.getIndexFieldDocId()).toString()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a document by ID from the search index.
+     *
+     * @param id the document ID to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/searchlist/doc/{doc_id}
     @Execute
     public JsonResponse<ApiResult> delete$doc(final String id) {
@@ -202,6 +249,12 @@ public class ApiAdminSearchlistAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Deletes documents matching the given query from the search index.
+     *
+     * @param body the search parameters defining which documents to delete
+     * @return JSON response containing the count of deleted documents
+     */
     // DELETE /api/admin/searchlist/query
     @Execute
     public JsonResponse<ApiResult> delete$query(final SearchBody body) {

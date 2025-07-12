@@ -162,6 +162,13 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data for the web config search results.
+     * Registers web config items and restores search criteria from the pager.
+     *
+     * @param data the render data to populate with search results
+     * @param form the search form containing filter criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
 
@@ -362,6 +369,14 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Retrieves or creates a WebConfig entity based on the form's CRUD mode.
+     *
+     * @param form the form containing the web config data
+     * @param username the username of the current user
+     * @param currentTime the current timestamp
+     * @return an optional WebConfig entity
+     */
     public static OptionalEntity<WebConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -381,6 +396,13 @@ public class AdminWebconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Converts a form to a WebConfig entity with proper user and timestamp information.
+     * Also processes permissions and virtual hosts from form fields.
+     *
+     * @param form the form containing the web config data
+     * @return an optional WebConfig entity with updated metadata
+     */
     public static OptionalEntity<WebConfig> getWebConfig(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -401,6 +423,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers available roles and labels for use in web config forms.
+     * Includes role types, label types, and label setting configuration.
+     *
+     * @param data the render data to register the roles and labels with
+     */
     protected void registerRolesAndLabels(final RenderData data) {
         RenderDataUtil.register(data, "labelSettingEnabled", fessConfig.isFormAdminLabelInConfigEnabled());
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
@@ -410,6 +438,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     * Throws a validation error if the modes do not match.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

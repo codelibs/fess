@@ -36,11 +36,23 @@ import org.lastaflute.job.LaJobScheduler;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Job scheduler for managing all scheduled jobs in Fess.
+ * Implements LaJobScheduler to handle job scheduling and execution.
+ */
 public class AllJobScheduler implements LaJobScheduler {
 
     private static final Logger logger = LogManager.getLogger(AllJobScheduler.class);
 
+    /** Application type identifier for job context */
     protected static final String APP_TYPE = "JOB";
+
+    /**
+     * Default constructor.
+     */
+    public AllJobScheduler() {
+        // Default constructor
+    }
 
     @Resource
     private TimeManager timeManager;
@@ -60,8 +72,10 @@ public class AllJobScheduler implements LaJobScheduler {
     @Resource
     private JobHelper jobHelper;
 
+    /** The job class to be executed by this scheduler */
     protected Class<? extends LaJob> jobClass = ScriptExecutorJob.class;
 
+    /** The timestamp when the scheduler was last updated */
     protected long schedulerTime;
 
     @Override
@@ -102,6 +116,11 @@ public class AllJobScheduler implements LaJobScheduler {
                 resource -> accessContextLogic.create(resource, OptionalThing::empty, OptionalThing::empty, () -> APP_TYPE));
     }
 
+    /**
+     * Sets the job class to be executed by this scheduler.
+     *
+     * @param jobClass the job class to set
+     */
     public void setJobClass(final Class<? extends LaJob> jobClass) {
         this.jobClass = jobClass;
     }

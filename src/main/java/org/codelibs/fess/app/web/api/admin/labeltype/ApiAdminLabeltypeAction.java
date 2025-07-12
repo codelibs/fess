@@ -43,17 +43,29 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * API action for admin label type.
+ * API action for admin label type management.
  *
  * @author Keiichi Watanabe
  */
 public class ApiAdminLabeltypeAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminLabeltypeAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminLabeltypeAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** The label type service for managing label type settings. */
     @Resource
     private LabelTypeService labelTypeService;
 
@@ -61,6 +73,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves label type settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing label type settings list
+     */
     // GET /api/admin/labeltype/settings
     // PUT /api/admin/labeltype/settings
     @Execute
@@ -73,6 +91,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific label type setting by ID.
+     *
+     * @param id the ID of the label type setting to retrieve
+     * @return JSON response containing the label type setting
+     */
     // GET /api/admin/labeltype/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -82,6 +106,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new label type setting.
+     *
+     * @param body the label type data to create
+     * @return JSON response containing the created label type setting ID
+     */
     // POST /api/admin/labeltype/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -103,6 +133,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(labelType.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing label type setting.
+     *
+     * @param body the label type data to update
+     * @return JSON response containing the updated label type setting ID
+     */
     // PUT /api/admin/labeltype/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -123,6 +159,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(labelType.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a label type setting by ID.
+     *
+     * @param id the ID of the label type setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/labeltype/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -140,6 +182,12 @@ public class ApiAdminLabeltypeAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a LabelType entity.
+     *
+     * @param entity the label type entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final LabelType entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

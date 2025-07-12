@@ -23,11 +23,33 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin suggest management.
+ */
 public class ApiAdminSuggestAction extends FessApiAdminAction {
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminSuggestAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    /** The suggest helper for managing suggest functionality. */
     @Resource
     protected SuggestHelper suggestHelper;
 
+    /**
+     * Retrieves suggest statistics including word counts.
+     *
+     * @return JSON response containing suggest statistics
+     */
     // GET /api/admin/suggest
     @Execute
     public JsonResponse<ApiResult> get$index() {
@@ -38,6 +60,11 @@ public class ApiAdminSuggestAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiConfigResponse().setting(body).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes all suggest words from the system.
+     *
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/suggest/all
     @Execute
     public JsonResponse<ApiResult> delete$all() {
@@ -47,6 +74,11 @@ public class ApiAdminSuggestAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes document-related suggest words.
+     *
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/suggest/document
     @Execute
     public JsonResponse<ApiResult> delete$document() {
@@ -56,6 +88,11 @@ public class ApiAdminSuggestAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes query-related suggest words.
+     *
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/suggest/query
     @Execute
     public JsonResponse<ApiResult> delete$query() {

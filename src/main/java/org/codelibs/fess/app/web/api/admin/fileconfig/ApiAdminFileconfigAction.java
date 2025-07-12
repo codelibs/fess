@@ -43,7 +43,9 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * API action for admin file config.
+ * API action for admin file configuration management.
+ * Provides RESTful API endpoints for managing file crawling configuration settings in the Fess search engine.
+ * File configurations define settings for crawling file systems, FTP servers, and other file-based data sources.
  *
  * @author Keiichi Watanabe
  */
@@ -52,8 +54,19 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     private static final Logger logger = LogManager.getLogger(ApiAdminFileconfigAction.class);
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminFileconfigAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing file configuration settings */
     @Resource
     private FileConfigService fileConfigService;
 
@@ -63,6 +76,13 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
 
     // GET /api/admin/fileconfig/settings
     // PUT /api/admin/fileconfig/settings
+    /**
+     * Returns list of file configuration settings.
+     * Supports both GET and PUT requests for retrieving paginated file configuration settings.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing file configuration settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -74,6 +94,12 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/fileconfig/setting/{id}
+    /**
+     * Returns specific file configuration setting by ID.
+     *
+     * @param id the file configuration setting ID
+     * @return JSON response containing the file configuration setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse().setting(fileConfigService.getFileConfig(id).map(this::createEditBody).orElseGet(() -> {
@@ -83,6 +109,12 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/fileconfig/setting
+    /**
+     * Creates a new file configuration setting.
+     *
+     * @param body file configuration setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -104,6 +136,12 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/fileconfig/setting
+    /**
+     * Updates an existing file configuration setting.
+     *
+     * @param body file configuration setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -124,6 +162,12 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/fileconfig/setting/{id}
+    /**
+     * Deletes a specific file configuration setting.
+     *
+     * @param id the file configuration setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         fileConfigService.getFileConfig(id).ifPresent(entity -> {
@@ -140,6 +184,13 @@ public class ApiAdminFileconfigAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a file configuration entity for API responses.
+     * Processes permissions and virtual hosts for proper display formatting.
+     *
+     * @param entity the file configuration entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final FileConfig entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

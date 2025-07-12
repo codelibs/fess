@@ -20,10 +20,27 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Job for aggregating and storing search logs.
+ * This job processes search logs and stores them in the search log repository.
+ */
 public class AggregateLogJob {
 
     private static final Logger logger = LogManager.getLogger(AggregateLogJob.class);
 
+    /**
+     * Default constructor.
+     */
+    public AggregateLogJob() {
+        // Default constructor
+    }
+
+    /**
+     * Executes the search log aggregation job.
+     * Stores search logs using the SearchLogHelper and returns execution results.
+     *
+     * @return execution result message, empty if successful or error message if failed
+     */
     public String execute() {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
 

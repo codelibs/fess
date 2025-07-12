@@ -54,6 +54,18 @@ import org.lastaflute.web.response.StreamResponse;
  */
 public class ApiAdminBackupAction extends FessApiAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public ApiAdminBackupAction() {
+        // Default constructor
+    }
+
+    /**
+     * Retrieves a list of available backup files.
+     *
+     * @return JSON response with backup file list
+     */
     // GET /api/admin/backup/files
     @Execute
     public JsonResponse<ApiResult> files() {
@@ -61,6 +73,13 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
         return asJson(new ApiBackupFilesResponse().files(list).total(list.size()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads a specific backup file by ID.
+     * Supports various backup formats including system properties, bulk data, and NDJSON logs.
+     *
+     * @param id the backup file ID to download
+     * @return stream response containing the backup file data
+     */
     // GET /api/admin/backup/file/{id}
     @Execute
     public StreamResponse get$file(final String id) {

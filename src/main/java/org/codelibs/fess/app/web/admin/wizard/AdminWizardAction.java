@@ -69,24 +69,24 @@ public class AdminWizardAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //
-    @Resource
     /** System properties for configuration management */
+    @Resource
     protected DynamicProperties systemProperties;
 
-    @Resource
     /** Service for managing web crawler configurations */
+    @Resource
     protected WebConfigService webConfigService;
 
-    @Resource
     /** Service for managing file crawler configurations */
+    @Resource
     protected FileConfigService fileConfigService;
 
-    @Resource
     /** Helper for managing crawler processes */
+    @Resource
     protected ProcessHelper processHelper;
 
-    @Resource
     /** Service for managing scheduled jobs */
+    @Resource
     protected ScheduledJobService scheduledJobService;
 
     // ===================================================================================
@@ -166,6 +166,13 @@ public class AdminWizardAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("startCrawlingForm"));
     }
 
+    /**
+     * Internal method to create crawling configuration based on form data.
+     * Determines whether to create a web or file crawler configuration.
+     *
+     * @param form the form containing crawling configuration data
+     * @return the name of the created configuration
+     */
     protected String crawlingConfigInternal(final CrawlingConfigForm form) {
 
         String configName = form.crawlingConfigName;
@@ -262,6 +269,13 @@ public class AdminWizardAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Retrieves an integer value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found or invalid
+     * @return the integer value or default value
+     */
     protected Integer getDefaultInteger(final String key, final Integer defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -272,6 +286,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Retrieves a long value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found or invalid
+     * @return the long value or default value
+     */
     protected Long getDefaultLong(final String key, final Long defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -282,6 +303,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Retrieves a string value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found
+     * @return the string value or default value
+     */
     protected String getDefaultString(final String key, final String defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -290,6 +318,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Determines if the given path represents a web crawling target.
+     * Checks if the path starts with HTTP or HTTPS protocols.
+     *
+     * @param path the path to check
+     * @return true if the path is a web crawling path, false otherwise
+     */
     protected boolean isWebCrawlingPath(final String path) {
         if (path.startsWith("http:") || path.startsWith("https:")) {
             return true;
@@ -298,6 +333,13 @@ public class AdminWizardAction extends FessAdminAction {
         return false;
     }
 
+    /**
+     * Converts a crawling path to the appropriate protocol format.
+     * Handles various path formats and adds proper protocol prefixes.
+     *
+     * @param path the original path to convert
+     * @return the converted path with appropriate protocol prefix
+     */
     protected String convertCrawlingPath(final String path) {
         if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
                 || path.startsWith("ftp:") || path.startsWith("storage:")) {

@@ -54,18 +54,47 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin elevate word management.
+ * Provides RESTful API endpoints for managing elevate word settings in the Fess search engine.
+ * Elevate words boost specific search terms to appear higher in search results.
+ */
 public class ApiAdminElevatewordAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminElevatewordAction.class);
 
+    // ===================================================================================
+    //                                                                           Constructor
+    //                                                                           ===========
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminElevatewordAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+
+    /** Service for managing elevate word configurations */
     @Resource
     private ElevateWordService elevateWordService;
 
+    /** Helper for managing search suggestions and elevate words */
     @Resource
     protected SuggestHelper suggestHelper;
 
     // GET /api/admin/elevateword
     // PUT /api/admin/elevateword
+    /**
+     * Returns list of elevate word settings.
+     * Supports both GET and PUT requests for retrieving paginated elevate word configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing elevate word settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -77,6 +106,12 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/elevateword/{id}
+    /**
+     * Retrieves a specific elevate word setting by ID.
+     *
+     * @param id the ID of the elevate word to retrieve
+     * @return JSON response containing the elevate word configuration
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
 
@@ -93,6 +128,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/elevateword/setting
+    /**
+     * Creates a new elevate word setting.
+     * Also adds the elevate word to the suggest helper for search enhancement.
+     *
+     * @param body elevate word setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -115,6 +157,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/elevateword/setting
+    /**
+     * Updates an existing elevate word setting.
+     * Refreshes all elevate words in the suggest helper to maintain consistency.
+     *
+     * @param body elevate word setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -138,6 +187,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/elevateword/setting/{id}
+    /**
+     * Deletes a specific elevate word setting.
+     * Also removes the elevate word from the suggest helper.
+     *
+     * @param id the elevate word setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         try {
@@ -161,6 +217,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/elevateword/upload
+    /**
+     * Uploads and imports elevate words from a CSV file.
+     * Processes the file asynchronously and updates the suggest helper.
+     *
+     * @param body upload form containing the CSV file
+     * @return JSON response with upload status
+     */
     @Execute
     public JsonResponse<ApiResult> put$upload(final UploadForm body) {
         validateApi(body, messages -> {});
@@ -176,6 +239,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/elevateword/download
+    /**
+     * Downloads all elevate words as a CSV file.
+     * Creates a temporary file with the exported data for download.
+     *
+     * @param body download parameters
+     * @return stream response containing the CSV file
+     */
     @Execute
     public StreamResponse get$download(final DownloadBody body) {
         validateApi(body, messages -> {});
@@ -197,6 +267,13 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         });
     }
 
+    /**
+     * Creates an edit body from an elevate word entity for API responses.
+     * Processes permissions and converts them to a readable format.
+     *
+     * @param entity the elevate word entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final ElevateWord entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
@@ -209,6 +286,11 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         return body;
     }
 
+    /**
+     * Gets the CSV file encoding from configuration.
+     *
+     * @return the CSV file encoding string
+     */
     private String getCsvEncoding() {
         return fessConfig.getCsvFileEncoding();
     }

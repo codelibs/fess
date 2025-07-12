@@ -38,13 +38,33 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin Synonym dictionary management.
+ * Provides REST endpoints for managing synonym dictionary items in the Fess search engine.
+ *
+ * @author FessProject
+ */
 public class ApiAdminDictSynonymAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDictSynonymAction() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictSynonymAction.class);
 
     @Resource
     private SynonymService synonymService;
 
+    /**
+     * Retrieves synonym dictionary settings with pagination support.
+     *
+     * @param dictId the dictionary ID
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of synonym dictionary items
+     */
     // GET /api/admin/dict/synonym/settings/{dictId}
     @Execute
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
@@ -57,6 +77,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 .status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific synonym dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the synonym item to retrieve
+     * @return JSON response containing the synonym dictionary item
+     */
     // GET /api/admin/dict/synonym/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String dictId, final long id) {
@@ -67,6 +94,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates a new synonym dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing synonym item information
+     * @return JSON response with result status
+     */
     // POST /api/admin/dict/synonym/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
@@ -85,6 +119,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Updates an existing synonym dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing updated synonym item information
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/synonym/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
@@ -103,6 +144,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes a synonym dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the synonym item to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/dict/synonym/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String dictId, final long id) {
@@ -115,6 +163,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(id)).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Uploads synonym dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param form the upload form containing the dictionary file
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/synonym/upload/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$upload(final String dictId, final UploadForm form) {
@@ -133,6 +188,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads synonym dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param body the download request body
+     * @return stream response containing the dictionary file data
+     */
     // GET /api/admin/dict/synonym/download/{dictId}
     @Execute
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
@@ -147,6 +209,13 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 });
     }
 
+    /**
+     * Creates an EditBody from a SynonymItem entity for API responses.
+     *
+     * @param entity the SynonymItem entity to convert
+     * @param dictId the dictionary ID
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final SynonymItem entity, final String dictId) {
         final EditBody body = new EditBody();
         body.id = entity.getId();

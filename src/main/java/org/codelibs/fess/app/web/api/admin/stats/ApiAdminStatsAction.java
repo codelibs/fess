@@ -40,11 +40,22 @@ import org.opensearch.monitor.os.OsStats;
 import org.opensearch.monitor.process.ProcessProbe;
 
 /**
- * API action for admin stats.
+ * API action for admin statistics management.
  *
  * @author shinsuke
  */
 public class ApiAdminStatsAction extends FessApiAdminAction {
+
+    // ===================================================================================
+    //                                                                           Constructor
+    //                                                                           ===========
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminStatsAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -54,6 +65,11 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves system statistics including JVM, OS, process, engine, and filesystem information.
+     *
+     * @return JSON response containing system statistics
+     */
     // GET /api/admin/stats
     @Execute
     public JsonResponse<ApiResult> index() {
@@ -191,126 +207,364 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
         return engineObj;
     }
 
+    /**
+     * Data transfer object representing filesystem statistics.
+     */
     public static class FsObj {
+        /**
+         * Default constructor.
+         */
+        public FsObj() {
+            // Default constructor
+        }
+
+        /** Filesystem usage percentage */
         public short percent;
+        /** Used space in bytes */
         public long used;
+        /** Filesystem path */
         public String path;
+        /** Free space in bytes */
         public long free;
+        /** Total space in bytes */
         public long total;
+        /** Usable space in bytes */
         public long usable;
     }
 
+    /**
+     * Data transfer object representing search engine cluster statistics.
+     */
     public static class EngineObj {
+        /**
+         * Default constructor.
+         */
+        public EngineObj() {
+            // Default constructor
+        }
+
+        /** Exception message if any error occurred */
         public String exception;
+        /** Cluster health status */
         public String status;
+        /** Number of in-flight fetch operations */
         public int numberOfInFlightFetch;
+        /** Number of pending tasks */
         public int numberOfPendingTasks;
+        /** Number of delayed unassigned shards */
         public int delayedUnassignedShards;
+        /** Number of unassigned shards */
         public int unassignedShards;
+        /** Number of initializing shards */
         public int initializingShards;
+        /** Number of relocating shards */
         public int relocatingShards;
+        /** Percentage of active shards */
         public double activeShardsPercent;
+        /** Number of active shards */
         public int activeShards;
+        /** Number of active primary shards */
         public int activePrimaryShards;
+        /** Number of data nodes */
         public int numberOfDataNodes;
+        /** Total number of nodes */
         public int numberOfNodes;
+        /** Cluster name */
         public String clusterName;
     }
 
+    /**
+     * Data transfer object representing JVM statistics.
+     */
     public static class JvmObj {
+        /**
+         * Default constructor.
+         */
+        public JvmObj() {
+            // Default constructor
+        }
+
+        /** JVM memory statistics */
         public JvmMemoryObj memory;
+        /** JVM buffer pool statistics */
         public JvmPoolObj[] pools;
+        /** JVM garbage collection statistics */
         public JvmGcObj[] gc;
+        /** JVM thread statistics */
         public JvmThreadsObj threads;
+        /** JVM class loading statistics */
         public JvmClassesObj classes;
+        /** JVM uptime in milliseconds */
         public long uptime;
     }
 
+    /**
+     * Data transfer object representing JVM memory statistics.
+     */
     public static class JvmMemoryObj {
+        /**
+         * Default constructor.
+         */
+        public JvmMemoryObj() {
+            // Default constructor
+        }
+
+        /** Heap memory statistics */
         public JvmMemoryHeapObj heap;
+        /** Non-heap memory statistics */
         public JvmMemoryNonHeapObj nonHeap;
     }
 
+    /**
+     * Data transfer object representing JVM heap memory statistics.
+     */
     public static class JvmMemoryHeapObj {
+        /**
+         * Default constructor.
+         */
+        public JvmMemoryHeapObj() {
+            // Default constructor
+        }
+
+        /** Used heap memory in bytes */
         public long used;
+        /** Committed heap memory in bytes */
         public long committed;
+        /** Maximum heap memory in bytes */
         public long max;
+        /** Heap memory usage percentage */
         public short percent;
     }
 
+    /**
+     * Data transfer object representing JVM non-heap memory statistics.
+     */
     public static class JvmMemoryNonHeapObj {
+        /**
+         * Default constructor.
+         */
+        public JvmMemoryNonHeapObj() {
+            // Default constructor
+        }
+
+        /** Used non-heap memory in bytes */
         public long used;
+        /** Committed non-heap memory in bytes */
         public long committed;
+        /** Maximum non-heap memory in bytes */
         public long max;
+        /** Non-heap memory usage percentage */
         public short percent;
     }
 
+    /**
+     * Data transfer object representing JVM buffer pool statistics.
+     */
     public static class JvmPoolObj {
+        /**
+         * Default constructor.
+         */
+        public JvmPoolObj() {
+            // Default constructor
+        }
+
+        /** Buffer pool name */
         public String key;
+        /** Number of buffers */
         public long count;
+        /** Used memory in bytes */
         public long used;
+        /** Total capacity in bytes */
         public long capacity;
     }
 
+    /**
+     * Data transfer object representing JVM garbage collection statistics.
+     */
     public static class JvmGcObj {
+        /**
+         * Default constructor.
+         */
+        public JvmGcObj() {
+            // Default constructor
+        }
+
+        /** Garbage collector name */
         public String key;
+        /** Number of collections */
         public long count;
+        /** Total collection time in milliseconds */
         public long time;
     }
 
+    /**
+     * Data transfer object representing JVM thread statistics.
+     */
     public static class JvmThreadsObj {
+        /**
+         * Default constructor.
+         */
+        public JvmThreadsObj() {
+            // Default constructor
+        }
+
+        /** Current number of threads */
         public int count;
+        /** Peak number of threads */
         public int peak;
     }
 
+    /**
+     * Data transfer object representing JVM class loading statistics.
+     */
     public static class JvmClassesObj {
+        /**
+         * Default constructor.
+         */
+        public JvmClassesObj() {
+            // Default constructor
+        }
+
+        /** Currently loaded classes */
         public long loaded;
+        /** Total classes loaded since JVM start */
         public long total_loaded;
+        /** Total classes unloaded */
         public long unloaded;
     }
 
+    /**
+     * Data transfer object representing process statistics.
+     */
     public static class ProcessObj {
+        /**
+         * Default constructor.
+         */
+        public ProcessObj() {
+            // Default constructor
+        }
+
         public ProcessFileDescriptorObj fileFescriptor;
         public ProcessCpuObj cpu;
         public ProcessVirtualMemoryObj virtualMemory;
     }
 
+    /**
+     * Data transfer object representing process file descriptor statistics.
+     */
     public static class ProcessFileDescriptorObj {
+        /**
+         * Default constructor.
+         */
+        public ProcessFileDescriptorObj() {
+            // Default constructor
+        }
+
         public long open;
         public long max;
     }
 
+    /**
+     * Data transfer object representing process CPU statistics.
+     */
     public static class ProcessCpuObj {
+        /**
+         * Default constructor.
+         */
+        public ProcessCpuObj() {
+            // Default constructor
+        }
+
         public short percent;
         public long total;
     }
 
+    /**
+     * Data transfer object representing process virtual memory statistics.
+     */
     public static class ProcessVirtualMemoryObj {
+        /**
+         * Default constructor.
+         */
+        public ProcessVirtualMemoryObj() {
+            // Default constructor
+        }
+
         public long total;
     }
 
+    /**
+     * Data transfer object representing operating system statistics.
+     */
     public static class OsObj {
+        /**
+         * Default constructor.
+         */
+        public OsObj() {
+            // Default constructor
+        }
+
         public OsMemoryObj memory;
         public OsCpuObj cpu;
         public double[] loadAverages;
     }
 
+    /**
+     * Data transfer object representing OS memory statistics.
+     */
     public static class OsMemoryObj {
+        /**
+         * Default constructor.
+         */
+        public OsMemoryObj() {
+            // Default constructor
+        }
+
         public OsMemoryPhysicalObj physical;
         public OsMemorySwapSpaceObj swapSpace;
     }
 
+    /**
+     * Data transfer object representing OS physical memory statistics.
+     */
     public static class OsMemoryPhysicalObj {
+        /**
+         * Default constructor.
+         */
+        public OsMemoryPhysicalObj() {
+            // Default constructor
+        }
+
         public long free;
         public long total;
     }
 
+    /**
+     * Data transfer object representing OS swap space statistics.
+     */
     public static class OsMemorySwapSpaceObj {
+        /**
+         * Default constructor.
+         */
+        public OsMemorySwapSpaceObj() {
+            // Default constructor
+        }
+
         public long free;
         public long total;
     }
 
+    /**
+     * Data transfer object representing OS CPU statistics.
+     */
     public static class OsCpuObj {
+        /**
+         * Default constructor.
+         */
+        public OsCpuObj() {
+            // Default constructor
+        }
+
         public short percent;
     }
 }

@@ -43,6 +43,20 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminStorageAction.class);
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminStorageAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
+    //                                                                      Search Execute
+    //                                                                      ==============
+
     // GET /api/admin/storage/list/{id}
     // PUT /api/admin/storage/list/{id}
     @Execute

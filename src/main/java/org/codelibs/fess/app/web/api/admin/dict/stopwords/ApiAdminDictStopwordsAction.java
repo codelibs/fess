@@ -38,13 +38,33 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin Stopwords dictionary management.
+ * Provides REST endpoints for managing stopwords dictionary items in the Fess search engine.
+ *
+ * @author FessProject
+ */
 public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDictStopwordsAction() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStopwordsAction.class);
 
     @Resource
     private StopwordsService stopwordsService;
 
+    /**
+     * Retrieves stopwords dictionary settings with pagination support.
+     *
+     * @param dictId the dictionary ID
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of stopwords dictionary items
+     */
     // GET /api/admin/dict/stopwords/settings/{dictId}
     @Execute
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
@@ -57,6 +77,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 .status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific stopwords dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the stopwords item to retrieve
+     * @return JSON response containing the stopwords dictionary item
+     */
     // GET /api/admin/dict/stopwords/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String dictId, final long id) {
@@ -67,6 +94,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates a new stopwords dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing stopwords item information
+     * @return JSON response with result status
+     */
     // POST /api/admin/dict/stopwords/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
@@ -85,6 +119,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Updates an existing stopwords dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing updated stopwords item information
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/stopwords/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
@@ -103,6 +144,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes a stopwords dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the stopwords item to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/dict/stopwords/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String dictId, final long id) {
@@ -115,6 +163,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(id)).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Uploads stopwords dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param form the upload form containing the dictionary file
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/stopwords/upload/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$upload(final String dictId, final UploadForm form) {
@@ -133,6 +188,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads stopwords dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param body the download request body
+     * @return stream response containing the dictionary file data
+     */
     // GET /api/admin/dict/stopwords/download/{dictId}
     @Execute
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
@@ -147,6 +209,13 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 });
     }
 
+    /**
+     * Creates an EditBody from a StopwordsItem entity for API responses.
+     *
+     * @param entity the StopwordsItem entity to convert
+     * @param dictId the dictionary ID
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final StopwordsItem entity, final String dictId) {
         final EditBody body = new EditBody();
         body.id = entity.getId();

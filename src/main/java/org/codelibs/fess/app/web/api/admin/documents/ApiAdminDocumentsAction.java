@@ -41,15 +41,35 @@ import org.opensearch.action.bulk.BulkResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin document management.
+ * Provides RESTful API endpoints for bulk document operations in the Fess search engine.
+ * Supports indexing multiple documents with automatic field validation and default value assignment.
+ *
+ * @author FessProject
+ */
 public class ApiAdminDocumentsAction extends FessApiAdminAction {
+
     // ===================================================================================
     // Constant
     //
     private static final Logger logger = LogManager.getLogger(ApiAdminSearchlistAction.class);
 
     // ===================================================================================
+    // Constructor
+    // ===========
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDocumentsAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     // Attribute
     // =========
+    /** Search engine client for document operations */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
@@ -57,6 +77,13 @@ public class ApiAdminDocumentsAction extends FessApiAdminAction {
     // Search Execute
     //
 
+    /**
+     * Performs bulk document operations (index multiple documents).
+     * Validates document fields and adds default values where necessary.
+     *
+     * @param body the bulk request body containing documents to process
+     * @return JSON response with bulk operation results
+     */
     // PUT /api/admin/documents/bulk
     @Execute
     public JsonResponse<ApiResult> put$bulk(final BulkBody body) {

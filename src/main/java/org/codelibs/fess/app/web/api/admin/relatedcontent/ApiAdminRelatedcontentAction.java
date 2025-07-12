@@ -37,13 +37,29 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin related content management.
+ * Provides RESTful API endpoints for managing related content settings in the Fess search engine.
+ * Related content settings define content relationships and associations for search results.
+ */
 public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminRelatedcontentAction.class);
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminRelatedcontentAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing related content configurations */
     @Resource
     private RelatedContentService relatedContentService;
 
@@ -53,6 +69,13 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
 
     // GET /api/admin/relatedcontent/settings
     // PUT /api/admin/relatedcontent/settings
+    /**
+     * Returns list of related content settings.
+     * Supports both GET and PUT requests for retrieving paginated related content configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing related content settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -64,6 +87,12 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/relatedcontent/setting/{id}
+    /**
+     * Returns specific related content setting by ID.
+     *
+     * @param id the related content setting ID
+     * @return JSON response containing the related content setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(
@@ -74,6 +103,12 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/relatedcontent/setting
+    /**
+     * Creates a new related content setting.
+     *
+     * @param body related content setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -95,6 +130,12 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/relatedcontent/setting
+    /**
+     * Updates an existing related content setting.
+     *
+     * @param body related content setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -115,6 +156,12 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/relatedcontent/setting/{id}
+    /**
+     * Deletes a specific related content setting.
+     *
+     * @param id the related content setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         relatedContentService.getRelatedContent(id).ifPresent(entity -> {
@@ -131,6 +178,12 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a related content entity for API responses.
+     *
+     * @param entity the related content entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final RelatedContent entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

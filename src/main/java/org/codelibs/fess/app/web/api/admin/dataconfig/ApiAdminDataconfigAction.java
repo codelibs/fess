@@ -49,6 +49,13 @@ import jakarta.annotation.Resource;
  */
 public class ApiAdminDataconfigAction extends FessApiAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDataconfigAction() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminDataconfigAction.class);
 
     // ===================================================================================
@@ -61,6 +68,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves data config settings with pagination support.
+     *
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of data config settings
+     */
     // GET /api/admin/dataconfig/settings
     // PUT /api/admin/dataconfig/settings
     @Execute
@@ -73,6 +86,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific data config setting by ID.
+     *
+     * @param id the ID of the data config to retrieve
+     * @return JSON response containing the data config setting
+     */
     // GET /api/admin/dataconfig/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -82,6 +101,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new data config setting.
+     *
+     * @param body the request body containing data config information
+     * @return JSON response with result status
+     */
     // POST /api/admin/dataconfig/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -103,6 +128,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(dataConfig.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing data config setting.
+     *
+     * @param body the request body containing updated data config information
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dataconfig/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -123,6 +154,12 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(dataConfig.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a data config setting by ID.
+     *
+     * @param id the ID of the data config to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/dataconfig/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -140,6 +177,13 @@ public class ApiAdminDataconfigAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a DataConfig entity for API responses.
+     * Handles permission and virtual host encoding.
+     *
+     * @param entity the DataConfig entity to convert
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final DataConfig entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

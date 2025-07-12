@@ -38,7 +38,9 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * API action for admin duplicate host.
+ * API action for admin duplicate host management.
+ * Provides RESTful API endpoints for managing duplicate host settings in the Fess search engine.
+ * Duplicate host settings help prevent indexing the same content from multiple similar URLs.
  *
  * @author Keiichi Watanabe
  */
@@ -47,8 +49,20 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     private static final Logger logger = LogManager.getLogger(ApiAdminDuplicatehostAction.class);
 
     // ===================================================================================
+    //                                                                           Constructor
+    //                                                                           ===========
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDuplicatehostAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing duplicate host configurations */
     @Resource
     private DuplicateHostService duplicateHostService;
 
@@ -58,6 +72,13 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
 
     // GET /api/admin/duplicatehost/settings
     // PUT /api/admin/duplicatehost/settings
+    /**
+     * Returns list of duplicate host settings.
+     * Supports both GET and PUT requests for retrieving paginated duplicate host configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing duplicate host settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -69,6 +90,12 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/duplicatehost/setting/{id}
+    /**
+     * Returns specific duplicate host setting by ID.
+     *
+     * @param id the duplicate host setting ID
+     * @return JSON response containing the duplicate host setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse().setting(duplicateHostService.getDuplicateHost(id).map(this::createEditBody).orElseGet(() -> {
@@ -78,6 +105,12 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/duplicatehost/setting
+    /**
+     * Creates a new duplicate host setting.
+     *
+     * @param body duplicate host setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -99,6 +132,12 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/duplicatehost/setting
+    /**
+     * Updates an existing duplicate host setting.
+     *
+     * @param body duplicate host setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -119,6 +158,12 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/duplicatehost/setting/{id}
+    /**
+     * Deletes a specific duplicate host setting.
+     *
+     * @param id the duplicate host setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         duplicateHostService.getDuplicateHost(id).ifPresent(entity -> {
@@ -135,6 +180,12 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a duplicate host entity for API responses.
+     *
+     * @param entity the duplicate host entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final DuplicateHost entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

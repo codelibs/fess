@@ -48,6 +48,13 @@ import org.lastaflute.web.response.JsonResponse;
  */
 public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public ApiAdminAccesstokenAction() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(ApiAdminAccesstokenAction.class);
 
     // ===================================================================================
@@ -60,6 +67,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 
     // GET /api/admin/accesstoken
     // PUT /api/admin/accesstoken
+    /**
+     * Retrieves a list of access token settings.
+     *
+     * @param body the search body containing filter criteria
+     * @return JSON response with access token list
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -70,6 +83,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/accesstoken/setting/{id}
+    /**
+     * Retrieves a specific access token setting by ID.
+     *
+     * @param id the access token ID to retrieve
+     * @return JSON response with the access token setting
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse().setting(accessTokenService.getAccessToken(id).map(this::createEditBody).orElseGet(() -> {
@@ -79,6 +98,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/accesstoken/setting
+    /**
+     * Creates a new access token setting.
+     *
+     * @param body the create body containing access token data
+     * @return JSON response with the created access token ID
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -100,6 +125,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/accesstoken/setting
+    /**
+     * Updates an existing access token setting.
+     *
+     * @param body the edit body containing updated access token data
+     * @return JSON response with the updated access token ID
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -120,6 +151,12 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/accesstoken/setting/{id}
+    /**
+     * Deletes an access token setting by ID.
+     *
+     * @param id the access token ID to delete
+     * @return JSON response confirming deletion
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         accessTokenService.getAccessToken(id).ifPresent(entity -> {
@@ -136,6 +173,13 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from an AccessToken entity for API responses.
+     * Converts permissions and handles date formatting.
+     *
+     * @param entity the AccessToken entity to convert
+     * @return the EditBody representation of the entity
+     */
     protected EditBody createEditBody(final AccessToken entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME).excludeNull()
