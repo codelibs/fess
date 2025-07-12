@@ -158,6 +158,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers pagination and user list data for rendering the user search results.
+     *
+     * @param data the render data container to populate
+     * @param form the search form containing pagination parameters
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "userItems", userService.getUserList(userPager)); // page navi
         // restore from pager
@@ -368,6 +374,12 @@ public class AdminUserAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Returns the user entity based on the provided form data, applying any necessary transformations.
+     *
+     * @param form the form containing user data for retrieval and update
+     * @return optional user entity populated from the form
+     */
     public static OptionalEntity<User> getUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
@@ -381,6 +393,13 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Creates a label/value map item for dropdowns or list displays.
+     *
+     * @param label the display label for the item
+     * @param value the value associated with the item
+     * @return a map containing the label and value entries
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -392,6 +411,12 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                        Small Helper
     //                                                                        ============
 
+    /**
+     * Verifies that the current CRUD mode matches the expected mode, throwing a validation error if not.
+     *
+     * @param crudMode   the actual CRUD mode value
+     * @param expectedMode the expected CRUD mode value
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -400,6 +425,12 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Validates the password and confirmation fields in the form for user creation and update.
+     *
+     * @param form the form containing password and confirmation fields
+     * @param validationErrorLambda callback to report validation errors
+     */
     protected void verifyPassword(final CreateForm form, final VaErrorHook validationErrorLambda) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             resetPassword(form);
@@ -415,11 +446,22 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Resets the password and confirmation fields in the user form.
+     *
+     * @param form the form whose password fields should be reset
+     */
     public static void resetPassword(final CreateForm form) {
         form.password = null;
         form.confirmPassword = null;
     }
 
+    /**
+     * Validates LDAP user attribute types using the configured LDAP manager.
+     *
+     * @param attributes the map of attributes to validate
+     * @param throwError callback to report any validation errors
+     */
     public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
         ComponentUtil.getLdapManager().validateUserAttributes(Long.class, attributes,
                 s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));

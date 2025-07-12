@@ -73,8 +73,8 @@ public class AdminWebauthAction extends FessAdminAction {
     @Resource
     /** Pager for paginating web authentication results */
     private WebAuthPager webAuthPager;
+    /** Service for accessing and modifying web configuration settings */
     @Resource
-    /** Service for managing web crawler configurations */
     protected WebConfigService webConfigService;
 
     // ===================================================================================

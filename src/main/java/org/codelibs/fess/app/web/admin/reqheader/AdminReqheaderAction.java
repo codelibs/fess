@@ -69,8 +69,8 @@ public class AdminReqheaderAction extends FessAdminAction {
     private RequestHeaderService requestHeaderService;
     @Resource
     private ReqHeaderPager reqHeaderPager;
-    @Resource
     /** Web configuration service for managing web crawl configurations. */
+    @Resource
     protected WebConfigService webConfigService;
 
     // ===================================================================================

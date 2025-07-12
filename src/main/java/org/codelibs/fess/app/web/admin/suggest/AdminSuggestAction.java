@@ -44,8 +44,8 @@ public class AdminSuggestAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Helper for managing suggest functionality. */
     @Resource
-    /** Helper for managing suggest functionality */
     protected SuggestHelper suggestHelper;
 
     // ===================================================================================

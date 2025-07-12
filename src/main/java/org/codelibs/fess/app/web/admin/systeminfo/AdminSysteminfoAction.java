@@ -58,8 +58,8 @@ public class AdminSysteminfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** System properties for retrieving configuration information. */
     @Resource
-    /** System properties for retrieving configuration information */
     protected DynamicProperties systemProperties;
 
     private static final String[] bugReportLabels =

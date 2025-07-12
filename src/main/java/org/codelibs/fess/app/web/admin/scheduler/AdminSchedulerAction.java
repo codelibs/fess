@@ -69,8 +69,8 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Resource
     /** Pager for paginating scheduled job results */
     private SchedulerPager schedulerPager;
+    /** Helper for processing scheduled jobs. */
     @Resource
-    /** Helper for processing scheduled jobs */
     protected ProcessHelper processHelper;
 
     // ===================================================================================

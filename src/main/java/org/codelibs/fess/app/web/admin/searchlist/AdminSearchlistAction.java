@@ -77,20 +77,20 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Attribute
     // =========
 
+    /** Client for interacting with the search engine. */
     @Resource
-    /** Client for interacting with the search engine */
     protected SearchEngineClient searchEngineClient;
 
+    /** Helper for building and parsing search queries. */
     @Resource
-    /** Helper for building and parsing search queries */
     protected QueryHelper queryHelper;
 
+    /** Helper for executing search operations. */
     @Resource
-    /** Helper for executing search operations */
     protected SearchHelper searchHelper;
 
+    /** HTTP servlet request for accessing request parameters. */
     @Resource
-    /** HTTP servlet request for accessing request parameters */
     protected HttpServletRequest request;
 
     /** List of document items returned from search */
@@ -545,6 +545,13 @@ public class AdminSearchlistAction extends FessAdminAction {
      * Web-specific implementation of SearchRenderData for rendering search results in the admin interface.
      */
     protected static class WebRenderData extends SearchRenderData {
+
+        /**
+         * Default constructor.
+         */
+        protected WebRenderData() {
+            super();
+        }
 
         /**
          * Registers all search-related data for rendering in the web interface.
