@@ -25,11 +25,9 @@ import java.util.Set;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.HighlightInfo;
-import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -69,6 +67,7 @@ public class ViewHelperTest extends UnitFessTestCase {
     @Override
     public void tearDown() throws Exception {
         propertiesFile.delete();
+        ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 

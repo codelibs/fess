@@ -17,9 +17,9 @@ package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.function.BiFunction;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;

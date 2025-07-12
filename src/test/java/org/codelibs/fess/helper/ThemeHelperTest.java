@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,9 +24,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
-import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ResourceUtil;
 
 public class ThemeHelperTest extends UnitFessTestCase {
 
@@ -40,6 +36,11 @@ public class ThemeHelperTest extends UnitFessTestCase {
         super.setUp();
         themeHelper = new ThemeHelper();
         tempDir = Files.createTempDirectory("theme-test");
+        Files.createDirectories(Paths.get("target", "fess", "WEB-INF", "view"));
+        Files.createDirectories(Paths.get("target", "fess", "WEB-INF", "plugin"));
+        Files.createDirectories(Paths.get("target", "fess", "images"));
+        Files.createDirectories(Paths.get("target", "fess", "css"));
+        Files.createDirectories(Paths.get("target", "fess", "js"));
     }
 
     @Override

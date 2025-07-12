@@ -29,6 +29,12 @@ import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
 public class OsddHelperTest extends UnitFessTestCase {
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_init_nofile() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override

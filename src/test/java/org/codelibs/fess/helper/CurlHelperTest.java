@@ -19,11 +19,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -33,7 +28,6 @@ import org.codelibs.fesen.client.node.NodeManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ResourceUtil;
 
 public class CurlHelperTest extends UnitFessTestCase {
 

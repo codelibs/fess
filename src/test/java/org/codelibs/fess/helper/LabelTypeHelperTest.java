@@ -16,15 +16,12 @@
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper.LabelTypePattern;
@@ -44,6 +41,12 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockLabelTypeService(), LabelTypeService.class.getCanonicalName());
         ComponentUtil.register(new MockVirtualHostHelper(), "virtualHostHelper");
         ComponentUtil.register(new MockRoleQueryHelper(), "roleQueryHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     public void test_init() {

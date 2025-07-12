@@ -37,6 +37,12 @@ public class JobHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockJobLogBhv(), JobLogBhv.class.getCanonicalName());
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_register_with_null_scheduledJob() {
         try {
             jobHelper.register((ScheduledJob) null);

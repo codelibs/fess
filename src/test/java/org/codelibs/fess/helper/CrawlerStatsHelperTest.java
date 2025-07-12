@@ -45,6 +45,12 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         crawlerStatsHelper.init();
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_beginDone() {
         String key = "test";
         crawlerStatsHelper.begin(key);

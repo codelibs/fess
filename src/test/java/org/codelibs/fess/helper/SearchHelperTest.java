@@ -15,42 +15,21 @@
  */
 package org.codelibs.fess.helper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
-import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
-import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.RequestParameter;
-import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
-import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.opensearch.client.SearchEngineClient;
-import org.codelibs.fess.util.QueryStringBuilder;
-import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.QueryResponseList;
-import org.dbflute.optional.OptionalEntity;
-import org.dbflute.optional.OptionalThing;
-import org.opensearch.action.bulk.BulkRequestBuilder;
-import org.opensearch.action.update.UpdateRequestBuilder;
-import org.opensearch.index.query.BoolQueryBuilder;
-import org.opensearch.index.query.QueryBuilders;
 
 import jakarta.servlet.http.Cookie;
 
@@ -67,6 +46,12 @@ public class SearchHelperTest extends UnitFessTestCase {
     private void setupMockComponents() {
         ComponentUtil.setFessConfig(new MockFessConfig());
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     public void test_serializeParameters() {

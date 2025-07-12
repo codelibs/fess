@@ -28,8 +28,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
-import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfo;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.unit.UnitFessTestCase;

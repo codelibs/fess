@@ -23,11 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.misc.Tuple3;
-import org.codelibs.fess.opensearch.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.cbean.result.ListResultBean;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilder;
@@ -42,16 +40,13 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         keyMatchHelper = new KeyMatchHelper();
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
-        // ComponentUtil.register(new MockSearchEngineClient(), "searchEngineClient");
-        // ComponentUtil.register(new MockKeyMatchBhv(), KeyMatchBhv.class);
     }
 
-    // public static class MockKeyMatchBhv extends KeyMatchBhv {
-    //     @Override
-    //     public ListResultBean<KeyMatch> selectList(org.dbflute.cbean.ConditionBean cb) {
-    //         return new ListResultBean<>();
-    //     }
-    // }
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
 
     public void test_init() {
         try {

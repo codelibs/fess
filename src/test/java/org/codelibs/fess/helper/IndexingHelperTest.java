@@ -83,6 +83,12 @@ public class IndexingHelperTest extends UnitFessTestCase {
         }, WebConfigService.class.getCanonicalName());
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_sendDocuments() {
         documentSizeByQuery = 0L;
         final AtomicReference<String> sentIndex = new AtomicReference<>();

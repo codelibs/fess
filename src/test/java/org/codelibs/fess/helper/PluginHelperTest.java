@@ -27,9 +27,6 @@ import org.codelibs.fess.exception.PluginException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.curl.CurlRequest;
 import org.lastaflute.di.exception.IORuntimeException;
 
 public class PluginHelperTest extends UnitFessTestCase {
