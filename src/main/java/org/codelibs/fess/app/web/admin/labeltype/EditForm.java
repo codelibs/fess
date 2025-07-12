@@ -21,6 +21,8 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for Label Type.
+ *
  * @author Keiichi Watanabe
  */
 public class EditForm extends CreateForm {

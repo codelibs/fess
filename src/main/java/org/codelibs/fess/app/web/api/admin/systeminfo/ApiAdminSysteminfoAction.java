@@ -29,6 +29,8 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 /**
+ * API action for admin system info.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminSysteminfoAction extends FessApiAdminAction {

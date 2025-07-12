@@ -22,6 +22,8 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Protected Words.
+ *
  * @author ma2tani
  */
 public class CreateForm {

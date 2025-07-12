@@ -37,9 +37,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Path Map management.
+ *
  * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class AdminPathmapAction extends FessAdminAction {
 

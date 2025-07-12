@@ -21,6 +21,8 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for Search Log.
+ *
  * @author shinsuke
  */
 public class EditForm {

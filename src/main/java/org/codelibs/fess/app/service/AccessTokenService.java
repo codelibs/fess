@@ -38,14 +38,35 @@ import org.dbflute.optional.OptionalEntity;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * The service for access token.
+ */
 public class AccessTokenService {
 
+    /**
+     * Default constructor.
+     */
+    public AccessTokenService() {
+        // nothing
+    }
+
+    /**
+     * The behavior of access token.
+     */
     @Resource
     protected AccessTokenBhv accessTokenBhv;
 
+    /**
+     * The Fess configuration.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Get the list of access tokens.
+     * @param accessTokenPager The pager for access token.
+     * @return The list of access tokens.
+     */
     public List<AccessToken> getAccessTokenList(final AccessTokenPager accessTokenPager) {
 
         final PagingResultBean<AccessToken> accessTokenList = accessTokenBhv.selectPage(cb -> {
@@ -61,22 +82,40 @@ public class AccessTokenService {
         return accessTokenList;
     }
 
+    /**
+     * Get the access token.
+     * @param id The ID of the access token.
+     * @return The access token.
+     */
     public OptionalEntity<AccessToken> getAccessToken(final String id) {
         return accessTokenBhv.selectByPK(id);
     }
 
+    /**
+     * Store the access token.
+     * @param accessToken The access token.
+     */
     public void store(final AccessToken accessToken) {
 
         accessTokenBhv.insertOrUpdate(accessToken, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Delete the access token.
+     * @param accessToken The access token.
+     */
     public void delete(final AccessToken accessToken) {
 
         accessTokenBhv.delete(accessToken, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Set up the list condition.
+     * @param cb The callback.
+     * @param accessTokenPager The pager for access token.
+     */
     protected void setupListCondition(final AccessTokenCB cb, final AccessTokenPager accessTokenPager) {
         if (accessTokenPager.id != null) {
             cb.query().docMeta().setId_Equal(accessTokenPager.id);
@@ -91,6 +130,11 @@ public class AccessTokenService {
 
     }
 
+    /**
+     * Get the permissions.
+     * @param request The request.
+     * @return The permissions.
+     */
     public OptionalEntity<Set<String>> getPermissions(final HttpServletRequest request) {
         final String token = ComponentUtil.getAccessTokenHelper().getAccessTokenFromRequest(request);
         if (StringUtil.isNotBlank(token)) {

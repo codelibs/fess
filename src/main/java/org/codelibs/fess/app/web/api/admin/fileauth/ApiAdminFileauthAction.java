@@ -40,6 +40,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin file authentication.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminFileauthAction extends FessApiAdminAction {

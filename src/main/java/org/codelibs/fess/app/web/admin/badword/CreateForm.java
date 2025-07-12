@@ -23,8 +23,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Bad Word.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

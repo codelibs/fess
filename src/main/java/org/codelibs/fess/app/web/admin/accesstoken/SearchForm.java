@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.accesstoken;
 
 /**
+ * The search form for Access Token.
+ *
  * @author codelibs
- * @author jflute
  */
 public class SearchForm {
 

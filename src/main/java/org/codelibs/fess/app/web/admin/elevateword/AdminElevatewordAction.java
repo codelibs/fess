@@ -60,6 +60,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Elevate Word management.
+ *
  * @author Keiichi Watanabe
  */
 public class AdminElevatewordAction extends FessAdminAction {

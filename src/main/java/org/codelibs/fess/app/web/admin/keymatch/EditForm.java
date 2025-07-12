@@ -21,8 +21,9 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for Key Match.
+ *
  * @author codelibs
- * @author jflute
  */
 public class EditForm extends CreateForm {
 

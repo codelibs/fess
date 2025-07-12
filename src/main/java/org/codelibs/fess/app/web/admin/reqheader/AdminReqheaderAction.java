@@ -44,9 +44,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Request Header management.
+ *
  * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class AdminReqheaderAction extends FessAdminAction {
 

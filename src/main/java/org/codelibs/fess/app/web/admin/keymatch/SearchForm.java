@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.keymatch;
 
 /**
+ * The search form for Key Match.
+ *
  * @author codelibs
- * @author jflute
  */
 public class SearchForm {
 

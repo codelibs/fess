@@ -19,8 +19,9 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The upload form for Elevate Word.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class UploadForm {
 

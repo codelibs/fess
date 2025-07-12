@@ -30,6 +30,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin general settings.
+ *
  * @author shinsuke
  */
 public class ApiAdminGeneralAction extends FessApiAdminAction {

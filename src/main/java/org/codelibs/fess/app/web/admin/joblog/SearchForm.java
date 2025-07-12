@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.joblog;
 
 /**
+ * The search form for Job Log.
+ *
  * @author codelibs
- * @author Shunji Makino
  */
 public class SearchForm {
 

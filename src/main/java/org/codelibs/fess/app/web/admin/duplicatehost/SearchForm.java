@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.duplicatehost;
 
 /**
+ * The search form for Duplicate Host.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class SearchForm {
 

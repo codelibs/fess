@@ -38,6 +38,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Related Content management.
+ *
  * @author shinsuke
  */
 public class AdminRelatedcontentAction extends FessAdminAction {

@@ -43,6 +43,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin web config.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminWebconfigAction extends FessApiAdminAction {

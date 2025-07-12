@@ -46,6 +46,8 @@ import org.lastaflute.web.ruts.renderer.JspHtmlRenderingProvider;
 import jakarta.annotation.Resource;
 
 /**
+ * The framework assistant director for Fess.
+ *
  * @author jflute
  */
 public class FessFwAssistantDirector extends CachedFwAssistantDirector {

@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.boostdoc;
 
 /**
+ * The search form for Boost Document.
+ *
  * @author codelibs
- * @author jflute
  */
 public class SearchForm {
 

@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.role;
 
 /**
+ * The search form for Role.
+ *
  * @author shinsuke
  */
 public class SearchForm {

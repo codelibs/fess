@@ -18,22 +18,45 @@ package org.codelibs.fess.helper;
 import org.codelibs.core.concurrent.CommonPoolUtil;
 import org.codelibs.core.lang.ThreadUtil;
 
+/**
+ * The abstract helper for configuration.
+ *
+ * This class provides a basic framework for managing configurations that can be reloaded.
+ * It includes functionality for updating configurations in a separate thread and controlling the reloading interval.
+ */
 public abstract class AbstractConfigHelper {
 
+    /**
+     * The interval for reloading.
+     */
     protected long reloadInterval = 1000L;
 
+    /**
+     * Update the configuration.
+     */
     public void update() {
         CommonPoolUtil.execute(this::load);
     }
 
+    /**
+     * Wait for the next reloading.
+     */
     protected void waitForNext() {
         if (reloadInterval > 0) {
             ThreadUtil.sleep(reloadInterval);
         }
     }
 
+    /**
+     * Load the configuration.
+     * @return The number of loaded configurations.
+     */
     public abstract int load();
 
+    /**
+     * Set the interval for reloading.
+     * @param reloadInterval The interval for reloading.
+     */
     public void setReloadInterval(final long reloadInterval) {
         this.reloadInterval = reloadInterval;
     }

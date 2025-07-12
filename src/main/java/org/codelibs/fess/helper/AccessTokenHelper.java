@@ -25,16 +25,41 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * The helper for access token.
+ */
 public class AccessTokenHelper {
 
+    /**
+     * Default constructor.
+     */
+    public AccessTokenHelper() {
+        // nothing
+    }
+
+    /**
+     * The bearer string.
+     */
     protected static final String BEARER = "Bearer";
 
+    /**
+     * The random instance.
+     */
     protected Random random = new SecureRandom();
 
+    /**
+     * Generate the access token.
+     * @return The access token.
+     */
     public String generateAccessToken() {
         return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger(), 0, 0, true, true, null, random);
     }
 
+    /**
+     * Get the access token from the request.
+     * @param request The request.
+     * @return The access token.
+     */
     public String getAccessTokenFromRequest(final HttpServletRequest request) {
         final String token = request.getHeader("Authorization");
         if (token != null) {
@@ -54,6 +79,10 @@ public class AccessTokenHelper {
         return null;
     }
 
+    /**
+     * Set the random instance.
+     * @param random The random instance.
+     */
     public void setRandom(final Random random) {
         this.random = random;
     }

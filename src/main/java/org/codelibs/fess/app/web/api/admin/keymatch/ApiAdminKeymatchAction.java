@@ -38,6 +38,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin key match.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminKeymatchAction extends FessApiAdminAction {

@@ -40,6 +40,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin boost doc.
+ *
  * @author shinsuke
  */
 public class ApiAdminBoostdocAction extends FessApiAdminAction {

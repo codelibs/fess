@@ -21,6 +21,8 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for Data Config.
+ *
  * @author Keiichi Watanabe
  */
 public class EditForm extends CreateForm {

@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.admin.dict.stopwords;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The search form for Stopwords.
+ *
  * @author ma2tani
  */
 public class SearchForm {

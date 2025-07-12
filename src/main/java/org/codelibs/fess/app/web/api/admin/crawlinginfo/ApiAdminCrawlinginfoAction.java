@@ -35,6 +35,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin crawling info.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {

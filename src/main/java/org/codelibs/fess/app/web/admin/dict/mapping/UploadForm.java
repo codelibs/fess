@@ -19,8 +19,9 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The upload form for Mapping.
+ *
  * @author nullpos
- * @author ma2tani
  */
 public class UploadForm {
 

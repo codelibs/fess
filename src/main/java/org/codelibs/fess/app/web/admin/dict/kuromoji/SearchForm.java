@@ -18,8 +18,9 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The search form for Kuromoji.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class SearchForm {
 

@@ -30,6 +30,8 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
+ * The DBM of RequestHeader.
+ *
  * @author ESFlute (using FreeGen)
  */
 public class RequestHeaderDbm extends AbstractDBMeta {

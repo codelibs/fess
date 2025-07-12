@@ -30,6 +30,8 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
+ * The DBM of CrawlingInfoParam.
+ *
  * @author ESFlute (using FreeGen)
  */
 public class CrawlingInfoParamDbm extends AbstractDBMeta {

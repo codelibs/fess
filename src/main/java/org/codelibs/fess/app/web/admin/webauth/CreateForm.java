@@ -25,8 +25,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Web Authentication.
+ *
  * @author codelibs
- * @author Shunji Makino
  */
 public class CreateForm {
 

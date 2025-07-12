@@ -48,6 +48,8 @@ import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 /**
+ * API action for admin backup.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminBackupAction extends FessApiAdminAction {

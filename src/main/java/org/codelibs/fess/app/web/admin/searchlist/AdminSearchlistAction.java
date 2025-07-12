@@ -52,8 +52,9 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
+ * Admin action for Search List.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminSearchlistAction extends FessAdminAction {
 

@@ -42,8 +42,9 @@ import org.lastaflute.web.validation.VaMessenger;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Group management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminGroupAction extends FessAdminAction {
 

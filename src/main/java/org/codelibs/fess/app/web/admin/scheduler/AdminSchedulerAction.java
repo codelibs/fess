@@ -42,8 +42,9 @@ import org.lastaflute.web.util.LaRequestUtil;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Scheduler management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminSchedulerAction extends FessAdminAction {
 

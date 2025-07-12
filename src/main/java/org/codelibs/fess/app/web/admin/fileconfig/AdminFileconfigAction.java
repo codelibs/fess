@@ -48,6 +48,8 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for File Config management.
+ *
  * @author shinsuke
  * @author Keiichi Watanabe
  */

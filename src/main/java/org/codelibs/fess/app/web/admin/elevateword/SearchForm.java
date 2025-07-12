@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.elevateword;
 
 /**
+ * The search form for Elevate Word.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class SearchForm {
 

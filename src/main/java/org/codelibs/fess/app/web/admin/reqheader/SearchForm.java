@@ -16,9 +16,9 @@
 package org.codelibs.fess.app.web.admin.reqheader;
 
 /**
+ * The search form for Request Header.
+ *
  * @author codelibs
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class SearchForm {
 

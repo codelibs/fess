@@ -21,8 +21,9 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for Web Authentication.
+ *
  * @author codelibs
- * @author Shunji Makino
  */
 public class EditForm extends CreateForm {
 

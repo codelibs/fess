@@ -30,6 +30,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for File Config.
+ *
  * @author codelibs
  * @author Keiichi Watanabe
  */

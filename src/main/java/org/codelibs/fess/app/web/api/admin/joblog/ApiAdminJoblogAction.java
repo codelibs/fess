@@ -34,6 +34,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin job log.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminJoblogAction extends FessApiAdminAction {

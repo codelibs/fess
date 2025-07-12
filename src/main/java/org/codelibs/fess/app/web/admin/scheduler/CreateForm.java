@@ -27,6 +27,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Scheduler.
+ *
  * @author shinsuke
  */
 public class CreateForm {

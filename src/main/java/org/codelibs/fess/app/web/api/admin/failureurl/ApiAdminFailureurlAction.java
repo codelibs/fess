@@ -35,6 +35,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin failure URL.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminFailureurlAction extends FessApiAdminAction {

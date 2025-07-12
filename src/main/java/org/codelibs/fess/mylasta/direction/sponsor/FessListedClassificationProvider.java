@@ -24,6 +24,8 @@ import org.lastaflute.db.dbflute.classification.ListedClassificationProvider;
 import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundException;
 
 /**
+ * The provider of listed classification.
+ *
  * @author jflute
  */
 public class FessListedClassificationProvider implements ListedClassificationProvider {

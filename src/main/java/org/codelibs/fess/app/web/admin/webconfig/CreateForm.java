@@ -31,9 +31,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Web Config.
+ *
  * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

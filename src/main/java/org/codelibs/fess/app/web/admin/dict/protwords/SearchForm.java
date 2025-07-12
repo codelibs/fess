@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.admin.dict.protwords;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The search form for Protected Words.
+ *
  * @author ma2tani
  */
 public class SearchForm {

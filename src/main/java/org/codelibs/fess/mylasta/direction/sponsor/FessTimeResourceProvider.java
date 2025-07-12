@@ -21,6 +21,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.time.TypicalTimeResourceProvider;
 
 /**
+ * The provider of time resource.
+ *
  * @author jflute
  */
 public class FessTimeResourceProvider extends TypicalTimeResourceProvider {

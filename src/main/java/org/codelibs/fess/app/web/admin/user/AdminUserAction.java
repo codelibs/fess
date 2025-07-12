@@ -49,8 +49,9 @@ import org.lastaflute.web.validation.VaMessenger;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for User management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminUserAction extends FessAdminAction {
 

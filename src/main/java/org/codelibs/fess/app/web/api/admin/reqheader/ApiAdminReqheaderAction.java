@@ -40,6 +40,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin request header.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminReqheaderAction extends FessApiAdminAction {

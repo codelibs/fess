@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.admin.dict.mapping;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The search form for Mapping.
+ *
  * @author nullpos
  */
 public class SearchForm {

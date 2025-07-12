@@ -40,6 +40,8 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
+ * Admin action for Search Request.
+ *
  * @author shinsuke
  */
 public class AdminSereqAction extends FessAdminAction {

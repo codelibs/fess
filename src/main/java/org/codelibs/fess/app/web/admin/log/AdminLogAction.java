@@ -43,8 +43,9 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
+ * Admin action for Log.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class AdminLogAction extends FessAdminAction {
 

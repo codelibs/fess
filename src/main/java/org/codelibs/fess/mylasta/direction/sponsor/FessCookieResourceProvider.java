@@ -20,6 +20,8 @@ import org.lastaflute.core.security.InvertibleCryptographer;
 import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
 
 /**
+ * The provider of cookie resource.
+ *
  * @author jflute
  */
 public class FessCookieResourceProvider implements CookieResourceProvider {

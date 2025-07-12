@@ -58,7 +58,17 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * The action for admin pages.
+ */
 public class AdminAction extends FessAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public AdminAction() {
+        // nothing
+    }
 
     @Override
     protected String getActionRole() {
@@ -68,6 +78,10 @@ public class AdminAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ //
             AdminDashboardAction.ROLE, //
@@ -304,6 +318,11 @@ public class AdminAction extends FessAdminAction {
         }).orElse(AdminDashboardAction.class));
     }
 
+    /**
+     * Get the admin action class.
+     * @param user The user.
+     * @return The admin action class.
+     */
     public static Class<? extends FessAdminAction> getAdminActionClass(final FessUserBean user) {
         if (user.hasRoles(getActionRoles(AdminDashboardAction.ROLE))) {
             return AdminDashboardAction.class;

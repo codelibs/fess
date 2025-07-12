@@ -43,6 +43,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin file config.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminFileconfigAction extends FessApiAdminAction {

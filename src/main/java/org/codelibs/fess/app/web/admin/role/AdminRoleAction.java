@@ -38,8 +38,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Role management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminRoleAction extends FessAdminAction {
 

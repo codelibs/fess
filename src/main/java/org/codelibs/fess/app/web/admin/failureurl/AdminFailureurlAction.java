@@ -30,8 +30,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Failure URL management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminFailureurlAction extends FessAdminAction {
 

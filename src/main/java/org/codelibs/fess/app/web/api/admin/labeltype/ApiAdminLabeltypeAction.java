@@ -43,6 +43,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin label type.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminLabeltypeAction extends FessApiAdminAction {

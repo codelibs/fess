@@ -30,6 +30,8 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
+ * The DBM of ElevateWord.
+ *
  * @author ESFlute (using FreeGen)
  */
 public class ElevateWordDbm extends AbstractDBMeta {

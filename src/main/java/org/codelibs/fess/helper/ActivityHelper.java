@@ -39,27 +39,57 @@ import org.lastaflute.web.util.LaRequestUtil;
 import jakarta.annotation.PostConstruct;
 
 /**
- * @author shinsuke
+ * The helper for user activities.
+ * This class provides methods to log user actions such as login, logout, and access.
+ * It supports both LTSV and ECS log formats.
  *
+ * @author shinsuke
  */
 public class ActivityHelper {
 
+    /**
+     * The logger.
+     */
     protected Logger logger = null;
 
+    /**
+     * The logger name.
+     */
     protected String loggerName = "fess.log.audit";
 
+    /**
+     * The permission separator.
+     */
     protected String permissionSeparator = "|";
 
+    /**
+     * The flag to use ECS format.
+     */
     protected boolean useEcsFormat = false;
 
+    /**
+     * The ECS version.
+     */
     protected String ecsVersion = "1.2.0";
 
+    /**
+     * The ECS service name.
+     */
     protected String ecsServiceName = "fess";
 
+    /**
+     * The ECS event dataset.
+     */
     protected String ecsEventDataset = "app";
 
+    /**
+     * The environment map.
+     */
     protected Map<String, String> envMap;
 
+    /**
+     * Initialize the helper.
+     */
     @PostConstruct
     public void init() {
         logger = LogManager.getLogger(loggerName);
@@ -71,6 +101,10 @@ public class ActivityHelper {
         }
     }
 
+    /**
+     * Get the environment map.
+     * @return The environment map.
+     */
     protected Map<String, String> getEnvMap() {
         if (envMap != null) {
             return envMap;
@@ -78,10 +112,18 @@ public class ActivityHelper {
         return System.getenv();
     }
 
+    /**
+     * Set the environment map.
+     * @param envMap The environment map.
+     */
     public void setEnvMap(final Map<String, String> envMap) {
         this.envMap = envMap;
     }
 
+    /**
+     * Log the login activity.
+     * @param user The user.
+     */
     public void login(final OptionalThing<FessUserBean> user) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.LOGIN.name());
@@ -92,6 +134,10 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Log the login failure activity.
+     * @param credential The credential.
+     */
     public void loginFailure(final OptionalThing<LoginCredential> credential) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.LOGIN_FAILURE.name());
@@ -104,6 +150,10 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Log the logout activity.
+     * @param user The user.
+     */
     public void logout(final OptionalThing<FessUserBean> user) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.LOGOUT.name());
@@ -114,6 +164,12 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Log the access activity.
+     * @param user The user.
+     * @param path The path.
+     * @param execute The execute.
+     */
     public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.ACCESS.name());
@@ -123,6 +179,10 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Log the permission changed activity.
+     * @param user The user.
+     */
     public void permissionChanged(final OptionalThing<FessUserBean> user) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", Action.UPDATE_PERMISSION.name());
@@ -133,6 +193,12 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Print the log.
+     * @param action The action.
+     * @param user The user.
+     * @param params The parameters.
+     */
     public void print(final String action, final OptionalThing<FessUserBean> user, final Map<String, String> params) {
         final Map<String, String> valueMap = new LinkedHashMap<>();
         valueMap.put("action", action.replace('\t', '_').toUpperCase(Locale.ENGLISH));
@@ -144,6 +210,10 @@ public class ActivityHelper {
         log(valueMap);
     }
 
+    /**
+     * Log the value map.
+     * @param valueMap The value map.
+     */
     protected void log(final Map<String, String> valueMap) {
         valueMap.put("ip", getClientIp());
         valueMap.put("time", DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now()));
@@ -154,10 +224,18 @@ public class ActivityHelper {
         }
     }
 
+    /**
+     * Print the log by LTSV.
+     * @param valueMap The value map.
+     */
     protected void printByLtsv(final Map<String, String> valueMap) {
         printLog(valueMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.joining("\t")));
     }
 
+    /**
+     * Print the log by ECS.
+     * @param valueMap The value map.
+     */
     protected void printByEcs(final Map<String, String> valueMap) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("{\"@timestamp\":\"").append(valueMap.remove("time")).append('"');
@@ -173,34 +251,84 @@ public class ActivityHelper {
         printLog(buf.toString());
     }
 
+    /**
+     * Print the log.
+     * @param message The message.
+     */
     protected void printLog(final String message) {
         logger.info(message);
     }
 
+    /**
+     * Get the client IP.
+     * @return The client IP.
+     */
     protected String getClientIp() {
         return LaRequestUtil.getOptionalRequest().map(req -> ComponentUtil.getViewHelper().getClientIp(req)).orElse("-");
     }
 
+    /**
+     * The action.
+     */
     protected enum Action {
-        LOGIN, LOGOUT, ACCESS, LOGIN_FAILURE, UPDATE_PERMISSION;
+        /**
+         * The login action.
+         */
+        LOGIN,
+        /**
+         * The logout action.
+         */
+        LOGOUT,
+        /**
+         * The access action.
+         */
+        ACCESS,
+        /**
+         * The login failure action.
+         */
+        LOGIN_FAILURE,
+        /**
+         * The update permission action.
+         */
+        UPDATE_PERMISSION;
     }
 
+    /**
+     * Set the logger name.
+     * @param loggerName The logger name.
+     */
     public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
     }
 
+    /**
+     * Set the permission separator.
+     * @param permissionSeparator The permission separator.
+     */
     public void setPermissionSeparator(final String permissionSeparator) {
         this.permissionSeparator = permissionSeparator;
     }
 
+    /**
+     * Set the ECS version.
+     * @param ecsVersion The ECS version.
+     */
     public void setEcsVersion(final String ecsVersion) {
         this.ecsVersion = ecsVersion;
     }
 
+    /**
+     * Set the ECS service name.
+     * @param ecsServiceName The ECS service name.
+     */
     public void setEcsServiceName(final String ecsServiceName) {
         this.ecsServiceName = ecsServiceName;
     }
 
+    /**
+     * Set the ECS event dataset.
+     * @param ecsEventDataset The ECS event dataset.
+     */
     public void setEcsEventDataset(final String ecsEventDataset) {
         this.ecsEventDataset = ecsEventDataset;
     }

@@ -25,8 +25,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for File Authentication.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

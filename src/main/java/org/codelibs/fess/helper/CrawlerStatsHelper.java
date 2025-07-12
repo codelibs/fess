@@ -36,8 +36,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 /**
+ * The helper for crawler statistics.
  * @author shinsuke
- *
  */
 public class CrawlerStatsHelper {
     private static final Logger logger = LogManager.getLogger(CrawlerStatsHelper.class);

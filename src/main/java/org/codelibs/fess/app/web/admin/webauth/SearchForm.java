@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.webauth;
 
 /**
+ * The search form for Web Authentication.
+ *
  * @author codelibs
- * @author Shunji Makino
  */
 public class SearchForm {
 

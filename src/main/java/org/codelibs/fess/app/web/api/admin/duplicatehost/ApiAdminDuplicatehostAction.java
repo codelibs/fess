@@ -38,6 +38,8 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin duplicate host.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminDuplicatehostAction extends FessApiAdminAction {

@@ -49,6 +49,8 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Synonym management.
+ *
  * @author shinsuke
  * @author Keiichi Watanabe
  */

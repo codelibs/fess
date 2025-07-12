@@ -19,6 +19,8 @@ import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
+ * The edit form for Protected Words.
+ *
  * @author ma2tani
  */
 public class EditForm extends CreateForm {

@@ -34,8 +34,9 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The list form for Search List.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class ListForm extends SearchRequestParams {
 

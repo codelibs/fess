@@ -37,8 +37,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Duplicate Host management.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class AdminDuplicatehostAction extends FessAdminAction {
 

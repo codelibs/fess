@@ -18,8 +18,9 @@ package org.codelibs.fess.app.web.admin.dict.stemmeroverride;
 import org.lastaflute.web.validation.Required;
 
 /**
+ * The search form for Stemmer Override.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class SearchForm {
 

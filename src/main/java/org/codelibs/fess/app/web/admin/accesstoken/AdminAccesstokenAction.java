@@ -45,18 +45,33 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Access Token management.
+ * This class provides CRUD operations for access tokens.
+ *
  * @author shinsuke
  */
 public class AdminAccesstokenAction extends FessAdminAction {
 
     private static final Logger logger = LogManager.getLogger(AdminAccesstokenAction.class);
 
+    /**
+     * The role for this action.
+     */
     public static final String ROLE = "admin-accesstoken";
 
+    /**
+     * The token parameter.
+     */
     public static final String TOKEN = "token";
 
+    /**
+     * The expires parameter.
+     */
     public static final String EXPIRES = "expires";
 
+    /**
+     * The expired time parameter.
+     */
     public static final String EXPIRED_TIME = "expiredTime";
 
     // ===================================================================================
@@ -84,12 +99,22 @@ public class AdminAccesstokenAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -103,6 +128,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search the access tokens.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -112,6 +142,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -121,6 +156,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "accessTokenItems", accessTokenService.getAccessTokenList(accessTokenPager)); // page navi
 
@@ -134,6 +174,10 @@ public class AdminAccesstokenAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -149,6 +193,12 @@ public class AdminAccesstokenAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param crudMode The CRUD mode.
+     * @param id The ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -170,6 +220,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -197,6 +252,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create an access token.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -219,6 +279,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Update an access token.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -240,6 +305,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Delete an access token.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -285,6 +355,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Get the access token.
+     * @param form The create form.
+     * @return The access token.
+     */
     public static OptionalEntity<AccessToken> getAccessToken(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -304,6 +379,11 @@ public class AdminAccesstokenAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

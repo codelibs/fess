@@ -33,8 +33,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Job Log.
+ *
  * @author shinsuke
- * @author Shunji Makino
  */
 public class AdminJoblogAction extends FessAdminAction {
 

@@ -35,6 +35,8 @@ import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
 
 /**
+ * API action for admin log.
+ *
  * @author Keiichi Watanabe
  */
 public class ApiAdminLogAction extends FessApiAdminAction {

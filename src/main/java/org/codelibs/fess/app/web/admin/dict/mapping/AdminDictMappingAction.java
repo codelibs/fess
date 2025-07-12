@@ -49,11 +49,22 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Mapping management.
+ *
  * @author nullpos
- * @author ma2tani
  */
 public class AdminDictMappingAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictMappingAction() {
+        // nothing
+    }
+
+    /**
+     * The role for this action.
+     */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictMappingAction.class);
@@ -83,6 +94,11 @@ public class AdminDictMappingAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -93,6 +109,12 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -107,6 +129,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search for char mapping items.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -117,6 +144,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -127,6 +159,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "charMappingItemItems", charMappingService.getCharMappingList(form.dictId, charMappingPager));
@@ -143,6 +180,11 @@ public class AdminDictMappingAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -156,6 +198,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -180,6 +227,13 @@ public class AdminDictMappingAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param dictId The dictionary ID.
+     * @param crudMode The CRUD mode.
+     * @param id The ID of the char mapping item.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -204,6 +258,11 @@ public class AdminDictMappingAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Show the download page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -221,6 +280,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Download a char mapping file.
+     * @param form The download form.
+     * @return The action response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -239,6 +303,11 @@ public class AdminDictMappingAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Show the upload page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -256,6 +325,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Upload a char mapping file.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -281,6 +355,11 @@ public class AdminDictMappingAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a new char mapping item.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -302,6 +381,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Update a char mapping item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -323,6 +407,11 @@ public class AdminDictMappingAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Delete a char mapping item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -364,6 +453,12 @@ public class AdminDictMappingAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Create a char mapping item.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return An optional entity of a char mapping item.
+     */
     protected OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
         try {
             return createCharMappingItem(this, form, hook);
@@ -373,6 +468,13 @@ public class AdminDictMappingAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Create a char mapping item.
+     * @param action The action.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return An optional entity of a char mapping item.
+     */
     public static OptionalEntity<CharMappingItem> createCharMappingItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
@@ -388,6 +490,12 @@ public class AdminDictMappingAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     * @param dictId The dictionary ID.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -433,6 +541,10 @@ public class AdminDictMappingAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Get the HTML response for the dictionary index page.
+     * @return The HTML response.
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }

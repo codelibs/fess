@@ -36,6 +36,8 @@ import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.util.ContainerUtil;
 
 /**
+ * The creator of mail delivery department.
+ *
  * @author jflute
  */
 public class FessMailDeliveryDepartmentCreator {

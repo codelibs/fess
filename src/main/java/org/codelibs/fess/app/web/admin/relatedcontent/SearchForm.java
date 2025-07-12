@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.relatedcontent;
 
 /**
+ * The search form for Related Content.
+ *
  * @author shinsuke
  */
 public class SearchForm {

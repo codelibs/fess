@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.pathmap;
 
 /**
+ * The search form for Path Map.
+ *
  * @author codelibs
- * @author Shunji Makino
  */
 public class SearchForm {
 

@@ -29,6 +29,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.ServletContext;
 
 /**
+ * Base action for admin pages.
+ *
  * @author codelibs
  * @author jflute
  */
@@ -62,6 +64,10 @@ public abstract class FessAdminAction extends FessBaseAction {
         }
     }
 
+    /**
+     * Get the action role.
+     * @return The action role.
+     */
     protected abstract String getActionRole();
 
     protected void write(final String path, final byte[] data) {

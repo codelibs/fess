@@ -27,9 +27,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Label Type.
+ *
  * @author codelibs
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

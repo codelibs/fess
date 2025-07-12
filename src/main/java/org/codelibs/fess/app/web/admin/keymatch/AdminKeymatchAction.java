@@ -42,8 +42,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Key Match management.
+ *
  * @author shinsuke
- * @author jflute
  */
 public class AdminKeymatchAction extends FessAdminAction {
 

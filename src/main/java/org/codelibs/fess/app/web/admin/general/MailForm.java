@@ -20,6 +20,8 @@ import org.lastaflute.web.validation.Required;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The mail form for General settings.
+ *
  * @author shinsuke
  */
 public class MailForm {

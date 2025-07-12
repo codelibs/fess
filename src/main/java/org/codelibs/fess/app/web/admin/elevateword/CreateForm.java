@@ -23,8 +23,9 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Elevate Word.
+ *
  * @author codelibs
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

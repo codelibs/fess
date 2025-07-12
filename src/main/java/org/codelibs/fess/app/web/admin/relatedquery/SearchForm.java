@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.relatedquery;
 
 /**
+ * The search form for Related Query.
+ *
  * @author shinsuke
  */
 public class SearchForm {

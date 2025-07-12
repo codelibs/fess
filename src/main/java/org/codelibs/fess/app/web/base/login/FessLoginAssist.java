@@ -44,8 +44,9 @@ import org.lastaflute.web.servlet.session.SessionManager;
 import jakarta.annotation.Resource;
 
 /**
+ * The assist for login.
+ *
  * @author jflute
- * @author shinsuke
  */
 public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, FessUser> // #change_it also UserBean
         implements PrimaryLoginManager {

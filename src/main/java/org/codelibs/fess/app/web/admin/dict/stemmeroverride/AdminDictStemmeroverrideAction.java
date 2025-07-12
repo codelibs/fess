@@ -47,10 +47,23 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Stemmer Override management.
+ *
  * @author shinsuke
  */
 public class AdminDictStemmeroverrideAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictStemmeroverrideAction() {
+        // nothing
+    }
+
+    /**
+     * The role for this action.
+     */
+    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictStemmeroverrideAction.class);
@@ -141,6 +154,11 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -279,6 +297,11 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a stemmer override item.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -363,6 +386,12 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Create a stemmer override item.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return An optional entity of a stemmer override item.
+     */
     protected OptionalEntity<StemmerOverrideItem> createStemmerOverrideItem(final CreateForm form, final VaErrorHook hook) {
         try {
             return createStemmerOverrideItem(this, form, hook);
@@ -372,6 +401,13 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Get the stemmer override item.
+     * @param action The action.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return The stemmer override item.
+     */
     public static OptionalEntity<StemmerOverrideItem> createStemmerOverrideItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
@@ -396,6 +432,10 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Get the HTML response for the dictionary index page.
+     * @return The HTML response.
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }

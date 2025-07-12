@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.group;
 
 /**
+ * The search form for Group.
+ *
  * @author shinsuke
  */
 public class SearchForm {

@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.admin.elevateword;
 
 /**
+ * The download form for Elevate Word.
+ *
  * @author shinsuke
  */
 public class DownloadForm {

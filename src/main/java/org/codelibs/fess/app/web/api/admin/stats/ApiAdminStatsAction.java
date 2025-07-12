@@ -40,6 +40,8 @@ import org.opensearch.monitor.os.OsStats;
 import org.opensearch.monitor.process.ProcessProbe;
 
 /**
+ * API action for admin stats.
+ *
  * @author shinsuke
  */
 public class ApiAdminStatsAction extends FessApiAdminAction {

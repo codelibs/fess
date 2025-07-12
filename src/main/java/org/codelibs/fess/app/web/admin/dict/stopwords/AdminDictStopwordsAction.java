@@ -45,10 +45,13 @@ import org.lastaflute.web.validation.VaErrorHook;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Stopwords management.
+ *
  * @author ma2tani
  */
 public class AdminDictStopwordsAction extends FessAdminAction {
 
+    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictStopwordsAction.class);

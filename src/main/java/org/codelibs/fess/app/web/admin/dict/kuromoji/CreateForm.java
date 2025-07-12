@@ -22,8 +22,9 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The create form for Kuromoji.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

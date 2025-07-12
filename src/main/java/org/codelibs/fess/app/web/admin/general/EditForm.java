@@ -23,8 +23,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
+ * The edit form for General settings.
+ *
  * @author shinsuke
- * @author Shunji Makino
  */
 public class EditForm {
 

@@ -20,6 +20,8 @@ import org.lastaflute.core.security.OneWayCryptographer;
 import org.lastaflute.core.security.SecurityResourceProvider;
 
 /**
+ * The provider of security resource.
+ *
  * @author jflute
  */
 public class FessSecurityResourceProvider implements SecurityResourceProvider {

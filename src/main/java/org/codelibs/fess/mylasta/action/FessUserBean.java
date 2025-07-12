@@ -23,6 +23,8 @@ import org.codelibs.fess.entity.FessUser;
 import org.lastaflute.web.login.TypicalUserBean;
 
 /**
+ * The user bean for Fess.
+ *
  * @author jflute
  */
 public class FessUserBean extends TypicalUserBean<String> { // #change_it also LoginAssist

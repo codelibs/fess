@@ -16,8 +16,9 @@
 package org.codelibs.fess.app.web.admin.design;
 
 /**
+ * The edit form for Design.
+ *
  * @author codelibs
- * @author jflute
  */
 public class EditForm {
 

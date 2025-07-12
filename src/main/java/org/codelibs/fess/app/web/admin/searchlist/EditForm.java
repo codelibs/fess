@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.admin.searchlist;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
+ * The edit form for Search List.
+ *
  * @author shinsuke
  */
 public class EditForm extends CreateForm {

@@ -47,6 +47,8 @@ import org.opensearch.index.query.QueryBuilders;
 import jakarta.annotation.Resource;
 
 /**
+ * API action for admin search list.
+ *
  * @author shinsuke
  */
 public class ApiAdminSearchlistAction extends FessApiAdminAction {

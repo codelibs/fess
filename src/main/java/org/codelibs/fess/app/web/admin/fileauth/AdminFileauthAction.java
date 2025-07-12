@@ -45,8 +45,9 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for File Authentication management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminFileauthAction extends FessAdminAction {
 

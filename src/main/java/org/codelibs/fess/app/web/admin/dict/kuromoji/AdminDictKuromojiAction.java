@@ -47,11 +47,20 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
+ * Admin action for Kuromoji dictionary management.
+ *
  * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminDictKuromojiAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictKuromojiAction() {
+        // nothing
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictKuromojiAction.class);
@@ -81,6 +90,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -91,6 +105,12 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -105,6 +125,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search for kuromoji items.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -115,6 +140,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -125,6 +155,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "kuromojiItemItems", kuromojiService.getKuromojiList(form.dictId, kuromojiPager));
@@ -141,6 +176,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -154,6 +194,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -177,6 +222,13 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param dictId The dictionary ID.
+     * @param crudMode The CRUD mode.
+     * @param id The ID of the kuromoji item.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -201,6 +253,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Show the download page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -218,6 +275,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Download a kuromoji dictionary file.
+     * @param form The download form.
+     * @return The action response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -236,6 +298,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Show the upload page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -253,6 +320,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Upload a kuromoji dictionary file.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -278,6 +350,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a new kuromoji item.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -300,6 +377,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Update a kuromoji item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -322,6 +404,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Delete a kuromoji item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -363,6 +450,12 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Create a kuromoji item.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return An optional entity of a kuromoji item.
+     */
     protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form, final VaErrorHook hook) {
         try {
             return createKuromojiItem(this, form, hook);
@@ -372,6 +465,13 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Create a kuromoji item.
+     * @param action The action.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return An optional entity of a kuromoji item.
+     */
     public static OptionalEntity<KuromojiItem> createKuromojiItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
@@ -386,6 +486,12 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     * @param dictId The dictionary ID.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -394,6 +500,10 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Verify the form.
+     * @param form The create form.
+     */
     protected void verifyForm(final CreateForm form) {
         if (form.token != null && form.token.split(" ").length > 1) {
             throwValidationError(messages -> {
@@ -411,6 +521,10 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Get the HTML response for the dictionary index page.
+     * @return The HTML response.
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }
