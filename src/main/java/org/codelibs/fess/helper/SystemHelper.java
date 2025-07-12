@@ -208,8 +208,11 @@ public class SystemHelper {
     }
 
     public String getUsername() {
-        final RequestManager requestManager = ComponentUtil.getRequestManager();
-        return requestManager.findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(Constants.GUEST_USER);
+        return getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(Constants.GUEST_USER);
+    }
+
+    protected RequestManager getRequestManager() {
+        return ComponentUtil.getRequestManager();
     }
 
     public Date getCurrentTime() {

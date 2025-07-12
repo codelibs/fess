@@ -28,10 +28,6 @@ import org.codelibs.fess.opensearch.config.exentity.BadWord;
 import org.codelibs.fess.opensearch.config.exentity.ElevateWord;
 import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
-import org.codelibs.fess.suggest.Suggester;
-import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
-import org.codelibs.fess.suggest.index.SuggestDeleteResponse;
-import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -54,6 +50,12 @@ public class SuggestHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockBadWordBhv(), "badWordBhv");
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
         ComponentUtil.register(new MockPopularWordHelper(), "popularWordHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     public void test_init() {

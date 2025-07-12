@@ -16,7 +16,6 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
-import java.util.Locale;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -43,6 +42,12 @@ public class SambaHelperTest extends UnitFessTestCase {
         ComponentUtil.register(systemProps, "systemProperties");
 
         sambaHelper = new SambaHelper();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     public void test_smb_account() throws SmbException {

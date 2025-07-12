@@ -25,8 +25,6 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.helper.PermissionHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -52,6 +50,12 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockFessConfig(), "fessConfig");
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
         ComponentUtil.register(new MockPermissionHelper(), "permissionHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     private Set<String> buildByParameter(final RoleQueryHelper roleQueryHelperImpl, final HttpServletRequest request) {

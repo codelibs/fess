@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.app.web.base.login.FessCredential;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;

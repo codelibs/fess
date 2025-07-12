@@ -39,6 +39,12 @@ public class LanguageHelperTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(new MockFessConfig());
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_createScript() {
         Map<String, Object> doc = new HashMap<>();
         assertEquals("aaa", languageHelper.createScript(doc, "aaa").getIdOrCode());

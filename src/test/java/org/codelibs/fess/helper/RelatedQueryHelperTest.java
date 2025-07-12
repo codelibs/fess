@@ -62,6 +62,12 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         inject(virtualHostHelper);
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
+    }
+
     public void test_init() {
         // Setup test data
         List<RelatedQuery> testData = new ArrayList<>();

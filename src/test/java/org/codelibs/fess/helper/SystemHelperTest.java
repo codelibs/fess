@@ -37,7 +37,11 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.request.SimpleRequestManager;
 
 public class SystemHelperTest extends UnitFessTestCase {
 
@@ -73,11 +77,26 @@ public class SystemHelperTest extends UnitFessTestCase {
             protected File getDesignJspFile(String path) {
                 return new File(desginJspRootFile, path);
             }
+
+            @Override
+            protected RequestManager getRequestManager() {
+                return new SimpleRequestManager() {
+                    public OptionalThing<LoginManager> findLoginManager(Class<?> userBeanType) {
+                        return OptionalThing.empty();
+                    }
+                };
+            }
         };
         envMap.clear();
         systemHelper.init();
         systemHelper.addShutdownHook(() -> {});
         ComponentUtil.register(systemHelper, "systemHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     public void test_getUsername() {
