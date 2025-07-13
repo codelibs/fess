@@ -23,7 +23,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 /**
  * The create form for Search List.
  *
- * @author shinsuke
  */
 public class CreateForm {
 

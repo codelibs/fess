@@ -40,7 +40,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin key match management.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminKeymatchAction extends FessApiAdminAction {
 

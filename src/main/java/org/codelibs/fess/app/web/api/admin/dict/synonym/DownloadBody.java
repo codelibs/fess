@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.synonym;
 
 import org.codelibs.fess.app.web.admin.dict.synonym.DownloadForm;
 
+/**
+ * Download body for synonym dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading synonym dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        // Use of default constructor
+    }
 }

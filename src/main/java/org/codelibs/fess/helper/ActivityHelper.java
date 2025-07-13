@@ -43,7 +43,6 @@ import jakarta.annotation.PostConstruct;
  * This class provides methods to log user actions such as login, logout, and access.
  * It supports both LTSV and ECS log formats.
  *
- * @author shinsuke
  */
 public class ActivityHelper {
 

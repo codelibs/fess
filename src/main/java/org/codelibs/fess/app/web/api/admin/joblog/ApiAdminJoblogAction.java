@@ -38,7 +38,6 @@ import jakarta.annotation.Resource;
  * Provides RESTful API endpoints for viewing and managing job execution logs in the Fess search engine.
  * Job logs contain information about crawling jobs, indexing tasks, and system maintenance operations.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminJoblogAction extends FessApiAdminAction {
 

@@ -27,7 +27,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The create form for Group.
  *
- * @author shinsuke
  */
 public class CreateForm {
 

@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Stopwords management.
  *
- * @author ma2tani
  */
 public class AdminDictStopwordsAction extends FessAdminAction {
 

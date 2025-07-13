@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
  * Provides RESTful API endpoints for managing file authentication settings in the Fess search engine.
  * File authentication settings define access credentials and permissions for file-based crawling.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminFileauthAction extends FessApiAdminAction {
 

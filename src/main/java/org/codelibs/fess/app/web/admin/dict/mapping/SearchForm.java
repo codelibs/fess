@@ -20,7 +20,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The search form for Mapping.
  *
- * @author nullpos
  */
 public class SearchForm {
 

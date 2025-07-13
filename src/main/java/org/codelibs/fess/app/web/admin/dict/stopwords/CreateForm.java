@@ -26,7 +26,6 @@ import jakarta.validation.constraints.Size;
  * This form handles the creation of stopwords that should be
  * excluded from search indexing and analysis.
  *
- * @author ma2tani
  */
 public class CreateForm {
 

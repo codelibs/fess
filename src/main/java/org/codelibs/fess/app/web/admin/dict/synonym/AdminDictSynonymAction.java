@@ -51,8 +51,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Synonym management.
  *
- * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminDictSynonymAction extends FessAdminAction {
 

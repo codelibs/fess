@@ -48,7 +48,6 @@ import jakarta.annotation.Resource;
  * Admin action for Access Token management.
  * This class provides CRUD operations for access tokens.
  *
- * @author shinsuke
  */
 public class AdminAccesstokenAction extends FessAdminAction {
 

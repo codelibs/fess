@@ -34,11 +34,32 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Manager class for handling dictionary files in the Fess search system.
+ * This class provides functionality to retrieve, store, and manage various
+ * dictionary files such as synonyms, kuromoji, protwords, and stopwords.
+ * It coordinates with DictionaryCreator instances to handle different
+ * dictionary types and manages file synchronization through ConfigSync.
+ *
+ */
 public class DictionaryManager {
     private static final Logger logger = LogManager.getLogger(DictionaryManager.class);
 
+    /** List of dictionary creators for handling different dictionary types */
     protected List<DictionaryCreator> creatorList = new ArrayList<>();
 
+    /**
+     * Default constructor for DictionaryManager.
+     * Creates a new dictionary manager with an empty creator list.
+     */
+    public DictionaryManager() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the dictionary manager after construction.
+     * Sets up the relationship between this manager and all registered creators.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -49,6 +70,15 @@ public class DictionaryManager {
         });
     }
 
+    /**
+     * Retrieves all available dictionary files from the ConfigSync storage.
+     * This method queries the ConfigSync API to get file information and
+     * uses registered DictionaryCreator instances to create appropriate
+     * DictionaryFile objects.
+     *
+     * @return an array of dictionary files available in the system
+     * @throws DictionaryException if there's an error accessing the dictionaries
+     */
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
                 .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
@@ -76,6 +106,12 @@ public class DictionaryManager {
         }
     }
 
+    /**
+     * Retrieves a specific dictionary file by its ID.
+     *
+     * @param id the unique identifier of the dictionary file to retrieve
+     * @return an OptionalEntity containing the dictionary file if found, empty otherwise
+     */
     public OptionalEntity<DictionaryFile<? extends DictionaryItem>> getDictionaryFile(final String id) {
         for (final DictionaryFile<? extends DictionaryItem> dictFile : getDictionaryFiles()) {
             if (dictFile.getId().equals(id)) {
@@ -85,6 +121,16 @@ public class DictionaryManager {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Stores or updates a dictionary file in the ConfigSync storage.
+     * This method checks for concurrent modifications by comparing timestamps
+     * and uploads the file content to the ConfigSync API.
+     *
+     * @param dictFile the dictionary file metadata to store
+     * @param file the actual file containing the dictionary content
+     * @throws DictionaryException if the file was updated by another process,
+     *         if the file doesn't exist, or if there's an error during storage
+     */
     public void store(final DictionaryFile<? extends DictionaryItem> dictFile, final File file) {
         getDictionaryFile(dictFile.getId()).ifPresent(currentFile -> {
             if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
@@ -107,10 +153,24 @@ public class DictionaryManager {
         });
     }
 
+    /**
+     * Gets the HTTP response containing the content of a dictionary file.
+     * This method retrieves the raw file content from ConfigSync storage.
+     *
+     * @param dictFile the dictionary file to retrieve content for
+     * @return a CurlResponse containing the file content
+     */
     public CurlResponse getContentResponse(final DictionaryFile<? extends DictionaryItem> dictFile) {
         return ComponentUtil.getCurlHelper().get("/_configsync/file").param("path", dictFile.getPath()).execute();
     }
 
+    /**
+     * Adds a new dictionary creator to this manager.
+     * Dictionary creators are responsible for creating specific types
+     * of dictionary files based on file paths and timestamps.
+     *
+     * @param creator the dictionary creator to add
+     */
     public void addCreator(final DictionaryCreator creator) {
         creatorList.add(creator);
     }

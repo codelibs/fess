@@ -49,7 +49,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Kuromoji dictionary management.
  *
- * @author shinsuke
  */
 public class AdminDictKuromojiAction extends FessAdminAction {
 

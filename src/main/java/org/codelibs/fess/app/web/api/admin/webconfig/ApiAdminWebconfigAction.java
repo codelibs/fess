@@ -45,7 +45,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin web configuration management.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminWebconfigAction extends FessApiAdminAction {
 

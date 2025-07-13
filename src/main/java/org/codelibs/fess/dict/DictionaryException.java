@@ -17,14 +17,31 @@ package org.codelibs.fess.dict;
 
 import org.codelibs.fess.exception.FessSystemException;
 
+/**
+ * Exception thrown when dictionary operations encounter errors.
+ * This exception is typically used for issues during dictionary file
+ * reading, writing, parsing, or other dictionary-related operations.
+ */
 public class DictionaryException extends FessSystemException {
 
+    /** Serial version UID for serialization. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a new DictionaryException with the specified message and cause.
+     *
+     * @param message the detail message
+     * @param cause the underlying cause of the exception
+     */
     public DictionaryException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Creates a new DictionaryException with the specified message.
+     *
+     * @param message the detail message
+     */
     public DictionaryException(final String message) {
         super(message);
     }

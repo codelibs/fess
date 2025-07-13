@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.stopwords;
 
 import org.codelibs.fess.app.web.admin.dict.stopwords.DownloadForm;
 
+/**
+ * Download body for stop words dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading stop words dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        // Use of default constructor
+    }
 }

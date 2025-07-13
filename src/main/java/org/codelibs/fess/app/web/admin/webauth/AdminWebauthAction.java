@@ -47,8 +47,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Web Authentication management.
  *
- * @author shinsuke
- * @author Shunji Makino
  */
 public class AdminWebauthAction extends FessAdminAction {
 

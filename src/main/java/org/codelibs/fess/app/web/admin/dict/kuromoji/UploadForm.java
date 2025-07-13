@@ -21,7 +21,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The upload form for Kuromoji.
  *
- * @author shinsuke
  */
 public class UploadForm {
 

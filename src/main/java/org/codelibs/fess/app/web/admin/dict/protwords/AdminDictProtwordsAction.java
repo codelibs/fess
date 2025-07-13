@@ -49,7 +49,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Protected Words management.
  *
- * @author ma2tani
  */
 public class AdminDictProtwordsAction extends FessAdminAction {
 

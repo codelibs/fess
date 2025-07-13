@@ -15,9 +15,29 @@
  */
 package org.codelibs.fess.dict;
 
+/**
+ * Abstract base class for all dictionary items in the Fess search system.
+ * Dictionary items are used to store entries in various dictionaries such as
+ * synonyms, kuromoji, protwords, and stopwords dictionaries.
+ *
+ */
 public abstract class DictionaryItem {
+    /** The unique identifier for this dictionary item */
     protected long id;
 
+    /**
+     * Default constructor for DictionaryItem.
+     * Creates a new dictionary item with default values.
+     */
+    public DictionaryItem() {
+        // Default constructor
+    }
+
+    /**
+     * Gets the unique identifier for this dictionary item.
+     *
+     * @return the ID of this dictionary item
+     */
     public long getId() {
         return id;
     }

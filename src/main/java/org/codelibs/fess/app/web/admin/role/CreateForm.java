@@ -27,8 +27,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The create form for Role.
  *
- * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

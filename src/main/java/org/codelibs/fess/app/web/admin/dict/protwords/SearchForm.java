@@ -20,7 +20,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The search form for Protected Words.
  *
- * @author ma2tani
  */
 public class SearchForm {
 

@@ -40,7 +40,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Role management.
  *
- * @author shinsuke
  */
 public class AdminRoleAction extends FessAdminAction {
 

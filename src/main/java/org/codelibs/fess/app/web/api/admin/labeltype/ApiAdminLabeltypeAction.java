@@ -45,7 +45,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin label type management.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminLabeltypeAction extends FessApiAdminAction {
 

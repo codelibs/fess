@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Key Match management.
  *
- * @author shinsuke
  */
 public class AdminKeymatchAction extends FessAdminAction {
 

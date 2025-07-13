@@ -23,17 +23,36 @@ import org.codelibs.fess.Constants;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Abstract base class for creating dictionary files from file paths.
+ * Dictionary creators are responsible for recognizing specific file patterns
+ * and creating appropriate DictionaryFile instances for them.
+ */
 public abstract class DictionaryCreator {
 
+    /** Pattern used to match file paths that this creator can handle. */
     protected Pattern pattern;
 
+    /** Manager for dictionary operations and lifecycle. */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /**
+     * Creates a new DictionaryCreator with the specified pattern.
+     *
+     * @param pattern the regular expression pattern to match file paths
+     */
     protected DictionaryCreator(final String pattern) {
         this.pattern = Pattern.compile(pattern);
     }
 
+    /**
+     * Creates a dictionary file for the given path and timestamp if it matches this creator's pattern.
+     *
+     * @param path the file path to create a dictionary file for
+     * @param timestamp the timestamp of the dictionary file
+     * @return a DictionaryFile instance if the path matches, null otherwise
+     */
     public DictionaryFile<? extends DictionaryItem> create(final String path, final Date timestamp) {
         if (!isTarget(path)) {
             return null;
@@ -42,10 +61,22 @@ public abstract class DictionaryCreator {
         return newDictionaryFile(encodePath(path), path, timestamp);
     }
 
+    /**
+     * Encodes a file path using Base64 URL-safe encoding.
+     *
+     * @param path the file path to encode
+     * @return the Base64 encoded path
+     */
     protected String encodePath(final String path) {
         return Base64.getUrlEncoder().encodeToString(path.getBytes(Constants.CHARSET_UTF_8));
     }
 
+    /**
+     * Checks if the given path matches this creator's pattern.
+     *
+     * @param path the file path to check
+     * @return true if the path matches the pattern, false otherwise
+     */
     protected boolean isTarget(final String path) {
         return pattern.matcher(path).find();
     }
@@ -60,6 +91,11 @@ public abstract class DictionaryCreator {
      */
     protected abstract DictionaryFile<? extends DictionaryItem> newDictionaryFile(String id, String path, Date timestamp);
 
+    /**
+     * Sets the dictionary manager for this creator.
+     *
+     * @param dictionaryManager the dictionary manager to set
+     */
     public void setDictionaryManager(final DictionaryManager dictionaryManager) {
         this.dictionaryManager = dictionaryManager;
     }

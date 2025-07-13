@@ -28,7 +28,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Dashboard.
  *
- * @author shinsuke
  */
 public class AdminDashboardAction extends FessAdminAction {
 

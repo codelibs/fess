@@ -17,7 +17,23 @@ package org.codelibs.fess.app.web.admin.dict.mapping;
 
 import org.lastaflute.web.validation.Required;
 
+/**
+ * The download form for mapping dictionary.
+ * This form is used for downloading mapping dictionary files from the admin interface.
+ *
+ */
 public class DownloadForm {
+
+    /**
+     * Dictionary ID for identifying the mapping dictionary to download.
+     */
     @Required
     public String dictId;
+
+    /**
+     * Default constructor.
+     */
+    public DownloadForm() {
+        // Use of default constructor
+    }
 }

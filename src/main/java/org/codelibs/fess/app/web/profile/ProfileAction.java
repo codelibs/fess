@@ -14,8 +14,6 @@
  * governing permissions and limitations under the License.
  */
 /**
- * @author Keiichi Watanabe
- * @author shinsuke
  */
 package org.codelibs.fess.app.web.profile;
 

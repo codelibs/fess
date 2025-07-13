@@ -26,7 +26,6 @@ import jakarta.validation.constraints.Size;
  * Mapping dictionaries allow administrators to define synonym mappings
  * where multiple input terms can be mapped to a single output term for search normalization.
  *
- * @author nullpos
  */
 public class CreateForm {
 

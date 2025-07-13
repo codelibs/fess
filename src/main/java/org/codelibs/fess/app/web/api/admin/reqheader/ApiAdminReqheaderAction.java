@@ -42,7 +42,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin request header management.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminReqheaderAction extends FessApiAdminAction {
 

@@ -20,7 +20,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The search form for Kuromoji.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

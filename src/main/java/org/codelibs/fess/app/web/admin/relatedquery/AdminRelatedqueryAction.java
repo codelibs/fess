@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Related Query management.
  *
- * @author shinsuke
  */
 public class AdminRelatedqueryAction extends FessAdminAction {
 

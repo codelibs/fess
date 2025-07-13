@@ -40,7 +40,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Boost Document management.
  *
- * @author shinsuke
  */
 public class AdminBoostdocAction extends FessAdminAction {
 

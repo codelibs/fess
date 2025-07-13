@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.crawlinginfo;
 /**
  * The search form for Crawling Info.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

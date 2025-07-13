@@ -28,12 +28,25 @@ import org.opensearch.index.query.QueryBuilderVisitor;
 import org.opensearch.index.query.QueryRewriteContext;
 import org.opensearch.index.query.QueryShardContext;
 
+/**
+ * Default implementation of QueryBuilder that wraps other QueryBuilder instances
+ * and provides additional functionality for adding inner queries dynamically.
+ * Supports both BoolQueryBuilder and DisMaxQueryBuilder as underlying implementations.
+ */
 public class DefaultQueryBuilder implements QueryBuilder {
 
+    /** The underlying query builder being wrapped. */
     private final QueryBuilder queryBuilder;
 
+    /** The type of the underlying query builder. */
     private final QueryType queryType;
 
+    /**
+     * Creates a new DefaultQueryBuilder wrapping the specified QueryBuilder.
+     *
+     * @param queryBuilder the query builder to wrap (must be BoolQueryBuilder or DisMaxQueryBuilder)
+     * @throws IllegalArgumentException if the query builder type is not supported
+     */
     public DefaultQueryBuilder(final QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
         if (queryBuilder instanceof BoolQueryBuilder) {
@@ -45,6 +58,14 @@ public class DefaultQueryBuilder implements QueryBuilder {
         }
     }
 
+    /**
+     * Adds an inner query builder to the wrapped query.
+     * For BoolQueryBuilder, adds as a should clause.
+     * For DisMaxQueryBuilder, adds as a query.
+     *
+     * @param innerQueryBuilder the query builder to add
+     * @return this instance for method chaining
+     */
     public DefaultQueryBuilder add(final QueryBuilder innerQueryBuilder) {
         switch (queryType) {
         case BOOL:
@@ -59,55 +80,118 @@ public class DefaultQueryBuilder implements QueryBuilder {
         return this;
     }
 
+    /**
+     * Enumeration of supported query types.
+     */
     enum QueryType {
-        BOOL, DISMAX;
+        /** Boolean query type. */
+        BOOL,
+        /** DisMax query type. */
+        DISMAX;
     }
 
+    /**
+     * Returns the writeable name of the wrapped query builder.
+     *
+     * @return the writeable name
+     */
     @Override
     public String getWriteableName() {
         return queryBuilder.getWriteableName();
     }
 
+    /**
+     * Creates a Lucene Query from this query builder.
+     *
+     * @param context the query shard context
+     * @return the Lucene Query
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     public Query toQuery(final QueryShardContext context) throws IOException {
         return queryBuilder.toQuery(context);
     }
 
+    /**
+     * Returns whether this query builder is a fragment.
+     *
+     * @return true if this is a fragment, false otherwise
+     */
     @Override
     public boolean isFragment() {
         return queryBuilder.isFragment();
     }
 
+    /**
+     * Sets the query name.
+     *
+     * @param queryName the query name to set
+     * @return the query builder
+     */
     @Override
     public QueryBuilder queryName(final String queryName) {
         return queryBuilder.queryName(queryName);
     }
 
+    /**
+     * Returns the query name.
+     *
+     * @return the query name
+     */
     @Override
     public String queryName() {
         return queryBuilder.queryName();
     }
 
+    /**
+     * Returns the boost value.
+     *
+     * @return the boost value
+     */
     @Override
     public float boost() {
         return queryBuilder.boost();
     }
 
+    /**
+     * Sets the boost value.
+     *
+     * @param boost the boost value to set
+     * @return the query builder
+     */
     @Override
     public QueryBuilder boost(final float boost) {
         return queryBuilder.boost(boost);
     }
 
+    /**
+     * Applies a filter to the query.
+     *
+     * @param filter the filter query builder
+     * @return the query builder
+     */
     @Override
     public QueryBuilder filter(QueryBuilder filter) {
         return queryBuilder.filter(filter);
     }
 
+    /**
+     * Returns the name of the query.
+     *
+     * @return the query name
+     */
     @Override
     public String getName() {
         return queryBuilder.getName();
     }
 
+    /**
+     * Rewrites the query using the provided rewrite context.
+     *
+     * @param queryShardContext the query rewrite context
+     * @return the rewritten query builder
+     * @throws IOException if an I/O error occurs during rewriting
+     */
     @Override
     public QueryBuilder rewrite(final QueryRewriteContext queryShardContext) throws IOException {
         return queryBuilder.rewrite(queryShardContext);

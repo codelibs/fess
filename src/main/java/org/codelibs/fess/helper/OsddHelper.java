@@ -33,7 +33,6 @@ import jakarta.annotation.PostConstruct;
 /**
  * Helper class for Open Search Description Document.
  *
- * @author shinsuke
  *
  */
 public class OsddHelper {

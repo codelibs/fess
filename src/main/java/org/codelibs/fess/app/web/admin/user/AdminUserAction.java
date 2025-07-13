@@ -51,7 +51,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for User management.
  *
- * @author shinsuke
  */
 public class AdminUserAction extends FessAdminAction {
 

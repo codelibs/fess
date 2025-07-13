@@ -54,7 +54,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Bad Word management.
  *
- * @author Keiichi Watanabe
  */
 public class AdminBadwordAction extends FessAdminAction {
 

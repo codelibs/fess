@@ -17,9 +17,15 @@ package org.codelibs.fess.app.web.admin.elevateword;
 
 /**
  * The download form for Elevate Word.
+ * This form is used for downloading elevate word configurations from the admin interface.
  *
- * @author shinsuke
  */
 public class DownloadForm {
 
+    /**
+     * Default constructor.
+     */
+    public DownloadForm() {
+        // Use of default constructor
+    }
 }

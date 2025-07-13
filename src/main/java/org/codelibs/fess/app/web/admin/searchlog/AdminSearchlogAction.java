@@ -32,7 +32,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Search Log.
  *
- * @author shinsuke
  */
 public class AdminSearchlogAction extends FessAdminAction {
 

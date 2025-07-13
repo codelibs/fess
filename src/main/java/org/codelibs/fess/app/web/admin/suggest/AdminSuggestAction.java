@@ -27,7 +27,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for suggest management.
  *
- * @author yfujita
  */
 public class AdminSuggestAction extends FessAdminAction {
 

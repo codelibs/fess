@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for General settings.
  *
- * @author shinsuke
  */
 public class AdminGeneralAction extends FessAdminAction {
 

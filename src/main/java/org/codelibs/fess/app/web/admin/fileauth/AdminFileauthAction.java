@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for File Authentication management.
  *
- * @author shinsuke
  */
 public class AdminFileauthAction extends FessAdminAction {
 

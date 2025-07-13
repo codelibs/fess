@@ -52,7 +52,6 @@ import jakarta.annotation.Resource;
 /**
  * The base action for Fess.
  *
- * @author jflute
  */
 public abstract class FessBaseAction extends TypicalAction // has several interfaces for direct use
         implements LaValidatable<FessMessages>, FessHtmlPath {

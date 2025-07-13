@@ -20,7 +20,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The search form for Stemmer Override.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

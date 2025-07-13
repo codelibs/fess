@@ -42,7 +42,6 @@ import org.opensearch.monitor.process.ProcessProbe;
 /**
  * API action for admin statistics management.
  *
- * @author shinsuke
  */
 public class ApiAdminStatsAction extends FessApiAdminAction {
 

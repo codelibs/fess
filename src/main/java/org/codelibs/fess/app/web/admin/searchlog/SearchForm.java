@@ -22,7 +22,6 @@ import org.codelibs.fess.util.ComponentUtil;
 /**
  * The search form for Search Log.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

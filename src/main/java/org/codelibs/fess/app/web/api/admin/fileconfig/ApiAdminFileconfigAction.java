@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
  * Provides RESTful API endpoints for managing file crawling configuration settings in the Fess search engine.
  * File configurations define settings for crawling file systems, FTP servers, and other file-based data sources.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminFileconfigAction extends FessApiAdminAction {
 

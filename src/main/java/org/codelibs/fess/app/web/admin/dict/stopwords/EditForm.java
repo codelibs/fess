@@ -19,16 +19,34 @@ import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
- * The edit form for Stopwords.
+ * Form class for editing stopwords dictionary entries in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing stopwords entries.
+ * Stopwords are common words that are typically ignored during text indexing and search operations.
  *
- * @author ma2tani
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The unique identifier of the stopwords dictionary entry being edited.
+     * This is a required field for identifying which dictionary entry to update.
+     */
     @Required
     @ValidateTypeFailure
     public Long id;
 
+    /**
+     * Returns a display-friendly identifier combining the dictionary ID and entry ID.
+     * This method creates a composite identifier for UI display purposes.
+     *
+     * @return A string in the format "dictId:id" for display purposes
+     */
     public String getDisplayId() {
         return dictId + ":" + id;
     }

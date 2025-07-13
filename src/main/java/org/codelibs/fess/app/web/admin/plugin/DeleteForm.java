@@ -19,12 +19,33 @@ import org.lastaflute.web.validation.Required;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for plugin deletion operations in the admin interface.
+ * Contains validation rules for plugin name and version information.
+ */
 public class DeleteForm {
 
+    /**
+     * Creates a new instance of DeleteForm.
+     * This constructor initializes the form for plugin deletion operations
+     * in the admin interface with validation rules for plugin information.
+     */
+    public DeleteForm() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
+     * The name of the plugin to delete.
+     * Required field with maximum length of 100 characters.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The version of the plugin to delete.
+     * Optional field with maximum length of 100 characters.
+     */
     @Size(max = 100)
     public String version;
 

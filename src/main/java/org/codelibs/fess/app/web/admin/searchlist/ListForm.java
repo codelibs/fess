@@ -36,7 +36,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The list form for Search List.
  *
- * @author shinsuke
  */
 public class ListForm extends SearchRequestParams {
 

@@ -44,7 +44,6 @@ import org.lastaflute.web.response.JsonResponse;
 /**
  * API action for admin access token.
  *
- * @author shinsuke
  */
 public class ApiAdminAccesstokenAction extends FessApiAdminAction {
 

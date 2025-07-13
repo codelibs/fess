@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.keymatch;
 
 import org.codelibs.fess.app.web.admin.keymatch.EditForm;
 
+/**
+ * Request body class for key match edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for key match management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        // Default constructor
+    }
 
 }

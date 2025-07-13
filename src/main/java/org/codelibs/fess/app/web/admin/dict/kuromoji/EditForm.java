@@ -18,12 +18,34 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
+/**
+ * Form class for editing Kuromoji dictionary entries in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing Kuromoji dictionary entries.
+ * Kuromoji is a Japanese morphological analyzer, and this dictionary manages custom tokenization rules.
+ */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The unique identifier of the Kuromoji dictionary entry being edited.
+     * This is a required field for identifying which dictionary entry to update.
+     */
     @Required
     @ValidateTypeFailure
     public Long id;
 
+    /**
+     * Returns a display-friendly identifier combining the dictionary ID and entry ID.
+     * This method creates a composite identifier for UI display purposes.
+     *
+     * @return A string in the format "dictId:id" for display purposes
+     */
     public String getDisplayId() {
         return dictId + ":" + id;
     }

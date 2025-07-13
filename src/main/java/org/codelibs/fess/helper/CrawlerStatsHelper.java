@@ -43,7 +43,6 @@ import jakarta.annotation.PreDestroy;
  * objects and provides methods to begin tracking, record events, and
  * finalize statistics collection.
  *
- * @author shinsuke
  */
 public class CrawlerStatsHelper {
 

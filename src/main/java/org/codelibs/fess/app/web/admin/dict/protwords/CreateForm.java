@@ -26,7 +26,6 @@ import jakarta.validation.constraints.Size;
  * Protected words are terms that should not be modified or analyzed during
  * text processing, preserving their original form in search indexes.
  *
- * @author ma2tani
  */
 public class CreateForm {
 

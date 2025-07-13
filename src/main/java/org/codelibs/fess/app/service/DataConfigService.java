@@ -57,6 +57,15 @@ public class DataConfigService extends FessAppService {
     protected FessConfig fessConfig;
 
     /**
+     * Creates a new instance of DataConfigService.
+     * This constructor initializes the service for managing data configuration operations
+     * including CRUD operations and search functionality.
+     */
+    public DataConfigService() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
      * Retrieves a paginated list of data configurations based on search criteria.
      *
      * <p>This method performs a paginated search through all data configurations,

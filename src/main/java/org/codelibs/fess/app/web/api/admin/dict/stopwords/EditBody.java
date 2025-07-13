@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.stopwords;
 
 import org.codelibs.fess.app.web.admin.dict.stopwords.EditForm;
 
+/**
+ * Request body class for stop words dictionary edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for stop words dictionary management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        // Default constructor
+    }
+
 }

@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Scheduler management.
  *
- * @author shinsuke
  */
 public class AdminSchedulerAction extends FessAdminAction {
 

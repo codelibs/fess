@@ -21,7 +21,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The upload form for Stopwords.
  *
- * @author ma2tani
  */
 public class UploadForm {
 

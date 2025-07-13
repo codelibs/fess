@@ -26,7 +26,6 @@ import jakarta.validation.constraints.Size;
  * Kuromoji is a Japanese morphological analyzer and this form allows
  * administrators to add custom dictionary entries for better Japanese text analysis.
  *
- * @author shinsuke
  */
 public class CreateForm {
 

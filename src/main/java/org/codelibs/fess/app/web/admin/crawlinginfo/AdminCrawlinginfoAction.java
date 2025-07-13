@@ -35,7 +35,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Crawling Info management.
  *
- * @author shinsuke
  */
 public class AdminCrawlinginfoAction extends FessAdminAction {
 

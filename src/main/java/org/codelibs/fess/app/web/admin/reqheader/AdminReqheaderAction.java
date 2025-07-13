@@ -46,7 +46,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Request Header management.
  *
- * @author shinsuke
  */
 public class AdminReqheaderAction extends FessAdminAction {
 

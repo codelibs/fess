@@ -39,7 +39,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for System Info.
  *
- * @author Keiichi Watanabe
  */
 public class AdminSysteminfoAction extends FessAdminAction {
 

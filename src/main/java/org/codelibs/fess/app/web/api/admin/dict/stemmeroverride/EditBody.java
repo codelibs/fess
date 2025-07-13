@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.stemmeroverride;
 
 import org.codelibs.fess.app.web.admin.dict.stemmeroverride.EditForm;
 
+/**
+ * Request body class for stemmer override dictionary edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for stemmer override dictionary management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        // Default constructor
+    }
+
 }

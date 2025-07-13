@@ -33,7 +33,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The create form for Web Config.
  *
- * @author shinsuke
  */
 public class CreateForm {
 

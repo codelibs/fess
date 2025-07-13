@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for configuration wizard.
  *
- * @author shinsuke
  */
 public class AdminWizardAction extends FessAdminAction {
 

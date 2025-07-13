@@ -32,7 +32,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Failure URL management.
  *
- * @author shinsuke
  */
 public class AdminFailureurlAction extends FessAdminAction {
 

@@ -26,8 +26,6 @@ import jakarta.validation.constraints.Size;
  * This form handles the creation of stemmer override rules that modify
  * the stemming behavior for specific words.
  *
- * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class CreateForm {
 

@@ -21,22 +21,50 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The edit form for File Authentication.
+ * Form class for editing file authentication configurations in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing file authentication entries,
+ * including tracking information for optimistic locking and audit trails.
+ * File authentication configurations define access control for file system crawling operations.
  *
- * @author Keiichi Watanabe
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The unique identifier of the file authentication configuration being edited.
+     * This is a required field for identifying which file authentication entry to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this file authentication configuration.
+     * Used for audit trail purposes to track who made changes.
+     * Maximum length is 255 characters.
+     */
     @Size(max = 255)
     public String updatedBy;
 
+    /**
+     * The timestamp when this file authentication configuration was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the file authentication configuration for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the configuration hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

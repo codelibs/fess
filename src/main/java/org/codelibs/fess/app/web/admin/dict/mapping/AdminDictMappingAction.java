@@ -51,7 +51,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Mapping management.
  *
- * @author nullpos
  */
 public class AdminDictMappingAction extends FessAdminAction {
 

@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.elevateword;
 
 import org.codelibs.fess.app.web.admin.elevateword.DownloadForm;
 
+/**
+ * Download body for elevate word API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading elevate word configurations via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        // Use of default constructor
+    }
 }

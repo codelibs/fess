@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.scheduler;
 /**
  * The search form for Scheduler.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

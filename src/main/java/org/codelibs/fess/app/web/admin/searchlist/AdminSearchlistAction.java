@@ -54,7 +54,6 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Admin action for Search List.
  *
- * @author shinsuke
  */
 public class AdminSearchlistAction extends FessAdminAction {
 

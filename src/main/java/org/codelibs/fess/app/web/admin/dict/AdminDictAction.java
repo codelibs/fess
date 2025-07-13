@@ -30,7 +30,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Dictionary management.
  *
- * @author Keiichi Watanabe
  */
 public class AdminDictAction extends FessAdminAction {
 

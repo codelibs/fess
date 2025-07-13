@@ -42,7 +42,6 @@ import jakarta.annotation.Resource;
  * Provides RESTful API endpoints for managing duplicate host settings in the Fess search engine.
  * Duplicate host settings help prevent indexing the same content from multiple similar URLs.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
 

@@ -49,7 +49,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Stemmer Override management.
  *
- * @author shinsuke
  */
 public class AdminDictStemmeroverrideAction extends FessAdminAction {
 

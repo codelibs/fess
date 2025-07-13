@@ -83,6 +83,15 @@ public class DataIndexHelper {
     protected final List<DataCrawlingThread> dataCrawlingThreadList = Collections.synchronizedList(new ArrayList<>());
 
     /**
+     * Creates a new instance of DataIndexHelper.
+     * This constructor initializes the helper for managing data crawling operations,
+     * including thread pool management and session-based crawling coordination.
+     */
+    public DataIndexHelper() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
      * Initiates crawling for all configured data stores.
      * This method retrieves all available data configurations and
      * starts the crawling process for each one.

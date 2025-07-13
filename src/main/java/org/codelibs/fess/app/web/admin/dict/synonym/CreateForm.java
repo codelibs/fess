@@ -26,7 +26,6 @@ import jakarta.validation.constraints.Size;
  * This form handles the creation of synonym mappings that expand
  * search queries to include related terms.
  *
- * @author shinsuke
  */
 public class CreateForm {
 

@@ -21,7 +21,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The upload form for Mapping.
  *
- * @author nullpos
  */
 public class UploadForm {
 

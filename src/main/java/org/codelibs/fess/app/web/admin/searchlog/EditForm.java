@@ -23,7 +23,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The edit form for Search Log.
  *
- * @author shinsuke
  */
 public class EditForm {
 

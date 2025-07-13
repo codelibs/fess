@@ -51,9 +51,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Web Config management.
  *
- * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
  */
 public class AdminWebconfigAction extends FessAdminAction {
 

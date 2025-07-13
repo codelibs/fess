@@ -50,8 +50,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for File Config management.
  *
- * @author shinsuke
- * @author Keiichi Watanabe
  */
 public class AdminFileconfigAction extends FessAdminAction {
 

@@ -45,7 +45,6 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
  * Admin action for Plugin management.
  * This class provides functionality for installing, deleting, and managing plugins in the Fess system.
  *
- * @author shinsuke
  */
 public class AdminPluginAction extends FessAdminAction {
 

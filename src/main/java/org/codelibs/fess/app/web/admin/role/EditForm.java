@@ -21,22 +21,49 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The edit form for Role.
+ * Form class for editing user roles in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing role entries,
+ * including tracking information for optimistic locking and audit trails.
+ * Roles define permissions and access levels for users within the system.
  *
- * @author Keiichi Watanabe
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The unique identifier of the role being edited.
+     * This is a required field for identifying which role to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this role.
+     * Used for audit trail purposes to track who made changes.
+     */
     @Size(max = 1000)
     public String updatedBy;
 
+    /**
+     * The timestamp when this role was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the role for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the role hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

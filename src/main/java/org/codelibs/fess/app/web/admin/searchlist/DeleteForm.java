@@ -19,11 +19,32 @@ import org.lastaflute.web.validation.Required;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for deleting documents from search results in the admin interface.
+ * Contains query and document ID fields for targeted document deletion.
+ */
 public class DeleteForm {
 
+    /**
+     * Creates a new instance of DeleteForm.
+     * This constructor initializes the form for deleting documents from search results
+     * in the admin interface with validation rules for query and document identification.
+     */
+    public DeleteForm() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
+     * The search query used to find the document.
+     * Optional field with maximum length of 1000 characters.
+     */
     @Size(max = 1000)
     public String q;
 
+    /**
+     * The document ID of the document to delete.
+     * Required field for identifying the specific document.
+     */
     @Required
     public String docId;
 

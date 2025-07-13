@@ -44,7 +44,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 /**
  * Admin action for Design management.
  *
- * @author jflute
  */
 public class AdminDesignAction extends FessAdminAction {
 

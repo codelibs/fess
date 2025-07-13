@@ -35,7 +35,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Job Log.
  *
- * @author shinsuke
  */
 public class AdminJoblogAction extends FessAdminAction {
 

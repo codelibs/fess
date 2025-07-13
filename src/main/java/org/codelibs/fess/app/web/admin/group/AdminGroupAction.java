@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Group management.
  *
- * @author shinsuke
  */
 public class AdminGroupAction extends FessAdminAction {
 

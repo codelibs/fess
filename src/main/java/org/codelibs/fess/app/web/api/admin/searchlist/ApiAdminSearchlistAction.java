@@ -49,7 +49,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin search list management.
  *
- * @author shinsuke
  */
 public class ApiAdminSearchlistAction extends FessApiAdminAction {
 

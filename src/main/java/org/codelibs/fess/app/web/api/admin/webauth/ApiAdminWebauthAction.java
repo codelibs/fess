@@ -42,7 +42,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin web authentication management.
  *
- * @author Keiichi Watanabe
  */
 public class ApiAdminWebauthAction extends FessApiAdminAction {
 

@@ -21,22 +21,49 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The edit form for Boost Document.
+ * Form class for editing boost document configurations in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing boost document entries,
+ * including tracking information for optimistic locking and audit trails.
+ * Boost documents are used to increase the relevance score of specific documents in search results.
  *
- * @author shinsuke
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The unique identifier of the boost document configuration being edited.
+     * This is a required field for identifying which boost document to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this boost document configuration.
+     * Used for audit trail purposes to track who made changes.
+     */
     @Size(max = 1000)
     public String updatedBy;
 
+    /**
+     * The timestamp when this boost document configuration was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the boost document configuration for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the configuration hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

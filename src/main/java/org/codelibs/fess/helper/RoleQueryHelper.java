@@ -47,7 +47,6 @@ import jakarta.servlet.http.HttpServletRequest;
  * a request header and a cookie. The format of the default value
  * is "[\d]+\nrole1,role2,role3", which you can encrypt.
  *
- * @author shinsuke
  *
  */
 public class RoleQueryHelper {

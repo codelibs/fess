@@ -18,8 +18,13 @@ package org.codelibs.fess.app.web.admin.badword;
 /**
  * The download form for Bad Word.
  *
- * @author shinsuke
  */
 public class DownloadForm {
 
+    /**
+     * Default constructor.
+     */
+    public DownloadForm() {
+        // Use of default constructor
+    }
 }

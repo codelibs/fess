@@ -15,9 +15,24 @@
  */
 package org.codelibs.fess.dict;
 
+/**
+ * Exception thrown when a dictionary has expired and is no longer valid.
+ * This runtime exception indicates that a dictionary file or dictionary data
+ * has exceeded its lifetime and should be refreshed or reloaded.
+ */
 public class DictionaryExpiredException extends RuntimeException {
 
+    /** Serial version UID for serialization. */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Creates a new instance of DictionaryExpiredException.
+     * This constructor initializes the exception to indicate that a dictionary
+     * has expired and is no longer valid for use.
+     */
+    public DictionaryExpiredException() {
+        // Default constructor with explicit documentation
+    }
 
     //    public DictionaryExpiredException() {
     //        super("errors.expired_dict_id");

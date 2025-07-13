@@ -22,9 +22,22 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.dbflute.optional.OptionalThing;
 
+/**
+ * Abstract base class for rank fusion searchers in the Fess search system.
+ * Rank fusion searchers are responsible for executing search queries and
+ * can be combined to implement advanced ranking strategies.
+ */
 public abstract class RankFusionSearcher {
+    /** The name of this searcher, lazily initialized. */
     protected String name;
 
+    /**
+     * Returns the name of this searcher.
+     * The name is derived from the class name by converting it to lowercase
+     * and removing the "Searcher" suffix.
+     *
+     * @return the searcher name
+     */
     public String getName() {
         if (name == null) {
             name = StringUtil.decamelize(this.getClass().getSimpleName().replace("Searcher", StringUtil.EMPTY)).toLowerCase(Locale.ENGLISH);
@@ -32,6 +45,15 @@ public abstract class RankFusionSearcher {
         return name;
     }
 
+    /**
+     * Executes a search operation with the specified parameters.
+     * This method must be implemented by concrete searcher classes.
+     *
+     * @param query the search query string
+     * @param params the search request parameters including pagination, filters, etc.
+     * @param userBean the optional user bean for access control and personalization
+     * @return the search result containing matched documents and metadata
+     */
     protected abstract SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean);
 
 }

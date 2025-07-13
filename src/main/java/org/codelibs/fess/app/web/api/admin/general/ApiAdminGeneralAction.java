@@ -34,7 +34,6 @@ import jakarta.annotation.Resource;
  * Provides RESTful API endpoints for managing general system configuration settings in the Fess search engine.
  * General settings include system-wide parameters, LDAP configuration, and core application settings.
  *
- * @author shinsuke
  */
 public class ApiAdminGeneralAction extends FessApiAdminAction {
 

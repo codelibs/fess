@@ -87,6 +87,14 @@ public class DataConfigPager implements Serializable {
     public String description;
 
     /**
+     * Creates a new DataConfigPager with default values.
+     * Initializes pagination settings and clears all search parameters.
+     */
+    public DataConfigPager() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
      * Clears all paging state and search/filter parameters.
      * Resets the pager to its initial state with default values.
      */

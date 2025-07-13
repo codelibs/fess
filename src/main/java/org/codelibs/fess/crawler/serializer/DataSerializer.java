@@ -41,7 +41,6 @@ import com.esotericsoftware.kryo.io.Output;
  * per thread to avoid synchronization overhead.
  * </p>
  *
- * @author CodeLibs Project
  */
 public class DataSerializer {
 

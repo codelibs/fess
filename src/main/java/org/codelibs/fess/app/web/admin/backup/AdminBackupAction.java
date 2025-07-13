@@ -89,7 +89,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Backup management.
  *
- * @author shinsuke
  */
 public class AdminBackupAction extends FessAdminAction {
 

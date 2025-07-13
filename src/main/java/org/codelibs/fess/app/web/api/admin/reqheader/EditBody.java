@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.reqheader;
 
 import org.codelibs.fess.app.web.admin.reqheader.EditForm;
 
+/**
+ * Request body class for request header edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for request header management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        // Default constructor
+    }
 
 }

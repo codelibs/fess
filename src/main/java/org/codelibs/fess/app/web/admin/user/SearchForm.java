@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.user;
 /**
  * The search form for User.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

@@ -17,7 +17,23 @@ package org.codelibs.fess.app.web.admin.dict.stopwords;
 
 import org.lastaflute.web.validation.Required;
 
+/**
+ * The download form for stop words dictionary.
+ * This form is used for downloading stop words dictionary files from the admin interface.
+ *
+ */
 public class DownloadForm {
+
+    /**
+     * Dictionary ID for identifying the stop words dictionary to download.
+     */
     @Required
     public String dictId;
+
+    /**
+     * Default constructor.
+     */
+    public DownloadForm() {
+        // Use of default constructor
+    }
 }

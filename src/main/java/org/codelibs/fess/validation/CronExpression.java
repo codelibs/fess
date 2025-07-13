@@ -29,13 +29,13 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
+/**
+ * Validation constraint to ensure that a string is a valid cron expression.
+ */
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = CronExpressionValidator.class)
-/**
- * Validation constraint to ensure that a string is a valid cron expression.
- */
 public @interface CronExpression {
 
     /**

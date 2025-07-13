@@ -39,7 +39,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Path Map management.
  *
- * @author shinsuke
  */
 public class AdminPathmapAction extends FessAdminAction {
 

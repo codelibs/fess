@@ -54,7 +54,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Data Config management.
  *
- * @author shinsuke
  */
 public class AdminDataconfigAction extends FessAdminAction {
 

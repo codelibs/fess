@@ -48,7 +48,6 @@ import jakarta.annotation.Resource;
 /**
  * Admin action for Label Type management.
  *
- * @author shinsuke
  */
 public class AdminLabeltypeAction extends FessAdminAction {
 

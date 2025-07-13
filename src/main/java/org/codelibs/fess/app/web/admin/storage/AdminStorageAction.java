@@ -59,7 +59,6 @@ import io.minio.messages.Item;
 /**
  * Admin action for Storage management.
  *
- * @author shinsuke
  */
 public class AdminStorageAction extends FessAdminAction {
 

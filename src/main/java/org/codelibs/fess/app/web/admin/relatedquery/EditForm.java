@@ -23,7 +23,6 @@ import jakarta.validation.constraints.Size;
 /**
  * The edit form for Related Query.
  *
- * @author shinsuke
  */
 public class EditForm extends CreateForm {
 

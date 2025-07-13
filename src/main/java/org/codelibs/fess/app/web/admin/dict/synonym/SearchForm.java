@@ -20,7 +20,6 @@ import org.lastaflute.web.validation.Required;
 /**
  * The search form for Synonym.
  *
- * @author shinsuke
  */
 public class SearchForm {
 

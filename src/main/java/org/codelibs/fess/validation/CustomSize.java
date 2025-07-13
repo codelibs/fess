@@ -31,13 +31,13 @@ import org.codelibs.core.lang.StringUtil;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
+/**
+ * Validation constraint for custom size limits based on configuration keys.
+ */
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = CustomSizeValidator.class)
-/**
- * Validation constraint for custom size limits based on configuration keys.
- */
 public @interface CustomSize {
 
     /**
