@@ -39,6 +39,10 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 import org.lastaflute.web.response.StreamResponse;
 
+/**
+ * Handles API requests for storage management in the Fess application.
+ * Provides endpoints for listing, downloading, deleting, and uploading files.
+ */
 public class ApiAdminStorageAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminStorageAction.class);
@@ -59,6 +63,11 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
 
     // GET /api/admin/storage/list/{id}
     // PUT /api/admin/storage/list/{id}
+    /**
+     * Lists files and directories in storage.
+     * @param id The ID of the directory to list.
+     * @return A JSON response containing the list of files and directories.
+     */
     @Execute
     public JsonResponse<ApiResult> list(final OptionalThing<String> id) {
         final List<Map<String, Object>> list = getFileItems(id.isPresent() ? decodePath(id.get()) : null);
@@ -75,6 +84,11 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/storage/download/{id}/
+    /**
+     * Downloads a file from storage.
+     * @param id The ID of the file to download.
+     * @return A StreamResponse containing the file content.
+     */
     @Execute
     public StreamResponse get$download(final String id) {
         final PathInfo pi = convertToItem(id);
@@ -92,6 +106,11 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/storage/delete/{id}/
+    /**
+     * Deletes a file from storage.
+     * @param id The ID of the file to delete.
+     * @return A JSON response indicating the success or failure of the operation.
+     */
     @Execute
     public JsonResponse<ApiResult> delete$delete(final String id) {
         final PathInfo pi = convertToItem(id);
@@ -112,6 +131,11 @@ public class ApiAdminStorageAction extends FessApiAdminAction {
 
     // curl -XPOST -H "Authorization: CHANGEME" localhost:8080/api/admin/storage/upload/ -F path=/ -F file=@...
     // PUT /api/admin/storage/upload/{pathId}/
+    /**
+     * Uploads a file to storage.
+     * @param form The form containing the file to upload and the target path.
+     * @return A JSON response indicating the success or failure of the operation.
+     */
     @Execute
     public JsonResponse<ApiResult> put$upload(final UploadForm form) {
         validateApi(form, messages -> {});

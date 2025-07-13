@@ -218,7 +218,7 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
-        /** Filesystem usage percentage */
+        /** The percentage of used space on the filesystem. */
         public short percent;
         /** Used space in bytes */
         public long used;
@@ -353,7 +353,7 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
         public long committed;
         /** Maximum non-heap memory in bytes */
         public long max;
-        /** Non-heap memory usage percentage */
+        /** The percentage of non-heap memory usage. */
         public short percent;
     }
 
@@ -444,8 +444,11 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** File descriptor statistics for the process. */
         public ProcessFileDescriptorObj fileFescriptor;
+        /** CPU statistics for the process. */
         public ProcessCpuObj cpu;
+        /** Virtual memory statistics for the process. */
         public ProcessVirtualMemoryObj virtualMemory;
     }
 
@@ -460,7 +463,9 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Number of currently open file descriptors. */
         public long open;
+        /** Maximum number of file descriptors that can be opened. */
         public long max;
     }
 
@@ -475,7 +480,9 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** CPU usage percentage for the process. */
         public short percent;
+        /** Total CPU time used by the process in milliseconds. */
         public long total;
     }
 
@@ -490,6 +497,7 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Total virtual memory size in bytes. */
         public long total;
     }
 
@@ -504,8 +512,11 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Memory statistics for the operating system. */
         public OsMemoryObj memory;
+        /** CPU statistics for the operating system. */
         public OsCpuObj cpu;
+        /** System load averages. */
         public double[] loadAverages;
     }
 
@@ -520,7 +531,9 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Physical memory statistics. */
         public OsMemoryPhysicalObj physical;
+        /** Swap space statistics. */
         public OsMemorySwapSpaceObj swapSpace;
     }
 
@@ -535,7 +548,9 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Free physical memory in bytes. */
         public long free;
+        /** Total physical memory in bytes. */
         public long total;
     }
 
@@ -550,7 +565,9 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** Free swap space in bytes. */
         public long free;
+        /** Total swap space in bytes. */
         public long total;
     }
 
@@ -565,6 +582,7 @@ public class ApiAdminStatsAction extends FessApiAdminAction {
             // Default constructor
         }
 
+        /** CPU usage percentage for the operating system. */
         public short percent;
     }
 }
