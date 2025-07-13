@@ -27,6 +27,10 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
 
+/**
+ * Action class for handling cached document content requests.
+ * Provides functionality to retrieve and display cached versions of crawled documents.
+ */
 public class CacheAction extends FessSearchAction {
 
     // ===================================================================================
@@ -45,6 +49,12 @@ public class CacheAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Retrieves and displays cached content for a specific document.
+     *
+     * @param form the cache form containing document ID and highlight query
+     * @return ActionResponse containing the cached document content or error redirect
+     */
     @Execute
     public ActionResponse index(final CacheForm form) {
         validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));

@@ -21,11 +21,24 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Factory for managing CORS handlers based on origin.
+ * Maintains a registry of CORS handlers for different origins and provides lookup functionality.
+ */
 public class CorsHandlerFactory {
     private static final Logger logger = LogManager.getLogger(CorsHandlerFactory.class);
 
+    /**
+     * Map of origin patterns to their corresponding CORS handlers.
+     */
     protected Map<String, CorsHandler> handerMap = new HashMap<>();
 
+    /**
+     * Adds a CORS handler for the specified origin.
+     *
+     * @param origin the origin pattern (can be "*" for wildcard)
+     * @param handler the CORS handler to associate with the origin
+     */
     public void add(final String origin, final CorsHandler handler) {
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", origin);
@@ -33,6 +46,13 @@ public class CorsHandlerFactory {
         handerMap.put(origin, handler);
     }
 
+    /**
+     * Gets the CORS handler for the specified origin.
+     * If no specific handler is found, returns the wildcard handler.
+     *
+     * @param origin the origin to look up
+     * @return the CORS handler for the origin, or null if none found
+     */
     public CorsHandler get(final String origin) {
         final CorsHandler handler = handerMap.get(origin);
         if (handler != null) {

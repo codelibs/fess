@@ -30,6 +30,11 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig;
 import org.codelibs.fess.opensearch.config.exentity.FailureUrl;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Helper class for crawler logging operations.
+ * Extends LogHelperImpl to provide specialized logging functionality for crawler operations,
+ * including failure URL tracking and crawler statistics integration.
+ */
 public class CrawlerLogHelper extends LogHelperImpl {
     private static final Logger logger = LogManager.getLogger(CrawlerLogHelper.class);
 

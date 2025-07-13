@@ -32,6 +32,13 @@ public interface ThumbnailGenerator {
      */
     String getName();
 
+    /**
+     * Generates a thumbnail for the given thumbnail ID and saves it to the output file.
+     *
+     * @param thumbnailId the unique identifier for the thumbnail
+     * @param outputFile the file where the generated thumbnail will be saved
+     * @return true if the thumbnail was successfully generated, false otherwise
+     */
     boolean generate(String thumbnailId, File outputFile);
 
     /**
@@ -47,6 +54,9 @@ public interface ThumbnailGenerator {
      */
     boolean isAvailable();
 
+    /**
+     * Destroys this thumbnail generator and releases any resources.
+     */
     void destroy();
 
     /**

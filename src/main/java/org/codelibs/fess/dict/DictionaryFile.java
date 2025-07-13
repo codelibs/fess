@@ -48,6 +48,11 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         return id;
     }
 
+    /**
+     * Gets the file path of this dictionary.
+     *
+     * @return the file path
+     */
     public String getPath() {
         return path;
     }
@@ -68,16 +73,49 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         }
     }
 
+    /**
+     * Gets the type identifier for this dictionary file.
+     *
+     * @return the dictionary type
+     */
     public abstract String getType();
 
+    /**
+     * Retrieves a paginated list of dictionary items.
+     *
+     * @param offset the starting offset for pagination
+     * @param size the number of items to retrieve
+     * @return a paginated list of dictionary items
+     */
     public abstract PagingList<T> selectList(int offset, int size);
 
+    /**
+     * Retrieves a dictionary item by its ID.
+     *
+     * @param id the item ID
+     * @return an optional containing the item if found
+     */
     public abstract OptionalEntity<T> get(long id);
 
+    /**
+     * Inserts a new dictionary item.
+     *
+     * @param item the item to insert
+     */
     public abstract void insert(T item);
 
+    /**
+     * Updates an existing dictionary item.
+     *
+     * @param item the item to update
+     */
     public abstract void update(T item);
 
+    /**
+     * Deletes a dictionary item.
+     *
+     * @param item the item to delete
+     */
     public abstract void delete(T item);
 
     public static class PagingList<E> implements List<E> {

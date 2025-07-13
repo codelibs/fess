@@ -22,21 +22,37 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for crawling configuration wizard in the admin interface.
+ * Contains validation constraints for creating new crawling configurations.
+ */
 public class CrawlingConfigForm {
 
+    /**
+     * Name of the crawling configuration.
+     */
     @Required
     @Size(max = 200)
     public String crawlingConfigName;
 
+    /**
+     * Path or URL to be crawled by this configuration.
+     */
     @Required
     @Size(max = 1000)
     public String crawlingConfigPath;
 
+    /**
+     * Maximum depth for crawling (how many levels deep to follow links).
+     */
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer depth;
 
+    /**
+     * Maximum number of pages/documents to access during crawling.
+     */
     @Min(value = 0)
     @Max(value = 9223372036854775807L)
     @ValidateTypeFailure

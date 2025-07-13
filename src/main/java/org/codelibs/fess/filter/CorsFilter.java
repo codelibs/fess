@@ -32,10 +32,17 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filter for handling Cross-Origin Resource Sharing (CORS) requests.
+ * Processes CORS headers and handles preflight OPTIONS requests.
+ */
 public class CorsFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
 
+    /**
+     * HTTP OPTIONS method constant used for CORS preflight requests.
+     */
     protected static final String OPTIONS = "OPTIONS";
 
     @Override

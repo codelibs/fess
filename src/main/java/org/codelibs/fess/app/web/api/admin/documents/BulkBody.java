@@ -18,8 +18,14 @@ package org.codelibs.fess.app.web.api.admin.documents;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Request body for bulk document operations containing a list of documents.
+ */
 public class BulkBody {
 
+    /**
+     * List of documents to be processed in bulk operations.
+     */
     public List<Map<String, Object>> documents;
 
 }

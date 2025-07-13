@@ -50,6 +50,14 @@ public abstract class DictionaryCreator {
         return pattern.matcher(path).find();
     }
 
+    /**
+     * Creates a new dictionary file instance for the given parameters.
+     *
+     * @param id the encoded identifier for the dictionary file
+     * @param path the file path of the dictionary
+     * @param timestamp the timestamp of the dictionary file
+     * @return a new DictionaryFile instance
+     */
     protected abstract DictionaryFile<? extends DictionaryItem> newDictionaryFile(String id, String path, Date timestamp);
 
     public void setDictionaryManager(final DictionaryManager dictionaryManager) {

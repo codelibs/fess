@@ -27,6 +27,10 @@ import org.opensearch.common.settings.Settings;
 import org.opensearch.common.settings.Settings.Builder;
 import org.opensearch.transport.client.Client;
 
+/**
+ * OpenSearch client implementation specifically for crawler operations.
+ * Extends FesenClient to provide search engine connectivity for the crawler components.
+ */
 public class CrawlerEngineClient extends FesenClient {
     @Override
     protected Client createClient() {
