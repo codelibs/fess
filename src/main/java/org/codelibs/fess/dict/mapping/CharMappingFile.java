@@ -43,27 +43,62 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * Character mapping file handler for managing character mapping dictionaries.
+ * This class provides functionality to load, parse, and manage character mapping
+ * rules that define how input characters should be transformed to output characters
+ * during text analysis and search processing.
+ *
+ * Character mapping files contain mapping rules in the format:
+ * input1,input2,... => output
+ */
 public class CharMappingFile extends DictionaryFile<CharMappingItem> {
+    /** Logger instance for this class. */
     private static final Logger logger = LogManager.getLogger(CharMappingFile.class);
 
+    /** Type identifier for character mapping dictionaries. */
     private static final String MAPPING = "mapping";
 
+    /** List of character mapping items loaded from the mapping file. */
     List<CharMappingItem> mappingItemList;
 
+    /**
+     * Constructs a new CharMappingFile instance.
+     *
+     * @param id the unique identifier for this mapping file
+     * @param path the file path to the character mapping dictionary
+     * @param timestamp the last modification timestamp of the file
+     */
     public CharMappingFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
 
+    /**
+     * Returns the type identifier for this dictionary file.
+     *
+     * @return the string "mapping" identifying this as a character mapping file
+     */
     @Override
     public String getType() {
         return MAPPING;
     }
 
+    /**
+     * Returns the file path of this character mapping dictionary.
+     *
+     * @return the file path as a string
+     */
     @Override
     public String getPath() {
         return path;
     }
 
+    /**
+     * Retrieves a character mapping item by its ID.
+     *
+     * @param id the unique identifier of the mapping item to retrieve
+     * @return an OptionalEntity containing the mapping item if found, empty otherwise
+     */
     @Override
     public OptionalEntity<CharMappingItem> get(final long id) {
         if (mappingItemList == null) {
@@ -78,6 +113,13 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Retrieves a paginated list of character mapping items.
+     *
+     * @param offset the starting index for pagination (0-based)
+     * @param size the maximum number of items to return
+     * @return a PagingList containing the requested subset of mapping items
+     */
     @Override
     public synchronized PagingList<CharMappingItem> selectList(final int offset, final int size) {
         if (mappingItemList == null) {
@@ -96,6 +138,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         return new PagingList<>(mappingItemList.subList(offset, toIndex), offset, size, mappingItemList.size());
     }
 
+    /**
+     * Inserts a new character mapping item into the dictionary file.
+     *
+     * @param item the character mapping item to insert
+     */
     @Override
     public synchronized void insert(final CharMappingItem item) {
         try (MappingUpdater updater = new MappingUpdater(item)) {
@@ -103,6 +150,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         }
     }
 
+    /**
+     * Updates an existing character mapping item in the dictionary file.
+     *
+     * @param item the character mapping item to update
+     */
     @Override
     public synchronized void update(final CharMappingItem item) {
         try (MappingUpdater updater = new MappingUpdater(item)) {
@@ -110,6 +162,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         }
     }
 
+    /**
+     * Deletes a character mapping item from the dictionary file.
+     *
+     * @param item the character mapping item to delete
+     */
     @Override
     public synchronized void delete(final CharMappingItem item) {
         final CharMappingItem mappingItem = item;
@@ -120,6 +177,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         }
     }
 
+    /**
+     * Reloads the character mapping items from the dictionary file.
+     *
+     * @param updater the mapping updater to use for writing changes, or null for read-only reload
+     */
     protected void reload(final MappingUpdater updater) {
         try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
             reload(updater, curlResponse.getContentAsStream());
@@ -128,6 +190,13 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         }
     }
 
+    /**
+     * Reloads the character mapping items from the provided input stream.
+     * Parses mapping rules in the format: input1,input2,... => output
+     *
+     * @param updater the mapping updater to use for writing changes, or null for read-only reload
+     * @param in the input stream to read the mapping data from
+     */
     protected void reload(final MappingUpdater updater, final InputStream in) {
         final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
         final List<CharMappingItem> itemList = new ArrayList<>();
@@ -196,31 +265,61 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
         }
     }
 
+    /**
+     * Returns the simple file name (without directory path) of this mapping file.
+     *
+     * @return the file name without the full path
+     */
     public String getSimpleName() {
         return new File(path).getName();
     }
 
+    /**
+     * Updates the entire mapping file content from the provided input stream.
+     *
+     * @param in the input stream containing the new mapping file content
+     * @throws IOException if an I/O error occurs during the update
+     */
     public synchronized void update(final InputStream in) throws IOException {
         try (MappingUpdater updater = new MappingUpdater(null)) {
             reload(updater, in);
         }
     }
 
+    /**
+     * Returns a string representation of this character mapping file.
+     *
+     * @return a string containing the path, mapping items, and ID of this file
+     */
     @Override
     public String toString() {
         return "MappingFile [path=" + path + ", mappingItemList=" + mappingItemList + ", id=" + id + "]";
     }
 
+    /**
+     * Inner class for handling updates to the character mapping file.
+     * This class manages the temporary file creation, writing operations,
+     * and atomic updates to ensure data consistency during modifications.
+     */
     protected class MappingUpdater implements Closeable {
 
+        /** Flag indicating whether changes should be committed to the file. */
         protected boolean isCommit = false;
 
+        /** Temporary file used for writing updates before committing. */
         protected File newFile;
 
+        /** Writer for outputting content to the temporary file. */
         protected Writer writer;
 
+        /** The mapping item being updated, or null for read-only operations. */
         protected CharMappingItem item;
 
+        /**
+         * Constructs a new MappingUpdater for handling file updates.
+         *
+         * @param newItem the character mapping item to update, or null for read-only operations
+         */
         protected MappingUpdater(final CharMappingItem newItem) {
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(MAPPING, ".txt");
@@ -234,6 +333,12 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             item = newItem;
         }
 
+        /**
+         * Writes a character mapping item to the temporary file.
+         *
+         * @param oldItem the existing mapping item to process
+         * @return the mapping item that was written, or null if the item was deleted
+         */
         public CharMappingItem write(final CharMappingItem oldItem) {
             try {
                 if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
@@ -261,6 +366,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             }
         }
 
+        /**
+         * Writes a raw line of text to the temporary file.
+         *
+         * @param line the line of text to write
+         */
         public void write(final String line) {
             try {
                 writer.write(line);
@@ -270,6 +380,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             }
         }
 
+        /**
+         * Commits any pending changes and marks the updater for final write.
+         *
+         * @return the committed mapping item, or null if no item was pending
+         */
         public CharMappingItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {
@@ -284,6 +399,11 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             return null;
         }
 
+        /**
+         * Closes the updater and finalizes the file update operation.
+         * If changes were committed, the temporary file replaces the original.
+         * Otherwise, the temporary file is deleted.
+         */
         @Override
         public void close() {
             try {

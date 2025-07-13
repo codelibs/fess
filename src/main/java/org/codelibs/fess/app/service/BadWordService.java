@@ -43,21 +43,40 @@ import com.orangesignal.csv.CsvWriter;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for bad word management operations.
+ * Provides CRUD operations and CSV import/export functionality for bad words.
+ */
 public class BadWordService {
 
     private static final String DELETE_PREFIX = "--";
 
     private static final Logger logger = LogManager.getLogger(BadWordService.class);
 
+    /** Database behavior for bad word operations. */
     @Resource
     protected BadWordBhv badWordBhv;
 
+    /** Search engine client for index operations. */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
+    /** Fess configuration. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor for BadWordService.
+     */
+    public BadWordService() {
+        // Default constructor
+    }
+
+    /**
+     * Gets a paginated list of bad words.
+     * @param badWordPager The pager with search criteria and pagination settings.
+     * @return List of bad words matching the criteria.
+     */
     public List<BadWord> getBadWordList(final BadWordPager badWordPager) {
 
         final PagingResultBean<BadWord> badWordList = badWordBhv.selectPage(cb -> {
@@ -73,22 +92,40 @@ public class BadWordService {
         return badWordList;
     }
 
+    /**
+     * Gets a bad word by its ID.
+     * @param id The bad word ID.
+     * @return Optional entity containing the bad word if found.
+     */
     public OptionalEntity<BadWord> getBadWord(final String id) {
         return badWordBhv.selectByPK(id);
     }
 
+    /**
+     * Stores (inserts or updates) a bad word.
+     * @param badWord The bad word to store.
+     */
     public void store(final BadWord badWord) {
 
         badWordBhv.insertOrUpdate(badWord, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Deletes a bad word.
+     * @param badWord The bad word to delete.
+     */
     public void delete(final BadWord badWord) {
 
         badWordBhv.delete(badWord, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Sets up search conditions for bad word list queries.
+     * @param cb The condition bean for the query.
+     * @param badWordPager The pager containing search criteria.
+     */
     protected void setupListCondition(final BadWordCB cb, final BadWordPager badWordPager) {
         if (badWordPager.id != null) {
             cb.query().docMeta().setId_Equal(badWordPager.id);
@@ -102,6 +139,10 @@ public class BadWordService {
 
     }
 
+    /**
+     * Imports bad words from a CSV file.
+     * @param reader The reader for the CSV data.
+     */
     public void importCsv(final Reader reader) {
         @SuppressWarnings("resource")
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
@@ -146,6 +187,10 @@ public class BadWordService {
         }
     }
 
+    /**
+     * Exports bad words to a CSV file.
+     * @param writer The writer for the CSV output.
+     */
     public void exportCsv(final Writer writer) {
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);

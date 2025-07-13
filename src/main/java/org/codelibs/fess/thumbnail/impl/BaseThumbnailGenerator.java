@@ -44,27 +44,53 @@ import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
+/**
+ * Abstract base class for thumbnail generators.
+ * Provides common functionality for thumbnail generation implementations.
+ */
 public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     private static final Logger logger = LogManager.getLogger(BaseThumbnailGenerator.class);
 
+    /** Map of conditions for thumbnail generation. */
     protected final Map<String, String> conditionMap = new HashMap<>();
 
+    /** Length for directory name generation. */
     protected int directoryNameLength = 5;
 
+    /** List of generator names. */
     protected List<String> generatorList;
 
+    /** Map of file paths for thumbnail generation. */
     protected Map<String, String> filePathMap = new HashMap<>();
 
+    /** The name of this thumbnail generator. */
     protected String name;
 
+    /** Maximum number of redirects to follow. */
     protected int maxRedirectCount = 10;
 
+    /** Availability status of this generator. */
     protected Boolean available = null;
 
+    /**
+     * Registers this thumbnail generator with the thumbnail manager.
+     */
     public void register() {
         ComponentUtil.getThumbnailManager().add(this);
     }
 
+    /**
+     * Default constructor for BaseThumbnailGenerator.
+     */
+    public BaseThumbnailGenerator() {
+        // Default constructor
+    }
+
+    /**
+     * Adds a condition for thumbnail generation.
+     * @param key The condition key.
+     * @param regex The regex pattern for the condition.
+     */
     public void addCondition(final String key, final String regex) {
         final String value = conditionMap.get(key);
         if (StringUtil.isBlank(value)) {
@@ -157,10 +183,19 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return task;
     }
 
+    /**
+     * Sets the directory name length for thumbnail storage.
+     * @param directoryNameLength The directory name length.
+     */
     public void setDirectoryNameLength(final int directoryNameLength) {
         this.directoryNameLength = directoryNameLength;
     }
 
+    /**
+     * Expands a file path using the file path mapping.
+     * @param value The original path value.
+     * @return The expanded path or the original value if no mapping exists.
+     */
     protected String expandPath(final String value) {
         if (value != null && filePathMap.containsKey(value)) {
             return filePathMap.get(value);
@@ -168,6 +203,11 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return value;
     }
 
+    /**
+     * Updates the thumbnail field in the search index.
+     * @param thumbnailId The thumbnail ID.
+     * @param value The thumbnail value to update.
+     */
     protected void updateThumbnailField(final String thumbnailId, final String value) {
         // TODO bulk
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -179,6 +219,12 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         }
     }
 
+    /**
+     * Processes thumbnail generation with a consumer function.
+     * @param id The document ID.
+     * @param consumer The consumer function to process thumbnail and config ID.
+     * @return True if processing was successful, false otherwise.
+     */
     protected boolean process(final String id, final BiPredicate<String, String> consumer) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
@@ -210,6 +256,12 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return false;
     }
 
+    /**
+     * Processes thumbnail generation with a response data consumer.
+     * @param id The document ID.
+     * @param consumer The consumer function to process response data.
+     * @return True if processing was successful, false otherwise.
+     */
     protected boolean process(final String id, final Predicate<ResponseData> consumer) {
         return process(id, (configId, url) -> {
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
@@ -253,6 +305,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         });
     }
 
+    /**
+     * Sets the list of generator names.
+     * @param generatorList The list of generator names.
+     */
     public void setGeneratorList(final List<String> generatorList) {
         this.generatorList = generatorList;
     }
@@ -262,10 +318,18 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return name;
     }
 
+    /**
+     * Sets the name of this thumbnail generator.
+     * @param name The generator name.
+     */
     public void setName(final String name) {
         this.name = name;
     }
 
+    /**
+     * Sets the maximum number of redirects to follow.
+     * @param maxRedirectCount The maximum redirect count.
+     */
     public void setMaxRedirectCount(final int maxRedirectCount) {
         this.maxRedirectCount = maxRedirectCount;
     }

@@ -30,13 +30,40 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing character mapping operations.
+ * <p>
+ * This service handles character mapping management including CRUD operations
+ * and list retrieval. Character mappings are used for text normalization
+ * and character substitution during document processing and search operations.
+ * </p>
+ *
+ * @author FessProject
+ */
 public class CharMappingService {
+    /**
+     * Dictionary manager for accessing and managing dictionary files.
+     */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /**
+     * Fess configuration settings.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of character mapping items from the specified dictionary.
+     * <p>
+     * This method fetches character mapping items with pagination support and updates
+     * the pager with the current page information including total count and page ranges.
+     * </p>
+     *
+     * @param dictId the dictionary ID to retrieve character mappings from
+     * @param charMappingPager the pager object containing pagination parameters
+     * @return a list of character mapping items for the current page, or empty list if dictionary not found
+     */
     public List<CharMappingItem> getCharMappingList(final String dictId, final CharMappingPager charMappingPager) {
         return getCharMappingFile(dictId).map(file -> {
             final int pageSize = charMappingPager.getPageSize();
@@ -52,15 +79,47 @@ public class CharMappingService {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Retrieves the character mapping file for the specified dictionary ID.
+     * <p>
+     * This method looks up the dictionary file and ensures it is a character mapping file
+     * before returning it wrapped in an OptionalEntity.
+     * </p>
+     *
+     * @param dictId the dictionary ID to retrieve the character mapping file for
+     * @return an OptionalEntity containing the character mapping file if found and valid, empty otherwise
+     */
     public OptionalEntity<CharMappingFile> getCharMappingFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(CharMappingFile.class::isInstance)
                 .map(file -> OptionalEntity.of((CharMappingFile) file)).orElse(OptionalEntity.empty());
     }
 
+    /**
+     * Retrieves a specific character mapping item by its ID from the specified dictionary.
+     * <p>
+     * This method looks up a character mapping item using its unique identifier
+     * within the context of the specified dictionary.
+     * </p>
+     *
+     * @param dictId the dictionary ID containing the character mapping item
+     * @param id the unique identifier of the character mapping item
+     * @return an OptionalEntity containing the character mapping item if found, empty otherwise
+     */
     public OptionalEntity<CharMappingItem> getCharMappingItem(final String dictId, final long id) {
         return getCharMappingFile(dictId).map(file -> file.get(id).get());
     }
 
+    /**
+     * Stores a character mapping item in the specified dictionary.
+     * <p>
+     * This method performs either an insert operation (for new items with ID 0)
+     * or an update operation (for existing items with non-zero ID) depending on
+     * the item's current state.
+     * </p>
+     *
+     * @param dictId the dictionary ID to store the character mapping item in
+     * @param charMappingItem the character mapping item to store
+     */
     public void store(final String dictId, final CharMappingItem charMappingItem) {
         getCharMappingFile(dictId).ifPresent(file -> {
             if (charMappingItem.getId() == 0) {
@@ -71,6 +130,16 @@ public class CharMappingService {
         });
     }
 
+    /**
+     * Deletes a character mapping item from the specified dictionary.
+     * <p>
+     * This method removes the specified character mapping item from the dictionary
+     * if the dictionary file exists and is accessible.
+     * </p>
+     *
+     * @param dictId the dictionary ID to delete the character mapping item from
+     * @param charMappingItem the character mapping item to delete
+     */
     public void delete(final String dictId, final CharMappingItem charMappingItem) {
         getCharMappingFile(dictId).ifPresent(file -> {
             file.delete(charMappingItem);

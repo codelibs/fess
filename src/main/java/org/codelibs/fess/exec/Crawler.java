@@ -77,69 +77,137 @@ import org.opensearch.monitor.process.ProcessProbe;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Main executable class for running crawling operations in the Fess search engine.
+ * This class serves as the entry point for crawling web content, file systems, and data stores.
+ * It manages the crawling lifecycle, including initialization, execution coordination,
+ * monitoring, and cleanup operations.
+ *
+ * <p>The crawler can operate in different modes based on command-line options:
+ * <ul>
+ * <li>Web crawling - crawls web sites and web content</li>
+ * <li>File system crawling - crawls file systems and documents</li>
+ * <li>Data store crawling - crawls databases and other data sources</li>
+ * <li>Combined crawling - runs multiple crawling types simultaneously</li>
+ * </ul>
+ *
+ * <p>Command line usage:
+ * <pre>
+ * java org.codelibs.fess.exec.Crawler [options...]
+ *   -s, --sessionId sessionId     : Session ID for the crawling session
+ *   -n, --name name               : Name for the crawling session
+ *   -w, --webConfigIds ids        : Comma-separated web config IDs
+ *   -f, --fileConfigIds ids       : Comma-separated file config IDs
+ *   -d, --dataConfigIds ids       : Comma-separated data config IDs
+ *   -p, --properties path         : Properties file path
+ *   -e, --expires days            : Expires for documents (in days)
+ *   -h, --hotThread interval      : Interval for hot thread logging
+ * </pre>
+ *
+ * @author FessProject
+ * @since 1.0
+ */
 public class Crawler {
 
+    /** Logger instance for this class. */
     private static final Logger logger = LogManager.getLogger(Crawler.class);
 
+    /** Thread name for web and file system crawling process. */
     private static final String WEB_FS_CRAWLING_PROCESS = "WebFsCrawler";
 
+    /** Thread name for data store crawling process. */
     private static final String DATA_CRAWLING_PROCESS = "DataStoreCrawler";
 
+    /** Atomic flag indicating whether the crawler is currently running. */
     private static AtomicBoolean running = new AtomicBoolean(false);
 
+    /** Thread-safe queue for collecting error messages during crawling operations. */
     private static Queue<String> errors = new ConcurrentLinkedQueue<>();
 
+    /** Injected search engine client for OpenSearch operations. */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
+    /** Injected helper for web and file system indexing operations. */
     @Resource
     protected WebFsIndexHelper webFsIndexHelper;
 
+    /** Injected helper for data store indexing operations. */
     @Resource
     protected DataIndexHelper dataIndexHelper;
 
+    /** Injected service for managing path mappings during crawling. */
     @Resource
     protected PathMappingService pathMappingService;
 
+    /** Injected service for managing crawling session information. */
     @Resource
     protected CrawlingInfoService crawlingInfoService;
 
+    /**
+     * Adds an error message to the error queue for later processing.
+     * This method is thread-safe and can be called from multiple crawler threads.
+     *
+     * @param msg the error message to add; ignored if null or blank
+     */
     public static void addError(final String msg) {
         if (StringUtil.isNotBlank(msg)) {
             errors.offer(msg);
         }
     }
 
+    /**
+     * Command-line options container for the crawler application.
+     * This class uses args4j annotations to define command-line arguments
+     * and provides methods to parse and access configuration values.
+     */
     public static class Options {
 
+        /** Session ID for the crawling session. If not provided, a timestamp-based ID will be generated. */
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
         public String sessionId;
 
+        /** Name for the crawling session for identification purposes. */
         @Option(name = "-n", aliases = "--name", metaVar = "name", usage = "Name")
         public String name;
 
+        /** Comma-separated list of web configuration IDs to crawl. */
         @Option(name = "-w", aliases = "--webConfigIds", metaVar = "webConfigIds", usage = "Web Config IDs")
         public String webConfigIds;
 
+        /** Comma-separated list of file system configuration IDs to crawl. */
         @Option(name = "-f", aliases = "--fileConfigIds", metaVar = "fileConfigIds", usage = "File Config IDs")
         public String fileConfigIds;
 
+        /** Comma-separated list of data store configuration IDs to crawl. */
         @Option(name = "-d", aliases = "--dataConfigIds", metaVar = "dataConfigIds", usage = "Data Config IDs")
         public String dataConfigIds;
 
+        /** Path to properties file for system configuration overrides. */
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         public String propertiesPath;
 
+        /** Number of days after which documents should expire and be cleaned up. */
         @Option(name = "-e", aliases = "--expires", metaVar = "expires", usage = "Expires for documents")
         public String expires;
 
+        /** Interval in milliseconds for hot thread monitoring and logging. */
         @Option(name = "-h", aliases = "--hotThread", metaVar = "hotThread", usage = "Interval for Hot Thread logging")
         public Integer hotThread;
 
+        /**
+         * Default constructor for Options.
+         * Protected to allow subclassing while preventing direct instantiation.
+         */
         protected Options() {
             // nothing
         }
 
+        /**
+         * Parses the web configuration IDs string into a list.
+         *
+         * @return list of web configuration IDs, or null if none specified
+         */
         protected List<String> getWebConfigIdList() {
             if (StringUtil.isNotBlank(webConfigIds)) {
                 final String[] values = webConfigIds.split(",");
@@ -148,6 +216,11 @@ public class Crawler {
             return null;
         }
 
+        /**
+         * Parses the file configuration IDs string into a list.
+         *
+         * @return list of file configuration IDs, or null if none specified
+         */
         protected List<String> getFileConfigIdList() {
             if (StringUtil.isNotBlank(fileConfigIds)) {
                 final String[] values = fileConfigIds.split(",");
@@ -156,6 +229,11 @@ public class Crawler {
             return null;
         }
 
+        /**
+         * Parses the data configuration IDs string into a list.
+         *
+         * @return list of data configuration IDs, or null if none specified
+         */
         protected List<String> getDataConfigIdList() {
             if (StringUtil.isNotBlank(dataConfigIds)) {
                 final String[] values = dataConfigIds.split(",");
@@ -164,12 +242,24 @@ public class Crawler {
             return null;
         }
 
+        /**
+         * Creates a list from an array of configuration ID values.
+         *
+         * @param values array of configuration ID strings
+         * @return list containing all values from the array
+         */
         private static List<String> createConfigIdList(final String[] values) {
             final List<String> idList = new ArrayList<>();
             Collections.addAll(idList, values);
             return idList;
         }
 
+        /**
+         * Returns a string representation of this Options object.
+         * Contains all option values for debugging and logging purposes.
+         *
+         * @return string representation containing all option values
+         */
         @Override
         public String toString() {
             return "Options [sessionId=" + sessionId + ", name=" + name + ", webConfigIds=" + webConfigIds + ", fileConfigIds="
@@ -179,6 +269,11 @@ public class Crawler {
 
     }
 
+    /**
+     * Initializes OpenSearch monitoring probes.
+     * Forces the loading of process, OS, and JVM monitoring probes
+     * to ensure they are available for system monitoring during crawling.
+     */
     static void initializeProbes() {
         // Force probes to be loaded
         ProcessProbe.getInstance();
@@ -186,6 +281,13 @@ public class Crawler {
         JvmInfo.jvmInfo();
     }
 
+    /**
+     * Main entry point for the crawler application.
+     * Parses command-line arguments, initializes the application container,
+     * sets up monitoring, and executes the crawling process.
+     *
+     * @param args command-line arguments as defined in the Options class
+     */
     public static void main(final String[] args) {
         final Options options = new Options();
 
@@ -303,6 +405,11 @@ public class Crawler {
         }
     }
 
+    /**
+     * Destroys the DI container and stops the timeout manager.
+     * This method ensures proper cleanup of resources when the crawler shuts down.
+     * It's called both during normal shutdown and in error conditions.
+     */
     private static void destroyContainer() {
         if (running.getAndSet(false)) {
             TimeoutManager.getInstance().stop();
@@ -314,6 +421,14 @@ public class Crawler {
         }
     }
 
+    /**
+     * Main processing method that coordinates the entire crawling workflow.
+     * This method handles session setup, crawler initialization, crawling execution,
+     * and cleanup operations.
+     *
+     * @param options parsed command-line options containing crawling configuration
+     * @return exit code (Constants.EXIT_OK for success, Constants.EXIT_FAIL for failure)
+     */
     private static int process(final Options options) {
         final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
 
@@ -392,6 +507,13 @@ public class Crawler {
         }
     }
 
+    /**
+     * Sends email notification with crawling results and statistics.
+     * The email contains detailed information about the crawling session including
+     * execution times, index sizes, and status information.
+     *
+     * @param infoMap map containing crawling session information and statistics
+     */
     protected void sendMail(final Map<String, String> infoMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.hasNotification()) {
@@ -458,6 +580,14 @@ public class Crawler {
         }
     }
 
+    /**
+     * Retrieves a value from a map with a default fallback.
+     *
+     * @param dataMap the map to retrieve the value from
+     * @param key the key to look up
+     * @param defaultValue the default value to return if key is not found or value is blank
+     * @return the value from the map or the default value
+     */
     private String getValueFromMap(final Map<String, String> dataMap, final String key, final String defaultValue) {
         final String value = dataMap.get(key);
         if (StringUtil.isBlank(value)) {
@@ -466,6 +596,14 @@ public class Crawler {
         return value;
     }
 
+    /**
+     * Executes the actual crawling operations based on the provided options.
+     * This method coordinates web/file system crawling and data store crawling,
+     * running them in parallel threads when multiple types are requested.
+     *
+     * @param options crawling configuration options
+     * @return exit code (Constants.EXIT_OK for success, Constants.EXIT_FAIL for failure)
+     */
     public int doCrawl(final Options options) {
         if (logger.isInfoEnabled()) {
             logger.info("Starting Crawler..");
@@ -549,6 +687,13 @@ public class Crawler {
         }
     }
 
+    /**
+     * Writes the current timestamp to the crawling session information.
+     * The timestamp is formatted in ISO 8601 extended format.
+     *
+     * @param crawlingInfoHelper helper for managing crawling session information
+     * @param key the key under which to store the timestamp
+     */
     protected void writeTimeToSessionInfo(final CrawlingInfoHelper crawlingInfoHelper, final String key) {
         if (crawlingInfoHelper != null) {
             final SimpleDateFormat dateFormat = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
@@ -556,6 +701,12 @@ public class Crawler {
         }
     }
 
+    /**
+     * Waits for a crawler thread to complete execution.
+     * This method handles interruptions gracefully and logs when a crawler process is interrupted.
+     *
+     * @param crawlerThread the thread to wait for; null threads are ignored
+     */
     private void joinCrawlerThread(final Thread crawlerThread) {
         if (crawlerThread != null) {
             try {

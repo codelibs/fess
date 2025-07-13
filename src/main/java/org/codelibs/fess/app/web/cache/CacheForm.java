@@ -22,23 +22,39 @@ import org.lastaflute.web.validation.Required;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for cache-related operations.
+ * Contains parameters for document caching and error page display.
+ */
 public class CacheForm {
 
+    /** Document ID for cache operations. */
     @Required
     @Size(max = 100)
     public String docId;
 
+    /** Highlight query parameters. */
     public String[] hq;
 
-    // for error page
-
+    /** Search query parameter for error page. */
     public String q;
 
+    /** Number of results parameter for error page. */
     public String num;
 
+    /** Sort parameter for error page. */
     public String sort;
 
+    /** Language parameter for error page. */
     public String lang;
 
+    /** Additional fields map for cache operations. */
     public Map<String, String[]> fields = new HashMap<>();
+
+    /**
+     * Default constructor for CacheForm.
+     */
+    public CacheForm() {
+        // Default constructor
+    }
 }

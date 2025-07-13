@@ -27,7 +27,18 @@ import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Query command implementation for handling Boolean queries.
+ * Converts Lucene BooleanQuery objects to OpenSearch BoolQueryBuilder objects.
+ */
 public class BooleanQueryCommand extends QueryCommand {
+    /**
+     * Default constructor for BooleanQueryCommand.
+     */
+    public BooleanQueryCommand() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(BooleanQueryCommand.class);
 
     @Override
@@ -47,6 +58,13 @@ public class BooleanQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a Lucene BooleanQuery to an OpenSearch BoolQueryBuilder.
+     * @param context The query context.
+     * @param booleanQuery The boolean query to convert.
+     * @param boost The boost factor to apply.
+     * @return The converted BoolQueryBuilder.
+     */
     protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery, final float boost) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (final BooleanClause clause : booleanQuery.clauses()) {

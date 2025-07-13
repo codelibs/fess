@@ -22,12 +22,30 @@ import org.lastaflute.web.response.ActionResponse;
 
 public interface SsoAuthenticator {
 
+    /**
+     * Gets the login credential for SSO authentication.
+     * @return The login credential.
+     */
     LoginCredential getLoginCredential();
 
+    /**
+     * Resolves credential using the provided resolver.
+     * @param resolver The login credential resolver.
+     */
     void resolveCredential(LoginCredentialResolver resolver);
 
+    /**
+     * Gets the action response for the specified SSO response type.
+     * @param responseType The type of SSO response required.
+     * @return The action response.
+     */
     ActionResponse getResponse(SsoResponseType responseType);
 
+    /**
+     * Performs logout for the specified user.
+     * @param user The user to logout.
+     * @return The logout URL or null if not applicable.
+     */
     String logout(FessUserBean user);
 
 }

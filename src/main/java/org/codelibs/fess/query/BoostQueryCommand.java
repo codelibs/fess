@@ -24,7 +24,18 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 
+/**
+ * Query command implementation for handling Boost queries.
+ * Processes Lucene BoostQuery objects and applies boost factors.
+ */
 public class BoostQueryCommand extends QueryCommand {
+    /**
+     * Default constructor for BoostQueryCommand.
+     */
+    public BoostQueryCommand() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(BoostQueryCommand.class);
 
     @Override

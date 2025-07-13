@@ -53,7 +53,16 @@ public class ApiResult {
      * Represents the status of an API response.
      */
     public enum Status {
-        OK(0), BAD_REQUEST(1), SYSTEM_ERROR(2), UNAUTHORIZED(3), FAILED(9);
+        /** Successful response status. */
+        OK(0),
+        /** Bad request status indicating client error. */
+        BAD_REQUEST(1),
+        /** System error status indicating server error. */
+        SYSTEM_ERROR(2),
+        /** Unauthorized status indicating authentication failure. */
+        UNAUTHORIZED(3),
+        /** General failure status. */
+        FAILED(9);
 
         private final int id;
 
@@ -61,6 +70,10 @@ public class ApiResult {
             this.id = id;
         }
 
+        /**
+         * Gets the numeric ID of the status.
+         * @return The numeric ID of the status.
+         */
         public int getId() {
             return id;
         }
@@ -70,9 +83,23 @@ public class ApiResult {
      * Represents the base API response structure.
      */
     public static class ApiResponse {
+        /** The version of the product. */
         protected String version = ComponentUtil.getSystemHelper().getProductVersion();
+        /** The status code of the response. */
         protected int status;
 
+        /**
+         * Default constructor for ApiResponse.
+         */
+        public ApiResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the status of the response.
+         * @param status The status to set.
+         * @return This ApiResponse instance.
+         */
         public ApiResponse status(final Status status) {
             this.status = status.getId();
             return this;
@@ -91,14 +118,33 @@ public class ApiResult {
      * Represents an API response for an update operation.
      */
     public static class ApiUpdateResponse extends ApiResponse {
+        /** The ID of the updated item. */
         protected String id;
+        /** Whether the item was created (true) or updated (false). */
         protected boolean created;
 
+        /**
+         * Default constructor for ApiUpdateResponse.
+         */
+        public ApiUpdateResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the ID of the updated item.
+         * @param id The ID to set.
+         * @return This ApiUpdateResponse instance.
+         */
         public ApiUpdateResponse id(final String id) {
             this.id = id;
             return this;
         }
 
+        /**
+         * Sets whether the item was created or updated.
+         * @param created True if created, false if updated.
+         * @return This ApiUpdateResponse instance.
+         */
         public ApiUpdateResponse created(final boolean created) {
             this.created = created;
             return this;
@@ -262,6 +308,14 @@ public class ApiResult {
          * The ID of the search query.
          */
         protected String queryId;
+
+        /**
+         * Default constructor for ApiDocsResponse.
+         */
+        public ApiDocsResponse() {
+            // Default constructor
+        }
+
         /**
          * The list of documents returned in the search results.
          */
@@ -339,6 +393,11 @@ public class ApiResult {
          */
         protected List<Map<String, Object>> facetQuery;
 
+        /**
+         * Populates this response with search render data.
+         * @param data The search render data to populate from.
+         * @return This ApiDocsResponse instance.
+         */
         public ApiDocsResponse renderData(final SearchRenderData data) {
             queryId = data.getQueryId();
             docs = data.getDocumentItems();
@@ -398,8 +457,21 @@ public class ApiResult {
      * Represents an API response for a log entry.
      */
     public static class ApiLogResponse extends ApiResponse {
+        /** The log entry object. */
         protected Object log;
 
+        /**
+         * Default constructor for ApiLogResponse.
+         */
+        public ApiLogResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the log entry object.
+         * @param log The log entry object.
+         * @return This ApiLogResponse instance.
+         */
         public ApiLogResponse log(final Object log) {
             this.log = log;
             return this;
@@ -416,17 +488,36 @@ public class ApiResult {
      * @param <T> the type of the logs
      */
     public static class ApiLogsResponse<T> extends ApiResponse {
+        /** The list of log entries. */
         protected List<T> logs;
+
+        /**
+         * Default constructor for ApiLogsResponse.
+         */
+        public ApiLogsResponse() {
+            // Default constructor
+        }
+
         /**
          * The total number of logs.
          */
         protected long total = 0;
 
+        /**
+         * Sets the list of log entries.
+         * @param logs The list of log entries.
+         * @return This ApiLogsResponse instance.
+         */
         public ApiLogsResponse<T> logs(final List<T> logs) {
             this.logs = logs;
             return this;
         }
 
+        /**
+         * Sets the total number of logs.
+         * @param total The total number of logs.
+         * @return This ApiLogsResponse instance.
+         */
         public ApiLogsResponse<T> total(final long total) {
             this.total = total;
             return this;
@@ -442,17 +533,36 @@ public class ApiResult {
      * Represents an API response containing a list of log files.
      */
     public static class ApiLogFilesResponse extends ApiResponse {
+        /** The list of log files. */
         protected List<Map<String, Object>> files;
+
+        /**
+         * Default constructor for ApiLogFilesResponse.
+         */
+        public ApiLogFilesResponse() {
+            // Default constructor
+        }
+
         /**
          * The total number of log files.
          */
         protected long total = 0;
 
+        /**
+         * Sets the list of log files.
+         * @param files The list of log files.
+         * @return This ApiLogFilesResponse instance.
+         */
         public ApiLogFilesResponse files(final List<Map<String, Object>> files) {
             this.files = files;
             return this;
         }
 
+        /**
+         * Sets the total number of log files.
+         * @param total The total number of log files.
+         * @return This ApiLogFilesResponse instance.
+         */
         public ApiLogFilesResponse total(final long total) {
             this.total = total;
             return this;
@@ -514,26 +624,58 @@ public class ApiResult {
      * Represents an API response containing system information.
      */
     public static class ApiSystemInfoResponse extends ApiResponse {
+        /** Environment properties. */
         protected List<Map<String, String>> envProps;
+
+        /**
+         * Default constructor for ApiSystemInfoResponse.
+         */
+        public ApiSystemInfoResponse() {
+            // Default constructor
+        }
+
+        /** System properties. */
         protected List<Map<String, String>> systemProps;
+        /** Fess-specific properties. */
         protected List<Map<String, String>> fessProps;
+        /** Bug report properties. */
         protected List<Map<String, String>> bugReportProps;
 
+        /**
+         * Sets the environment properties.
+         * @param envProps The environment properties.
+         * @return This ApiSystemInfoResponse instance.
+         */
         public ApiSystemInfoResponse envProps(final List<Map<String, String>> envProps) {
             this.envProps = envProps;
             return this;
         }
 
+        /**
+         * Sets the system properties.
+         * @param systemProps The system properties.
+         * @return This ApiSystemInfoResponse instance.
+         */
         public ApiSystemInfoResponse systemProps(final List<Map<String, String>> systemProps) {
             this.systemProps = systemProps;
             return this;
         }
 
+        /**
+         * Sets the Fess-specific properties.
+         * @param fessProps The Fess-specific properties.
+         * @return This ApiSystemInfoResponse instance.
+         */
         public ApiSystemInfoResponse fessProps(final List<Map<String, String>> fessProps) {
             this.fessProps = fessProps;
             return this;
         }
 
+        /**
+         * Sets the bug report properties.
+         * @param bugReportProps The bug report properties.
+         * @return This ApiSystemInfoResponse instance.
+         */
         public ApiSystemInfoResponse bugReportProps(final List<Map<String, String>> bugReportProps) {
             this.bugReportProps = bugReportProps;
             return this;
@@ -549,13 +691,31 @@ public class ApiResult {
      * Represents an API response for an error.
      */
     public static class ApiErrorResponse extends ApiResponse {
+        /** The error message. */
         protected String message;
 
+        /**
+         * Default constructor for ApiErrorResponse.
+         */
+        public ApiErrorResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the error message.
+         * @param message The error message.
+         * @return This ApiErrorResponse instance.
+         */
         public ApiErrorResponse message(final String message) {
             this.message = message;
             return this;
         }
 
+        /**
+         * Sets the error message from validation messages.
+         * @param validationMessagesLambda Lambda function to process validation messages.
+         * @return This ApiErrorResponse instance.
+         */
         public ApiErrorResponse message(final VaMessenger<FessMessages> validationMessagesLambda) {
             final FessMessages messages = new FessMessages();
             validationMessagesLambda.message(messages);
@@ -570,8 +730,21 @@ public class ApiResult {
      * Represents an API response for plugin information.
      */
     public static class ApiPluginResponse extends ApiResponse {
+        /** The list of plugins. */
         protected List<Map<String, String>> plugins;
 
+        /**
+         * Default constructor for ApiPluginResponse.
+         */
+        public ApiPluginResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the list of plugins.
+         * @param plugins The list of plugins.
+         * @return This ApiPluginResponse instance.
+         */
         public ApiPluginResponse plugins(final List<Map<String, String>> plugins) {
             this.plugins = plugins;
             return this;
@@ -587,8 +760,21 @@ public class ApiResult {
      * Represents an API response for storage-related operations, typically containing a list of items.
      */
     public static class ApiStorageResponse extends ApiResponse {
+        /** The list of storage items. */
         protected List<Map<String, Object>> items;
 
+        /**
+         * Default constructor for ApiStorageResponse.
+         */
+        public ApiStorageResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the list of storage items.
+         * @param items The list of storage items.
+         * @return This ApiStorageResponse instance.
+         */
         public ApiStorageResponse items(final List<Map<String, Object>> items) {
             this.items = items;
             return this;
@@ -604,8 +790,21 @@ public class ApiResult {
      * Represents an API response containing statistical information.
      */
     public static class ApiStatsResponse extends ApiResponse {
+        /** The statistical data. */
         protected Map<String, Object> stats;
 
+        /**
+         * Default constructor for ApiStatsResponse.
+         */
+        public ApiStatsResponse() {
+            // Default constructor
+        }
+
+        /**
+         * Sets the statistical data.
+         * @param stats The statistical data.
+         * @return This ApiStatsResponse instance.
+         */
         public ApiStatsResponse stats(final Map<String, Object> stats) {
             this.stats = stats;
             return this;

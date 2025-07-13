@@ -28,24 +28,69 @@ import org.lastaflute.web.util.LaResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Base implementation for API managers providing common functionality.
+ * Abstract class that provides format detection and response handling for web APIs.
+ */
 public abstract class BaseApiManager implements WebApiManager {
 
     private static final String API_FORMAT_TYPE = "apiFormatType";
 
+    /** Path prefix for API endpoints. */
     protected String pathPrefix;
 
+    /**
+     * Enumeration of supported API format types.
+     */
     protected enum FormatType {
-        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, PING, SCROLL, SUGGEST, OTHER;
+        /** Search API format. */
+        SEARCH,
+        /** Label API format. */
+        LABEL,
+        /** Popular word API format. */
+        POPULARWORD,
+        /** Favorite API format. */
+        FAVORITE,
+        /** Favorites API format. */
+        FAVORITES,
+        /** Ping API format. */
+        PING,
+        /** Scroll API format. */
+        SCROLL,
+        /** Suggest API format. */
+        SUGGEST,
+        /** Other API format. */
+        OTHER;
     }
 
+    /**
+     * Default constructor for BaseApiManager.
+     */
+    public BaseApiManager() {
+        // Default constructor
+    }
+
+    /**
+     * Gets the path prefix for API endpoints.
+     * @return The path prefix.
+     */
     public String getPathPrefix() {
         return pathPrefix;
     }
 
+    /**
+     * Sets the path prefix for API endpoints.
+     * @param pathPrefix The path prefix to set.
+     */
     public void setPathPrefix(final String pathPrefix) {
         this.pathPrefix = pathPrefix;
     }
 
+    /**
+     * Gets the format type for the request.
+     * @param request The HTTP servlet request.
+     * @return The format type.
+     */
     protected FormatType getFormatType(final HttpServletRequest request) {
         FormatType formatType = (FormatType) request.getAttribute(API_FORMAT_TYPE);
         if (formatType != null) {
@@ -57,6 +102,11 @@ public abstract class BaseApiManager implements WebApiManager {
         return formatType;
     }
 
+    /**
+     * Detects the format type from the request parameters.
+     * @param request The HTTP servlet request.
+     * @return The detected format type.
+     */
     protected FormatType detectFormatType(final HttpServletRequest request) {
         String value = request.getParameter("type");
         if (value == null) {
@@ -99,6 +149,12 @@ public abstract class BaseApiManager implements WebApiManager {
         return FormatType.OTHER;
     }
 
+    /**
+     * Writes text content to the HTTP response with specified content type and encoding.
+     * @param text The text content to write.
+     * @param contentType The content type for the response.
+     * @param encoding The character encoding for the response.
+     */
     protected void write(final String text, final String contentType, final String encoding) {
         final StringBuilder buf = new StringBuilder(50);
         if (contentType == null) {
@@ -124,5 +180,9 @@ public abstract class BaseApiManager implements WebApiManager {
         }
     }
 
+    /**
+     * Writes custom headers to the HTTP response.
+     * @param response The HTTP servlet response.
+     */
     protected abstract void writeHeaders(final HttpServletResponse response);
 }

@@ -15,8 +15,16 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+/**
+ * Interface for Fess credential management.
+ * Provides access to user identification information.
+ */
 public interface FessCredential {
 
+    /**
+     * Gets the user ID for this credential.
+     * @return The user ID.
+     */
     String getUserId();
 
 }

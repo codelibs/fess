@@ -35,10 +35,25 @@ import org.opensearch.search.sort.SortBuilder;
 import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.search.sort.SortOrder;
 
+/**
+ * Abstract base class for query command implementations.
+ * Provides common functionality for processing and executing search queries.
+ */
 public abstract class QueryCommand {
 
+    /**
+     * Executes the query command and returns a QueryBuilder.
+     * @param context The query context containing search parameters.
+     * @param query The Lucene query to execute.
+     * @param boost The boost factor to apply.
+     * @return The executed QueryBuilder.
+     */
     public abstract QueryBuilder execute(final QueryContext context, final Query query, final float boost);
 
+    /**
+     * Gets the class name of the query this command handles.
+     * @return The query class name.
+     */
     protected abstract String getQueryClassName();
 
     public void register() {
