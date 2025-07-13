@@ -37,8 +37,6 @@ import org.codelibs.core.lang.StringUtil;
  * <li>Authentication type identifiers</li>
  * <li>Reserved words and regex patterns for query processing</li>
  * </ul>
- *
- * @author Fess Project
  */
 public class Constants extends CoreLibConstants {
 

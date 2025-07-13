@@ -22,34 +22,52 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The create form for Kuromoji.
+ * Form class for creating Kuromoji dictionary entries.
+ * Kuromoji is a Japanese morphological analyzer and this form allows
+ * administrators to add custom dictionary entries for better Japanese text analysis.
  *
  * @author shinsuke
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** Dictionary identifier */
     @Required
     public String dictId;
 
+    /** CRUD operation mode (CREATE, EDIT, etc.) */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** Token (word) to be added to the dictionary */
     @Required
     @Size(max = 1000)
     public String token;
 
+    /** Segmentation information for the token */
     @Required
     @Size(max = 1000)
     public String segmentation;
 
+    /** Reading (pronunciation) of the token in katakana */
     @Required
     @Size(max = 1000)
     public String reading;
 
+    /** Part of speech tag for the token */
     @Required
     @Size(max = 1000)
     public String pos;
 
+    /**
+     * Initializes the form with default values for creating a new Kuromoji dictionary entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

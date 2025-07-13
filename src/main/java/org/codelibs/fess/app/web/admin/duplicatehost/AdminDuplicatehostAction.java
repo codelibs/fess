@@ -38,8 +38,6 @@ import jakarta.annotation.Resource;
 
 /**
  * Admin action for Duplicate Host management.
- *
- * @author codelibs
  */
 public class AdminDuplicatehostAction extends FessAdminAction {
 

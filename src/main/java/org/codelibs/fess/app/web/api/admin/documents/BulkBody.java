@@ -24,6 +24,13 @@ import java.util.Map;
 public class BulkBody {
 
     /**
+     * Creates a new instance of BulkBody.
+     */
+    public BulkBody() {
+        // Default constructor
+    }
+
+    /**
      * List of documents to be processed in bulk operations.
      */
     public List<Map<String, Object>> documents;

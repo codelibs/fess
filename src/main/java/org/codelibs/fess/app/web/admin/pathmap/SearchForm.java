@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.pathmap;
 
 /**
  * The search form for Path Map.
- *
- * @author codelibs
  */
 public class SearchForm {
 

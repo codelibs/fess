@@ -47,21 +47,59 @@ import org.opensearch.search.aggregations.bucket.terms.Terms;
 import org.opensearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 
+/**
+ * Helper class for managing crawling information and statistics.
+ * Provides functionality to track crawling sessions, manage document expiration,
+ * and handle crawling information storage and retrieval.
+ */
 public class CrawlingInfoHelper {
+
+    /**
+     * Creates a new instance of CrawlingInfoHelper.
+     */
+    public CrawlingInfoHelper() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(CrawlingInfoHelper.class);
 
+    /**
+     * Key used for facet count aggregations.
+     */
     public static final String FACET_COUNT_KEY = "count";
 
+    /**
+     * Map containing crawling information parameters.
+     */
     protected Map<String, String> infoMap;
 
+    /**
+     * Document expiration time in milliseconds.
+     */
     protected Long documentExpires;
 
+    /**
+     * Maximum number of session IDs to include in lists.
+     */
     protected int maxSessionIdsInList;
 
+    /**
+     * Retrieves the CrawlingInfoService component instance.
+     *
+     * @return the CrawlingInfoService component for managing crawling information
+     */
     protected CrawlingInfoService getCrawlingInfoService() {
         return ComponentUtil.getComponent(CrawlingInfoService.class);
     }
 
+    /**
+     * Extracts the canonical session ID by removing any suffix after the first hyphen.
+     * If the session ID contains a hyphen, returns the portion before the first hyphen.
+     * Otherwise, returns the original session ID.
+     *
+     * @param sessionId the session ID to process
+     * @return the canonical session ID (portion before first hyphen, or original if no hyphen)
+     */
     public String getCanonicalSessionId(final String sessionId) {
         final int idx = sessionId.indexOf('-');
         if (idx >= 0) {
@@ -70,6 +108,15 @@ public class CrawlingInfoHelper {
         return sessionId;
     }
 
+    /**
+     * Stores crawling information and parameters for the specified session.
+     * Creates a new crawling info record if none exists or if create flag is true.
+     * Also stores any accumulated information parameters and clears the info map.
+     *
+     * @param sessionId the session ID for the crawling information
+     * @param create if true, creates a new crawling info regardless of existing records
+     * @throws FessSystemException if unable to store the crawling session
+     */
     public synchronized void store(final String sessionId, final boolean create) {
         CrawlingInfo crawlingInfo = create ? null : getCrawlingInfoService().getLast(sessionId);
         if (crawlingInfo == null) {
@@ -96,6 +143,13 @@ public class CrawlingInfoHelper {
         infoMap = null;
     }
 
+    /**
+     * Adds a key-value pair to the information map.
+     * Initializes the info map as a synchronized LinkedHashMap if it doesn't exist.
+     *
+     * @param key the parameter key to store
+     * @param value the parameter value to store
+     */
     public synchronized void putToInfoMap(final String key, final String value) {
         if (infoMap == null) {
             infoMap = Collections.synchronizedMap(new LinkedHashMap<>());
@@ -104,6 +158,15 @@ public class CrawlingInfoHelper {
         infoMap.put(key, value);
     }
 
+    /**
+     * Updates crawling information parameters for the specified session.
+     * Sets the name and expiration time based on the provided parameters.
+     *
+     * @param sessionId the session ID to update
+     * @param name the name to set for the crawling session (uses system name if blank)
+     * @param dayForCleanup number of days until cleanup (sets expiration if >= 0)
+     * @throws FessSystemException if unable to store the updated crawling session
+     */
     public void updateParams(final String sessionId, final String name, final int dayForCleanup) {
         final CrawlingInfo crawlingInfo = getCrawlingInfoService().getLast(sessionId);
         if (crawlingInfo == null) {
@@ -128,6 +191,14 @@ public class CrawlingInfoHelper {
 
     }
 
+    /**
+     * Calculates the document expiration date based on crawling configuration.
+     * If the config has a timeToLive value, calculates expiration from current time.
+     * Otherwise, returns the stored document expiration time.
+     *
+     * @param config the crawling configuration containing time-to-live settings
+     * @return the document expiration date, or null if no expiration is set
+     */
     public Date getDocumentExpires(final CrawlingConfig config) {
         if (config != null) {
             final Integer timeToLive = config.getTimeToLive();
@@ -140,11 +211,23 @@ public class CrawlingInfoHelper {
         return documentExpires != null ? new Date(documentExpires) : null;
     }
 
+    /**
+     * Calculates the expiration time in milliseconds from the current time.
+     *
+     * @param days the number of days from now when the item should expire
+     * @return the expiration time in milliseconds since epoch
+     */
     protected long getExpiredTime(final int days) {
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         return now + days * Constants.ONE_DAY_IN_MILLIS;
     }
 
+    /**
+     * Retrieves all crawling information parameters for the specified session as a map.
+     *
+     * @param sessionId the session ID to retrieve parameters for
+     * @return a map containing all key-value parameter pairs for the session
+     */
     public Map<String, String> getInfoMap(final String sessionId) {
         final List<CrawlingInfoParam> crawlingInfoParamList = getCrawlingInfoService().getLastCrawlingInfoParamList(sessionId);
         final Map<String, String> map = new HashMap<>();
@@ -154,6 +237,13 @@ public class CrawlingInfoHelper {
         return map;
     }
 
+    /**
+     * Generates a unique document ID from the provided data map.
+     * Constructs an ID string from URL, roles, and virtual hosts, then generates a hash.
+     *
+     * @param dataMap the document data map containing URL, roles, and virtual host information
+     * @return a unique hashed ID string for the document
+     */
     public String generateId(final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = (String) dataMap.get(fessConfig.getIndexFieldUrl());
@@ -178,6 +268,13 @@ public class CrawlingInfoHelper {
         return generateId(urlId);
     }
 
+    /**
+     * Retrieves a list of session IDs with their document counts from the search engine.
+     * Uses aggregation to get session segments and their corresponding document counts.
+     *
+     * @param searchEngineClient the search engine client to perform the query
+     * @return a list of maps containing session IDs and their document counts
+     */
     public List<Map<String, String>> getSessionIdList(final SearchEngineClient searchEngineClient) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return searchEngineClient.search(fessConfig.getIndexDocumentSearchIndex(), queryRequestBuilder -> {
@@ -202,6 +299,14 @@ public class CrawlingInfoHelper {
         });
     }
 
+    /**
+     * Generates a hashed ID from the provided URL ID string.
+     * Encodes special characters using URL encoding or Base64 encoding as needed,
+     * then applies a message digest algorithm to create a unique hash.
+     *
+     * @param urlId the URL ID string to generate a hash for
+     * @return a hashed ID string generated from the input URL ID
+     */
     protected String generateId(final String urlId) {
         final StringBuilder encodedBuf = new StringBuilder(urlId.length() + 100);
         for (int i = 0; i < urlId.length(); i++) {
@@ -252,6 +357,12 @@ public class CrawlingInfoHelper {
         return MessageDigestUtil.digest(ComponentUtil.getFessConfig().getIndexIdDigestAlgorithm(), id);
     }
 
+    /**
+     * Sets the maximum number of session IDs to include in session ID lists.
+     * This controls the size limit for aggregation results when retrieving session lists.
+     *
+     * @param maxSessionIdsInList the maximum number of session IDs to include in lists
+     */
     public void setMaxSessionIdsInList(final int maxSessionIdsInList) {
         this.maxSessionIdsInList = maxSessionIdsInList;
     }

@@ -22,8 +22,6 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The edit form for Web Authentication.
- *
- * @author codelibs
  */
 public class EditForm extends CreateForm {
 

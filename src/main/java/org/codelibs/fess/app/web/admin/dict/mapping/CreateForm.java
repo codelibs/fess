@@ -22,25 +22,41 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The create form for Mapping.
+ * Form class for creating mapping dictionary entries.
+ * Mapping dictionaries allow administrators to define synonym mappings
+ * where multiple input terms can be mapped to a single output term for search normalization.
  *
  * @author nullpos
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** Dictionary identifier */
     @Required
     public String dictId;
 
+    /** CRUD operation mode (CREATE, EDIT, etc.) */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** Input terms (comma-separated) that will be mapped to the output term */
     @Required
     @Size(max = 1000)
     public String inputs;
 
+    /** Output term that input terms will be mapped to */
     @Size(min = 1, max = 1000)
     public String output;
 
+    /**
+     * Initializes the form with default values for creating a new mapping dictionary entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

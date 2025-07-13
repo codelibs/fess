@@ -20,8 +20,6 @@ import org.lastaflute.web.validation.Required;
 
 /**
  * The upload form for Elevate Word.
- *
- * @author codelibs
  */
 public class UploadForm {
 

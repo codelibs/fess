@@ -22,28 +22,58 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * The create form for managing related queries.
+ */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD operation mode (create, update, etc.).
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The search term for which related queries are shown.
+     */
     @Required
     @Size(max = 10000)
     public String term;
 
+    /**
+     * The related queries to be suggested (one per line).
+     */
     @Required
     @Size(max = 10000)
     public String queries;
 
+    /**
+     * The virtual host for which these related queries apply.
+     */
     @Size(max = 1000)
     public String virtualHost;
 
+    /**
+     * The username who created these related queries.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when these related queries were created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating new related queries.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();

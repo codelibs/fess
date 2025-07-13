@@ -20,8 +20,6 @@ import org.lastaflute.web.validation.Required;
 
 /**
  * The upload form for Bad Word.
- *
- * @author codelibs
  */
 public class UploadForm {
 

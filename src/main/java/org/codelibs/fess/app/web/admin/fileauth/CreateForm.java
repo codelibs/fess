@@ -26,45 +26,63 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The create form for File Authentication.
- *
- * @author codelibs
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** The CRUD operation mode for this form. */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** The hostname of the file server (maximum 100 characters). */
     @Size(max = 100)
     public String hostname;
 
+    /** The port number of the file server (0 to 2147483647). */
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer port;
 
+    /** The protocol scheme for file access (maximum 10 characters). */
     @Size(max = 10)
     public String protocolScheme;
 
+    /** The username for file authentication (required, maximum 100 characters). */
     @Required
     @Size(max = 100)
     public String username;
 
+    /** The password for file authentication (maximum 100 characters). */
     @Size(max = 100)
     public String password;
 
+    /** Additional parameters for file authentication (maximum 1000 characters). */
     @Size(max = 1000)
     public String parameters;
 
+    /** The ID of the associated file configuration (required, maximum 1000 characters). */
     @Required
     @Size(max = 1000)
     public String fileConfigId;
 
+    /** The user who created this file authentication configuration (maximum 1000 characters). */
     @Size(max = 1000)
     public String createdBy;
 
+    /** The timestamp when this file authentication configuration was created. */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creation mode.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();

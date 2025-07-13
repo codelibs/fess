@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.labeltype;
 
 /**
  * The search form for Label Type.
- *
- * @author codelibs
  */
 public class SearchForm {
 

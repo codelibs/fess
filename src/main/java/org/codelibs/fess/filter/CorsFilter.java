@@ -38,6 +38,13 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class CorsFilter implements Filter {
 
+    /**
+     * Creates a new instance of CorsFilter.
+     */
+    public CorsFilter() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
 
     /**

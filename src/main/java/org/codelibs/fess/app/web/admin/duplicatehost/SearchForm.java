@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.duplicatehost;
 
 /**
  * The search form for Duplicate Host.
- *
- * @author codelibs
  */
 public class SearchForm {
 

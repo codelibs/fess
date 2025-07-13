@@ -41,8 +41,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin Synonym dictionary management.
  * Provides REST endpoints for managing synonym dictionary items in the Fess search engine.
- *
- * @author FessProject
  */
 public class ApiAdminDictSynonymAction extends FessApiAdminAction {
 

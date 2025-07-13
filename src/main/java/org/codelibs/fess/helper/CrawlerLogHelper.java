@@ -36,6 +36,14 @@ import org.codelibs.fess.util.ComponentUtil;
  * including failure URL tracking and crawler statistics integration.
  */
 public class CrawlerLogHelper extends LogHelperImpl {
+
+    /**
+     * Creates a new instance of CrawlerLogHelper.
+     */
+    public CrawlerLogHelper() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(CrawlerLogHelper.class);
 
     @Override
@@ -172,6 +180,15 @@ public class CrawlerLogHelper extends LogHelperImpl {
         }
     }
 
+    /**
+     * Stores a failure URL with error information for later analysis.
+     *
+     * @param crawlerContext the crawler context
+     * @param urlQueue the URL queue containing the failed URL
+     * @param errorName the name/type of the error
+     * @param e the throwable that caused the failure
+     * @return the stored FailureUrl entity
+     */
     protected FailureUrl storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue<?> urlQueue, final String errorName,
             final Throwable e) {
 
@@ -182,6 +199,12 @@ public class CrawlerLogHelper extends LogHelperImpl {
         return failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 
+    /**
+     * Gets the crawling configuration for the specified session ID.
+     *
+     * @param sessionCountId the session count ID
+     * @return the crawling configuration
+     */
     protected CrawlingConfig getCrawlingConfig(final String sessionCountId) {
         return ComponentUtil.getCrawlingConfigHelper().get(sessionCountId);
     }

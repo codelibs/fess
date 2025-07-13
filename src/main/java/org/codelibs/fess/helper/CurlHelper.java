@@ -41,13 +41,27 @@ import org.codelibs.fess.util.ResourceUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing HTTP requests using cURL-like operations.
+ */
 public class CurlHelper {
+
+    /**
+     * Default constructor.
+     */
+    public CurlHelper() {
+        // Empty constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(CurlHelper.class);
 
     private SSLSocketFactory sslSocketFactory;
 
     private NodeManager nodeManager;
 
+    /**
+     * Initializes the CurlHelper with SSL configuration and node manager.
+     */
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -80,26 +94,57 @@ public class CurlHelper {
         nodeManager.setHeartbeatInterval(fessConfig.getFesenHeartbeatInterval());
     }
 
+    /**
+     * Creates a GET request for the specified path.
+     * @param path the request path
+     * @return the configured CurlRequest
+     */
     public CurlRequest get(final String path) {
         return request(Method.GET, path).header("Content-Type", "application/json");
     }
 
+    /**
+     * Creates a POST request for the specified path.
+     * @param path the request path
+     * @return the configured CurlRequest
+     */
     public CurlRequest post(final String path) {
         return request(Method.POST, path).header("Content-Type", "application/json");
     }
 
+    /**
+     * Creates a PUT request for the specified path.
+     * @param path the request path
+     * @return the configured CurlRequest
+     */
     public CurlRequest put(final String path) {
         return request(Method.PUT, path).header("Content-Type", "application/json");
     }
 
+    /**
+     * Creates a DELETE request for the specified path.
+     * @param path the request path
+     * @return the configured CurlRequest
+     */
     public CurlRequest delete(final String path) {
         return request(Method.DELETE, path).header("Content-Type", "application/json");
     }
 
+    /**
+     * Creates a request with the specified HTTP method and path.
+     * @param method the HTTP method
+     * @param path the request path
+     * @return the configured CurlRequest
+     */
     public CurlRequest request(final Method method, final String path) {
         return request(new FesenRequest(new CurlRequest(method, null), nodeManager, path));
     }
 
+    /**
+     * Configures the request with authentication and SSL settings.
+     * @param request the request to configure
+     * @return the configured request
+     */
     protected CurlRequest request(final CurlRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String username = fessConfig.getFesenUsername();

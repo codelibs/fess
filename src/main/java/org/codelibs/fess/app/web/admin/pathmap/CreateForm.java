@@ -26,39 +26,70 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The create form for Path Map.
- *
- * @author codelibs
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD operation mode (create, update, etc.).
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The regular expression pattern to match request paths.
+     */
     @Required
     @Size(max = 1000)
     public String regex;
 
+    /**
+     * The replacement pattern for matched paths.
+     */
     @Size(max = 1000)
     public String replacement;
 
+    /**
+     * The processing type for path mapping.
+     */
     @Required
     public String processType;
 
+    /**
+     * The sort order for this path mapping (0-2147483647).
+     */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /**
+     * The username who created this path mapping.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this path mapping was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * The user agent string for this path mapping.
+     */
     @Size(max = 1000)
     public String userAgent;
 
+    /**
+     * Initializes the form with default values for creating a new path mapping.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;

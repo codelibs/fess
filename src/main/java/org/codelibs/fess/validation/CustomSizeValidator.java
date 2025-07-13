@@ -23,7 +23,18 @@ import org.hibernate.validator.constraintvalidation.HibernateConstraintValidator
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+/**
+ * Validator implementation for the CustomSize constraint.
+ */
 public class CustomSizeValidator implements ConstraintValidator<CustomSize, CharSequence> {
+
+    /**
+     * Default constructor.
+     */
+    public CustomSizeValidator() {
+        // Empty constructor
+    }
+
     private int min = 0;
     private int max = Integer.MAX_VALUE;
     private String message;

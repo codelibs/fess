@@ -61,8 +61,20 @@ public abstract class ExecJob {
 
     protected boolean processTimeout = false;
 
+    /**
+     * Executes the job and returns the result as a string.
+     * This method contains the main business logic for the specific job implementation.
+     *
+     * @return the execution result message or summary
+     */
     public abstract String execute();
 
+    /**
+     * Returns the execution type identifier for this job.
+     * This type is used for classpath construction, configuration, and logging purposes.
+     *
+     * @return the execution type (e.g., "crawler", "suggest", etc.)
+     */
     protected abstract String getExecuteType();
 
     public String execute(final JobExecutor jobExecutor) {

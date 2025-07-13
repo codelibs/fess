@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.dataconfig;
 
 /**
  * The search form for Data Config.
- *
- * @author codelibs
  */
 public class SearchForm {
 

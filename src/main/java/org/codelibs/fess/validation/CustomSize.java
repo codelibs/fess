@@ -35,20 +35,38 @@ import jakarta.validation.Payload;
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = CustomSizeValidator.class)
+/**
+ * Validation constraint for custom size limits based on configuration keys.
+ */
 public @interface CustomSize {
 
+    /**
+     * The error message when validation fails.
+     * @return the error message
+     */
     String message() default "{jakarta.validation.constraints.Size.message}";
 
+    /**
+     * The validation groups this constraint belongs to.
+     * @return the groups
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * The payload associated with this constraint.
+     * @return the payload
+     */
     Class<? extends Payload>[] payload() default {};
 
     /**
+     * Gets the configuration key for the minimum size constraint.
      * @return name of size the element must be higher or equal to
      */
     String minKey() default StringUtil.EMPTY;
 
     /**
+     * Gets the configuration key for the maximum size constraint.
+     *
      * @return name of size the element must be lower or equal to
      */
     String maxKey() default StringUtil.EMPTY;

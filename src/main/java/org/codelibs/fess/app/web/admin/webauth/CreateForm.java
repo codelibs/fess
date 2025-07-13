@@ -26,48 +26,89 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The create form for Web Authentication.
- *
- * @author codelibs
  */
 public class CreateForm {
 
+    /**
+     * Default constructor.
+     */
+    public CreateForm() {
+        // Empty constructor
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The hostname for the web authentication.
+     */
     @Size(max = 100)
     public String hostname;
 
+    /**
+     * The port number for the web authentication.
+     */
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer port;
 
+    /**
+     * The authentication realm.
+     */
     @Size(max = 100)
     public String authRealm;
 
+    /**
+     * The protocol scheme (http, https).
+     */
     @Size(max = 10)
     public String protocolScheme;
 
+    /**
+     * The username for authentication.
+     */
     @Required
     @Size(max = 100)
     public String username;
 
+    /**
+     * The password for authentication.
+     */
     @Size(max = 100)
     public String password;
 
+    /**
+     * Additional parameters for the authentication.
+     */
     @Size(max = 1000)
     public String parameters;
 
+    /**
+     * The web configuration ID this authentication is associated with.
+     */
     @Required
     @Size(max = 1000)
     public String webConfigId;
 
+    /**
+     * The user who created this authentication configuration.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this authentication configuration was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new web authentication configuration.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();

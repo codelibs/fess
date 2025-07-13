@@ -31,8 +31,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin dictionary management.
  * Provides REST endpoints for managing dictionaries in the Fess search engine.
- *
- * @author FessProject
  */
 public class ApiAdminDictAction extends FessApiAdminAction {
 

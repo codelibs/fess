@@ -41,8 +41,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin Stopwords dictionary management.
  * Provides REST endpoints for managing stopwords dictionary items in the Fess search engine.
- *
- * @author FessProject
  */
 public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
 

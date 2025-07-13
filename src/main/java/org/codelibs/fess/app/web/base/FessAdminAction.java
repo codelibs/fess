@@ -31,7 +31,6 @@ import jakarta.servlet.ServletContext;
 /**
  * Base action for admin pages.
  *
- * @author codelibs
  * @author jflute
  */
 public abstract class FessAdminAction extends FessBaseAction {

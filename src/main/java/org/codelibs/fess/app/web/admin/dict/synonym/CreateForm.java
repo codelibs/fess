@@ -22,26 +22,41 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The create form for Synonym.
+ * Form class for creating new synonym dictionary entries.
+ * This form handles the creation of synonym mappings that expand
+ * search queries to include related terms.
  *
  * @author shinsuke
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /** The dictionary ID to which this synonym entry belongs */
     @Required
     public String dictId;
 
+    /** The CRUD operation mode for form processing */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** The input terms that should be considered synonymous */
     @Required
     @Size(max = 1000)
     public String inputs;
 
+    /** The output synonyms that should be matched for the input terms */
     @Required
     @Size(max = 1000)
     public String outputs;
 
+    /**
+     * Initializes the form with default values for creating a new synonym entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

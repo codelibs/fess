@@ -28,46 +28,83 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The create form for Label Type.
- *
- * @author codelibs
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The name of the label type.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The value of the label type (alphanumeric and underscore only).
+     */
     @Required
     @Size(max = 100)
     @Pattern(regexp = "^[a-zA-Z0-9_]+$")
     public String value;
 
+    /**
+     * The paths to include for this label type.
+     */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String includedPaths;
 
+    /**
+     * The paths to exclude for this label type.
+     */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String excludedPaths;
 
+    /**
+     * The permissions required to view this label type.
+     */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
+    /**
+     * The virtual host for the label type.
+     */
     @Size(max = 1000)
     public String virtualHost;
 
+    /**
+     * The sort order for displaying this label type.
+     */
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /**
+     * The user who created this label type.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this label type was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;

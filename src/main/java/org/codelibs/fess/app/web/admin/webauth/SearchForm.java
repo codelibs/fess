@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.webauth;
 
 /**
  * The search form for Web Authentication.
- *
- * @author codelibs
  */
 public class SearchForm {
 

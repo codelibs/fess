@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.failureurl;
 
 /**
  * The search form for Failure URL.
- *
- * @author codelibs
  */
 public class SearchForm {
 

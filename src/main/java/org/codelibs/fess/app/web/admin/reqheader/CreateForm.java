@@ -24,32 +24,57 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The create form for Request Header.
- *
- * @author codelibs
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The name of the request header.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The value of the request header.
+     */
     @Required
     @Size(max = 1000)
     public String value;
 
+    /**
+     * The web configuration ID associated with this request header.
+     */
     @Required
     @Size(max = 1000)
     public String webConfigId;
 
+    /**
+     * The username of who created this request header.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this request header was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new request header.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();

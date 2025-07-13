@@ -21,7 +21,17 @@ import org.lastaflute.job.util.LaCronUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+/**
+ * Validator implementation for the CronExpression constraint.
+ */
 public class CronExpressionValidator implements ConstraintValidator<CronExpression, String> {
+
+    /**
+     * Default constructor.
+     */
+    public CronExpressionValidator() {
+        // Empty constructor
+    }
 
     @Override
     public void initialize(final CronExpression constraintAnnotation) {
@@ -32,6 +42,11 @@ public class CronExpressionValidator implements ConstraintValidator<CronExpressi
         return determineValid(value);
     }
 
+    /**
+     * Determines if the given value is a valid cron expression.
+     * @param value the value to validate
+     * @return true if valid, false otherwise
+     */
     protected boolean determineValid(final String value) {
         if (StringUtil.isNotBlank(value) && !LaCronUtil.isCronExpValid(value)) {
             return false;

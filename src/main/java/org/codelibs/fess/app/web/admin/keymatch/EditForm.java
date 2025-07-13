@@ -22,8 +22,6 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The edit form for Key Match.
- *
- * @author codelibs
  */
 public class EditForm extends CreateForm {
 

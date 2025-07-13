@@ -17,6 +17,16 @@ package org.codelibs.fess.app.web.api.admin.reqheader;
 
 import org.codelibs.fess.app.web.admin.reqheader.CreateForm;
 
+/**
+ * Request body for creating request header via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
 
 }

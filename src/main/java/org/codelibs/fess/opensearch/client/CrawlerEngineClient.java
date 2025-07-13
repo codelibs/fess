@@ -32,6 +32,14 @@ import org.opensearch.transport.client.Client;
  * Extends FesenClient to provide search engine connectivity for the crawler components.
  */
 public class CrawlerEngineClient extends FesenClient {
+
+    /**
+     * Creates a new instance of CrawlerEngineClient.
+     */
+    public CrawlerEngineClient() {
+        // Default constructor
+    }
+
     @Override
     protected Client createClient() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

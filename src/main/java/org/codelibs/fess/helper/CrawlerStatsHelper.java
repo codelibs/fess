@@ -46,6 +46,14 @@ import jakarta.annotation.PreDestroy;
  * @author shinsuke
  */
 public class CrawlerStatsHelper {
+
+    /**
+     * Creates a new instance of CrawlerStatsHelper.
+     */
+    public CrawlerStatsHelper() {
+        // Default constructor
+    }
+
     /** Logger instance for this class. */
     private static final Logger logger = LogManager.getLogger(CrawlerStatsHelper.class);
 

@@ -20,8 +20,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * The edit form for Job Log.
- *
- * @author codelibs
  */
 public class EditForm {
 

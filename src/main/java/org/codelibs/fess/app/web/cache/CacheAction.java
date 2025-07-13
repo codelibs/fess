@@ -33,6 +33,13 @@ import org.lastaflute.web.response.StreamResponse;
  */
 public class CacheAction extends FessSearchAction {
 
+    /**
+     * Creates a new instance of CacheAction.
+     */
+    public CacheAction() {
+        // Default constructor
+    }
+
     // ===================================================================================
     //                                                                            Constant
     //

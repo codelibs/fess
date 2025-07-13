@@ -33,12 +33,27 @@ import jakarta.validation.Payload;
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = CronExpressionValidator.class)
+/**
+ * Validation constraint to ensure that a string is a valid cron expression.
+ */
 public @interface CronExpression {
 
+    /**
+     * The error message when validation fails.
+     * @return the error message
+     */
     String message() default "{org.lastaflute.validator.constraints.CronExpression.message}";
 
+    /**
+     * The validation groups this constraint belongs to.
+     * @return the groups
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * The payload associated with this constraint.
+     * @return the payload
+     */
     Class<? extends Payload>[] payload() default {};
 
 }

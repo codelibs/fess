@@ -41,8 +41,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin Kuromoji dictionary management.
  * Provides REST endpoints for managing Kuromoji dictionary items in the Fess search engine.
- *
- * @author FessProject
  */
 public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
 

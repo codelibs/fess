@@ -22,22 +22,37 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * The create form for Protected Words.
+ * Form class for creating protected words dictionary entries.
+ * Protected words are terms that should not be modified or analyzed during
+ * text processing, preserving their original form in search indexes.
  *
  * @author ma2tani
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** Dictionary identifier */
     @Required
     public String dictId;
 
+    /** CRUD operation mode (CREATE, EDIT, etc.) */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** Word or phrase to be protected from analysis */
     @Required
     @Size(max = 1000)
     public String input;
 
+    /**
+     * Initializes the form with default values for creating a new protected words entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

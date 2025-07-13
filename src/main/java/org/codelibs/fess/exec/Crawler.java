@@ -103,11 +103,15 @@ import jakarta.annotation.Resource;
  *   -e, --expires days            : Expires for documents (in days)
  *   -h, --hotThread interval      : Interval for hot thread logging
  * </pre>
- *
- * @author FessProject
- * @since 1.0
  */
 public class Crawler {
+
+    /**
+     * Creates a new instance of Crawler.
+     */
+    public Crawler() {
+        // Default constructor
+    }
 
     /** Logger instance for this class. */
     private static final Logger logger = LogManager.getLogger(Crawler.class);

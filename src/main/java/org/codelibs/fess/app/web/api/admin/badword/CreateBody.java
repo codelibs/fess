@@ -17,5 +17,16 @@ package org.codelibs.fess.app.web.api.admin.badword;
 
 import org.codelibs.fess.app.web.admin.badword.CreateForm;
 
+/**
+ * Request body for creating bad word via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
+
 }

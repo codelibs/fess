@@ -37,10 +37,16 @@ import jakarta.annotation.Resource;
  * and list retrieval. Character mappings are used for text normalization
  * and character substitution during document processing and search operations.
  * </p>
- *
- * @author FessProject
  */
 public class CharMappingService {
+
+    /**
+     * Creates a new instance of CharMappingService.
+     */
+    public CharMappingService() {
+        // Default constructor
+    }
+
     /**
      * Dictionary manager for accessing and managing dictionary files.
      */

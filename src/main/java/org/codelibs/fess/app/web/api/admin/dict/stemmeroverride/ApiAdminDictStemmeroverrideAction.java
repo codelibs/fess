@@ -41,8 +41,6 @@ import jakarta.annotation.Resource;
 /**
  * API action for admin Stemmer Override dictionary management.
  * Provides REST endpoints for managing stemmer override dictionary items in the Fess search engine.
- *
- * @author FessProject
  */
 public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
 

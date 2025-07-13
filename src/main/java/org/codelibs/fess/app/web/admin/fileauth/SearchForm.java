@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.fileauth;
 
 /**
  * The search form for File Authentication.
- *
- * @author codelibs
  */
 public class SearchForm {
 

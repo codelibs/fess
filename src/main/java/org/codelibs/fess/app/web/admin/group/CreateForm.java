@@ -31,15 +31,33 @@ import jakarta.validation.constraints.Size;
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The name of the group.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * Additional attributes for the group.
+     */
     public Map<String, String> attributes = new HashMap<>();
 
+    /**
+     * Initializes the form with default values.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

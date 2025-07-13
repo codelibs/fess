@@ -29,6 +29,13 @@ import jakarta.validation.constraints.Size;
 public class CrawlingConfigForm {
 
     /**
+     * Creates a new form instance.
+     */
+    public CrawlingConfigForm() {
+        // Default constructor
+    }
+
+    /**
      * Name of the crawling configuration.
      */
     @Required

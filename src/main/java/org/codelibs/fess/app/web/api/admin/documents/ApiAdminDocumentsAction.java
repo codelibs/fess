@@ -45,8 +45,6 @@ import jakarta.annotation.Resource;
  * API action for admin document management.
  * Provides RESTful API endpoints for bulk document operations in the Fess search engine.
  * Supports indexing multiple documents with automatic field validation and default value assignment.
- *
- * @author FessProject
  */
 public class ApiAdminDocumentsAction extends FessApiAdminAction {
 

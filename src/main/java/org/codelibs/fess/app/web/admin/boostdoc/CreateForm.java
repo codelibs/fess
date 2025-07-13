@@ -24,31 +24,52 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for creating boost document configurations.
+ * Boost documents allow administrators to define URL patterns and boost expressions
+ * to influence search result rankings for specific documents.
+ */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** CRUD operation mode (CREATE, EDIT, etc.) */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** URL expression pattern to match documents for boosting */
     @Required
     @Size(max = 10000)
     public String urlExpr;
 
+    /** Boost expression to apply to matching documents */
     @Required
     @Size(max = 10000)
     public String boostExpr;
 
+    /** Sort order for displaying boost configurations */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /** User who created this configuration */
     @Size(max = 1000)
     public String createdBy;
 
+    /** Timestamp when this configuration was created */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new boost document configuration.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;

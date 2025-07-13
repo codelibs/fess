@@ -25,6 +25,13 @@ import jakarta.servlet.ServletResponse;
 public abstract class CorsHandler {
 
     /**
+     * Creates a new instance of CorsHandler.
+     */
+    public CorsHandler() {
+        // Default constructor
+    }
+
+    /**
      * CORS header for specifying allowed origin.
      */
     protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";

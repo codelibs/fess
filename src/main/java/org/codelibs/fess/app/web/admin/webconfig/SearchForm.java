@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.webconfig;
 
 /**
  * The search form for Web Config.
- *
- * @author codelibs
  */
 public class SearchForm {
 

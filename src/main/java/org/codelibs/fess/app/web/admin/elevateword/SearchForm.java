@@ -17,8 +17,6 @@ package org.codelibs.fess.app.web.admin.elevateword;
 
 /**
  * The search form for Elevate Word.
- *
- * @author codelibs
  */
 public class SearchForm {
 

@@ -17,5 +17,16 @@ package org.codelibs.fess.app.web.api.admin.dict.synonym;
 
 import org.codelibs.fess.app.web.admin.dict.synonym.CreateForm;
 
+/**
+ * Request body for creating synonym dictionary via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
+
 }

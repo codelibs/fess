@@ -22,8 +22,6 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The edit form for Failure URL.
- *
- * @author codelibs
  */
 public class EditForm {
 

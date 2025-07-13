@@ -26,6 +26,14 @@ import org.apache.logging.log4j.Logger;
  * Maintains a registry of CORS handlers for different origins and provides lookup functionality.
  */
 public class CorsHandlerFactory {
+
+    /**
+     * Creates a new instance of CorsHandlerFactory.
+     */
+    public CorsHandlerFactory() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(CorsHandlerFactory.class);
 
     /**
