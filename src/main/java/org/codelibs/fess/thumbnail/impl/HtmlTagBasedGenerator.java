@@ -37,14 +37,37 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
+/**
+ * HTML tag-based thumbnail generator that creates thumbnails from image content
+ * referenced in HTML documents. This generator extracts images from HTML content
+ * and processes them to create thumbnail images based on configured dimensions
+ * and format settings.
+ *
+ * <p>The generator validates image MIME types, processes image data through
+ * ImageIO operations, and applies scaling and cropping to generate thumbnails
+ * that meet the specified size requirements.</p>
+ *
+ * @author FessProject
+ */
 public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LogManager.getLogger(HtmlTagBasedGenerator.class);
 
+    /**
+     * Destroys this thumbnail generator and releases any resources.
+     * This implementation is empty as no cleanup is required.
+     */
     @Override
     public void destroy() {
     }
 
+    /**
+     * Creates a thumbnail generation task for the specified document.
+     *
+     * @param path the file path or URL of the document
+     * @param docMap the document metadata map containing field values
+     * @return a tuple containing the generator name, thumbnail ID, and path
+     */
     @Override
     public Tuple3<String, String, String> createTask(final String path, final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -56,6 +79,17 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         return task;
     }
 
+    /**
+     * Generates a thumbnail image and saves it to the specified output file.
+     *
+     * <p>This method processes the image content associated with the thumbnail ID,
+     * validates the image format, applies scaling and cropping transformations,
+     * and writes the resulting thumbnail to the output file.</p>
+     *
+     * @param thumbnailId the unique identifier for the thumbnail
+     * @param outputFile the file where the generated thumbnail will be saved
+     * @return true if the thumbnail was successfully generated, false otherwise
+     */
     @Override
     public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
@@ -126,12 +160,31 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
 
     }
 
+    /**
+     * Checks if the response data contains an image MIME type that can be processed
+     * for thumbnail generation.
+     *
+     * @param responseData the response data containing MIME type information
+     * @return true if the MIME type represents a supported image format, false otherwise
+     */
     protected boolean isImageMimeType(final ResponseData responseData) {
         final String mimeType=responseData.getMimeType();if(mimeType==null){return true;}
 
         return switch(mimeType){case"image/png","image/gif","image/jpeg","image/bmp"->true;default->false;};
     }
 
+    /**
+     * Processes and saves an image from the input stream to the output file as a thumbnail.
+     *
+     * <p>This method reads image data, validates dimensions, applies subsampling and scaling
+     * transformations based on configuration settings, and writes the processed thumbnail
+     * to the specified output file.</p>
+     *
+     * @param input the image input stream containing the source image data
+     * @param outputFile the file where the processed thumbnail will be saved
+     * @return the result of the image processing operation
+     * @throws IOException if an error occurs during image reading or writing operations
+     */
     protected Result saveImage(final ImageInputStream input, final File outputFile) throws IOException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
@@ -169,7 +222,17 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         return Result.FAILED;
     }
 
+    /**
+     * Enumeration representing the possible results of thumbnail image processing.
+     */
     protected enum Result {
-        OK, FAILED, INVALID_SIZE, NO_IMAGE;
+        /** Thumbnail was successfully generated */
+        OK,
+        /** Thumbnail generation failed due to processing errors */
+        FAILED,
+        /** Image dimensions do not meet validation requirements */
+        INVALID_SIZE,
+        /** No valid image data was found in the input */
+        NO_IMAGE;
     }
 }

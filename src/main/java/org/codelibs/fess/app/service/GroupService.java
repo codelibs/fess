@@ -33,17 +33,33 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing group operations in the Fess application.
+ * Provides CRUD operations for groups, including integration with LDAP manager
+ * and user-group relationships. Handles group pagination, searching, and
+ * maintaining data consistency between groups and associated users.
+ */
 public class GroupService {
 
+    /** Behavior class for group database operations */
     @Resource
     protected GroupBhv groupBhv;
 
+    /** Configuration settings for the Fess application */
     @Resource
     protected FessConfig fessConfig;
 
+    /** Behavior class for user database operations */
     @Resource
     protected UserBhv userBhv;
 
+    /**
+     * Retrieves a paginated list of groups based on the provided pager criteria.
+     * Updates the pager with pagination information including page numbers and ranges.
+     *
+     * @param groupPager the pager containing pagination and search criteria
+     * @return a list of groups matching the criteria
+     */
     public List<Group> getGroupList(final GroupPager groupPager) {
 
         final PagingResultBean<Group> groupList = groupBhv.selectPage(cb -> {
@@ -60,6 +76,12 @@ public class GroupService {
         return groupList;
     }
 
+    /**
+     * Retrieves a specific group by its ID and applies LDAP manager settings.
+     *
+     * @param id the unique identifier of the group
+     * @return an OptionalEntity containing the group if found, empty otherwise
+     */
     public OptionalEntity<Group> getGroup(final String id) {
         return groupBhv.selectByPK(id).map(g -> {
             ComponentUtil.getLdapManager().apply(g);
@@ -67,6 +89,12 @@ public class GroupService {
         });
     }
 
+    /**
+     * Stores a group by inserting or updating it in both LDAP and the database.
+     * Uses refresh policy to ensure immediate availability of the stored data.
+     *
+     * @param group the group entity to store
+     */
     public void store(final Group group) {
         ComponentUtil.getLdapManager().insert(group);
 
@@ -76,6 +104,12 @@ public class GroupService {
 
     }
 
+    /**
+     * Deletes a group from both LDAP and the database, and removes the group
+     * association from all users that belong to this group.
+     *
+     * @param group the group entity to delete
+     */
     public void delete(final Group group) {
         ComponentUtil.getLdapManager().delete(group);
 
@@ -91,6 +125,13 @@ public class GroupService {
 
     }
 
+    /**
+     * Sets up the search conditions for group list queries based on pager criteria.
+     * Configures the condition bean with ID filtering and ordering by name.
+     *
+     * @param cb the condition bean for building the query
+     * @param groupPager the pager containing search and filter criteria
+     */
     protected void setupListCondition(final GroupCB cb, final GroupPager groupPager) {
         if (groupPager.id != null) {
             cb.query().docMeta().setId_Equal(groupPager.id);
@@ -104,6 +145,12 @@ public class GroupService {
 
     }
 
+    /**
+     * Retrieves all available groups ordered by name in ascending order.
+     * Limited by the configured maximum fetch size for groups.
+     *
+     * @return a list of all available groups
+     */
     public List<Group> getAvailableGroupList() {
         return groupBhv.selectList(cb -> {
             cb.query().matchAll();

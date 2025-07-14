@@ -19,7 +19,19 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * Action class for handling general error pages.
+ * This action displays error pages when unhandled exceptions occur
+ * during search operations or page navigation.
+ */
 public class ErrorAction extends FessSearchAction {
+
+    /**
+     * Default constructor for ErrorAction.
+     */
+    public ErrorAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -32,6 +44,12 @@ public class ErrorAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the general error page.
+     *
+     * @param form the error form containing error information
+     * @return HTML response for the error page
+     */
     @Execute
     public HtmlResponse index(final ErrorForm form) {
         return asHtml(virtualHost(path_Error_ErrorJsp));

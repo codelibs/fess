@@ -27,13 +27,31 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing file type mappings based on MIME types.
+ * This class provides functionality to map MIME types to file types and
+ * retrieve appropriate file type classifications for documents during indexing.
+ *
+ * The mappings are loaded from configuration and can be dynamically modified
+ * at runtime. When a MIME type is not found in the mapping, a default value
+ * is returned.
+ */
 public class FileTypeHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FileTypeHelper.class);
 
+    /** Default file type value returned when MIME type is not found in mappings */
     protected String defaultValue = "others";
 
+    /** Map storing MIME type to file type mappings */
     protected Map<String, String> mimetypeMap = new LinkedHashMap<>();
 
+    /**
+     * Initializes the file type mappings by loading configuration from Fess settings.
+     * This method is called automatically after dependency injection is complete.
+     * The mappings are loaded from the index filetype configuration property,
+     * where each line contains a MIME type to file type mapping in the format "mimetype=filetype".
+     */
     @PostConstruct
     public void init() {
         StreamUtil.split(ComponentUtil.getFessConfig().getIndexFiletype(), "\n")
@@ -48,10 +66,22 @@ public class FileTypeHelper {
         }
     }
 
+    /**
+     * Adds or updates a MIME type to file type mapping.
+     *
+     * @param mimetype the MIME type to map (e.g., "application/pdf")
+     * @param filetype the file type classification (e.g., "pdf")
+     */
     public void add(final String mimetype, final String filetype) {
         mimetypeMap.put(mimetype, filetype);
     }
 
+    /**
+     * Retrieves the file type for a given MIME type.
+     *
+     * @param mimetype the MIME type to look up
+     * @return the corresponding file type, or the default value if not found
+     */
     public String get(final String mimetype) {
         final String filetype = mimetypeMap.get(mimetype);
         if (StringUtil.isBlank(filetype)) {
@@ -60,14 +90,29 @@ public class FileTypeHelper {
         return filetype;
     }
 
+    /**
+     * Gets the default file type value used when MIME type is not found.
+     *
+     * @return the default file type value
+     */
     public String getDefaultValue() {
         return defaultValue;
     }
 
+    /**
+     * Sets the default file type value to use when MIME type is not found.
+     *
+     * @param defaultValue the new default file type value
+     */
     public void setDefaultValue(final String defaultValue) {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * Gets all distinct file types currently configured in the mappings.
+     *
+     * @return an array of all unique file type values
+     */
     public String[] getTypes() {
         return mimetypeMap.values().stream().distinct().toArray(n -> new String[n]);
     }

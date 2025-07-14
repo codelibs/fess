@@ -19,7 +19,19 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * Action class for handling HTTP 404 Not Found error pages.
+ * This action displays error pages when the requested resource
+ * cannot be found on the server.
+ */
 public class ErrorNotfoundAction extends FessSearchAction {
+
+    /**
+     * Default constructor for ErrorNotfoundAction.
+     */
+    public ErrorNotfoundAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -32,7 +44,12 @@ public class ErrorNotfoundAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
-
+    /**
+     * Displays the not found error page.
+     *
+     * @param form the error form containing error information
+     * @return HTML response for the not found error page
+     */
     @Execute
     public HtmlResponse index(final ErrorForm form) {
         return asHtml(virtualHost(path_Error_NotFoundJsp));

@@ -61,57 +61,103 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 
+/**
+ * IndexUpdater is responsible for updating the search index with crawled document data.
+ * This class extends Thread and continuously processes access results from the crawler,
+ * transforms them into indexed documents, and updates the OpenSearch index.
+ *
+ * <p>The updater performs the following key operations:
+ * <ul>
+ * <li>Retrieves crawled documents from the data service</li>
+ * <li>Transforms document data using appropriate transformers</li>
+ * <li>Applies document boosting rules and click/favorite count enhancements</li>
+ * <li>Sends processed documents to the search engine for indexing</li>
+ * <li>Manages cleanup of processed crawler session data</li>
+ * </ul>
+ *
+ * <p>The updater runs continuously until crawling is finished and all documents are processed.
+ * It includes error handling, retry logic, and performance monitoring capabilities.
+ *
+ * @author CodeLibs Project
+ */
 public class IndexUpdater extends Thread {
+    /** Logger for this class */
     private static final Logger logger = LogManager.getLogger(IndexUpdater.class);
 
+    /** List of crawler session IDs to process */
     protected List<String> sessionIdList;
 
+    /** OpenSearch client for index operations */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
+    /** Service for managing crawled document data */
     @Resource
     protected DataService<OpenSearchAccessResult> dataService;
 
+    /** Service for managing URL crawling queue */
     @Resource
     protected UrlQueueService<OpenSearchUrlQueue> urlQueueService;
 
+    /** Service for URL filtering operations */
     @Resource
     protected UrlFilterService urlFilterService;
 
+    /** Behavior class for click log operations */
     @Resource
     protected ClickLogBhv clickLogBhv;
 
+    /** Behavior class for favorite log operations */
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
+    /** Helper for system-level operations */
     @Resource
     protected SystemHelper systemHelper;
 
+    /** Helper for document indexing operations */
     @Resource
     protected IndexingHelper indexingHelper;
 
+    /** Flag indicating if crawling should be finished */
     protected boolean finishCrawling = false;
 
+    /** Total execution time in milliseconds */
     protected long executeTime;
 
+    /** Total number of processed documents */
     protected long documentSize;
 
+    /** Maximum number of indexer errors allowed */
     protected int maxIndexerErrorCount = 0;
 
+    /** Maximum number of general errors allowed before termination */
     protected int maxErrorCount = 2;
 
+    /** List of finished crawler session IDs for cleanup */
     protected List<String> finishedSessionIdList = new ArrayList<>();
 
+    /** List of document boost matchers for scoring enhancement */
     private final List<DocBoostMatcher> docBoostMatcherList = new ArrayList<>();
 
+    /** List of active crawler instances */
     private List<Crawler> crawlerList;
 
+    /** Factory for creating document ingesters */
     private IngestFactory ingestFactory = null;
 
+    /**
+     * Default constructor for IndexUpdater.
+     * Initializes a new instance with default settings.
+     */
     public IndexUpdater() {
         // nothing
     }
 
+    /**
+     * Initializes the IndexUpdater after dependency injection.
+     * Sets up the ingest factory if available in the component container.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -122,6 +168,10 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Destroys the IndexUpdater when the container is shutting down.
+     * Stops all crawler instances if crawling is still in progress.
+     */
     @PreDestroy
     public void destroy() {
         if (!finishCrawling) {
@@ -132,12 +182,24 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Adds a finished session ID to the cleanup list.
+     * This method is thread-safe and adds the session ID to be cleaned up later.
+     *
+     * @param sessionId the crawler session ID that has finished processing
+     */
     public void addFinishedSessionId(final String sessionId) {
         synchronized (finishedSessionIdList) {
             finishedSessionIdList.add(sessionId);
         }
     }
 
+    /**
+     * Deletes all data associated with a specific crawler session.
+     * Removes URL filters, URL queues, and access result data for the session.
+     *
+     * @param sessionId the session ID whose data should be deleted
+     */
     private void deleteBySessionId(final String sessionId) {
         try {
             urlFilterService.delete(sessionId);
@@ -156,6 +218,23 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Main execution method that runs the index updating process.
+     * Continuously processes crawled documents from the data service, transforms them,
+     * and updates the search index until crawling is finished and all documents are processed.
+     *
+     * <p>The method performs the following operations in a loop:
+     * <ul>
+     * <li>Retrieves access results from the data service</li>
+     * <li>Processes each document through transformers</li>
+     * <li>Applies document boosting and metadata enhancements</li>
+     * <li>Sends processed documents to the search engine</li>
+     * <li>Cleans up processed data and manages crawler sessions</li>
+     * </ul>
+     *
+     * <p>The method includes error handling, retry logic, and will terminate
+     * if too many empty results are encountered or if a system shutdown is requested.
+     */
     @Override
     public void run() {
         if (dataService == null) {
@@ -320,6 +399,14 @@ public class IndexUpdater extends Thread {
 
     }
 
+    /**
+     * Processes a list of access results and converts them into indexable documents.
+     * Each access result is transformed into a document map and added to the document list.
+     *
+     * @param docList the document list to add processed documents to
+     * @param accessResultList the list to track processed access results for cleanup
+     * @param arList the list of access results to process
+     */
     private void processAccessResults(final DocList docList, final List<OpenSearchAccessResult> accessResultList,
             final List<OpenSearchAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -395,6 +482,13 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Retrieves the access result data from an OpenSearch access result.
+     * Handles exceptions that may occur during data retrieval.
+     *
+     * @param accessResult the access result to extract data from
+     * @return the access result data, or null if retrieval fails
+     */
     private AccessResultData<?> getAccessResultData(final OpenSearchAccessResult accessResult) {
         try {
             return accessResult.getAccessResultData();
@@ -404,6 +498,14 @@ public class IndexUpdater extends Thread {
         return null;
     }
 
+    /**
+     * Processes a document through the ingest pipeline if an ingest factory is available.
+     * Applies all configured ingesters to transform and enrich the document data.
+     *
+     * @param accessResult the access result containing document metadata
+     * @param map the document data map to process
+     * @return the processed document map after applying all ingesters
+     */
     protected Map<String, Object> ingest(final AccessResult<String> accessResult, final Map<String, Object> map) {
         if (ingestFactory == null) {
             return map;
@@ -419,6 +521,13 @@ public class IndexUpdater extends Thread {
         return target;
     }
 
+    /**
+     * Updates a document with additional metadata and enhancements.
+     * Adds click counts, favorite counts, document boosting, and generates document ID.
+     * Also applies language-specific updates through the language helper.
+     *
+     * @param map the document data map to update with additional metadata
+     */
     protected void updateDocument(final Map<String, Object> map) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -449,6 +558,13 @@ public class IndexUpdater extends Thread {
         ComponentUtil.getLanguageHelper().updateDocument(map);
     }
 
+    /**
+     * Adds a boost value to the document for search relevance scoring.
+     * The boost value affects how highly the document will rank in search results.
+     *
+     * @param map the document data map to add the boost value to
+     * @param documentBoost the boost value to apply to the document
+     */
     protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
@@ -457,6 +573,12 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Adds a click count field to the document based on search log data.
+     * The click count represents how many times users have clicked on this document in search results.
+     *
+     * @param doc the document data map to add the click count to
+     */
     protected void addClickCountField(final Map<String, Object> doc) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = (String) doc.get(fessConfig.getIndexFieldUrl());
@@ -470,6 +592,12 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Adds a favorite count field to the document based on user favorite data.
+     * The favorite count represents how many users have marked this document as a favorite.
+     *
+     * @param map the document data map to add the favorite count to
+     */
     protected void addFavoriteCountField(final Map<String, Object> map) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String url = (String) map.get(fessConfig.getIndexFieldUrl());
@@ -483,6 +611,13 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Cleans up processed access results by updating their status in the data service.
+     * This marks the access results as processed and clears the list.
+     *
+     * @param accessResultList the list of access results to clean up
+     * @return the time taken for the cleanup operation in milliseconds, or -1 if no cleanup was needed
+     */
     private long cleanupAccessResults(final List<OpenSearchAccessResult> accessResultList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = systemHelper.getCurrentTimeAsLong();
@@ -498,6 +633,14 @@ public class IndexUpdater extends Thread {
         return -1;
     }
 
+    /**
+     * Retrieves a list of access results from the data service for processing.
+     * Filters out results that are too recent based on commit margin time and manages crawler throttling.
+     *
+     * @param cb the consumer to customize the search request
+     * @param cleanupTime the time taken for the last cleanup operation
+     * @return the list of access results ready for processing
+     */
     private List<OpenSearchAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb, final long cleanupTime) {
         if (logger.isDebugEnabled()) {
             logger.debug("Getting documents in IndexUpdater queue.");
@@ -542,6 +685,10 @@ public class IndexUpdater extends Thread {
         return arList;
     }
 
+    /**
+     * Cleans up data for all finished crawler sessions.
+     * Deletes URL filters, URL queues, and access result data for each finished session.
+     */
     private void cleanupFinishedSessionData() {
         final long execTime = systemHelper.getCurrentTimeAsLong();
         // cleanup
@@ -563,6 +710,10 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Forces all crawlers to stop immediately.
+     * Sets the force stop flag and stops all active crawler instances.
+     */
     private void forceStop() {
         systemHelper.setForceStop(true);
         for (final Crawler crawler : crawlerList) {
@@ -570,43 +721,93 @@ public class IndexUpdater extends Thread {
         }
     }
 
+    /**
+     * Gets the total execution time for index updates.
+     *
+     * @return the total execution time in milliseconds
+     */
     public long getExecuteTime() {
         return executeTime;
     }
 
+    /**
+     * Gets the list of crawler session IDs being processed.
+     *
+     * @return the list of session IDs
+     */
     public List<String> getSessionIdList() {
         return sessionIdList;
     }
 
+    /**
+     * Sets the list of crawler session IDs to process.
+     *
+     * @param sessionIdList the list of session IDs to set
+     */
     public void setSessionIdList(final List<String> sessionIdList) {
         this.sessionIdList = sessionIdList;
     }
 
+    /**
+     * Sets the flag indicating whether crawling should be finished.
+     *
+     * @param finishCrawling true if crawling should be finished, false otherwise
+     */
     public void setFinishCrawling(final boolean finishCrawling) {
         this.finishCrawling = finishCrawling;
     }
 
+    /**
+     * Gets the total number of documents processed.
+     *
+     * @return the total document count
+     */
     public long getDocumentSize() {
         return documentSize;
     }
 
+    /**
+     * Sets the uncaught exception handler for this IndexUpdater thread.
+     *
+     * @param eh the uncaught exception handler to set
+     */
     @Override
     public void setUncaughtExceptionHandler(final UncaughtExceptionHandler eh) {
         super.setUncaughtExceptionHandler(eh);
     }
 
+    /**
+     * Sets the default uncaught exception handler for all threads.
+     *
+     * @param eh the default uncaught exception handler to set
+     */
     public static void setDefaultUncaughtExceptionHandler(final UncaughtExceptionHandler eh) {
         Thread.setDefaultUncaughtExceptionHandler(eh);
     }
 
+    /**
+     * Sets the maximum number of indexer errors allowed.
+     *
+     * @param maxIndexerErrorCount the maximum error count to set
+     */
     public void setMaxIndexerErrorCount(final int maxIndexerErrorCount) {
         this.maxIndexerErrorCount = maxIndexerErrorCount;
     }
 
+    /**
+     * Adds a document boost matcher rule for enhancing document relevance scores.
+     *
+     * @param rule the document boost matcher rule to add
+     */
     public void addDocBoostMatcher(final DocBoostMatcher rule) {
         docBoostMatcherList.add(rule);
     }
 
+    /**
+     * Sets the list of crawler instances that this updater will manage.
+     *
+     * @param crawlerList the list of crawlers to set
+     */
     public void setCrawlerList(final List<Crawler> crawlerList) {
         this.crawlerList = crawlerList;
     }

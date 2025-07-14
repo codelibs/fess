@@ -106,14 +106,18 @@ public class FacetResponse {
         }
 
         /**
-         * @return the valueCountMap
+         * Gets the map of field values and their document counts.
+         *
+         * @return the valueCountMap containing field values and counts
          */
         public Map<String, Long> getValueCountMap() {
             return valueCountMap;
         }
 
         /**
-         * @return the name
+         * Gets the decoded name of this field facet.
+         *
+         * @return the field name
          */
         public String getName() {
             return name;
@@ -122,14 +126,18 @@ public class FacetResponse {
     }
 
     /**
-     * @return the queryCountMap
+     * Gets the map of query facet counts.
+     *
+     * @return the queryCountMap containing decoded query strings and their counts
      */
     public Map<String, Long> getQueryCountMap() {
         return queryCountMap;
     }
 
     /**
-     * @return the fieldList
+     * Gets the list of field facets.
+     *
+     * @return the fieldList containing all field facet information
      */
     public List<Field> getFieldList() {
         return fieldList;
