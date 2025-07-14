@@ -38,17 +38,44 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet filter for handling character encoding conversion and URL redirection.
+ * This filter processes requests with specific encoding requirements and converts
+ * character encodings according to configured mapping rules.
+ *
+ * <p>The filter intercepts requests matching configured path patterns and
+ * redirects them with proper character encoding applied to parameters.</p>
+ */
 public class EncodingFilter implements Filter {
+    /** Configuration key for encoding rules mapping */
     public static final String ENCODING_MAP = "encodingRules";
 
+    /** Map of path patterns to their corresponding character encodings */
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
 
+    /** Default character encoding to use for requests */
     protected String encoding;
 
+    /** Servlet context for this filter */
     protected ServletContext servletContext;
 
+    /** URL codec for encoding and decoding URL parameters */
     protected URLCodec urlCodec = new URLCodec();
 
+    /**
+     * Default constructor for EncodingFilter.
+     */
+    public EncodingFilter() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the filter with configuration parameters.
+     * Sets up encoding mappings and default encoding from filter configuration.
+     *
+     * @param config the filter configuration containing initialization parameters
+     * @throws ServletException if an error occurs during initialization
+     */
     @Override
     public void init(final FilterConfig config) throws ServletException {
         servletContext = config.getServletContext();
@@ -71,6 +98,17 @@ public class EncodingFilter implements Filter {
         }
     }
 
+    /**
+     * Processes requests and applies character encoding conversion if needed.
+     * Checks if the request path matches any configured encoding rule and
+     * performs URL redirection with proper parameter encoding.
+     *
+     * @param request the servlet request to process
+     * @param response the servlet response to use for redirection
+     * @param chain the filter chain to continue processing
+     * @throws IOException if an I/O error occurs during processing
+     * @throws ServletException if a servlet error occurs
+     */
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -118,6 +156,15 @@ public class EncodingFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Extracts and parses parameters from the request query string.
+     * Applies the specified character encoding to decode parameter values.
+     *
+     * @param request the HTTP request containing the query string
+     * @param enc the character encoding to use for decoding
+     * @return a map of parameter names to their decoded values
+     * @throws IOException if an error occurs during parameter parsing
+     */
     protected Map<String, String[]> getParameterMapFromQueryString(final HttpServletRequest request, final String enc) throws IOException {
         final String queryString = request.getQueryString();
         if (StringUtil.isNotBlank(queryString)) {
@@ -126,6 +173,15 @@ public class EncodingFilter implements Filter {
         return Collections.emptyMap();
     }
 
+    /**
+     * Parses a query string and extracts parameter name-value pairs.
+     * Applies URL decoding with the specified character encoding.
+     *
+     * @param queryString the query string to parse
+     * @param enc the character encoding to use for URL decoding
+     * @return a map of parameter names to their decoded values
+     * @throws IOException if an error occurs during URL decoding
+     */
     protected Map<String, String[]> parseQueryString(final String queryString, final String enc) throws IOException {
         final Map<String, List<String>> paramListMap = new HashMap<>();
         final String[] pairs = queryString.split("&");
@@ -166,6 +222,10 @@ public class EncodingFilter implements Filter {
         return paramMap;
     }
 
+    /**
+     * Cleans up resources when the filter is destroyed.
+     * Currently performs no cleanup operations.
+     */
     @Override
     public void destroy() {
         // nothing

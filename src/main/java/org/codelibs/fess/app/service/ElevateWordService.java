@@ -52,25 +52,42 @@ import com.orangesignal.csv.CsvWriter;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing elevate words functionality.
+ * Elevate words are used to boost the relevance of documents containing specific terms in search results.
+ * This service provides CRUD operations, CSV import/export, and related functionality.
+ */
 public class ElevateWordService {
 
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(ElevateWordService.class);
 
+    /** Behavior handler for ElevateWordToLabel entity operations */
     @Resource
     protected ElevateWordToLabelBhv elevateWordToLabelBhv;
 
+    /** Behavior handler for ElevateWord entity operations */
     @Resource
     protected ElevateWordBhv elevateWordBhv;
 
+    /** Behavior handler for LabelType entity operations */
     @Resource
     protected LabelTypeBhv labelTypeBhv;
 
+    /** Configuration settings for Fess application */
     @Resource
     protected FessConfig fessConfig;
 
+    /** Client for interacting with the search engine */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
+    /**
+     * Retrieves a paginated list of elevate words based on the provided pager criteria.
+     *
+     * @param elevateWordPager the pager containing pagination and filtering criteria
+     * @return list of elevate words matching the criteria
+     */
     public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 
         final PagingResultBean<ElevateWord> elevateWordList = elevateWordBhv.selectPage(cb -> {
@@ -87,6 +104,12 @@ public class ElevateWordService {
         return elevateWordList;
     }
 
+    /**
+     * Retrieves a specific elevate word by its ID, including associated label type information.
+     *
+     * @param id the unique identifier of the elevate word
+     * @return OptionalEntity containing the elevate word if found, or empty if not found
+     */
     public OptionalEntity<ElevateWord> getElevateWord(final String id) {
         return elevateWordBhv.selectByPK(id).map(entity -> {
 
@@ -105,6 +128,11 @@ public class ElevateWordService {
         });
     }
 
+    /**
+     * Stores (inserts or updates) an elevate word and manages its associated label type mappings.
+     *
+     * @param elevateWord the elevate word entity to store
+     */
     public void store(final ElevateWord elevateWord) {
         final boolean isNew = elevateWord.getId() == null;
         final String[] labelTypeIds = elevateWord.getLabelTypeIds();
@@ -160,6 +188,11 @@ public class ElevateWordService {
         }
     }
 
+    /**
+     * Deletes an elevate word from the system.
+     *
+     * @param elevateWord the elevate word entity to delete
+     */
     public void delete(final ElevateWord elevateWord) {
 
         elevateWordBhv.delete(elevateWord, op -> {
@@ -168,6 +201,12 @@ public class ElevateWordService {
 
     }
 
+    /**
+     * Sets up the condition builder for querying elevate words based on pager criteria.
+     *
+     * @param cb the condition builder to configure
+     * @param elevateWordPager the pager containing search criteria
+     */
     protected void setupListCondition(final ElevateWordCB cb, final ElevateWordPager elevateWordPager) {
         if (elevateWordPager.id != null) {
             cb.query().docMeta().setId_Equal(elevateWordPager.id);
@@ -181,6 +220,12 @@ public class ElevateWordService {
 
     }
 
+    /**
+     * Imports elevate words from a CSV file.
+     * Expected CSV format: SuggestWord, Reading, Permissions, Labels, Boost
+     *
+     * @param reader the Reader containing CSV data to import
+     */
     public void importCsv(final Reader reader) {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
@@ -271,6 +316,12 @@ public class ElevateWordService {
         }
     }
 
+    /**
+     * Exports elevate words to a CSV file.
+     * CSV format: SuggestWord, Reading, Permissions, Labels, Boost
+     *
+     * @param writer the Writer to output CSV data to
+     */
     public void exportCsv(final Writer writer) {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
@@ -324,6 +375,14 @@ public class ElevateWordService {
         }
     }
 
+    /**
+     * Safely retrieves a value from a list at the specified index, handling bounds checking
+     * and cleaning up quoted strings.
+     *
+     * @param list the list to retrieve the value from
+     * @param index the index of the value to retrieve
+     * @return the cleaned value at the specified index, or empty string if index is out of bounds
+     */
     static String getValue(final List<String> list, final int index) {
         if (index >= list.size()) {
             return StringUtil.EMPTY;

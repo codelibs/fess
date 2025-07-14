@@ -33,17 +33,43 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing file configuration operations.
+ * This service provides CRUD operations for file crawler configurations,
+ * including retrieval, storage, deletion, and search functionality.
+ * It handles pagination and integrates with the file authentication system.
+ */
 public class FileConfigService extends FessAppService {
 
+    /**
+     * Behavior class for file configuration database operations.
+     * Provides access to the file configuration entity operations.
+     */
     @Resource
     protected FileConfigBhv fileConfigBhv;
 
+    /**
+     * Behavior class for file authentication database operations.
+     * Manages authentication configurations associated with file configurations.
+     */
     @Resource
     protected FileAuthenticationBhv fileAuthenticationBhv;
 
+    /**
+     * Fess configuration object providing access to application settings.
+     * Used for retrieving pagination and other configuration parameters.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of file configurations based on the provided pager criteria.
+     * This method applies search conditions from the pager and updates the pager with
+     * pagination information including page numbers and result counts.
+     *
+     * @param fileConfigPager the pager containing search criteria and pagination settings
+     * @return a list of file configurations matching the criteria
+     */
     public List<FileConfig> getFileConfigList(final FileConfigPager fileConfigPager) {
 
         final PagingResultBean<FileConfig> fileConfigList = fileConfigBhv.selectPage(cb -> {
@@ -60,6 +86,13 @@ public class FileConfigService extends FessAppService {
         return fileConfigList;
     }
 
+    /**
+     * Deletes a file configuration and its associated authentication records.
+     * This method removes the file configuration from the database and also
+     * deletes all related file authentication entries.
+     *
+     * @param fileConfig the file configuration to be deleted
+     */
     public void delete(final FileConfig fileConfig) {
 
         final String fileConfigId = fileConfig.getId();
@@ -73,10 +106,24 @@ public class FileConfigService extends FessAppService {
         });
     }
 
+    /**
+     * Retrieves a file configuration by its unique identifier.
+     *
+     * @param id the unique identifier of the file configuration
+     * @return an OptionalEntity containing the file configuration if found, empty otherwise
+     */
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
         return fileConfigBhv.selectByPK(id);
     }
 
+    /**
+     * Retrieves a file configuration by its name.
+     * If multiple configurations exist with the same name, returns the first one
+     * ordered by sort order.
+     *
+     * @param name the name of the file configuration to retrieve
+     * @return an OptionalEntity containing the file configuration if found, empty otherwise
+     */
     public OptionalEntity<FileConfig> getFileConfigByName(final String name) {
         final ListResultBean<FileConfig> list = fileConfigBhv.selectList(cb -> {
             cb.query().setName_Equal(name);
@@ -88,6 +135,13 @@ public class FileConfigService extends FessAppService {
         return OptionalEntity.of(list.get(0));
     }
 
+    /**
+     * Stores a file configuration in the database.
+     * This method encrypts the configuration parameters before saving and
+     * performs an insert or update operation based on whether the configuration exists.
+     *
+     * @param fileConfig the file configuration to be stored
+     */
     public void store(final FileConfig fileConfig) {
         fileConfig.setConfigParameter(ParameterUtil.encrypt(fileConfig.getConfigParameter()));
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
@@ -95,6 +149,14 @@ public class FileConfigService extends FessAppService {
         });
     }
 
+    /**
+     * Sets up search conditions for the file configuration list query.
+     * This method applies various filter conditions based on the pager parameters
+     * including name, paths, and description filters with wildcard and phrase matching.
+     *
+     * @param cb the condition bean for building the database query
+     * @param fileConfigPager the pager containing search filter criteria
+     */
     protected void setupListCondition(final FileConfigCB cb, final FileConfigPager fileConfigPager) {
         if (StringUtil.isNotBlank(fileConfigPager.name)) {
             cb.query().setName_Wildcard(wrapQuery(fileConfigPager.name));

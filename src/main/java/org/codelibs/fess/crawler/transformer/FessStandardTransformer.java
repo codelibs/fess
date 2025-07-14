@@ -26,9 +26,22 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Standard transformer implementation for the Fess search engine.
+ * This transformer handles document transformation and content extraction using
+ * the standard Fess file transformation process with support for various content types.
+ *
+ * <p>It extends AbstractFessFileTransformer to provide file-specific transformation
+ * capabilities while using the appropriate extractor for each document type.</p>
+ */
 public class FessStandardTransformer extends AbstractFessFileTransformer {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FessStandardTransformer.class);
 
+    /**
+     * Initializes the transformer after dependency injection.
+     * Sets up the Fess configuration and data serializer components.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -38,16 +51,34 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
         dataSerializer = ComponentUtil.getComponent("dataSerializer");
     }
 
+    /**
+     * Gets the Fess configuration instance.
+     *
+     * @return the Fess configuration
+     */
     @Override
     public FessConfig getFessConfig() {
         return fessConfig;
     }
 
+    /**
+     * Gets the logger instance for this transformer.
+     *
+     * @return the logger instance
+     */
     @Override
     public Logger getLogger() {
         return logger;
     }
 
+    /**
+     * Gets the appropriate extractor for the given response data.
+     * Selects an extractor based on the MIME type or falls back to the Tika extractor.
+     *
+     * @param responseData the response data containing the document to extract
+     * @return the extractor instance for processing the document
+     * @throws FessSystemException if no suitable extractor can be found
+     */
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
         final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();

@@ -38,28 +38,59 @@ import org.dbflute.tomcat.TomcatBoot;
 import org.dbflute.tomcat.logging.BootLogger;
 import org.dbflute.tomcat.props.BootPropsTranslator;
 
+/**
+ * Main boot class for the Fess search engine application.
+ * This class extends TomcatBoot to provide Fess-specific Tomcat server configuration
+ * and initialization, including SSL setup, context path handling, and resource management.
+ *
+ * <p>The class handles system property configuration for paths, ports, and other
+ * Fess-specific settings during application startup.</p>
+ *
+ * @author Fess Project
+ * @since 1.0
+ */
 public class FessBoot extends TomcatBoot {
 
+    /** Configuration file name for logging properties */
     private static final String LOGGING_PROPERTIES = "logging.properties";
 
+    /** System property key for Fess context path configuration */
     private static final String FESS_CONTEXT_PATH = "fess.context.path";
 
+    /** System property key for Fess port configuration */
     private static final String FESS_PORT = "fess.port";
 
+    /** System property key for Fess temporary directory path */
     private static final String FESS_TEMP_PATH = "fess.temp.path";
 
+    /** System property key for Fess variable directory path */
     private static final String FESS_VAR_PATH = "fess.var.path";
 
+    /** System property key for Fess web application path */
     private static final String FESS_WEBAPP_PATH = "fess.webapp.path";
 
+    /** System property key for Java temporary directory */
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
+    /** System property key for Tomcat configuration path */
     private static final String TOMCAT_CONFIG_PATH = "tomcat.config.path";
 
+    /**
+     * Constructs a new FessBoot instance with the specified port and context path.
+     *
+     * @param port the port number for the Tomcat server
+     * @param contextPath the context path for the web application
+     */
     public FessBoot(final int port, final String contextPath) {
         super(port, contextPath);
     }
 
+    /**
+     * Prepares and returns the web application path.
+     * Checks for the fess.webapp.path system property first, then falls back to the parent implementation.
+     *
+     * @return the web application path
+     */
     @Override
     protected String prepareWebappPath() {
         final String value = System.getProperty(FESS_WEBAPP_PATH);
@@ -69,6 +100,11 @@ public class FessBoot extends TomcatBoot {
         return super.prepareWebappPath();
     }
 
+    /**
+     * Returns the directory path for temporary mark files.
+     *
+     * @return the absolute path to the fessboot directory in the system temp directory
+     */
     @Override
     protected String getMarkDir() {
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
@@ -78,6 +114,12 @@ public class FessBoot extends TomcatBoot {
     //                                                                        main
     //                                                                        ============
 
+    /**
+     * Main method to start the Fess application.
+     * Sets up system properties, configures Tomcat, and starts the server.
+     *
+     * @param args command line arguments (not used)
+     */
     public static void main(final String[] args) {
         // update java.io.tmpdir
         final String tempPath = System.getProperty(FESS_TEMP_PATH);
@@ -112,14 +154,29 @@ public class FessBoot extends TomcatBoot {
         }).useTldDetect(jarName -> (jarName.contains("jstl") || jarName.contains("lasta-taglib"))).asDevelopment(isNoneEnv()).bootAwait();
     }
 
+    /**
+     * Shuts down the Fess application.
+     *
+     * @param args command line arguments (not used)
+     */
     public static void shutdown(final String[] args) {
         System.exit(0);
     }
 
+    /**
+     * Checks if the lasta.env system property is not set.
+     *
+     * @return true if lasta.env is not set, false otherwise
+     */
     private static boolean isNoneEnv() {
         return System.getProperty("lasta.env") == null;
     }
 
+    /**
+     * Gets the port number for the Tomcat server from system properties.
+     *
+     * @return the port number (default 8080 if not specified)
+     */
     protected static int getPort() {
         final String value = System.getProperty(FESS_PORT);
         if (value != null) {
@@ -128,6 +185,11 @@ public class FessBoot extends TomcatBoot {
         return 8080;
     }
 
+    /**
+     * Gets the context path for the web application from system properties.
+     *
+     * @return the context path (empty string if not specified or if set to "/")
+     */
     protected static String getContextPath() {
         final String value = System.getProperty(FESS_CONTEXT_PATH);
         if (value != null && !"/".equals(value)) {
@@ -136,10 +198,19 @@ public class FessBoot extends TomcatBoot {
         return StringUtil.EMPTY;
     }
 
+    /**
+     * Gets the Tomcat configuration path from system properties.
+     *
+     * @return the Tomcat configuration path, or null if not specified
+     */
     protected static String getTomcatConfigPath() {
         return System.getProperty(TOMCAT_CONFIG_PATH);
     }
 
+    /**
+     * Sets up the web application context with Fess-specific configurations.
+     * Configures the web resource root and cookie processor for the context.
+     */
     @Override
     protected void setupWebappContext() {
         super.setupWebappContext();
@@ -154,12 +225,30 @@ public class FessBoot extends TomcatBoot {
         }
     }
 
+    /**
+     * Creates a Fess-specific boot properties translator.
+     *
+     * @return a new FessBootPropsTranslator instance
+     */
     @Override
     protected BootPropsTranslator createBootPropsTranslator() {
         return new FessBootPropsTranslator();
     }
 
+    /**
+     * Fess-specific implementation of BootPropsTranslator.
+     * Handles SSL configuration and cookie settings for the Tomcat server.
+     */
     static class FessBootPropsTranslator extends BootPropsTranslator {
+        /**
+         * Sets up server configuration if needed, including SSL and cookie settings.
+         *
+         * @param logger the boot logger for logging configuration messages
+         * @param server the Tomcat server instance
+         * @param connector the Tomcat connector
+         * @param props the configuration properties
+         * @param readConfigList the list of read configuration items
+         */
         @Override
         public void setupServerConfigIfNeeds(final BootLogger logger, final Tomcat server, final Connector connector,
                 final Properties props, final List<String> readConfigList) {

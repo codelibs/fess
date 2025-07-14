@@ -26,13 +26,31 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;
 import org.apache.catalina.webresources.StandardRoot;
 
+/**
+ * Fess-specific web resource root implementation for Tomcat.
+ * This class extends StandardRoot to provide custom web resource handling
+ * for Fess plugins, including support for plugin JAR files in the WEB-INF/plugin directory.
+ */
 public class FessWebResourceRoot extends StandardRoot {
+    /** Logger instance for this class */
     private static final Logger logger = Logger.getLogger(FessWebResourceRoot.class.getName());
 
+    /**
+     * Constructs a new FessWebResourceRoot with the specified context.
+     *
+     * @param context the Tomcat context for this web resource root
+     */
     public FessWebResourceRoot(final Context context) {
         super(context);
     }
 
+    /**
+     * Processes WEB-INF/lib directory and additionally scans WEB-INF/plugin for Fess plugins.
+     * This method extends the standard processing to include plugin JAR files that contain
+     * the "Fess-WebAppJar" manifest attribute.
+     *
+     * @throws LifecycleException if an error occurs during processing
+     */
     @Override
     protected void processWebInfLib() throws LifecycleException {
         super.processWebInfLib();

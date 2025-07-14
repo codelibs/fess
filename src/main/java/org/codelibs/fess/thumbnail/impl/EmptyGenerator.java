@@ -17,13 +17,30 @@ package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
 
+/**
+ * Empty implementation of thumbnail generator that does not generate any thumbnails.
+ * This class is used as a no-op thumbnail generator when thumbnail generation is disabled
+ * or when no specific thumbnail generator is configured.
+ */
 public class EmptyGenerator extends BaseThumbnailGenerator {
 
+    /**
+     * Generates a thumbnail for the specified ID and output file.
+     * This implementation always returns false, indicating no thumbnail was generated.
+     *
+     * @param thumbnailId the ID of the thumbnail to generate
+     * @param outputFile the output file where the thumbnail should be saved
+     * @return false always, as this generator does not create thumbnails
+     */
     @Override
     public boolean generate(final String thumbnailId, final File outputFile) {
         return false;
     }
 
+    /**
+     * Destroys this generator and releases any resources.
+     * This implementation does nothing as no resources are held.
+     */
     @Override
     public void destroy() {
         // nothing

@@ -58,14 +58,47 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
+/**
+ * FessCrawlerThread is a specialized crawler thread implementation for the Fess search engine.
+ * This class extends the base CrawlerThread and provides Fess-specific functionality for
+ * crawling and indexing documents, including incremental crawling capabilities, content
+ * modification checking, and integration with the Fess search engine backend.
+ *
+ * <p>Key features include:</p>
+ * <ul>
+ * <li>Incremental crawling support with last-modified timestamp checking</li>
+ * <li>Document expiration handling</li>
+ * <li>Child URL extraction and queueing</li>
+ * <li>Integration with Fess configuration and permission systems</li>
+ * <li>Client selection based on URL patterns</li>
+ * </ul>
+ *
+ * @author FessCrawlerThread
+ * @see CrawlerThread
+ * @see org.codelibs.fess.crawler.client.CrawlerClient
+ */
 public class FessCrawlerThread extends CrawlerThread {
 
     private static final Logger logger = LogManager.getLogger(FessCrawlerThread.class);
 
     protected static final String CRAWLER_CLIENTS = "crawlerClients";
 
+    /**
+     * Cache for client rules mapping client names to their corresponding URL patterns.
+     * This cache improves performance by avoiding repeated parsing of client configuration rules.
+     * The key is the rule string, and the value is a pair containing the client name and compiled pattern.
+     */
     protected ConcurrentHashMap<String, Pair<String, Pattern>> clientRuleCache = new ConcurrentHashMap<>();
 
+    /**
+     * Determines whether the content at the given URL has been updated since the last crawl.
+     * This method implements incremental crawling by comparing timestamps and checking document
+     * expiration. It also handles special cases for different URL schemes (SMB, file, FTP).
+     *
+     * @param client the crawler client to use for accessing the URL
+     * @param urlQueue the URL queue item containing the URL to check
+     * @return true if the content has been updated and should be crawled, false otherwise
+     */
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
         if (ComponentUtil.getFessConfig().isIncrementalCrawling()) {
@@ -188,6 +221,13 @@ public class FessCrawlerThread extends CrawlerThread {
         return true;
     }
 
+    /**
+     * Stores child URLs from the given set into the crawling queue for future processing.
+     * This method filters out blank URLs and increments the depth for child URLs.
+     *
+     * @param urlQueue the parent URL queue item
+     * @param childUrlSet the set of child URLs to be queued for crawling
+     */
     protected void storeChildUrlsToQueue(final UrlQueue<?> urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             // add an url
@@ -203,6 +243,13 @@ public class FessCrawlerThread extends CrawlerThread {
         }
     }
 
+    /**
+     * Extracts anchor URLs from the given object and converts them to RequestData objects.
+     * The input object can be either a single string or a list of strings representing URLs.
+     *
+     * @param obj the object containing anchor URLs (String or List of Strings)
+     * @return a set of RequestData objects for the anchor URLs, or null if no valid URLs found
+     */
     protected Set<RequestData> getAnchorSet(final Object obj) {
         List<String> anchorList;
         if (obj instanceof final String s) {
@@ -224,6 +271,14 @@ public class FessCrawlerThread extends CrawlerThread {
         return childUrlSet;
     }
 
+    /**
+     * Retrieves child URLs for a given document ID from the search engine index.
+     * This method queries the search engine for child documents and extracts their URLs.
+     *
+     * @param searchEngineClient the search engine client to query
+     * @param id the parent document ID to find children for
+     * @return a set of RequestData objects for the child URLs, or null if no children found
+     */
     protected Set<RequestData> getChildUrlSet(final SearchEngineClient searchEngineClient, final String id) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
@@ -245,6 +300,14 @@ public class FessCrawlerThread extends CrawlerThread {
         return urlSet;
     }
 
+    /**
+     * Processes the response data from a crawled URL, including failure handling.
+     * This method extends the base response processing to handle Fess-specific failure
+     * URL tracking when certain HTTP status codes are encountered.
+     *
+     * @param urlQueue the URL queue item that was processed
+     * @param responseData the response data from the crawl operation
+     */
     @Override
     protected void processResponse(final UrlQueue<?> urlQueue, final ResponseData responseData) {
         super.processResponse(urlQueue, responseData);
@@ -261,6 +324,15 @@ public class FessCrawlerThread extends CrawlerThread {
         }
     }
 
+    /**
+     * Stores a child URL in the crawling queue with duplicate host handling.
+     * This method applies duplicate host conversion before storing the URL.
+     *
+     * @param childUrl the child URL to store
+     * @param parentUrl the parent URL that referenced this child URL
+     * @param weight the weight/priority of the child URL
+     * @param depth the crawling depth of the child URL
+     */
     @Override
     protected void storeChildUrl(final String childUrl, final String parentUrl, final float weight, final int depth) {
         if (StringUtil.isNotBlank(childUrl)) {
@@ -270,6 +342,15 @@ public class FessCrawlerThread extends CrawlerThread {
         }
     }
 
+    /**
+     * Retrieves the appropriate crawler client for the given URL based on configured rules.
+     * This method uses client rules to determine which specific client implementation
+     * should be used for crawling the URL, falling back to the default client if no
+     * specific rule matches.
+     *
+     * @param url the URL to get a client for
+     * @return the crawler client instance to use for the URL
+     */
     @Override
     protected CrawlerClient getClient(final String url) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
@@ -290,6 +371,14 @@ public class FessCrawlerThread extends CrawlerThread {
         return client;
     }
 
+    /**
+     * Parses client rule configuration string into a list of client name and pattern pairs.
+     * The configuration string format is "clientName:pattern,clientName:pattern,..."
+     * Results are cached to improve performance on subsequent calls.
+     *
+     * @param value the client rule configuration string
+     * @return a list of pairs containing client names and their corresponding compiled patterns
+     */
     protected List<Pair<String, Pattern>> getClientRuleList(final String value) {
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();

@@ -27,13 +27,33 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * View class for managing facet query configurations and their display.
+ * This class handles the setup and organization of query facets for the search interface,
+ * including automatic generation of file type facets and custom query mappings.
+ */
 public class FacetQueryView {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FacetQueryView.class);
 
+    /** Title for this facet query view */
     protected String title;
 
+    /** Map of display keys to their corresponding query strings */
     protected Map<String, String> queryMap = new LinkedHashMap<>();
 
+    /**
+     * Default constructor for FacetQueryView.
+     */
+    public FacetQueryView() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the facet query view with default file type queries.
+     * This method is called after dependency injection to set up file type facets
+     * and register all queries with the FacetInfo component.
+     */
     @PostConstruct
     public void init() {
         final String filetypeField = ComponentUtil.getFessConfig().getIndexFieldFiletype();
@@ -63,22 +83,49 @@ public class FacetQueryView {
         queryMap.values().stream().distinct().forEach(facetInfo::addQuery);
     }
 
+    /**
+     * Gets the title for this facet query view.
+     *
+     * @return the title string
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Sets the title for this facet query view.
+     *
+     * @param title the title to set
+     */
     public void setTitle(final String title) {
         this.title = title;
     }
 
+    /**
+     * Gets the map of display keys to query strings.
+     *
+     * @return the query map
+     */
     public Map<String, String> getQueryMap() {
         return queryMap;
     }
 
+    /**
+     * Adds a query to the query map with the specified display key.
+     *
+     * @param key the display key for the query
+     * @param query the query string to add
+     */
     public void addQuery(final String key, final String query) {
         queryMap.put(key, query);
     }
 
+    /**
+     * Returns a string representation of this FacetQueryView object.
+     * Includes the title and query map for debugging purposes.
+     *
+     * @return string representation of this FacetQueryView instance
+     */
     @Override
     public String toString() {
         return "FacetQueryView [title=" + title + ", queryMap=" + queryMap + "]";

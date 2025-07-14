@@ -15,10 +15,21 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when a user is not found in the Fess system.
+ * This exception is typically thrown during authentication or user lookup operations
+ * when the specified user does not exist in the system.
+ */
 public class FessUserNotFoundException extends FessSystemException {
 
+    /** Serial version UID for serialization compatibility */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new FessUserNotFoundException with the specified username.
+     *
+     * @param username the username that was not found
+     */
     public FessUserNotFoundException(final String username) {
         super("User is not found: " + username);
     }
