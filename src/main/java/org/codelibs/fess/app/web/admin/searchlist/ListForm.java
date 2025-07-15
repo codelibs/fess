@@ -50,20 +50,27 @@ public class ListForm extends SearchRequestParams {
     @ValidateTypeFailure
     public Integer offset;
 
+    /** The page number. */
     @ValidateTypeFailure
     public Integer pn;
 
+    /** The number of results to display. */
     @ValidateTypeFailure
     public Integer num;
 
+    /** The languages. */
     public String[] lang;
 
+    /** The fields. */
     public Map<String, String[]> fields = new HashMap<>();
 
+    /** The conditions. */
     public Map<String, String[]> as = new HashMap<>();
 
+    /** The extra queries. */
     public String[] ex_q;
 
+    /** The similar document hash. */
     public String sdh;
 
     @Override

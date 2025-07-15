@@ -31,17 +31,34 @@ import org.opensearch.script.Script;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for language detection.
+ */
 public class LanguageHelper {
     private static final Logger logger = LogManager.getLogger(LanguageHelper.class);
 
+    /** An array of language fields. */
     protected String[] langFields;
 
+    /** An array of supported languages. */
     protected String[] supportedLanguages;
 
+    /** The language detector. */
     protected LanguageDetector detector;
 
+    /** The maximum text length for language detection. */
     protected int maxTextLength;
 
+    /**
+     * Default constructor.
+     */
+    public LanguageHelper() {
+        // do nothing
+    }
+
+    /**
+     * Initializes the helper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -53,6 +70,11 @@ public class LanguageHelper {
         maxTextLength = fessConfig.getIndexerLanguageDetectLengthAsInteger();
     }
 
+    /**
+     * Updates a document with language information.
+     *
+     * @param doc The document to update.
+     */
     public void updateDocument(final Map<String, Object> doc) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String language = getSupportedLanguage(DocumentUtil.getValue(doc, fessConfig.getIndexFieldLang(), String.class));
@@ -85,6 +107,12 @@ public class LanguageHelper {
         }
     }
 
+    /**
+     * Detects the language of a text.
+     *
+     * @param text The text to detect the language from.
+     * @return The detected language.
+     */
     protected String detectLanguage(final String text) {
         if (StringUtil.isBlank(text)) {
             return null;
@@ -97,6 +125,12 @@ public class LanguageHelper {
         return getSupportedLanguage(result.getLanguage());
     }
 
+    /**
+     * Returns the text to be used for language detection.
+     *
+     * @param text The original text.
+     * @return The text for language detection.
+     */
     protected String getDetectText(final String text) {
         final String result;
         if (text.length() <= maxTextLength) {
@@ -107,6 +141,12 @@ public class LanguageHelper {
         return result.replaceAll("\\s+", " ");
     }
 
+    /**
+     * Returns the supported language for a given language.
+     *
+     * @param lang The language to check.
+     * @return The supported language, or null if not supported.
+     */
     protected String getSupportedLanguage(final String lang) {
         if (StringUtil.isBlank(lang)) {
             return null;
@@ -119,10 +159,22 @@ public class LanguageHelper {
         return null;
     }
 
+    /**
+     * Sets the language detector.
+     *
+     * @param detector The language detector.
+     */
     public void setDetector(final LanguageDetector detector) {
         this.detector = detector;
     }
 
+    /**
+     * Creates a script for updating a document with language information.
+     *
+     * @param doc The document.
+     * @param code The script code.
+     * @return The script.
+     */
     public Script createScript(final Map<String, Object> doc, final String code) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(code);
@@ -139,6 +191,11 @@ public class LanguageHelper {
         return new Script(buf.toString());
     }
 
+    /**
+     * Returns the reindex script source.
+     *
+     * @return The reindex script source.
+     */
     public String getReindexScriptSource() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String langField = fessConfig.getIndexFieldLang();

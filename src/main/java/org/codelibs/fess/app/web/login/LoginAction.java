@@ -35,6 +35,9 @@ import org.lastaflute.web.validation.VaErrorHook;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * The login action.
+ */
 public class LoginAction extends FessLoginAction {
 
     private static final Logger logger = LogManager.getLogger(LoginAction.class);

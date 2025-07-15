@@ -30,8 +30,12 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for KeyMatch.
+ */
 public class KeyMatchService extends FessAppService {
 
+    /** The KeyMatch behavior. */
     @Resource
     protected KeyMatchBhv keyMatchBhv;
 
@@ -42,9 +46,16 @@ public class KeyMatchService extends FessAppService {
         // Default constructor
     }
 
+    /** The Fess config. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Get a list of key matches.
+     *
+     * @param keyMatchPager Pager for key matches.
+     * @return A list of key matches.
+     */
     public List<KeyMatch> getKeyMatchList(final KeyMatchPager keyMatchPager) {
 
         final PagingResultBean<KeyMatch> keyMatchList = keyMatchBhv.selectPage(cb -> {
@@ -61,10 +72,21 @@ public class KeyMatchService extends FessAppService {
         return keyMatchList;
     }
 
+    /**
+     * Get a key match.
+     *
+     * @param id The ID of the key match.
+     * @return An optional entity of the key match.
+     */
     public OptionalEntity<KeyMatch> getKeyMatch(final String id) {
         return keyMatchBhv.selectByPK(id);
     }
 
+    /**
+     * Store a key match.
+     *
+     * @param keyMatch The key match to store.
+     */
     public void store(final KeyMatch keyMatch) {
 
         keyMatchBhv.insertOrUpdate(keyMatch, op -> {
@@ -73,6 +95,11 @@ public class KeyMatchService extends FessAppService {
 
     }
 
+    /**
+     * Delete a key match.
+     *
+     * @param keyMatch The key match to delete.
+     */
     public void delete(final KeyMatch keyMatch) {
 
         keyMatchBhv.delete(keyMatch, op -> {
@@ -81,6 +108,12 @@ public class KeyMatchService extends FessAppService {
 
     }
 
+    /**
+     * Set up list conditions.
+     *
+     * @param cb The condition bean.
+     * @param keyMatchPager The pager for key matches.
+     */
     protected void setupListCondition(final KeyMatchCB cb, final KeyMatchPager keyMatchPager) {
         if (StringUtil.isNotBlank(keyMatchPager.term)) {
             cb.query().setTerm_Wildcard(wrapQuery(keyMatchPager.term));

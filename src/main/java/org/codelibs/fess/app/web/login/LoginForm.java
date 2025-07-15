@@ -17,16 +17,25 @@ package org.codelibs.fess.app.web.login;
 
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * The login form.
+ */
 public class LoginForm {
 
+    /** The username. */
     @NotBlank
     public String username;
 
+    /** The password. */
     @NotBlank
     public String password;
 
+    /** The confirm password. */
     public String confirmPassword;
 
+    /**
+     * Clears the security info.
+     */
     public void clearSecurityInfo() {
         password = null;
         confirmPassword = null;

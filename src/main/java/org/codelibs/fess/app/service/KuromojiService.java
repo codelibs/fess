@@ -30,13 +30,32 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for Kuromoji.
+ */
 public class KuromojiService {
+    /** The dictionary manager. */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /** The Fess config. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor.
+     */
+    public KuromojiService() {
+        // do nothing
+    }
+
+    /**
+     * Get a list of Kuromoji items.
+     *
+     * @param dictId The dictionary ID.
+     * @param kuromojiPager The pager for Kuromoji.
+     * @return A list of Kuromoji items.
+     */
     public List<KuromojiItem> getKuromojiList(final String dictId, final KuromojiPager kuromojiPager) {
         return getKuromojiFile(dictId).map(file -> {
             final int pageSize = kuromojiPager.getPageSize();
@@ -51,15 +70,34 @@ public class KuromojiService {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Get a Kuromoji file.
+     *
+     * @param dictId The dictionary ID.
+     * @return An optional entity of the Kuromoji file.
+     */
     public OptionalEntity<KuromojiFile> getKuromojiFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(KuromojiFile.class::isInstance)
                 .map(file -> OptionalEntity.of((KuromojiFile) file)).orElse(OptionalEntity.empty());
     }
 
+    /**
+     * Get a Kuromoji item.
+     *
+     * @param dictId The dictionary ID.
+     * @param id The ID of the Kuromoji item.
+     * @return An optional entity of the Kuromoji item.
+     */
     public OptionalEntity<KuromojiItem> getKuromojiItem(final String dictId, final long id) {
         return getKuromojiFile(dictId).map(file -> file.get(id).get());
     }
 
+    /**
+     * Store a Kuromoji item.
+     *
+     * @param dictId The dictionary ID.
+     * @param kuromojiItem The Kuromoji item to store.
+     */
     public void store(final String dictId, final KuromojiItem kuromojiItem) {
         getKuromojiFile(dictId).ifPresent(file -> {
             if (kuromojiItem.getId() == 0) {
@@ -70,6 +108,12 @@ public class KuromojiService {
         });
     }
 
+    /**
+     * Delete a Kuromoji item.
+     *
+     * @param dictId The dictionary ID.
+     * @param kuromojiItem The Kuromoji item to delete.
+     */
     public void delete(final String dictId, final KuromojiItem kuromojiItem) {
         getKuromojiFile(dictId).ifPresent(file -> {
             file.delete(kuromojiItem);

@@ -28,16 +28,28 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
+/**
+ * An LDAP user.
+ */
 public class LdapUser implements FessUser {
 
     private static final long serialVersionUID = 1L;
 
+    /** The environment for LDAP connection. */
     protected Hashtable<String, String> env;
 
+    /** The name of the user. */
     protected String name;
 
+    /** The permissions of the user. */
     protected String[] permissions = null;
 
+    /**
+     * Constructs a new LDAP user.
+     *
+     * @param env The environment for LDAP connection.
+     * @param name The name of the user.
+     */
     public LdapUser(final Hashtable<String, String> env, final String name) {
         this.env = env;
         this.name = name;
@@ -82,6 +94,11 @@ public class LdapUser implements FessUser {
                 .map(s -> s.substring(1)).toArray(n -> new String[n]));
     }
 
+    /**
+     * Returns the environment for LDAP connection.
+     *
+     * @return The environment for LDAP connection.
+     */
     public Hashtable<String, String> getEnvironment() {
         return env;
     }

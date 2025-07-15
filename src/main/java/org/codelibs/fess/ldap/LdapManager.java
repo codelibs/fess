@@ -65,15 +65,31 @@ import org.dbflute.util.DfTypeUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Manages LDAP connections and operations.
+ */
 public class LdapManager {
     private static final Logger logger = LogManager.getLogger(LdapManager.class);
 
+    /** A thread-local variable to hold the directory context. */
     protected ThreadLocal<DirContextHolder> contextLocal = new ThreadLocal<>();
 
+    /** A flag to indicate if the LDAP connection is bound. */
     protected volatile boolean isBind = false;
 
+    /** The Fess configuration. */
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor.
+     */
+    public LdapManager() {
+        // do nothing
+    }
+
+    /**
+     * Initializes the LDAP manager.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -82,6 +98,16 @@ public class LdapManager {
         fessConfig = ComponentUtil.getFessConfig();
     }
 
+    /**
+     * Creates the environment for LDAP connection.
+     *
+     * @param initialContextFactory The initial context factory.
+     * @param securityAuthentication The security authentication.
+     * @param providerUrl The provider URL.
+     * @param principal The principal.
+     * @param credntials The credentials.
+     * @return The environment for LDAP connection.
+     */
     protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
             final String providerUrl, final String principal, final String credntials) {
         final Hashtable<String, String> env = new Hashtable<>();
@@ -96,6 +122,13 @@ public class LdapManager {
         return env;
     }
 
+    /**
+     * Puts a key-value pair to the environment.
+     *
+     * @param env The environment.
+     * @param key The key.
+     * @param value The value.
+     */
     protected void putEnv(final Hashtable<String, String> env, final String key, final String value) {
         if (value == null) {
             throw new LdapConfigurationException(key + " is null.");
@@ -103,6 +136,11 @@ public class LdapManager {
         env.put(key, value);
     }
 
+    /**
+     * Creates the admin environment for LDAP connection.
+     *
+     * @return The admin environment for LDAP connection.
+     */
     protected Hashtable<String, String> createAdminEnv() {
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
@@ -111,6 +149,13 @@ public class LdapManager {
                 fessConfig.getLdapAdminSecurityCredentials());
     }
 
+    /**
+     * Creates the search environment for LDAP connection.
+     *
+     * @param username The username.
+     * @param password The password.
+     * @return The search environment for LDAP connection.
+     */
     protected Hashtable<String, String> createSearchEnv(final String username, final String password) {
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
@@ -119,6 +164,11 @@ public class LdapManager {
                 fessConfig.getLdapSecurityPrincipal(username), password);
     }
 
+    /**
+     * Creates the search environment for LDAP connection.
+     *
+     * @return The search environment for LDAP connection.
+     */
     protected Hashtable<String, String> createSearchEnv() {
         return createEnvironment(//
                 fessConfig.getLdapInitialContextFactory(), //
@@ -127,10 +177,18 @@ public class LdapManager {
                 fessConfig.getLdapAdminSecurityCredentials());
     }
 
+    /**
+     * Updates the LDAP configuration.
+     */
     public void updateConfig() {
         isBind = false;
     }
 
+    /**
+     * Validates the LDAP connection.
+     *
+     * @return True if the LDAP connection is valid, otherwise false.
+     */
     protected boolean validate() {
         if (!isBind) {
             if (fessConfig.getLdapAdminSecurityPrincipal() == null || fessConfig.getLdapAdminSecurityCredentials() == null) {
@@ -1169,24 +1227,52 @@ public class LdapManager {
         }
     }
 
+    /**
+     * Modifies an entry by adding a new attribute.
+     *
+     * @param modifyList The list of modification items.
+     * @param name The name of the attribute.
+     * @param value The value of the attribute.
+     */
     protected void modifyAddEntry(final List<ModificationItem> modifyList, final String name, final String value) {
         final Attribute attr = new BasicAttribute(name, value);
         final ModificationItem mod = new ModificationItem(DirContext.ADD_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
+    /**
+     * Modifies an entry by replacing an attribute.
+     *
+     * @param modifyList The list of modification items.
+     * @param name The name of the attribute.
+     * @param value The value of the attribute.
+     */
     protected void modifyReplaceEntry(final List<ModificationItem> modifyList, final String name, final String value) {
         final Attribute attr = new BasicAttribute(name, value);
         final ModificationItem mod = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
+    /**
+     * Modifies an entry by deleting an attribute.
+     *
+     * @param modifyList The list of modification items.
+     * @param name The name of the attribute.
+     * @param value The value of the attribute.
+     */
     protected void modifyDeleteEntry(final List<ModificationItem> modifyList, final String name, final Object value) {
         final Attribute attr = new BasicAttribute(name, value);
         final ModificationItem mod = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
+    /**
+     * Modifies an entry.
+     *
+     * @param dn The DN of the entry.
+     * @param modifyList The list of modification items.
+     * @param envSupplier The environment supplier.
+     */
     protected void modify(final String dn, final List<ModificationItem> modifyList, final Supplier<Hashtable<String, String>> envSupplier) {
         if (modifyList.isEmpty()) {
             return;
@@ -1198,10 +1284,25 @@ public class LdapManager {
         }
     }
 
+    /**
+     * An interface for consuming search results.
+     */
     interface SearchConsumer {
+        /**
+         * Accepts a list of search results.
+         *
+         * @param t The list of search results.
+         * @throws NamingException If a naming exception occurs.
+         */
         void accept(List<SearchResult> t) throws NamingException;
     }
 
+    /**
+     * Gets the directory context.
+     *
+     * @param envSupplier The environment supplier.
+     * @return The directory context holder.
+     */
     protected DirContextHolder getDirContext(final Supplier<Hashtable<String, String>> envSupplier) {
         DirContextHolder holder = contextLocal.get();
         if (holder != null) {
@@ -1218,19 +1319,35 @@ public class LdapManager {
         }
     }
 
+    /**
+     * A holder for the directory context.
+     */
     protected class DirContextHolder implements AutoCloseable {
         private final DirContext context;
 
         private int counter = 1;
 
+        /**
+         * Constructs a new directory context holder.
+         *
+         * @param context The directory context.
+         */
         protected DirContextHolder(final DirContext context) {
             this.context = context;
         }
 
+        /**
+         * Returns the directory context.
+         *
+         * @return The directory context.
+         */
         public DirContext get() {
             return context;
         }
 
+        /**
+         * Increments the counter.
+         */
         public void inc() {
             counter++;
         }

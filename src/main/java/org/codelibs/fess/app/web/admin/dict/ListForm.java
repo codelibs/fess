@@ -20,5 +20,10 @@ package org.codelibs.fess.app.web.admin.dict;
  *
  */
 public class ListForm {
-
+    /**
+     * Default constructor.
+     */
+    public ListForm() {
+        // do nothing
+    }
 }

@@ -25,13 +25,22 @@ import org.codelibs.fess.dict.DictionaryItem;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * A dictionary creator for Kuromoji.
+ */
 public class KuromojiCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(KuromojiCreator.class);
 
+    /**
+     * Constructs a new Kuromoji creator.
+     */
     public KuromojiCreator() {
         super("kuromoji.*\\.txt");
     }
 
+    /**
+     * Registers this creator to the dictionary manager.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -40,6 +49,14 @@ public class KuromojiCreator extends DictionaryCreator {
         dictionaryManager.addCreator(this);
     }
 
+    /**
+     * Creates a new dictionary file.
+     *
+     * @param id The ID of the dictionary file.
+     * @param path The path of the dictionary file.
+     * @param timestamp The timestamp of the dictionary file.
+     * @return A new dictionary file.
+     */
     @Override
     protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(final String id, final String path, final Date timestamp) {
         return new KuromojiFile(id, path, timestamp).manager(dictionaryManager);
