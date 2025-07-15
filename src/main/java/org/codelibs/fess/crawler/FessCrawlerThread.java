@@ -79,8 +79,16 @@ import org.codelibs.fess.util.DocumentUtil;
  */
 public class FessCrawlerThread extends CrawlerThread {
 
+    /**
+     * Default constructor.
+     */
+    public FessCrawlerThread() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(FessCrawlerThread.class);
 
+    /** Configuration key for crawler clients used in parameter maps */
     protected static final String CRAWLER_CLIENTS = "crawlerClients";
 
     /**

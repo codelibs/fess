@@ -42,6 +42,14 @@ import jakarta.annotation.Resource;
 public class FileConfigService extends FessAppService {
 
     /**
+     * Default constructor for file configuration service.
+     * Creates a new instance with default values.
+     */
+    public FileConfigService() {
+        // Default constructor
+    }
+
+    /**
      * Behavior class for file configuration database operations.
      * Provides access to the file configuration entity operations.
      */

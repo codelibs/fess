@@ -139,6 +139,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected Map<String, PrunedTag[]> prunedTagsCache = new HashMap<>();
 
     /**
+     * Default constructor.
+     */
+    public FessXpathTransformer() {
+        // Default constructor
+    }
+
+    /**
      * Initializes the transformer after dependency injection.
      * Sets up the Fess configuration and data serializer components.
      */

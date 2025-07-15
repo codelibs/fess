@@ -42,8 +42,10 @@ public class FessUrlQueueService extends OpenSearchUrlQueueService {
 
     private static final Logger logger = LogManager.getLogger(FessUrlQueueService.class);
 
+    /** Configuration value for sequential URL processing order */
     protected static final String ORDER_SEQUENTIAL = "sequential";
 
+    /** Configuration value for random URL processing order */
     protected static final String ORDER_RANDOM = "random";
 
     /**

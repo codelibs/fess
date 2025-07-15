@@ -40,21 +40,44 @@ import org.codelibs.fess.util.MemoryUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Implementation of IndexUpdateCallback for handling document indexing operations.
+ * This class manages the process of updating the search index with documents from
+ * data stores, including bulk operations, document transformation, and error handling.
+ */
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LogManager.getLogger(IndexUpdateCallbackImpl.class);
 
+    /**
+     * Default constructor for index update callback implementation.
+     * Creates a new instance with default values.
+     */
+    public IndexUpdateCallbackImpl() {
+        // Default constructor
+    }
+
+    /** Atomic counter for the number of documents processed */
     protected AtomicLong documentSize = new AtomicLong(0);
 
+    /** Total execution time for all operations */
     protected volatile long executeTime = 0;
 
+    /** List of documents waiting to be indexed */
     protected final DocList docList = new DocList();
 
+    /** Maximum size of document requests in bytes */
     protected long maxDocumentRequestSize;
 
+    /** Maximum number of documents to cache before indexing */
     protected int maxDocumentCacheSize;
 
+    /** Factory for creating ingesters to process documents */
     private IngestFactory ingestFactory = null;
 
+    /**
+     * Initializes the callback implementation after dependency injection.
+     * Sets up configuration values and initializes the ingest factory if available.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -67,8 +90,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.codelibs.fess.ds.callback.IndexUpdateCallback#store(java.util.Map)
+    /**
+     * Stores a document in the index after processing and validation.
+     * Handles document transformation, field addition, and batched indexing.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the document data to store
+     * @throws DataStoreException if required fields are missing or other errors occur
      */
     @Override
     public void store(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
@@ -143,6 +171,14 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     }
 
+    /**
+     * Processes a document through the ingest pipeline.
+     * Applies all available ingesters to transform the document data.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the document data to process
+     * @return the processed document data
+     */
     protected Map<String, Object> ingest(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         if (ingestFactory == null) {
             return dataMap;
@@ -158,6 +194,10 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         return target;
     }
 
+    /**
+     * Commits any remaining documents in the cache to the index.
+     * This method ensures all pending documents are processed.
+     */
     @Override
     public void commit() {
         synchronized (docList) {
@@ -169,6 +209,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Adds click count information to the document.
+     *
+     * @param doc the document to update
+     * @param url the URL to get click count for
+     * @param clickCountField the field name to store click count
+     */
     protected void addClickCountField(final Map<String, Object> doc, final String url, final String clickCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final int count = searchLogHelper.getClickCount(url);
@@ -178,6 +225,13 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Adds favorite count information to the document.
+     *
+     * @param doc the document to update
+     * @param url the URL to get favorite count for
+     * @param favoriteCountField the field name to store favorite count
+     */
     protected void addFavoriteCountField(final Map<String, Object> doc, final String url, final String favoriteCountField) {
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final long count = searchLogHelper.getFavoriteCount(url);
@@ -187,11 +241,21 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Returns the total number of documents processed.
+     *
+     * @return the number of documents processed
+     */
     @Override
     public long getDocumentSize() {
         return documentSize.get();
     }
 
+    /**
+     * Returns the total execution time for all operations.
+     *
+     * @return the total execution time in milliseconds
+     */
     @Override
     public long getExecuteTime() {
         return executeTime;

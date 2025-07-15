@@ -58,6 +58,14 @@ public class IndexingHelper {
     /** Default number of rows to process in a single batch */
     protected int defaultRowSize = 100;
 
+    /**
+     * Default constructor for indexing helper.
+     * Creates a new instance with default values.
+     */
+    public IndexingHelper() {
+        // Default constructor
+    }
+
     /** Interval between requests in milliseconds */
     protected long requestInterval = 500;
 

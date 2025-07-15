@@ -19,6 +19,10 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Utility class for JVM-related operations.
+ * This class provides methods for handling JVM options and version detection.
+ */
 public final class JvmUtil {
     private static final Pattern VERSION_PREFIX_PATTERN = Pattern.compile("([0-9]+)(\\-?):(.*)");
 
@@ -26,6 +30,14 @@ public final class JvmUtil {
         // nothing
     }
 
+    /**
+     * Filters JVM options based on the current Java version.
+     * Options can be prefixed with version numbers to specify compatibility.
+     * Format: "version:option" or "version-:option" (for version and above).
+     *
+     * @param values the array of JVM options to filter
+     * @return the filtered array of JVM options applicable to the current Java version
+     */
     public static String[] filterJvmOptions(final String[] values) {
         final int version = getJavaVersion();
         return Arrays.stream(values).map(s -> {
@@ -45,6 +57,13 @@ public final class JvmUtil {
         }).filter(s -> s != null).toArray(n -> new String[n]);
     }
 
+    /**
+     * Gets the major version number of the current Java runtime.
+     * For Java 8 and below, returns the minor version (e.g., 8 for Java 1.8).
+     * For Java 9 and above, returns the major version (e.g., 11 for Java 11).
+     *
+     * @return the Java version number, defaults to 8 if version cannot be determined
+     */
     public static int getJavaVersion() {
         final String javaVersion = System.getProperty("java.version");
         int version = 8;

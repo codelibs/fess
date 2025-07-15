@@ -47,6 +47,13 @@ import jakarta.annotation.PostConstruct;
 public class KeyMatchHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);
 
+    /**
+     * Default constructor.
+     */
+    public KeyMatchHelper() {
+        // Default constructor
+    }
+
     protected volatile Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap =
             Collections.emptyMap();
 

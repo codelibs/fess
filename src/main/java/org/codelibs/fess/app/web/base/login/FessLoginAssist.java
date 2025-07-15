@@ -53,6 +53,13 @@ import jakarta.annotation.Resource;
 public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, FessUser> // #change_it also UserBean
         implements PrimaryLoginManager {
 
+    /**
+     * Default constructor.
+     */
+    public FessLoginAssist() {
+        // Default constructor
+    }
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========

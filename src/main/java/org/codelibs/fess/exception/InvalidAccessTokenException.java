@@ -15,17 +15,35 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when an invalid access token is encountered.
+ * This exception is typically used in authentication and authorization contexts
+ * where a provided access token is invalid, expired, or malformed.
+ */
 public class InvalidAccessTokenException extends FessSystemException {
 
+    /** Serial version UID for serialization */
     private static final long serialVersionUID = 1L;
 
+    /** Type of the invalid access token */
     private final String type;
 
+    /**
+     * Creates a new InvalidAccessTokenException with the specified type and message.
+     *
+     * @param type the type of the invalid access token
+     * @param message the detailed error message
+     */
     public InvalidAccessTokenException(final String type, final String message) {
         super(message);
         this.type = type;
     }
 
+    /**
+     * Returns the type of the invalid access token.
+     *
+     * @return the type of the invalid access token
+     */
     public String getType() {
         return type;
     }

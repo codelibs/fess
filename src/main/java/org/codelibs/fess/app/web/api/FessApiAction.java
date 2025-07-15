@@ -43,6 +43,13 @@ import jakarta.servlet.http.HttpServletRequest;
 public abstract class FessApiAction extends FessBaseAction {
 
     /**
+     * Default constructor.
+     */
+    public FessApiAction() {
+        // Default constructor
+    }
+
+    /**
      * Message manager for handling internationalized messages and validation errors.
      * Used to convert validation messages to localized text for API responses.
      */

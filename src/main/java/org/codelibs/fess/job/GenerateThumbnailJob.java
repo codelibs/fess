@@ -56,6 +56,13 @@ public class GenerateThumbnailJob extends ExecJob {
     protected boolean cleanup = false;
 
     /**
+     * Default constructor for the GenerateThumbnailJob.
+     */
+    public GenerateThumbnailJob() {
+        // Default constructor
+    }
+
+    /**
      * Sets the number of threads to use for thumbnail generation.
      *
      * @param numOfThreads the number of threads

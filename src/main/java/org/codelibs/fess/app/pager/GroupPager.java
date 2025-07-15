@@ -69,6 +69,14 @@ public class GroupPager implements Serializable {
     public String versionNo;
 
     /**
+     * Default constructor for GroupPager.
+     * Initializes the pager with default values for pagination settings.
+     */
+    public GroupPager() {
+        // Default constructor
+    }
+
+    /**
      * Clears all pagination data and search criteria, resetting the pager to its initial state.
      * This method resets record counts, pagination flags, and search parameters to their default values.
      */

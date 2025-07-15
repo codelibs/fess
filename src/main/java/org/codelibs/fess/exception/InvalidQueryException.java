@@ -18,24 +18,46 @@ package org.codelibs.fess.exception;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.lastaflute.web.validation.VaMessenger;
 
+/**
+ * Exception thrown when an invalid query is encountered.
+ * This exception is typically used in search contexts where a provided
+ * query is malformed, contains invalid syntax, or violates query constraints.
+ */
 public class InvalidQueryException extends FessSystemException {
 
+    /** Serial version UID for serialization */
     private static final long serialVersionUID = 1L;
 
+    /** Message code for localized error messages */
     private final transient VaMessenger<FessMessages> messageCode;
 
+    /**
+     * Creates a new InvalidQueryException with message code, message, and cause.
+     *
+     * @param messageCode the message code for localized error messages
+     * @param message the detailed error message
+     * @param cause the cause of the exception
+     */
     public InvalidQueryException(final VaMessenger<FessMessages> messageCode, final String message, final Throwable cause) {
         super(message, cause);
         this.messageCode = messageCode;
     }
 
+    /**
+     * Creates a new InvalidQueryException with message code and message.
+     *
+     * @param messageCode the message code for localized error messages
+     * @param message the detailed error message
+     */
     public InvalidQueryException(final VaMessenger<FessMessages> messageCode, final String message) {
         super(message);
         this.messageCode = messageCode;
     }
 
     /**
-     * @return the messageCode
+     * Returns the message code for localized error messages.
+     *
+     * @return the message code
      */
     public VaMessenger<FessMessages> getMessageCode() {
         return messageCode;

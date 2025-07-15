@@ -54,6 +54,13 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LogManager.getLogger(HtmlTagBasedGenerator.class);
 
     /**
+     * Default constructor for HtmlTagBasedGenerator.
+     */
+    public HtmlTagBasedGenerator() {
+        // Default constructor
+    }
+
+    /**
      * Destroys this thumbnail generator and releases any resources.
      * This implementation is empty as no cleanup is required.
      */

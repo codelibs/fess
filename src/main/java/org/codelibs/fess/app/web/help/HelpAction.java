@@ -21,6 +21,11 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * Action class for handling help page requests in the Fess search application.
+ * This class extends FessSearchAction to provide help functionality including
+ * authentication checks and form parameter setup for the help interface.
+ */
 public class HelpAction extends FessSearchAction {
 
     // ===================================================================================
@@ -32,6 +37,17 @@ public class HelpAction extends FessSearchAction {
     //
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+
+    /**
+     * Default constructor for HelpAction.
+     */
+    public HelpAction() {
+        // Default constructor
+    }
+
+    // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
 
@@ -39,6 +55,13 @@ public class HelpAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Handles the help page request and renders the help interface.
+     * This method performs authentication checks and sets up the necessary
+     * form parameters and rendering data for the help page display.
+     *
+     * @return HtmlResponse containing the rendered help page or redirect to login if authentication is required
+     */
     @Execute
     public HtmlResponse index() {
         if (isLoginRequired()) {

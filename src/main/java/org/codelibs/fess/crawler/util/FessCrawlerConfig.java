@@ -25,6 +25,13 @@ import org.codelibs.fess.util.ComponentUtil;
 public class FessCrawlerConfig extends OpenSearchCrawlerConfig {
 
     /**
+     * Default constructor.
+     */
+    public FessCrawlerConfig() {
+        // Default constructor
+    }
+
+    /**
      * Gets the name of the queue index for the crawler.
      *
      * @return the queue index name

@@ -24,6 +24,13 @@ public class KeyMatchPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Default constructor.
+     */
+    public KeyMatchPager() {
+        // Default constructor
+    }
+
     public static final int DEFAULT_PAGE_SIZE = 20;
 
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;

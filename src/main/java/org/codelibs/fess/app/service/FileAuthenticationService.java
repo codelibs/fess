@@ -38,6 +38,14 @@ import jakarta.annotation.Resource;
 public class FileAuthenticationService {
 
     /**
+     * Default constructor for file authentication service.
+     * Creates a new instance with default values.
+     */
+    public FileAuthenticationService() {
+        // Default constructor
+    }
+
+    /**
      * Behavior class for file authentication database operations.
      */
     @Resource

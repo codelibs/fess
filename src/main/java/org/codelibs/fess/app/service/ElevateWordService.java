@@ -62,6 +62,13 @@ public class ElevateWordService {
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(ElevateWordService.class);
 
+    /**
+     * Default constructor.
+     */
+    public ElevateWordService() {
+        // Default constructor
+    }
+
     /** Behavior handler for ElevateWordToLabel entity operations */
     @Resource
     protected ElevateWordToLabelBhv elevateWordToLabelBhv;

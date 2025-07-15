@@ -54,6 +54,13 @@ public class GroupService {
     protected UserBhv userBhv;
 
     /**
+     * Default constructor for GroupService.
+     */
+    public GroupService() {
+        // Default constructor
+    }
+
+    /**
      * Retrieves a paginated list of groups based on the provided pager criteria.
      * Updates the pager with pagination information including page numbers and ranges.
      *

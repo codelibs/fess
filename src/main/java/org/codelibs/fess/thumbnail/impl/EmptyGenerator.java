@@ -25,6 +25,13 @@ import java.io.File;
 public class EmptyGenerator extends BaseThumbnailGenerator {
 
     /**
+     * Default constructor.
+     */
+    public EmptyGenerator() {
+        // Default constructor
+    }
+
+    /**
      * Generates a thumbnail for the specified ID and output file.
      * This implementation always returns false, indicating no thumbnail was generated.
      *

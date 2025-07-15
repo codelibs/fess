@@ -47,6 +47,14 @@ public class FileTypeHelper {
     protected Map<String, String> mimetypeMap = new LinkedHashMap<>();
 
     /**
+     * Default constructor for file type helper.
+     * Creates a new instance with default values.
+     */
+    public FileTypeHelper() {
+        // Default constructor
+    }
+
+    /**
      * Initializes the file type mappings by loading configuration from Fess settings.
      * This method is called automatically after dependency injection is complete.
      * The mappings are loaded from the index filetype configuration property,

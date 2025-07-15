@@ -126,6 +126,13 @@ public class GsaConfigParser extends DefaultHandler {
     protected String userAgent = "gsa-crawler";
 
     /**
+     * Default constructor for GsaConfigParser.
+     */
+    public GsaConfigParser() {
+        // Default constructor
+    }
+
+    /**
      * Parses a GSA configuration XML file from the given input source.
      * This method configures a secure SAX parser and processes the XML content
      * to extract configuration information for web and file crawling.

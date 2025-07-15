@@ -37,6 +37,14 @@ import jakarta.annotation.Resource;
  * This service handles the persistence and retrieval of favorite log entries in the search system.
  */
 public class FavoriteLogService {
+
+    /**
+     * Default constructor.
+     */
+    public FavoriteLogService() {
+        // Default constructor
+    }
+
     /** System helper for common system operations and utilities. */
     @Resource
     protected SystemHelper systemHelper;

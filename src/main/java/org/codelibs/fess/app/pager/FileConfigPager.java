@@ -30,6 +30,14 @@ public class FileConfigPager implements Serializable {
     /** Serial version UID for serialization */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Default constructor for file configuration pager.
+     * Creates a new instance with default values.
+     */
+    public FileConfigPager() {
+        // Default constructor
+    }
+
     /** Default page size for pagination */
     public static final int DEFAULT_PAGE_SIZE = 20;
 

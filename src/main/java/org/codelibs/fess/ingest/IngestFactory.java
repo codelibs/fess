@@ -20,11 +20,34 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Factory class for managing and organizing document ingesters.
+ * The factory maintains a sorted collection of ingesters based on their priority
+ * and provides methods to add new ingesters and retrieve the current collection.
+ *
+ * Ingesters are automatically sorted by priority, with lower numbers having higher priority.
+ */
 public class IngestFactory {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(IngestFactory.class);
 
+    /** Array of registered ingesters, sorted by priority */
     private Ingester[] ingesters = {};
 
+    /**
+     * Default constructor.
+     */
+    public IngestFactory() {
+        // Default constructor
+    }
+
+    /**
+     * Adds an ingester to the factory.
+     * The ingester is inserted into the collection and the array is re-sorted by priority.
+     * This method is thread-safe.
+     *
+     * @param ingester the ingester to add
+     */
     public synchronized void add(final Ingester ingester) {
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", ingester.getClass().getSimpleName());
@@ -35,6 +58,13 @@ public class IngestFactory {
         ingesters = newIngesters;
     }
 
+    /**
+     * Returns the array of registered ingesters sorted by priority.
+     * The returned array contains all ingesters in priority order
+     * (lower priority numbers first).
+     *
+     * @return the sorted array of ingesters
+     */
     public Ingester[] getIngesters() {
         return ingesters;
     }

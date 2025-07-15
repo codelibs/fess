@@ -47,6 +47,10 @@ public interface FessUser extends Serializable {
      */
     String[] getPermissions();
 
+    /**
+     * Determines if the user's information can be edited.
+     * @return True if the user's information is editable, false otherwise.
+     */
     default boolean isEditable() {
         return false;
     }

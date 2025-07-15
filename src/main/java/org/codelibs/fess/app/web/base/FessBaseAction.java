@@ -61,6 +61,13 @@ import jakarta.annotation.Resource;
 public abstract class FessBaseAction extends TypicalAction // has several interfaces for direct use
         implements LaValidatable<FessMessages>, FessHtmlPath {
 
+    /**
+     * Default constructor.
+     */
+    public FessBaseAction() {
+        // Default constructor
+    }
+
     // ===================================================================================
     //                                                                          Definition
     //                                                                          ==========

@@ -28,8 +28,20 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 
+/**
+ * Groovy script engine implementation that extends AbstractScriptEngine.
+ * This class provides support for executing Groovy scripts with parameter binding
+ * and DI container integration.
+ */
 public class GroovyEngine extends AbstractScriptEngine {
     private static final Logger logger = LogManager.getLogger(GroovyEngine.class);
+
+    /**
+     * Default constructor for GroovyEngine.
+     */
+    public GroovyEngine() {
+        // Default constructor
+    }
 
     @Override
     public Object evaluate(final String template, final Map<String, Object> paramMap) {

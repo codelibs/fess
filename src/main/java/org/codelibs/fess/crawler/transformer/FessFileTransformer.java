@@ -35,6 +35,13 @@ import jakarta.annotation.PostConstruct;
  * capabilities using the appropriate extractor for each file type.</p>
  */
 public class FessFileTransformer extends AbstractFessFileTransformer {
+    /**
+     * Default constructor.
+     */
+    public FessFileTransformer() {
+        // Default constructor
+    }
+
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FessFileTransformer.class);
 

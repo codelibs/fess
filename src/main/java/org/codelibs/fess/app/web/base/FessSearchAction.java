@@ -61,6 +61,13 @@ import jakarta.servlet.http.HttpSession;
  */
 public abstract class FessSearchAction extends FessBaseAction {
 
+    /**
+     * Default constructor.
+     */
+    public FessSearchAction() {
+        // Default constructor
+    }
+
     /** The field name used for label-based search filtering. */
     protected static final String LABEL_FIELD = "label";
 

@@ -32,6 +32,13 @@ import jakarta.validation.constraints.Size;
 public class GoForm {
 
     /**
+     * Default constructor for GoForm.
+     */
+    public GoForm() {
+        // Default constructor
+    }
+
+    /**
      * Document identifier for the target document to redirect to.
      * This is required and limited to 100 characters.
      */

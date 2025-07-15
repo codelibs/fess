@@ -27,6 +27,13 @@ import org.lastaflute.web.response.HtmlResponse;
  */
 public abstract class FessLoginAction extends FessSearchAction {
     /**
+     * Default constructor.
+     */
+    public FessLoginAction() {
+        // Default constructor
+    }
+
+    /**
      * Returns the appropriate HTML response for login handling.
      * If a user is already authenticated, redirects to the appropriate admin interface.
      * Otherwise, displays the login page.

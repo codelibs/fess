@@ -28,6 +28,14 @@ public class FileAuthPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Default constructor for file authentication pager.
+     * Creates a new instance with default values.
+     */
+    public FileAuthPager() {
+        // Default constructor
+    }
+
     /** The default number of records to display per page. */
     public static final int DEFAULT_PAGE_SIZE = 20;
 

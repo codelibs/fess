@@ -49,6 +49,13 @@ public class FailureUrlService {
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FailureUrlService.class);
 
+    /**
+     * Default constructor.
+     */
+    public FailureUrlService() {
+        // Default constructor
+    }
+
     /** Behavior class for FailureUrl entity operations */
     @Resource
     protected FailureUrlBhv failureUrlBhv;

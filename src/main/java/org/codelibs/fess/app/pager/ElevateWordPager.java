@@ -29,6 +29,13 @@ public class ElevateWordPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Default constructor.
+     */
+    public ElevateWordPager() {
+        // Default constructor
+    }
+
     /** Default page size for pagination */
     public static final int DEFAULT_PAGE_SIZE = 20;
 

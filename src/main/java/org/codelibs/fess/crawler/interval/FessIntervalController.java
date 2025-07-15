@@ -28,6 +28,13 @@ import org.codelibs.fess.util.ComponentUtil;
 public class FessIntervalController extends DefaultIntervalController {
 
     /**
+     * Default constructor.
+     */
+    public FessIntervalController() {
+        // Default constructor
+    }
+
+    /**
      * Gets the delay time in milliseconds after processing a URL.
      *
      * @return the delay time in milliseconds after processing

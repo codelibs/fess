@@ -30,6 +30,13 @@ public class FailureUrlPager implements Serializable {
     /** Serial version UID for serialization compatibility. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Default constructor.
+     */
+    public FailureUrlPager() {
+        // Default constructor
+    }
+
     /** URL filter for searching failure URLs. */
     //@Maxbytelength(maxbytelength = 1000)
     public String url;

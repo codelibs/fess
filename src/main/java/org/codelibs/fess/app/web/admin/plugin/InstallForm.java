@@ -20,11 +20,25 @@ import org.lastaflute.web.validation.Required;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form for plugin installation through the admin web interface.
+ * This class represents the form data structure for installing a plugin
+ * via file upload through the admin UI.
+ */
 public class InstallForm {
 
+    /** Plugin identifier (required, max 400 characters) */
     @Required
     @Size(max = 400)
     public String id;
 
+    /**
+     * Default constructor.
+     */
+    public InstallForm() {
+        // Default constructor
+    }
+
+    /** JAR file containing the plugin to install */
     public MultipartFormFile jarFile;
 }

@@ -37,6 +37,13 @@ import jakarta.annotation.PostConstruct;
  * before it is stored in the search index.</p>
  */
 public class FessResponseProcessor extends DefaultResponseProcessor {
+    /**
+     * Default constructor.
+     */
+    public FessResponseProcessor() {
+        // Default constructor
+    }
+
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FessResponseProcessor.class);
 

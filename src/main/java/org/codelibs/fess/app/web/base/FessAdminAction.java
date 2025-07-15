@@ -42,6 +42,13 @@ public abstract class FessAdminAction extends FessBaseAction {
     /** Constant suffix for view names. */
     public static final String VIEW = "-view";
 
+    /**
+     * Default constructor.
+     */
+    public FessAdminAction() {
+        // Default constructor
+    }
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========

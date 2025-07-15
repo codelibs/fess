@@ -17,14 +17,29 @@ package org.codelibs.fess.exception;
 
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 
+/**
+ * Exception thrown when a scheduled job cannot be found.
+ * This exception is typically thrown when attempting to access or
+ * manipulate a job that does not exist in the system.
+ */
 public class JobNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new JobNotFoundException with a message derived from the scheduled job.
+     *
+     * @param scheduledJob the scheduled job that was not found
+     */
     public JobNotFoundException(final ScheduledJob scheduledJob) {
         super(scheduledJob.toString());
     }
 
+    /**
+     * Constructs a new JobNotFoundException with the specified detail message.
+     *
+     * @param message the detail message explaining why the job was not found
+     */
     public JobNotFoundException(final String message) {
         super(message);
     }

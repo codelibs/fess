@@ -40,18 +40,43 @@ import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.job.subsidiary.CronParamsSupplier;
 
+/**
+ * Helper class for managing scheduled jobs within the Fess system.
+ * This class provides functionality for registering, unregistering, and monitoring scheduled jobs.
+ */
 public class JobHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(JobHelper.class);
 
+    /**
+     * Default constructor.
+     */
+    public JobHelper() {
+        // Default constructor
+    }
+
+    /** Monitor interval in seconds (default: 1 hour) */
     protected int monitorInterval = 60 * 60;// 1hour
 
+    /** Thread-local storage for job runtime information */
     protected ThreadLocal<LaJobRuntime> jobRuntimeLocal = new ThreadLocal<>();
 
+    /**
+     * Registers a scheduled job with the job manager.
+     *
+     * @param scheduledJob the scheduled job to register
+     */
     public void register(final ScheduledJob scheduledJob) {
         final JobManager jobManager = ComponentUtil.getJobManager();
         jobManager.schedule(cron -> register(cron, scheduledJob));
     }
 
+    /**
+     * Registers a scheduled job with the specified cron scheduler.
+     *
+     * @param cron the cron scheduler to use
+     * @param scheduledJob the scheduled job to register
+     */
     public void register(final LaCron cron, final ScheduledJob scheduledJob) {
         if (scheduledJob == null) {
             throw new ScheduledJobException("No job.");
@@ -108,6 +133,12 @@ public class JobHelper {
         });
     }
 
+    /**
+     * Finds a scheduled job by its unique identifier.
+     *
+     * @param jobUnique the unique identifier of the job
+     * @return an optional containing the scheduled job if found, empty otherwise
+     */
     private OptionalThing<LaScheduledJob> findJobByUniqueOf(final LaJobUnique jobUnique) {
         final JobManager jobManager = ComponentUtil.getJobManager();
         try {
@@ -117,6 +148,12 @@ public class JobHelper {
         }
     }
 
+    /**
+     * Unregisters a scheduled job from the job manager.
+     *
+     * @param scheduledJob the scheduled job to unregister
+     * @throws ScheduledJobException if the job cannot be unregistered
+     */
     public void unregister(final ScheduledJob scheduledJob) {
         try {
             final JobManager jobManager = ComponentUtil.getJobManager();
@@ -130,6 +167,12 @@ public class JobHelper {
         }
     }
 
+    /**
+     * Removes a scheduled job completely from the job manager.
+     *
+     * @param scheduledJob the scheduled job to remove
+     * @throws ScheduledJobException if the job cannot be removed
+     */
     public void remove(final ScheduledJob scheduledJob) {
         try {
             final JobManager jobManager = ComponentUtil.getJobManager();
@@ -143,34 +186,68 @@ public class JobHelper {
         }
     }
 
+    /**
+     * Checks if a job with the specified ID is available.
+     *
+     * @param id the job ID to check
+     * @return true if the job is available, false otherwise
+     */
     public boolean isAvailable(final String id) {
         return ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(id).filter(e -> Boolean.TRUE.equals(e.getAvailable()))
                 .isPresent();
     }
 
+    /**
+     * Stores a job log entry in the database.
+     *
+     * @param jobLog the job log entry to store
+     */
     public void store(final JobLog jobLog) {
         ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
+    /**
+     * Starts a monitor task for tracking job execution.
+     *
+     * @param jobLog the job log to monitor
+     * @return the timeout task for monitoring
+     */
     public TimeoutTask startMonitorTask(final JobLog jobLog) {
         final TimeoutTarget target = new MonitorTarget(jobLog);
         return TimeoutManager.getInstance().addTimeoutTarget(target, monitorInterval, true);
     }
 
+    /**
+     * Sets the monitor interval for job monitoring.
+     *
+     * @param monitorInterval the monitor interval in seconds
+     */
     public void setMonitorInterval(final int monitorInterval) {
         this.monitorInterval = monitorInterval;
     }
 
+    /**
+     * Inner class that implements TimeoutTarget for monitoring job execution.
+     */
     static class MonitorTarget implements TimeoutTarget {
 
+        /** The job log being monitored */
         private final JobLog jobLog;
 
+        /**
+         * Constructor for MonitorTarget.
+         *
+         * @param jobLog the job log to monitor
+         */
         public MonitorTarget(final JobLog jobLog) {
             this.jobLog = jobLog;
         }
 
+        /**
+         * Called when the timeout expires. Updates the job log if the job is still running.
+         */
         @Override
         public void expired() {
             if (jobLog.getEndTime() == null) {
@@ -186,10 +263,20 @@ public class JobHelper {
 
     }
 
+    /**
+     * Sets the job runtime for the current thread.
+     *
+     * @param runtime the job runtime to set
+     */
     public void setJobRuntime(final LaJobRuntime runtime) {
         jobRuntimeLocal.set(runtime);
     }
 
+    /**
+     * Gets the job runtime for the current thread.
+     *
+     * @return the job runtime for the current thread
+     */
     public LaJobRuntime getJobRuntime() {
         return jobRuntimeLocal.get();
     }

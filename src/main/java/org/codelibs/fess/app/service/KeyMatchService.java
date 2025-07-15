@@ -35,6 +35,13 @@ public class KeyMatchService extends FessAppService {
     @Resource
     protected KeyMatchBhv keyMatchBhv;
 
+    /**
+     * Default constructor.
+     */
+    public KeyMatchService() {
+        // Default constructor
+    }
+
     @Resource
     protected FessConfig fessConfig;
 
