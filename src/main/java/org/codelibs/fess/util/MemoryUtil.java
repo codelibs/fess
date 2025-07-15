@@ -31,10 +31,18 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Utility class for memory operations and size calculations.
+ */
 public final class MemoryUtil {
     private MemoryUtil() {
     }
 
+    /**
+     * Gets a formatted memory usage log string.
+     *
+     * @return formatted memory usage information
+     */
     public static String getMemoryUsageLog() {
         final Runtime runtime = Runtime.getRuntime();
         final long freeBytes = runtime.freeMemory();
@@ -45,6 +53,12 @@ public final class MemoryUtil {
                 + byteCountToDisplaySize(maxBytes) + "}";
     }
 
+    /**
+     * Converts byte count to human-readable size format.
+     *
+     * @param size the size in bytes
+     * @return formatted size string
+     */
     public static String byteCountToDisplaySize(final long size) {
         return byteCountToDisplaySize(BigInteger.valueOf(size));
     }
@@ -71,6 +85,11 @@ public final class MemoryUtil {
         return displaySize;
     }
 
+    /**
+     * Gets the currently used memory in bytes.
+     *
+     * @return used memory in bytes
+     */
     public static long getUsedMemory() {
         final Runtime runtime = Runtime.getRuntime();
         final long freeBytes = runtime.freeMemory();
@@ -78,6 +97,12 @@ public final class MemoryUtil {
         return totalBytes - freeBytes;
     }
 
+    /**
+     * Estimates the size of an object in bytes.
+     *
+     * @param obj the object to calculate size for
+     * @return estimated size in bytes
+     */
     public static long sizeOf(final Object obj) {
         if (obj == null) {
             return 0L;

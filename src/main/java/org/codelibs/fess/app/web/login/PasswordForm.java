@@ -17,16 +17,32 @@ package org.codelibs.fess.app.web.login;
 
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Form for password change.
+ */
 public class PasswordForm {
 
+    /**
+     * Default constructor.
+     */
+    public PasswordForm() {
+        // Default constructor
+    }
+
+    /** The username. */
     public String username;
 
+    /** The password. */
     @NotBlank
     public String password;
 
+    /** The confirm password. */
     @NotBlank
     public String confirmPassword;
 
+    /**
+     * Clears security information.
+     */
     public void clearSecurityInfo() {
         password = null;
         confirmPassword = null;

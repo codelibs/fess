@@ -26,18 +26,40 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.CaseFormat;
 
+/**
+ * Parameter map that converts between camelCase and snake_case.
+ *
+ * @param <K> the key type
+ * @param <V> the value type
+ */
 public class ParamMap<K, V> implements Map<K, V> {
 
     private final Map<K, V> parent;
 
+    /**
+     * Creates a new parameter map.
+     *
+     * @param parent the parent map
+     */
     public ParamMap(final Map<K, V> parent) {
         this.parent = parent;
     }
 
+    /**
+     * Gets the parent map.
+     *
+     * @return the parent map
+     */
     public Map<K, V> getParent() {
         return parent;
     }
 
+    /**
+     * Converts a key to camelCase.
+     *
+     * @param key the key to convert
+     * @return the converted key
+     */
     protected Object toCamelCase(final Object key) {
         if (key == null) {
             return key;

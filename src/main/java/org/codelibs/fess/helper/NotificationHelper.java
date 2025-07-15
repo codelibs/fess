@@ -29,16 +29,40 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.CardView;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 
+/**
+ * Helper class for sending notifications to various platforms.
+ */
 public class NotificationHelper {
+
+    /**
+     * Default constructor.
+     */
+    public NotificationHelper() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(NotificationHelper.class);
 
+    /** Line feed character for message formatting. */
     protected static final char LF = '\n';
 
+    /**
+     * Sends notifications to configured platforms.
+     *
+     * @param cardView the card view for the notification
+     * @param discloser the mail posting discloser
+     */
     public void send(final CardView cardView, final SMailPostingDiscloser discloser) {
         sendToSlack(cardView, discloser);
         sendToGoogleChat(cardView, discloser);
     }
 
+    /**
+     * Sends a notification to Slack.
+     *
+     * @param cardView the card view for the notification
+     * @param discloser the mail posting discloser
+     */
     protected void sendToSlack(final CardView cardView, final SMailPostingDiscloser discloser) {
         // https://api.slack.com/messaging/webhooks#posting_with_webhooks
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -63,6 +87,12 @@ public class NotificationHelper {
         }));
     }
 
+    /**
+     * Converts the discloser to a Slack message format.
+     *
+     * @param discloser the mail posting discloser
+     * @return the formatted Slack message
+     */
     protected String toSlackMessage(final SMailPostingDiscloser discloser) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("{\"text\":\"");
@@ -74,6 +104,12 @@ public class NotificationHelper {
         return buf.toString();
     }
 
+    /**
+     * Sends a notification to Google Chat.
+     *
+     * @param cardView the card view for the notification
+     * @param discloser the mail posting discloser
+     */
     protected void sendToGoogleChat(final CardView cardView, final SMailPostingDiscloser discloser) {
         // https://developers.google.com/hangouts/chat/how-tos/webhooks
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -98,6 +134,12 @@ public class NotificationHelper {
         }));
     }
 
+    /**
+     * Converts the discloser to a Google Chat message format.
+     *
+     * @param discloser the mail posting discloser
+     * @return the formatted Google Chat message
+     */
     protected String toGoogleChatMessage(final SMailPostingDiscloser discloser) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("{\"text\":\"");

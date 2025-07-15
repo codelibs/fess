@@ -19,6 +19,15 @@ import java.util.Map;
 
 import org.opensearch.search.rescore.RescorerBuilder;
 
+/**
+ * Interface for query rescoring implementations.
+ */
 public interface QueryRescorer {
+    /**
+     * Evaluates the rescorer with the given parameters.
+     *
+     * @param params the parameters for rescoring
+     * @return the rescorer builder
+     */
     RescorerBuilder<?> evaluate(final Map<String, Object> params);
 }

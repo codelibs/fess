@@ -24,7 +24,17 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.search.rescore.QueryRescorerBuilder;
 import org.opensearch.search.rescore.RescorerBuilder;
 
+/**
+ * Learning to Rank query rescorer implementation.
+ */
 public class LtrQueryRescorer implements QueryRescorer {
+
+    /**
+     * Default constructor.
+     */
+    public LtrQueryRescorer() {
+        // Default constructor
+    }
 
     @Override
     public RescorerBuilder<?> evaluate(final Map<String, Object> params) {

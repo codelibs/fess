@@ -32,20 +32,33 @@ import jakarta.annotation.PostConstruct;
 
 /**
  * Helper class for Open Search Description Document.
- *
- *
  */
 public class OsddHelper {
+
+    /**
+     * Default constructor.
+     */
+    public OsddHelper() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(OsddHelper.class);
 
+    /** The OSDD file path. */
     protected String osddPath;
 
+    /** The encoding for OSDD file. */
     protected String encoding = Constants.UTF_8;
 
+    /** The content type for OSDD response. */
     protected String contentType = "text/xml"; // "application/opensearchdescription+xml"
 
+    /** The OSDD file. */
     protected File osddFile;
 
+    /**
+     * Initializes the OSDD helper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -54,6 +67,11 @@ public class OsddHelper {
         osddFile = getOsddFile();
     }
 
+    /**
+     * Gets the OSDD file.
+     *
+     * @return the OSDD file
+     */
     protected File getOsddFile() {
         if (!isOsddLinkEnabled()) {
             logger.debug("OSDD is disabled.");
@@ -76,6 +94,11 @@ public class OsddHelper {
         return osddFile;
     }
 
+    /**
+     * Checks if OSDD link is enabled.
+     *
+     * @return true if OSDD link is enabled
+     */
     protected boolean isOsddLinkEnabled() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String osddLinkEnabled = fessConfig.getOsddLinkEnabled();
@@ -91,10 +114,20 @@ public class OsddHelper {
         return StringUtil.isBlank(ssoType) || Constants.NONE.equalsIgnoreCase(ssoType);
     }
 
+    /**
+     * Checks if the OpenSearch file exists.
+     *
+     * @return true if the OpenSearch file exists
+     */
     public boolean hasOpenSearchFile() {
         return osddFile != null;
     }
 
+    /**
+     * Returns the OSDD as a stream response.
+     *
+     * @return the stream response
+     */
     public StreamResponse asStream() {
         if (osddFile == null) {
             throw ComponentUtil.getResponseManager().new404("Unsupported Open Search Description Document response.");
@@ -107,14 +140,29 @@ public class OsddHelper {
         });
     }
 
+    /**
+     * Sets the OSDD path.
+     *
+     * @param osddPath the OSDD path
+     */
     public void setOsddPath(final String osddPath) {
         this.osddPath = osddPath;
     }
 
+    /**
+     * Sets the encoding.
+     *
+     * @param encoding the encoding
+     */
     public void setEncoding(final String encoding) {
         this.encoding = encoding;
     }
 
+    /**
+     * Sets the content type.
+     *
+     * @param contentType the content type
+     */
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }

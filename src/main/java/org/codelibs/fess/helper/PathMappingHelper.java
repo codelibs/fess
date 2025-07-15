@@ -36,18 +36,35 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for path mapping configuration.
+ */
 public class PathMappingHelper extends AbstractConfigHelper {
+
+    /**
+     * Default constructor.
+     */
+    public PathMappingHelper() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(PathMappingHelper.class);
 
+    /** Function matcher for encode URL. */
     protected static final String FUNCTION_ENCODEURL_MATCHER = "function:encodeUrl";
 
+    /** Groovy matcher prefix. */
     protected static final String GROOVY_MATCHER = "groovy:";
 
+    /** Map of path mappings by process type. */
     protected final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
 
+    /** Cached list of path mappings. */
     protected volatile List<PathMapping> cachedPathMappingList = null;
 
+    /**
+     * Initializes the path mapping helper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -84,6 +101,11 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return 0;
     }
 
+    /**
+     * Gets the list of process types.
+     *
+     * @return the list of process types
+     */
     protected List<String> getProcessTypeList() {
         final List<String> ptList = new ArrayList<>();
         final String executeType = System.getProperty("lasta.env");
@@ -96,6 +118,12 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return ptList;
     }
 
+    /**
+     * Sets the path mapping list for a session.
+     *
+     * @param sessionId the session ID
+     * @param pathMappingList the path mapping list
+     */
     public void setPathMappingList(final String sessionId, final List<PathMapping> pathMappingList) {
         if (sessionId != null) {
             if (pathMappingList != null) {
@@ -106,10 +134,21 @@ public class PathMappingHelper extends AbstractConfigHelper {
         }
     }
 
+    /**
+     * Removes the path mapping list for a session.
+     *
+     * @param sessionId the session ID
+     */
     public void removePathMappingList(final String sessionId) {
         pathMappingMap.remove(sessionId);
     }
 
+    /**
+     * Gets the path mapping list for a session.
+     *
+     * @param sessionId the session ID
+     * @return the path mapping list
+     */
     public List<PathMapping> getPathMappingList(final String sessionId) {
         if (sessionId == null) {
             return null;
@@ -117,6 +156,13 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return pathMappingMap.get(sessionId);
     }
 
+    /**
+     * Replaces URL for crawling.
+     *
+     * @param sessionId the session ID
+     * @param url the URL to replace
+     * @return the replaced URL
+     */
     public String replaceUrl(final String sessionId, final String url) { // for crawling
         final List<PathMapping> pathMappingList = getPathMappingList(sessionId);
         if (pathMappingList == null) {
@@ -125,6 +171,12 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return replaceUrl(pathMappingList, url);
     }
 
+    /**
+     * Replaces URLs in text.
+     *
+     * @param text the text containing URLs
+     * @return the text with replaced URLs
+     */
     public String replaceUrls(final String text) {
         if (cachedPathMappingList == null) {
             synchronized (this) {
@@ -146,6 +198,12 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return result;
     }
 
+    /**
+     * Replaces URL for display or URL converter.
+     *
+     * @param url the URL to replace
+     * @return the replaced URL
+     */
     public String replaceUrl(final String url) { // for display or url converer
         if (cachedPathMappingList == null) {
             synchronized (this) {
@@ -157,6 +215,13 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return replaceUrl(cachedPathMappingList, url);
     }
 
+    /**
+     * Creates a path matcher function for path mapping.
+     *
+     * @param matcher the regex matcher
+     * @param replacement the replacement string
+     * @return the path matcher function
+     */
     public BiFunction<String, Matcher, String> createPathMatcher(final Matcher matcher, final String replacement) { // for PathMapping
         if (FUNCTION_ENCODEURL_MATCHER.equals(replacement)) {
             return (u, m) -> DocumentUtil.encodeUrl(u);
@@ -178,6 +243,13 @@ public class PathMappingHelper extends AbstractConfigHelper {
         };
     }
 
+    /**
+     * Replaces URL using the given path mapping list.
+     *
+     * @param pathMappingList the path mapping list
+     * @param url the URL to replace
+     * @return the replaced URL
+     */
     protected String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
@@ -191,6 +263,12 @@ public class PathMappingHelper extends AbstractConfigHelper {
         return newUrl;
     }
 
+    /**
+     * Checks if the user agent matches the path mapping.
+     *
+     * @param pathMapping the path mapping
+     * @return true if the user agent matches
+     */
     protected boolean matchUserAgent(final PathMapping pathMapping) {
         if (!pathMapping.hasUAMathcer()) {
             return true;

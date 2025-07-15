@@ -57,7 +57,17 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * OpenID Connect authenticator for SSO integration.
+ */
 public class OpenIdConnectAuthenticator implements SsoAuthenticator {
+
+    /**
+     * Default constructor.
+     */
+    public OpenIdConnectAuthenticator() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(OpenIdConnectAuthenticator.class);
 
@@ -65,24 +75,36 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     private static final BaseEncoding BASE64URL_DECODER = BaseEncoding.base64Url().withSeparator("\n", 64);
 
+    /** Configuration key for OpenID Connect authorization server URL. */
     protected static final String OIC_AUTH_SERVER_URL = "oic.auth.server.url";
 
+    /** Configuration key for OpenID Connect client ID. */
     protected static final String OIC_CLIENT_ID = "oic.client.id";
 
+    /** Configuration key for OpenID Connect scope. */
     protected static final String OIC_SCOPE = "oic.scope";
 
+    /** Configuration key for OpenID Connect redirect URL. */
     protected static final String OIC_REDIRECT_URL = "oic.redirect.url";
 
+    /** Configuration key for OpenID Connect token server URL. */
     protected static final String OIC_TOKEN_SERVER_URL = "oic.token.server.url";
 
+    /** Configuration key for OpenID Connect client secret. */
     protected static final String OIC_CLIENT_SECRET = "oic.client.secret";
 
+    /** Session key for OpenID Connect state parameter. */
     protected static final String OIC_STATE = "OIC_STATE";
 
+    /** HTTP transport for OpenID Connect requests. */
     protected final HttpTransport httpTransport = new NetHttpTransport();
 
+    /** JSON factory for OpenID Connect response parsing. */
     protected final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
+    /**
+     * Initializes the OpenID Connect authenticator.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -117,6 +139,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         }).orElse(null);
     }
 
+    /**
+     * Gets the authorization URL for OpenID Connect.
+     *
+     * @param request the HTTP servlet request
+     * @return the authorization URL
+     */
     protected String getAuthUrl(final HttpServletRequest request) {
         final String state = UuidUtil.create();
         request.getSession().setAttribute(OIC_STATE, state);
@@ -128,6 +156,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 .build();
     }
 
+    /**
+     * Decodes a Base64 string to bytes.
+     *
+     * @param base64String the Base64 string to decode
+     * @return the decoded bytes, or null if input is null
+     */
     protected byte[] decodeBase64(String base64String) {
         if (base64String == null) {
             return null;
@@ -142,6 +176,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         }
     }
 
+    /**
+     * Processes the callback from OpenID Connect provider.
+     *
+     * @param request the HTTP servlet request
+     * @param code the authorization code
+     * @return the login credential
+     */
     protected LoginCredential processCallback(final HttpServletRequest request, final String code) {
         try {
             final TokenResponse tr = getTokenUrl(code);
@@ -182,6 +223,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         return null;
     }
 
+    /**
+     * Parses the JWT claim and extracts attributes.
+     *
+     * @param jwtClaim the JWT claim string
+     * @param attributes the attributes map to populate
+     * @throws IOException if an I/O error occurs
+     */
     protected void parseJwtClaim(final String jwtClaim, final Map<String, Object> attributes) throws IOException {
         try (final JsonParser jsonParser = jsonFactory.createJsonParser(jwtClaim)) {
             while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
@@ -204,6 +252,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         }
     }
 
+    /**
+     * Parses primitive values from JSON parser.
+     *
+     * @param jsonParser the JSON parser
+     * @return the parsed primitive value
+     * @throws IOException if an I/O error occurs
+     */
     protected Object parsePrimitive(final JsonParser jsonParser) throws IOException {
         final JsonToken token = jsonParser.getCurrentToken();
         return switch (token) {
@@ -217,6 +272,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         };
     }
 
+    /**
+     * Parses array values from JSON parser.
+     *
+     * @param jsonParser the JSON parser
+     * @return the parsed array as a list
+     * @throws IOException if an I/O error occurs
+     */
     protected Object parseArray(final JsonParser jsonParser) throws IOException {
         final List<Object> list = new ArrayList<>();
         while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
@@ -232,6 +294,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         return list;
     }
 
+    /**
+     * Parses object values from JSON parser.
+     *
+     * @param jsonParser the JSON parser
+     * @return the parsed object as a map
+     * @throws IOException if an I/O error occurs
+     */
     protected Map<String, Object> parseObject(final JsonParser jsonParser) throws IOException {
         final Map<String, Object> nestedMap = new HashMap<>();
         while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
@@ -251,6 +320,13 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
         return nestedMap;
     }
 
+    /**
+     * Gets the token response from the OpenID Connect provider.
+     *
+     * @param code the authorization code
+     * @return the token response
+     * @throws IOException if an I/O error occurs
+     */
     protected TokenResponse getTokenUrl(final String code) throws IOException {
         return new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
                 .setGrantType("authorization_code")//
@@ -260,26 +336,56 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 .execute();
     }
 
+    /**
+     * Gets the OpenID Connect client secret.
+     *
+     * @return the client secret
+     */
     protected String getOicClientSecret() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_CLIENT_SECRET, StringUtil.EMPTY);
     }
 
+    /**
+     * Gets the OpenID Connect token server URL.
+     *
+     * @return the token server URL
+     */
     protected String getOicTokenServerUrl() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_TOKEN_SERVER_URL, "https://accounts.google.com/o/oauth2/token");
     }
 
+    /**
+     * Gets the OpenID Connect redirect URL.
+     *
+     * @return the redirect URL
+     */
     protected String getOicRedirectUrl() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL, "http://localhost:8080/sso/");
     }
 
+    /**
+     * Gets the OpenID Connect scope.
+     *
+     * @return the scope
+     */
     protected String getOicScope() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_SCOPE, StringUtil.EMPTY);
     }
 
+    /**
+     * Gets the OpenID Connect client ID.
+     *
+     * @return the client ID
+     */
     protected String getOicClientId() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_CLIENT_ID, StringUtil.EMPTY);
     }
 
+    /**
+     * Gets the OpenID Connect authorization server URL.
+     *
+     * @return the authorization server URL
+     */
     protected String getOicAuthServerUrl() {
         return ComponentUtil.getSystemProperties().getProperty(OIC_AUTH_SERVER_URL, "https://accounts.google.com/o/oauth2/auth");
     }

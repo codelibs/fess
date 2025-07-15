@@ -28,8 +28,26 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Abstract base class for monitor targets that implement timeout functionality.
+ */
 public abstract class MonitorTarget implements TimeoutTarget {
 
+    /**
+     * Default constructor.
+     */
+    public MonitorTarget() {
+        // Default constructor
+    }
+
+    /**
+     * Appends a key-value pair to the buffer in JSON format.
+     *
+     * @param buf the string buffer to append to
+     * @param key the key name
+     * @param supplier the value supplier
+     * @return the updated buffer
+     */
     protected StringBuilder append(final StringBuilder buf, final String key, final Supplier<Object> supplier) {
         final StringBuilder tempBuf = new StringBuilder();
         tempBuf.append('"').append(key).append("\":");
@@ -53,12 +71,25 @@ public abstract class MonitorTarget implements TimeoutTarget {
         return buf;
     }
 
+    /**
+     * Appends a timestamp to the buffer.
+     *
+     * @param buf the string buffer to append to
+     * @return the updated buffer
+     */
     protected StringBuilder appendTimestamp(final StringBuilder buf) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         append(buf, "timestamp", () -> FessFunctions.formatDate(systemHelper.getCurrentTime()));
         return buf;
     }
 
+    /**
+     * Appends exception information to the buffer.
+     *
+     * @param buf the string buffer to append to
+     * @param exception the exception to append
+     * @return the updated buffer
+     */
     protected StringBuilder appendException(final StringBuilder buf, final Exception exception) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 PrintWriter writer = new PrintWriter(baos, false, Constants.CHARSET_UTF_8)) {

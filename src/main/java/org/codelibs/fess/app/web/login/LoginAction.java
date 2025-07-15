@@ -40,6 +40,13 @@ import jakarta.servlet.http.HttpSession;
  */
 public class LoginAction extends FessLoginAction {
 
+    /**
+     * Default constructor.
+     */
+    public LoginAction() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(LoginAction.class);
 
     private static final String INVALID_OLD_PASSWORD = "LoginAction.invalidOldPassword";
@@ -54,6 +61,11 @@ public class LoginAction extends FessLoginAction {
     //                                                                       Login Execute
     //                                                                      ==============
 
+    /**
+     * Displays the login page.
+     *
+     * @return the HTML response for the login page
+     */
     @Execute
     public HtmlResponse index() {
         getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));
@@ -70,6 +82,12 @@ public class LoginAction extends FessLoginAction {
         });
     }
 
+    /**
+     * Handles user login with the provided credentials.
+     *
+     * @param form the login form containing username and password
+     * @return the HTML response after login attempt
+     */
     @Execute
     public HtmlResponse login(final LoginForm form) {
         validate(form, messages -> {}, () -> asIndexPage(form));
@@ -98,6 +116,12 @@ public class LoginAction extends FessLoginAction {
         return redirect(getClass());
     }
 
+    /**
+     * Handles password change for the current user.
+     *
+     * @param form the password form containing new password and confirmation
+     * @return the HTML response after password change attempt
+     */
     @Execute
     public HtmlResponse changePassword(final PasswordForm form) {
         final VaErrorHook toIndexPage = () -> {

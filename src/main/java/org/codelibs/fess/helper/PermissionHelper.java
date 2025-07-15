@@ -40,22 +40,49 @@ import org.codelibs.fess.util.ComponentUtil;
 import jakarta.annotation.Resource;
 import jcifs.SID;
 
+/**
+ * Helper class for handling permission-related operations in Fess.
+ * Provides functionality to encode/decode permission strings and extract
+ * role type information from various file system protocols (SMB, file, FTP).
+ */
 public class PermissionHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(PermissionHelper.class);
 
+    /** Prefix used to identify role-based permissions */
     protected String rolePrefix = "{role}";
 
+    /** Prefix used to identify group-based permissions */
     protected String groupPrefix = "{group}";
 
+    /** Prefix used to identify user-based permissions */
     protected String userPrefix = "{user}";
 
+    /** Prefix used to identify allow permissions */
     protected String allowPrefix = "(allow)";
 
+    /** Prefix used to identify deny permissions */
     protected String denyPrefix = "(deny)";
 
+    /** System helper for user/group/role search operations */
     @Resource
     protected SystemHelper systemHelper;
 
+    /**
+     * Default constructor for PermissionHelper.
+     * Initializes the permission helper with default configuration.
+     */
+    public PermissionHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Encodes a permission string into a search role format.
+     * Processes user, group, and role prefixes along with allow/deny prefixes.
+     *
+     * @param value the permission string to encode
+     * @return the encoded permission string, or null if the input is blank or invalid
+     */
     public String encode(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
@@ -99,6 +126,13 @@ public class PermissionHelper {
         return permission;
     }
 
+    /**
+     * Decodes a search role format string back to a permission string.
+     * Reverses the encoding process to restore original permission format.
+     *
+     * @param value the encoded permission string to decode
+     * @return the decoded permission string, or null if the input is blank or invalid
+     */
     public String decode(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
@@ -133,18 +167,40 @@ public class PermissionHelper {
         return permission;
     }
 
+    /**
+     * Sets the prefix used to identify role-based permissions.
+     *
+     * @param rolePrefix the role prefix to set
+     */
     public void setRolePrefix(final String rolePrefix) {
         this.rolePrefix = rolePrefix;
     }
 
+    /**
+     * Sets the prefix used to identify group-based permissions.
+     *
+     * @param groupPrefix the group prefix to set
+     */
     public void setGroupPrefix(final String groupPrefix) {
         this.groupPrefix = groupPrefix;
     }
 
+    /**
+     * Sets the prefix used to identify user-based permissions.
+     *
+     * @param userPrefix the user prefix to set
+     */
     public void setUserPrefix(final String userPrefix) {
         this.userPrefix = userPrefix;
     }
 
+    /**
+     * Extracts role type information from SMB (Server Message Block) response data.
+     * Processes both SMB and SMB1 protocols to extract allowed and denied SIDs.
+     *
+     * @param responseData the response data containing SMB metadata
+     * @return a list of role type strings extracted from the SMB permissions
+     */
     public List<String> getSmbRoleTypeList(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -202,6 +258,13 @@ public class PermissionHelper {
         return roleTypeList;
     }
 
+    /**
+     * Extracts role type information from file system response data.
+     * Processes ACL (Access Control List) or POSIX file attributes to extract user and group information.
+     *
+     * @param responseData the response data containing file system metadata
+     * @return a list of role type strings extracted from the file permissions
+     */
     public List<String> getFileRoleTypeList(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -248,6 +311,13 @@ public class PermissionHelper {
         return roleTypeList;
     }
 
+    /**
+     * Extracts role type information from FTP (File Transfer Protocol) response data.
+     * Processes FTP metadata to extract file owner and group information.
+     *
+     * @param responseData the response data containing FTP metadata
+     * @return a list of role type strings extracted from the FTP file permissions
+     */
     public List<String> getFtpRoleTypeList(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -267,10 +337,20 @@ public class PermissionHelper {
         return roleTypeList;
     }
 
+    /**
+     * Sets the prefix used to identify allow permissions.
+     *
+     * @param allowPrefix the allow prefix to set
+     */
     public void setAllowPrefix(final String allowPrefix) {
         this.allowPrefix = allowPrefix;
     }
 
+    /**
+     * Sets the prefix used to identify deny permissions.
+     *
+     * @param denyPrefix the deny prefix to set
+     */
     public void setDenyPrefix(final String denyPrefix) {
         this.denyPrefix = denyPrefix;
     }

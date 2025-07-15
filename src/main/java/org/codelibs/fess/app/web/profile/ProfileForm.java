@@ -19,17 +19,33 @@ package org.codelibs.fess.app.web.profile;
 
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Form for user profile operations.
+ */
 public class ProfileForm {
 
+    /**
+     * Default constructor.
+     */
+    public ProfileForm() {
+        // Default constructor
+    }
+
+    /** The old password. */
     @NotBlank
     public String oldPassword;
 
+    /** The new password. */
     @NotBlank
     public String newPassword;
 
+    /** The confirm new password. */
     @NotBlank
     public String confirmNewPassword;
 
+    /**
+     * Clears security information.
+     */
     public void clearSecurityInfo() {
         oldPassword = null;
         newPassword = null;

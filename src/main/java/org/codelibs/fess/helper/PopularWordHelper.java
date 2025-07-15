@@ -37,15 +37,35 @@ import com.google.common.cache.CacheBuilder;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing popular words and suggestions.
+ * Provides functionality to retrieve popular words based on search parameters
+ * and manages caching for improved performance.
+ */
 public class PopularWordHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(PopularWordHelper.class);
 
+    /** Character used to separate cache key components */
     protected static final char CACHE_KEY_SPLITTER = '\n';
 
+    /** Cache for storing popular word lists */
     protected Cache<String, List<String>> cache;
 
+    /** Fess configuration instance */
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor.
+     */
+    public PopularWordHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the PopularWordHelper after dependency injection.
+     * Sets up the cache with configured size and expiration settings.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -56,6 +76,18 @@ public class PopularWordHelper {
                 .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES).build();
     }
 
+    /**
+     * Retrieves a list of popular words based on the specified search parameters.
+     * Uses caching to improve performance for repeated requests.
+     *
+     * @param searchRequestType the type of search request
+     * @param seed the seed value for popular word generation
+     * @param tags array of tags to filter results
+     * @param roles array of roles to filter results
+     * @param fields array of fields to search in
+     * @param excludes array of words to exclude from results
+     * @return list of popular words matching the criteria
+     */
     public List<String> getWordList(final SearchRequestType searchRequestType, final String seed, final String[] tags, final String[] roles,
             final String[] fields, final String[] excludes) {
         final String baseSeed = seed != null ? seed : fessConfig.getSuggestPopularWordSeed();
@@ -92,10 +124,23 @@ public class PopularWordHelper {
         return Collections.emptyList();
     }
 
+    /**
+     * Clears all cached popular word lists.
+     */
     public void clearCache() {
         cache.invalidateAll();
     }
 
+    /**
+     * Generates a cache key based on the provided parameters.
+     *
+     * @param seed the seed value
+     * @param tags array of tags
+     * @param roles array of roles
+     * @param fields array of fields
+     * @param excludes array of excluded words
+     * @return cache key string
+     */
     protected String getCacheKey(final String seed, final String[] tags, final String[] roles, final String[] fields,
             final String[] excludes) {
         final StringBuilder buf = new StringBuilder(100);

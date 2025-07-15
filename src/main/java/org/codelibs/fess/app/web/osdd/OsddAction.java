@@ -19,7 +19,17 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 
+/**
+ * OSDD (OpenSearch Description Document) action.
+ */
 public class OsddAction extends FessSearchAction {
+
+    /**
+     * Default constructor.
+     */
+    public OsddAction() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -37,6 +47,11 @@ public class OsddAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Returns the OSDD document.
+     *
+     * @return the OSDD document as a stream response
+     */
     @Execute
     public ActionResponse index() {
         if (isLoginRequired()) {

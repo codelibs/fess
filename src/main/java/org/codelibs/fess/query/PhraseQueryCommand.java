@@ -30,7 +30,18 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 
+/**
+ * Query command for phrase queries.
+ */
 public class PhraseQueryCommand extends QueryCommand {
+
+    /**
+     * Default constructor.
+     */
+    public PhraseQueryCommand() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(PhraseQueryCommand.class);
 
     @Override
@@ -50,6 +61,14 @@ public class PhraseQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a phrase query to a query builder.
+     *
+     * @param context the query context
+     * @param phraseQuery the phrase query
+     * @param boost the boost factor
+     * @return the query builder
+     */
     protected QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery phraseQuery, final float boost) {
         final Term[] terms = phraseQuery.getTerms();
         if (terms.length == 0) {
@@ -63,6 +82,17 @@ public class PhraseQueryCommand extends QueryCommand {
         return convertPhraseQuery(fessConfig, context, phraseQuery, boost, field, texts);
     }
 
+    /**
+     * Converts a phrase query to a query builder with specified field and texts.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param phraseQuery the phrase query
+     * @param boost the boost factor
+     * @param field the field name
+     * @param texts the query texts
+     * @return the query builder
+     */
     protected QueryBuilder convertPhraseQuery(final FessConfig fessConfig, final QueryContext context, final PhraseQuery phraseQuery,
             final float boost, final String field, final String[] texts) {
         final String text = String.join(" ", texts);

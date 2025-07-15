@@ -32,14 +32,32 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service for path mapping operations.
+ */
 public class PathMappingService extends FessAppService {
 
+    /**
+     * Default constructor.
+     */
+    public PathMappingService() {
+        // Default constructor
+    }
+
+    /** Path mapping behavior. */
     @Resource
     protected PathMappingBhv pathMappingBhv;
 
+    /** Fess configuration. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets the path mapping list with paging.
+     *
+     * @param pathMappingPager the path mapping pager
+     * @return the path mapping list
+     */
     public List<PathMapping> getPathMappingList(final PathMapPager pathMappingPager) {
 
         final PagingResultBean<PathMapping> pathMappingList = pathMappingBhv.selectPage(cb -> {
@@ -56,10 +74,21 @@ public class PathMappingService extends FessAppService {
         return pathMappingList;
     }
 
+    /**
+     * Gets a path mapping by ID.
+     *
+     * @param id the path mapping ID
+     * @return the path mapping
+     */
     public OptionalEntity<PathMapping> getPathMapping(final String id) {
         return pathMappingBhv.selectByPK(id);
     }
 
+    /**
+     * Stores a path mapping.
+     *
+     * @param pathMapping the path mapping to store
+     */
     public void store(final PathMapping pathMapping) {
 
         pathMappingBhv.insertOrUpdate(pathMapping, op -> {
@@ -69,6 +98,11 @@ public class PathMappingService extends FessAppService {
         ComponentUtil.getPathMappingHelper().init();
     }
 
+    /**
+     * Deletes a path mapping.
+     *
+     * @param pathMapping the path mapping to delete
+     */
     public void delete(final PathMapping pathMapping) {
 
         pathMappingBhv.delete(pathMapping, op -> {
@@ -78,6 +112,12 @@ public class PathMappingService extends FessAppService {
         ComponentUtil.getPathMappingHelper().init();
     }
 
+    /**
+     * Gets the path mapping list by process types.
+     *
+     * @param processTypeList the process type list
+     * @return the path mapping list
+     */
     public List<PathMapping> getPathMappingList(final Collection<String> processTypeList) {
 
         return pathMappingBhv.selectList(cb -> {
@@ -87,6 +127,12 @@ public class PathMappingService extends FessAppService {
         });
     }
 
+    /**
+     * Sets up list condition for path mapping search.
+     *
+     * @param cb the condition bean
+     * @param pathMappingPager the path mapping pager
+     */
     protected void setupListCondition(final PathMappingCB cb, final PathMapPager pathMappingPager) {
         if (StringUtil.isNotBlank(pathMappingPager.regex)) {
             cb.query().setRegex_Wildcard(wrapQuery(pathMappingPager.regex));

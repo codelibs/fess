@@ -30,9 +30,21 @@ import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Query command for prefix queries.
+ */
 public class PrefixQueryCommand extends QueryCommand {
+
+    /**
+     * Default constructor.
+     */
+    public PrefixQueryCommand() {
+        // Default constructor
+    }
+
     private static final Logger logger = LogManager.getLogger(PrefixQueryCommand.class);
 
+    /** Flag to convert wildcard to lowercase. */
     protected boolean lowercaseWildcard = true;
 
     @Override
@@ -52,6 +64,14 @@ public class PrefixQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a prefix query to a query builder.
+     *
+     * @param context the query context
+     * @param prefixQuery the prefix query
+     * @param boost the boost factor
+     * @return the query builder
+     */
     protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), prefixQuery.getField());
@@ -84,6 +104,12 @@ public class PrefixQueryCommand extends QueryCommand {
                 .maxExpansions(fessConfig.getQueryPrefixExpansionsAsInteger()).slop(fessConfig.getQueryPrefixSlopAsInteger());
     }
 
+    /**
+     * Converts value to lowercase if lowercase wildcard is enabled.
+     *
+     * @param value the value to convert
+     * @return the converted value
+     */
     protected String toLowercaseWildcard(final String value) {
         if (lowercaseWildcard) {
             return value.toLowerCase(Locale.ROOT);
@@ -91,6 +117,11 @@ public class PrefixQueryCommand extends QueryCommand {
         return value;
     }
 
+    /**
+     * Sets the lowercase wildcard flag.
+     *
+     * @param lowercaseWildcard the lowercase wildcard flag
+     */
     public void setLowercaseWildcard(final boolean lowercaseWildcard) {
         this.lowercaseWildcard = lowercaseWildcard;
     }

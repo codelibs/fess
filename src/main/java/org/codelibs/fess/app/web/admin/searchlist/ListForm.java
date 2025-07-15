@@ -35,18 +35,28 @@ import jakarta.validation.constraints.Size;
 
 /**
  * The list form for Search List.
- *
  */
 public class ListForm extends SearchRequestParams {
 
+    /**
+     * Default constructor.
+     */
+    public ListForm() {
+        // Default constructor
+    }
+
+    /** The search query string. */
     @Size(max = 1000)
     public String q;
 
+    /** The sort field and direction. */
     public String sort;
 
+    /** The start position for search results. */
     @ValidateTypeFailure
     public Integer start;
 
+    /** The offset for pagination. */
     @ValidateTypeFailure
     public Integer offset;
 
@@ -146,6 +156,9 @@ public class ListForm extends SearchRequestParams {
         return sort;
     }
 
+    /**
+     * Initializes the form with default values from configuration.
+     */
     public void initialize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (start == null) {

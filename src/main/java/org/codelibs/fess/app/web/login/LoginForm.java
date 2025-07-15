@@ -22,6 +22,13 @@ import jakarta.validation.constraints.NotBlank;
  */
 public class LoginForm {
 
+    /**
+     * Default constructor.
+     */
+    public LoginForm() {
+        // Default constructor
+    }
+
     /** The username. */
     @NotBlank
     public String username;
