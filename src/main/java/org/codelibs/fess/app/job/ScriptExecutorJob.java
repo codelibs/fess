@@ -31,7 +31,17 @@ import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRuntime;
 import org.lastaflute.job.key.LaJobUnique;
 
+/**
+ * This job executes a script.
+ */
 public class ScriptExecutorJob implements LaJob {
+    /**
+     * Constructor.
+     */
+    public ScriptExecutorJob() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(ScriptExecutorJob.class);
 
     @Override
@@ -45,6 +55,10 @@ public class ScriptExecutorJob implements LaJob {
         }
     }
 
+    /**
+     * Processes the job.
+     * @param runtime The job runtime.
+     */
     protected void process(final LaJobRuntime runtime) {
         if (!runtime.getParameterMap().containsKey(Constants.SCHEDULED_JOB)) {
             logger.warn("{} is empty.", Constants.SCHEDULED_JOB);

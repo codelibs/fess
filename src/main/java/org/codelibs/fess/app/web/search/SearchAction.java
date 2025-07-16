@@ -47,6 +47,9 @@ import org.lastaflute.web.util.LaRequestUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * The action for search operations.
+ */
 public class SearchAction extends FessSearchAction {
 
     // ===================================================================================
@@ -58,9 +61,15 @@ public class SearchAction extends FessSearchAction {
     //                                                                           Attribute
     //
 
+    /**
+     * The helper for related content.
+     */
     @Resource
     protected RelatedContentHelper relatedContentHelper;
 
+    /**
+     * The helper for related queries.
+     */
     @Resource
     protected RelatedQueryHelper relatedQueryHelper;
 
@@ -71,11 +80,21 @@ public class SearchAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * The index page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse index(final SearchForm form) {
         return search(form);
     }
 
+    /**
+     * The advance search page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse advance(final SearchForm form) {
         if (isLoginRequired()) {
@@ -98,6 +117,11 @@ public class SearchAction extends FessSearchAction {
         });
     }
 
+    /**
+     * The search page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse search(final SearchForm form) {
         if (viewHelper.isUseSession()) {
@@ -111,21 +135,41 @@ public class SearchAction extends FessSearchAction {
         return doSearch(form);
     }
 
+    /**
+     * The previous page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse prev(final SearchForm form) {
         return doMove(form, -1);
     }
 
+    /**
+     * The next page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse next(final SearchForm form) {
         return doMove(form, 1);
     }
 
+    /**
+     * The move page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     public HtmlResponse move(final SearchForm form) {
         return doMove(form, 0);
     }
 
+    /**
+     * Performs a search.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     protected HtmlResponse doSearch(final SearchForm form) {
         validate(form, messages -> {}, () -> asHtml(virtualHost(path_SearchJsp)));
         if (isLoginRequired()) {
@@ -185,6 +229,12 @@ public class SearchAction extends FessSearchAction {
         }
     }
 
+    /**
+     * Moves to a specific page.
+     * @param form The search form.
+     * @param move The number of pages to move.
+     * @return The HTML response.
+     */
     protected HtmlResponse doMove(final SearchForm form, final int move) {
         int start = fessConfig.getPagingSearchPageStartAsInteger();
         if (form.pn != null) {
@@ -202,6 +252,12 @@ public class SearchAction extends FessSearchAction {
         return doSearch(form);
     }
 
+    /**
+     * Gets the display query.
+     * @param form The search form.
+     * @param labelTypeItems The list of label type items.
+     * @return The display query.
+     */
     protected String getDisplayQuery(final SearchForm form, final List<Map<String, String>> labelTypeItems) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(form.q);
@@ -224,6 +280,10 @@ public class SearchAction extends FessSearchAction {
         return buf.toString();
     }
 
+    /**
+     * Creates a paging query.
+     * @param form The search form.
+     */
     protected void createPagingQuery(final SearchForm form) {
         final List<String> pagingQueryList = new ArrayList<>();
         if (form.ex_q != null) {
@@ -266,8 +326,15 @@ public class SearchAction extends FessSearchAction {
         request.setAttribute(Constants.PAGING_QUERY_LIST, pagingQueryList);
     }
 
+    /**
+     * The render data for the search page.
+     */
     protected static class WebRenderData extends SearchRenderData {
 
+        /**
+         * Registers the render data.
+         * @param data The render data.
+         */
         public void register(final RenderData data) {
             RenderDataUtil.register(data, "queryId", queryId);
             RenderDataUtil.register(data, "documentItems", documentItems);

@@ -51,34 +51,83 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class RoleQueryHelper {
 
+    /**
+     * Constructor.
+     */
+    public RoleQueryHelper() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(RoleQueryHelper.class);
 
+    /**
+     * The key for user roles in the request attribute.
+     */
     protected static final String USER_ROLES = "userRoles";
 
+    /**
+     * The cached cipher for encryption and decryption.
+     */
     protected CachedCipher cipher;
 
+    /**
+     * The separator for values in the role string.
+     */
     protected String valueSeparator = "\n";
 
+    /**
+     * The separator for roles in the role string.
+     */
     protected String roleSeparator = ",";
 
+    /**
+     * The key for the request parameter that contains role information.
+     */
     protected String parameterKey;
 
+    /**
+     * Whether the parameter value is encrypted.
+     */
     protected boolean encryptedParameterValue = true;
 
+    /**
+     * The key for the request header that contains role information.
+     */
     protected String headerKey;
 
+    /**
+     * Whether the header value is encrypted.
+     */
     protected boolean encryptedHeaderValue = true;
 
+    /**
+     * The key for the cookie that stores role information.
+     */
     protected String cookieKey;
 
+    /**
+     * Whether the cookie value is encrypted.
+     */
     protected boolean encryptedCookieValue = true;
 
+    /**
+     * The maximum age of the role information in seconds.
+     */
     protected long maxAge = 30 * 60; // sec
 
+    /**
+     * A map of cookie names to role names.
+     */
     protected Map<String, String> cookieNameMap;
 
+    /**
+     * A list of default roles.
+     */
     protected final List<String> defaultRoleList = new ArrayList<>();
 
+    /**
+     * Initializes the RoleQueryHelper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -89,6 +138,11 @@ public class RoleQueryHelper {
         }));
     }
 
+    /**
+     * Builds a set of roles from the request.
+     * @param searchRequestType The type of the search request.
+     * @return A set of roles.
+     */
     public Set<String> build(final SearchRequestType searchRequestType) {
         final Set<String> roleSet = new HashSet<>();
         final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
@@ -161,6 +215,13 @@ public class RoleQueryHelper {
         return roleSet;
     }
 
+    /**
+     * Processes the access token.
+     * @param request The HTTP request.
+     * @param roleSet The set of roles.
+     * @param isApiRequest Whether the request is an API request.
+     * @return true if the access token is processed, false otherwise.
+     */
     protected boolean processAccessToken(final HttpServletRequest request, final Set<String> roleSet, final boolean isApiRequest) {
         if (isApiRequest) {
             return ComponentUtil.getComponent(AccessTokenService.class).getPermissions(request).map(p -> {
@@ -171,6 +232,11 @@ public class RoleQueryHelper {
         return false;
     }
 
+    /**
+     * Processes the request parameter.
+     * @param request The HTTP request.
+     * @param roleSet The set of roles.
+     */
     protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
@@ -182,6 +248,11 @@ public class RoleQueryHelper {
 
     }
 
+    /**
+     * Processes the request header.
+     * @param request The HTTP request.
+     * @param roleSet The set of roles.
+     */
     protected void processHeader(final HttpServletRequest request, final Set<String> roleSet) {
 
         final String parameter = request.getHeader(headerKey);
@@ -194,6 +265,11 @@ public class RoleQueryHelper {
 
     }
 
+    /**
+     * Processes the cookie.
+     * @param request The HTTP request.
+     * @param roleSet The set of roles.
+     */
     protected void processCookie(final HttpServletRequest request, final Set<String> roleSet) {
 
         final Cookie[] cookies = request.getCookies();
@@ -213,6 +289,11 @@ public class RoleQueryHelper {
 
     }
 
+    /**
+     * Builds roles from the cookie name mapping.
+     * @param request The HTTP request.
+     * @param roleSet The set of roles.
+     */
     protected void buildByCookieNameMapping(final HttpServletRequest request, final Set<String> roleSet) {
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -223,6 +304,11 @@ public class RoleQueryHelper {
 
     }
 
+    /**
+     * Adds a role from the cookie mapping.
+     * @param roleNameList The list of role names.
+     * @param cookie The cookie.
+     */
     protected void addRoleFromCookieMapping(final Set<String> roleNameList, final Cookie cookie) {
         final String roleName = cookieNameMap.get(cookie.getName());
         if (StringUtil.isNotBlank(roleName)) {
@@ -230,6 +316,12 @@ public class RoleQueryHelper {
         }
     }
 
+    /**
+     * Parses the role set from a string.
+     * @param value The string to parse.
+     * @param encrypted Whether the string is encrypted.
+     * @param roleSet The set of roles.
+     */
     protected void parseRoleSet(final String value, final boolean encrypted, final Set<String> roleSet) {
         String rolesStr = value;
         if (encrypted && cipher != null) {
@@ -281,10 +373,19 @@ public class RoleQueryHelper {
         }
     }
 
+    /**
+     * Gets the current time in milliseconds.
+     * @return The current time in milliseconds.
+     */
     protected long getCurrentTime() {
         return ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }
 
+    /**
+     * Adds a cookie name mapping.
+     * @param cookieName The name of the cookie.
+     * @param roleName The name of the role.
+     */
     public void addCookieNameMapping(final String cookieName, final String roleName) {
         if (cookieNameMap == null) {
             cookieNameMap = new HashMap<>();
@@ -292,42 +393,82 @@ public class RoleQueryHelper {
         cookieNameMap.put(cookieName, roleName);
     }
 
+    /**
+     * Sets the cached cipher.
+     * @param cipher The cached cipher.
+     */
     public void setCipher(final CachedCipher cipher) {
         this.cipher = cipher;
     }
 
+    /**
+     * Sets the value separator.
+     * @param valueSeparator The value separator.
+     */
     public void setValueSeparator(final String valueSeparator) {
         this.valueSeparator = valueSeparator;
     }
 
+    /**
+     * Sets the role separator.
+     * @param roleSeparator The role separator.
+     */
     public void setRoleSeparator(final String roleSeparator) {
         this.roleSeparator = roleSeparator;
     }
 
+    /**
+     * Sets the parameter key.
+     * @param parameterKey The parameter key.
+     */
     public void setParameterKey(final String parameterKey) {
         this.parameterKey = parameterKey;
     }
 
+    /**
+     * Sets whether the parameter value is encrypted.
+     * @param encryptedParameterValue Whether the parameter value is encrypted.
+     */
     public void setEncryptedParameterValue(final boolean encryptedParameterValue) {
         this.encryptedParameterValue = encryptedParameterValue;
     }
 
+    /**
+     * Sets the header key.
+     * @param headerKey The header key.
+     */
     public void setHeaderKey(final String headerKey) {
         this.headerKey = headerKey;
     }
 
+    /**
+     * Sets whether the header value is encrypted.
+     * @param encryptedHeaderValue Whether the header value is encrypted.
+     */
     public void setEncryptedHeaderValue(final boolean encryptedHeaderValue) {
         this.encryptedHeaderValue = encryptedHeaderValue;
     }
 
+    /**
+     * Sets the cookie key.
+     * @param cookieKey The cookie key.
+     */
     public void setCookieKey(final String cookieKey) {
         this.cookieKey = cookieKey;
     }
 
+    /**
+     * Sets whether the cookie value is encrypted.
+     * @param encryptedCookieValue Whether the cookie value is encrypted.
+     */
     public void setEncryptedCookieValue(final boolean encryptedCookieValue) {
         this.encryptedCookieValue = encryptedCookieValue;
     }
 
+    /**
+     * Sets the maximum age of the role information in seconds.
+     * @param maxAge The maximum age of the role information in seconds.
+     */
     public void setMaxAge(final long maxAge) {
         this.maxAge = maxAge;
     }

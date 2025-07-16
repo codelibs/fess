@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * This exception is thrown when the requested result offset exceeds the limit.
+ */
 public class ResultOffsetExceededException extends FessSystemException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor.
+     * @param message The exception message.
+     */
     public ResultOffsetExceededException(final String message) {
         super(message);
     }

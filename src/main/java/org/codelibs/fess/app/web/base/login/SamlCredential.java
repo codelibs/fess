@@ -33,6 +33,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.saml2.Auth;
 import org.lastaflute.web.login.credential.LoginCredential;
 
+/**
+ * Credential for SAML authentication.
+ */
 public class SamlCredential implements LoginCredential, FessCredential {
 
     private final Map<String, List<String>> attributes;
@@ -47,6 +50,10 @@ public class SamlCredential implements LoginCredential, FessCredential {
 
     private final String nameidSPNameQualifier;
 
+    /**
+     * Constructor.
+     * @param auth The SAML authentication.
+     */
     public SamlCredential(final Auth auth) {
         attributes = auth.getAttributes();
         nameId = auth.getNameId();
@@ -66,11 +73,19 @@ public class SamlCredential implements LoginCredential, FessCredential {
         return nameId;
     }
 
+    /**
+     * Gets the SAML user.
+     * @return The SAML user.
+     */
     public SamlUser getUser() {
         return new SamlUser(nameId, sessionIndex, nameIdFormat, nameidNameQualifier, nameidSPNameQualifier, getDefaultGroupsAsArray(),
                 getDefaultRolesAsArray());
     }
 
+    /**
+     * Gets the default groups as an array.
+     * @return The default groups as an array.
+     */
     protected String[] getDefaultGroupsAsArray() {
         final List<String> list = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -88,6 +103,10 @@ public class SamlCredential implements LoginCredential, FessCredential {
         return list.stream().filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]);
     }
 
+    /**
+     * Gets the default roles as an array.
+     * @return The default roles as an array.
+     */
     protected String[] getDefaultRolesAsArray() {
         final List<String> list = new ArrayList<>();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -105,26 +124,63 @@ public class SamlCredential implements LoginCredential, FessCredential {
         return list.stream().filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]);
     }
 
+    /**
+     * Represents a SAML user.
+     */
     public static class SamlUser implements FessUser {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * The groups of the user.
+         */
         protected String[] groups;
 
+        /**
+         * The roles of the user.
+         */
         protected String[] roles;
 
+        /**
+         * The permissions of the user.
+         */
         protected String[] permissions;
 
+        /**
+         * The name ID of the user.
+         */
         protected String nameId;
 
+        /**
+         * The session index of the user.
+         */
         protected String sessionIndex;
 
+        /**
+         * The name ID format of the user.
+         */
         protected String nameIdFormat;
 
+        /**
+         * The name ID name qualifier of the user.
+         */
         protected String nameidNameQualifier;
 
+        /**
+         * The name ID SP name qualifier of the user.
+         */
         protected String nameidSPNameQualifier;
 
+        /**
+         * Constructor.
+         * @param nameId The name ID.
+         * @param sessionIndex The session index.
+         * @param nameIdFormat The name ID format.
+         * @param nameidNameQualifier The name ID name qualifier.
+         * @param nameidSPNameQualifier The name ID SP name qualifier.
+         * @param groups The groups.
+         * @param roles The roles.
+         */
         public SamlUser(final String nameId, final String sessionIndex, final String nameIdFormat, final String nameidNameQualifier,
                 final String nameidSPNameQualifier, final String[] groups, final String[] roles) {
             this.nameId = nameId;
@@ -164,18 +220,34 @@ public class SamlCredential implements LoginCredential, FessCredential {
             return permissions;
         }
 
+        /**
+         * Gets the session index.
+         * @return The session index.
+         */
         public String getSessionIndex() {
             return sessionIndex;
         }
 
+        /**
+         * Gets the name ID format.
+         * @return The name ID format.
+         */
         public String getNameIdFormat() {
             return nameIdFormat;
         }
 
+        /**
+         * Gets the name ID name qualifier.
+         * @return The name ID name qualifier.
+         */
         public String getNameidNameQualifier() {
             return nameidNameQualifier;
         }
 
+        /**
+         * Gets the name ID SP name qualifier.
+         * @return The name ID SP name qualifier.
+         */
         public String getNameidSPNameQualifier() {
             return nameidSPNameQualifier;
         }

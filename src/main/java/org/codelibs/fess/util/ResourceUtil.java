@@ -351,6 +351,11 @@ public class ResourceUtil {
         return libDir.listFiles(filter);
     }
 
+    /**
+     * Resolves system properties in a given string.
+     * @param value The string to resolve.
+     * @return The resolved string.
+     */
     public static String resolve(final String value) {
         if (value == null) {
             return null;

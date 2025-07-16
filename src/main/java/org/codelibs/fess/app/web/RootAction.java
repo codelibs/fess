@@ -21,7 +21,17 @@ import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * The action for the root of the application.
+ */
 public class RootAction extends FessSearchAction {
+
+    /**
+     * Constructor.
+     */
+    public RootAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -34,6 +44,10 @@ public class RootAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * The index page.
+     * @return The HTML response for the index page.
+     */
     @Execute
     public HtmlResponse index() {
         if (isLoginRequired()) {

@@ -15,11 +15,15 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * This exception is thrown when a scheduled job fails.
+ */
 public class ScheduledJobException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
     /**
+     * Constructor.
      * @param message Exception message.
      * @param cause Root cause for this exception.
      */
@@ -28,6 +32,7 @@ public class ScheduledJobException extends FessSystemException {
     }
 
     /**
+     * Constructor.
      * @param message Exception message.
      */
     public ScheduledJobException(final String message) {

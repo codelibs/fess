@@ -21,11 +21,25 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class updates scores of documents.
+ */
 public class ScoreUpdater {
+    /**
+     * Constructor.
+     */
+    public ScoreUpdater() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(ScoreUpdater.class);
 
     private final List<ScoreBooster> scoreBoosterList = new ArrayList<>();
 
+    /**
+     * Executes all score boosters.
+     * @return The result of the execution.
+     */
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder();
         scoreBoosterList.forEach(b -> {
@@ -40,6 +54,10 @@ public class ScoreUpdater {
         return resultBuf.toString();
     }
 
+    /**
+     * Adds a score booster.
+     * @param scoreBooster The score booster.
+     */
     protected void addScoreBooster(final ScoreBooster scoreBooster) {
         scoreBoosterList.add(scoreBooster);
         scoreBoosterList.sort((b1, b2) -> b2.getPriority() - b1.getPriority());

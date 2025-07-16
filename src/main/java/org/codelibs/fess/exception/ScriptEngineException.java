@@ -15,14 +15,26 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * This exception is thrown when a script engine error occurs.
+ */
 public class ScriptEngineException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor.
+     * @param message The exception message.
+     */
     public ScriptEngineException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructor.
+     * @param message The exception message.
+     * @param cause The cause of the exception.
+     */
     public ScriptEngineException(final String message, final Throwable cause) {
         super(message, cause);
     }
