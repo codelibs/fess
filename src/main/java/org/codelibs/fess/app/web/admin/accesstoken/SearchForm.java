@@ -20,6 +20,15 @@ package org.codelibs.fess.app.web.admin.accesstoken;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching access tokens.
+     */
     public String id;
 
 }

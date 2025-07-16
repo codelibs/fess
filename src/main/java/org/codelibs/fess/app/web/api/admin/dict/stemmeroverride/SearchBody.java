@@ -17,6 +17,16 @@ package org.codelibs.fess.app.web.api.admin.dict.stemmeroverride;
 
 import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
+/**
+ * Search request body for stemmer override dictionary administration.
+ * Extends BaseSearchDictBody with stemmer override dictionary-specific search parameters.
+ */
 public class SearchBody extends BaseSearchDictBody {
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

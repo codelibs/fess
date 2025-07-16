@@ -17,12 +17,23 @@ package org.codelibs.fess.app.web.admin.relatedcontent;
 
 /**
  * The search form for Related Content.
- *
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The search term field for related content.
+     */
     public String term;
 
+    /**
+     * The content field for searching related content.
+     */
     public String content;
 
 }

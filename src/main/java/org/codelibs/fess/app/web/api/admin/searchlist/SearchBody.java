@@ -18,10 +18,21 @@ package org.codelibs.fess.app.web.api.admin.searchlist;
 import org.codelibs.fess.app.web.admin.searchlist.ListForm;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
+/**
+ * Search request body for search list administration API.
+ */
 public class SearchBody extends ListForm {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 
     // `size` is an alias of `num`.
     // `size` is prepared to be compatible with other Admin APIs
+    /** Number of search results to retrieve (alias for num) */
     @ValidateTypeFailure
     public Integer size;
 

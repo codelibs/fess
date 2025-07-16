@@ -20,5 +20,14 @@ package org.codelibs.fess.app.web.admin.reqheader;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching request headers.
+     */
     public String id;
 }

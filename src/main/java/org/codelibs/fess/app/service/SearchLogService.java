@@ -61,46 +61,88 @@ import org.opensearch.search.aggregations.metrics.Cardinality;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing search logs and related analytics.
+ *
+ * This service provides functionality for querying, aggregating, and managing
+ * various types of search logs including search logs, click logs, favorite logs,
+ * and user information logs. It supports different aggregation types for
+ * analytics and reporting purposes.
+ */
 public class SearchLogService {
 
+    /** Date format pattern for parsing time ranges. */
     private static final String YYYY_MM_DD_HH_MM = "yyyy-MM-dd HH:mm";
 
+    /** Field name for count values in aggregation results. */
     private static final String COUNT = "count";
 
+    /** Field name for key values in aggregation results. */
     private static final String KEY = "key";
 
+    /** Field name for ID values in aggregation results. */
     private static final String ID = "id";
 
+    /** Field name for user information ID in aggregations. */
     private static final String USER_INFO_ID = "userInfoId";
 
+    /** Field name for query time in aggregations. */
     private static final String QUERY_TIME = "queryTime";
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SearchLogService.class);
 
+    /** Behavior handler for search log operations. */
     @Resource
     private SearchLogBhv searchLogBhv;
 
+    /** Behavior handler for click log operations. */
     @Resource
     private ClickLogBhv clickLogBhv;
 
+    /** Behavior handler for favorite log operations. */
     @Resource
     private FavoriteLogBhv favoriteLogBhv;
 
+    /** Behavior handler for user information operations. */
     @Resource
     private UserInfoBhv userInfoBhv;
 
+    /** System helper for date/time operations. */
     @Resource
     private SystemHelper systemHelper;
 
+    /** Fess configuration settings. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor for creating a new SearchLogService instance.
+     */
+    public SearchLogService() {
+        // Default constructor
+    }
+
+    /**
+     * Deletes search logs older than the specified number of days.
+     *
+     * @param days Number of days to keep (logs older than this will be deleted)
+     */
     public void deleteBefore(final int days) {
         searchLogBhv.queryDelete(cb -> {
             cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
         });
     }
 
+    /**
+     * Retrieves a list of search logs based on the specified pager criteria.
+     *
+     * This method supports various log types including search logs, click logs,
+     * favorite logs, user information, and different aggregation types for analytics.
+     *
+     * @param pager The search log pager containing filter criteria and pagination settings
+     * @return List of search log entries or aggregated data based on the log type
+     */
     public List<?> getSearchLogList(final SearchLogPager pager) {
         final EsPagingResultBean<?> list;
         if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(pager.logType)) {
@@ -357,6 +399,12 @@ public class SearchLogService {
         return list;
     }
 
+    /**
+     * Updates the pager with aggregation result information.
+     *
+     * @param pager The search log pager to update
+     * @param size The size of the aggregation results
+     */
     private void updatePagerByAgg(final SearchLogPager pager, final int size) {
         pager.setAllPageCount(1);
         pager.setAllRecordCount(size);
@@ -366,6 +414,12 @@ public class SearchLogService {
         pager.setPageSize(pager.getPageSize());
     }
 
+    /**
+     * Creates search conditions for search log queries based on pager criteria.
+     *
+     * @param pager The search log pager containing filter criteria
+     * @param cb The search log condition bean to configure
+     */
     private void createSearchLogCondition(final SearchLogPager pager, final SearchLogCB cb) {
         if (StringUtil.isNotBlank(pager.queryId)) {
             cb.query().setQueryId_Term(pager.queryId);
@@ -394,6 +448,12 @@ public class SearchLogService {
         }
     }
 
+    /**
+     * Creates search conditions for favorite log queries based on pager criteria.
+     *
+     * @param pager The search log pager containing filter criteria
+     * @param cb The favorite log condition bean to configure
+     */
     private void createFavoriteLogCondition(final SearchLogPager pager, final FavoriteLogCB cb) {
         if (StringUtil.isNotBlank(pager.queryId)) {
             cb.query().setQueryId_Term(pager.queryId);
@@ -419,6 +479,12 @@ public class SearchLogService {
         }
     }
 
+    /**
+     * Creates search conditions for user info queries based on pager criteria.
+     *
+     * @param pager The search log pager containing filter criteria
+     * @param cb The user info condition bean to configure
+     */
     private void createUserInfoCondition(final SearchLogPager pager, final UserInfoCB cb) {
         if (StringUtil.isNotBlank(pager.userSessionId)) {
             cb.query().setId_Equal(pager.userSessionId);
@@ -441,6 +507,12 @@ public class SearchLogService {
         }
     }
 
+    /**
+     * Creates search conditions for click log queries based on pager criteria.
+     *
+     * @param pager The search log pager containing filter criteria
+     * @param cb The click log condition bean to configure
+     */
     private void createClickLogCondition(final SearchLogPager pager, final ClickLogCB cb) {
         if (StringUtil.isNotBlank(pager.queryId)) {
             cb.query().setQueryId_Term(pager.queryId);
@@ -466,10 +538,24 @@ public class SearchLogService {
         }
     }
 
+    /**
+     * Parses a date/time string and converts it to UTC timezone.
+     *
+     * @param value The date/time string to parse
+     * @param formatter The date/time formatter to use
+     * @return LocalDateTime in UTC timezone
+     */
     protected LocalDateTime parseDateTime(final String value, final DateTimeFormatter formatter) {
         return LocalDateTime.parse(value, formatter).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
+    /**
+     * Retrieves a specific search log entry by log type and ID.
+     *
+     * @param logType The type of log to retrieve (search, click, favorite, userinfo)
+     * @param id The ID of the log entry
+     * @return Optional entity containing the log entry if found
+     */
     public OptionalEntity<?> getSearchLog(final String logType, final String id) {
         if (SearchLogPager.LOG_TYPE_CLICK.equalsIgnoreCase(logType)) {
             return clickLogBhv.selectByPK(id);
@@ -483,6 +569,13 @@ public class SearchLogService {
         return searchLogBhv.selectByPK(id);
     }
 
+    /**
+     * Retrieves a search log entry as a formatted map of field names and values.
+     *
+     * @param logType The type of log to retrieve (search, click, favorite, userinfo)
+     * @param id The ID of the log entry
+     * @return Map containing formatted field names and values for display
+     */
     public Map<String, String> getSearchLogMap(final String logType, final String id) {
         if (SearchLogPager.LOG_TYPE_USERINFO.equalsIgnoreCase(logType)) {
             return userInfoBhv.selectByPK(id).map(e -> {
@@ -551,10 +644,22 @@ public class SearchLogService {
         }).get();
     }
 
+    /**
+     * Converts a number to its string representation, handling null values.
+     *
+     * @param value The number to convert
+     * @return String representation of the number, or empty string if null
+     */
     private String toNumberString(final Number value) {
         return value != null ? value.toString() : StringUtil.EMPTY;
     }
 
+    /**
+     * Deletes a search log entry based on its type.
+     *
+     * @param e The log entity to delete (ClickLog, FavoriteLog, UserInfo, or SearchLog)
+     * @throws FessSystemException if the entity type is not recognized
+     */
     public void deleteSearchLog(final Object e) {
         if (e instanceof final ClickLog clickLog) {
             clickLogBhv.delete(clickLog);

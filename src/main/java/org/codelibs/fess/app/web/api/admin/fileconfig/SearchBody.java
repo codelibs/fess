@@ -17,12 +17,25 @@ package org.codelibs.fess.app.web.api.admin.fileconfig;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for file crawling configuration administration API.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
+
+    /** Name of the file crawling configuration */
     public String name;
 
+    /** File paths to crawl */
     public String paths;
 
+    /** Description of the file crawling configuration */
     public String description;
 
 }

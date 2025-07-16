@@ -19,10 +19,18 @@ import org.lastaflute.web.validation.Required;
 
 /**
  * The search form for Stemmer Override.
- *
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The dictionary ID field for stemmer override dictionary operations.
+     */
     @Required
     public String dictId;
 }

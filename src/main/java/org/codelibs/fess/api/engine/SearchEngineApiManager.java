@@ -49,17 +49,30 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * API manager for search engine administrative operations.
+ * Provides secure access to search engine APIs through authentication and token-based authorization.
+ */
 public class SearchEngineApiManager extends BaseApiManager {
     private static final String ADMIN_SERVER = "/admin/server_";
 
     private static final Logger logger = LogManager.getLogger(SearchEngineApiManager.class);
 
+    /** Roles that are allowed to access the search engine API */
     protected String[] acceptedRoles = { "admin" };
 
+    /**
+     * Default constructor.
+     * Initializes the API manager with the admin server path prefix.
+     */
     public SearchEngineApiManager() {
         setPathPrefix(ADMIN_SERVER);
     }
 
+    /**
+     * Registers this API manager with the web API manager factory.
+     * Called automatically after construction via @PostConstruct.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -115,6 +128,14 @@ public class SearchEngineApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes API requests to the search engine.
+     * Handles both regular API calls and plugin requests.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @param path     the request path after removing the prefix
+     */
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         if ("/_plugin".equals(path) || path.startsWith("/_plugin/")) {
             processPluginRequest(request, response, path.replaceFirst("^/_plugin", StringUtil.EMPTY));
@@ -168,6 +189,14 @@ public class SearchEngineApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes requests for plugin resources (static files).
+     * Sets appropriate content types and serves files from the resource path.
+     *
+     * @param request  the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @param path     the plugin resource path
+     */
     protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         if (StringUtil.isNotBlank(path)) {
             final String lowerPath = path.toLowerCase(Locale.ROOT);
@@ -228,15 +257,30 @@ public class SearchEngineApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Sets the roles that are allowed to access the search engine API.
+     *
+     * @param acceptedRoles array of role names that can access the API
+     */
     public void setAcceptedRoles(final String[] acceptedRoles) {
         this.acceptedRoles = acceptedRoles;
     }
 
+    /**
+     * Gets the server path with access token for API requests.
+     *
+     * @return the complete server path including the access token
+     * @throws FessSystemException if no access token is available
+     */
     public String getServerPath() {
         return getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
                 .orElseThrow(() -> new FessSystemException("Cannot create an access token."));
     }
 
+    /**
+     * Generates and saves a new access token for the current session.
+     * The token is used to authenticate API requests.
+     */
     public void saveToken() {
         getSessionManager().setAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, UUID.randomUUID().toString().replace("-", ""));
     }

@@ -49,27 +49,71 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * SPNEGO (Security Provider Negotiation Protocol) authenticator implementation.
+ *
+ * This class provides Single Sign-On (SSO) authentication using the SPNEGO protocol,
+ * which is commonly used for Kerberos-based authentication in Windows environments.
+ * It handles the negotiation between client and server to establish a secure
+ * authentication context without requiring users to explicitly enter credentials.
+ *
+ * The authenticator supports various configuration options including delegation,
+ * basic authentication fallback, and localhost authentication bypass.
+ */
 public class SpnegoAuthenticator implements SsoAuthenticator {
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SpnegoAuthenticator.class);
 
+    /** Configuration key for SPNEGO initialization status. */
     protected static final String SPNEGO_INITIALIZED = "spnego.initialized";
+
+    /** Configuration key for directories to exclude from SPNEGO authentication. */
     protected static final String SPNEGO_EXCLUDE_DIRS = "spnego.exclude.dirs";
+
+    /** Configuration key for enabling delegation in SPNEGO authentication. */
     protected static final String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
+
+    /** Configuration key for allowing localhost authentication bypass. */
     protected static final String SPNEGO_ALLOW_LOCALHOST = "spnego.allow.localhost";
+
+    /** Configuration key for prompting NTLM authentication. */
     protected static final String SPNEGO_PROMPT_NTLM = "spnego.prompt.ntlm";
+
+    /** Configuration key for allowing unsecure basic authentication. */
     protected static final String SPNEGO_ALLOW_UNSECURE_BASIC = "spnego.allow.unsecure.basic";
+
+    /** Configuration key for allowing basic authentication. */
     protected static final String SPNEGO_ALLOW_BASIC = "spnego.allow.basic";
+
+    /** Configuration key for pre-authentication password. */
     protected static final String SPNEGO_PREAUTH_PASSWORD = "spnego.preauth.password";
+
+    /** Configuration key for pre-authentication username. */
     protected static final String SPNEGO_PREAUTH_USERNAME = "spnego.preauth.username";
+
+    /** Configuration key for login server module name. */
     protected static final String SPNEGO_LOGIN_SERVER_MODULE = "spnego.login.server.module";
+
+    /** Configuration key for login client module name. */
     protected static final String SPNEGO_LOGIN_CLIENT_MODULE = "spnego.login.client.module";
+
+    /** Configuration key for Kerberos configuration file path. */
     protected static final String SPNEGO_KRB5_CONF = "spnego.krb5.conf";
+
+    /** Configuration key for login configuration file path. */
     protected static final String SPNEGO_LOGIN_CONF = "spnego.login.conf";
+
+    /** Configuration key for SPNEGO logger level. */
     protected static final String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
 
+    /** The underlying SPNEGO authenticator instance. */
     protected org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
 
+    /**
+     * Initializes the SPNEGO authenticator and registers it with the SSO manager.
+     * This method is called automatically after dependency injection is complete.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -78,6 +122,16 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         ComponentUtil.getSsoManager().register(this);
     }
 
+    /**
+     * Gets or creates the SPNEGO authenticator instance.
+     *
+     * This method implements lazy initialization with synchronization to ensure
+     * the authenticator is only created once. It configures the authenticator
+     * with the appropriate SPNEGO settings and marks initialization as complete.
+     *
+     * @return The configured SPNEGO authenticator instance
+     * @throws SsoLoginException if SPNEGO initialization fails
+     */
     protected synchronized org.codelibs.spnego.SpnegoAuthenticator getAuthenticator() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (authenticator != null && fessConfig.getSystemPropertyAsBoolean(SPNEGO_INITIALIZED, false)) {
@@ -98,8 +152,17 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.codelibs.fess.sso.spnego.SsoAuthenticator#getLoginCredential()
+    /**
+     * Attempts to obtain login credentials using SPNEGO authentication.
+     *
+     * This method processes the HTTP request to extract and validate SPNEGO
+     * authentication tokens. It handles the SPNEGO handshake process and
+     * extracts the user principal from successful authentication.
+     *
+     * @return The login credential containing the authenticated username,
+     *         an ActionResponseCredential for authentication challenges,
+     *         or null if no authentication information is available
+     * @throws SsoLoginException if SPNEGO authentication fails
      */
     @Override
     public LoginCredential getLoginCredential() {
@@ -159,18 +222,47 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     }
 
+    /**
+     * SPNEGO filter configuration implementation.
+     *
+     * This inner class provides configuration parameters for the SPNEGO filter,
+     * mapping system properties to SPNEGO configuration values. It handles
+     * various authentication settings including Kerberos configuration,
+     * authentication modules, and security options.
+     */
     protected static class SpengoConfig implements FilterConfig {
 
+        /**
+         * Gets the filter name for this SPNEGO configuration.
+         *
+         * @return The fully qualified class name of SpnegoAuthenticator
+         */
         @Override
         public String getFilterName() {
             return SpnegoAuthenticator.class.getName();
         }
 
+        /**
+         * Gets the servlet context. This operation is not supported.
+         *
+         * @return Never returns, always throws UnsupportedOperationException
+         * @throws UnsupportedOperationException Always thrown as this operation is not supported
+         */
         @Override
         public ServletContext getServletContext() {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Gets the initialization parameter value for the given parameter name.
+         *
+         * This method maps SPNEGO configuration parameter names to their corresponding
+         * values from system properties or default values. It handles various
+         * authentication and security settings for SPNEGO.
+         *
+         * @param name The name of the initialization parameter
+         * @return The parameter value, or null if not found
+         */
         @Override
         public String getInitParameter(final String name) {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
@@ -231,10 +323,23 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             return null;
         }
 
+        /**
+         * Gets a system property value with a default fallback.
+         *
+         * @param key The property key to look up
+         * @param defaultValue The default value to return if the property is not set
+         * @return The property value or the default value
+         */
         protected String getProperty(final String key, final String defaultValue) {
             return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
         }
 
+        /**
+         * Resolves a resource path to an absolute file path.
+         *
+         * @param path The resource path to resolve
+         * @return The absolute file path of the resource, or null if not found
+         */
         protected String getResourcePath(final String path) {
             final File file = ResourceUtil.getResourceAsFileNoException(path);
             if (file != null) {
@@ -243,6 +348,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             return null;
         }
 
+        /**
+         * Gets the names of all initialization parameters. This operation is not supported.
+         *
+         * @return Never returns, always throws UnsupportedOperationException
+         * @throws UnsupportedOperationException Always thrown as this operation is not supported
+         */
         @Override
         public Enumeration<String> getInitParameterNames() {
             throw new UnsupportedOperationException();
@@ -250,6 +361,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     }
 
+    /**
+     * Resolves the SPNEGO credential to a user entity.
+     *
+     * This method handles the resolution of SPNEGO credentials by checking
+     * if the user is an admin user or needs to be authenticated through LDAP.
+     *
+     * @param resolver The credential resolver to use for user lookup
+     */
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
         resolver.resolve(SpnegoCredential.class, credential -> {
@@ -261,11 +380,29 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         });
     }
 
+    /**
+     * Gets the action response for the specified SSO response type.
+     *
+     * SPNEGO authentication typically doesn't require special response handling
+     * for metadata or logout operations, so this method returns null.
+     *
+     * @param responseType The type of SSO response requested
+     * @return Always returns null for SPNEGO authentication
+     */
     @Override
     public ActionResponse getResponse(final SsoResponseType responseType) {
         return null;
     }
 
+    /**
+     * Performs logout for the specified user.
+     *
+     * SPNEGO authentication relies on the underlying Kerberos infrastructure
+     * for session management, so no specific logout URL is provided.
+     *
+     * @param user The user to logout
+     * @return Always returns null as SPNEGO doesn't provide a logout URL
+     */
     @Override
     public String logout(final FessUserBean user) {
         return null;

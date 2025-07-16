@@ -940,6 +940,11 @@ public class SearchApiManager extends BaseApiManager {
 
         private int pageSize = -1;
 
+        /**
+         * Constructor for JsonRequestParams.
+         * @param request The HTTP servlet request containing the search parameters
+         * @param fessConfig The Fess configuration object
+         */
         protected JsonRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
@@ -1106,6 +1111,14 @@ public class SearchApiManager extends BaseApiManager {
 
         private final String[] tags;
 
+        /**
+         * Constructor for RequestParameter.
+         * @param request The HTTP servlet request
+         * @param query The search query string
+         * @param tags Array of tags to filter suggestions
+         * @param fields Array of fields to search in for suggestions
+         * @param num The maximum number of suggestions to return
+         */
         protected RequestParameter(final HttpServletRequest request, final String query, final String[] tags, final String[] fields,
                 final int num) {
             this.query = query;
@@ -1115,6 +1128,11 @@ public class SearchApiManager extends BaseApiManager {
             this.request = request;
         }
 
+        /**
+         * Parses the HTTP request to create a RequestParameter object.
+         * @param request The HTTP servlet request containing the parameters
+         * @return A new RequestParameter object with parsed values
+         */
         protected static RequestParameter parse(final HttpServletRequest request) {
             final String query = request.getParameter("q");
             final String[] tags = getParamValueArray(request, "label");
@@ -1136,10 +1154,18 @@ public class SearchApiManager extends BaseApiManager {
             return query;
         }
 
+        /**
+         * Gets the suggest fields for the request.
+         * @return Array of field names to search in for suggestions
+         */
         protected String[] getSuggestFields() {
             return fields;
         }
 
+        /**
+         * Gets the maximum number of suggestions to return.
+         * @return The maximum number of suggestions
+         */
         protected int getNum() {
             return num;
         }
@@ -1154,6 +1180,10 @@ public class SearchApiManager extends BaseApiManager {
             return Collections.emptyMap();
         }
 
+        /**
+         * Gets the tags for filtering suggestions.
+         * @return Array of tags used to filter suggestions
+         */
         public String[] getTags() {
             return tags;
         }

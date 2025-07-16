@@ -17,6 +17,19 @@ package org.codelibs.fess.app.web.api.admin.elevateword;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for elevate word administration.
+ * Extends BaseSearchBody with elevate word-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /** The elevate word ID to search for. */
     public String id;
+
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

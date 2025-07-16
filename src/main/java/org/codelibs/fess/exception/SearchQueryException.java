@@ -15,18 +15,42 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when there are issues with search query processing.
+ *
+ * This exception is typically thrown when query parsing, serialization,
+ * or processing fails during search operations. It extends FessSystemException
+ * to provide specific handling for search query-related errors.
+ */
 public class SearchQueryException extends FessSystemException {
 
+    /** Serial version UID for serialization. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new SearchQueryException with the specified detail message and cause.
+     *
+     * @param message The detail message explaining the exception
+     * @param cause The cause of this exception
+     */
     public SearchQueryException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new SearchQueryException with the specified detail message.
+     *
+     * @param message The detail message explaining the exception
+     */
     public SearchQueryException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new SearchQueryException with the specified cause.
+     *
+     * @param cause The cause of this exception
+     */
     public SearchQueryException(final Throwable cause) {
         super(cause);
     }

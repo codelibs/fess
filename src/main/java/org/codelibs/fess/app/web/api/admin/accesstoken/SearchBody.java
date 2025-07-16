@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.accesstoken;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for access token administration.
+ * Extends BaseSearchBody with access token-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /** The access token ID to search for. */
     public String id;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

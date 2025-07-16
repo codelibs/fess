@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.reqheader;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for request header administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
+
+    /** Request header configuration ID */
     public String id;
 
 }

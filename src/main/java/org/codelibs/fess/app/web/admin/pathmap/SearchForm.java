@@ -20,8 +20,20 @@ package org.codelibs.fess.app.web.admin.pathmap;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The regular expression pattern field for path mapping.
+     */
     public String regex;
 
+    /**
+     * The replacement string field for path mapping.
+     */
     public String replacement;
 
 }

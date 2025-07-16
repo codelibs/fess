@@ -30,6 +30,13 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public abstract class SearchRequestParams {
 
+    /**
+     * Default constructor.
+     */
+    protected SearchRequestParams() {
+        // Default constructor
+    }
+
     /** The parameter for negative query. */
     public static final String AS_NQ = "nq";
 

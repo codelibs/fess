@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.crawlinginfo;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for crawling information administration.
+ * Extends BaseSearchBody with crawling information-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /** The crawling session ID to search for. */
     public String sessionId;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

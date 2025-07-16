@@ -20,5 +20,14 @@ package org.codelibs.fess.app.web.admin.joblog;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching job logs.
+     */
     public String id;
 }

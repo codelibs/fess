@@ -81,26 +81,62 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Helper class for handling search operations in Fess.
+ *
+ * This class provides comprehensive search functionality including document search,
+ * scroll search, and bulk operations. It handles search request parameter processing,
+ * query building, response formatting, and search log management.
+ *
+ * Key features:
+ * - Document search with pagination and faceting
+ * - Scroll search for large result sets
+ * - Document retrieval by ID
+ * - Bulk document updates
+ * - Search parameter serialization/deserialization for cookies
+ * - Integration with search engines and logging systems
+ */
 public class SearchHelper {
 
     // ===================================================================================
     //                                                                            Constant
     //
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
     // ===================================================================================
     //                                                                            Variable
     //
 
+    /** Array of search request parameter rewriters for modifying search parameters. */
     protected SearchRequestParamsRewriter[] searchRequestParamsRewriters = {};
 
+    /** Jackson ObjectMapper for JSON serialization/deserialization. */
     protected ObjectMapper mapper = new ObjectMapper();;
+
+    /**
+     * Default constructor for creating a new SearchHelper instance.
+     */
+    public SearchHelper() {
+        // Default constructor
+    }
 
     // ===================================================================================
     //                                                                              Method
     //                                                                      ==============
 
+    /**
+     * Performs a search operation and populates the search render data with results.
+     *
+     * This method handles the complete search workflow including parameter processing,
+     * query execution, result formatting, and logging. It supports automatic retry
+     * with escaped queries if the initial search fails.
+     *
+     * @param searchRequestParams The search request parameters
+     * @param data The search render data to populate with results
+     * @param userBean Optional user information for permission checking
+     */
     public void search(final SearchRequestParams searchRequestParams, final SearchRenderData data,
             final OptionalThing<FessUserBean> userBean) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -187,6 +223,17 @@ public class SearchHelper {
 
     }
 
+    /**
+     * Internal search method that executes the actual search query.
+     *
+     * This method performs the search using the rank fusion processor and may retry
+     * with OR operator if the hit count is below the configured minimum threshold.
+     *
+     * @param query The search query string
+     * @param params The search request parameters
+     * @param userBean Optional user information for permission checking
+     * @return List of search result documents
+     */
     protected List<Map<String, Object>> searchInternal(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final RankFusionProcessor rankFusionProcessor = ComponentUtil.getRankFusionProcessor();
@@ -207,6 +254,17 @@ public class SearchHelper {
         return documentItems;
     }
 
+    /**
+     * Performs a scroll search for processing large result sets efficiently.
+     *
+     * This method uses OpenSearch scroll API to iterate through large numbers of
+     * documents without loading them all into memory at once.
+     *
+     * @param params The search request parameters
+     * @param cursor Function to process each document in the result set
+     * @param userBean Optional user information for permission checking
+     * @return Total number of documents processed
+     */
     public long scrollSearch(final SearchRequestParams params, final BooleanFunction<Map<String, Object>> cursor,
             final OptionalThing<FessUserBean> userBean) {
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
@@ -259,6 +317,13 @@ public class SearchHelper {
                 }, cursor);
     }
 
+    /**
+     * Deletes documents matching the specified search parameters.
+     *
+     * @param request The HTTP servlet request
+     * @param params The search request parameters to identify documents to delete
+     * @return Number of documents deleted
+     */
     public long deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
         final String query = ComponentUtil.getQueryStringBuilder().params(params).build();
 
@@ -269,6 +334,16 @@ public class SearchHelper {
                 queryContext.getQueryBuilder());
     }
 
+    /**
+     * Extracts and normalizes language preferences from request parameters or browser locale.
+     *
+     * This method prioritizes explicit language parameters over browser locale settings
+     * and handles special cases like "all languages" selection.
+     *
+     * @param request The HTTP servlet request
+     * @param params The search request parameters
+     * @return Array of normalized language codes
+     */
     public String[] getLanguages(final HttpServletRequest request, final SearchRequestParams params) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         if (params.getLanguages() != null) {
@@ -310,6 +385,14 @@ public class SearchHelper {
         return StringUtil.EMPTY_STRINGS;
     }
 
+    /**
+     * Retrieves a single document by its document ID.
+     *
+     * @param docId The document ID to retrieve
+     * @param fields Array of field names to include in the result
+     * @param userBean Optional user information for permission checking
+     * @return Optional entity containing the document data if found
+     */
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -329,6 +412,15 @@ public class SearchHelper {
 
     }
 
+    /**
+     * Retrieves multiple documents by their document IDs.
+     *
+     * @param docIds Array of document IDs to retrieve
+     * @param fields Array of field names to include in the results
+     * @param userBean Optional user information for permission checking
+     * @param searchRequestType Type of search request for role-based access control
+     * @return List of document data maps
+     */
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
             final OptionalThing<FessUserBean> userBean, final SearchRequestType searchRequestType) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -350,10 +442,25 @@ public class SearchHelper {
         });
     }
 
+    /**
+     * Updates a single field of a document.
+     *
+     * @param id The document ID to update
+     * @param field The field name to update
+     * @param value The new value for the field
+     * @return true if the update was successful, false otherwise
+     */
     public boolean update(final String id, final String field, final Object value) {
         return ComponentUtil.getSearchEngineClient().update(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), id, field, value);
     }
 
+    /**
+     * Updates a document using a custom update request builder.
+     *
+     * @param id The document ID to update
+     * @param builderLambda Consumer function to configure the update request builder
+     * @return true if the update was successful, false otherwise
+     */
     public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -367,6 +474,14 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Performs bulk update operations using a custom bulk request builder.
+     *
+     * @param consumer Consumer function to configure the bulk request builder
+     * @return true if all bulk operations were successful, false otherwise
+     * @throws InterruptedRuntimeException if the operation is interrupted
+     * @throws SearchEngineClientException if the bulk update fails
+     */
     public boolean bulkUpdate(final Consumer<BulkRequestBuilder> consumer) {
         final BulkRequestBuilder builder = ComponentUtil.getSearchEngineClient().prepareBulk();
         consumer.accept(builder);
@@ -383,6 +498,12 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Applies registered parameter rewriters to modify search request parameters.
+     *
+     * @param params The original search request parameters
+     * @return Modified search request parameters after applying all rewriters
+     */
     protected SearchRequestParams rewrite(final SearchRequestParams params) {
         SearchRequestParams newParams = params;
         for (final SearchRequestParamsRewriter rewriter : searchRequestParamsRewriters) {
@@ -391,11 +512,22 @@ public class SearchHelper {
         return newParams;
     }
 
+    /**
+     * Adds a search request parameter rewriter to the list of active rewriters.
+     *
+     * @param rewriter The parameter rewriter to add
+     */
     public void addRewriter(final SearchRequestParamsRewriter rewriter) {
         searchRequestParamsRewriters = Arrays.copyOf(searchRequestParamsRewriters, searchRequestParamsRewriters.length + 1);
         searchRequestParamsRewriters[searchRequestParamsRewriters.length - 1] = rewriter;
     }
 
+    /**
+     * Stores current search parameters in a browser cookie for later retrieval.
+     *
+     * This method serializes the current request parameters, compresses them using GZIP,
+     * encodes them with Base64, and stores them in a secure HTTP cookie.
+     */
     public void storeSearchParameters() {
         LaRequestUtil.getOptionalRequest().ifPresent(req -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -480,6 +612,13 @@ public class SearchHelper {
         });
     }
 
+    /**
+     * Serializes request parameters to a compressed and encoded string.
+     *
+     * @param parameters Array of request parameters to serialize
+     * @return Base64-encoded, GZIP-compressed JSON string of parameters
+     * @throws SearchQueryException if serialization fails
+     */
     protected String serializeParameters(final RequestParameter[] parameters) {
         final List<Object[]> compactList = new ArrayList<>();
         for (final RequestParameter p : parameters) {
@@ -494,6 +633,13 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Compresses data using GZIP compression.
+     *
+     * @param data The data to compress
+     * @return GZIP-compressed data
+     * @throws IORuntimeException if compression fails
+     */
     protected byte[] gzipCompress(final byte[] data) {
         try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             try (final GZIPOutputStream gzipOut = new GZIPOutputStream(bos)) {
@@ -505,6 +651,11 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Retrieves and deserializes search parameters from browser cookies.
+     *
+     * @return Array of request parameters from the cookie, or empty array if none found
+     */
     public RequestParameter[] getSearchParameters() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -548,6 +699,13 @@ public class SearchHelper {
         }).orElse(new RequestParameter[0]);
     }
 
+    /**
+     * Decompresses GZIP-compressed data.
+     *
+     * @param compressed The GZIP-compressed data to decompress
+     * @return Decompressed data
+     * @throws IORuntimeException if decompression fails
+     */
     protected byte[] gzipDecompress(final byte[] compressed) {
         try (final ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
                 final GZIPInputStream gzipIn = new GZIPInputStream(bis);
@@ -563,7 +721,19 @@ public class SearchHelper {
         }
     }
 
+    /**
+     * Interface for rewriting search request parameters.
+     *
+     * Implementations can modify search parameters before they are processed
+     * by the search engine, allowing for custom parameter transformation logic.
+     */
     public interface SearchRequestParamsRewriter {
+        /**
+         * Rewrites the given search request parameters.
+         *
+         * @param params The original search request parameters
+         * @return Modified search request parameters
+         */
         SearchRequestParams rewrite(SearchRequestParams params);
     }
 }

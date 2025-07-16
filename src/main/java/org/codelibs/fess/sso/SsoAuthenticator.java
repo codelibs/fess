@@ -20,6 +20,15 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 
+/**
+ * Interface for SSO (Single Sign-On) authenticator implementations.
+ *
+ * This interface defines the contract for SSO authentication providers that can be
+ * integrated with Fess. Implementations handle specific SSO protocols like SAML,
+ * OAuth, SPNEGO, or other authentication mechanisms. Each authenticator is responsible
+ * for obtaining login credentials, resolving user information, and managing SSO
+ * lifecycle operations like logout and metadata exchange.
+ */
 public interface SsoAuthenticator {
 
     /**

@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.boostdoc;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for boost document administration.
+ * Extends BaseSearchBody with boost document-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /** The URL expression pattern to search for in boost documents. */
     public String urlExpr;
 
+    /** The boost expression to search for in boost documents. */
     public String boostExpr;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

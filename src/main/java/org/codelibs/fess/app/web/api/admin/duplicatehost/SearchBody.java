@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.duplicatehost;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for duplicate host administration.
+ * Extends BaseSearchBody with duplicate host-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /** The regular host name to search for. */
     public String regularName;
 
+    /** The duplicate host name to search for. */
     public String duplicateHostName;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

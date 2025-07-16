@@ -52,6 +52,13 @@ import jakarta.servlet.http.HttpSession;
  */
 public class SearchAction extends FessSearchAction {
 
+    /**
+     * Default constructor.
+     */
+    public SearchAction() {
+        // Default constructor
+    }
+
     // ===================================================================================
     //                                                                            Constant
     //
@@ -330,6 +337,13 @@ public class SearchAction extends FessSearchAction {
      * The render data for the search page.
      */
     protected static class WebRenderData extends SearchRenderData {
+
+        /**
+         * Default constructor.
+         */
+        public WebRenderData() {
+            // Default constructor
+        }
 
         /**
          * Registers the render data.

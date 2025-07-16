@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.pathmap;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for path mapping administration API.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
+
+    /** Regular expression pattern for path mapping */
     public String regex;
 
+    /** Replacement pattern for path mapping */
     public String replacement;
 
 }

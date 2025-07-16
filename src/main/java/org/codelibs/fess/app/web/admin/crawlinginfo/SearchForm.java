@@ -17,10 +17,18 @@ package org.codelibs.fess.app.web.admin.crawlinginfo;
 
 /**
  * The search form for Crawling Info.
- *
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The session ID field for searching crawling information.
+     */
     public String sessionId;
 
 }

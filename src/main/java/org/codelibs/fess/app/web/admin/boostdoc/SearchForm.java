@@ -20,8 +20,20 @@ package org.codelibs.fess.app.web.admin.boostdoc;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The URL expression field for boost document configuration.
+     */
     public String urlExpr;
 
+    /**
+     * The boost expression field for document scoring.
+     */
     public String boostExpr;
 
 }

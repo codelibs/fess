@@ -26,11 +26,33 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 
+/**
+ * Manager class for coordinating SSO (Single Sign-On) authentication operations.
+ *
+ * This class serves as the central coordinator for SSO authentication in Fess.
+ * It manages registered SSO authenticators, determines when SSO is available,
+ * and delegates authentication operations to the appropriate SSO provider based
+ * on the current configuration.
+ */
 public class SsoManager {
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SsoManager.class);
 
+    /** List of registered SSO authenticators. */
     protected final List<SsoAuthenticator> authenticatorList = new ArrayList<>();
 
+    /**
+     * Default constructor for creating a new SsoManager instance.
+     */
+    public SsoManager() {
+        // Default constructor
+    }
+
+    /**
+     * Checks whether SSO authentication is available and configured.
+     *
+     * @return true if SSO is configured and available, false otherwise
+     */
     public boolean available() {
         final String ssoType = getSsoType();
         if (logger.isDebugEnabled()) {
@@ -39,6 +61,12 @@ public class SsoManager {
         return !Constants.NONE.equals(ssoType);
     }
 
+    /**
+     * Attempts to obtain login credentials using the configured SSO authenticator.
+     *
+     * @return The login credential from SSO authentication, or null if SSO is not available
+     *         or no credential could be obtained
+     */
     public LoginCredential getLoginCredential() {
         if (available()) {
             final SsoAuthenticator authenticator = getAuthenticator();
@@ -49,6 +77,12 @@ public class SsoManager {
         return null;
     }
 
+    /**
+     * Gets the appropriate response for the specified SSO response type.
+     *
+     * @param responseType The type of SSO response required (e.g., METADATA, LOGOUT)
+     * @return The action response from the SSO authenticator, or null if SSO is not available
+     */
     public ActionResponse getResponse(final SsoResponseType responseType) {
         if (available()) {
             final SsoAuthenticator authenticator = getAuthenticator();
@@ -59,6 +93,12 @@ public class SsoManager {
         return null;
     }
 
+    /**
+     * Performs logout operations for the specified user using SSO.
+     *
+     * @param user The user to logout
+     * @return The logout URL from the SSO authenticator, or null if SSO is not available
+     */
     public String logout(final FessUserBean user) {
         if (available()) {
             final SsoAuthenticator authenticator = getAuthenticator();
@@ -69,6 +109,11 @@ public class SsoManager {
         return null;
     }
 
+    /**
+     * Gets the SSO authenticator instance for the configured SSO type.
+     *
+     * @return The SSO authenticator instance, or null if not found
+     */
     protected SsoAuthenticator getAuthenticator() {
         final String name = getSsoType() + "Authenticator";
         if (ComponentUtil.hasComponent(name)) {
@@ -77,14 +122,29 @@ public class SsoManager {
         return null;
     }
 
+    /**
+     * Gets the configured SSO type from the system configuration.
+     *
+     * @return The SSO type string from configuration
+     */
     protected String getSsoType() {
         return ComponentUtil.getFessConfig().getSsoType();
     }
 
+    /**
+     * Gets all registered SSO authenticators.
+     *
+     * @return Array of all registered SSO authenticators
+     */
     public SsoAuthenticator[] getAuthenticators() {
         return authenticatorList.toArray(new SsoAuthenticator[authenticatorList.size()]);
     }
 
+    /**
+     * Registers an SSO authenticator with this manager.
+     *
+     * @param authenticator The SSO authenticator to register
+     */
     public void register(final SsoAuthenticator authenticator) {
         if (logger.isInfoEnabled()) {
             logger.info("Load {}", authenticator.getClass().getSimpleName());

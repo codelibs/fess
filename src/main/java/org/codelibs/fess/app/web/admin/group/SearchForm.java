@@ -17,9 +17,17 @@ package org.codelibs.fess.app.web.admin.group;
 
 /**
  * The search form for Group.
- *
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching groups.
+     */
     public String id;
 }

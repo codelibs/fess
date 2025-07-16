@@ -20,5 +20,14 @@ package org.codelibs.fess.app.web.admin.webauth;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching web authentication settings.
+     */
     public String id;
 }

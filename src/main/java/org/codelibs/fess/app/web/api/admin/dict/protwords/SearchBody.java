@@ -17,5 +17,16 @@ package org.codelibs.fess.app.web.api.admin.dict.protwords;
 
 import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
+/**
+ * Search request body for protected words dictionary administration.
+ * Extends BaseSearchDictBody with protected words dictionary-specific search parameters.
+ */
 public class SearchBody extends BaseSearchDictBody {
+
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
 }

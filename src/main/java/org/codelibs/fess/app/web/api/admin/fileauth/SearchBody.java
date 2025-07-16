@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.fileauth;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for file authentication administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
+
+    /** File authentication configuration ID */
     public String id;
 
 }

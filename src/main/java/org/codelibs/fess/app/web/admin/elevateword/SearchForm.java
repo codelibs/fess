@@ -20,5 +20,14 @@ package org.codelibs.fess.app.web.admin.elevateword;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching elevate words.
+     */
     public String id;
 }

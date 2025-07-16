@@ -20,10 +20,25 @@ package org.codelibs.fess.app.web.admin.dataconfig;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The name field for searching data configurations.
+     */
     public String name;
 
+    /**
+     * The handler name field for searching data configurations.
+     */
     public String handlerName;
 
+    /**
+     * The description field for searching data configurations.
+     */
     public String description;
 
 }

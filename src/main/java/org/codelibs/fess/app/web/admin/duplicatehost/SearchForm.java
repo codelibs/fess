@@ -20,8 +20,20 @@ package org.codelibs.fess.app.web.admin.duplicatehost;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The regular name field for duplicate host configuration.
+     */
     public String regularName;
 
+    /**
+     * The duplicate host name field for searching duplicate hosts.
+     */
     public String duplicateHostName;
 
 }

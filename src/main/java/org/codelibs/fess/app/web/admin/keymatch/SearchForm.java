@@ -20,8 +20,20 @@ package org.codelibs.fess.app.web.admin.keymatch;
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The search term field for key match configuration.
+     */
     public String term;
 
+    /**
+     * The query field for key match configuration.
+     */
     public String query;
 
 }

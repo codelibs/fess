@@ -33,39 +33,86 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Base search form class that extends SearchRequestParams.
+ * Provides form fields and methods for handling search requests in the web interface.
+ * Contains validation constraints and convenience methods for parameter processing.
+ */
 public class SearchForm extends SearchRequestParams {
 
+    /**
+     * Map of additional search fields with their values.
+     */
     public Map<String, String[]> fields = new HashMap<>();
 
+    /**
+     * Map of advanced search conditions.
+     */
     public Map<String, String[]> as = new HashMap<>();
 
+    /**
+     * The main search query string.
+     */
     @Size(max = 1000)
     public String q;
 
+    /**
+     * The sort parameter for search results.
+     */
     @Size(max = 1000)
     public String sort;
 
+    /**
+     * The number of search results to return per page.
+     */
     @ValidateTypeFailure
     public Integer num;
 
+    /**
+     * Array of language codes to filter search results.
+     */
     public String[] lang;
 
+    /**
+     * Array of additional query strings to exclude from search.
+     */
     public String[] ex_q;
 
+    /**
+     * The starting position for search results pagination.
+     */
     @ValidateTypeFailure
     public Integer start;
 
+    /**
+     * The offset for search results.
+     */
     @ValidateTypeFailure
     public Integer offset;
 
+    /**
+     * The page number for pagination.
+     */
     @ValidateTypeFailure
     public Integer pn;
 
+    /**
+     * Similar document hash for finding related documents.
+     */
     @Size(max = 1000)
     public String sdh;
 
+    /**
+     * Parameter to control tracking of total hits in search results.
+     */
     @Size(max = 100)
     public String track_total_hits;
+
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
 
     // advance
 

@@ -17,10 +17,24 @@ package org.codelibs.fess.app.web.api.admin.webconfig;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for web crawling configuration administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        // Default constructor
+    }
+
+    /** Name of the web crawling configuration */
     public String name;
 
+    /** URLs to crawl */
     public String urls;
 
+    /** Description of the web crawling configuration */
     public String description;
 }
