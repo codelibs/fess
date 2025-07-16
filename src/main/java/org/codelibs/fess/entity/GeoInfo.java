@@ -37,7 +37,6 @@ import jakarta.servlet.http.HttpServletRequest;
  * This class processes geographic query parameters from HTTP requests and converts them
  * into OpenSearch geo-distance queries for location-based search functionality.
  *
- * @author FessProject
  */
 public class GeoInfo {
 

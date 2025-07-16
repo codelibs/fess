@@ -46,7 +46,6 @@ import org.dbflute.tomcat.props.BootPropsTranslator;
  * <p>The class handles system property configuration for paths, ports, and other
  * Fess-specific settings during application startup.</p>
  *
- * @author Fess Project
  * @since 1.0
  */
 public class FessBoot extends TomcatBoot {

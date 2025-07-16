@@ -48,7 +48,6 @@ import jakarta.annotation.Resource;
  * This class extends TypicalLoginAssist to provide Fess-specific login functionality
  * including user authentication, permission checking, and login history management.
  *
- * @author CodeLibs Project
  */
 public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, FessUser> // #change_it also UserBean
         implements PrimaryLoginManager {

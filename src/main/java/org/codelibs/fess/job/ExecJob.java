@@ -45,7 +45,6 @@ import org.lastaflute.job.LaJobRuntime;
  * <p>Subclasses must implement the abstract methods to define specific job behavior
  * and execution type identification.</p>
  *
- * @author Fess Project
  * @version 1.0
  */
 public abstract class ExecJob {

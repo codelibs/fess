@@ -78,7 +78,6 @@ import jakarta.annotation.Resource;
  * <p>The updater runs continuously until crawling is finished and all documents are processed.
  * It includes error handling, retry logic, and performance monitoring capabilities.
  *
- * @author CodeLibs Project
  */
 public class IndexUpdater extends Thread {
     /** Logger for this class */

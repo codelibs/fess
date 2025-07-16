@@ -25,7 +25,6 @@ import org.codelibs.fess.util.ComponentUtil;
  * This class manages the state and metadata required for paginated display of group lists,
  * including page navigation, record counts, and search criteria.
  *
- * @author FessProject
  */
 public class GroupPager implements Serializable {
 

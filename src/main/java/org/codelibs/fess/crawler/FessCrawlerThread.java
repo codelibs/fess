@@ -73,7 +73,6 @@ import org.codelibs.fess.util.DocumentUtil;
  * <li>Client selection based on URL patterns</li>
  * </ul>
  *
- * @author FessCrawlerThread
  * @see CrawlerThread
  * @see org.codelibs.fess.crawler.client.CrawlerClient
  */

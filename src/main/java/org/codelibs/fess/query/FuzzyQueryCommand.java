@@ -35,7 +35,6 @@ import org.opensearch.index.query.QueryBuilders;
  * This class converts Lucene FuzzyQuery objects into OpenSearch fuzzy query builders,
  * supporting configurable fuzzy matching parameters like edit distance and expansions.
  *
- * @author FessProject
  */
 public class FuzzyQueryCommand extends QueryCommand {
     private static final Logger logger = LogManager.getLogger(FuzzyQueryCommand.class);

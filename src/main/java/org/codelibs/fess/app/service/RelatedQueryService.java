@@ -31,14 +31,42 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing related query entities.
+ * This service provides operations to retrieve, store, and delete related queries,
+ * which are used to suggest alternative search terms to users.
+ */
 public class RelatedQueryService extends FessAppService {
 
+    /**
+     * Default constructor for RelatedQueryService.
+     * This constructor is used by the DI container to create an instance of the service.
+     */
+    public RelatedQueryService() {
+        // Default constructor
+    }
+
+    /**
+     * Behavior class for accessing related query data in the database.
+     * This provides database operations for RelatedQuery entities.
+     */
     @Resource
     protected RelatedQueryBhv relatedQueryBhv;
 
+    /**
+     * Configuration properties for Fess application.
+     * Used to access various configuration settings like paging parameters.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of related queries based on the provided pager parameters.
+     * This method performs a database query with pagination and updates the pager with result information.
+     *
+     * @param relatedQueryPager the pager containing pagination parameters and search conditions
+     * @return a list of RelatedQuery entities matching the search criteria
+     */
     public List<RelatedQuery> getRelatedQueryList(final RelatedQueryPager relatedQueryPager) {
 
         final PagingResultBean<RelatedQuery> relatedQueryList = relatedQueryBhv.selectPage(cb -> {
@@ -54,22 +82,47 @@ public class RelatedQueryService extends FessAppService {
         return relatedQueryList;
     }
 
+    /**
+     * Retrieves a specific related query by its unique identifier.
+     *
+     * @param id the unique identifier of the related query to retrieve
+     * @return an OptionalEntity containing the RelatedQuery if found, or empty if not found
+     */
     public OptionalEntity<RelatedQuery> getRelatedQuery(final String id) {
         return relatedQueryBhv.selectByPK(id);
     }
 
+    /**
+     * Stores (inserts or updates) a related query in the database.
+     * After storing, the related query helper is updated to refresh the cache.
+     *
+     * @param relatedQuery the RelatedQuery entity to store
+     */
     public void store(final RelatedQuery relatedQuery) {
 
         relatedQueryBhv.insertOrUpdate(relatedQuery, op -> op.setRefreshPolicy(Constants.TRUE));
         ComponentUtil.getRelatedQueryHelper().update();
     }
 
+    /**
+     * Deletes a related query from the database.
+     * After deletion, the related query helper is updated to refresh the cache.
+     *
+     * @param relatedQuery the RelatedQuery entity to delete
+     */
     public void delete(final RelatedQuery relatedQuery) {
 
         relatedQueryBhv.delete(relatedQuery, op -> op.setRefreshPolicy(Constants.TRUE));
         ComponentUtil.getRelatedQueryHelper().update();
     }
 
+    /**
+     * Sets up the search conditions for the related query list based on the pager parameters.
+     * This method configures wildcard searches for term and queries fields, and sets up ordering.
+     *
+     * @param cb the condition bean for building the query
+     * @param relatedQueryPager the pager containing search parameters
+     */
     protected void setupListCondition(final RelatedQueryCB cb, final RelatedQueryPager relatedQueryPager) {
         if (StringUtil.isNotBlank(relatedQueryPager.term)) {
             cb.query().setTerm_Wildcard(wrapQuery(relatedQueryPager.term));

@@ -41,7 +41,6 @@ import org.dbflute.twowaysql.factory.SqlAnalyzerFactory;
  * This class provides basic scaffolding for DBFlute behavior invoker assistance,
  * primarily returning null implementations as placeholders for OpenSearch-specific functionality.
  *
- * @author FessProject
  */
 public class ImplementedInvokerAssistant implements InvokerAssistant {
 

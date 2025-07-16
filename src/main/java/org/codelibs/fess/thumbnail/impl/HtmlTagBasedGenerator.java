@@ -47,7 +47,6 @@ import org.codelibs.fess.util.DocumentUtil;
  * ImageIO operations, and applies scaling and cropping to generate thumbnails
  * that meet the specified size requirements.</p>
  *
- * @author FessProject
  */
 public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
 

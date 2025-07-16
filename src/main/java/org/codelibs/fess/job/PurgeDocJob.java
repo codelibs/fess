@@ -23,10 +23,30 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Job for purging expired documents from the search index.
+ * This job removes documents that have passed their expiration time based on the expires field.
+ * It helps maintain the search index by cleaning up outdated content automatically.
+ */
 public class PurgeDocJob {
 
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(PurgeDocJob.class);
 
+    /**
+     * Default constructor for PurgeDocJob.
+     * Creates a new instance of the document purging job with default settings.
+     */
+    public PurgeDocJob() {
+        // Default constructor
+    }
+
+    /**
+     * Executes the document purging job.
+     * Removes all documents from the search index that have expired based on their expires field.
+     *
+     * @return a string containing the execution result and any error messages
+     */
     public String execute() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

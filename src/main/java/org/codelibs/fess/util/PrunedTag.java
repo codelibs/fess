@@ -27,17 +27,39 @@ import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.exception.FessSystemException;
 import org.w3c.dom.Node;
 
+/**
+ * Represents a tag configuration for pruning HTML content during document processing.
+ * This class defines tag patterns that match HTML elements based on tag name, CSS class, ID, or custom attributes.
+ * It is used to identify and remove unwanted HTML elements from crawled documents.
+ */
 public class PrunedTag {
+    /** The HTML tag name to match (e.g., "div", "span", "p") */
     private final String tag;
+    /** The ID attribute value to match */
     private String id;
+    /** The CSS class name to match */
     private String css;
+    /** The custom attribute name to match */
     private String attrName;
+    /** The custom attribute value to match */
     private String attrValue;
 
+    /**
+     * Creates a new PrunedTag instance with the specified tag name.
+     *
+     * @param tag the HTML tag name to match (e.g., "div", "span", "p")
+     */
     public PrunedTag(final String tag) {
         this.tag = tag;
     }
 
+    /**
+     * Checks if this pruned tag configuration matches the given DOM node.
+     * The matching is based on tag name, and optionally ID, CSS class, or custom attributes.
+     *
+     * @param node the DOM node to check against this pruned tag configuration
+     * @return true if the node matches this pruned tag configuration, false otherwise
+     */
     public boolean matches(final Node node) {
         if (tag.equalsIgnoreCase(node.getNodeName())) {
             if (attrName != null) {
@@ -89,14 +111,30 @@ public class PrunedTag {
                 && StringUtils.compare(attrValue, other.attrValue) == 0;
     }
 
+    /**
+     * Sets the ID attribute value that this pruned tag should match.
+     *
+     * @param id the ID attribute value to match
+     */
     public void setId(final String id) {
         this.id = id;
     }
 
+    /**
+     * Sets the CSS class name that this pruned tag should match.
+     *
+     * @param css the CSS class name to match
+     */
     public void setCss(final String css) {
         this.css = css;
     }
 
+    /**
+     * Sets a custom attribute name-value pair that this pruned tag should match.
+     *
+     * @param name the attribute name to match
+     * @param value the attribute value to match
+     */
     public void setAttr(final String name, final String value) {
         attrName = name;
         attrValue = value;
@@ -107,6 +145,19 @@ public class PrunedTag {
         return "PrunedTag [tag=" + tag + ", id=" + id + ", css=" + css + ", attrName=" + attrName + ", attrValue=" + attrValue + "]";
     }
 
+    /**
+     * Parses a comma-separated string of pruned tag configurations into an array of PrunedTag objects.
+     * Each tag configuration follows the pattern: tagname[attr=value].classname#id
+     *
+     * Examples:
+     * - "div.content" matches div elements with class "content"
+     * - "span#header" matches span elements with ID "header"
+     * - "p[data-type=ad]" matches p elements with data-type attribute equal to "ad"
+     *
+     * @param value the comma-separated string of pruned tag configurations
+     * @return an array of PrunedTag objects parsed from the input string
+     * @throws FessSystemException if the input string contains invalid tag patterns
+     */
     public static PrunedTag[] parse(final String value) {
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
             final Pattern pattern = Pattern.compile("(\\w+)(\\[[^\\]]+\\])?(\\.[\\w\\-]+)?(#[\\w\\-]+)?");

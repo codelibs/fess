@@ -35,7 +35,6 @@ import jakarta.servlet.ServletContext;
  * including authentication, authorization, and HTML data setup.
  * </p>
  *
- * @author Fess Project
  */
 public abstract class FessAdminAction extends FessBaseAction {
 

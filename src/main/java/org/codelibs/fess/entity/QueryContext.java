@@ -37,26 +37,46 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.opensearch.search.sort.SortBuilder;
 
+/**
+ * Context object that holds query-related information and state during search processing.
+ * Contains the query string, query builder, sort criteria, and various metadata.
+ */
 public class QueryContext {
 
+    /** Prefix for queries that search only in URL fields. */
     protected static final String ALLINURL_FIELD_PREFIX = "allinurl:";
 
+    /** Prefix for queries that search only in title fields. */
     protected static final String ALLINTITLE_FIELD_PREFIX = "allintitle:";
 
+    /** The OpenSearch query builder used for executing the search. */
     protected QueryBuilder queryBuilder;
 
+    /** List of sort builders to apply to the search query. */
     protected final List<SortBuilder<?>> sortBuilderList = new ArrayList<>();
 
+    /** The original query string provided by the user. */
     protected String queryString;
 
+    /** Set of query terms that should be highlighted in search results. */
     protected Set<String> highlightedQuerySet = null;
 
+    /** Map storing field names and their associated query terms for logging. */
     protected Map<String, List<String>> fieldLogMap = null;
 
+    /** Flag indicating whether role-based query filtering should be disabled. */
     protected boolean disableRoleQuery = false;
 
+    /** The default field to search in when no specific field is specified. */
     protected String defaultField = null;
 
+    /**
+     * Constructs a new QueryContext with the specified query string.
+     * Processes special query prefixes (allinurl:, allintitle:) and initializes
+     * request-scoped attributes for highlighting and field logging.
+     * @param queryString The query string to process.
+     * @param isQuery Whether this is a search query (enables highlighting and logging).
+     */
     @SuppressWarnings("unchecked")
     public QueryContext(final String queryString, final boolean isQuery) {
         if (queryString != null) {
@@ -88,12 +108,20 @@ public class QueryContext {
         }
     }
 
+    /**
+     * Adds function score configuration to the query builder.
+     * @param functionScoreQuery Consumer that configures the function score filters.
+     */
     public void addFunctionScore(final Consumer<List<FilterFunctionBuilder>> functionScoreQuery) {
         final List<FilterFunctionBuilder> list = new ArrayList<>();
         functionScoreQuery.accept(list);
         queryBuilder = QueryBuilders.functionScoreQuery(queryBuilder, list.toArray(new FilterFunctionBuilder[list.size()]));
     }
 
+    /**
+     * Adds additional query clauses using a boolean query builder.
+     * @param boolQuery Consumer that configures the boolean query.
+     */
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {
         BoolQueryBuilder builder;
         if (queryBuilder instanceof MatchAllQueryBuilder) {
@@ -107,26 +135,51 @@ public class QueryContext {
         }
     }
 
+    /**
+     * Sets the query builder for this context.
+     * @param queryBuilder The query builder to use.
+     */
     public void setQueryBuilder(final QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
     }
 
+    /**
+     * Adds sort builders to the query context.
+     * @param sortBuilders Variable number of sort builders to add.
+     */
     public void addSorts(final SortBuilder<?>... sortBuilders) {
         stream(sortBuilders).of(stream -> stream.forEach(sortBuilder -> sortBuilderList.add(sortBuilder)));
     }
 
+    /**
+     * Checks if any sort builders have been added to this context.
+     * @return True if sort builders are present, false otherwise.
+     */
     public boolean hasSorts() {
         return !sortBuilderList.isEmpty();
     }
 
+    /**
+     * Gets the list of sort builders for this query context.
+     * @return The list of sort builders.
+     */
     public List<SortBuilder<?>> sortBuilders() {
         return sortBuilderList;
     }
 
+    /**
+     * Gets the query builder for this context.
+     * @return The query builder.
+     */
     public QueryBuilder getQueryBuilder() {
         return queryBuilder;
     }
 
+    /**
+     * Adds a field and text pair to the field log for tracking query terms.
+     * @param field The field name.
+     * @param text The query text for this field.
+     */
     public void addFieldLog(final String field, final String text) {
         if (fieldLogMap == null) {
             return;
@@ -140,6 +193,10 @@ public class QueryContext {
         list.add(text);
     }
 
+    /**
+     * Gets the default field keywords from the field log.
+     * @return List of keywords for the default field, or empty list if none.
+     */
     public List<String> getDefaultKeyword() {
         if (fieldLogMap != null) {
             return fieldLogMap.getOrDefault(Constants.DEFAULT_FIELD, Collections.emptyList());
@@ -147,28 +204,51 @@ public class QueryContext {
         return Collections.emptyList();
     }
 
+    /**
+     * Adds a query term to the highlighted query set.
+     * @param text The query text to highlight.
+     */
     public void addHighlightedQuery(final String text) {
         if (highlightedQuerySet != null) {
             highlightedQuerySet.add(text);
         }
     }
 
+    /**
+     * Gets the processed query string.
+     * @return The query string.
+     */
     public String getQueryString() {
         return queryString;
     }
 
+    /**
+     * Checks if role-based query filtering is enabled.
+     * @return True if role query is enabled, false otherwise.
+     */
     public boolean roleQueryEnabled() {
         return !disableRoleQuery;
     }
 
+    /**
+     * Disables role-based query filtering for this context.
+     */
     public void skipRoleQuery() {
         disableRoleQuery = true;
     }
 
+    /**
+     * Gets the default field for this query context.
+     * @return The default field name, or null if not set.
+     */
     public String getDefaultField() {
         return defaultField;
     }
 
+    /**
+     * Sets the default field for this query context.
+     * @param defaultField The default field name to set.
+     */
     public void setDefaultField(final String defaultField) {
         this.defaultField = defaultField;
     }

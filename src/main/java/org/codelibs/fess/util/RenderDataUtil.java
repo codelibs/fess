@@ -23,8 +23,33 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.dbflute.Entity;
 import org.lastaflute.web.response.render.RenderData;
 
+/**
+ * Utility class for managing render data in web responses.
+ * This class provides methods to register values in RenderData objects with proper handling
+ * of Entity objects and Collections that may contain Entity objects.
+ *
+ */
 public class RenderDataUtil {
 
+    /**
+     * Default constructor.
+     * This constructor is provided for utility class instantiation, though this class
+     * is designed to be used statically.
+     */
+    public RenderDataUtil() {
+        // Default constructor
+    }
+
+    /**
+     * Registers a value in the render data with the specified key.
+     * If the value is an Entity object, it will be converted to a Map using BeanUtil.
+     * If the value is a Collection containing Entity objects, each Entity will be converted to a Map.
+     * For other types of values, they are registered directly.
+     *
+     * @param data the RenderData object to register the value in
+     * @param key the key to associate with the value
+     * @param value the value to register; can be null, Entity, Collection, or any other object
+     */
     public static void register(final RenderData data, final String key, final Object value) {
         if (value == null) {
             return;

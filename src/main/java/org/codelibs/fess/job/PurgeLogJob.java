@@ -24,10 +24,36 @@ import org.codelibs.fess.app.service.UserInfoService;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Job for purging old log entries from the system.
+ * This job removes old crawling sessions, search logs, job logs, and user info logs
+ * based on configured retention periods. It helps maintain system performance by
+ * preventing log tables from growing too large.
+ */
 public class PurgeLogJob {
 
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(PurgeLogJob.class);
 
+    /**
+     * Default constructor for PurgeLogJob.
+     * Creates a new instance of the log purging job with default settings.
+     */
+    public PurgeLogJob() {
+        // Default constructor
+    }
+
+    /**
+     * Executes the log purging job.
+     * Performs the following cleanup operations:
+     * - Purges old crawling sessions
+     * - Purges search logs older than configured days
+     * - Purges job logs older than configured days
+     * - Purges user info logs older than configured days
+     * - Updates job log status
+     *
+     * @return a string containing the execution result and any error messages
+     */
     public String execute() {
         final CrawlingInfoService crawlingInfoService = ComponentUtil.getComponent(CrawlingInfoService.class);
         final SearchLogService searchLogService = ComponentUtil.getComponent(SearchLogService.class);

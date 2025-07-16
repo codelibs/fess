@@ -74,7 +74,6 @@ import jakarta.servlet.http.HttpServletRequest;
  * in Fess web templates, including date formatting, localization, file operations, and
  * query parameter handling.
  *
- * @author Fess Project
  * @since 1.0
  */
 public class FessFunctions {

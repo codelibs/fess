@@ -27,7 +27,6 @@ import jakarta.validation.constraints.Size;
  * or search results. This form captures the necessary parameters for document
  * access tracking and error page fallback information.
  *
- * @author FessProject
  */
 public class GoForm {
 

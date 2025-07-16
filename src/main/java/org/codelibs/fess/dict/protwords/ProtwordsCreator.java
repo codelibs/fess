@@ -25,13 +25,25 @@ import org.codelibs.fess.dict.DictionaryItem;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Creator for protected words dictionary files.
+ * This class manages the creation and registration of protected words dictionary files.
+ */
 public class ProtwordsCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(ProtwordsCreator.class);
 
+    /**
+     * Constructor for ProtwordsCreator.
+     * Initializes the creator with a pattern to match protwords files.
+     */
     public ProtwordsCreator() {
         super("protwords.*\\.txt");
     }
 
+    /**
+     * Registers this creator with the dictionary manager.
+     * This method is called automatically after construction to add this creator to the dictionary manager.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {

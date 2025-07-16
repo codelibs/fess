@@ -20,7 +20,6 @@ package org.codelibs.fess.exception;
  * This exception extends FessSystemException and is used to handle specific
  * configuration-related issues when working with GSA integration.
  *
- * @author FessProject
  */
 public class GsaConfigException extends FessSystemException {
 

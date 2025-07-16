@@ -35,40 +35,76 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Configuration class for query field mappings in the Fess search engine.
+ * This class manages field configurations for various query operations including
+ * response fields, search fields, facet fields, sort fields, and highlighting.
+ * It initializes field mappings from the FessConfig and provides methods to
+ * query field properties and capabilities.
+ */
 public class QueryFieldConfig {
 
+    /**
+     * Default constructor.
+     */
+    public QueryFieldConfig() {
+        // Default constructor
+    }
+
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(QueryFieldConfig.class);
 
+    /** Field name for document score in search results */
     public static final String SCORE_FIELD = "score";
 
+    /** Field name for OpenSearch document score */
     public static final String DOC_SCORE_FIELD = "_score";
 
+    /** Field name for site information in search results */
     public static final String SITE_FIELD = "site";
 
+    /** Field name for URL-based search queries */
     public static final String INURL_FIELD = "inurl";
 
+    /** Sort value for score-based sorting */
     protected static final String SCORE_SORT_VALUE = "score";
 
+    /** Array of fields to be included in standard search response */
     protected String[] responseFields;
 
+    /** Array of fields to be included in scroll search response */
     protected String[] scrollResponseFields;
 
+    /** Array of fields to be included in cache search response */
     protected String[] cacheResponseFields;
 
+    /** Array of fields that can be highlighted in search results */
     protected String[] highlightedFields;
 
+    /** Array of fields that can be searched against */
     protected String[] searchFields;
 
+    /** Array of fields that can be used for faceted search */
     protected String[] facetFields;
 
+    /** Array of fields that can be used for sorting search results */
     protected String[] sortFields;
 
+    /** Set of fields that are allowed in API responses */
     protected Set<String> apiResponseFieldSet;
 
+    /** Set of fields that are not analyzed during indexing */
     protected Set<String> notAnalyzedFieldSet;
 
+    /** List of additional default fields with their boost values */
     protected List<Pair<String, Float>> additionalDefaultList = new ArrayList<>();
 
+    /**
+     * Initializes the query field configuration by loading field mappings from FessConfig.
+     * This method is called after dependency injection is complete.
+     * It sets up response fields, search fields, facet fields, sort fields, and other
+     * field configurations based on the application configuration.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -271,11 +307,22 @@ public class QueryFieldConfig {
         }).forEach(additionalDefaultList::add));
     }
 
+    /**
+     * Sets the fields that should not be analyzed during indexing.
+     *
+     * @param fields array of field names that should not be analyzed
+     */
     public void setNotAnalyzedFields(final String[] fields) {
         notAnalyzedFieldSet = new HashSet<>();
         Collections.addAll(notAnalyzedFieldSet, fields);
     }
 
+    /**
+     * Checks if the specified field can be used for sorting.
+     *
+     * @param field the field name to check
+     * @return true if the field can be used for sorting, false otherwise
+     */
     protected boolean isSortField(final String field) {
         for (final String f : sortFields) {
             if (f.equals(field)) {
@@ -285,6 +332,12 @@ public class QueryFieldConfig {
         return false;
     }
 
+    /**
+     * Checks if the specified field can be used for faceted search.
+     *
+     * @param field the field name to check
+     * @return true if the field can be used for faceted search, false otherwise
+     */
     public boolean isFacetField(final String field) {
         if (StringUtil.isBlank(field)) {
             return false;
@@ -298,104 +351,166 @@ public class QueryFieldConfig {
         return flag;
     }
 
+    /**
+     * Checks if the specified sort value is valid for facet sorting.
+     *
+     * @param sort the sort value to check
+     * @return true if the sort value is valid for facets ("count" or "index"), false otherwise
+     */
     public boolean isFacetSortValue(final String sort) {
         return "count".equals(sort) || "index".equals(sort);
     }
 
+    /**
+     * Sets the fields that are allowed in API responses.
+     *
+     * @param fields array of field names that are allowed in API responses
+     */
     public void setApiResponseFields(final String[] fields) {
         apiResponseFieldSet = new HashSet<>();
         Collections.addAll(apiResponseFieldSet, fields);
     }
 
+    /**
+     * Checks if the specified field is allowed in API responses.
+     *
+     * @param field the field name to check
+     * @return true if the field is allowed in API responses, false otherwise
+     */
     public boolean isApiResponseField(final String field) {
         return apiResponseFieldSet.contains(field);
     }
 
     /**
-     * @return the responseFields
+     * Gets the fields that are included in standard search responses.
+     *
+     * @return array of field names for standard search responses
      */
     public String[] getResponseFields() {
         return responseFields;
     }
 
     /**
-     * @param responseFields the responseFields to set
+     * Sets the fields that are included in standard search responses.
+     *
+     * @param responseFields array of field names for standard search responses
      */
     public void setResponseFields(final String[] responseFields) {
         this.responseFields = responseFields;
     }
 
+    /**
+     * Gets the fields that are included in scroll search responses.
+     *
+     * @return array of field names for scroll search responses
+     */
     public String[] getScrollResponseFields() {
         return scrollResponseFields;
     }
 
+    /**
+     * Sets the fields that are included in scroll search responses.
+     *
+     * @param scrollResponseFields array of field names for scroll search responses
+     */
     public void setScrollResponseFields(final String[] scrollResponseFields) {
         this.scrollResponseFields = scrollResponseFields;
     }
 
+    /**
+     * Gets the fields that are included in cache search responses.
+     *
+     * @return array of field names for cache search responses
+     */
     public String[] getCacheResponseFields() {
         return cacheResponseFields;
     }
 
+    /**
+     * Sets the fields that are included in cache search responses.
+     *
+     * @param cacheResponseFields array of field names for cache search responses
+     */
     public void setCacheResponseFields(final String[] cacheResponseFields) {
         this.cacheResponseFields = cacheResponseFields;
     }
 
     /**
-     * @return the highlightedFields
+     * Gets the fields that can be highlighted in search results.
+     *
+     * @return array of field names that can be highlighted
      */
     public String[] getHighlightedFields() {
         return highlightedFields;
     }
 
     /**
-     * @param highlightedFields the highlightedFields to set
+     * Sets the fields that can be highlighted in search results.
+     *
+     * @param highlightedFields array of field names that can be highlighted
      */
     public void setHighlightedFields(final String[] highlightedFields) {
         this.highlightedFields = highlightedFields;
     }
 
+    /**
+     * Processes the highlighted fields using the provided stream consumer.
+     *
+     * @param stream consumer that processes the stream of highlighted field names
+     */
     public void highlightedFields(final Consumer<Stream<String>> stream) {
         stream(highlightedFields).of(stream);
     }
 
     /**
-     * @return the supportedFields
+     * Gets the fields that can be searched against.
+     *
+     * @return array of field names that can be searched
      */
     public String[] getSearchFields() {
         return searchFields;
     }
 
     /**
-     * @param supportedFields the supportedFields to set
+     * Sets the fields that can be searched against.
+     *
+     * @param supportedFields array of field names that can be searched
      */
     public void setSearchFields(final String[] supportedFields) {
         searchFields = supportedFields;
     }
 
     /**
-     * @return the facetFields
+     * Gets the fields that can be used for faceted search.
+     *
+     * @return array of field names that can be used for faceted search
      */
     public String[] getFacetFields() {
         return facetFields;
     }
 
     /**
-     * @param facetFields the facetFields to set
+     * Sets the fields that can be used for faceted search.
+     *
+     * @param facetFields array of field names that can be used for faceted search
      */
     public void setFacetFields(final String[] facetFields) {
         this.facetFields = facetFields;
     }
 
     /**
-     * @return the sortFields
+     * Gets the fields that can be used for sorting search results.
+     *
+     * @return array of field names that can be used for sorting
      */
     public String[] getSortFields() {
         return sortFields;
     }
 
     /**
-     * @param sortFields the sortFields to set
+     * Sets the fields that can be used for sorting search results.
+     *
+     * @param sortFields array of field names that can be used for sorting
      */
     public void setSortFields(final String[] sortFields) {
         this.sortFields = sortFields;

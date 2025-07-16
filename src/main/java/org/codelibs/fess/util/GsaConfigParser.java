@@ -58,7 +58,6 @@ import org.xml.sax.helpers.DefaultHandler;
  * <li>URL pattern matching with regular expressions and contains filters</li>
  * </ul>
  *
- * @author FessProject
  */
 public class GsaConfigParser extends DefaultHandler {
 

@@ -60,18 +60,45 @@ import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * RankFusionProcessor manages multiple search engines and combines their results using rank fusion algorithms.
+ * This processor supports searching with multiple searchers concurrently and merging their results based on
+ * ranking scores to provide more comprehensive and accurate search results.
+ *
+ * The processor maintains a pool of searchers and an executor service for concurrent operations.
+ * It implements rank fusion techniques to combine results from different search engines
+ * and provides a unified search interface.
+ */
 public class RankFusionProcessor implements AutoCloseable {
 
     private static final Logger logger = LogManager.getLogger(RankFusionProcessor.class);
 
+    /** Array of rank fusion searchers available for processing search requests */
     protected RankFusionSearcher[] searchers = new RankFusionSearcher[1];
 
+    /** Executor service for concurrent search operations across multiple searchers */
     protected ExecutorService executorService;
 
+    /** Size of the window for rank fusion processing, determines how many results to consider */
     protected int windowSize;
 
+    /** Set of available searcher names that can be used for search processing */
     protected Set<String> availableSearcherNameSet;
 
+    /**
+     * Default constructor for RankFusionProcessor.
+     * Initializes the processor with default values. The actual initialization
+     * is performed by the init() method which is called after construction.
+     */
+    public RankFusionProcessor() {
+        // Default constructor - initialization is done in init() method
+    }
+
+    /**
+     * Initializes the rank fusion processor after construction.
+     * Sets up the window size based on configuration and loads available searchers.
+     * This method is called automatically after the bean is constructed.
+     */
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -87,10 +114,19 @@ public class RankFusionProcessor implements AutoCloseable {
         load();
     }
 
+    /**
+     * Updates the processor configuration by reloading available searchers.
+     * This method executes the load operation asynchronously in a separate thread.
+     */
     public void update() {
         CommonPoolUtil.execute(this::load);
     }
 
+    /**
+     * Loads the available searcher names from system properties.
+     * Parses the "rank.fusion.searchers" system property to determine which searchers
+     * are available for use in rank fusion processing.
+     */
     protected void load() {
         final String value = System.getProperty("rank.fusion.searchers");
         if (StringUtil.isBlank(value)) {
@@ -121,6 +157,16 @@ public class RankFusionProcessor implements AutoCloseable {
         }
     }
 
+    /**
+     * Performs a search operation using rank fusion across available searchers.
+     * If only one searcher is available, uses the main searcher. Otherwise, performs
+     * concurrent searches across multiple searchers and fuses the results.
+     *
+     * @param query the search query string
+     * @param params search request parameters including pagination and filters
+     * @param userBean optional user information for personalized search
+     * @return list of search result documents with fused ranking scores
+     */
     public List<Map<String, Object>> search(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final RankFusionSearcher[] availableSearchers = getAvailableSearchers();
@@ -130,6 +176,13 @@ public class RankFusionProcessor implements AutoCloseable {
         return searchWithMultipleSearchers(availableSearchers, query, params, userBean);
     }
 
+    /**
+     * Gets the array of available searchers based on configuration.
+     * Filters the searchers array to include only those specified in the available searcher name set.
+     * If no specific searchers are configured, returns all searchers.
+     *
+     * @return array of available RankFusionSearcher instances
+     */
     protected RankFusionSearcher[] getAvailableSearchers() {
         if (availableSearcherNameSet.isEmpty()) {
             return searchers;
@@ -145,6 +198,17 @@ public class RankFusionProcessor implements AutoCloseable {
         return availableSearchers;
     }
 
+    /**
+     * Performs concurrent searches using multiple searchers and fuses the results.
+     * Executes searches in parallel across all provided searchers, then combines the results
+     * using rank fusion algorithms to produce a unified result set.
+     *
+     * @param searchers array of searchers to use for concurrent searching
+     * @param query the search query string
+     * @param params search request parameters including pagination and filters
+     * @param userBean optional user information for personalized search
+     * @return list of search result documents with fused ranking scores
+     */
     protected List<Map<String, Object>> searchWithMultipleSearchers(final RankFusionSearcher[] searchers, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
@@ -273,6 +337,15 @@ public class RankFusionProcessor implements AutoCloseable {
                 mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
+    /**
+     * Extracts a subset of documents from the full result list based on pagination parameters.
+     * Applies proper bounds checking to ensure the extracted range is within the document list size.
+     *
+     * @param docs the full list of search result documents
+     * @param pageSize the number of documents to include in the page
+     * @param startPosition the starting position for pagination
+     * @return sublist of documents for the requested page
+     */
     protected List<Map<String, Object>> extractList(final List<Map<String, Object>> docs, final int pageSize, final int startPosition) {
         final int size = docs.size();
         if (size == 0) {
@@ -289,6 +362,16 @@ public class RankFusionProcessor implements AutoCloseable {
         return docs.subList(fromIndex, toIndex);
     }
 
+    /**
+     * Performs a search using only the main searcher without rank fusion.
+     * This method is used when only one searcher is available or configured.
+     *
+     * @param searcher the main searcher to use for the search operation
+     * @param query the search query string
+     * @param params search request parameters including pagination and filters
+     * @param userBean optional user information for personalized search
+     * @return list of search result documents from the main searcher
+     */
     protected List<Map<String, Object>> searchWithMainSearcher(final RankFusionSearcher searcher, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
@@ -301,6 +384,22 @@ public class RankFusionProcessor implements AutoCloseable {
                 searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
     }
 
+    /**
+     * Creates a QueryResponseList containing the search results and metadata.
+     * Wraps the document list with additional information about the search operation
+     * including record counts, timing, and pagination details.
+     *
+     * @param documentList the list of search result documents
+     * @param allRecordCount the total number of records found
+     * @param allRecordCountRelation the relationship of the record count (exact, approximate, etc.)
+     * @param queryTime the time taken to execute the search query
+     * @param partialResults whether the results are partial due to timeout or other constraints
+     * @param facetResponse the facet information for the search results
+     * @param start the starting position for pagination
+     * @param pageSize the size of the current page
+     * @param offset the offset applied to the results
+     * @return QueryResponseList containing the search results and metadata
+     */
     protected QueryResponseList createResponseList(final List<Map<String, Object>> documentList, final long allRecordCount,
             final String allRecordCountRelation, final long queryTime, final boolean partialResults, final FacetResponse facetResponse,
             final int start, final int pageSize, final int offset) {
@@ -308,6 +407,13 @@ public class RankFusionProcessor implements AutoCloseable {
                 pageSize, offset);
     }
 
+    /**
+     * Converts an object value to a float for score calculations.
+     * Handles Float and String types, returning 0.0f for unsupported types.
+     *
+     * @param value the object to convert to float
+     * @return float representation of the value, or 0.0f if conversion fails
+     */
     protected float toFloat(final Object value) {
         if (value instanceof final Float f) {
             return f;
@@ -318,6 +424,11 @@ public class RankFusionProcessor implements AutoCloseable {
         return 0.0f;
     }
 
+    /**
+     * Wrapper class for SearchRequestParams that allows overriding specific parameters.
+     * This wrapper is used to modify pagination parameters while preserving all other
+     * search request parameters from the parent object.
+     */
     protected static class SearchRequestParamsWrapper extends SearchRequestParams {
         private final SearchRequestParams parent;
         private final int startPosition;
@@ -329,6 +440,11 @@ public class RankFusionProcessor implements AutoCloseable {
             this.pageSize = pageSize;
         }
 
+        /**
+         * Gets the parent SearchRequestParams object that this wrapper delegates to.
+         *
+         * @return the parent SearchRequestParams instance
+         */
         public SearchRequestParams getParent() {
             return parent;
         }
@@ -449,10 +565,24 @@ public class RankFusionProcessor implements AutoCloseable {
         }
     }
 
+    /**
+     * Sets the main searcher at index 0 of the searchers array.
+     * This method is used to configure the primary searcher for rank fusion processing.
+     *
+     * @param searcher the RankFusionSearcher to set as the main searcher
+     */
     public void setSeacher(final RankFusionSearcher searcher) {
         searchers[0] = searcher;
     }
 
+    /**
+     * Registers a new searcher with the rank fusion processor.
+     * Adds the searcher to the searchers array and initializes the executor service
+     * if it hasn't been created yet. The executor service is created with a thread pool
+     * sized based on configuration or system capabilities.
+     *
+     * @param searcher the RankFusionSearcher to register
+     */
     public void register(final RankFusionSearcher searcher) {
         if (logger.isDebugEnabled()) {
             logger.debug("Load {}", searcher.getClass().getSimpleName());

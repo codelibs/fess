@@ -31,14 +31,41 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing related content entities.
+ * This service provides CRUD operations for related content, including
+ * retrieval, storage, deletion, and search functionality.
+ */
 public class RelatedContentService extends FessAppService {
 
+    /**
+     * Default constructor.
+     * Creates a new instance of RelatedContentService.
+     */
+    public RelatedContentService() {
+        // Default constructor
+    }
+
+    /**
+     * Behavior class for RelatedContent entity operations.
+     * Provides database access methods for related content management.
+     */
     @Resource
     protected RelatedContentBhv relatedContentBhv;
 
+    /**
+     * Configuration settings for Fess application.
+     * Contains various configuration parameters used throughout the application.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of related content entities.
+     *
+     * @param relatedContentPager the pager object containing pagination and search parameters
+     * @return a list of RelatedContent entities matching the specified criteria
+     */
     public List<RelatedContent> getRelatedContentList(final RelatedContentPager relatedContentPager) {
 
         final PagingResultBean<RelatedContent> relatedContentList = relatedContentBhv.selectPage(cb -> {
@@ -54,22 +81,47 @@ public class RelatedContentService extends FessAppService {
         return relatedContentList;
     }
 
+    /**
+     * Retrieves a specific related content entity by its ID.
+     *
+     * @param id the unique identifier of the related content
+     * @return an OptionalEntity containing the RelatedContent if found, empty otherwise
+     */
     public OptionalEntity<RelatedContent> getRelatedContent(final String id) {
         return relatedContentBhv.selectByPK(id);
     }
 
+    /**
+     * Stores (inserts or updates) a related content entity.
+     * After storing, updates the related content helper to refresh the cache.
+     *
+     * @param relatedContent the RelatedContent entity to store
+     */
     public void store(final RelatedContent relatedContent) {
 
         relatedContentBhv.insertOrUpdate(relatedContent, op -> op.setRefreshPolicy(Constants.TRUE));
         ComponentUtil.getRelatedContentHelper().update();
     }
 
+    /**
+     * Deletes a related content entity from the database.
+     * After deletion, updates the related content helper to refresh the cache.
+     *
+     * @param relatedContent the RelatedContent entity to delete
+     */
     public void delete(final RelatedContent relatedContent) {
 
         relatedContentBhv.delete(relatedContent, op -> op.setRefreshPolicy(Constants.TRUE));
         ComponentUtil.getRelatedContentHelper().update();
     }
 
+    /**
+     * Sets up the search conditions for listing related content entities.
+     * Configures wildcard searches for term and content fields, and sets up ordering.
+     *
+     * @param cb the condition bean for building the query
+     * @param relatedContentPager the pager containing search parameters
+     */
     protected void setupListCondition(final RelatedContentCB cb, final RelatedContentPager relatedContentPager) {
         if (StringUtil.isNotBlank(relatedContentPager.term)) {
             cb.query().setTerm_Wildcard(wrapQuery(relatedContentPager.term));
@@ -87,6 +139,12 @@ public class RelatedContentService extends FessAppService {
 
     }
 
+    /**
+     * Retrieves a list of all available related content entities.
+     * Results are ordered by term and limited by the configured maximum fetch size.
+     *
+     * @return a list of all available RelatedContent entities
+     */
     public List<RelatedContent> getAvailableRelatedContentList() {
         return relatedContentBhv.selectList(cb -> {
             cb.query().matchAll();

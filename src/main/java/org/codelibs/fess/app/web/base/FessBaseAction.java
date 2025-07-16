@@ -55,7 +55,6 @@ import jakarta.annotation.Resource;
  * including user authentication, validation, message handling, and access context management.
  * It extends LastaFlute's TypicalAction and implements validation and HTML path interfaces.
  *
- * @author FESs Project
  * @since 1.0
  */
 public abstract class FessBaseAction extends TypicalAction // has several interfaces for direct use

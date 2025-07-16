@@ -32,6 +32,15 @@ public abstract class RankFusionSearcher {
     protected String name;
 
     /**
+     * Default constructor for creating a new rank fusion searcher instance.
+     * This constructor initializes the searcher with default values.
+     * The searcher name will be lazily initialized when first accessed.
+     */
+    public RankFusionSearcher() {
+        // Default constructor - name will be initialized lazily
+    }
+
+    /**
      * Returns the name of this searcher.
      * The name is derived from the class name by converting it to lowercase
      * and removing the "Searcher" suffix.
