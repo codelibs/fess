@@ -22,7 +22,6 @@ import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Pager for role management.
- * @author fess
  *
  */
 public class RolePager implements Serializable {
@@ -56,14 +55,29 @@ public class RolePager implements Serializable {
      */
     private int allPageCount;
 
+    /**
+     * Flag indicating whether a previous page exists.
+     */
     private boolean existPrePage;
 
+    /**
+     * Flag indicating whether a next page exists.
+     */
     private boolean existNextPage;
 
+    /**
+     * List of page numbers for pagination navigation.
+     */
     private List<Integer> pageNumberList;
 
+    /**
+     * Number of records per page.
+     */
     private int pageSize;
 
+    /**
+     * Current page number in pagination.
+     */
     private int currentPageNumber;
 
     /**

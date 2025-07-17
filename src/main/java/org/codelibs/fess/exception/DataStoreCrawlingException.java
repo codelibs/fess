@@ -26,8 +26,14 @@ public class DataStoreCrawlingException extends CrawlingAccessException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The URL where the crawling error occurred.
+     */
     private final String url;
 
+    /**
+     * Flag indicating whether the crawling process should be aborted.
+     */
     private final boolean abort;
 
     /**

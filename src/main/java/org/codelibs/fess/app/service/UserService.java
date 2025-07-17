@@ -38,7 +38,6 @@ import jakarta.annotation.Resource;
  * This service provides CRUD operations for user management, including user authentication,
  * password management, and user listing with pagination support.
  *
- * @author FessProject
  */
 public class UserService {
 

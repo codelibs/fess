@@ -22,7 +22,6 @@ import org.codelibs.fess.app.web.RootAction;
  * This exception is used to indicate that a user does not have the required role
  * to access a specific action or resource.
  *
- * @author FessProject
  */
 public class UserRoleLoginException extends RuntimeException {
 

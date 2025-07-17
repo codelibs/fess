@@ -44,18 +44,39 @@ public class SchedulerPager implements Serializable {
      */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /**
+     * Total number of records.
+     */
     private int allRecordCount;
 
+    /**
+     * Total number of pages.
+     */
     private int allPageCount;
 
+    /**
+     * Flag indicating whether a previous page exists.
+     */
     private boolean existPrePage;
 
+    /**
+     * Flag indicating whether a next page exists.
+     */
     private boolean existNextPage;
 
+    /**
+     * List of page numbers for pagination navigation.
+     */
     private List<Integer> pageNumberList;
 
+    /**
+     * Number of records per page.
+     */
     private int pageSize;
 
+    /**
+     * Current page number in pagination.
+     */
     private int currentPageNumber;
 
     /**

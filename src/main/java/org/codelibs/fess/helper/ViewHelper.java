@@ -100,7 +100,6 @@ import jakarta.servlet.http.HttpSession;
  * This class provides utilities for content rendering, URL processing, highlighting,
  * caching, pagination, and user interface functionality.
  *
- * @author FessProject
  */
 public class ViewHelper {
 

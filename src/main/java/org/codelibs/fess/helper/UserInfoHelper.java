@@ -41,7 +41,6 @@ import jakarta.servlet.http.HttpSession;
  * It provides functionality for generating unique user codes, managing user sessions,
  * and tracking search result document IDs for analytics and personalization.
  *
- * @author FessProject
  */
 public class UserInfoHelper {
 

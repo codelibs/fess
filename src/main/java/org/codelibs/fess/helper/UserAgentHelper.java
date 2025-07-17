@@ -22,7 +22,6 @@ import org.lastaflute.web.util.LaRequestUtil;
  * This class analyzes the User-Agent header to determine which browser type is being used
  * and caches the result in the request attribute for performance optimization.
  *
- * @author FessProject
  */
 public class UserAgentHelper {
 
