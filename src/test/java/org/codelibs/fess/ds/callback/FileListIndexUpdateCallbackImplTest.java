@@ -145,7 +145,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
     public void test_isUrlCrawlable_complexExcludePattern() {
         DataStoreParams paramMap = new DataStoreParams();
-        paramMap.put("url_exclude_pattern", "(admin|private|temp)");
+        paramMap.put("url_exclude_pattern", ".*(admin|private|temp).*");
 
         boolean result1 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/admin/config.html");
         boolean result2 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/private/data.html");
