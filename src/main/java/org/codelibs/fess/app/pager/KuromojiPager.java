@@ -34,18 +34,25 @@ public class KuromojiPager implements Serializable {
         // no-op
     }
 
+    /** The total number of records. */
     private int allRecordCount;
 
+    /** The total number of pages. */
     private int allPageCount;
 
+    /** Whether a previous page exists. */
     private boolean existPrePage;
 
+    /** Whether a next page exists. */
     private boolean existNextPage;
 
+    /** The list of page numbers. */
     private List<Integer> pageNumberList;
 
+    /** The number of items per page. */
     private int pageSize;
 
+    /** The current page number. */
     private int currentPageNumber;
 
     /** The ID of the Kuromoji dictionary. */

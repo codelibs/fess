@@ -35,18 +35,27 @@ public class ProtwordsPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** The total number of records. */
     private int allRecordCount;
 
+    /**
+     * The total number of pages.
+     */
     private int allPageCount;
 
+    /** Whether a previous page exists. */
     private boolean existPrePage;
 
+    /** Whether a next page exists. */
     private boolean existNextPage;
 
+    /** The list of page numbers for pagination display. */
     private List<Integer> pageNumberList;
 
+    /** The number of items to display per page. */
     private int pageSize;
 
+    /** The current page number. */
     private int currentPageNumber;
 
     /** The dictionary ID */

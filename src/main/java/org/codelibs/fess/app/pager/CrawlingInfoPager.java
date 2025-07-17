@@ -45,18 +45,39 @@ public class CrawlingInfoPager implements Serializable {
      */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /**
+     * The total number of records across all pages.
+     */
     private int allRecordCount;
 
+    /**
+     * The total number of pages available.
+     */
     private int allPageCount;
 
+    /**
+     * Indicates whether a previous page exists before the current page.
+     */
     private boolean existPrePage;
 
+    /**
+     * Indicates whether a next page exists after the current page.
+     */
     private boolean existNextPage;
 
+    /**
+     * The list of page numbers to display in the pagination component.
+     */
     private List<Integer> pageNumberList;
 
+    /**
+     * The number of records to display per page.
+     */
     private int pageSize;
 
+    /**
+     * The current page number (1-based) for pagination.
+     */
     private int currentPageNumber;
 
     /**

@@ -31,18 +31,25 @@ public class BoostDocPager implements Serializable {
     /** Default current page number. */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /** Total number of records. */
     private int allRecordCount;
 
+    /** Total number of pages. */
     private int allPageCount;
 
+    /** Indicates if a previous page exists. */
     private boolean existPrePage;
 
+    /** Indicates if a next page exists. */
     private boolean existNextPage;
 
+    /** List of page numbers for pagination navigation. */
     private List<Integer> pageNumberList;
 
+    /** Page size for pagination. */
     private int pageSize;
 
+    /** Current page number for pagination. */
     private int currentPageNumber;
 
     /** Boost document ID for search filtering. */

@@ -46,8 +46,14 @@ public class RolePager implements Serializable {
      */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /**
+     * Total number of records.
+     */
     private int allRecordCount;
 
+    /**
+     * Total number of pages.
+     */
     private int allPageCount;
 
     private boolean existPrePage;

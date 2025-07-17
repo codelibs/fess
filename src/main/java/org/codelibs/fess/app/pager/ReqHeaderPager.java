@@ -39,18 +39,39 @@ public class ReqHeaderPager implements Serializable {
      */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /**
+     * The total number of records in the result set.
+     */
     private int allRecordCount;
 
+    /**
+     * The total number of pages available for pagination.
+     */
     private int allPageCount;
 
+    /**
+     * Indicates whether a previous page exists for pagination.
+     */
     private boolean existPrePage;
 
+    /**
+     * Indicates whether a next page exists for pagination.
+     */
     private boolean existNextPage;
 
+    /**
+     * The list of page numbers to display for pagination navigation.
+     */
     private List<Integer> pageNumberList;
 
+    /**
+     * The number of records to display per page.
+     */
     private int pageSize;
 
+    /**
+     * The current page number for pagination.
+     */
     private int currentPageNumber;
 
     /**

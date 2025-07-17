@@ -40,18 +40,25 @@ public class PathMapPager implements Serializable {
     /** Default current page number. */
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
+    /** The total number of records. */
     private int allRecordCount;
 
+    /** The total number of pages. */
     private int allPageCount;
 
+    /** Indicates if a previous page exists. */
     private boolean existPrePage;
 
+    /** Indicates if a next page exists. */
     private boolean existNextPage;
 
+    /** The list of page numbers. */
     private List<Integer> pageNumberList;
 
+    /** The number of records per page. */
     private int pageSize;
 
+    /** The current page number. */
     private int currentPageNumber;
 
     /** The ID. */
