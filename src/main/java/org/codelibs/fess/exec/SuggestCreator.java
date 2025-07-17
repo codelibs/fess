@@ -47,23 +47,45 @@ import org.opensearch.monitor.process.ProcessProbe;
 
 import jakarta.annotation.Resource;
 
+/**
+ * This class is a command-line application for creating and managing the suggest index.
+ * It provides functionality to index words from documents and search logs, as well as
+ * to purge old suggest data.
+ */
 public class SuggestCreator {
+
+    /**
+     * Constructs a new suggest creator.
+     */
+    public SuggestCreator() {
+        // do nothing
+    }
 
     private static final Logger logger = LogManager.getLogger(SuggestCreator.class);
 
+    /** The search engine client for interacting with OpenSearch. */
     @Resource
     public SearchEngineClient searchEngineClient;
 
+    /**
+     * A nested class for parsing command-line options.
+     */
     protected static class Options {
+        /** The session ID for the suggest creation process. */
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
         protected String sessionId;
 
+        /** The name of the suggest creator instance. */
         @Option(name = "-n", aliases = "--name", metaVar = "name", usage = "Name")
         protected String name;
 
+        /** The path to the properties file for configuration. */
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         protected String propertiesPath;
 
+        /**
+         * Constructs a new Options object.
+         */
         protected Options() {
             // nothing
         }
@@ -74,6 +96,9 @@ public class SuggestCreator {
         }
     }
 
+    /**
+     * Initializes the necessary probes for monitoring system resources.
+     */
     static void initializeProbes() {
         // Force probes to be loaded
         ProcessProbe.getInstance();
@@ -81,6 +106,11 @@ public class SuggestCreator {
         JvmInfo.jvmInfo();
     }
 
+    /**
+     * The main method for the SuggestCreator application.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(final String[] args) {
         final Options options = new Options();
         final CmdLineParser parser = new CmdLineParser(options);

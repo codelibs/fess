@@ -25,13 +25,28 @@ import org.codelibs.fess.dict.DictionaryItem;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * A dictionary creator for synonym files.
+ * This class is responsible for creating {@link SynonymFile} instances
+ * from files that match the pattern "synonym.*\\.txt".
+ */
 public class SynonymCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(SynonymCreator.class);
 
+    /**
+     * Constructs a new creator for synonym dictionaries.
+     * It sets the file pattern to match files starting with "synonym"
+     * and ending with ".txt".
+     */
     public SynonymCreator() {
         super("synonym.*\\.txt");
     }
 
+    /**
+     * Registers this creator with the dictionary manager upon initialization.
+     * This method is annotated with {@link PostConstruct} to be executed after
+     * dependency injection is complete.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -40,6 +55,14 @@ public class SynonymCreator extends DictionaryCreator {
         dictionaryManager.addCreator(this);
     }
 
+    /**
+     * Creates a new {@link SynonymFile} instance.
+     *
+     * @param id        The unique identifier for the dictionary file.
+     * @param path      The file path of the dictionary.
+     * @param timestamp The last modified timestamp of the file.
+     * @return A new {@link SynonymFile} associated with the dictionary manager.
+     */
     @Override
     protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(final String id, final String path, final Date timestamp) {
         return new SynonymFile(id, path, timestamp).manager(dictionaryManager);

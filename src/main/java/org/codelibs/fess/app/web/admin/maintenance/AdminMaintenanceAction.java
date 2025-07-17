@@ -211,7 +211,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     /**
-     * Writes OpenSearch/Elasticsearch JSON API responses to the ZIP output stream.
+     * Writes OpenSearch JSON API responses to the ZIP output stream.
      *
      * @param zos the ZIP output stream to write to
      * @param id the diagnostic ID for organizing files in the ZIP
@@ -230,7 +230,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     /**
-     * Writes a specific OpenSearch/Elasticsearch API response to the ZIP output stream.
+     * Writes a specific OpenSearch API response to the ZIP output stream.
      *
      * @param zos the ZIP output stream to write to
      * @param id the diagnostic ID for organizing files in the ZIP
@@ -250,7 +250,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     /**
-     * Writes OpenSearch/Elasticsearch CAT API responses to the ZIP output stream.
+     * Writes OpenSearch CAT API responses to the ZIP output stream.
      *
      * @param zos the ZIP output stream to write to
      * @param id the diagnostic ID for organizing files in the ZIP

@@ -31,13 +31,24 @@ import org.opensearch.index.query.AbstractQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryShardContext;
 
+/**
+ * A query builder for a stored LTR (Learning to Rank) query.
+ * This builder constructs a query that uses a pre-trained LTR model
+ * to re-rank search results based on a given set of features.
+ */
 public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBuilder> implements NamedWriteable {
+    /** The name of the query. */
     public static final String NAME = "sltr";
 
+    /** The parse field for the model name. */
     public static final ParseField MODEL_NAME = new ParseField("model");
+    /** The parse field for the featureset name. */
     public static final ParseField FEATURESET_NAME = new ParseField("featureset");
+    /** The parse field for the store name. */
     public static final ParseField STORE_NAME = new ParseField("store");
+    /** The parse field for the query parameters. */
     public static final ParseField PARAMS = new ParseField("params");
+    /** The parse field for the active features. */
     public static final ParseField ACTIVE_FEATURES = new ParseField("active_features");
     private static final ObjectParser<StoredLtrQueryBuilder, Void> PARSER;
 
@@ -57,6 +68,13 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
     private String storeName;
     private Map<String, Object> params;
     private List<String> activeFeatures;
+
+    /**
+     * Constructs a new stored LTR query builder.
+     */
+    public StoredLtrQueryBuilder() {
+        // do nothing
+    }
 
     @Override
     public String getWriteableName() {
@@ -111,46 +129,101 @@ public class StoredLtrQueryBuilder extends AbstractQueryBuilder<StoredLtrQueryBu
         return Objects.hash(modelName, featureSetName, storeName, params, activeFeatures);
     }
 
+    /**
+     * Gets the name of the LTR model.
+     *
+     * @return The model name.
+     */
     public String modelName() {
         return modelName;
     }
 
+    /**
+     * Sets the name of the LTR model.
+     *
+     * @param modelName The model name.
+     * @return This query builder.
+     */
     public StoredLtrQueryBuilder modelName(final String modelName) {
         this.modelName = Objects.requireNonNull(modelName);
         return this;
     }
 
+    /**
+     * Gets the name of the featureset.
+     *
+     * @return The featureset name.
+     */
     public String featureSetName() {
         return featureSetName;
     }
 
+    /**
+     * Sets the name of the featureset.
+     *
+     * @param featureSetName The featureset name.
+     * @return This query builder.
+     */
     public StoredLtrQueryBuilder featureSetName(final String featureSetName) {
         this.featureSetName = featureSetName;
         return this;
     }
 
+    /**
+     * Gets the name of the feature store.
+     *
+     * @return The store name.
+     */
     public String storeName() {
         return storeName;
     }
 
+    /**
+     * Sets the name of the feature store.
+     *
+     * @param storeName The store name.
+     * @return This query builder.
+     */
     public StoredLtrQueryBuilder storeName(final String storeName) {
         this.storeName = storeName;
         return this;
     }
 
+    /**
+     * Gets the parameters for the LTR query.
+     *
+     * @return A map of query parameters.
+     */
     public Map<String, Object> params() {
         return params;
     }
 
+    /**
+     * Sets the parameters for the LTR query.
+     *
+     * @param params A map of query parameters.
+     * @return This query builder.
+     */
     public StoredLtrQueryBuilder params(final Map<String, Object> params) {
         this.params = Objects.requireNonNull(params);
         return this;
     }
 
+    /**
+     * Gets the list of active features.
+     *
+     * @return A list of active features.
+     */
     public List<String> activeFeatures() {
         return activeFeatures;
     }
 
+    /**
+     * Sets the list of active features.
+     *
+     * @param activeFeatures A list of active features.
+     * @return This query builder.
+     */
     public StoredLtrQueryBuilder activeFeatures(final List<String> activeFeatures) {
         this.activeFeatures = Objects.requireNonNull(activeFeatures);
         return this;

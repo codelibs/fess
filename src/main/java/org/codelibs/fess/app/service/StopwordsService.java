@@ -30,13 +30,34 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service for managing stopwords.
+ * This class provides methods to interact with stopwords dictionaries,
+ * including retrieving, storing, and deleting stopwords.
+ */
 public class StopwordsService {
+    /** The dictionary manager for accessing dictionary files. */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /** The Fess configuration for accessing system settings. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Constructs a new stopwords service.
+     */
+    public StopwordsService() {
+        // do nothing
+    }
+
+    /**
+     * Retrieves a list of stopwords for a given dictionary and pager.
+     *
+     * @param dictId         The ID of the dictionary.
+     * @param stopwordsPager The pager for controlling pagination.
+     * @return A list of stopwords.
+     */
     public List<StopwordsItem> getStopwordsList(final String dictId, final StopwordsPager stopwordsPager) {
         return getStopwordsFile(dictId).map(file -> {
             final int pageSize = stopwordsPager.getPageSize();
@@ -52,15 +73,34 @@ public class StopwordsService {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Retrieves a stopwords file for a given dictionary ID.
+     *
+     * @param dictId The ID of the dictionary.
+     * @return An optional entity containing the stopwords file, or empty if not found.
+     */
     public OptionalEntity<StopwordsFile> getStopwordsFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(StopwordsFile.class::isInstance)
                 .map(file -> OptionalEntity.of((StopwordsFile) file)).orElse(OptionalEntity.empty());
     }
 
+    /**
+     * Retrieves a specific stopword item by its ID.
+     *
+     * @param dictId The ID of the dictionary.
+     * @param id     The ID of the stopword item.
+     * @return An optional entity containing the stopword item, or empty if not found.
+     */
     public OptionalEntity<StopwordsItem> getStopwordsItem(final String dictId, final long id) {
         return getStopwordsFile(dictId).map(file -> file.get(id).get());
     }
 
+    /**
+     * Stores a stopword item in the specified dictionary.
+     *
+     * @param dictId        The ID of the dictionary.
+     * @param stopwordsItem The stopword item to store.
+     */
     public void store(final String dictId, final StopwordsItem stopwordsItem) {
         getStopwordsFile(dictId).ifPresent(file -> {
             if (stopwordsItem.getId() == 0) {
@@ -71,6 +111,12 @@ public class StopwordsService {
         });
     }
 
+    /**
+     * Deletes a stopword item from the specified dictionary.
+     *
+     * @param dictId        The ID of the dictionary.
+     * @param stopwordsItem The stopword item to delete.
+     */
     public void delete(final String dictId, final StopwordsItem stopwordsItem) {
         getStopwordsFile(dictId).ifPresent(file -> {
             file.delete(stopwordsItem);

@@ -25,13 +25,28 @@ import org.codelibs.fess.dict.DictionaryItem;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * A dictionary creator for stemmer override files.
+ * This class is responsible for creating {@link StemmerOverrideFile} instances
+ * from files that match the pattern "stemmer_override.*\\.txt".
+ */
 public class StemmerOverrideCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(StemmerOverrideCreator.class);
 
+    /**
+     * Constructs a new creator for stemmer override dictionaries.
+     * It sets the file pattern to match files starting with "stemmer_override"
+     * and ending with ".txt".
+     */
     public StemmerOverrideCreator() {
         super("stemmer_override.*\\.txt");
     }
 
+    /**
+     * Registers this creator with the dictionary manager upon initialization.
+     * This method is annotated with {@link PostConstruct} to be executed after
+     * dependency injection is complete.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -40,6 +55,14 @@ public class StemmerOverrideCreator extends DictionaryCreator {
         dictionaryManager.addCreator(this);
     }
 
+    /**
+     * Creates a new {@link StemmerOverrideFile} instance.
+     *
+     * @param id        The unique identifier for the dictionary file.
+     * @param path      The file path of the dictionary.
+     * @param timestamp The last modified timestamp of the file.
+     * @return A new {@link StemmerOverrideFile} associated with the dictionary manager.
+     */
     @Override
     protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(final String id, final String path, final Date timestamp) {
         return new StemmerOverrideFile(id, path, timestamp).manager(dictionaryManager);

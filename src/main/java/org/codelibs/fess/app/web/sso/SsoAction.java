@@ -54,6 +54,13 @@ public class SsoAction extends FessLoginAction {
     //
     private static final Logger logger = LogManager.getLogger(SsoAction.class);
 
+    /**
+     * Constructs a new SSO action.
+     */
+    public SsoAction() {
+        // do nothing
+    }
+
     // ===================================================================================
     //                                                                       Login Execute
     //                                                                      ==============

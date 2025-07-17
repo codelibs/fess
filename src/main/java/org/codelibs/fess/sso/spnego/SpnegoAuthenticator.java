@@ -111,6 +111,13 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     protected org.codelibs.spnego.SpnegoAuthenticator authenticator = null;
 
     /**
+     * Constructs a new SPNEGO authenticator.
+     */
+    public SpnegoAuthenticator() {
+        // do nothing
+    }
+
+    /**
      * Initializes the SPNEGO authenticator and registers it with the SSO manager.
      * This method is called automatically after dependency injection is complete.
      */
@@ -231,6 +238,13 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      * authentication modules, and security options.
      */
     protected static class SpengoConfig implements FilterConfig {
+
+        /**
+         * Constructs a new SPNEGO filter configuration.
+         */
+        public SpengoConfig() {
+            // do nothing
+        }
 
         /**
          * Gets the filter name for this SPNEGO configuration.

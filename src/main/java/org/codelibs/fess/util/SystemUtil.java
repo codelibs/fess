@@ -17,10 +17,23 @@ package org.codelibs.fess.util;
 
 import org.codelibs.fess.Constants;
 
+/**
+ * This class provides system-related utility methods.
+ * It extends {@link org.codelibs.core.lang.SystemUtil} and adds
+ * methods specific to the Fess application.
+ */
 public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private SystemUtil() {
     }
 
+    /**
+     * Gets the HTTP address of the search engine.
+     *
+     * @return The search engine HTTP address.
+     */
     public static String getSearchEngineHttpAddress() {
         return System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
     }

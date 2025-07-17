@@ -17,10 +17,25 @@ package org.codelibs.fess.app.web.api.admin.suggest;
 
 import org.codelibs.fess.app.web.admin.suggest.SuggestForm;
 
+/**
+ * Represents the request body for suggest API operations.
+ * This class extends {@link SuggestForm} and adds fields for tracking
+ * the number of total, document, and query words.
+ */
 public class SuggestBody extends SuggestForm {
+    /**
+     * Constructs a new suggest body.
+     */
+    public SuggestBody() {
+        // do nothing
+    }
+
+    /** The total number of words in the suggest index. */
     public Long totalWordsNum;
 
+    /** The number of words from documents. */
     public Long documentWordsNum;
 
+    /** The number of words from search queries. */
     public Long queryWordsNum;
 }

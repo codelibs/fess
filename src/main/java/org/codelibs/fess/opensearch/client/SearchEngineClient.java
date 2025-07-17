@@ -181,7 +181,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 /**
- * Client for interacting with OpenSearch/Elasticsearch search engine.
+ * Client for interacting with OpenSearch search engine.
  * Provides document indexing, searching, and administrative operations.
  */
 public class SearchEngineClient implements Client {

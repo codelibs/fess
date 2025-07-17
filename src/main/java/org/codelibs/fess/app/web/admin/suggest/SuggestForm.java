@@ -15,5 +15,14 @@
  */
 package org.codelibs.fess.app.web.admin.suggest;
 
+/**
+ * This class is a form for suggest settings.
+ */
 public class SuggestForm {
+    /**
+     * Constructs a new suggest form.
+     */
+    public SuggestForm() {
+        // do nothing
+    }
 }
