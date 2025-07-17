@@ -269,17 +269,15 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     }
 
     /**
-     * Determines whether the specified URL is crawlable based on the provided parameters.
-     * <p>
-     * If the {@code paramMap} contains a value for {@code URL_EXCLUDE_PATTERN}, this method checks if the URL matches
-     * the exclude pattern. If the pattern is provided as a {@link String}, it is compiled into a {@link Pattern} and
-     * stored back in the map for future use. If the URL matches the exclude pattern, the method returns {@code false},
+     * Determines whether the specified URL is crawlable based on the exclusion pattern
+     * provided in the {@code paramMap}. If the {@code URL_EXCLUDE_PATTERN} key exists in
+     * the parameter map, its value is used as a regular expression pattern to match against
+     * the given URL. If the URL matches the exclusion pattern, the method returns {@code false},
      * indicating that the URL should not be crawled. Otherwise, it returns {@code true}.
-     * </p>
      *
-     * @param paramMap the parameters containing potential exclude patterns
-     * @param url the URL to check for crawlability
-     * @return {@code true} if the URL is crawlable; {@code false} if it matches the exclude pattern
+     * @param paramMap the parameter map containing potential exclusion patterns
+     * @param url the URL to be checked for crawlability
+     * @return {@code true} if the URL is crawlable; {@code false} if it matches the exclusion pattern
      */
     protected boolean isUrlCrawlable(final DataStoreParams paramMap, final String url) {
         if (paramMap.containsKey(URL_EXCLUDE_PATTERN)) {
@@ -291,7 +289,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 }
             }
             if (paramMap.get(URL_EXCLUDE_PATTERN) instanceof final Pattern pattern) {
-                if (pattern.matcher(url).find()) {
+                if (pattern.matcher(url).matches()) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Skipping URL {} due to exclude pattern: {}", url, pattern);
                     }
