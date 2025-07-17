@@ -15,26 +15,48 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when a dependency injection container or component is not available.
+ * This exception indicates that the required container or a specific component within it cannot be accessed.
+ */
 public class ContainerNotAvailableException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /** The name of the component that is not available. */
     private String componentName;
 
+    /**
+     * Constructor with component name.
+     * @param componentName The name of the component that is not available.
+     */
     public ContainerNotAvailableException(final String componentName) {
         super(componentName + " is not available.");
     }
 
+    /**
+     * Constructor with component name and cause.
+     * @param componentName The name of the component that is not available.
+     * @param cause The cause of the exception.
+     */
     public ContainerNotAvailableException(final String componentName, final Throwable cause) {
         super(componentName + " is not available.", cause);
         this.componentName = componentName;
     }
 
+    /**
+     * Constructor with cause only.
+     * @param cause The cause of the exception.
+     */
     public ContainerNotAvailableException(final Throwable cause) {
         super("Container is not avaiable.");
         componentName = "container";
     }
 
+    /**
+     * Gets the name of the component that is not available.
+     * @return The component name.
+     */
     public String getComponentName() {
         return componentName;
     }

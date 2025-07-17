@@ -17,5 +17,19 @@ package org.codelibs.fess.app.web.api.admin.plugin;
 
 import org.codelibs.fess.app.web.admin.plugin.DeleteForm;
 
+/**
+ * Request body class for plugin deletion API endpoint.
+ * Extends the standard plugin DeleteForm to provide JSON request body functionality
+ * for REST API operations.
+ */
 public class DeleteBody extends DeleteForm {
+
+    /**
+     * Creates a new instance of DeleteBody.
+     * This constructor initializes the request body for plugin deletion API operations,
+     * extending the standard plugin DeleteForm with JSON request body functionality.
+     */
+    public DeleteBody() {
+        super();
+    }
 }

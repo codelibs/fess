@@ -30,14 +30,39 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing file authentication configurations.
+ * This service provides operations for retrieving, storing, and deleting
+ * file authentication settings used by the Fess search engine.
+ */
 public class FileAuthenticationService {
 
+    /**
+     * Default constructor for file authentication service.
+     * Creates a new instance with default values.
+     */
+    public FileAuthenticationService() {
+        // Default constructor
+    }
+
+    /**
+     * Behavior class for file authentication database operations.
+     */
     @Resource
     protected FileAuthenticationBhv fileAuthenticationBhv;
 
+    /**
+     * Configuration settings for the Fess application.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of file authentication configurations.
+     *
+     * @param fileAuthenticationPager the pager containing pagination settings and search criteria
+     * @return a list of file authentication configurations for the current page
+     */
     public List<FileAuthentication> getFileAuthenticationList(final FileAuthPager fileAuthenticationPager) {
 
         final PagingResultBean<FileAuthentication> fileAuthenticationList = fileAuthenticationBhv.selectPage(cb -> {
@@ -54,10 +79,22 @@ public class FileAuthenticationService {
         return fileAuthenticationList;
     }
 
+    /**
+     * Retrieves a specific file authentication configuration by its ID.
+     *
+     * @param id the unique identifier of the file authentication configuration
+     * @return an OptionalEntity containing the file authentication if found, empty otherwise
+     */
     public OptionalEntity<FileAuthentication> getFileAuthentication(final String id) {
         return fileAuthenticationBhv.selectByPK(id);
     }
 
+    /**
+     * Stores a file authentication configuration.
+     * The parameters are encrypted before storage for security.
+     *
+     * @param fileAuthentication the file authentication configuration to store
+     */
     public void store(final FileAuthentication fileAuthentication) {
         fileAuthentication.setParameters(ParameterUtil.encrypt(fileAuthentication.getParameters()));
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
@@ -66,6 +103,11 @@ public class FileAuthenticationService {
 
     }
 
+    /**
+     * Deletes a file authentication configuration from the system.
+     *
+     * @param fileAuthentication the file authentication configuration to delete
+     */
     public void delete(final FileAuthentication fileAuthentication) {
 
         fileAuthenticationBhv.delete(fileAuthentication, op -> {
@@ -74,6 +116,13 @@ public class FileAuthenticationService {
 
     }
 
+    /**
+     * Sets up the search conditions for retrieving file authentication configurations.
+     * This method configures the query conditions and ordering for the database query.
+     *
+     * @param cb the condition bean for building the query
+     * @param fileAuthenticationPager the pager containing search criteria
+     */
     protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthPager fileAuthenticationPager) {
         if (fileAuthenticationPager.id != null) {
             cb.query().docMeta().setId_Equal(fileAuthenticationPager.id);
@@ -87,6 +136,12 @@ public class FileAuthenticationService {
 
     }
 
+    /**
+     * Retrieves all file authentication configurations associated with a specific file configuration.
+     *
+     * @param fileConfigId the ID of the file configuration to retrieve authentications for
+     * @return a list of file authentication configurations for the specified file configuration
+     */
     public List<FileAuthentication> getFileAuthenticationList(final String fileConfigId) {
         return fileAuthenticationBhv.selectList(cb -> {
             cb.query().setFileConfigId_Equal(fileConfigId);

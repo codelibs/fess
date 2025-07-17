@@ -16,10 +16,18 @@
 package org.codelibs.fess.app.web.admin.webauth;
 
 /**
- * @author codelibs
- * @author Shunji Makino
+ * The search form for Web Authentication.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching web authentication settings.
+     */
     public String id;
 }

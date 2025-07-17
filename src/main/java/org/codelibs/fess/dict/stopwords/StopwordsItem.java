@@ -19,11 +19,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.dict.DictionaryItem;
 
+/**
+ * Represents an item in a stopwords dictionary.
+ * This class stores a stopword and tracks its updated value.
+ */
 public class StopwordsItem extends DictionaryItem {
+    /** The original stopword. */
     private final String input;
 
+    /** The new stopword, if updated. */
     private String newInput;
 
+    /**
+     * Constructs a new stopword item.
+     *
+     * @param id    The unique identifier of the item.
+     * @param input The stopword.
+     */
     public StopwordsItem(final long id, final String input) {
         this.id = id;
         this.input = input;
@@ -34,18 +46,38 @@ public class StopwordsItem extends DictionaryItem {
         }
     }
 
+    /**
+     * Gets the new stopword.
+     *
+     * @return The new stopword.
+     */
     public String getNewInput() {
         return newInput;
     }
 
+    /**
+     * Sets the new stopword.
+     *
+     * @param newInput The new stopword.
+     */
     public void setNewInput(final String newInput) {
         this.newInput = newInput;
     }
 
+    /**
+     * Gets the original stopword.
+     *
+     * @return The original stopword.
+     */
     public String getInput() {
         return input;
     }
 
+    /**
+     * Gets the value of the stopword.
+     *
+     * @return The stopword value, or an empty string if null.
+     */
     public String getInputValue() {
         if (input == null) {
             return StringUtil.EMPTY;
@@ -53,10 +85,20 @@ public class StopwordsItem extends DictionaryItem {
         return input;
     }
 
+    /**
+     * Checks if the item has been updated.
+     *
+     * @return true if the item has been updated, false otherwise.
+     */
     public boolean isUpdated() {
         return newInput != null;
     }
 
+    /**
+     * Checks if the item has been marked for deletion.
+     *
+     * @return true if the item is marked for deletion, false otherwise.
+     */
     public boolean isDeleted() {
         return isUpdated() && newInput.length() == 0;
     }
@@ -88,6 +130,11 @@ public class StopwordsItem extends DictionaryItem {
         return "StopwordsItem [id=" + id + ", inputs=" + input + ", newInputs=" + newInput + "]";
     }
 
+    /**
+     * Converts the item to a string representation for writing to a file.
+     *
+     * @return The stopword as a string.
+     */
     public String toLineString() {
         if (isUpdated()) {
             return StringUtils.join(newInput);

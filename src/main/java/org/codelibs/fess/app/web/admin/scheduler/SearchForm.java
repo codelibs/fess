@@ -16,9 +16,18 @@
 package org.codelibs.fess.app.web.admin.scheduler;
 
 /**
- * @author shinsuke
+ * The search form for Scheduler.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching scheduled jobs.
+     */
     public String id;
 }

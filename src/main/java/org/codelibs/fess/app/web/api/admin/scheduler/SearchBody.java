@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.scheduler;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for scheduler administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Scheduler ID */
     public String id;
 }

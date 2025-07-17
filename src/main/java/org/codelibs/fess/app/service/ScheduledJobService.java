@@ -33,16 +33,37 @@ import org.lastaflute.job.LaCron;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing scheduled jobs.
+ */
 public class ScheduledJobService {
+
+    /**
+     * Constructor.
+     */
+    public ScheduledJobService() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ScheduledJobService.class);
 
+    /**
+     * The behavior for scheduled jobs.
+     */
     @Resource
     protected ScheduledJobBhv scheduledJobBhv;
 
+    /**
+     * The Fess configuration.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a list of scheduled jobs based on the pager.
+     * @param scheduledJobPager The pager for scheduled jobs.
+     * @return A list of scheduled jobs.
+     */
     public List<ScheduledJob> getScheduledJobList(final SchedulerPager scheduledJobPager) {
 
         final PagingResultBean<ScheduledJob> scheduledJobList = scheduledJobBhv.selectPage(cb -> {
@@ -59,6 +80,11 @@ public class ScheduledJobService {
         return scheduledJobList;
     }
 
+    /**
+     * Gets a list of scheduled jobs that have been updated after a specific time.
+     * @param updateTime The update time.
+     * @return A list of scheduled jobs.
+     */
     public List<ScheduledJob> getScheduledJobListAfter(final long updateTime) {
         return scheduledJobBhv.selectPage(cb -> {
             cb.fetchFirst(fessConfig.getPageScheduledJobMaxFetchSizeAsInteger());
@@ -67,10 +93,19 @@ public class ScheduledJobService {
         });
     }
 
+    /**
+     * Gets a scheduled job by its ID.
+     * @param id The ID of the scheduled job.
+     * @return An optional entity of the scheduled job.
+     */
     public OptionalEntity<ScheduledJob> getScheduledJob(final String id) {
         return scheduledJobBhv.selectByPK(id);
     }
 
+    /**
+     * Deletes a scheduled job.
+     * @param scheduledJob The scheduled job to delete.
+     */
     public void delete(final ScheduledJob scheduledJob) {
         scheduledJobBhv.delete(scheduledJob, op -> {
             op.setRefreshPolicy(Constants.TRUE);
@@ -78,6 +113,11 @@ public class ScheduledJobService {
         ComponentUtil.getJobHelper().remove(scheduledJob);
     }
 
+    /**
+     * Sets up the list condition for the scheduled job query.
+     * @param cb The scheduled job condition bean.
+     * @param scheduledJobPager The scheduled job pager.
+     */
     protected void setupListCondition(final ScheduledJobCB cb, final SchedulerPager scheduledJobPager) {
         if (scheduledJobPager.id != null) {
             cb.query().docMeta().setId_Equal(scheduledJobPager.id);
@@ -92,6 +132,10 @@ public class ScheduledJobService {
 
     }
 
+    /**
+     * Gets a list of all scheduled jobs.
+     * @return A list of all scheduled jobs.
+     */
     public List<ScheduledJob> getScheduledJobList() {
         return scheduledJobBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
@@ -100,12 +144,20 @@ public class ScheduledJobService {
         });
     }
 
+    /**
+     * Stores a scheduled job.
+     * @param scheduledJob The scheduled job to store.
+     */
     public void store(final ScheduledJob scheduledJob) {
         scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
             op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
+    /**
+     * Gets a list of crawler jobs.
+     * @return A list of crawler jobs.
+     */
     public List<ScheduledJob> getCrawlerJobList() {
         return scheduledJobBhv.selectList(cb -> {
             cb.query().setCrawler_Equal(Constants.T);
@@ -115,6 +167,10 @@ public class ScheduledJobService {
         });
     }
 
+    /**
+     * Starts all available scheduled jobs.
+     * @param cron The cron scheduler.
+     */
     public void start(final LaCron cron) {
         scheduledJobBhv.selectCursor(cb -> {
             cb.query().setAvailable_Equal(Constants.T);

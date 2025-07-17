@@ -17,5 +17,15 @@ package org.codelibs.fess.app.web.api.admin.role;
 
 import org.codelibs.fess.app.web.admin.role.CreateForm;
 
+/**
+ * Request body for creating role via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
 }

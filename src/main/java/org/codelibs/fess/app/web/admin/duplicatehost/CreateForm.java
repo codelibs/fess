@@ -25,34 +25,50 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * Form class for creating new duplicate host configuration entries.
+ * This form handles the creation of duplicate host mappings that redirect
+ * crawling from duplicate hostnames to the regular canonical hostname.
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /** The CRUD operation mode for form processing */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** The regular canonical hostname that should be used */
     @Required
     @Size(max = 1000)
     public String regularName;
 
+    /** The duplicate hostname that should be redirected to the regular name */
     @Required
     @Size(max = 1000)
     public String duplicateHostName;
 
+    /** The sort order for displaying this duplicate host entry */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /** The username of who created this duplicate host entry */
     @Size(max = 1000)
     public String createdBy;
 
+    /** The timestamp when this duplicate host entry was created */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new duplicate host entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;

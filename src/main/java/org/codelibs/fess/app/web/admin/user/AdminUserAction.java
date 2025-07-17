@@ -49,11 +49,19 @@ import org.lastaflute.web.validation.VaMessenger;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for User management.
+ *
  */
 public class AdminUserAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminUserAction() {
+        super();
+    }
+
+    /** Role name for admin user operations */
     public static final String ROLE = "admin-user";
 
     private static final Logger logger = LogManager.getLogger(AdminUserAction.class);
@@ -88,12 +96,24 @@ public class AdminUserAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the user management index page.
+     *
+     * @return HTML response for the user list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of users.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the user list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -107,6 +127,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for users based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered user results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -116,6 +142,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all users.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset user list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -125,6 +157,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers pagination and user list data for rendering the user search results.
+     *
+     * @param data the render data container to populate
+     * @param form the search form containing pagination parameters
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "userItems", userService.getUserList(userPager)); // page navi
         // restore from pager
@@ -142,6 +180,11 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new user.
+     *
+     * @return HTML response for the user creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -156,6 +199,12 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing user.
+     *
+     * @param form the edit form containing user ID
+     * @return HTML response for the user edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -180,6 +229,13 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a user.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the user to display
+     * @return HTML response for the user details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -205,6 +261,12 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new user.
+     *
+     * @param form the create form containing the new user data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -228,6 +290,12 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param form the edit form containing the updated user data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -251,6 +319,12 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a user.
+     *
+     * @param form the edit form containing the ID of the user to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -299,6 +373,12 @@ public class AdminUserAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Returns the user entity based on the provided form data, applying any necessary transformations.
+     *
+     * @param form the form containing user data for retrieval and update
+     * @return optional user entity populated from the form
+     */
     public static OptionalEntity<User> getUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
@@ -312,6 +392,13 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Creates a label/value map item for dropdowns or list displays.
+     *
+     * @param label the display label for the item
+     * @param value the value associated with the item
+     * @return a map containing the label and value entries
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -323,6 +410,12 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                        Small Helper
     //                                                                        ============
 
+    /**
+     * Verifies that the current CRUD mode matches the expected mode, throwing a validation error if not.
+     *
+     * @param crudMode   the actual CRUD mode value
+     * @param expectedMode the expected CRUD mode value
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -331,6 +424,12 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Validates the password and confirmation fields in the form for user creation and update.
+     *
+     * @param form the form containing password and confirmation fields
+     * @param validationErrorLambda callback to report validation errors
+     */
     protected void verifyPassword(final CreateForm form, final VaErrorHook validationErrorLambda) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             resetPassword(form);
@@ -346,11 +445,22 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Resets the password and confirmation fields in the user form.
+     *
+     * @param form the form whose password fields should be reset
+     */
     public static void resetPassword(final CreateForm form) {
         form.password = null;
         form.confirmPassword = null;
     }
 
+    /**
+     * Validates LDAP user attribute types using the configured LDAP manager.
+     *
+     * @param attributes the map of attributes to validate
+     * @param throwError callback to report any validation errors
+     */
     public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
         ComponentUtil.getLdapManager().validateUserAttributes(Long.class, attributes,
                 s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));

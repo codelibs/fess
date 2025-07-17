@@ -17,10 +17,23 @@ package org.codelibs.fess.exception;
 
 import jakarta.servlet.ServletException;
 
+/**
+ * Runtime exception wrapper for ServletException.
+ *
+ * This exception is used to wrap checked ServletExceptions and convert them
+ * into unchecked RuntimeExceptions, allowing them to be thrown from methods
+ * that don't declare ServletException in their throws clause.
+ */
 public class ServletRuntimeException extends RuntimeException {
 
+    /** Serial version UID for serialization compatibility. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new ServletRuntimeException wrapping the given ServletException.
+     *
+     * @param e The ServletException to wrap
+     */
     public ServletRuntimeException(final ServletException e) {
         super(e);
     }

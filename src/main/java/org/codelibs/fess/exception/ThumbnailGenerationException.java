@@ -15,14 +15,29 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when thumbnail generation fails.
+ * This exception is used for errors during thumbnail creation and processing.
+ */
 public class ThumbnailGenerationException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new ThumbnailGenerationException with the specified message and cause.
+     *
+     * @param message the exception message
+     * @param cause the underlying cause of this exception
+     */
     public ThumbnailGenerationException(final String message, final Exception cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new ThumbnailGenerationException with the specified message.
+     *
+     * @param message the exception message
+     */
     public ThumbnailGenerationException(final String message) {
         super(message, false, false);
     }

@@ -29,14 +29,30 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.JsonResponse;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin system information management.
+ *
  */
 public class ApiAdminSysteminfoAction extends FessApiAdminAction {
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminSysteminfoAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves system information including bug report, environment, Fess properties, and system properties.
+     *
+     * @return JSON response containing system information
+     */
     // GET /api/admin/systeminfo
     @Execute
     public JsonResponse<ApiResult> get$index() {

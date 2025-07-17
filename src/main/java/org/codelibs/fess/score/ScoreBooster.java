@@ -34,21 +34,52 @@ import org.opensearch.script.Script;
 import org.opensearch.script.ScriptType;
 import org.opensearch.search.SearchHit;
 
+/**
+ * This class is a base class for score boosters.
+ */
 public abstract class ScoreBooster {
+    /**
+     * Constructor.
+     */
+    public ScoreBooster() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(ScoreBooster.class);
 
+    /**
+     * The bulk request builder.
+     */
     protected BulkRequestBuilder bulkRequestBuilder = null;
 
+    /**
+     * The priority of this score booster.
+     */
     protected int priority = 1;
 
+    /**
+     * The request timeout.
+     */
     protected String requestTimeout = "1m";
 
+    /**
+     * The request cache size.
+     */
     protected int requestCacheSize = 1000;
 
+    /**
+     * The script language.
+     */
     protected String scriptLang = "painless";
 
+    /**
+     * The script code.
+     */
     protected String scriptCode = null;
 
+    /**
+     * A function to find document IDs.
+     */
     protected Function<Map<String, Object>, String[]> idFinder = params -> {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SearchEngineClient client = ComponentUtil.getSearchEngineClient();
@@ -62,6 +93,9 @@ public abstract class ScoreBooster {
         return Arrays.stream(response.getHits().getHits()).map(SearchHit::getId).toArray(n -> new String[n]);
     };
 
+    /**
+     * A function to handle requests.
+     */
     protected Function<Map<String, Object>, Long> requestHandler = params -> {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String[] ids = idFinder.apply(params);
@@ -83,22 +117,41 @@ public abstract class ScoreBooster {
         return (long) ids.length;
     };
 
+    /**
+     * Processes the score boosting.
+     * @return The number of processed documents.
+     */
     public abstract long process();
 
+    /**
+     * Enables this score booster.
+     */
     protected void enable() {
         final ScoreUpdater scoreUpdater = ComponentUtil.getComponent("scoreUpdater");
         scoreUpdater.addScoreBooster(this);
     }
 
+    /**
+     * Updates the score of documents.
+     * @param params The parameters for the update.
+     * @return The number of updated documents.
+     */
     protected long updateScore(final Map<String, Object> params) {
         return requestHandler.apply(params);
     }
 
+    /**
+     * Creates an update request builder.
+     * @return The update request builder.
+     */
     protected UpdateRequestBuilder createUpdateRequestBuilder() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return ComponentUtil.getSearchEngineClient().prepareUpdate().setIndex(fessConfig.getIndexDocumentSearchIndex());
     }
 
+    /**
+     * Flushes the bulk request builder.
+     */
     protected void flush() {
         if (bulkRequestBuilder != null) {
             final BulkResponse response = bulkRequestBuilder.execute().actionGet(requestTimeout);
@@ -109,26 +162,50 @@ public abstract class ScoreBooster {
         }
     }
 
+    /**
+     * Gets the priority of this score booster.
+     * @return The priority.
+     */
     public int getPriority() {
         return priority;
     }
 
+    /**
+     * Sets the priority of this score booster.
+     * @param priority The priority.
+     */
     public void setPriority(final int priority) {
         this.priority = priority;
     }
 
+    /**
+     * Sets the request timeout.
+     * @param bulkRequestTimeout The request timeout.
+     */
     public void setRequestTimeout(final String bulkRequestTimeout) {
         requestTimeout = bulkRequestTimeout;
     }
 
+    /**
+     * Sets the request cache size.
+     * @param requestCacheSize The request cache size.
+     */
     public void setRequestCacheSize(final int requestCacheSize) {
         this.requestCacheSize = requestCacheSize;
     }
 
+    /**
+     * Sets the script language.
+     * @param scriptLang The script language.
+     */
     public void setScriptLang(final String scriptLang) {
         this.scriptLang = scriptLang;
     }
 
+    /**
+     * Sets the script code.
+     * @param scriptCode The script code.
+     */
     public void setScriptCode(final String scriptCode) {
         this.scriptCode = scriptCode;
     }

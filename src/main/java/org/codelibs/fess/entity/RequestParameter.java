@@ -17,25 +17,58 @@ package org.codelibs.fess.entity;
 
 import java.util.Arrays;
 
+/**
+ * Entity class representing a request parameter with a name and associated values.
+ * This class encapsulates HTTP request parameters that can have multiple values,
+ * such as query parameters, form parameters, or other request-related data.
+ *
+ * <p>This class is immutable and thread-safe. Once created, the parameter name
+ * and values cannot be modified.</p>
+ *
+ */
 public class RequestParameter {
 
+    /** The name of the request parameter. */
     private final String name;
 
+    /** The array of values associated with this parameter. */
     private final String[] values;
 
+    /**
+     * Constructs a new RequestParameter with the specified name and values.
+     *
+     * @param name the name of the parameter, must not be null
+     * @param values the array of values for this parameter, can be null or empty
+     */
     public RequestParameter(final String name, final String[] values) {
         this.name = name;
         this.values = values;
     }
 
+    /**
+     * Returns the name of this request parameter.
+     *
+     * @return the parameter name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the array of values associated with this request parameter.
+     *
+     * @return the parameter values array, may be null or empty
+     */
     public String[] getValues() {
         return values;
     }
 
+    /**
+     * Returns a string representation of this RequestParameter.
+     * The format includes the parameter name and its values in array format.
+     *
+     * @return a string representation of this object in the format "[name, [value1, value2, ...]]"
+     */
     @Override
     public String toString() {
         return "[" + name + ", " + Arrays.toString(values) + "]";

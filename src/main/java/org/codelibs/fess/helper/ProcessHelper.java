@@ -36,13 +36,33 @@ import org.codelibs.fess.util.JobProcess;
 
 import jakarta.annotation.PreDestroy;
 
+/**
+ * Helper class for managing system processes in Fess.
+ * This class provides functionality to start, stop, and manage external processes
+ * such as crawler processes, with proper resource cleanup and lifecycle management.
+ */
 public class ProcessHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(ProcessHelper.class);
 
+    /** Map of running processes indexed by session ID */
     protected final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
+    /** Timeout in seconds for process destruction */
     protected int processDestroyTimeout = 10;
 
+    /**
+     * Default constructor for ProcessHelper.
+     * Initializes the process management system with default timeout values.
+     */
+    public ProcessHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Cleanup method called when the bean is destroyed.
+     * Stops all running processes and cleans up resources.
+     */
     @PreDestroy
     public void destroy() {
         for (final String sessionId : runningProcessMap.keySet()) {
@@ -55,10 +75,31 @@ public class ProcessHelper {
         }
     }
 
+    /**
+     * Starts a new process with the given session ID and command list.
+     * Uses default buffer size and no output callback.
+     *
+     * @param sessionId unique identifier for the process session
+     * @param cmdList list of command and arguments to execute
+     * @param pbCall callback to configure the ProcessBuilder
+     * @return JobProcess representing the started process
+     */
     public JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall) {
         return startProcess(sessionId, cmdList, pbCall, InputStreamThread.MAX_BUFFER_SIZE, null);
     }
 
+    /**
+     * Starts a new process with the given session ID, command list, buffer size, and output callback.
+     * This method is synchronized to ensure thread safety when managing processes.
+     *
+     * @param sessionId unique identifier for the process session
+     * @param cmdList list of command and arguments to execute
+     * @param pbCall callback to configure the ProcessBuilder
+     * @param bufferSize size of the buffer for process output
+     * @param outputCallback callback to handle process output lines
+     * @return JobProcess representing the started process
+     * @throws JobProcessingException if the process cannot be started
+     */
     public synchronized JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall,
             final int bufferSize, final Consumer<String> outputCallback) {
         final ProcessBuilder pb = new ProcessBuilder(cmdList);
@@ -74,20 +115,45 @@ public class ProcessHelper {
         }
     }
 
+    /**
+     * Destroys the process associated with the given session ID.
+     *
+     * @param sessionId unique identifier for the process session
+     * @return exit code of the destroyed process, or -1 if the process was not found
+     */
     public int destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
         return destroyProcess(sessionId, jobProcess);
     }
 
+    /**
+     * Checks if any processes are currently running.
+     *
+     * @return true if at least one process is running, false otherwise
+     */
     public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
     }
 
+    /**
+     * Checks if the process with the given session ID is currently running.
+     *
+     * @param sessionId unique identifier for the process session
+     * @return true if the process is running, false otherwise
+     */
     public boolean isProcessRunning(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.get(sessionId);
         return jobProcess != null && jobProcess.getProcess().isAlive();
     }
 
+    /**
+     * Internal method to destroy a specific JobProcess.
+     * Handles cleanup of streams, threads, and process termination.
+     *
+     * @param sessionId unique identifier for the process session
+     * @param jobProcess the JobProcess to destroy
+     * @return exit code of the destroyed process, or -1 if the process was null or could not be destroyed
+     */
     protected int destroyProcess(final String sessionId, final JobProcess jobProcess) {
         if (jobProcess != null) {
             final InputStreamThread ist = jobProcess.getInputStreamThread();
@@ -142,14 +208,32 @@ public class ProcessHelper {
         return -1;
     }
 
+    /**
+     * Gets the set of session IDs for all currently running processes.
+     *
+     * @return set of session IDs for running processes
+     */
     public Set<String> getRunningSessionIdSet() {
         return runningProcessMap.keySet();
     }
 
+    /**
+     * Sets the timeout for process destruction.
+     *
+     * @param processDestroyTimeout timeout in seconds for process destruction
+     */
     public void setProcessDestroyTimeout(final int processDestroyTimeout) {
         this.processDestroyTimeout = processDestroyTimeout;
     }
 
+    /**
+     * Sends a command to the process associated with the given session ID.
+     *
+     * @param sessionId unique identifier for the process session
+     * @param command the command to send to the process
+     * @throws JobNotFoundException if no process is found for the given session ID
+     * @throws JobProcessingException if there's an error sending the command
+     */
     public void sendCommand(final String sessionId, final String command) {
         final JobProcess jobProcess = runningProcessMap.get(sessionId);
         if (jobProcess == null) {

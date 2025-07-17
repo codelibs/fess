@@ -30,10 +30,25 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.lastaflute.core.mail.Postbox;
 
+/**
+ * Job for pinging search engine.
+ */
 public class PingSearchEngineJob {
+
+    /**
+     * Default constructor.
+     */
+    public PingSearchEngineJob() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(PingSearchEngineJob.class);
 
+    /**
+     * Executes the ping job.
+     *
+     * @return the execution result
+     */
     public String execute() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

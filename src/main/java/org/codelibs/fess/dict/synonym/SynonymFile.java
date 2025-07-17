@@ -39,11 +39,29 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * Manages a dictionary file for synonyms.
+ * This class handles reading, parsing, and updating files that contain
+ * synonym rules. The file format supports both explicit mappings (e.g., `a => b`)
+ * and equivalent synonyms (e.g., `a, b, c`).
+ *
+ * The class provides methods for retrieving, adding, updating, and
+ * deleting synonym items, as well as reloading the dictionary
+ * from its source file.
+ */
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
 
+    /** The list of synonym items loaded from the dictionary file. */
     List<SynonymItem> synonymItemList;
 
+    /**
+     * Constructs a new synonym file.
+     *
+     * @param id        The unique identifier for this dictionary file.
+     * @param path      The path to the dictionary file.
+     * @param timestamp The last modified timestamp of the file.
+     */
     public SynonymFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
@@ -114,6 +132,12 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
     }
 
+    /**
+     * Reloads the synonym dictionary from its source file.
+     *
+     * @param updater An optional updater to apply changes during reload.
+     * @throws DictionaryException if the dictionary file cannot be read.
+     */
     protected void reload(final SynonymUpdater updater) {
         try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
             reload(updater, curlResponse.getContentAsStream());
@@ -122,6 +146,13 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
     }
 
+    /**
+     * Reloads the synonym dictionary from an input stream.
+     *
+     * @param updater An optional updater to apply changes.
+     * @param in      The input stream to read the dictionary from.
+     * @throws DictionaryException if the input stream cannot be parsed.
+     */
     protected void reload(final SynonymUpdater updater, final InputStream in) {
         final List<SynonymItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
@@ -257,10 +288,21 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return s;
     }
 
+    /**
+     * Returns the simple name of the dictionary file.
+     *
+     * @return The file name without the path.
+     */
     public String getSimpleName() {
         return new File(path).getName();
     }
 
+    /**
+     * Updates the dictionary file with content from an input stream.
+     *
+     * @param in The input stream containing the new dictionary content.
+     * @throws IOException if an I/O error occurs.
+     */
     public synchronized void update(final InputStream in) throws IOException {
         try (SynonymUpdater updater = new SynonymUpdater(null)) {
             reload(updater, in);
@@ -272,16 +314,31 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return "SynonymFile [path=" + path + ", synonymItemList=" + synonymItemList + ", id=" + id + "]";
     }
 
+    /**
+     * An inner class for updating the synonym file.
+     * This class handles the process of writing changes to a temporary file
+     * and then replacing the original file upon successful commit.
+     */
     protected class SynonymUpdater implements Closeable {
 
+        /** A flag indicating whether the changes have been committed. */
         protected boolean isCommit = false;
 
+        /** The temporary file to write changes to. */
         protected File newFile;
 
+        /** The writer for the temporary file. */
         protected Writer writer;
 
+        /** The synonym item being added or updated. */
         protected SynonymItem item;
 
+        /**
+         * Constructs a new updater for a synonym item.
+         *
+         * @param newItem The item to be added or updated.
+         * @throws DictionaryException if the temporary file cannot be created.
+         */
         protected SynonymUpdater(final SynonymItem newItem) {
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(SYNONYM, ".txt");
@@ -295,6 +352,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             item = newItem;
         }
 
+        /**
+         * Writes a synonym item to the temporary file.
+         * If the item is being updated, it writes the new version.
+         *
+         * @param oldItem The original item from the dictionary.
+         * @return The written item, or null if the item was deleted.
+         * @throws DictionaryException if the file was updated concurrently.
+         */
         public SynonymItem write(final SynonymItem oldItem) {
             try {
                 if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
@@ -322,6 +387,12 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             }
         }
 
+        /**
+         * Writes a raw line to the temporary file.
+         *
+         * @param line The line to write.
+         * @throws DictionaryException if an I/O error occurs.
+         */
         public void write(final String line) {
             try {
                 writer.write(line);
@@ -331,6 +402,13 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             }
         }
 
+        /**
+         * Commits the changes to the dictionary file.
+         * If there is a pending new item, it is written to the file.
+         *
+         * @return The committed item, or null if no item was committed.
+         * @throws DictionaryException if an I/O error occurs.
+         */
         public SynonymItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {

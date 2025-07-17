@@ -22,6 +22,8 @@ import org.lastaflute.di.core.meta.impl.InstanceDefFactory;
 import org.lastaflute.di.naming.NamingConvention;
 
 /**
+ * The creator of pager.
+ *
  * @author shinsuke
  */
 public class PagerCreator extends ComponentCreatorImpl {

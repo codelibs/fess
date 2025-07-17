@@ -30,14 +30,38 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing web authentication configurations.
+ * Provides CRUD operations for web authentication settings including
+ * listing, retrieving, storing, and deleting authentication configurations.
+ */
 public class WebAuthenticationService {
 
+    /**
+     * Default constructor.
+     */
+    public WebAuthenticationService() {
+        // Default constructor
+    }
+
+    /**
+     * Behavior class for web authentication operations.
+     */
     @Resource
     protected WebAuthenticationBhv webAuthenticationBhv;
 
+    /**
+     * Fess configuration settings.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a paginated list of web authentications based on the provided pager.
+     *
+     * @param webAuthenticationPager The pager containing pagination and search criteria
+     * @return List of web authentication configurations
+     */
     public List<WebAuthentication> getWebAuthenticationList(final WebAuthPager webAuthenticationPager) {
 
         final PagingResultBean<WebAuthentication> webAuthenticationList = webAuthenticationBhv.selectPage(cb -> {
@@ -54,10 +78,22 @@ public class WebAuthenticationService {
         return webAuthenticationList;
     }
 
+    /**
+     * Gets a web authentication configuration by its ID.
+     *
+     * @param id The ID of the web authentication configuration
+     * @return Optional containing the web authentication if found
+     */
     public OptionalEntity<WebAuthentication> getWebAuthentication(final String id) {
         return webAuthenticationBhv.selectByPK(id);
     }
 
+    /**
+     * Stores a web authentication configuration.
+     * Parameters are encrypted before storage.
+     *
+     * @param webAuthentication The web authentication configuration to store
+     */
     public void store(final WebAuthentication webAuthentication) {
         webAuthentication.setParameters(ParameterUtil.encrypt(webAuthentication.getParameters()));
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
@@ -66,6 +102,11 @@ public class WebAuthenticationService {
 
     }
 
+    /**
+     * Deletes a web authentication configuration.
+     *
+     * @param webAuthentication The web authentication configuration to delete
+     */
     public void delete(final WebAuthentication webAuthentication) {
 
         webAuthenticationBhv.delete(webAuthentication, op -> {
@@ -74,6 +115,12 @@ public class WebAuthenticationService {
 
     }
 
+    /**
+     * Sets up the list condition for querying web authentications.
+     *
+     * @param cb The condition bean for the query
+     * @param webAuthenticationPager The pager containing search criteria
+     */
     protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthPager webAuthenticationPager) {
         if (webAuthenticationPager.id != null) {
             cb.query().docMeta().setId_Equal(webAuthenticationPager.id);
@@ -87,6 +134,12 @@ public class WebAuthenticationService {
 
     }
 
+    /**
+     * Gets a list of web authentications for a specific web configuration.
+     *
+     * @param webConfigId The ID of the web configuration
+     * @return List of web authentication configurations for the specified web config
+     */
     public List<WebAuthentication> getWebAuthenticationList(final String webConfigId) {
         return webAuthenticationBhv.selectList(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);

@@ -27,50 +27,96 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
+ * The create form for Scheduler.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The name of the scheduled job.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The target class for the scheduled job.
+     */
     @Required
     @Size(max = 100)
     public String target;
 
+    /**
+     * The cron expression defining when the job should run.
+     */
     @Size(max = 100)
     @CronExpression
     public String cronExpression;
 
+    /**
+     * The type of script for the scheduled job.
+     */
     @Required
     @Size(max = 100)
     public String scriptType;
 
+    /**
+     * The script data or code for the scheduled job.
+     */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String scriptData;
 
+    /**
+     * Whether this job is related to crawling.
+     */
     public String crawler;
 
+    /**
+     * Whether job logging is enabled.
+     */
     public String jobLogging;
 
+    /**
+     * Whether the scheduled job is available/enabled.
+     */
     public String available;
 
+    /**
+     * The sort order for displaying this scheduled job.
+     */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /**
+     * The username of who created this scheduled job.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this scheduled job was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new scheduled job.
+     */
     public void initialize() {
         target = Constants.DEFAULT_JOB_TARGET;
         cronExpression = Constants.DEFAULT_CRON_EXPRESSION;

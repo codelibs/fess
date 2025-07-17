@@ -19,14 +19,34 @@ import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
- * @author nullpos
+ * Form class for editing mapping dictionary entries in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing mapping dictionary entries.
+ * Mapping dictionaries define field mappings and transformations during the indexing process.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the mapping dictionary entry being edited.
+     * This is a required field for identifying which dictionary entry to update.
+     */
     @Required
     @ValidateTypeFailure
     public Long id;
 
+    /**
+     * Returns a display-friendly identifier combining the dictionary ID and entry ID.
+     * This method creates a composite identifier for UI display purposes.
+     *
+     * @return A string in the format "dictId:id" for display purposes
+     */
     public String getDisplayId() {
         return dictId + ":" + id;
     }

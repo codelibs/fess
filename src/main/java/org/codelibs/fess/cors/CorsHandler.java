@@ -18,20 +18,56 @@ package org.codelibs.fess.cors;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 
+/**
+ * Abstract base class for handling CORS (Cross-Origin Resource Sharing) requests.
+ * Provides common CORS header constants and defines the processing interface.
+ */
 public abstract class CorsHandler {
 
+    /**
+     * Creates a new instance of CorsHandler.
+     */
+    public CorsHandler() {
+        // Default constructor
+    }
+
+    /**
+     * CORS header for specifying allowed origin.
+     */
     protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
+    /**
+     * CORS header for specifying allowed headers.
+     */
     protected static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 
+    /**
+     * CORS header for specifying allowed HTTP methods.
+     */
     protected static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 
+    /**
+     * CORS header for allowing private network access.
+     */
     protected static final String ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK = "Access-Control-Allow-Private-Network";
 
+    /**
+     * CORS header for allowing credentials.
+     */
     protected static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
+    /**
+     * CORS header for specifying cache duration for preflight requests.
+     */
     protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
+    /**
+     * Processes the CORS request by setting appropriate headers.
+     *
+     * @param origin the origin of the request
+     * @param request the servlet request
+     * @param response the servlet response
+     */
     public abstract void process(String origin, ServletRequest request, ServletResponse response);
 
 }

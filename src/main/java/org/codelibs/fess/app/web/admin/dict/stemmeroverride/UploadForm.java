@@ -19,15 +19,32 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Form for uploading stemmer override files to the Fess search engine.
+ * Stemmer override allows custom rules to override the default stemming behavior for specific words.
+ * This form is used in the admin interface to upload custom stemmer override dictionary files.
  */
 public class UploadForm {
 
+    /**
+     * The dictionary ID that identifies which stemmer override dictionary configuration to update.
+     * This ID corresponds to a specific stemmer override dictionary instance in the system.
+     */
     @Required
     public String dictId;
 
+    /**
+     * The multipart file containing the stemmer override rules to be uploaded.
+     * This file should contain mappings that override default stemming for specific words.
+     */
     @Required
     public MultipartFormFile stemmerOverrideFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

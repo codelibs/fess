@@ -15,17 +15,38 @@
  */
 package org.codelibs.fess.app.web;
 
+/**
+ * Constants for CRUD operation modes.
+ */
 public class CrudMode {
+    /**
+     * Mode for listing records.
+     */
     public static final int LIST = 0;
 
+    /**
+     * Mode for creating a new record.
+     */
     public static final int CREATE = 1;
 
+    /**
+     * Mode for editing an existing record.
+     */
     public static final int EDIT = 2;
 
+    /**
+     * Mode for deleting a record.
+     */
     public static final int DELETE = 3;
 
+    /**
+     * Mode for viewing record details.
+     */
     public static final int DETAILS = 4;
 
+    /**
+     * Protected constructor to prevent instantiation.
+     */
     protected CrudMode() {
         // nothing
     }

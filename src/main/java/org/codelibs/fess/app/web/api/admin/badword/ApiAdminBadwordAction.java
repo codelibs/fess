@@ -50,16 +50,34 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin bad word management.
+ * Provides REST endpoints for managing bad words in the Fess search engine.
+ */
 public class ApiAdminBadwordAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminBadwordAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminBadwordAction.class);
 
     @Resource
     private BadWordService badWordService;
 
+    /** Helper for managing search suggestions and bad words */
     @Resource
     protected SuggestHelper suggestHelper;
 
+    /**
+     * Retrieves bad word settings with pagination support.
+     *
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of bad word configurations
+     */
     // GET /api/admin/badword/settings
     // PUT /api/admin/badword/settings
     @Execute
@@ -72,6 +90,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific bad word setting by ID.
+     *
+     * @param id the ID of the bad word to retrieve
+     * @return JSON response containing the bad word configuration
+     */
     // GET /api/admin/badword/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -86,6 +110,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/badword/setting
+    /**
+     * Creates a new bad word setting.
+     *
+     * @param body the request body containing bad word information
+     * @return JSON response with result status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -107,6 +137,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/user/setting
+    /**
+     * Updates an existing bad word setting.
+     *
+     * @param body the request body containing updated bad word information
+     * @return JSON response with result status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -128,6 +164,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(badWord.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a bad word setting by ID.
+     *
+     * @param id the ID of the bad word to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/badword/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -152,6 +194,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/badword/upload
+    /**
+     * Uploads bad words from a CSV file.
+     *
+     * @param body the upload form containing the CSV file
+     * @return JSON response with result status
+     */
     @Execute
     public JsonResponse<ApiResult> put$upload(final UploadForm body) {
         validateApi(body, messages -> {});
@@ -166,6 +214,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads bad word settings as a CSV file.
+     *
+     * @param body the download request body containing download parameters
+     * @return stream response containing the CSV file data
+     */
     // GET /api/admin/badword/download
     @Execute
     public StreamResponse get$download(final DownloadBody body) {
@@ -188,6 +242,12 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         });
     }
 
+    /**
+     * Creates an EditBody from a BadWord entity for API responses.
+     *
+     * @param entity the BadWord entity to convert
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final BadWord entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

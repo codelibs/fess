@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.kuromoji;
 
 import org.codelibs.fess.app.web.admin.dict.kuromoji.DownloadForm;
 
+/**
+ * Download body for Kuromoji dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading Kuromoji dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        super();
+    }
 }

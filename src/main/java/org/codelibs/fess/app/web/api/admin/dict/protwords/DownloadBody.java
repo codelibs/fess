@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.protwords;
 
 import org.codelibs.fess.app.web.admin.dict.protwords.DownloadForm;
 
+/**
+ * Download body for protected words dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading protected words dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        super();
+    }
 }

@@ -19,7 +19,19 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * Action class for handling HTTP 400 Bad Request error pages.
+ * This action displays error pages when a client request contains
+ * invalid syntax or cannot be fulfilled due to malformed request parameters.
+ */
 public class ErrorBadrequrestAction extends FessSearchAction {
+
+    /**
+     * Default constructor for ErrorBadrequrestAction.
+     */
+    public ErrorBadrequrestAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -32,7 +44,12 @@ public class ErrorBadrequrestAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
-
+    /**
+     * Displays the bad request error page.
+     *
+     * @param form the error form containing error information
+     * @return HTML response for the bad request error page
+     */
     @Execute
     public HtmlResponse index(final ErrorForm form) {
         return asHtml(virtualHost(path_Error_BadRequestJsp));

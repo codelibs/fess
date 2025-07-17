@@ -17,7 +17,16 @@ package org.codelibs.fess.app.web.base.login;
 
 import org.lastaflute.web.login.credential.UserPasswordCredential;
 
+/**
+ * The credential for a local user.
+ */
 public class LocalUserCredential extends UserPasswordCredential implements FessCredential {
+    /**
+     * Creates a new LocalUserCredential with the specified user and password.
+     *
+     * @param user the username
+     * @param password the password
+     */
     public LocalUserCredential(final String user, final String password) {
         super(user, password);
     }

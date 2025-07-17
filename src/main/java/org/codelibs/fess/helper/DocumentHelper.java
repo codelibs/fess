@@ -63,11 +63,31 @@ import org.lastaflute.di.core.exception.ComponentNotFoundException;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for document processing and manipulation in the Fess search system.
+ * This class provides utilities for processing document content, titles, and digests,
+ * handling text normalization, content extraction, and similar document hash encoding/decoding.
+ * It also manages document processing requests and integrates with the crawler system.
+ *
+ */
 public class DocumentHelper {
     private static final Logger logger = LogManager.getLogger(DocumentHelper.class);
 
+    /** Prefix used for encoded similar document hashes */
     protected static final String SIMILAR_DOC_HASH_PREFIX = "$";
 
+    /**
+     * Default constructor for DocumentHelper.
+     * Creates a new document helper instance.
+     */
+    public DocumentHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the document helper after construction.
+     * Sets up the TikaExtractor with configuration parameters for text processing.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -90,6 +110,16 @@ public class DocumentHelper {
         }
     }
 
+    /**
+     * Processes and normalizes a document title.
+     * Applies text normalization using configured space characters and returns
+     * a clean title suitable for indexing.
+     *
+     * @param responseData the response data from crawling (not currently used)
+     * @param title the raw title text to process
+     * @param dataMap additional data map (not currently used)
+     * @return the normalized title, or empty string if title is null
+     */
     public String getTitle(final ResponseData responseData, final String title, final Map<String, Object> dataMap) {
         if (title == null) {
             return StringUtil.EMPTY; // empty
@@ -103,6 +133,17 @@ public class DocumentHelper {
         }
     }
 
+    /**
+     * Processes and normalizes document content.
+     * Applies text normalization including duplicate term removal, size limits,
+     * and space character handling. May preserve original content based on configuration.
+     *
+     * @param crawlingConfig the crawling configuration containing processing parameters
+     * @param responseData the response data from crawling
+     * @param content the raw content text to process
+     * @param dataMap additional data map
+     * @return the normalized content, or empty string if content is null
+     */
     public String getContent(final CrawlingConfig crawlingConfig, final ResponseData responseData, final String content,
             final Map<String, Object> dataMap) {
         if (content == null) {
@@ -132,26 +173,56 @@ public class DocumentHelper {
         }
     }
 
+    /**
+     * Gets the maximum size for alphanumeric terms from configuration.
+     *
+     * @return the maximum alphanumeric term size
+     */
     protected int getMaxAlphanumTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.getCrawlerDocumentMaxAlphanumTermSizeAsInteger();
     }
 
+    /**
+     * Gets the maximum size for symbol terms from configuration.
+     *
+     * @return the maximum symbol term size
+     */
     protected int getMaxSymbolTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.getCrawlerDocumentMaxSymbolTermSizeAsInteger();
     }
 
+    /**
+     * Checks if duplicate term removal is enabled in configuration.
+     *
+     * @return true if duplicate terms should be removed, false otherwise
+     */
     protected boolean isDuplicateTermRemoved() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.isCrawlerDocumentDuplicateTermRemoved();
     }
 
+    /**
+     * Gets the array of space character codes from configuration.
+     *
+     * @return array of character codes to be treated as spaces
+     */
     protected int[] getSpaceChars() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.getCrawlerDocumentSpaceCharsAsArray();
     }
 
+    /**
+     * Creates a digest (abbreviated summary) of document content.
+     * Truncates and normalizes content to create a summary suitable for display.
+     *
+     * @param responseData the response data from crawling (not currently used)
+     * @param content the content to create a digest from
+     * @param dataMap additional data map (not currently used)
+     * @param maxWidth the maximum width of the digest
+     * @return the abbreviated and normalized digest, or empty string if content is null
+     */
     public String getDigest(final ResponseData responseData, final String content, final Map<String, Object> dataMap, final int maxWidth) {
         if (content == null) {
             return StringUtil.EMPTY; // empty
@@ -173,6 +244,19 @@ public class DocumentHelper {
         }
     }
 
+    /**
+     * Processes a crawling request for a specific URL.
+     * Executes the full crawling pipeline including client execution, rule processing,
+     * transformation, and data extraction.
+     *
+     * @param crawlingConfig the crawling configuration to use
+     * @param crawlingInfoId the crawling session ID
+     * @param url the URL to process
+     * @return a map containing the processed document data
+     * @throws CrawlingAccessException if crawling fails or configuration is invalid
+     * @throws ChildUrlsException if the URL redirects to another location
+     * @throws CrawlerSystemException if data deserialization fails
+     */
     public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String crawlingInfoId, final String url) {
         if (StringUtil.isBlank(crawlingInfoId)) {
             throw new CrawlingAccessException("sessionId is null.");
@@ -232,6 +316,13 @@ public class DocumentHelper {
         }
     }
 
+    /**
+     * Decodes a similar document hash from its compressed and encoded form.
+     * Reverses the encoding process applied by encodeSimilarDocHash.
+     *
+     * @param hash the encoded hash string to decode
+     * @return the decoded hash string, or the original hash if decoding fails
+     */
     public String decodeSimilarDocHash(final String hash) {
         if (hash != null && hash.startsWith(SIMILAR_DOC_HASH_PREFIX) && hash.length() > SIMILAR_DOC_HASH_PREFIX.length()) {
             final byte[] decode = Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length()));
@@ -247,6 +338,13 @@ public class DocumentHelper {
         return hash;
     }
 
+    /**
+     * Encodes a similar document hash using GZIP compression and Base64 encoding.
+     * This reduces storage space for hash values while maintaining uniqueness.
+     *
+     * @param hash the hash string to encode
+     * @return the encoded hash string with prefix, or the original hash if encoding fails
+     */
     public String encodeSimilarDocHash(final String hash) {
         if (hash != null && !hash.startsWith(SIMILAR_DOC_HASH_PREFIX)) {
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -261,6 +359,14 @@ public class DocumentHelper {
         return hash;
     }
 
+    /**
+     * Appends line numbers to each line of content with a given prefix.
+     * Useful for debugging and displaying content with line references.
+     *
+     * @param prefix the prefix to add before each line number
+     * @param content the content to add line numbers to
+     * @return the content with line numbers prepended, or empty string if content is blank
+     */
     public String appendLineNumber(final String prefix, final String content) {
         if (StringUtil.isBlank(content)) {
             return StringUtil.EMPTY;

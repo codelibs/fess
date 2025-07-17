@@ -24,33 +24,66 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
+/**
+ * The create form for managing related content.
+ */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD operation mode (create, update, etc.).
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The search term for which related content is shown.
+     */
     @Required
     @Size(max = 10000)
     public String term;
 
+    /**
+     * The related content to be displayed.
+     */
     @Required
     @Size(max = 10000)
     public String content;
 
+    /**
+     * The virtual host for which this related content applies.
+     */
     @Size(max = 1000)
     public String virtualHost;
 
+    /**
+     * The sort order for this related content (0-2147483647).
+     */
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /**
+     * The username who created this related content.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this related content was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating new related content.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         createdBy = ComponentUtil.getSystemHelper().getUsername();

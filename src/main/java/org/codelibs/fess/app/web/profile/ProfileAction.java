@@ -14,8 +14,6 @@
  * governing permissions and limitations under the License.
  */
 /**
- * @author Keiichi Watanabe
- * @author shinsuke
  */
 package org.codelibs.fess.app.web.profile;
 
@@ -32,7 +30,17 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Action for user profile operations.
+ */
 public class ProfileAction extends FessSearchAction {
+
+    /**
+     * Default constructor.
+     */
+    public ProfileAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ProfileAction.class);
 
@@ -54,11 +62,22 @@ public class ProfileAction extends FessSearchAction {
     // Search Execute
     // ==============
 
+    /**
+     * Displays the profile index page.
+     *
+     * @return the HTML response
+     */
     @Execute
     public HtmlResponse index() {
         return asIndexHtml();
     }
 
+    /**
+     * Changes the user password.
+     *
+     * @param form the profile form
+     * @return the HTML response
+     */
     @Execute
     public HtmlResponse changePassword(final ProfileForm form) {
         final VaErrorHook toIndexPage = () -> {
@@ -96,6 +115,11 @@ public class ProfileAction extends FessSearchAction {
         });
     }
 
+    /**
+     * Returns the index HTML response.
+     *
+     * @return the HTML response
+     */
     protected HtmlResponse asIndexHtml() {
         return getUserBean().map(u -> asHtml(virtualHost(path_Profile_IndexJsp)).useForm(ProfileForm.class))
                 .orElseGet(() -> redirect(LoginAction.class));

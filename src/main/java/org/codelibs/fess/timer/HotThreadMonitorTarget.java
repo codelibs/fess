@@ -27,8 +27,21 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.action.admin.cluster.node.hotthreads.NodesHotThreadsResponse;
 import org.opensearch.common.unit.TimeValue;
 
+/**
+ * Monitor target for tracking hot threads in the OpenSearch cluster.
+ * This class extends MonitorTarget to provide monitoring functionality for
+ * hot threads, which helps identify performance bottlenecks and resource
+ * usage issues in the search engine cluster.
+ */
 public class HotThreadMonitorTarget extends MonitorTarget {
     private static final Logger logger = LogManager.getLogger(HotThreadMonitorTarget.class);
+
+    /**
+     * Default constructor for HotThreadMonitorTarget.
+     */
+    public HotThreadMonitorTarget() {
+        super();
+    }
 
     @Override
     public void expired() {

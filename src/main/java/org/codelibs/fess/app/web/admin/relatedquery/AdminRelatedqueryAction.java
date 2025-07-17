@@ -45,10 +45,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
+ * Admin action for Related Query management.
+ *
  */
 public class AdminRelatedqueryAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminRelatedqueryAction() {
+        super();
+    }
+
+    /** Role name for admin related query operations */
     public static final String ROLE = "admin-relatedquery";
 
     private static final Logger logger = LogManager.getLogger(AdminRelatedqueryAction.class);
@@ -78,12 +87,24 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the related query management index page.
+     *
+     * @return HTML response for the related query list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of related query items.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the related query list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -97,6 +118,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for related query items based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered related query results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -106,6 +133,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all related query items.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset related query list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -115,6 +148,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search paging data for rendering the related query list.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "relatedQueryItems", relatedQueryService.getRelatedQueryList(relatedQueryPager)); // page navi
 
@@ -128,6 +167,11 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new related query item.
+     *
+     * @return HTML response for the create form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -140,6 +184,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing related query item.
+     *
+     * @param form the edit form containing the ID of the item to edit
+     * @return HTML response for the edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -168,6 +218,13 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a related query item.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the related query item to display
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -193,6 +250,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new related query item.
+     *
+     * @param form the create form containing the new item data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -214,6 +277,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing related query item.
+     *
+     * @param form the edit form containing the updated item data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -235,6 +304,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a related query item.
+     *
+     * @param form the edit form containing the ID of the item to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -280,6 +355,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a RelatedQuery entity from the provided form data.
+     *
+     * @param form the form containing the related query data
+     * @return optional entity containing the related query data, or empty if creation fails
+     */
     public static OptionalEntity<RelatedQuery> getRelatedQuery(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -297,6 +378,12 @@ public class AdminRelatedqueryAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

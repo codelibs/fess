@@ -17,6 +17,16 @@ package org.codelibs.fess.app.web.api.admin.accesstoken;
 
 import org.codelibs.fess.app.web.admin.accesstoken.CreateForm;
 
+/**
+ * Request body for creating access token via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
 
 }

@@ -15,14 +15,31 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when GSA (Google Search Appliance) configuration errors occur.
+ * This exception extends FessSystemException and is used to handle specific
+ * configuration-related issues when working with GSA integration.
+ *
+ */
 public class GsaConfigException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new GSA configuration exception with the specified detail message and cause.
+     *
+     * @param message the detail message describing the configuration error
+     * @param cause the cause of the exception
+     */
     public GsaConfigException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new GSA configuration exception with the specified detail message.
+     *
+     * @param message the detail message describing the configuration error
+     */
     public GsaConfigException(final String message) {
         super(message);
     }

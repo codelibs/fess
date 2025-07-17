@@ -44,12 +44,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
+ * Admin action for Request Header management.
+ *
  */
 public class AdminReqheaderAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminReqheaderAction() {
+        super();
+    }
+
+    /** Role name for admin request header operations */
     public static final String ROLE = "admin-reqheader";
 
     private static final Logger logger = LogManager.getLogger(AdminReqheaderAction.class);
@@ -61,6 +68,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     private RequestHeaderService requestHeaderService;
     @Resource
     private ReqHeaderPager reqHeaderPager;
+    /** Web configuration service for managing web crawl configurations. */
     @Resource
     protected WebConfigService webConfigService;
 
@@ -81,12 +89,25 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the request header management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the request header list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of request header items.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the request header list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -100,6 +121,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for request header items based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered request header results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -109,6 +136,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all request header items.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset request header list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -118,6 +151,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search paging data for rendering the request header list.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
         RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
@@ -132,6 +171,11 @@ public class AdminReqheaderAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new request header item.
+     *
+     * @return HTML response for the create form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -146,6 +190,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing request header item.
+     *
+     * @param form the edit form containing the ID of the item to edit
+     * @return HTML response for the edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -169,6 +219,13 @@ public class AdminReqheaderAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a request header item.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the request header item to display
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -191,6 +248,12 @@ public class AdminReqheaderAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new request header item.
+     *
+     * @param form the create form containing the new item data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -212,6 +275,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing request header item.
+     *
+     * @param form the edit form containing the updated item data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -233,6 +302,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a request header item.
+     *
+     * @param form the edit form containing the ID of the item to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -258,6 +333,14 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Creates a RequestHeader entity from form data with user and timestamp information.
+     *
+     * @param form the form containing the request header data
+     * @param username the username of the user performing the operation
+     * @param currentTime the current timestamp
+     * @return optional entity containing the request header data, or empty if creation fails
+     */
     public static OptionalEntity<RequestHeader> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -277,6 +360,12 @@ public class AdminReqheaderAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a RequestHeader entity from the provided form data.
+     *
+     * @param form the form containing the request header data
+     * @return optional entity containing the request header data, or empty if creation fails
+     */
     public static OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -289,6 +378,11 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers web configuration items for rendering in the UI.
+     *
+     * @param data the render data to populate with web config items
+     */
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
@@ -298,6 +392,13 @@ public class AdminReqheaderAction extends FessAdminAction {
         RenderDataUtil.register(data, "webConfigItems", itemList);
     }
 
+    /**
+     * Creates a map item for UI rendering with label and value.
+     *
+     * @param label the display label for the item
+     * @param value the value for the item
+     * @return map containing the label and value
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -308,6 +409,12 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

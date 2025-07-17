@@ -16,8 +16,14 @@
 package org.codelibs.fess.app.web.admin.dict;
 
 /**
- * @author Keiichi Watanabe
+ * The list form for Dictionary.
+ *
  */
 public class ListForm {
-
+    /**
+     * Default constructor.
+     */
+    public ListForm() {
+        // do nothing
+    }
 }

@@ -30,14 +30,36 @@ import org.opensearch.common.unit.Fuzziness;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Query command implementation for handling fuzzy search queries.
+ * This class converts Lucene FuzzyQuery objects into OpenSearch fuzzy query builders,
+ * supporting configurable fuzzy matching parameters like edit distance and expansions.
+ *
+ */
 public class FuzzyQueryCommand extends QueryCommand {
     private static final Logger logger = LogManager.getLogger(FuzzyQueryCommand.class);
+
+    /**
+     * Default constructor.
+     */
+    public FuzzyQueryCommand() {
+        super();
+    }
 
     @Override
     protected String getQueryClassName() {
         return FuzzyQuery.class.getSimpleName();
     }
 
+    /**
+     * Executes the fuzzy query command to convert a Lucene FuzzyQuery into an OpenSearch QueryBuilder.
+     *
+     * @param context the query context containing search configuration
+     * @param query the Lucene query to convert (must be a FuzzyQuery)
+     * @param boost the boost factor to apply to the query
+     * @return OpenSearch QueryBuilder for fuzzy matching
+     * @throws InvalidQueryException if the query is not a FuzzyQuery
+     */
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final FuzzyQuery fuzzyQuery) {
@@ -50,6 +72,15 @@ public class FuzzyQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a Lucene FuzzyQuery into an OpenSearch fuzzy query builder.
+     * Applies fuzzy matching configuration including edit distance, expansions, and prefix length.
+     *
+     * @param context the query context containing field mappings
+     * @param fuzzyQuery the Lucene FuzzyQuery to convert
+     * @param boost the boost factor to apply
+     * @return OpenSearch QueryBuilder configured for fuzzy matching
+     */
     protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Term term = fuzzyQuery.getTerm();

@@ -18,7 +18,19 @@ package org.codelibs.fess.app.web.api.admin.dict;
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 import org.lastaflute.web.validation.Required;
 
+/**
+ * Base class for dictionary search request body objects in admin API.
+ * Extends BaseSearchBody with dictionary-specific parameters.
+ */
 public class BaseSearchDictBody extends BaseSearchBody {
+    /** The dictionary ID for the search operation. */
     @Required
     public String dictId;
+
+    /**
+     * Default constructor for BaseSearchDictBody.
+     */
+    public BaseSearchDictBody() {
+        super();
+    }
 }

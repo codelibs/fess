@@ -29,38 +29,83 @@ import org.codelibs.curl.CurlResponse;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
 
+/**
+ * Abstract base class for dictionary files that manage dictionary items.
+ * A dictionary file represents a collection of dictionary items with
+ * CRUD operations and pagination support.
+ *
+ * @param <T> the type of dictionary items managed by this file
+ */
 public abstract class DictionaryFile<T extends DictionaryItem> {
+    /** The dictionary manager responsible for this file. */
     protected DictionaryManager dictionaryManager;
 
+    /** The unique identifier for this dictionary file. */
     protected String id;
 
+    /** The file path of this dictionary. */
     protected String path;
 
+    /** The timestamp when this dictionary file was created or last modified. */
     protected Date timestamp;
 
+    /**
+     * Creates a new DictionaryFile with the specified parameters.
+     *
+     * @param id the unique identifier for this dictionary file
+     * @param path the file path of this dictionary
+     * @param timestamp the timestamp of the dictionary file
+     */
     protected DictionaryFile(final String id, final String path, final Date timestamp) {
         this.id = id;
         this.path = path;
         this.timestamp = timestamp;
     }
 
+    /**
+     * Returns the unique identifier of this dictionary file.
+     *
+     * @return the dictionary file ID
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Gets the file path of this dictionary.
+     *
+     * @return the file path
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * Returns the timestamp of this dictionary file.
+     *
+     * @return the timestamp when this dictionary was created or last modified
+     */
     public Date getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Sets the dictionary manager for this file and returns this instance.
+     *
+     * @param dictionaryManager the dictionary manager to set
+     * @return this dictionary file instance for method chaining
+     */
     public DictionaryFile<T> manager(final DictionaryManager dictionaryManager) {
         this.dictionaryManager = dictionaryManager;
         return this;
     }
 
+    /**
+     * Writes the content of this dictionary file to the provided output stream.
+     *
+     * @param out the output stream to write to
+     * @throws IOException if an I/O error occurs during writing
+     */
     public void writeOut(final WrittenStreamOut out) throws IOException {
         try (final CurlResponse curlResponse = dictionaryManager.getContentResponse(this);
                 final InputStream inputStream = new BufferedInputStream(curlResponse.getContentAsStream())) {
@@ -68,31 +113,84 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         }
     }
 
+    /**
+     * Gets the type identifier for this dictionary file.
+     *
+     * @return the dictionary type
+     */
     public abstract String getType();
 
+    /**
+     * Retrieves a paginated list of dictionary items.
+     *
+     * @param offset the starting offset for pagination
+     * @param size the number of items to retrieve
+     * @return a paginated list of dictionary items
+     */
     public abstract PagingList<T> selectList(int offset, int size);
 
+    /**
+     * Retrieves a dictionary item by its ID.
+     *
+     * @param id the item ID
+     * @return an optional containing the item if found
+     */
     public abstract OptionalEntity<T> get(long id);
 
+    /**
+     * Inserts a new dictionary item.
+     *
+     * @param item the item to insert
+     */
     public abstract void insert(T item);
 
+    /**
+     * Updates an existing dictionary item.
+     *
+     * @param item the item to update
+     */
     public abstract void update(T item);
 
+    /**
+     * Deletes a dictionary item.
+     *
+     * @param item the item to delete
+     */
     public abstract void delete(T item);
 
+    /**
+     * A paginated list implementation that wraps another list and provides
+     * pagination metadata and functionality.
+     *
+     * @param <E> the type of elements in this list
+     */
     public static class PagingList<E> implements List<E> {
+        /** The underlying list containing the actual data. */
         private final List<E> parent;
 
+        /** The total number of pages available. */
         protected int allPageCount;
 
+        /** The total number of records across all pages. */
         protected int allRecordCount;
 
+        /** The number of records per page. */
         protected int pageSize;
 
+        /** The current page number (1-based). */
         protected int currentPageNumber;
 
+        /** The size of the page range for navigation. */
         protected int pageRangeSize;
 
+        /**
+         * Creates a new PagingList with the specified parameters.
+         *
+         * @param list the underlying list of items for this page
+         * @param offset the starting offset for this page
+         * @param size the page size
+         * @param allRecordCount the total number of records across all pages
+         */
         public PagingList(final List<E> list, final int offset, final int size, final int allRecordCount) {
             parent = list;
             this.allRecordCount = allRecordCount;
@@ -216,34 +314,74 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
             return parent.subList(fromIndex, toIndex);
         }
 
+        /**
+         * Returns the total number of records across all pages.
+         *
+         * @return the total record count
+         */
         public int getAllRecordCount() {
             return allRecordCount;
         }
 
+        /**
+         * Returns the page size (number of records per page).
+         *
+         * @return the page size
+         */
         public int getPageSize() {
             return pageSize;
         }
 
+        /**
+         * Returns the current page number (1-based).
+         *
+         * @return the current page number
+         */
         public int getCurrentPageNumber() {
             return currentPageNumber;
         }
 
+        /**
+         * Returns the total number of pages.
+         *
+         * @return the total page count
+         */
         public int getAllPageCount() {
             return allPageCount;
         }
 
+        /**
+         * Checks if a previous page exists.
+         *
+         * @return true if there is a previous page, false otherwise
+         */
         public boolean isExistPrePage() {
             return currentPageNumber != 1;
         }
 
+        /**
+         * Checks if a next page exists.
+         *
+         * @return true if there is a next page, false otherwise
+         */
         public boolean isExistNextPage() {
             return currentPageNumber != allPageCount;
         }
 
+        /**
+         * Sets the page range size for navigation.
+         *
+         * @param pageRangeSize the page range size to set
+         */
         public void setPageRangeSize(final int pageRangeSize) {
             this.pageRangeSize = pageRangeSize;
         }
 
+        /**
+         * Creates a list of page numbers for navigation.
+         *
+         * @return a list of page numbers within the page range
+         */
         public List<Integer> createPageNumberList() {
             int startPage = currentPageNumber - pageRangeSize;
             if (startPage < 1) {

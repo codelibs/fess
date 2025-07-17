@@ -30,18 +30,47 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet filter for processing web API requests.
+ * This filter intercepts HTTP requests and delegates processing to appropriate web API managers.
+ */
 public class WebApiFilter implements Filter {
 
+    /**
+     * Default constructor.
+     */
+    public WebApiFilter() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the web API filter.
+     *
+     * @param filterConfig The filter configuration
+     * @throws ServletException If initialization fails
+     */
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         // nothing
     }
 
+    /**
+     * Destroys the web API filter and cleans up resources.
+     */
     @Override
     public void destroy() {
         // nothing
     }
 
+    /**
+     * Filters HTTP requests and processes them through appropriate web API managers.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param chain The filter chain
+     * @throws IOException If an I/O error occurs
+     * @throws ServletException If a servlet error occurs
+     */
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {

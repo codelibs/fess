@@ -34,15 +34,29 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin job log management.
+ * Provides RESTful API endpoints for viewing and managing job execution logs in the Fess search engine.
+ * Job logs contain information about crawling jobs, indexing tasks, and system maintenance operations.
+ *
  */
 public class ApiAdminJoblogAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminJoblogAction.class);
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminJoblogAction() {
+        super();
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing job log data */
     @Resource
     private JobLogService jobLogService;
 
@@ -51,6 +65,13 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
     //                                                                      ==============
 
     // GET /api/admin/joblog/logs
+    /**
+     * Returns list of job logs.
+     * Supports filtering and pagination for job execution history.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing job logs list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -61,6 +82,13 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/joblog/log/{id}
+    /**
+     * Returns specific job log by ID.
+     * Provides detailed information about a particular job execution.
+     *
+     * @param id the job log ID
+     * @return JSON response containing the job log details
+     */
     @Execute
     public JsonResponse<ApiResult> get$log(final String id) {
         return asJson(new ApiLogResponse().log(jobLogService.getJobLog(id).map(this::createEditBody).orElseGet(() -> {
@@ -70,6 +98,13 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/joblog/log/{id}
+    /**
+     * Deletes a specific job log.
+     * Useful for cleaning up old job execution records.
+     *
+     * @param id the job log ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$log(final String id) {
         jobLogService.getJobLog(id).ifPresent(entity -> {
@@ -86,6 +121,12 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a job log entity for API responses.
+     *
+     * @param entity the job log entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final JobLog entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

@@ -24,6 +24,8 @@ import org.lastaflute.core.direction.CurtainBeforeHook;
 import org.lastaflute.core.direction.FwAssistantDirector;
 
 /**
+ * The hook before curtain.
+ *
  * @author jflute
  */
 public class FessCurtainBeforeHook implements CurtainBeforeHook {

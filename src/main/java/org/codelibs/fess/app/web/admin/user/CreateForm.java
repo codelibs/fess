@@ -25,30 +25,61 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * The create form for User.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Default constructor.
+     */
+    public CreateForm() {
+        // Empty constructor
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The username of the user.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The password for the user.
+     */
     @Size(max = 100)
     public String password;
 
+    /**
+     * The password confirmation field.
+     */
     @Size(max = 100)
     public String confirmPassword;
 
+    /**
+     * The attributes map for the user.
+     */
     public Map<String, String> attributes = new HashMap<>();
 
+    /**
+     * The roles assigned to the user.
+     */
     public String[] roles;
 
+    /**
+     * The groups assigned to the user.
+     */
     public String[] groups;
 
+    /**
+     * Initializes the form with default values for creating a new user.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

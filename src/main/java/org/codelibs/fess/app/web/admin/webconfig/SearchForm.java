@@ -16,16 +16,29 @@
 package org.codelibs.fess.app.web.admin.webconfig;
 
 /**
- * @author codelibs
- * @author Shunji Makino
- * @author Keiichi Watanabe
+ * The search form for Web Config.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The name field for searching web configurations.
+     */
     public String name;
 
+    /**
+     * The URLs field for searching web configurations.
+     */
     public String urls;
 
+    /**
+     * The description field for searching web configurations.
+     */
     public String description;
 
 }

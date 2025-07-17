@@ -44,10 +44,32 @@ import org.opensearch.search.SearchHits;
 import org.opensearch.search.aggregations.Aggregations;
 import org.opensearch.search.fetch.subphase.highlight.HighlightField;
 
+/**
+ * Default implementation of RankFusionSearcher that performs standard OpenSearch queries.
+ * This searcher handles query execution, response processing, and document highlighting.
+ */
 public class DefaultSearcher extends RankFusionSearcher {
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(DefaultSearcher.class);
 
+    /**
+     * Creates a new instance of DefaultSearcher.
+     * This constructor initializes the default rank fusion searcher for performing
+     * standard OpenSearch queries with response processing and document highlighting.
+     */
+    public DefaultSearcher() {
+        super();
+    }
+
+    /**
+     * Performs a search operation using the specified query and parameters.
+     *
+     * @param query the search query string
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @return the search result containing documents and metadata
+     */
     @Override
     protected SearchResult search(final String query, final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         final int pageSize = params.getPageSize();
@@ -58,6 +80,12 @@ public class DefaultSearcher extends RankFusionSearcher {
         return processResponse(searchResponseOpt);
     }
 
+    /**
+     * Processes the OpenSearch response and converts it to a SearchResult.
+     *
+     * @param searchResponseOpt the optional search response from OpenSearch
+     * @return the processed search result
+     */
     protected SearchResult processResponse(final OptionalEntity<SearchResponse> searchResponseOpt) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SearchResultBuilder builder = SearchResult.create();
@@ -108,6 +136,14 @@ public class DefaultSearcher extends RankFusionSearcher {
         return builder.build();
     }
 
+    /**
+     * Sends a search request to OpenSearch with the specified parameters.
+     *
+     * @param query the search query string
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @return the optional search response from OpenSearch
+     */
     protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -127,6 +163,14 @@ public class DefaultSearcher extends RankFusionSearcher {
                 });
     }
 
+    /**
+     * Creates a search condition for the OpenSearch request.
+     *
+     * @param query the search query string
+     * @param params the search request parameters
+     * @param userBean the optional user bean for access control
+     * @return the search condition for the request
+     */
     protected SearchCondition<SearchRequestBuilder> createSearchCondition(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         return searchRequestBuilder -> {
@@ -139,6 +183,14 @@ public class DefaultSearcher extends RankFusionSearcher {
         };
     }
 
+    /**
+     * Parses a search hit from OpenSearch and converts it to a document map.
+     *
+     * @param fessConfig the Fess configuration
+     * @param hlPrefix the highlight prefix for field names
+     * @param searchHit the search hit to parse
+     * @return the parsed document as a map
+     */
     protected Map<String, Object> parseSearchHit(final FessConfig fessConfig, final String hlPrefix, final SearchHit searchHit) {
         final Map<String, Object> docMap = new HashMap<>(32);
         if (searchHit.getSourceAsMap() == null) {

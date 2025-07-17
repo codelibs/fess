@@ -83,40 +83,72 @@ import org.xml.sax.InputSource;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * A transformer implementation for processing HTML documents using XPath expressions.
+ * This class extends XpathTransformer to provide Fess-specific document processing capabilities
+ * including content extraction, metadata processing, and robots tag handling.
+ */
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
 
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FessXpathTransformer.class);
 
+    /** HTTP header name for robots tag */
     private static final String X_ROBOTS_TAG = "X-Robots-Tag";
 
+    /** XPath expression for extracting thumbnail content from meta tags */
     private static final String META_NAME_THUMBNAIL_CONTENT = "//META[@name=\"thumbnail\" or @name=\"THUMBNAIL\"]/@content";
 
+    /** XPath expression for extracting Open Graph image content from meta tags */
     private static final String META_PROPERTY_OGIMAGE_CONTENT = "//META[@property=\"og:image\"]/@content";
 
+    /** XPath expression for extracting robots content from meta tags */
     private static final String META_NAME_ROBOTS_CONTENT = "//META[@name=\"robots\" or @name=\"ROBOTS\"]/@content";
 
+    /** Robots tag value indicating no indexing or following */
     private static final String ROBOTS_TAG_NONE = "none";
 
+    /** Robots tag value indicating no indexing */
     private static final String ROBOTS_TAG_NOINDEX = "noindex";
 
+    /** Robots tag value indicating no following of links */
     private static final String ROBOTS_TAG_NOFOLLOW = "nofollow";
 
+    /** Size of UTF-8 BOM (Byte Order Mark) in bytes */
     private static final int UTF8_BOM_SIZE = 3;
 
+    /** Flag indicating whether content should be pruned */
     public boolean prunedContent = true;
 
+    /** Map containing URL conversion rules (regex patterns to replacement strings) */
     protected Map<String, String> convertUrlMap = new LinkedHashMap<>();
 
+    /** Fess configuration instance */
     protected FessConfig fessConfig;
 
+    /** Data serializer for converting objects to binary format */
     protected DataSerializer dataSerializer;
 
+    /** Flag indicating whether to process Google on/off comments */
     protected boolean useGoogleOffOn = true;
 
+    /** Map storing field pruning rules */
     protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
 
+    /** Cache for storing parsed pruned tags by configuration ID */
     protected Map<String, PrunedTag[]> prunedTagsCache = new HashMap<>();
 
+    /**
+     * Default constructor.
+     */
+    public FessXpathTransformer() {
+        super();
+    }
+
+    /**
+     * Initializes the transformer after dependency injection.
+     * Sets up the Fess configuration and data serializer components.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -126,16 +158,33 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         dataSerializer = ComponentUtil.getComponent("dataSerializer");
     }
 
+    /**
+     * Returns the Fess configuration instance.
+     *
+     * @return the Fess configuration
+     */
     @Override
     public FessConfig getFessConfig() {
         return fessConfig;
     }
 
+    /**
+     * Returns the logger instance for this class.
+     *
+     * @return the logger instance
+     */
     @Override
     public Logger getLogger() {
         return logger;
     }
 
+    /**
+     * Stores parsed data from response into result data.
+     * Processes HTML content using XPath expressions and handles robots tags.
+     *
+     * @param responseData the response data from crawling
+     * @param resultData the result data to store processed information
+     */
     @Override
     protected void storeData(final ResponseData responseData, final ResultData resultData) {
         final DOMParser parser = getDomParser();
@@ -204,6 +253,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         resultData.setEncoding(charsetName);
     }
 
+    /**
+     * Normalizes the extracted data, particularly handling title normalization.
+     *
+     * @param responseData the response data from crawling
+     * @param dataMap the data map containing extracted field values
+     */
     protected void normalizeData(final ResponseData responseData, final Map<String, Object> dataMap) {
         final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
         if (titleObj != null) {
@@ -212,6 +267,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Processes robots meta tags in the HTML document.
+     * Handles noindex, nofollow, and none directives.
+     *
+     * @param responseData the response data from crawling
+     * @param resultData the result data to store processed information
+     * @param document the parsed HTML document
+     */
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
@@ -261,6 +324,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     }
 
+    /**
+     * Processes X-Robots-Tag HTTP headers.
+     * Handles noindex, nofollow, and none directives from HTTP headers.
+     *
+     * @param responseData the response data from crawling
+     * @param resultData the result data to store processed information
+     */
     protected void processXRobotsTag(final ResponseData responseData, final ResultData resultData) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
@@ -305,12 +375,25 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 });
     }
 
+    /**
+     * Retrieves configuration parameter map for the given configuration name.
+     *
+     * @param responseData the response data from crawling
+     * @param config the configuration name to retrieve
+     * @return map of configuration parameters
+     */
     protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         return crawlingConfig.getConfigParameterMap(config);
     }
 
+    /**
+     * Validates if the given URL string is a valid URL.
+     *
+     * @param urlStr the URL string to validate
+     * @return true if the URL is valid, false otherwise
+     */
     protected boolean isValidUrl(final String urlStr) {
         if (StringUtil.isBlank(urlStr)) {
             return false;
@@ -335,6 +418,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return true;
     }
 
+    /**
+     * Validates if the canonical URL is valid relative to the original URL.
+     * Specifically checks for HTTPS to HTTP downgrades.
+     *
+     * @param url the original URL
+     * @param canonicalUrl the canonical URL to validate
+     * @return true if the canonical URL is valid, false otherwise
+     */
     protected boolean isValidCanonicalUrl(final String url, final String canonicalUrl) {
         if (url.startsWith("https:") && canonicalUrl.startsWith("http:")) {
             if (logger.isDebugEnabled()) {
@@ -345,6 +436,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return true;
     }
 
+    /**
+     * Processes additional data including canonical URLs, content extraction, and metadata.
+     *
+     * @param dataMap the data map to populate
+     * @param responseData the response data from crawling
+     * @param document the parsed HTML document
+     * @return the processed data map
+     */
     protected Map<String, Object> processAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData,
             final Document document) {
         // canonical
@@ -513,6 +612,17 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return processFieldConfigs(dataMap, fieldConfigs);
     }
 
+    /**
+     * Puts content data into the result data map.
+     *
+     * @param dataMap the data map to populate
+     * @param responseData the response data from crawling
+     * @param fessConfig the Fess configuration
+     * @param crawlingConfig the crawling configuration
+     * @param documentHelper the document helper for content processing
+     * @param body the extracted body content
+     * @param fileName the file name if applicable
+     */
     protected void putResultDataContent(final Map<String, Object> dataMap, final ResponseData responseData, final FessConfig fessConfig,
             final CrawlingConfig crawlingConfig, final DocumentHelper documentHelper, final String body, final String fileName) {
         final String content = documentHelper.getContent(crawlingConfig, responseData, body, dataMap);
@@ -523,11 +633,24 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Retrieves the crawling configuration for the given response data.
+     *
+     * @param responseData the response data from crawling
+     * @return the crawling configuration
+     */
     protected CrawlingConfig getCrawlingConfig(final ResponseData responseData) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         return crawlingConfigHelper.get(responseData.getSessionId());
     }
 
+    /**
+     * Gets the XPath expression for extracting language information.
+     *
+     * @param fessConfig the Fess configuration
+     * @param xpathConfigMap the XPath configuration map
+     * @return the XPath expression for language extraction
+     */
     protected String getLangXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
         final String xpath = xpathConfigMap.get(XPath.DEFAULT_LANG);
         if (StringUtil.isNotBlank(xpath)) {
@@ -536,6 +659,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return fessConfig.getCrawlerDocumentHtmlLangXpath();
     }
 
+    /**
+     * Gets the XPath expression for extracting content.
+     *
+     * @param fessConfig the Fess configuration
+     * @param xpathConfigMap the XPath configuration map
+     * @return the XPath expression for content extraction
+     */
     protected String getContentXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
         final String xpath = xpathConfigMap.get(XPath.DEFAULT_CONTENT);
         if (StringUtil.isNotBlank(xpath)) {
@@ -544,6 +674,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return fessConfig.getCrawlerDocumentHtmlContentXpath();
     }
 
+    /**
+     * Gets the XPath expression for extracting digest information.
+     *
+     * @param fessConfig the Fess configuration
+     * @param xpathConfigMap the XPath configuration map
+     * @return the XPath expression for digest extraction
+     */
     protected String getDigestXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
         final String xpath = xpathConfigMap.get(XPath.DEFAULT_DIGEST);
         if (StringUtil.isNotBlank(xpath)) {
@@ -552,6 +689,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return fessConfig.getCrawlerDocumentHtmlDigestXpath();
     }
 
+    /**
+     * Extracts the canonical URL from the HTML document.
+     *
+     * @param responseData the response data from crawling
+     * @param document the parsed HTML document
+     * @return the canonical URL if found, null otherwise
+     */
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
         String xpath = configMap.get(Config.HTML_CANONICAL_XPATH);
@@ -568,6 +712,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
     }
 
+    /**
+     * Normalizes the canonical URL relative to the base URL.
+     *
+     * @param baseUrl the base URL
+     * @param canonicalUrl the canonical URL to normalize
+     * @return the normalized canonical URL
+     */
     protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
         try {
             final URL u = new URL(baseUrl);
@@ -578,6 +729,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return null;
     }
 
+    /**
+     * Removes HTML comment tags from the content.
+     *
+     * @param content the content to process
+     * @return the content with comment tags removed
+     */
     protected String removeCommentTag(final String content) {
         if (content == null) {
             return StringUtil.EMPTY;
@@ -599,6 +756,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return value;
     }
 
+    /**
+     * Extracts text content from a single node using XPath expression.
+     *
+     * @param document the parsed HTML document
+     * @param xpath the XPath expression to evaluate
+     * @param pruneFunc the function to apply for node pruning
+     * @return the extracted text content
+     */
     protected String getSingleNodeValue(final Document document, final String xpath, final UnaryOperator<Node> pruneFunc) {
         StringBuilder buf = null;
         XPathNodes list = null;
@@ -624,6 +789,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return buf.toString().trim();
     }
 
+    /**
+     * Recursively parses text content from a node and its children.
+     *
+     * @param node the node to parse
+     * @param buf the StringBuilder to append content to
+     */
     protected void parseTextContent(final Node node, final StringBuilder buf) {
         if (node.hasChildNodes()) {
             final NodeList nodeList = node.getChildNodes();
@@ -642,6 +813,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Processes Google on/off comment directives in the node.
+     *
+     * @param node the node to process
+     * @param flag the flag indicating whether content should be included
+     * @return the processed node
+     */
     protected Node processGoogleOffOn(final Node node, final ValueHolder<Boolean> flag) {
         final NodeList nodeList = node.getChildNodes();
         List<Node> removedNodeList = null;
@@ -673,6 +851,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return node;
     }
 
+    /**
+     * Prunes unwanted tags from the node based on configuration.
+     *
+     * @param node the node to prune
+     * @param crawlingConfig the crawling configuration containing pruning rules
+     * @return the pruned node
+     */
     protected Node pruneNode(final Node node, final CrawlingConfig crawlingConfig) {
         PrunedTag[] prunedTags = null;
         if (crawlingConfig != null) {
@@ -696,6 +881,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return pruneNodeByTags(node, prunedTags);
     }
 
+    /**
+     * Prunes nodes based on the specified pruned tags.
+     *
+     * @param node the node to prune
+     * @param prunedTags the array of pruned tag configurations
+     * @return the pruned node
+     */
     protected Node pruneNodeByTags(final Node node, final PrunedTag[] prunedTags) {
         final NodeList nodeList = node.getChildNodes();
         final List<Node> childNodeList = new ArrayList<>();
@@ -720,6 +912,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return node;
     }
 
+    /**
+     * Checks if a node matches any of the pruned tag configurations.
+     *
+     * @param node the node to check
+     * @param prunedTags the array of pruned tag configurations
+     * @return true if the node should be pruned, false otherwise
+     */
     protected boolean isPrunedTag(final Node node, final PrunedTag[] prunedTags) {
         for (final PrunedTag prunedTag : prunedTags) {
             if (prunedTag.matches(node)) {
@@ -729,6 +928,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return false;
     }
 
+    /**
+     * Extracts text content from multiple nodes using XPath expression.
+     *
+     * @param document the parsed HTML document
+     * @param xpath the XPath expression to evaluate
+     * @return the concatenated text content from all matching nodes
+     */
     protected String getMultipleNodeValue(final Document document, final String xpath) {
         XPathNodes nodeList = null;
         final StringBuilder buf = new StringBuilder(100);
@@ -745,6 +951,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return buf.toString().trim();
     }
 
+    /**
+     * Replaces duplicate hosts in the URL using the duplicate host helper.
+     *
+     * @param url the URL to process
+     * @return the URL with duplicate hosts replaced
+     */
     protected String replaceDuplicateHost(final String url) {
         try {
             // remove duplicate host
@@ -755,6 +967,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Extracts anchor URLs from the HTML document.
+     *
+     * @param document the parsed HTML document
+     * @param responseData the response data from crawling
+     * @return list of anchor URLs found in the document
+     */
     protected List<String> getAnchorList(final Document document, final ResponseData responseData) {
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
@@ -777,6 +996,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return urlList;
     }
 
+    /**
+     * Gets the base URL for resolving relative URLs.
+     *
+     * @param currentUrl the current URL
+     * @param baseHref the base href value from HTML
+     * @return the base URL
+     * @throws MalformedURLException if the URL is malformed
+     */
     protected URL getBaseUrl(final String currentUrl, final String baseHref) throws MalformedURLException {
         if (baseHref != null) {
             return getURL(currentUrl, baseHref);
@@ -784,6 +1011,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return new URL(currentUrl);
     }
 
+    /**
+     * Gets child URL extraction rules from configuration.
+     *
+     * @param responseData the response data from crawling
+     * @param resultData the result data
+     * @return stream of tag-attribute pairs for URL extraction
+     */
     @Override
     protected Stream<Pair<String, String>> getChildUrlRules(final ResponseData responseData, final ResultData resultData) {
         final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
@@ -795,6 +1029,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 .map(v -> new Pair<String, String>(v[0].trim(), v[1].trim()));
     }
 
+    /**
+     * Converts and processes child URLs using path mapping and URL conversion rules.
+     *
+     * @param urlList the list of request data containing URLs to convert
+     * @return the converted list of request data
+     */
     @Override
     protected List<RequestData> convertChildUrlList(final List<RequestData> urlList) {
         if (urlList != null) {
@@ -811,10 +1051,21 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return urlList;
     }
 
+    /**
+     * Gets the path mapping helper for URL transformations.
+     *
+     * @return the path mapping helper instance
+     */
     protected PathMappingHelper getPathMappingHelper() {
         return ComponentUtil.getPathMappingHelper();
     }
 
+    /**
+     * Deserializes data from access result data.
+     *
+     * @param accessResultData the access result data containing serialized data
+     * @return the deserialized object
+     */
     @Override
     public Object getData(final AccessResultData<?> accessResultData) {
         final byte[] data = accessResultData.getData();
@@ -828,6 +1079,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return new HashMap<String, Object>();
     }
 
+    /**
+     * Adds child URL from tag attribute value.
+     *
+     * @param urlList the list to add URLs to
+     * @param url the base URL for resolving relative URLs
+     * @param attrValue the attribute value containing the URL
+     * @param encoding the character encoding
+     */
     @Override
     protected void addChildUrlFromTagAttribute(final List<String> urlList, final URL url, final String attrValue, final String encoding) {
         final String urlValue = attrValue.trim();
@@ -861,14 +1120,33 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Checks if the byte array contains UTF-8 BOM (Byte Order Mark).
+     *
+     * @param b the byte array to check
+     * @return true if the bytes represent UTF-8 BOM, false otherwise
+     */
     private boolean isUtf8BomBytes(final byte[] b) {
         return b[0] == (byte) 0xEF && b[1] == (byte) 0xBB && b[2] == (byte) 0xBF;
     }
 
+    /**
+     * Sets whether to process Google on/off comment directives.
+     *
+     * @param useGoogleOffOn true to enable Google on/off processing, false to disable
+     */
     public void setUseGoogleOffOn(final boolean useGoogleOffOn) {
         this.useGoogleOffOn = useGoogleOffOn;
     }
 
+    /**
+     * Extracts thumbnail URL from the HTML document.
+     * Looks for thumbnail meta tags, Open Graph images, and image tags.
+     *
+     * @param responseData the response data from crawling
+     * @param document the parsed HTML document
+     * @return the thumbnail URL if found, null otherwise
+     */
     protected String getThumbnailUrl(final ResponseData responseData, final Document document) {
         // TODO PageMap
         try {
@@ -932,6 +1210,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return null;
     }
 
+    /**
+     * Extracts thumbnail source URL from image tag attributes.
+     *
+     * @param url the base URL for resolving relative URLs
+     * @param attributes the named node map of image tag attributes
+     * @return the thumbnail source URL if found, null otherwise
+     */
     protected String getThumbnailSrc(final String url, final NamedNodeMap attributes) {
         final Node srcNode = attributes.getNamedItem("src");
         if (srcNode != null) {
@@ -949,6 +1234,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return null;
     }
 
+    /**
+     * Gets an attribute value as an integer.
+     *
+     * @param attributes the named node map of attributes
+     * @param name the attribute name
+     * @return the attribute value as Integer, null if not found or not parseable
+     */
     protected Integer getAttributeAsInteger(final NamedNodeMap attributes, final String name) {
         final Node namedItem = attributes.getNamedItem(name);
         if (namedItem == null) {
@@ -968,6 +1260,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
     }
 
+    /**
+     * Creates a URL object from the current URL and a relative or absolute URL string.
+     *
+     * @param currentUrl the current URL as base
+     * @param url the URL string to process
+     * @return the URL object
+     * @throws MalformedURLException if the URL is malformed
+     */
     protected URL getURL(final String currentUrl, final String url) throws MalformedURLException {
         if (url != null) {
             if (url.startsWith("://")) {
@@ -986,15 +1286,33 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return null;
     }
 
+    /**
+     * Adds a field extraction rule with pruning option.
+     *
+     * @param name the field name
+     * @param xpath the XPath expression for extraction
+     * @param isPruned whether the extracted content should be pruned
+     */
     public void addFieldRule(final String name, final String xpath, final boolean isPruned) {
         addFieldRule(name, xpath);
         fieldPrunedRuleMap.put(name, isPruned);
     }
 
+    /**
+     * Sets the URL conversion map for transforming URLs.
+     *
+     * @param convertUrlMap the map of regex patterns to replacement strings
+     */
     public void setConvertUrlMap(final Map<String, String> convertUrlMap) {
         this.convertUrlMap.putAll(convertUrlMap);
     }
 
+    /**
+     * Adds a URL conversion rule.
+     *
+     * @param regex the regular expression pattern to match
+     * @param replacement the replacement string
+     */
     public void addConvertUrl(final String regex, final String replacement) {
         convertUrlMap.put(regex, replacement);
     }

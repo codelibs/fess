@@ -32,12 +32,20 @@ import org.lastaflute.web.login.credential.LoginCredential;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.UserInfo;
 
+/**
+ * Azure Active Directory credential implementation for Fess authentication.
+ * Provides login credential functionality using Azure AD authentication results.
+ */
 public class AzureAdCredential implements LoginCredential, FessCredential {
 
     private static final Logger logger = LogManager.getLogger(AzureAdCredential.class);
 
     private final AuthenticationResult authResult;
 
+    /**
+     * Constructs an Azure AD credential with the authentication result.
+     * @param authResult The authentication result from Azure AD.
+     */
     public AzureAdCredential(final AuthenticationResult authResult) {
         this.authResult = authResult;
     }
@@ -52,21 +60,36 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         return "{" + authResult.getUserInfo().getDisplayableId() + "}";
     }
 
+    /**
+     * Gets the Azure AD user associated with this credential.
+     * @return The Azure AD user instance.
+     */
     public AzureAdUser getUser() {
         return new AzureAdUser(authResult);
     }
 
+    /**
+     * Azure AD user implementation providing user information and permissions.
+     */
     public static class AzureAdUser implements FessUser {
         private static final long serialVersionUID = 1L;
 
+        /** User's group memberships. */
         protected String[] groups;
 
+        /** User's role assignments. */
         protected String[] roles;
 
+        /** User's computed permissions. */
         protected String[] permissions;
 
+        /** Azure AD authentication result. */
         protected AuthenticationResult authResult;
 
+        /**
+         * Constructs an Azure AD user with the authentication result.
+         * @param authResult The authentication result from Azure AD.
+         */
         public AzureAdUser(final AuthenticationResult authResult) {
             this.authResult = authResult;
             final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
@@ -127,14 +150,26 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             return true;
         }
 
+        /**
+         * Gets the Azure AD authentication result.
+         * @return The authentication result.
+         */
         public AuthenticationResult getAuthenticationResult() {
             return authResult;
         }
 
+        /**
+         * Sets the user's group memberships.
+         * @param groups Array of group names.
+         */
         public void setGroups(final String[] groups) {
             this.groups = groups;
         }
 
+        /**
+         * Sets the user's role assignments.
+         * @param roles Array of role names.
+         */
         public void setRoles(final String[] roles) {
             this.roles = roles;
         }

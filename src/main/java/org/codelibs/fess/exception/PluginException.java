@@ -15,14 +15,28 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception for plugin-related errors.
+ */
 public class PluginException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a plugin exception with message and cause.
+     *
+     * @param message the error message
+     * @param cause the cause
+     */
     public PluginException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Creates a plugin exception with message.
+     *
+     * @param message the error message
+     */
     public PluginException(final String message) {
         super(message);
     }

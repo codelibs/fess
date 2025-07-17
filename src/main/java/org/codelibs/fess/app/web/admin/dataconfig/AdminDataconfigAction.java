@@ -52,11 +52,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for Data Config management.
+ *
  */
 public class AdminDataconfigAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDataconfigAction() {
+        super();
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-dataconfig";
 
     private static final Logger logger = LogManager.getLogger(AdminDataconfigAction.class);
@@ -70,6 +78,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     private DataConfigPager dataConfigPager;
     @Resource
     private RoleTypeService roleTypeService;
+    /** The data store factory. */
     @Resource
     protected DataStoreFactory dataStoreFactory;
 
@@ -90,12 +99,22 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -109,6 +128,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search for data configs.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -118,6 +142,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -127,6 +156,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
         registerHandlerNames(data);
@@ -141,6 +175,10 @@ public class AdminDataconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -166,6 +204,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -197,6 +240,12 @@ public class AdminDataconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param crudMode The CRUD mode.
+     * @param id The data config ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -224,6 +273,11 @@ public class AdminDataconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a new data config.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -245,6 +299,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Update a data config.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -266,6 +325,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Delete a data config.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -289,6 +353,13 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Get a data config entity from a form.
+     * @param form The create form.
+     * @param username The username.
+     * @param currentTime The current time.
+     * @return An optional entity of a data config.
+     */
     public static OptionalEntity<DataConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -308,6 +379,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Get a data config from a form.
+     * @param form The create form.
+     * @return An optional entity of a data config.
+     */
     public static OptionalEntity<DataConfig> getDataConfig(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -328,10 +404,18 @@ public class AdminDataconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Register roles and labels.
+     * @param data The render data.
+     */
     protected void registerRolesAndLabels(final RenderData data) {
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
     }
 
+    /**
+     * Register handler names.
+     * @param data The render data.
+     */
     protected void registerHandlerNames(final RenderData data) {
         final String[] dataStoreNames = dataStoreFactory.getDataStoreNames();
         final List<Map<String, String>> itemList = new ArrayList<>();
@@ -347,6 +431,11 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

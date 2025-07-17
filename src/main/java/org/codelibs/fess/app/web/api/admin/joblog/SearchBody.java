@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.joblog;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for job log administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Job log ID */
     public String id;
 
 }

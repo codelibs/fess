@@ -20,14 +20,25 @@ import java.util.function.Supplier;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 
+/**
+ * The credential for action response.
+ */
 public class ActionResponseCredential implements LoginCredential {
 
     private final Supplier<ActionResponse> action;
 
+    /**
+     * Constructor.
+     * @param action The action.
+     */
     public ActionResponseCredential(final Supplier<ActionResponse> action) {
         this.action = action;
     }
 
+    /**
+     * Execute the action.
+     * @return The action response.
+     */
     public ActionResponse execute() {
         return action.get();
     }

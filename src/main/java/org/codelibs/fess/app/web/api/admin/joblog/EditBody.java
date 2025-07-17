@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.joblog;
 
 import org.codelibs.fess.app.web.admin.joblog.EditForm;
 
+/**
+ * Request body class for job log edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for job log management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
 
 }

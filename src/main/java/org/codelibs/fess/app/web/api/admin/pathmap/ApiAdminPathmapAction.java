@@ -34,15 +34,42 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin path mapping management.
+ * Provides RESTful API endpoints for managing path mapping settings in the Fess search engine.
+ * Path mappings define URL path transformations and redirections for crawling and indexing.
+ */
 public class ApiAdminPathmapAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminPathmapAction.class);
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminPathmapAction() {
+        super();
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+
+    /** Service for managing path mapping configurations */
     @Resource
     private PathMappingService pathMappingService;
 
     // GET /api/admin/pathmap
     // PUT /api/admin/pathmap
+    /**
+     * Returns list of path mapping settings.
+     * Supports both GET and PUT requests for retrieving paginated path mapping configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing path mapping settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -54,6 +81,12 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/pathmap/setting/{id}
+    /**
+     * Returns specific path mapping setting by ID.
+     *
+     * @param id the path mapping setting ID
+     * @return JSON response containing the path mapping setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(
@@ -64,6 +97,12 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/pathmap/setting
+    /**
+     * Creates a new path mapping setting.
+     *
+     * @param body path mapping setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -85,6 +124,12 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/pathmap/setting
+    /**
+     * Updates an existing path mapping setting.
+     *
+     * @param body path mapping setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -105,6 +150,12 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/pathmap/setting/{id}
+    /**
+     * Deletes a specific path mapping setting.
+     *
+     * @param id the path mapping setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         final PathMapping entity = pathMappingService.getPathMapping(id).orElseGet(() -> {
@@ -121,6 +172,12 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a path mapping entity for API responses.
+     *
+     * @param entity the path mapping entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final PathMapping entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));

@@ -40,9 +40,21 @@ import org.codelibs.fess.util.SystemUtil;
 
 import jakarta.servlet.ServletContext;
 
+/**
+ * This job is responsible for executing the suggest creator process.
+ * It builds and runs a command-line process to generate suggest data,
+ * handling classpath setup, system properties, and process monitoring.
+ */
 public class SuggestJob extends ExecJob {
 
     private static final Logger logger = LogManager.getLogger(SuggestJob.class);
+
+    /**
+     * Constructs a new suggest job.
+     */
+    public SuggestJob() {
+        // do nothing
+    }
 
     @Override
     public String execute() {
@@ -72,6 +84,11 @@ public class SuggestJob extends ExecJob {
 
     }
 
+    /**
+     * Executes the suggest creator process.
+     * This method constructs the command line arguments and starts the process.
+     * @throws JobProcessingException if the process fails.
+     */
     protected void executeSuggestCreator() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";

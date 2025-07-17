@@ -19,14 +19,32 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author ma2tani
+ * Form for uploading protected words files to the Fess search engine.
+ * Protected words are terms that should not be stemmed or modified during text analysis.
+ * This form is used in the admin interface to upload custom protected words dictionary files.
  */
 public class UploadForm {
 
+    /**
+     * The dictionary ID that identifies which protected words dictionary configuration to update.
+     * This ID corresponds to a specific protected words dictionary instance in the system.
+     */
     @Required
     public String dictId;
 
+    /**
+     * The multipart file containing the protected words to be uploaded.
+     * This file should contain a list of words that should be protected from stemming.
+     */
     @Required
     public MultipartFormFile protwordsFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

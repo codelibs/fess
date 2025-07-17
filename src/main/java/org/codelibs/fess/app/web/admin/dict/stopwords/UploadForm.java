@@ -19,14 +19,32 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author ma2tani
+ * Form for uploading stopwords files to the Fess search engine.
+ * Stopwords are common words that should be ignored during search indexing and querying.
+ * This form is used in the admin interface to upload custom stopwords dictionary files.
  */
 public class UploadForm {
 
+    /**
+     * The dictionary ID that identifies which stopwords dictionary configuration to update.
+     * This ID corresponds to a specific stopwords dictionary instance in the system.
+     */
     @Required
     public String dictId;
 
+    /**
+     * The multipart file containing the stopwords to be uploaded.
+     * This file should contain a list of words that should be filtered out during indexing.
+     */
     @Required
     public MultipartFormFile stopwordsFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

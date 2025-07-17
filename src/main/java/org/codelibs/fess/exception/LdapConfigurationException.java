@@ -15,10 +15,18 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * An exception thrown when LDAP configuration is invalid.
+ */
 public class LdapConfigurationException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new LDAP configuration exception with the specified detail message.
+     *
+     * @param message The detail message.
+     */
     public LdapConfigurationException(final String message) {
         super(message);
     }

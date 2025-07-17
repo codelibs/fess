@@ -16,13 +16,24 @@
 package org.codelibs.fess.app.web.admin.keymatch;
 
 /**
- * @author codelibs
- * @author jflute
+ * The search form for Key Match.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The search term field for key match configuration.
+     */
     public String term;
 
+    /**
+     * The query field for key match configuration.
+     */
     public String query;
 
 }

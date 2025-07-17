@@ -16,10 +16,18 @@
 package org.codelibs.fess.app.web.admin.badword;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * The search form for Bad Word.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching bad words.
+     */
     public String id;
 }

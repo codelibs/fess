@@ -20,26 +20,50 @@ import java.util.List;
 
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Pager for protected words dictionary management.
+ * This class handles pagination functionality for browsing protected words.
+ */
 public class ProtwordsPager implements Serializable {
+
+    /**
+     * Default constructor.
+     */
+    public ProtwordsPager() {
+        // Default constructor
+    }
 
     private static final long serialVersionUID = 1L;
 
+    /** The total number of records. */
     private int allRecordCount;
 
+    /**
+     * The total number of pages.
+     */
     private int allPageCount;
 
+    /** Whether a previous page exists. */
     private boolean existPrePage;
 
+    /** Whether a next page exists. */
     private boolean existNextPage;
 
+    /** The list of page numbers for pagination display. */
     private List<Integer> pageNumberList;
 
+    /** The number of items to display per page. */
     private int pageSize;
 
+    /** The current page number. */
     private int currentPageNumber;
 
+    /** The dictionary ID */
     public String id;
 
+    /**
+     * Clears all pagination data and resets to default values.
+     */
     public void clear() {
         allRecordCount = 0;
         allPageCount = 0;
@@ -51,46 +75,90 @@ public class ProtwordsPager implements Serializable {
         id = null;
     }
 
+    /**
+     * Gets the default page size from configuration.
+     * @return the default page size
+     */
     protected int getDefaultPageSize() {
         return ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
     }
 
+    /**
+     * Gets the default current page number.
+     * @return the default current page number (1)
+     */
     protected int getDefaultCurrentPageNumber() {
         return 1;
     }
 
+    /**
+     * Gets the total number of records.
+     * @return the total record count
+     */
     public int getAllRecordCount() {
         return allRecordCount;
     }
 
+    /**
+     * Sets the total number of records.
+     * @param allRecordCount the total record count
+     */
     public void setAllRecordCount(final int allRecordCount) {
         this.allRecordCount = allRecordCount;
     }
 
+    /**
+     * Gets the total number of pages.
+     * @return the total page count
+     */
     public int getAllPageCount() {
         return allPageCount;
     }
 
+    /**
+     * Sets the total number of pages.
+     * @param allPageCount the total page count
+     */
     public void setAllPageCount(final int allPageCount) {
         this.allPageCount = allPageCount;
     }
 
+    /**
+     * Checks if there is a previous page.
+     * @return true if previous page exists, false otherwise
+     */
     public boolean isExistPrePage() {
         return existPrePage;
     }
 
+    /**
+     * Sets whether a previous page exists.
+     * @param existPrePage true if previous page exists
+     */
     public void setExistPrePage(final boolean existPrePage) {
         this.existPrePage = existPrePage;
     }
 
+    /**
+     * Checks if there is a next page.
+     * @return true if next page exists, false otherwise
+     */
     public boolean isExistNextPage() {
         return existNextPage;
     }
 
+    /**
+     * Sets whether a next page exists.
+     * @param existNextPage true if next page exists
+     */
     public void setExistNextPage(final boolean existNextPage) {
         this.existNextPage = existNextPage;
     }
 
+    /**
+     * Gets the page size.
+     * @return the page size
+     */
     public int getPageSize() {
         if (pageSize <= 0) {
             pageSize = getDefaultPageSize();
@@ -98,10 +166,18 @@ public class ProtwordsPager implements Serializable {
         return pageSize;
     }
 
+    /**
+     * Sets the page size.
+     * @param pageSize the page size
+     */
     public void setPageSize(final int pageSize) {
         this.pageSize = pageSize;
     }
 
+    /**
+     * Gets the current page number.
+     * @return the current page number
+     */
     public int getCurrentPageNumber() {
         if (currentPageNumber <= 0) {
             currentPageNumber = getDefaultCurrentPageNumber();
@@ -109,14 +185,26 @@ public class ProtwordsPager implements Serializable {
         return currentPageNumber;
     }
 
+    /**
+     * Sets the current page number.
+     * @param currentPageNumber the current page number
+     */
     public void setCurrentPageNumber(final int currentPageNumber) {
         this.currentPageNumber = currentPageNumber;
     }
 
+    /**
+     * Gets the list of page numbers for pagination display.
+     * @return the list of page numbers
+     */
     public List<Integer> getPageNumberList() {
         return pageNumberList;
     }
 
+    /**
+     * Sets the list of page numbers for pagination display.
+     * @param pageNumberList the list of page numbers
+     */
     public void setPageNumberList(final List<Integer> pageNumberList) {
         this.pageNumberList = pageNumberList;
     }

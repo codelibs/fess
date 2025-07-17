@@ -16,10 +16,18 @@
 package org.codelibs.fess.app.web.admin.fileauth;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * The search form for File Authentication.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching file authentication settings.
+     */
     public String id;
 }

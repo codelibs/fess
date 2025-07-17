@@ -33,22 +33,61 @@ import org.lastaflute.web.validation.VaMessenger;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Abstract base class for Fess API actions that provides common functionality
+ * for API endpoints including authentication, message handling, and access control.
+ *
+ * This class extends FessBaseAction and provides specialized behavior for API requests,
+ * including token-based authentication and JSON response handling.
+ */
 public abstract class FessApiAction extends FessBaseAction {
 
+    /**
+     * Default constructor.
+     */
+    public FessApiAction() {
+        super();
+    }
+
+    /**
+     * Message manager for handling internationalized messages and validation errors.
+     * Used to convert validation messages to localized text for API responses.
+     */
     @Resource
     protected MessageManager messageManager;
 
+    /**
+     * Service for managing API access tokens including validation and authentication.
+     * Used to verify token-based authentication for API requests.
+     */
     @Resource
     protected AccessTokenService accessTokenService;
 
+    /**
+     * HTTP servlet request object providing access to request parameters, headers,
+     * and other request-specific information needed for API processing.
+     */
     @Resource
     protected HttpServletRequest request;
 
+    /**
+     * Returns an empty OptionalThing for login manager since API actions
+     * use token-based authentication instead of traditional session-based login.
+     *
+     * @return empty OptionalThing indicating no login manager is used
+     */
     @Override
     protected OptionalThing<LoginManager> myLoginManager() {
         return OptionalThing.empty();
     }
 
+    /**
+     * Pre-processes API requests by checking access authorization before executing the action.
+     * If access is not allowed, returns an unauthorized error response.
+     *
+     * @param runtime the action runtime context containing request information
+     * @return ActionResponse with unauthorized error if access denied, otherwise delegates to parent
+     */
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         if (!isAccessAllowed()) {
@@ -58,6 +97,13 @@ public abstract class FessApiAction extends FessBaseAction {
         return super.godHandPrologue(runtime);
     }
 
+    /**
+     * Converts validation messages to a localized string representation for API responses.
+     * Uses the request locale if available, otherwise defaults to English.
+     *
+     * @param validationMessagesLambda lambda function that adds validation messages
+     * @return concatenated string of localized validation messages separated by spaces
+     */
     protected String getMessage(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = new FessMessages();
         validationMessagesLambda.message(messages);
@@ -65,6 +111,13 @@ public abstract class FessApiAction extends FessBaseAction {
                 .collect(Collectors.joining(" "));
     }
 
+    /**
+     * Determines whether the current request is authorized to access the API endpoint.
+     * This default implementation returns false, requiring subclasses to override
+     * and implement proper access control logic.
+     *
+     * @return true if access is allowed, false otherwise
+     */
     protected boolean isAccessAllowed() {
         return false;
     }

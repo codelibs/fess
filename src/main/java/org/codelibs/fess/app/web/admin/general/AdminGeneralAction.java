@@ -42,11 +42,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
+ * Admin action for General settings.
+ *
  */
 public class AdminGeneralAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminGeneralAction() {
+        super();
+    }
+
+    /** The role name for general settings administration. */
     public static final String ROLE = "admin-general";
 
     private static final String DUMMY_PASSWORD = "**********";
@@ -56,6 +64,7 @@ public class AdminGeneralAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** System properties for configuration management. */
     @Resource
     protected DynamicProperties systemProperties;
 
@@ -77,6 +86,11 @@ public class AdminGeneralAction extends FessAdminAction {
     // ===================================================================================
     //
 
+    /**
+     * Displays the general settings index page.
+     *
+     * @return HTML response for the general settings page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -88,6 +102,12 @@ public class AdminGeneralAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sends a test mail using the provided notification settings.
+     *
+     * @param form the mail form containing notification settings
+     * @return HTML response after sending test mail
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse sendmail(final MailForm form) {
@@ -119,6 +139,12 @@ public class AdminGeneralAction extends FessAdminAction {
         return redirectByParam(AdminGeneralAction.class, "notificationTo", form.notificationTo);
     }
 
+    /**
+     * Updates the general system configuration settings.
+     *
+     * @param form the edit form containing updated settings
+     * @return HTML response after updating settings
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -130,6 +156,12 @@ public class AdminGeneralAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates the Fess configuration with values from the form.
+     *
+     * @param fessConfig the Fess configuration to update
+     * @param form the form containing new configuration values
+     */
     public static void updateConfig(final FessConfig fessConfig, final EditForm form) {
         fessConfig.setLoginRequired(isCheckboxEnabled(form.loginRequired));
         fessConfig.setResultCollapsed(isCheckboxEnabled(form.resultCollapsed));
@@ -191,6 +223,12 @@ public class AdminGeneralAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Updates the form with current configuration values.
+     *
+     * @param fessConfig the current Fess configuration
+     * @param form the form to populate with configuration values
+     */
     public static void updateForm(final FessConfig fessConfig, final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
         form.resultCollapsed = fessConfig.isResultCollapsed() ? Constants.TRUE : Constants.FALSE;

@@ -64,27 +64,53 @@ import org.opensearch.search.sort.SortBuilders;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing the suggest feature.
+ * This class provides methods for initializing the suggester, indexing data from
+ * various sources, and managing elevate words and bad words.
+ */
 public class SuggestHelper {
+    /**
+     * Constructs a new suggest helper.
+     */
+    public SuggestHelper() {
+        // do nothing
+    }
+
     private static final Logger logger = LogManager.getLogger(SuggestHelper.class);
 
+    /** The separator for text content. */
     protected static final String TEXT_SEP = " ";
 
+    /** The suggester instance for handling suggest operations. */
     protected Suggester suggester;
 
+    /** The Fess configuration for accessing system settings. */
     protected FessConfig fessConfig;
 
+    /** The set of field names for content. */
     protected final Set<String> contentFieldNameSet = new HashSet<>();
 
+    /** The set of field names for tags. */
     protected final Set<String> tagFieldNameSet = new HashSet<>();
 
+    /** The set of field names for roles. */
     protected final Set<String> roleFieldNameSet = new HashSet<>();
 
+    /** The list of content field names. */
     protected List<String> contentFieldList;
 
+    /** The popular word helper for handling popular words. */
     protected PopularWordHelper popularWordHelper = null;
 
+    /** The interval for storing search logs. */
     protected long searchStoreInterval = 1; // min
 
+    /**
+     * Initializes the SuggestHelper.
+     * This method sets up the suggester, configures field names, and initializes
+     * the connection to the search engine.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -128,10 +154,18 @@ public class SuggestHelper {
         }
     }
 
+    /**
+     * Gets the suggester instance.
+     *
+     * @return The suggester instance.
+     */
     public Suggester suggester() {
         return suggester;
     }
 
+    /**
+     * Stores search logs in the suggest index.
+     */
     public void storeSearchLog() {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
 
@@ -153,6 +187,11 @@ public class SuggestHelper {
         }, this::indexFromSearchLog);
     }
 
+    /**
+     * Indexes suggest data from a list of search logs.
+     *
+     * @param searchLogList The list of search logs to index.
+     */
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
         final Map<String, LocalDateTime> duplicateSessionMap = new HashMap<>();
         searchLogList.stream().forEach(searchLog -> {
@@ -214,6 +253,12 @@ public class SuggestHelper {
         refresh();
     }
 
+    /**
+     * Indexes suggest data from documents.
+     *
+     * @param success A callback for successful indexing.
+     * @param error   A callback for indexing errors.
+     */
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long interval = fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue();
@@ -246,6 +291,11 @@ public class SuggestHelper {
         }).error(t -> error.accept(t));
     }
 
+    /**
+     * Purges old suggest data from documents.
+     *
+     * @param time The timestamp to purge data before.
+     */
     public void purgeDocumentSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder
@@ -258,6 +308,11 @@ public class SuggestHelper {
         SuggestUtil.deleteByQuery(ComponentUtil.getSearchEngineClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
+    /**
+     * Purges old suggest data from search logs.
+     *
+     * @param time The timestamp to purge data before.
+     */
     public void purgeSearchlogSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder
@@ -270,18 +325,38 @@ public class SuggestHelper {
         SuggestUtil.deleteByQuery(ComponentUtil.getSearchEngineClient(), suggester.settings(), suggester.getIndex(), boolQueryBuilder);
     }
 
+    /**
+     * Gets the total number of words in the suggest index.
+     *
+     * @return The total number of words.
+     */
     public long getAllWordsNum() {
         return suggester.getAllWordsNum();
     }
 
+    /**
+     * Gets the number of words from documents in the suggest index.
+     *
+     * @return The number of document words.
+     */
     public long getDocumentWordsNum() {
         return suggester.getDocumentWordsNum();
     }
 
+    /**
+     * Gets the number of words from queries in the suggest index.
+     *
+     * @return The number of query words.
+     */
     public long getQueryWordsNum() {
         return suggester.getQueryWordsNum();
     }
 
+    /**
+     * Deletes all words from the suggest index.
+     *
+     * @return true if the operation was successful, false otherwise.
+     */
     public boolean deleteAllWords() {
         final SuggestDeleteResponse response = suggester.indexer().deleteAll();
         if (response.hasError()) {
@@ -292,6 +367,11 @@ public class SuggestHelper {
         return true;
     }
 
+    /**
+     * Deletes all document-based words from the suggest index.
+     *
+     * @return true if the operation was successful, false otherwise.
+     */
     public boolean deleteDocumentWords() {
         final SuggestDeleteResponse response = suggester.indexer().deleteDocumentWords();
         if (response.hasError()) {
@@ -302,6 +382,11 @@ public class SuggestHelper {
         return true;
     }
 
+    /**
+     * Deletes all query-based words from the suggest index.
+     *
+     * @return true if the operation was successful, false otherwise.
+     */
     public boolean deleteQueryWords() {
         final SuggestDeleteResponse response = suggester.indexer().deleteQueryWords();
         if (response.hasError()) {
@@ -312,6 +397,11 @@ public class SuggestHelper {
         return true;
     }
 
+    /**
+     * Stores all elevate words in the suggest index.
+     *
+     * @param apply true to apply the changes immediately.
+     */
     public void storeAllElevateWords(final boolean apply) {
         deleteAllElevateWord(apply);
 
@@ -327,6 +417,11 @@ public class SuggestHelper {
         refresh();
     }
 
+    /**
+     * Deletes all elevate words from the suggest index.
+     *
+     * @param apply true to apply the changes immediately.
+     */
     public void deleteAllElevateWord(final boolean apply) {
         final List<ElevateWord> list = ComponentUtil.getComponent(ElevateWordBhv.class).selectList(cb -> {
             cb.query().matchAll();
@@ -339,11 +434,27 @@ public class SuggestHelper {
         refresh();
     }
 
+    /**
+     * Deletes a specific elevate word from the suggest index.
+     *
+     * @param word  The elevate word to delete.
+     * @param apply true to apply the changes immediately.
+     */
     public void deleteElevateWord(final String word, final boolean apply) {
         suggester.indexer().deleteElevateWord(word, apply);
         refresh();
     }
 
+    /**
+     * Adds an elevate word to the suggest index.
+     *
+     * @param word        The elevate word.
+     * @param reading     The reading of the word.
+     * @param tags        The tags associated with the word.
+     * @param permissions The permissions for the word.
+     * @param boost       The boost value for the word.
+     * @param apply       true to apply the changes immediately.
+     */
     public void addElevateWord(final String word, final String reading, final String[] tags, final String[] permissions, final Float boost,
             final boolean apply) {
         final String[] readings;
@@ -368,10 +479,18 @@ public class SuggestHelper {
         refresh();
     }
 
+    /**
+     * Deletes all bad words from the suggest index.
+     */
     protected void deleteAllBadWords() {
         suggester.settings().badword().deleteAll();
     }
 
+    /**
+     * Stores all bad words in the suggest index.
+     *
+     * @param apply true to apply the changes immediately.
+     */
     public void storeAllBadWords(final boolean apply) {
         deleteAllBadWords();
         final List<BadWord> list = ComponentUtil.getComponent(BadWordBhv.class).selectList(cb -> {
@@ -385,16 +504,30 @@ public class SuggestHelper {
         refresh();
     }
 
+    /**
+     * Adds a bad word to the suggest index.
+     *
+     * @param badWord The bad word to add.
+     * @param apply   true to apply the changes immediately.
+     */
     public void addBadWord(final String badWord, final boolean apply) {
         suggester.indexer().addBadWord(badWord, apply);
         refresh();
     }
 
+    /**
+     * Deletes a bad word from the suggest index.
+     *
+     * @param badWord The bad word to delete.
+     */
     public void deleteBadWord(final String badWord) {
         suggester.indexer().deleteBadWord(badWord);
         refresh();
     }
 
+    /**
+     * Refreshes the suggest index.
+     */
     public synchronized void refresh() {
         suggester.refresh();
         if (popularWordHelper != null) {
@@ -402,6 +535,11 @@ public class SuggestHelper {
         }
     }
 
+    /**
+     * Sets the interval for storing search logs.
+     *
+     * @param searchStoreInterval The search store interval in minutes.
+     */
     public void setSearchStoreInterval(final long searchStoreInterval) {
         this.searchStoreInterval = searchStoreInterval;
     }

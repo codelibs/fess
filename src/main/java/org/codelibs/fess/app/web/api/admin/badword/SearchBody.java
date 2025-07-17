@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.badword;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for bad word administration.
+ * Extends BaseSearchBody with bad word-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /** The bad word ID to search for. */
     public String id;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        super();
+    }
 }

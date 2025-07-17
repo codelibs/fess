@@ -17,12 +17,27 @@ package org.codelibs.fess.app.web.api.admin.failureurl;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for failure URL administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** The URL that failed during crawling */
     public String url;
 
+    /** Minimum error count filter */
     public Integer errorCountMin;
 
+    /** Maximum error count filter */
     public Integer errorCountMax;
 
+    /** Name or type of the error */
     public String errorName;
 }

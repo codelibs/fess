@@ -16,12 +16,24 @@
 package org.codelibs.fess.app.web.admin.relatedquery;
 
 /**
- * @author shinsuke
+ * The search form for Related Query.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The search term field for related queries.
+     */
     public String term;
 
+    /**
+     * The queries field for searching related queries.
+     */
     public String queries;
 
 }

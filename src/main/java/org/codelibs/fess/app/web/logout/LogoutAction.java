@@ -24,7 +24,17 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * The logout action.
+ */
 public class LogoutAction extends FessSearchAction {
+
+    /**
+     * Default constructor.
+     */
+    public LogoutAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -42,6 +52,11 @@ public class LogoutAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Handles user logout and redirects to the login page.
+     *
+     * @return the HTML response after logout
+     */
     @Execute
     public HtmlResponse index() {
         final OptionalThing<FessUserBean> userBean = getUserBean();

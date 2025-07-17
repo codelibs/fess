@@ -29,11 +29,25 @@ import org.lastaflute.web.response.ActionResponse;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Action class for handling thumbnail image requests.
+ * Serves thumbnail images for documents in the search results.
+ */
 public class ThumbnailAction extends FessSearchAction {
+
+    /**
+     * Default constructor for ThumbnailAction.
+     */
+    public ThumbnailAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //
+    /**
+     * HTTP servlet response for streaming thumbnail images.
+     */
     @Resource
     protected HttpServletResponse response;
 
@@ -44,6 +58,12 @@ public class ThumbnailAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Serves a thumbnail image for the specified document.
+     *
+     * @param form the thumbnail request form containing document ID and query parameters
+     * @return ActionResponse containing the thumbnail image or 404 if not found
+     */
     @Execute
     public ActionResponse index(final ThumbnailForm form) {
         validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));
@@ -75,6 +95,12 @@ public class ThumbnailAction extends FessSearchAction {
         });
     }
 
+    /**
+     * Determines the MIME type of an image file based on its file extension.
+     *
+     * @param imageFile the image file
+     * @return the MIME type string
+     */
     protected String getImageMimeType(final File imageFile) {
         final String path = imageFile.getAbsolutePath();
         if (path.endsWith(".png")) {

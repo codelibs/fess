@@ -83,26 +83,50 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * The API manager for search operations.
+ */
 public class SearchApiManager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(SearchApiManager.class);
 
+    /**
+     * The message field.
+     */
     protected static final String MESSAGE_FIELD = "message";
 
+    /**
+     * The result field.
+     */
     protected static final String RESULT_FIELD = "result";
 
     private static final String DOC_ID_FIELD = "doc_id";
 
+    /**
+     * The GET method.
+     */
     protected static final String GET = "GET";
 
+    /**
+     * The POST method.
+     */
     protected static final String POST = "POST";
 
+    /**
+     * The MIME type.
+     */
     protected String mimeType = "application/json";
 
+    /**
+     * Constructor.
+     */
     public SearchApiManager() {
         setPathPrefix("/api/v1");
     }
 
+    /**
+     * Registers this API manager.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -194,6 +218,12 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Accepts the HTTP method.
+     * @param request The HTTP request.
+     * @param methods The accepted methods.
+     * @return true if the method is accepted, false otherwise.
+     */
     protected boolean acceptHttpMethod(final HttpServletRequest request, final String... methods) {
         final String method = request.getMethod();
         for (final String m : methods) {
@@ -205,6 +235,12 @@ public class SearchApiManager extends BaseApiManager {
         return false;
     }
 
+    /**
+     * Processes a scroll search request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
@@ -272,6 +308,12 @@ public class SearchApiManager extends BaseApiManager {
 
     }
 
+    /**
+     * Processes a ping request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -290,6 +332,12 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes a search request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -472,6 +520,11 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Gets a detailed message of the throwable.
+     * @param t The throwable.
+     * @return The detailed message.
+     */
     protected String detailedMessage(final Throwable t) {
         if (t == null) {
             return "Unknown";
@@ -497,6 +550,12 @@ public class SearchApiManager extends BaseApiManager {
         return sb.toString();
     }
 
+    /**
+     * Processes a label request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -538,6 +597,12 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes a popular word request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processPopularWordRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
@@ -589,6 +654,12 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes a favorite request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, POST)) {
             return;
@@ -682,6 +753,12 @@ public class SearchApiManager extends BaseApiManager {
 
     }
 
+    /**
+     * Processes a favorites request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     */
     protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -759,6 +836,14 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Processes a suggest request.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param chain The filter chain.
+     * @throws IOException If an I/O error occurs.
+     * @throws ServletException If a servlet error occurs.
+     */
     protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (!acceptHttpMethod(request, GET)) {
@@ -840,6 +925,9 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * The request parameters for JSON API.
+     */
     protected static class JsonRequestParams extends SearchRequestParams {
 
         private final HttpServletRequest request;
@@ -852,6 +940,11 @@ public class SearchApiManager extends BaseApiManager {
 
         private int pageSize = -1;
 
+        /**
+         * Constructor for JsonRequestParams.
+         * @param request The HTTP servlet request containing the search parameters
+         * @param fessConfig The Fess configuration object
+         */
         protected JsonRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
@@ -1004,6 +1097,9 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * The request parameters for suggest API.
+     */
     protected static class RequestParameter extends SearchRequestParams {
         private final String query;
 
@@ -1015,6 +1111,14 @@ public class SearchApiManager extends BaseApiManager {
 
         private final String[] tags;
 
+        /**
+         * Constructor for RequestParameter.
+         * @param request The HTTP servlet request
+         * @param query The search query string
+         * @param tags Array of tags to filter suggestions
+         * @param fields Array of fields to search in for suggestions
+         * @param num The maximum number of suggestions to return
+         */
         protected RequestParameter(final HttpServletRequest request, final String query, final String[] tags, final String[] fields,
                 final int num) {
             this.query = query;
@@ -1024,6 +1128,11 @@ public class SearchApiManager extends BaseApiManager {
             this.request = request;
         }
 
+        /**
+         * Parses the HTTP request to create a RequestParameter object.
+         * @param request The HTTP servlet request containing the parameters
+         * @return A new RequestParameter object with parsed values
+         */
         protected static RequestParameter parse(final HttpServletRequest request) {
             final String query = request.getParameter("q");
             final String[] tags = getParamValueArray(request, "label");
@@ -1045,10 +1154,18 @@ public class SearchApiManager extends BaseApiManager {
             return query;
         }
 
+        /**
+         * Gets the suggest fields for the request.
+         * @return Array of field names to search in for suggestions
+         */
         protected String[] getSuggestFields() {
             return fields;
         }
 
+        /**
+         * Gets the maximum number of suggestions to return.
+         * @return The maximum number of suggestions
+         */
         protected int getNum() {
             return num;
         }
@@ -1063,6 +1180,10 @@ public class SearchApiManager extends BaseApiManager {
             return Collections.emptyMap();
         }
 
+        /**
+         * Gets the tags for filtering suggestions.
+         * @return Array of tags used to filter suggestions
+         */
         public String[] getTags() {
             return tags;
         }
@@ -1138,6 +1259,11 @@ public class SearchApiManager extends BaseApiManager {
         ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 
+    /**
+     * Writes a JSON response.
+     * @param status The status code.
+     * @param t The throwable.
+     */
     protected void writeJsonResponse(final int status, final Throwable t) {
         final Supplier<String> stacktraceString = () -> {
             final StringBuilder buf = new StringBuilder(100);
@@ -1174,10 +1300,21 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * Escapes a JSON key-value pair.
+     * @param key The key.
+     * @param value The value.
+     * @return The escaped key-value pair.
+     */
     protected String escapeJsonKeyValue(final String key, final String value) {
         return "\"" + key + "\":" + escapeJson(value);
     }
 
+    /**
+     * Writes a JSON response.
+     * @param status The status code.
+     * @param body The body.
+     */
     protected void writeJsonResponse(final int status, final String body) {
         final String callback = LaRequestUtil.getOptionalRequest().map(req -> req.getParameter("callback")).orElse(null);
         final boolean isJsonp = ComponentUtil.getFessConfig().isApiJsonpEnabled() && StringUtil.isNotBlank(callback);
@@ -1201,10 +1338,20 @@ public class SearchApiManager extends BaseApiManager {
         write(buf.toString(), mimeType, Constants.UTF_8);
     }
 
+    /**
+     * Escapes a callback name.
+     * @param callbackName The callback name.
+     * @return The escaped callback name.
+     */
     protected String escapeCallbackName(final String callbackName) {
         return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
     }
 
+    /**
+     * Escapes a JSON object.
+     * @param obj The object to escape.
+     * @return The escaped object.
+     */
     protected String escapeJson(final Object obj) {
         if (obj == null) {
             return "null";
@@ -1260,6 +1407,10 @@ public class SearchApiManager extends BaseApiManager {
         return buf.toString();
     }
 
+    /**
+     * Sets the MIME type.
+     * @param mimeType The MIME type.
+     */
     public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }

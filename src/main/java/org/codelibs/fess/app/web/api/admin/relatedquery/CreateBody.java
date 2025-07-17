@@ -17,5 +17,15 @@ package org.codelibs.fess.app.web.api.admin.relatedquery;
 
 import org.codelibs.fess.app.web.admin.relatedquery.CreateForm;
 
+/**
+ * Request body for creating related query via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
 }

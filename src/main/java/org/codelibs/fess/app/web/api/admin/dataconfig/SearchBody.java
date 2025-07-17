@@ -17,12 +17,25 @@ package org.codelibs.fess.app.web.api.admin.dataconfig;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for data configuration administration.
+ * Extends BaseSearchBody with data configuration-specific search parameters.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /** The data configuration name to search for. */
     public String name;
 
+    /** The handler name to search for in data configurations. */
     public String handlerName;
 
+    /** The description to search for in data configurations. */
     public String description;
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        super();
+    }
 }

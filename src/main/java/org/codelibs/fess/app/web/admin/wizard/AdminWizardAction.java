@@ -44,8 +44,20 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Admin action for configuration wizard.
+ *
+ */
 public class AdminWizardAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWizardAction() {
+        super();
+    }
+
+    /** Role name for admin wizard operations */
     public static final String ROLE = "admin-wizard";
 
     // ===================================================================================
@@ -56,18 +68,23 @@ public class AdminWizardAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //
+    /** System properties for configuration management */
     @Resource
     protected DynamicProperties systemProperties;
 
+    /** Service for managing web crawler configurations */
     @Resource
     protected WebConfigService webConfigService;
 
+    /** Service for managing file crawler configurations */
     @Resource
     protected FileConfigService fileConfigService;
 
+    /** Helper for managing crawler processes */
     @Resource
     protected ProcessHelper processHelper;
 
+    /** Service for managing scheduled jobs */
     @Resource
     protected ScheduledJobService scheduledJobService;
 
@@ -89,6 +106,11 @@ public class AdminWizardAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Displays the wizard index page.
+     *
+     * @return HTML response for the wizard main page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -99,6 +121,11 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardJsp).useForm(IndexForm.class);
     }
 
+    /**
+     * Displays the crawling configuration form.
+     *
+     * @return HTML response for the crawling config form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigForm() {
@@ -106,6 +133,12 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
+    /**
+     * Creates a crawling configuration and returns to the config form.
+     *
+     * @param form the form containing crawling configuration data
+     * @return HTML response redirecting to the config form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
@@ -116,6 +149,12 @@ public class AdminWizardAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
     }
 
+    /**
+     * Creates a crawling configuration and proceeds to the start crawling form.
+     *
+     * @param form the form containing crawling configuration data
+     * @return HTML response redirecting to the start crawling form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
@@ -126,6 +165,13 @@ public class AdminWizardAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("startCrawlingForm"));
     }
 
+    /**
+     * Internal method to create crawling configuration based on form data.
+     * Determines whether to create a web or file crawler configuration.
+     *
+     * @param form the form containing crawling configuration data
+     * @return the name of the created configuration
+     */
     protected String crawlingConfigInternal(final CrawlingConfigForm form) {
 
         String configName = form.crawlingConfigName;
@@ -222,6 +268,13 @@ public class AdminWizardAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Retrieves an integer value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found or invalid
+     * @return the integer value or default value
+     */
     protected Integer getDefaultInteger(final String key, final Integer defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -232,6 +285,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Retrieves a long value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found or invalid
+     * @return the long value or default value
+     */
     protected Long getDefaultLong(final String key, final Long defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -242,6 +302,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Retrieves a string value from system properties with a default fallback.
+     *
+     * @param key the property key to look up
+     * @param defaultValue the default value if the property is not found
+     * @return the string value or default value
+     */
     protected String getDefaultString(final String key, final String defaultValue) {
         final String value = systemProperties.getProperty(key);
         if (value != null) {
@@ -250,6 +317,13 @@ public class AdminWizardAction extends FessAdminAction {
         return defaultValue;
     }
 
+    /**
+     * Determines if the given path represents a web crawling target.
+     * Checks if the path starts with HTTP or HTTPS protocols.
+     *
+     * @param path the path to check
+     * @return true if the path is a web crawling path, false otherwise
+     */
     protected boolean isWebCrawlingPath(final String path) {
         if (path.startsWith("http:") || path.startsWith("https:")) {
             return true;
@@ -258,6 +332,13 @@ public class AdminWizardAction extends FessAdminAction {
         return false;
     }
 
+    /**
+     * Converts a crawling path to the appropriate protocol format.
+     * Handles various path formats and adds proper protocol prefixes.
+     *
+     * @param path the original path to convert
+     * @return the converted path with appropriate protocol prefix
+     */
     protected String convertCrawlingPath(final String path) {
         if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
                 || path.startsWith("ftp:") || path.startsWith("storage:")) {
@@ -280,6 +361,11 @@ public class AdminWizardAction extends FessAdminAction {
         return path;
     }
 
+    /**
+     * Displays the start crawling form.
+     *
+     * @return HTML response for the start crawling form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse startCrawlingForm() {
@@ -287,6 +373,12 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_AdminWizardStartJsp).useForm(StartCrawlingForm.class);
     }
 
+    /**
+     * Starts the crawling process for all configured crawlers.
+     *
+     * @param form the start crawling form
+     * @return HTML response redirecting to the wizard index
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse startCrawling(final StartCrawlingForm form) {

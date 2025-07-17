@@ -16,13 +16,24 @@
 package org.codelibs.fess.app.web.admin.labeltype;
 
 /**
- * @author codelibs
- * @author Shunji Makino
+ * The search form for Label Type.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The name field for searching label types.
+     */
     public String name;
 
+    /**
+     * The value field for searching label types.
+     */
     public String value;
 
 }

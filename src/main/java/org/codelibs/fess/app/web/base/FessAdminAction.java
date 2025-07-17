@@ -29,16 +29,29 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.ServletContext;
 
 /**
- * @author codelibs
- * @author jflute
+ * Base action class for admin pages in Fess.
+ * <p>
+ * This abstract class provides common functionality for all admin actions,
+ * including authentication, authorization, and HTML data setup.
+ * </p>
+ *
  */
 public abstract class FessAdminAction extends FessBaseAction {
 
+    /** Constant suffix for view names. */
     public static final String VIEW = "-view";
+
+    /**
+     * Default constructor.
+     */
+    public FessAdminAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Helper for crawling configuration management. */
     @Resource
     protected CrawlingConfigHelper crawlingConfigHelper;
 
@@ -46,6 +59,15 @@ public abstract class FessAdminAction extends FessBaseAction {
     //                                                                        Small Helper
     //                                                                        ============
 
+    /**
+     * Sets up HTML data for admin pages.
+     * <p>
+     * This method configures common data needed for admin pages including
+     * editable flags, user roles, and forum links.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
@@ -62,12 +84,27 @@ public abstract class FessAdminAction extends FessBaseAction {
         }
     }
 
+    /**
+     * Get the action role.
+     * @return The action role.
+     */
     protected abstract String getActionRole();
 
+    /**
+     * Writes data to the specified file path.
+     *
+     * @param path the file path to write to
+     * @param data the data to write
+     */
     protected void write(final String path, final byte[] data) {
         LdiFileUtil.write(path, data);
     }
 
+    /**
+     * Gets the servlet context.
+     *
+     * @return the servlet context
+     */
     protected ServletContext getServletContext() {
         return LaServletContextUtil.getServletContext();
     }
@@ -94,6 +131,11 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                           User Info
     //                                                                           =========
+    /**
+     * Gets the login manager for this admin action.
+     *
+     * @return the login manager wrapped in OptionalThing
+     */
     @Override
     protected OptionalThing<LoginManager> myLoginManager() {
         return OptionalThing.of(fessLoginAssist);
@@ -102,6 +144,16 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Handles the prologue phase of action execution.
+     * <p>
+     * This method catches UserRoleLoginException and redirects to the
+     * appropriate action class.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     * @return the action response, or redirect response if login exception occurs
+     */
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         try {
@@ -111,6 +163,15 @@ public abstract class FessAdminAction extends FessBaseAction {
         }
     }
 
+    /**
+     * Hook method called before action execution.
+     * <p>
+     * This method logs user access activity for the current request.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     * @return the action response from the parent hook
+     */
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) {
         final String requestPath = runtime.getRequestPath();
@@ -119,6 +180,14 @@ public abstract class FessAdminAction extends FessBaseAction {
         return super.hookBefore(runtime);
     }
 
+    /**
+     * Hook method called after action execution completes.
+     * <p>
+     * This method performs cleanup operations by calling the parent hook.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     */
     @Override
     public void hookFinally(final ActionRuntime runtime) {
         super.hookFinally(runtime);

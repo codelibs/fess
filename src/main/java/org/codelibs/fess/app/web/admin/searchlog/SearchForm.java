@@ -20,26 +20,61 @@ import org.codelibs.fess.app.pager.SearchLogPager;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
- * @author shinsuke
+ * The search form for Search Log.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The log type field for filtering search logs.
+     */
     public String logType;
 
+    /**
+     * The query ID field for searching specific queries.
+     */
     public String queryId;
 
+    /**
+     * The user session ID field for filtering logs by session.
+     */
     public String userSessionId;
 
+    /**
+     * The requested time range field for filtering logs by date.
+     */
     public String requestedTimeRange;
 
+    /**
+     * The access type field for filtering logs by access method.
+     */
     public String accessType;
 
+    /**
+     * The size field for controlling page size.
+     */
     public String size;
 
+    /**
+     * Sets the page size for search log results.
+     *
+     * @param size the page size to set
+     */
     public void setPageSize(final int size) {
         this.size = Integer.toString(size);
     }
 
+    /**
+     * Gets the page size for search log results with validation.
+     * Returns the default page size if the current size is invalid.
+     *
+     * @return the validated page size
+     */
     public int getPageSize() {
         if (StringUtil.isBlank(size)) {
             return SearchLogPager.DEFAULT_PAGE_SIZE;

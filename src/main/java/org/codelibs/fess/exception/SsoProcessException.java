@@ -15,14 +15,34 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown during SSO (Single Sign-On) processing operations.
+ *
+ * This exception is used to indicate errors that occur during the execution
+ * of SSO authentication and authorization processes. It extends FessSystemException
+ * to provide consistent error handling within the Fess system for SSO-related
+ * processing failures such as token validation errors, communication failures
+ * with SSO providers, or configuration issues.
+ */
 public class SsoProcessException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new SSO process exception with the specified detailed message.
+     *
+     * @param message The detailed error message explaining the cause of the exception
+     */
     public SsoProcessException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new SSO process exception with the specified detailed message and cause.
+     *
+     * @param message The detailed error message explaining the cause of the exception
+     * @param e The underlying exception that caused this SSO process exception
+     */
     public SsoProcessException(final String message, final Exception e) {
         super(message, e);
     }

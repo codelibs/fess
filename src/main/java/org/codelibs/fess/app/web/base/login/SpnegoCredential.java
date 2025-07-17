@@ -17,18 +17,42 @@ package org.codelibs.fess.app.web.base.login;
 
 import org.lastaflute.web.login.credential.LoginCredential;
 
+/**
+ * SPNEGO authentication credential implementation.
+ *
+ * This class represents login credentials obtained through SPNEGO (Security Provider
+ * Negotiation Protocol) authentication. It contains the username extracted from the
+ * SPNEGO authentication process, typically from a Kerberos ticket.
+ */
 public class SpnegoCredential implements LoginCredential, FessCredential {
+
+    /** The username extracted from SPNEGO authentication. */
     private final String username;
 
+    /**
+     * Constructs a new SpnegoCredential with the specified username.
+     *
+     * @param username The username obtained from SPNEGO authentication
+     */
     public SpnegoCredential(final String username) {
         this.username = username;
     }
 
+    /**
+     * Gets the user identifier from this credential.
+     *
+     * @return The username from SPNEGO authentication
+     */
     @Override
     public String getUserId() {
         return username;
     }
 
+    /**
+     * Returns a string representation of this credential.
+     *
+     * @return A string representation containing the username in braces
+     */
     @Override
     public String toString() {
         return "{" + username + "}";

@@ -27,21 +27,44 @@ import org.opensearch.search.aggregations.BucketOrder;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Entity class representing facet configuration information for search results.
+ * This class holds configuration settings for faceted search including field facets,
+ * query facets, and various parameters that control facet behavior.
+ */
 public class FacetInfo {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FacetInfo.class);
 
+    /** Array of field names to create facets for */
     public String[] field;
 
+    /** Array of query strings to create query facets for */
     public String[] query;
 
+    /** Maximum number of facet values to return */
     public Integer size;
 
+    /** Minimum document count required for a facet value to be included */
     public Long minDocCount;
 
+    /** Sort order for facet values (e.g., "count.desc", "term.asc") */
     public String sort;
 
+    /** Value to use for documents that don't have the facet field */
     public String missing;
 
+    /**
+     * Default constructor for FacetInfo.
+     */
+    public FacetInfo() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the facet configuration from Fess configuration properties.
+     * This method is called after dependency injection to load default facet settings.
+     */
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -63,6 +86,12 @@ public class FacetInfo {
         }
     }
 
+    /**
+     * Converts the sort string into a BucketOrder object for OpenSearch aggregations.
+     * Parses sort configuration like "count.desc" or "term.asc" into appropriate bucket ordering.
+     *
+     * @return the BucketOrder instance representing the sort configuration
+     */
     public BucketOrder getBucketOrder() {
         if (StringUtil.isNotBlank(sort)) {
             final String[] values = sort.split("\\.");
@@ -84,6 +113,12 @@ public class FacetInfo {
         return BucketOrder.count(false);
     }
 
+    /**
+     * Adds a query facet to the existing query array.
+     * If no queries exist, creates a new array with the provided query.
+     *
+     * @param s the query string to add as a facet
+     */
     public void addQuery(final String s) {
         if (query == null) {
             query = new String[] { s };
@@ -97,6 +132,12 @@ public class FacetInfo {
         }
     }
 
+    /**
+     * Returns a string representation of this FacetInfo object.
+     * Includes all field values in the format useful for debugging.
+     *
+     * @return string representation of this FacetInfo instance
+     */
     @Override
     public String toString() {
         return "FacetInfo [field=" + Arrays.toString(field) + ", query=" + Arrays.toString(query) + ", size=" + size + ", minDocCount="

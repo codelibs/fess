@@ -16,9 +16,18 @@
 package org.codelibs.fess.app.web.admin.user;
 
 /**
- * @author shinsuke
+ * The search form for User.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching users.
+     */
     public String id;
 }

@@ -16,12 +16,29 @@
 package org.codelibs.fess.app.web.admin.design;
 
 /**
- * @author codelibs
- * @author jflute
+ * Form class for editing design files in the admin interface.
+ * This form handles the editing of template and design files used
+ * for customizing the search interface appearance and layout.
  */
 public class EditForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        // Default constructor
+    }
+
+    /**
+     * The name of the design file being edited.
+     * This specifies which template or design file to modify.
+     */
     public String fileName;
 
+    /**
+     * The content of the design file.
+     * This contains the actual template code, CSS, or other design content
+     * that will be saved to the specified file.
+     */
     public String content;
 }

@@ -45,47 +45,142 @@ import org.codelibs.fess.util.SystemUtil;
 
 import jakarta.servlet.ServletContext;
 
+/**
+ * CrawlJob is responsible for executing the crawling process in Fess.
+ * This job launches a separate crawler process that can crawl web sites, file systems,
+ * and data sources based on the configured crawling settings.
+ *
+ * <p>The job supports selective crawling by specifying configuration IDs for different
+ * types of crawlers (web, file, data). It manages the crawler process lifecycle,
+ * handles timeout scenarios, and ensures proper cleanup of resources.</p>
+ *
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Concurrent crawler process management with configurable limits</li>
+ *   <li>Selective crawling based on configuration IDs</li>
+ *   <li>Document expiration handling</li>
+ *   <li>Hot thread monitoring for performance analysis</li>
+ *   <li>Process isolation with separate JVM</li>
+ * </ul>
+ */
 public class CrawlJob extends ExecJob {
 
     private static final Logger logger = LogManager.getLogger(CrawlJob.class);
 
+    /**
+     * The namespace identifier for the crawling session.
+     * Used to organize and identify crawling activities in the system.
+     * Defaults to the system crawling info name.
+     */
     protected String namespace = Constants.CRAWLING_INFO_SYSTEM_NAME;
 
+    /**
+     * Array of web crawling configuration IDs to process.
+     * If null, all available web configurations will be crawled (when no other config IDs are specified).
+     */
     protected String[] webConfigIds;
 
+    /**
+     * Array of file system crawling configuration IDs to process.
+     * If null, all available file configurations will be crawled (when no other config IDs are specified).
+     */
     protected String[] fileConfigIds;
 
+    /**
+     * Array of data source crawling configuration IDs to process.
+     * If null, all available data configurations will be crawled (when no other config IDs are specified).
+     */
     protected String[] dataConfigIds;
 
+    /**
+     * Document expiration setting in days.
+     * -2: use system default, -1: never expire, 0 or positive: expire after specified days.
+     */
     protected int documentExpires = -2;
 
+    /**
+     * Hot thread monitoring interval in seconds.
+     * -1: disabled, positive value: enable hot thread monitoring with specified interval.
+     * Used for performance analysis and debugging of the crawler process.
+     */
     protected int hotThreadInterval = -1;
 
+    /**
+     * Default constructor for CrawlJob.
+     * Initializes the job with default settings.
+     */
+    public CrawlJob() {
+        super();
+    }
+
+    /**
+     * Sets the namespace for the crawling session.
+     * The namespace is used to organize and identify crawling activities.
+     *
+     * @param namespace the namespace identifier for the crawling session
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob namespace(final String namespace) {
         this.namespace = namespace;
         return this;
     }
 
+    /**
+     * Sets the document expiration period in days.
+     * Controls how long crawled documents remain in the search index.
+     *
+     * @param documentExpires the expiration period: -2 (system default), -1 (never expire),
+     *                       0 or positive (expire after specified days)
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob documentExpires(final int documentExpires) {
         this.documentExpires = documentExpires;
         return this;
     }
 
+    /**
+     * Sets the web crawling configuration IDs to process.
+     * If not set, all available web configurations will be crawled.
+     *
+     * @param webConfigIds array of web crawling configuration IDs, or null for all
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob webConfigIds(final String[] webConfigIds) {
         this.webConfigIds = webConfigIds;
         return this;
     }
 
+    /**
+     * Sets the file system crawling configuration IDs to process.
+     * If not set, all available file configurations will be crawled.
+     *
+     * @param fileConfigIds array of file crawling configuration IDs, or null for all
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob fileConfigIds(final String[] fileConfigIds) {
         this.fileConfigIds = fileConfigIds;
         return this;
     }
 
+    /**
+     * Sets the data source crawling configuration IDs to process.
+     * If not set, all available data configurations will be crawled.
+     *
+     * @param dataConfigIds array of data crawling configuration IDs, or null for all
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob dataConfigIds(final String[] dataConfigIds) {
         this.dataConfigIds = dataConfigIds;
         return this;
     }
 
+    /**
+     * Sets the hot thread monitoring interval for performance analysis.
+     * Hot threads help identify performance bottlenecks in the crawler process.
+     *
+     * @param hotThreadInterval monitoring interval in seconds, -1 to disable
+     * @return this CrawlJob instance for method chaining
+     */
     public CrawlJob hotThread(final int hotThreadInterval) {
         this.hotThreadInterval = hotThreadInterval;
         return this;
@@ -173,6 +268,13 @@ public class CrawlJob extends ExecJob {
 
     }
 
+    /**
+     * Gets the count of currently running crawler jobs.
+     * This method queries the scheduled jobs to count active crawler processes.
+     * Used to enforce maximum concurrent crawler limits.
+     *
+     * @return the number of currently running crawler jobs
+     */
     protected int getRunningJobCount() {
         final AtomicInteger counter = new AtomicInteger(0);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -194,6 +296,14 @@ public class CrawlJob extends ExecJob {
         return counter.get();
     }
 
+    /**
+     * Executes the crawler process in a separate JVM.
+     * This method constructs the command line arguments, sets up the classpath,
+     * and launches the crawler as an external process. It handles process lifecycle,
+     * monitors output, and ensures proper cleanup.
+     *
+     * @throws JobProcessingException if the crawler process fails or times out
+     */
     protected void executeCrawler() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";

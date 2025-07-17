@@ -21,20 +21,49 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author Keiichi Watanabe
+ * Form class for editing elevate word configurations in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing elevate word entries,
+ * including tracking information for optimistic locking and audit trails.
+ * Elevate words are used to boost specific documents in search results when certain keywords are matched.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the elevate word configuration being edited.
+     * This is a required field for identifying which elevate word entry to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this elevate word configuration.
+     * Used for audit trail purposes to track who made changes.
+     */
     @Size(max = 1000)
     public String updatedBy;
 
+    /**
+     * The timestamp when this elevate word configuration was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the elevate word configuration for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the configuration hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Long versionNo;

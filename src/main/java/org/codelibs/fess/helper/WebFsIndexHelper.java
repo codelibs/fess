@@ -45,22 +45,56 @@ import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Helper class for web and file system crawling and indexing operations.
+ * Manages the crawling process for both web configurations and file configurations,
+ * coordinating multiple crawler threads and handling indexing operations.
+ */
 public class WebFsIndexHelper {
+
+    /**
+     * Default constructor.
+     */
+    public WebFsIndexHelper() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(WebFsIndexHelper.class);
 
     private static final String DISABLE_URL_ENCODE = "#DISABLE_URL_ENCODE";
 
+    /**
+     * Maximum number of URLs to access during crawling.
+     */
     protected long maxAccessCount = Long.MAX_VALUE;
 
+    /**
+     * Interval time in milliseconds between crawling executions.
+     */
     protected long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
 
+    /**
+     * Thread priority for index updater operations.
+     */
     protected int indexUpdaterPriority = Thread.MAX_PRIORITY;
 
+    /**
+     * Thread priority for crawler operations.
+     */
     protected int crawlerPriority = Thread.NORM_PRIORITY;
 
+    /**
+     * Synchronized list of active crawlers.
+     */
     protected final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<>());
 
+    /**
+     * Initiates crawling for specified web and file configurations.
+     *
+     * @param sessionId The session ID for this crawling operation
+     * @param webConfigIdList List of web configuration IDs to crawl, null for all
+     * @param fileConfigIdList List of file configuration IDs to crawl, null for all
+     */
     public void crawl(final String sessionId, final List<String> webConfigIdList, final List<String> fileConfigIdList) {
         final boolean runAll = webConfigIdList == null && fileConfigIdList == null;
         final List<WebConfig> webConfigList;
@@ -87,6 +121,13 @@ public class WebFsIndexHelper {
         doCrawl(sessionId, webConfigList, fileConfigList);
     }
 
+    /**
+     * Performs the actual crawling operation for the provided configurations.
+     *
+     * @param sessionId The session ID for this crawling operation
+     * @param webConfigList List of web configurations to crawl
+     * @param fileConfigList List of file configurations to crawl
+     */
     protected void doCrawl(final String sessionId, final List<WebConfig> webConfigList, final List<FileConfig> fileConfigList) {
         final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
@@ -470,6 +511,11 @@ public class WebFsIndexHelper {
         }
     }
 
+    /**
+     * Gets the list of available boost document rules.
+     *
+     * @return List of boost document rules that are currently available
+     */
     protected List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
         return ComponentUtil.getComponent(BoostDocumentRuleBhv.class).selectList(cb -> {
             cb.query().matchAll();
@@ -478,6 +524,11 @@ public class WebFsIndexHelper {
         });
     }
 
+    /**
+     * Deletes crawl data for the specified session ID.
+     *
+     * @param sid The session ID whose crawl data should be deleted
+     */
     protected void deleteCrawlData(final String sid) {
         final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
         final OpenSearchUrlQueueService urlQueueService = ComponentUtil.getComponent(OpenSearchUrlQueueService.class);
@@ -506,18 +557,38 @@ public class WebFsIndexHelper {
         }
     }
 
+    /**
+     * Sets the maximum number of URLs to access during crawling.
+     *
+     * @param maxAccessCount The maximum access count
+     */
     public void setMaxAccessCount(final long maxAccessCount) {
         this.maxAccessCount = maxAccessCount;
     }
 
+    /**
+     * Sets the interval time between crawling executions.
+     *
+     * @param crawlingExecutionInterval The crawling execution interval in milliseconds
+     */
     public void setCrawlingExecutionInterval(final long crawlingExecutionInterval) {
         this.crawlingExecutionInterval = crawlingExecutionInterval;
     }
 
+    /**
+     * Sets the thread priority for index updater operations.
+     *
+     * @param indexUpdaterPriority The index updater thread priority
+     */
     public void setIndexUpdaterPriority(final int indexUpdaterPriority) {
         this.indexUpdaterPriority = indexUpdaterPriority;
     }
 
+    /**
+     * Sets the thread priority for crawler operations.
+     *
+     * @param crawlerPriority The crawler thread priority
+     */
     public void setCrawlerPriority(final int crawlerPriority) {
         this.crawlerPriority = crawlerPriority;
     }

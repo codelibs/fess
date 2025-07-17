@@ -87,14 +87,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
+ * Admin action for Backup management.
+ *
  */
 public class AdminBackupAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminBackupAction() {
+        super();
+    }
+
+    /**
+     * The role for this action.
+     */
     public static final String ROLE = "admin-backup";
 
     private static final Logger logger = LogManager.getLogger(AdminBackupAction.class);
 
+    /**
+     * The ndjson extension.
+     */
     public static final String NDJSON_EXTENTION = ".ndjson";
 
     private static final DateTimeFormatter ISO_8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -122,6 +136,10 @@ public class AdminBackupAction extends FessAdminAction {
         return ROLE;
     }
 
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -129,6 +147,11 @@ public class AdminBackupAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Upload a file.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -150,6 +173,11 @@ public class AdminBackupAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
+    /**
+     * Import the file asynchronously.
+     * @param fileName The file name.
+     * @param tempFile The temporary file.
+     */
     protected void asyncImport(final String fileName, final File tempFile) {
         final int fileType;
         if (fileName.startsWith("system") && fileName.endsWith(".properties")) {
@@ -303,6 +331,11 @@ public class AdminBackupAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Download a file.
+     * @param id The ID of the file.
+     * @return The action response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
@@ -444,6 +477,10 @@ public class AdminBackupAction extends FessAdminAction {
         return buf;
     }
 
+    /**
+     * Get the write call for search log ndjson.
+     * @return The write call.
+     */
     public static Consumer<Writer> getSearchLogNdjsonWriteCall() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -497,6 +534,10 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    /**
+     * Get the write call for user info ndjson.
+     * @return The write call.
+     */
     public static Consumer<Writer> getUserInfoNdjsonWriteCall() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -529,6 +570,10 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    /**
+     * Get the write call for favorite log ndjson.
+     * @return The write call.
+     */
     public static Consumer<Writer> getFavoriteLogNdjsonWriteCall() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -564,6 +609,10 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    /**
+     * Get the write call for click log ndjson.
+     * @return The write call.
+     */
     public static Consumer<Writer> getClickLogNdjsonWriteCall() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -601,6 +650,10 @@ public class AdminBackupAction extends FessAdminAction {
         };
     }
 
+    /**
+     * Get the backup items.
+     * @return The backup items.
+     */
     public static List<Map<String, String>> getBackupItems() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.map(name -> {

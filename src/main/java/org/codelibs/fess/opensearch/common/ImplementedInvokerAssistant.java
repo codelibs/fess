@@ -36,13 +36,29 @@ import org.dbflute.s2dao.jdbc.TnResultSetHandlerFactory;
 import org.dbflute.s2dao.metadata.TnBeanMetaDataFactory;
 import org.dbflute.twowaysql.factory.SqlAnalyzerFactory;
 
+/**
+ * Implementation of DBFlute's InvokerAssistant interface for OpenSearch integration.
+ * This class provides basic scaffolding for DBFlute behavior invoker assistance,
+ * primarily returning null implementations as placeholders for OpenSearch-specific functionality.
+ *
+ */
 public class ImplementedInvokerAssistant implements InvokerAssistant {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+
+    /**
+     * Default constructor.
+     */
+    public ImplementedInvokerAssistant() {
+        // Default constructor
+    }
+
+    /** Default client invoke names for DBFlute behavior invocation. */
     protected static final String[] DEFAULT_CLIENT_INVOKE_NAMES = { "Page", "Action", "Controller", "ControllerImpl", "Task", "Test" };
 
+    /** Default bypass invoke names for DBFlute behavior invocation. */
     protected static final String[] DEFAULT_BYPASS_INVOKE_NAMES =
             { "Service", "ServiceImpl", "Facade", "FacadeImpl", "Logic", "LogicImpl" };
 
@@ -159,11 +175,21 @@ public class ImplementedInvokerAssistant implements InvokerAssistant {
         return null;
     }
 
+    /**
+     * Assists client invoke names for DBFlute behavior invocation.
+     *
+     * @return array of default client invoke names
+     */
     @Override
     public String[] assistClientInvokeNames() {
         return DEFAULT_CLIENT_INVOKE_NAMES;
     }
 
+    /**
+     * Assists bypass invoke names for DBFlute behavior invocation.
+     *
+     * @return array of default bypass invoke names
+     */
     @Override
     public String[] assistByPassInvokeNames() {
         return DEFAULT_BYPASS_INVOKE_NAMES;

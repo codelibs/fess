@@ -23,14 +23,34 @@ import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.fess.Constants;
 import org.dbflute.optional.OptionalThing;
 
+/**
+ * Utility class for managing field configurations with parameter mappings.
+ * This class provides functionality to retrieve and manage field-specific configurations
+ * from a parameter map.
+ */
 public class FieldConfigs {
 
+    /**
+     * Map containing field names as keys and their corresponding configuration values as values.
+     */
     private final Map<String, String> params;
 
+    /**
+     * Constructs a new FieldConfigs instance with the specified parameter map.
+     *
+     * @param params the map containing field names as keys and configuration values as values
+     */
     public FieldConfigs(final Map<String, String> params) {
         this.params = params;
     }
 
+    /**
+     * Retrieves the configuration for the specified field name.
+     *
+     * @param fieldName the name of the field to get configuration for
+     * @return an OptionalThing containing the Config if the field exists and has a non-blank value,
+     *         otherwise an empty OptionalThing
+     */
     public OptionalThing<Config> getConfig(final String fieldName) {
         final String value = params.get(fieldName);
         if (StringUtil.isNotBlank(value)) {
@@ -39,14 +59,35 @@ public class FieldConfigs {
         return OptionalThing.empty();
     }
 
+    /**
+     * Configuration class that holds parsed configuration values for a field.
+     * This class parses pipe-separated configuration values and provides methods
+     * to check for specific configuration options.
+     */
     public static class Config {
 
+        /**
+         * Array of parsed configuration values split by pipe character and trimmed.
+         */
         private final String[] values;
 
+        /**
+         * Constructs a new Config instance by parsing the provided configuration value.
+         * The value is split by pipe character (|) and each part is trimmed.
+         *
+         * @param value the configuration value string to parse
+         */
         public Config(final String value) {
             values = StreamUtil.split(value, Pattern.quote("|")).get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
         }
 
+        /**
+         * Checks if the cache option is enabled in the configuration.
+         * Returns true if "cache" is present in the values or if there's a single "true" value
+         * for backward compatibility.
+         *
+         * @return true if caching is enabled, false otherwise
+         */
         public boolean isCache() {
             for (final String value : values) {
                 if ("cache".equalsIgnoreCase(value)) {
@@ -60,6 +101,12 @@ public class FieldConfigs {
             return false;
         }
 
+        /**
+         * Checks if the overwrite option is enabled in the configuration.
+         * Returns true if "overwrite" is present in the values.
+         *
+         * @return true if overwriting is enabled, false otherwise
+         */
         public boolean isOverwrite() {
             for (final String value : values) {
                 if ("overwrite".equalsIgnoreCase(value)) {
@@ -69,6 +116,11 @@ public class FieldConfigs {
             return false;
         }
 
+        /**
+         * Returns the array of parsed configuration values.
+         *
+         * @return the array of configuration values
+         */
         public String[] getValues() {
             return values;
         }

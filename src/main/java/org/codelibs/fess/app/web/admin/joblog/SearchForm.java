@@ -16,10 +16,18 @@
 package org.codelibs.fess.app.web.admin.joblog;
 
 /**
- * @author codelibs
- * @author Shunji Makino
+ * The search form for Job Log.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The ID field for searching job logs.
+     */
     public String id;
 }

@@ -17,8 +17,21 @@ package org.codelibs.fess.app.web.admin.design;
 
 import org.lastaflute.web.validation.Required;
 
+/**
+ * Form class for file access operations in the admin design interface.
+ * This form handles file name validation for accessing design files.
+ */
 public class FileAccessForm {
 
+    /** The name of the file to access (required) */
     @Required
     public String fileName;
+
+    /**
+     * Default constructor for file access form.
+     * Creates a new instance with default values.
+     */
+    public FileAccessForm() {
+        // Default constructor
+    }
 }

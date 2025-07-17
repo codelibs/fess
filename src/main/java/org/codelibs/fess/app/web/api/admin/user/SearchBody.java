@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.user;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for user administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** User ID */
     public String id;
 }

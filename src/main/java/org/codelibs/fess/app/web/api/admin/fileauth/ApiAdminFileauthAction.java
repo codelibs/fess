@@ -40,17 +40,32 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin file authentication management.
+ * Provides RESTful API endpoints for managing file authentication settings in the Fess search engine.
+ * File authentication settings define access credentials and permissions for file-based crawling.
+ *
  */
 public class ApiAdminFileauthAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminFileauthAction.class);
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminFileauthAction() {
+        super();
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing file authentication configurations */
     @Resource
     private FileAuthenticationService fileAuthService;
+    /** Service for managing file configuration settings */
     @Resource
     private FileConfigService fileConfigService;
 
@@ -60,6 +75,13 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
 
     // GET /api/admin/fileauth/settings
     // PUT /api/admin/fileauth/settings
+    /**
+     * Returns list of file authentication settings.
+     * Supports both GET and PUT requests for retrieving paginated file authentication configurations.
+     *
+     * @param body search parameters for filtering and pagination
+     * @return JSON response containing file authentication settings list with pagination info
+     */
     @Execute
     public JsonResponse<ApiResult> settings(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -71,6 +93,12 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/fileauth/setting/{id}
+    /**
+     * Returns specific file authentication setting by ID.
+     *
+     * @param id the file authentication setting ID
+     * @return JSON response containing the file authentication setting details
+     */
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
         return asJson(new ApiConfigResponse().setting(fileAuthService.getFileAuthentication(id).map(this::createEditBody).orElseGet(() -> {
@@ -80,6 +108,13 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
     }
 
     // POST /api/admin/fileauth/setting
+    /**
+     * Creates a new file authentication setting.
+     * Validates that the associated file config ID is valid before creation.
+     *
+     * @param body file authentication setting data to create
+     * @return JSON response with created setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
         validateApi(body, messages -> {});
@@ -105,6 +140,12 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/fileauth/setting
+    /**
+     * Updates an existing file authentication setting.
+     *
+     * @param body file authentication setting data to update
+     * @return JSON response with updated setting ID and status
+     */
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
         validateApi(body, messages -> {});
@@ -125,6 +166,12 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/fileauth/setting/{id}
+    /**
+     * Deletes a specific file authentication setting.
+     *
+     * @param id the file authentication setting ID to delete
+     * @return JSON response with deletion status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
         fileAuthService.getFileAuthentication(id).ifPresent(entity -> {
@@ -141,6 +188,12 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an edit body from a file authentication entity for API responses.
+     *
+     * @param entity the file authentication entity to convert
+     * @return edit body containing the entity data
+     */
     protected EditBody createEditBody(final FileAuthentication entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
@@ -149,6 +202,12 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         return body;
     }
 
+    /**
+     * Validates whether a file configuration ID exists.
+     *
+     * @param fileconfigId the file configuration ID to validate
+     * @return true if the file configuration exists, false otherwise
+     */
     protected Boolean isValidFileConfigId(final String fileconfigId) {
         return fileConfigService.getFileConfig(fileconfigId).isPresent();
     }

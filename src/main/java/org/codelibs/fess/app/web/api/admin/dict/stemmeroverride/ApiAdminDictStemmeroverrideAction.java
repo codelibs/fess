@@ -38,13 +38,31 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin Stemmer Override dictionary management.
+ * Provides REST endpoints for managing stemmer override dictionary items in the Fess search engine.
+ */
 public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDictStemmeroverrideAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStemmeroverrideAction.class);
 
     @Resource
     private StemmerOverrideService stemmerOverrideService;
 
+    /**
+     * Retrieves stemmer override dictionary settings with pagination support.
+     *
+     * @param dictId the dictionary ID
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of stemmer override dictionary items
+     */
     // GET /api/admin/dict/stemmerOverride/settings/{dictId}
     @Execute
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
@@ -57,6 +75,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 .status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific stemmer override dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the stemmer override item to retrieve
+     * @return JSON response containing the stemmer override dictionary item
+     */
     // GET /api/admin/dict/stemmerOverride/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String dictId, final long id) {
@@ -67,6 +92,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates a new stemmer override dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing stemmer override item information
+     * @return JSON response with result status
+     */
     // POST /api/admin/dict/stemmerOverride/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
@@ -85,6 +117,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Updates an existing stemmer override dictionary item.
+     *
+     * @param dictId the dictionary ID
+     * @param body the request body containing updated stemmer override item information
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/stemmerOverride/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
@@ -103,6 +142,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes a stemmer override dictionary item by ID.
+     *
+     * @param dictId the dictionary ID
+     * @param id the ID of the stemmer override item to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/dict/stemmerOverride/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String dictId, final long id) {
@@ -115,6 +161,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(id)).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Uploads stemmer override dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param form the upload form containing the dictionary file
+     * @return JSON response with result status
+     */
     // PUT /api/admin/dict/stemmerOverride/upload/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$upload(final String dictId, final UploadForm form) {
@@ -133,6 +186,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Downloads stemmer override dictionary file.
+     *
+     * @param dictId the dictionary ID
+     * @param body the download request body
+     * @return stream response containing the dictionary file data
+     */
     // GET /api/admin/dict/stemmerOverride/download/{dictId}
     @Execute
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
@@ -147,6 +207,13 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
                 });
     }
 
+    /**
+     * Creates an EditBody from a StemmerOverrideItem entity for API responses.
+     *
+     * @param entity the StemmerOverrideItem entity to convert
+     * @param dictId the dictionary ID
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final StemmerOverrideItem entity, final String dictId) {
         final EditBody body = new EditBody();
         body.id = entity.getId();

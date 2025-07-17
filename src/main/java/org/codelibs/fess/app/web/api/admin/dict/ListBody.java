@@ -19,9 +19,23 @@ import java.util.Date;
 
 import org.codelibs.fess.app.web.admin.dict.ListForm;
 
+/**
+ * The request body for listing dictionaries.
+ */
 public class ListBody extends ListForm {
+    /**
+     * Default constructor.
+     */
+    public ListBody() {
+        super();
+    }
+
+    /** The ID of the dictionary. */
     public String id;
+    /** The type of the dictionary. */
     public String type;
+    /** The path of the dictionary. */
     public String path;
+    /** The timestamp of the dictionary. */
     public Date timestamp;
 }

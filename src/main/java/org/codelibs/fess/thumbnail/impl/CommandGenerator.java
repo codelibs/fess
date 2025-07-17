@@ -36,19 +36,38 @@ import org.codelibs.fess.util.InputStreamThread;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Command-based thumbnail generator that executes external commands to create thumbnails.
+ * Uses external tools through command execution to generate thumbnail images from documents.
+ */
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LogManager.getLogger(CommandGenerator.class);
 
+    /** List of command strings to execute for thumbnail generation. */
     protected List<String> commandList;
 
+    /** Timeout for command execution in milliseconds. */
     protected long commandTimeout = 30 * 1000L;// 30sec
 
+    /** Timeout for destroying processes in milliseconds. */
     protected long commandDestroyTimeout = 5 * 1000L;// 5sec
 
+    /** Base directory for command execution. */
     protected File baseDir;
 
+    /** Timer for managing process destruction. */
     private Timer destoryTimer;
 
+    /**
+     * Default constructor for CommandGenerator.
+     */
+    public CommandGenerator() {
+        super();
+    }
+
+    /**
+     * Initializes the command generator after construction.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -61,6 +80,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         updateProperties();
     }
 
+    /**
+     * Updates timeout properties from system configuration.
+     */
     protected void updateProperties() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String commandTimeoutStr = fessConfig.getSystemProperty("thumbnail.command.timeout");
@@ -73,12 +95,21 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Destroys the command generator and cleanup resources.
+     */
     @Override
     public void destroy() {
         destoryTimer.cancel();
         destoryTimer = null;
     }
 
+    /**
+     * Generates a thumbnail for the given ID and saves it to the output file.
+     * @param thumbnailId The ID of the thumbnail to generate.
+     * @param outputFile The file where the thumbnail will be saved.
+     * @return True if thumbnail generation was successful, false otherwise.
+     */
     @Override
     public boolean generate(final String thumbnailId, final File outputFile) {
         if (logger.isDebugEnabled()) {
@@ -141,6 +172,11 @@ public class CommandGenerator extends BaseThumbnailGenerator {
 
     }
 
+    /**
+     * Executes the thumbnail generation command.
+     * @param thumbnailId The thumbnail ID being processed.
+     * @param cmdList The command list to execute.
+     */
     protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
         ProcessDestroyer task = null;
         Process p = null;
@@ -214,22 +250,39 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Timer task for destroying processes that exceed their timeout.
+     * Handles graceful and forceful termination of thumbnail generation processes.
+     */
     protected static class ProcessDestroyer extends TimerTask {
 
+        /** The process to monitor and destroy. */
         private final Process p;
 
+        /** The input stream thread reading process output. */
         private final InputStreamThread ist;
 
+        /** Flag indicating if the destroyer has been executed. */
         private final AtomicBoolean executed = new AtomicBoolean(false);
 
+        /** Timeout for process destruction in milliseconds. */
         private final long timeout;
 
+        /**
+         * Constructor for ProcessDestroyer.
+         * @param p The process to monitor.
+         * @param ist The input stream thread.
+         * @param timeout The destruction timeout.
+         */
         public ProcessDestroyer(final Process p, final InputStreamThread ist, final long timeout) {
             this.p = p;
             this.ist = ist;
             this.timeout = timeout;
         }
 
+        /**
+         * Runs the process destroyer task to terminate the process.
+         */
         @Override
         public void run() {
             if (!p.isAlive()) {
@@ -286,23 +339,43 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             }
         }
 
+        /**
+         * Checks if the destroyer has been executed.
+         * @return True if executed, false otherwise.
+         */
         public boolean isExecuted() {
             return executed.get();
         }
     }
 
+    /**
+     * Sets the list of commands to execute for thumbnail generation.
+     * @param commandList The command list.
+     */
     public void setCommandList(final List<String> commandList) {
         this.commandList = commandList;
     }
 
+    /**
+     * Sets the command execution timeout.
+     * @param commandTimeout The timeout in milliseconds.
+     */
     public void setCommandTimeout(final long commandTimeout) {
         this.commandTimeout = commandTimeout;
     }
 
+    /**
+     * Sets the base directory for command execution.
+     * @param baseDir The base directory.
+     */
     public void setBaseDir(final File baseDir) {
         this.baseDir = baseDir;
     }
 
+    /**
+     * Sets the timeout for destroying processes.
+     * @param commandDestroyTimeout The destroy timeout in milliseconds.
+     */
     public void setCommandDestroyTimeout(final long commandDestroyTimeout) {
         this.commandDestroyTimeout = commandDestroyTimeout;
     }

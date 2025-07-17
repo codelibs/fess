@@ -45,11 +45,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
+ * Admin action for Web Authentication management.
+ *
  */
 public class AdminWebauthAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWebauthAction() {
+        super();
+    }
+
+    /** Role name for admin web auth operations */
     public static final String ROLE = "admin-webauth";
 
     private static final Logger logger = LogManager.getLogger(AdminWebauthAction.class);
@@ -57,10 +65,13 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for managing web authentication configurations */
     @Resource
     private WebAuthenticationService webAuthenticationService;
+    /** Pager for paginating web authentication results */
     @Resource
     private WebAuthPager webAuthPager;
+    /** Service for accessing and modifying web configuration settings */
     @Resource
     protected WebConfigService webConfigService;
 
@@ -81,12 +92,25 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the web authentication management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the web authentication list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of web authentication configurations.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the web authentication list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -100,6 +124,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for web authentication configurations based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered web authentication results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -109,6 +139,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all web authentication configurations.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset web authentication list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -118,6 +154,13 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data for the web authentication search results.
+     * Registers web authentication items and determines if the create link should be displayed.
+     *
+     * @param data the render data to populate with search results
+     * @param form the search form containing filter criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
         RenderDataUtil.register(data, "displayCreateLink", !crawlingConfigHelper.getAllWebConfigList(false, false, false, null).isEmpty());
@@ -131,6 +174,11 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new web authentication configuration.
+     *
+     * @return HTML response for the web authentication creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -146,6 +194,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing web authentication configuration.
+     *
+     * @param form the edit form containing web authentication ID
+     * @return HTML response for the web authentication edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -169,6 +223,13 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a web authentication configuration.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the web authentication to display
+     * @return HTML response for the web authentication details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -194,6 +255,12 @@ public class AdminWebauthAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new web authentication configuration.
+     *
+     * @param form the create form containing the new web authentication data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -215,6 +282,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing web authentication configuration.
+     *
+     * @param form the edit form containing the updated web authentication data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -236,6 +309,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a web authentication configuration.
+     *
+     * @param form the edit form containing the ID of the web authentication to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -261,6 +340,14 @@ public class AdminWebauthAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Retrieves or creates a WebAuthentication entity based on the form's CRUD mode.
+     *
+     * @param form the form containing the web authentication data
+     * @param username the username of the current user
+     * @param currentTime the current timestamp
+     * @return an optional WebAuthentication entity
+     */
     public static OptionalEntity<WebAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -280,6 +367,12 @@ public class AdminWebauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Converts a form to a WebAuthentication entity with proper user and timestamp information.
+     *
+     * @param form the form containing the web authentication data
+     * @return an optional WebAuthentication entity with updated metadata
+     */
     public static OptionalEntity<WebAuthentication> getWebAuthentication(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -292,6 +385,12 @@ public class AdminWebauthAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers available protocol scheme items for web authentication forms.
+     * Includes Basic, Digest, NTLM, and Form authentication schemes.
+     *
+     * @param data the render data to register the protocol scheme items with
+     */
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
@@ -302,6 +401,12 @@ public class AdminWebauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 
+    /**
+     * Registers available web configuration items for use in web authentication forms.
+     * Retrieves all web configurations and creates form items from them.
+     *
+     * @param data the render data to register the web configuration items with
+     */
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final List<WebConfig> webConfigList = crawlingConfigHelper.getAllWebConfigList(false, false, false, null);
@@ -311,6 +416,13 @@ public class AdminWebauthAction extends FessAdminAction {
         RenderDataUtil.register(data, "webConfigItems", itemList);
     }
 
+    /**
+     * Creates a map item with label and value for use in dropdown lists and form options.
+     *
+     * @param label the display label for the item
+     * @param value the value associated with the item
+     * @return a map containing the label and value
+     */
     protected Map<String, String> createItem(final String label, final String value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
@@ -321,6 +433,13 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     * Throws a validation error if the modes do not match.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

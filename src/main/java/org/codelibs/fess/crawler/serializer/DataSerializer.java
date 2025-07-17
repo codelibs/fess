@@ -29,16 +29,41 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+/**
+ * A serializer class for handling object serialization and deserialization.
+ * <p>
+ * This class provides serialization capabilities using different serializers,
+ * currently supporting Kryo and JavaBin serialization formats. The serializer
+ * type is determined by the crawler data serializer configuration.
+ * </p>
+ * <p>
+ * The class is thread-safe and uses ThreadLocal to maintain Kryo instances
+ * per thread to avoid synchronization overhead.
+ * </p>
+ *
+ */
 public class DataSerializer {
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(DataSerializer.class);
 
+    /** Constant for JavaBin serializer type. */
     protected static final String JAVABIN = "javabin";
 
+    /** Constant for Kryo serializer type. */
     protected static final String KRYO = "kryo";
 
+    /** ThreadLocal container for Kryo instances to ensure thread safety. */
     protected final ThreadLocal<Kryo> kryoThreadLocal;
 
+    /**
+     * Constructs a new DataSerializer.
+     * <p>
+     * Initializes the ThreadLocal Kryo instances with appropriate configuration.
+     * The Kryo instances are configured to not require class registration for
+     * flexibility, and debug mode warnings are enabled when debug logging is active.
+     * </p>
+     */
     public DataSerializer() {
         kryoThreadLocal = ThreadLocal.withInitial(() -> {
             final Kryo kryo = new Kryo();
@@ -51,10 +76,27 @@ public class DataSerializer {
         });
     }
 
+    /**
+     * Gets the configured serializer type from the Fess configuration.
+     *
+     * @return the serializer type (either "kryo" or "javabin")
+     */
     protected String getSerializerType() {
         return ComponentUtil.getFessConfig().getCrawlerDataSerializer();
     }
 
+    /**
+     * Serializes an object to a byte array.
+     * <p>
+     * The serialization method used depends on the configured serializer type.
+     * Supported types are Kryo and JavaBin serialization.
+     * </p>
+     *
+     * @param obj the object to serialize
+     * @return the serialized object as a byte array
+     * @throws IllegalArgumentException if an unsupported serializer type is configured
+     * @throws IORuntimeException if an I/O error occurs during serialization
+     */
     public byte[] fromObjectToBinary(final Object obj) {
         final String serializer = getSerializerType();
         return switch (serializer) {
@@ -64,6 +106,18 @@ public class DataSerializer {
         };
     }
 
+    /**
+     * Deserializes a byte array back to an object.
+     * <p>
+     * The deserialization method used depends on the configured serializer type.
+     * Supported types are Kryo and JavaBin deserialization.
+     * </p>
+     *
+     * @param bytes the byte array to deserialize
+     * @return the deserialized object
+     * @throws IllegalArgumentException if an unsupported serializer type is configured
+     * @throws IORuntimeException if an I/O error occurs during deserialization
+     */
     public Object fromBinaryToObject(final byte[] bytes) {
         final String serializer = getSerializerType();
         return switch (serializer) {
@@ -73,6 +127,18 @@ public class DataSerializer {
         };
     }
 
+    /**
+     * Serializes an object using Kryo serialization.
+     * <p>
+     * Uses the thread-local Kryo instance to serialize the object along with
+     * its class information. The serialized data is written to a byte array
+     * output stream.
+     * </p>
+     *
+     * @param obj the object to serialize
+     * @return the serialized object as a byte array
+     * @throws IORuntimeException if an I/O error occurs during serialization
+     */
     protected byte[] serializeWithKryo(final Object obj) {
         final Kryo kryo = kryoThreadLocal.get();
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); final Output output = new Output(baos)) {
@@ -84,6 +150,16 @@ public class DataSerializer {
         }
     }
 
+    /**
+     * Deserializes a byte array using Kryo deserialization.
+     * <p>
+     * Uses the thread-local Kryo instance to read both the class information
+     * and object data from the byte array input stream.
+     * </p>
+     *
+     * @param bytes the byte array to deserialize
+     * @return the deserialized object
+     */
     protected Object deserializeWithKryo(final byte[] bytes) {
         final Kryo kryo = kryoThreadLocal.get();
         try (final Input input = new Input(new ByteArrayInputStream(bytes))) {

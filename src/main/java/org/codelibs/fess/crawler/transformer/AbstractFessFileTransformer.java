@@ -60,16 +60,40 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * The abstract transformer for Fess.
+ */
 public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
+
+    /**
+     * Default constructor.
+     */
+    public AbstractFessFileTransformer() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(AbstractFessFileTransformer.class);
 
+    /**
+     * The mapping for meta content.
+     */
     protected Map<String, String> metaContentMapping;
 
+    /**
+     * The Fess configuration.
+     */
     protected FessConfig fessConfig;
 
+    /**
+     * The data serializer.
+     */
     protected DataSerializer dataSerializer;
 
+    /**
+     * Get the extractor.
+     * @param responseData The response data.
+     * @return The extractor.
+     */
     protected abstract Extractor getExtractor(ResponseData responseData);
 
     @Override
@@ -91,6 +115,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return resultData;
     }
 
+    /**
+     * Generate the data.
+     * @param responseData The response data.
+     * @return The data.
+     */
     protected Map<String, Object> generateData(final ResponseData responseData) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
@@ -231,6 +260,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
 
                 final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
+
                 // text cache
                 putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), cache);
                 putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
@@ -341,6 +371,12 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return processFieldConfigs(dataMap, fieldConfigs);
     }
 
+    /**
+     * Get the last modified date.
+     * @param dataMap The data map.
+     * @param responseData The response data.
+     * @return The last modified date.
+     */
     protected Date getLastModified(final Map<String, Object> dataMap, final ResponseData responseData) {
         final Object lastModifiedObj = dataMap.get(fessConfig.getIndexFieldLastModified());
         if (lastModifiedObj instanceof Date) {
@@ -361,6 +397,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return responseData.getLastModified();
     }
 
+    /**
+     * Check if the data map has a title.
+     * @param dataMap The data map.
+     * @return true if the data map has a title.
+     */
     protected boolean hasTitle(final Map<String, Object> dataMap) {
         final Object titleObj = dataMap.get(fessConfig.getIndexFieldTitle());
         if (titleObj != null) {
@@ -372,6 +413,12 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return false;
     }
 
+    /**
+     * Create the parameters for extraction.
+     * @param responseData The response data.
+     * @param crawlingConfig The crawling configuration.
+     * @return The parameters for extraction.
+     */
     protected Map<String, String> createExtractParams(final ResponseData responseData, final CrawlingConfig crawlingConfig) {
         final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
         params.put(ExtractData.RESOURCE_NAME_KEY, getResourceName(responseData));
@@ -389,6 +436,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return params;
     }
 
+    /**
+     * Get the extracted data.
+     * @param extractor The extractor.
+     * @param in The input stream.
+     * @param params The parameters.
+     * @return The extracted data.
+     */
     protected ExtractData getExtractData(final Extractor extractor, final InputStream in, final Map<String, String> params) {
         try {
             return extractor.getText(in, params);
@@ -403,6 +457,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return new ExtractData();
     }
 
+    /**
+     * Get the resource name.
+     * @param responseData The response data.
+     * @return The resource name.
+     */
     protected String getResourceName(final ResponseData responseData) {
         String name = responseData.getUrl();
         final String enc = responseData.getCharSet();
@@ -423,6 +482,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
     }
 
+    /**
+     * Get the host on file.
+     * @param url The URL.
+     * @return The host on file.
+     */
     protected String getHostOnFile(final String url) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY; // empty
@@ -446,6 +510,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return getHost(url);
     }
 
+    /**
+     * Get the role types.
+     * @param responseData The response data.
+     * @return The role types.
+     */
     protected List<String> getRoleTypes(final ResponseData responseData) {
         final List<String> roleTypeList = new ArrayList<>();
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
@@ -457,6 +526,12 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return roleTypeList;
     }
 
+    /**
+     * Get the site on file.
+     * @param url The URL.
+     * @param encoding The encoding.
+     * @return The site on file.
+     */
     protected String getSiteOnFile(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY; // empty
@@ -496,6 +571,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return new HashMap<String, Object>();
     }
 
+    /**
+     * Add the meta content mapping.
+     * @param metaname The meta name.
+     * @param dynamicField The dynamic field.
+     */
     public void addMetaContentMapping(final String metaname, final String dynamicField) {
         if (metaContentMapping == null) {
             metaContentMapping = new HashMap<>();

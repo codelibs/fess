@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.role;
 
 import org.codelibs.fess.app.web.admin.role.EditForm;
 
+/**
+ * Request body class for role edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for role management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

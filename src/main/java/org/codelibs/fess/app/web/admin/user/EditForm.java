@@ -21,14 +21,34 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author Keiichi Watanabe
+ * Form class for editing users in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing user entries,
+ * including tracking information for optimistic locking.
+ * Users represent individual accounts that can access and search within the system.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the user being edited.
+     * This is a required field for identifying which user to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The version number of the user for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the user hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

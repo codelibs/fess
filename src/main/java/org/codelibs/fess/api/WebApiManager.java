@@ -22,10 +22,28 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Interface for managing web API request processing.
+ * Implementations of this interface handle specific types of web API requests
+ * by matching incoming requests and processing them accordingly.
+ */
 public interface WebApiManager {
 
+    /**
+     * Checks if the request matches this API manager.
+     * @param request The HTTP servlet request.
+     * @return True if the request matches, false otherwise.
+     */
     boolean matches(HttpServletRequest request);
 
+    /**
+     * Processes the request through this API manager.
+     * @param request The HTTP servlet request.
+     * @param response The HTTP servlet response.
+     * @param chain The filter chain.
+     * @throws IOException If an input/output error occurs.
+     * @throws ServletException If a servlet error occurs.
+     */
     void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException;
 
 }

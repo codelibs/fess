@@ -21,14 +21,34 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author Keiichi Watanabe
+ * Form class for editing scheduled job configurations in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing scheduler entries,
+ * including tracking information for optimistic locking.
+ * Schedulers define automated jobs such as crawling and system maintenance tasks.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the scheduler being edited.
+     * This is a required field for identifying which scheduler to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The version number of the scheduler for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the scheduler hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

@@ -22,7 +22,19 @@ import jakarta.validation.ConstraintDefinitionException;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+/**
+ * Validator implementation for URI type constraints.
+ * This validator checks URI strings against specified protocol types.
+ */
 public class UriTypeValidator implements ConstraintValidator<UriType, String> {
+
+    /**
+     * Default constructor for UriTypeValidator.
+     */
+    public UriTypeValidator() {
+        // Default constructor
+    }
+
     private String[] protocols;
 
     @Override
@@ -42,6 +54,13 @@ public class UriTypeValidator implements ConstraintValidator<UriType, String> {
         return true;
     }
 
+    /**
+     * Checks if the given value matches any of the specified protocols.
+     *
+     * @param protocols the allowed protocols
+     * @param value the URI string to validate
+     * @return true if the value matches allowed protocols, false otherwise
+     */
     protected static boolean check(final String[] protocols, final String value) {
         final String[] paths = value.split("[\r\n]");
         for (final String path : paths) {
@@ -61,7 +80,17 @@ public class UriTypeValidator implements ConstraintValidator<UriType, String> {
         return true;
     }
 
+    /**
+     * Enumeration of supported protocol types for URI validation.
+     */
     public enum ProtocolType {
-        WEB, FILE;
+        /**
+         * Web protocols (http, https, etc.).
+         */
+        WEB,
+        /**
+         * File protocols (file, etc.).
+         */
+        FILE;
     }
 }

@@ -18,7 +18,17 @@ package org.codelibs.fess.auth.chain;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * An authentication chain for LDAP.
+ */
 public class LdapChain implements AuthenticationChain {
+
+    /**
+     * Default constructor.
+     */
+    public LdapChain() {
+        // do nothing
+    }
 
     @Override
     public void update(final User user) {

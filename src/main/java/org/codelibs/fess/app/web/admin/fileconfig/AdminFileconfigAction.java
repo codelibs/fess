@@ -48,36 +48,62 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for File Config management.
+ *
  */
 public class AdminFileconfigAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminFileconfigAction() {
+        super();
+    }
+
+    /** The role name for file configuration administration. */
     public static final String ROLE = "admin-fileconfig";
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(AdminFileconfigAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for file configuration operations. */
     @Resource
     private FileConfigService fileConfigService;
+
+    /** Pager for file configuration list pagination. */
     @Resource
     private FileConfigPager fileConfigPager;
+
+    /** Service for role type operations. */
     @Resource
     private RoleTypeService roleTypeService;
+
+    /** Service for label type operations. */
     @Resource
     private LabelTypeService labelTypeService;
 
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Sets up HTML data for rendering, including help link.
+     *
+     * @param runtime the action runtime
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameFileconfig()));
     }
 
+    /**
+     * Returns the action role for this admin action.
+     *
+     * @return the role name
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
@@ -86,12 +112,24 @@ public class AdminFileconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the file configuration list page.
+     *
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays the file configuration list with pagination.
+     *
+     * @param pageNumber the page number
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -105,6 +143,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches file configurations based on the form criteria.
+     *
+     * @param form the search form
+     * @return HTML response for the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -114,6 +158,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays the default list.
+     *
+     * @param form the search form
+     * @return HTML response for the reset list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -123,6 +173,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up data for search result pagination.
+     *
+     * @param data the render data
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
 
@@ -136,6 +192,11 @@ public class AdminFileconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the create new file configuration page.
+     *
+     * @return HTML response for the create page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -163,6 +224,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the edit file configuration page.
+     *
+     * @param form the edit form
+     * @return HTML response for the edit page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -192,6 +259,13 @@ public class AdminFileconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the file configuration details page.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the file configuration ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -216,6 +290,12 @@ public class AdminFileconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new file configuration.
+     *
+     * @param form the create form
+     * @return HTML response after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -237,6 +317,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing file configuration.
+     *
+     * @param form the edit form
+     * @return HTML response after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -258,6 +344,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a file configuration.
+     *
+     * @param form the edit form
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -283,6 +375,14 @@ public class AdminFileconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Gets a file configuration entity based on the form and current user info.
+     *
+     * @param form the create form
+     * @param username the current username
+     * @param currentTime the current time
+     * @return optional file configuration entity
+     */
     public static OptionalEntity<FileConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -302,6 +402,12 @@ public class AdminFileconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Gets a file configuration entity from the form with system info.
+     *
+     * @param form the create form
+     * @return optional file configuration entity
+     */
     public static OptionalEntity<FileConfig> getFileConfig(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -322,6 +428,11 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers roles and labels for the dropdown lists.
+     *
+     * @param data the render data
+     */
     protected void registerRolesAndLabels(final RenderData data) {
         RenderDataUtil.register(data, "labelSettingEnabled", fessConfig.isFormAdminLabelInConfigEnabled());
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
@@ -331,6 +442,12 @@ public class AdminFileconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -343,6 +460,11 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Returns HTML response for the list page.
+     *
+     * @return HTML response for the list page
+     */
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
@@ -353,12 +475,22 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the edit page.
+     *
+     * @return HTML response for the edit page
+     */
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
         });
     }
 
+    /**
+     * Returns HTML response for the details page.
+     *
+     * @return HTML response for the details page
+     */
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).renderWith(data -> {
             registerRolesAndLabels(data);

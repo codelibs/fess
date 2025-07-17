@@ -17,7 +17,23 @@ package org.codelibs.fess.app.web.admin.dict.stemmeroverride;
 
 import org.lastaflute.web.validation.Required;
 
+/**
+ * The download form for stemmer override dictionary.
+ * This form is used for downloading stemmer override dictionary files from the admin interface.
+ *
+ */
 public class DownloadForm {
+
+    /**
+     * Dictionary ID for identifying the stemmer override dictionary to download.
+     */
     @Required
     public String dictId;
+
+    /**
+     * Default constructor.
+     */
+    public DownloadForm() {
+        // Use of default constructor
+    }
 }

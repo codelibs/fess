@@ -40,18 +40,44 @@ import org.codelibs.fess.util.SystemUtil;
 
 import jakarta.servlet.ServletContext;
 
+/**
+ * Job class for generating thumbnails for documents in the search engine.
+ * This job executes the ThumbnailGenerator process as a separate JVM process
+ * to create thumbnail images for supported document types.
+ */
 public class GenerateThumbnailJob extends ExecJob {
+    /** Logger for this class. */
     static final Logger logger = LogManager.getLogger(GenerateThumbnailJob.class);
 
+    /** Number of threads to use for thumbnail generation. */
     protected int numOfThreads = 1;
 
+    /** Flag indicating whether to perform cleanup operations. */
     protected boolean cleanup = false;
 
+    /**
+     * Default constructor for the GenerateThumbnailJob.
+     */
+    public GenerateThumbnailJob() {
+        super();
+    }
+
+    /**
+     * Sets the number of threads to use for thumbnail generation.
+     *
+     * @param numOfThreads the number of threads
+     * @return this job instance for method chaining
+     */
     public GenerateThumbnailJob numOfThreads(final int numOfThreads) {
         this.numOfThreads = numOfThreads;
         return this;
     }
 
+    /**
+     * Enables cleanup operations for this job.
+     *
+     * @return this job instance for method chaining
+     */
     public GenerateThumbnailJob cleanup() {
         cleanup = true;
         return this;
@@ -85,6 +111,13 @@ public class GenerateThumbnailJob extends ExecJob {
 
     }
 
+    /**
+     * Executes the thumbnail generator process.
+     * Sets up the classpath, JVM options, and command line arguments
+     * to launch the ThumbnailGenerator in a separate process.
+     *
+     * @throws JobProcessingException if the thumbnail generation process fails
+     */
     protected void executeThumbnailGenerator() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";

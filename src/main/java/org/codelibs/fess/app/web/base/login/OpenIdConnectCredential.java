@@ -29,10 +29,18 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
+/**
+ * OpenID Connect credential implementation.
+ */
 public class OpenIdConnectCredential implements LoginCredential, FessCredential {
 
     private final Map<String, Object> attributes;
 
+    /**
+     * Creates a new OpenID Connect credential.
+     *
+     * @param attributes the attributes from OpenID Connect provider
+     */
     public OpenIdConnectCredential(final Map<String, Object> attributes) {
         this.attributes = attributes;
     }
@@ -47,6 +55,11 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return DocumentUtil.getValue(attributes, "email", String.class);
     }
 
+    /**
+     * Gets the user groups.
+     *
+     * @return the user groups
+     */
     public String[] getUserGroups() {
         String[] userGroups = DocumentUtil.getValue(attributes, "groups", String[].class);
         if (userGroups == null) {
@@ -55,10 +68,20 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return userGroups;
     }
 
+    /**
+     * Gets the OpenID Connect user.
+     *
+     * @return the OpenID Connect user
+     */
     public OpenIdUser getUser() {
         return new OpenIdUser(getUserId(), getUserGroups(), getDefaultRolesAsArray());
     }
 
+    /**
+     * Gets the default groups as an array.
+     *
+     * @return the default groups
+     */
     protected static String[] getDefaultGroupsAsArray() {
         final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.groups");
         if (StringUtil.isBlank(value)) {
@@ -67,6 +90,11 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
+    /**
+     * Gets the default roles as an array.
+     *
+     * @return the default roles
+     */
     protected static String[] getDefaultRolesAsArray() {
         final String value = ComponentUtil.getFessConfig().getSystemProperty("oic.default.roles");
         if (StringUtil.isBlank(value)) {
@@ -75,18 +103,32 @@ public class OpenIdConnectCredential implements LoginCredential, FessCredential 
         return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
+    /**
+     * OpenID Connect user implementation.
+     */
     public static class OpenIdUser implements FessUser {
 
         private static final long serialVersionUID = 1L;
 
+        /** The user name. */
         protected final String name;
 
+        /** The user groups. */
         protected String[] groups;
 
+        /** The user roles. */
         protected String[] roles;
 
+        /** The user permissions. */
         protected String[] permissions;
 
+        /**
+         * Creates a new OpenID Connect user.
+         *
+         * @param name the user name
+         * @param groups the user groups
+         * @param roles the user roles
+         */
         protected OpenIdUser(final String name, final String[] groups, final String[] roles) {
             this.name = name;
             this.groups = groups;

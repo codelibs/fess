@@ -26,41 +26,73 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author codelibs
- * @author jflute
+ * The create form for Key Match.
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The search term that triggers the key match.
+     */
     @Required
     @Size(max = 100)
     public String term;
 
+    /**
+     * The query to execute when the term matches.
+     */
     @Required
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String query;
 
+    /**
+     * The maximum number of results to return.
+     */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer maxSize;
 
+    /**
+     * The boost score for matched results.
+     */
     @Required
     @ValidateTypeFailure
     public Float boost;
 
+    /**
+     * The virtual host for the key match.
+     */
     @Size(max = 1000)
     public String virtualHost;
 
+    /**
+     * The user who created this key match.
+     */
     @Size(max = 255)
     public String createdBy;
 
+    /**
+     * The timestamp when this key match was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         maxSize = 10;

@@ -40,9 +40,17 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
+ * API action for admin boost doc.
+ *
  */
 public class ApiAdminBoostdocAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminBoostdocAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminBoostdocAction.class);
 
@@ -56,6 +64,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves boost document rule settings with pagination support.
+     *
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of boost document rule configurations
+     */
     // GET /api/admin/boostdoc
     // PUT /api/admin/boostdoc
     @Execute
@@ -67,6 +81,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
                 .total(pager.getAllRecordCount()).status(Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific boost document rule setting by ID.
+     *
+     * @param id the ID of the boost document rule to retrieve
+     * @return JSON response containing the boost document rule configuration
+     */
     // GET /api/admin/boostdoc/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -77,6 +97,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
                 })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new boost document rule setting.
+     *
+     * @param body the request body containing boost document rule information
+     * @return JSON response with result status
+     */
     // POST /api/admin/boostdoc/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -97,6 +123,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(boostDoc.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing boost document rule setting.
+     *
+     * @param body the request body containing updated boost document rule information
+     * @return JSON response with result status
+     */
     // PUT /api/admin/boostdoc/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -117,6 +149,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(boostDoc.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a boost document rule setting by ID.
+     *
+     * @param id the ID of the boost document rule to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/boostdoc/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -134,6 +172,12 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a BoostDocumentRule entity for API responses.
+     *
+     * @param entity the BoostDocumentRule entity to convert
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final BoostDocumentRule entity) {
         final EditBody form = new EditBody();
         copyBeanToBean(entity, form, CopyOptions::excludeNull);

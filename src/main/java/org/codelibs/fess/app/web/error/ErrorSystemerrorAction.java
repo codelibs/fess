@@ -19,7 +19,19 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
+/**
+ * Action class for handling HTTP 500 Internal Server Error pages.
+ * This action displays error pages when the server encounters
+ * an unexpected condition that prevents it from fulfilling the request.
+ */
 public class ErrorSystemerrorAction extends FessSearchAction {
+
+    /**
+     * Default constructor for ErrorSystemerrorAction.
+     */
+    public ErrorSystemerrorAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                            Constant
@@ -32,7 +44,12 @@ public class ErrorSystemerrorAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
-
+    /**
+     * Displays the system error page.
+     *
+     * @param form the error form containing error information
+     * @return HTML response for the system error page
+     */
     @Execute
     public HtmlResponse index(final ErrorForm form) {
         return asHtml(virtualHost(path_Error_SystemJsp));

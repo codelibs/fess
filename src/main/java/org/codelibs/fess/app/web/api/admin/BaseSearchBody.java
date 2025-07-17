@@ -18,12 +18,29 @@ package org.codelibs.fess.app.web.api.admin;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Base class for search request body objects in admin API.
+ * Provides common pagination parameters for search operations.
+ */
 public class BaseSearchBody {
 
+    /** The page size for search results. */
     public Integer size = ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
 
+    /** The page number for search results. */
     public Integer page = Constants.DEFAULT_ADMIN_PAGE_NUMBER;
 
+    /**
+     * Default constructor for BaseSearchBody.
+     */
+    public BaseSearchBody() {
+        // Default constructor
+    }
+
+    /**
+     * Gets the page size for search results.
+     * @return The page size.
+     */
     public int getPageSize() {
         if (size != null) {
             return size;
@@ -31,6 +48,10 @@ public class BaseSearchBody {
         return ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
     }
 
+    /**
+     * Gets the current page number for search results.
+     * @return The current page number.
+     */
     public int getCurrentPageNumber() {
         if (page != null) {
             return page;

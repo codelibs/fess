@@ -21,22 +21,34 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
+ * The edit form for Related Query.
+ * This form extends CreateForm and adds fields necessary for editing existing related query entries.
  */
 public class EditForm extends CreateForm {
 
+    /** Unique identifier for the related query entry */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /** Username of the user who last updated this entry */
     @Size(max = 1000)
     public String updatedBy;
 
+    /** Timestamp when this entry was last updated */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /** Version number for optimistic locking */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;
+
+    /**
+     * Default constructor for EditForm.
+     */
+    public EditForm() {
+        super();
+    }
 
 }

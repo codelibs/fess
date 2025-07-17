@@ -180,7 +180,18 @@ import com.google.common.io.BaseEncoding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+/**
+ * Client for interacting with OpenSearch search engine.
+ * Provides document indexing, searching, and administrative operations.
+ */
 public class SearchEngineClient implements Client {
+
+    /**
+     * Default constructor.
+     */
+    public SearchEngineClient() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(SearchEngineClient.class);
 
@@ -192,69 +203,127 @@ public class SearchEngineClient implements Client {
 
     private static final String CONFIG_INDEX_PREFIX = "fess_config";
 
+    /** OpenSearch runner for managing the embedded search engine */
     protected OpenSearchRunner runner;
 
+    /** OpenSearch client for executing operations */
     protected Client client;
 
+    /** Configuration settings for the search engine */
     protected Map<String, String> settings;
 
+    /** Path to index configuration resources */
     protected String indexConfigPath = "fess_indices";
 
+    /** List of index configuration files to load */
     protected List<String> indexConfigList = new ArrayList<>();
 
+    /** Map of configuration types to their respective configuration files */
     protected Map<String, List<String>> configListMap = new HashMap<>();
 
+    /** Scroll timeout for search operations */
     protected String scrollForSearch = "1m";
 
+    /** Batch size for delete operations */
     protected int sizeForDelete = 100;
 
+    /** Scroll timeout for delete operations */
     protected String scrollForDelete = "1m";
 
+    /** Batch size for update operations */
     protected int sizeForUpdate = 100;
 
+    /** Scroll timeout for update operations */
     protected String scrollForUpdate = "1m";
 
+    /** Maximum retry attempts for configuration synchronization status checks */
     protected int maxConfigSyncStatusRetry = 10;
 
+    /** Maximum retry attempts for search engine status checks */
     protected int maxEsStatusRetry = 60;
 
+    /** Name of the search engine cluster */
     protected String clusterName = "fesen";
 
+    /** List of rewrite rules for document settings */
     protected final List<UnaryOperator<String>> docSettingRewriteRuleList = new ArrayList<>();
 
+    /** List of rewrite rules for document mappings */
     protected final List<UnaryOperator<String>> docMappingRewriteRuleList = new ArrayList<>();
 
+    /** Whether to use pipelines for document processing */
     protected boolean usePipeline = false;
 
+    /**
+     * Adds an index configuration file path to be loaded.
+     *
+     * @param path path to the index configuration file
+     */
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
     }
 
+    /**
+     * Adds a configuration file for a specific index.
+     *
+     * @param index the index name
+     * @param path  path to the configuration file
+     */
     public void addConfigFile(final String index, final String path) {
         configListMap.computeIfAbsent(index, k -> new ArrayList<>()).add(path);
     }
 
+    /**
+     * Sets the configuration settings for the search engine.
+     *
+     * @param settings map of configuration key-value pairs
+     */
     public void setSettings(final Map<String, String> settings) {
         this.settings = settings;
     }
 
+    /**
+     * Gets the current cluster health status.
+     *
+     * @return the cluster health status name
+     */
     public String getStatus() {
         return admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout()).getStatus()
                 .name();
     }
 
+    /**
+     * Sets the OpenSearch runner for embedded mode.
+     *
+     * @param runner the OpenSearch runner instance
+     */
     public void setRunner(final OpenSearchRunner runner) {
         this.runner = runner;
     }
 
+    /**
+     * Checks if the search engine is running in embedded mode.
+     *
+     * @return true if running in embedded mode, false otherwise
+     */
     public boolean isEmbedded() {
         return runner != null;
     }
 
+    /**
+     * Enables the use of ingest pipelines for document processing.
+     */
     public void usePipeline() {
         usePipeline = true;
     }
 
+    /**
+     * Resolves a hostname to an InetAddress.
+     *
+     * @param host the hostname to resolve
+     * @return the resolved InetAddress
+     * @throws FessSystemException if hostname resolution fails
+     */
     protected InetAddress getInetAddressByName(final String host) {
         try {
             return InetAddress.getByName(host);
@@ -263,6 +332,10 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Initializes the search engine client and configures indices.
+     * Called automatically after dependency injection is complete.
+     */
     @PostConstruct
     public void open() {
         if (logger.isDebugEnabled()) {
@@ -384,6 +457,13 @@ public class SearchEngineClient implements Client {
         });
     }
 
+    /**
+     * Creates an HTTP client for connecting to the search engine.
+     *
+     * @param fessConfig the Fess configuration
+     * @param host       the search engine host address
+     * @return the configured HTTP client
+     */
     protected Client createHttpClient(final FessConfig fessConfig, final String host) {
         final String[] hosts =
                 split(host, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
@@ -402,6 +482,12 @@ public class SearchEngineClient implements Client {
         return new HttpClient(builder.build(), null);
     }
 
+    /**
+     * Checks if an index exists in the search engine.
+     *
+     * @param indexName the name of the index to check
+     * @return true if the index exists, false otherwise
+     */
     public boolean existsIndex(final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         boolean exists = false;
@@ -415,6 +501,14 @@ public class SearchEngineClient implements Client {
         return exists;
     }
 
+    /**
+     * Copies documents from one index to another with optional transformation.
+     *
+     * @param fromIndex        the source index name
+     * @param toIndex          the destination index name
+     * @param waitForCompletion whether to wait for the operation to complete
+     * @return true if the copy operation was successful, false otherwise
+     */
     public boolean copyDocIndex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String source = fessConfig.getIndexReindexBody()//
@@ -425,6 +519,14 @@ public class SearchEngineClient implements Client {
         return reindex(fromIndex, toIndex, source, waitForCompletion);
     }
 
+    /**
+     * Reindexes documents from one index to another.
+     *
+     * @param fromIndex        the source index name
+     * @param toIndex          the destination index name
+     * @param waitForCompletion whether to wait for the operation to complete
+     * @return true if the reindex operation was successful, false otherwise
+     */
     public boolean reindex(final String fromIndex, final String toIndex, final boolean waitForCompletion) {
         final String template = """
                 {"source":{"index":"__SOURCE_INDEX__","size":__SIZE__},"dest":{"index":"__DEST_INDEX__"}}
@@ -437,6 +539,15 @@ public class SearchEngineClient implements Client {
         return reindex(fromIndex, toIndex, source, waitForCompletion);
     }
 
+    /**
+     * Performs a reindex operation with custom source configuration.
+     *
+     * @param fromIndex        the source index name
+     * @param toIndex          the destination index name
+     * @param source           the reindex configuration JSON
+     * @param waitForCompletion whether to wait for the operation to complete
+     * @return true if the reindex operation was successful, false otherwise
+     */
     protected boolean reindex(final String fromIndex, final String toIndex, final String source, final boolean waitForCompletion) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
@@ -456,6 +567,12 @@ public class SearchEngineClient implements Client {
         return false;
     }
 
+    /**
+     * Calculates the requests per second setting for reindex operations.
+     *
+     * @param fessConfig the Fess configuration
+     * @return the requests per second value, or null for no limit
+     */
     protected String getReindexRequestsPerSecound(final FessConfig fessConfig) {
         if (StringUtil.isBlank(fessConfig.getIndexReindexRequestsPerSecond())) {
             return null;
@@ -472,11 +589,28 @@ public class SearchEngineClient implements Client {
         return value;
     }
 
+    /**
+     * Creates a new index with default settings.
+     *
+     * @param index     the index configuration name
+     * @param indexName the actual index name to create
+     * @return true if the index was created successfully, false otherwise
+     */
     public boolean createIndex(final String index, final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createIndex(index, indexName, fessConfig.getIndexNumberOfShards(), fessConfig.getIndexAutoExpandReplicas(), true);
     }
 
+    /**
+     * Creates a new index with specified settings.
+     *
+     * @param index              the index configuration name
+     * @param indexName          the actual index name to create
+     * @param numberOfShards     the number of primary shards
+     * @param autoExpandReplicas the auto expand replicas setting
+     * @param uploadConfig       whether to upload configuration files
+     * @return true if the index was created successfully, false otherwise
+     */
     public boolean createIndex(final String index, final String indexName, final String numberOfShards, final String autoExpandReplicas,
             final boolean uploadConfig) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -514,6 +648,12 @@ public class SearchEngineClient implements Client {
         return false;
     }
 
+    /**
+     * Deletes an index from the search engine.
+     *
+     * @param indexName the name of the index to delete
+     * @return true if the index was deleted successfully, false otherwise
+     */
     public boolean deleteIndex(final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
@@ -526,6 +666,15 @@ public class SearchEngineClient implements Client {
         return false;
     }
 
+    /**
+     * Reads and processes index settings from configuration file.
+     *
+     * @param fesenType          the search engine type
+     * @param indexConfigFile    the path to the index configuration file
+     * @param numberOfShards     the number of primary shards
+     * @param autoExpandReplicas the auto expand replicas setting
+     * @return the processed index settings JSON
+     */
     protected String readIndexSetting(final String fesenType, final String indexConfigFile, final String numberOfShards,
             final String autoExpandReplicas) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -544,10 +693,23 @@ public class SearchEngineClient implements Client {
         return source;
     }
 
+    /**
+     * Adds a rewrite rule for document settings.
+     *
+     * @param rule the rewrite rule to apply to document settings
+     */
     public void addDocumentSettingRewriteRule(final UnaryOperator<String> rule) {
         docSettingRewriteRuleList.add(rule);
     }
 
+    /**
+     * Gets the resource path for configuration files, checking type-specific variants first.
+     *
+     * @param basePath the base path for resources
+     * @param type     the search engine type
+     * @param path     the relative path to the resource
+     * @return the full resource path
+     */
     protected String getResourcePath(final String basePath, final String type, final String path) {
         final String target = basePath + "/_" + type + path;
         if (ResourceUtil.getResourceNoException(target) != null) {
@@ -556,6 +718,13 @@ public class SearchEngineClient implements Client {
         return basePath + path;
     }
 
+    /**
+     * Adds field mappings to an index.
+     *
+     * @param index     the index configuration name
+     * @param docType   the document type
+     * @param indexName the actual index name
+     */
     public void addMapping(final String index, final String docType, final String indexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -603,10 +772,21 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Adds a rewrite rule for document mappings.
+     *
+     * @param rule the rewrite rule to apply to document mappings
+     */
     public void addDocumentMappingRewriteRule(final UnaryOperator<String> rule) {
         docMappingRewriteRuleList.add(rule);
     }
 
+    /**
+     * Updates index aliases to point to a new index.
+     *
+     * @param newIndex the new index to point aliases to
+     * @return true if the alias update was successful, false otherwise
+     */
     public boolean updateAlias(final String newIndex) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String updateAlias = fessConfig.getIndexDocumentUpdateIndex();
@@ -630,6 +810,12 @@ public class SearchEngineClient implements Client {
         return response.isAcknowledged();
     }
 
+    /**
+     * Creates aliases for a newly created index.
+     *
+     * @param index            the index configuration name
+     * @param createdIndexName the actual index name that was created
+     */
     protected void createAlias(final String index, final String createdIndexName) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         // alias
@@ -679,6 +865,11 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Sends configuration files to the search engine for an index.
+     *
+     * @param index the index configuration name
+     */
     protected void sendConfigFiles(final String index) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         configListMap.getOrDefault(index, Collections.emptyList()).forEach(path -> {
@@ -717,6 +908,11 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Flushes configuration files to the search engine and executes a callback.
+     *
+     * @param callback the callback to execute after flushing
+     */
     public void flushConfigFiles(final Runnable callback) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -743,10 +939,23 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Generates a new index name with timestamp suffix.
+     *
+     * @param configIndex the base index configuration name
+     * @return the generated index name with timestamp
+     */
     protected String generateNewIndexName(final String configIndex) {
         return configIndex + "." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
     }
 
+    /**
+     * Inserts bulk data from a file into an index.
+     *
+     * @param fessConfig  the Fess configuration
+     * @param configIndex the target index name
+     * @param dataPath    the path to the bulk data file
+     */
     protected void insertBulkData(final FessConfig fessConfig, final String configIndex, final String dataPath) {
         try {
             final BulkRequestBuilder builder = client.prepareBulk();
@@ -797,6 +1006,12 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Waits for the search engine cluster to reach yellow or green status.
+     *
+     * @param fessConfig the Fess configuration
+     * @throws ContainerInitFailureException if the cluster doesn't become available
+     */
     protected void waitForYellowStatus(final FessConfig fessConfig) {
         Exception cause = null;
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -833,6 +1048,11 @@ public class SearchEngineClient implements Client {
         throw new ContainerInitFailureException(message, cause);
     }
 
+    /**
+     * Waits for the configuration synchronization service to become available.
+     *
+     * @throws FessSystemException if ConfigSync doesn't become available
+     */
     protected void waitForConfigSyncStatus() {
         FessSystemException cause = null;
         for (int i = 0; i < maxConfigSyncStatusRetry; i++) {
@@ -876,6 +1096,14 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Updates documents in an index using a query.
+     *
+     * @param index   the index name
+     * @param option  function to customize the search request
+     * @param builder function to build update requests from search hits
+     * @return the number of documents processed
+     */
     public long updateByQuery(final String index, final Function<SearchRequestBuilder, SearchRequestBuilder> option,
             final BiFunction<UpdateRequestBuilder, SearchHit, UpdateRequestBuilder> builder) {
 
@@ -920,6 +1148,13 @@ public class SearchEngineClient implements Client {
         return count;
     }
 
+    /**
+     * Deletes documents in an index matching a query.
+     *
+     * @param index        the index name
+     * @param queryBuilder the query to match documents for deletion
+     * @return the number of documents deleted
+     */
     public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -960,6 +1195,11 @@ public class SearchEngineClient implements Client {
         return count;
     }
 
+    /**
+     * Deletes a scroll context to free resources.
+     *
+     * @param scrollId the scroll ID to delete
+     */
     protected void deleteScrollContext(final String scrollId) {
         if (scrollId != null) {
             client.prepareClearScroll().addScrollId(scrollId)
@@ -967,6 +1207,16 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Retrieves a document by ID with custom conditions and result processing.
+     *
+     * @param <T>          the result type
+     * @param index        the index name
+     * @param id           the document ID
+     * @param condition    the search condition
+     * @param searchResult the result processor
+     * @return the processed result
+     */
     protected <T> T get(final String index, final String id, final SearchCondition<GetRequestBuilder> condition,
             final SearchResult<T, GetRequestBuilder, GetResponse> searchResult) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -982,6 +1232,16 @@ public class SearchEngineClient implements Client {
         return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {}));
     }
 
+    /**
+     * Performs a search with custom conditions and result processing.
+     *
+     * @param <T>          the result type
+     * @param index        the index name
+     * @param condition    the search condition
+     * @param searchResult the result processor
+     * @return the processed search result
+     * @throws InvalidQueryException if the query is invalid
+     */
     public <T> T search(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final SearchResult<T, SearchRequestBuilder, SearchResponse> searchResult) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -1018,11 +1278,31 @@ public class SearchEngineClient implements Client {
         return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
     }
 
+    /**
+     * Performs a scroll search with default entity creation.
+     *
+     * @param index     the index name
+     * @param condition the search condition
+     * @param cursor    the cursor function to process each hit
+     * @return the number of documents processed
+     * @throws InvalidQueryException if the query is invalid
+     */
     public long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final BooleanFunction<Map<String, Object>> cursor) {
         return scrollSearch(index, condition, getDefaultEntityCreator(), cursor);
     }
 
+    /**
+     * Performs a scroll search with custom entity creation.
+     *
+     * @param <T>       the entity type
+     * @param index     the index name
+     * @param condition the search condition
+     * @param creator   the entity creator
+     * @param cursor    the cursor function to process each entity
+     * @return the number of documents processed
+     * @throws InvalidQueryException if the query is invalid
+     */
     public <T> long scrollSearch(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator, final BooleanFunction<T> cursor) {
         long count = 0;
@@ -1071,6 +1351,13 @@ public class SearchEngineClient implements Client {
         return count;
     }
 
+    /**
+     * Retrieves a single document matching the search condition.
+     *
+     * @param index     the index name
+     * @param condition the search condition
+     * @return an optional containing the document if found
+     */
     public OptionalEntity<Map<String, Object>> getDocument(final String index, final SearchCondition<SearchRequestBuilder> condition) {
         return getDocument(index, condition, (response, hit) -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1097,6 +1384,15 @@ public class SearchEngineClient implements Client {
         });
     }
 
+    /**
+     * Retrieves a single document with custom entity creation.
+     *
+     * @param <T>       the entity type
+     * @param index     the index name
+     * @param condition the search condition
+     * @param creator   the entity creator
+     * @return an optional containing the entity if found
+     */
     protected <T> OptionalEntity<T> getDocument(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator) {
         return search(index, searchRequestBuilder -> {
@@ -1111,10 +1407,22 @@ public class SearchEngineClient implements Client {
         }));
     }
 
+    /**
+     * Retrieves a list of documents matching the search condition.
+     *
+     * @param index     the index name
+     * @param condition the search condition
+     * @return a list of documents
+     */
     public List<Map<String, Object>> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition) {
         return getDocumentList(index, condition, getDefaultEntityCreator());
     }
 
+    /**
+     * Gets the default entity creator for converting search hits to maps.
+     *
+     * @return the default entity creator
+     */
     protected EntityCreator<Map<String, Object>, SearchResponse, SearchHit> getDefaultEntityCreator() {
         return (response, hit) -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1135,6 +1443,15 @@ public class SearchEngineClient implements Client {
         };
     }
 
+    /**
+     * Retrieves a list of documents with custom entity creation.
+     *
+     * @param <T>       the entity type
+     * @param index     the index name
+     * @param condition the search condition
+     * @param creator   the entity creator
+     * @return a list of entities
+     */
     protected <T> List<T> getDocumentList(final String index, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator) {
         return search(index, condition, (searchRequestBuilder, execTime, searchResponse) -> {
@@ -1146,6 +1463,16 @@ public class SearchEngineClient implements Client {
         });
     }
 
+    /**
+     * Updates a specific field in a document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @param field the field name to update
+     * @param value the new field value
+     * @return true if the update was successful, false otherwise
+     * @throws SearchEngineClientException if the update fails
+     */
     public boolean update(final String index, final String id, final String field, final Object value) {
         // Using ingest pipelines with doc_as_upsert is not supported.
         if (usePipeline) {
@@ -1160,6 +1487,16 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Updates a document by ID using a script when pipelines are enabled.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @param field the field name to update
+     * @param value the new field value
+     * @return true if the update was successful, false otherwise
+     * @throws SearchEngineClientException if the update fails
+     */
     protected boolean updateByIdWithScript(final String index, final String id, final String field, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final UpdateByQueryRequest request = new UpdateByQueryRequest(index).setQuery(QueryBuilders.idsQuery().addIds(id))
@@ -1184,6 +1521,11 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Refreshes the specified indices to make recent changes visible for search.
+     *
+     * @param indices the indices to refresh
+     */
     public void refresh(final String... indices) {
         client.admin().indices().prepareRefresh(indices).execute(new ActionListener<RefreshResponse>() {
             @Override
@@ -1201,6 +1543,11 @@ public class SearchEngineClient implements Client {
 
     }
 
+    /**
+     * Flushes the specified indices to ensure data is written to disk.
+     *
+     * @param indices the indices to flush
+     */
     public void flush(final String... indices) {
         client.admin().indices().prepareFlush(indices).execute(new ActionListener<FlushResponse>() {
 
@@ -1219,6 +1566,12 @@ public class SearchEngineClient implements Client {
 
     }
 
+    /**
+     * Pings the search engine cluster to check connectivity and health.
+     *
+     * @return the ping response with cluster information
+     * @throws SearchEngineClientException if the ping fails
+     */
     public PingResponse ping() {
         try {
             final ClusterHealthResponse response =
@@ -1229,6 +1582,14 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Adds multiple documents to the specified index in bulk.
+     *
+     * @param index   the target index
+     * @param docList list of documents to add
+     * @param options callback for customizing index request options
+     * @return the bulk response
+     */
     public BulkResponse addAll(final String index, final List<Map<String, Object>> docList,
             final BiConsumer<Map<String, Object>, IndexRequestBuilder> options) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -1242,29 +1603,61 @@ public class SearchEngineClient implements Client {
         return bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
     }
 
+    /**
+     * Builder class for constructing search conditions and parameters.
+     */
     public static class SearchConditionBuilder {
+        /** The search request builder being configured */
         protected final SearchRequestBuilder searchRequestBuilder;
+        /** The search query string */
         protected String query;
+        /** Fields to include in the response */
         protected String[] responseFields;
+        /** Search result offset (number of results to skip) */
         protected int offset = Constants.DEFAULT_START_COUNT;
+        /** Maximum number of results to return */
         protected int size = Constants.DEFAULT_PAGE_SIZE;
+        /** Geographic search information */
         protected GeoInfo geoInfo;
+        /** Facet configuration for aggregations */
         protected FacetInfo facetInfo;
+        /** Highlighting configuration */
         protected HighlightInfo highlightInfo;
+        /** Hash of document for similarity search */
         protected String similarDocHash;
+        /** Type of search request */
         protected SearchRequestType searchRequestType = SearchRequestType.SEARCH;
+        /** Whether scroll mode is enabled for large result sets */
         protected boolean isScroll = false;
+        /** Track total hits configuration */
         protected String trackTotalHits = null;
+        /** Minimum score threshold for results */
         protected Float minScore = null;
 
+        /**
+         * Creates a new SearchConditionBuilder instance.
+         *
+         * @param searchRequestBuilder the search request builder to configure
+         * @return a new SearchConditionBuilder instance
+         */
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
         }
 
+        /**
+         * Constructor for SearchConditionBuilder.
+         *
+         * @param searchRequestBuilder the search request builder to configure
+         */
         SearchConditionBuilder(final SearchRequestBuilder searchRequestBuilder) {
             this.searchRequestBuilder = searchRequestBuilder;
         }
 
+        /**
+         * Gets the current search condition as a map.
+         *
+         * @return a map containing the search condition parameters
+         */
         public Map<String, Object> condition() {
             final Map<String, Object> params = new HashMap<>();
             params.put("query", query);
@@ -1278,41 +1671,89 @@ public class SearchEngineClient implements Client {
             return params;
         }
 
+        /**
+         * Sets the search query string.
+         *
+         * @param query the query string
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder query(final String query) {
             this.query = query;
             return this;
         }
 
+        /**
+         * Sets the search request type.
+         *
+         * @param searchRequestType the search request type
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder searchRequestType(final SearchRequestType searchRequestType) {
             this.searchRequestType = searchRequestType;
             return this;
         }
 
+        /**
+         * Sets the fields to include in the response.
+         *
+         * @param responseFields the fields to include in the response
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder responseFields(final String[] responseFields) {
             this.responseFields = responseFields;
             return this;
         }
 
+        /**
+         * Sets the search result offset.
+         *
+         * @param offset the number of results to skip
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder offset(final int offset) {
             this.offset = offset;
             return this;
         }
 
+        /**
+         * Sets the maximum number of results to return.
+         *
+         * @param size the maximum number of results
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder size(final int size) {
             this.size = size;
             return this;
         }
 
+        /**
+         * Sets the geographic search information.
+         *
+         * @param geoInfo the geographic search information
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder geoInfo(final GeoInfo geoInfo) {
             this.geoInfo = geoInfo;
             return this;
         }
 
+        /**
+         * Sets the highlighting information.
+         *
+         * @param highlightInfo the highlighting configuration
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder highlightInfo(final HighlightInfo highlightInfo) {
             this.highlightInfo = highlightInfo;
             return this;
         }
 
+        /**
+         * Sets the similar document hash for similarity search.
+         *
+         * @param similarDocHash the hash of the document to find similar documents to
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder similarDocHash(final String similarDocHash) {
             if (StringUtil.isNotBlank(similarDocHash)) {
                 this.similarDocHash = similarDocHash;
@@ -1320,26 +1761,56 @@ public class SearchEngineClient implements Client {
             return this;
         }
 
+        /**
+         * Sets the facet information for aggregations.
+         *
+         * @param facetInfo the facet configuration
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder facetInfo(final FacetInfo facetInfo) {
             this.facetInfo = facetInfo;
             return this;
         }
 
+        /**
+         * Enables scroll mode for large result sets.
+         *
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder scroll() {
             isScroll = true;
             return this;
         }
 
+        /**
+         * Sets the track total hits configuration.
+         *
+         * @param trackTotalHits the track total hits setting
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder trackTotalHits(final String trackTotalHits) {
             this.trackTotalHits = trackTotalHits;
             return this;
         }
 
+        /**
+         * Sets the minimum score threshold for results.
+         *
+         * @param minScore the minimum score threshold
+         * @return this builder for method chaining
+         */
         public SearchConditionBuilder minScore(final Float minScore) {
             this.minScore = minScore;
             return this;
         }
 
+        /**
+         * Builds the search request with all configured parameters.
+         *
+         * @return true if the build was successful, false if the query is blank
+         * @throws ResultOffsetExceededException if the offset exceeds the maximum allowed
+         * @throws SearchQueryException if facet fields are invalid
+         */
         public boolean build() {
             if (StringUtil.isBlank(query)) {
                 return false;
@@ -1389,12 +1860,22 @@ public class SearchEngineClient implements Client {
             return true;
         }
 
+        /**
+         * Builds the minimum score configuration.
+         *
+         * @param fessConfig the Fess configuration
+         */
         protected void buildMinScore(final FessConfig fessConfig) {
             if (minScore != null) {
                 searchRequestBuilder.setMinScore(minScore);
             }
         }
 
+        /**
+         * Builds the track total hits configuration.
+         *
+         * @param fessConfig the Fess configuration
+         */
         protected void buildTrackTotalHits(final FessConfig fessConfig) {
             if (isScroll) {
                 return;
@@ -1419,6 +1900,14 @@ public class SearchEngineClient implements Client {
             }
         }
 
+        /**
+         * Builds the facet aggregations.
+         *
+         * @param queryHelper the query helper
+         * @param queryFieldConfig the query field configuration
+         * @param fessConfig the Fess configuration
+         * @throws SearchQueryException if facet fields are invalid
+         */
         protected void buildFacet(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             stream(facetInfo.field).of(stream -> stream.forEach(f -> {
                 if (!queryFieldConfig.isFacetField(f)) {
@@ -1449,6 +1938,13 @@ public class SearchEngineClient implements Client {
             }));
         }
 
+        /**
+         * Builds the highlighting configuration.
+         *
+         * @param queryHelper the query helper
+         * @param queryFieldConfig the query field configuration
+         * @param fessConfig the Fess configuration
+         */
         protected void buildHighlighter(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig,
                 final FessConfig fessConfig) {
             final String highlighterType = highlightInfo.getType();
@@ -1474,14 +1970,36 @@ public class SearchEngineClient implements Client {
             searchRequestBuilder.highlighter(highlightBuilder);
         }
 
+        /**
+         * Builds the sort configuration.
+         *
+         * @param queryContext the query context
+         * @param queryFieldConfig the query field configuration
+         * @param fessConfig the Fess configuration
+         */
         protected void buildSort(final QueryContext queryContext, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
         }
 
+        /**
+         * Builds the rescorer configuration.
+         *
+         * @param queryHelper the query helper
+         * @param queryFieldConfig the query field configuration
+         * @param fessConfig the Fess configuration
+         */
         protected void buildRescorer(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig, final FessConfig fessConfig) {
             stream(queryHelper.getRescorers(condition())).of(stream -> stream.forEach(searchRequestBuilder::addRescorer));
         }
 
+        /**
+         * Builds the query context with all search parameters.
+         *
+         * @param queryHelper the query helper
+         * @param queryFieldConfig the query field configuration
+         * @param fessConfig the Fess configuration
+         * @return the built query context
+         */
         protected QueryContext buildQueryContext(final QueryHelper queryHelper, final QueryFieldConfig queryFieldConfig,
                 final FessConfig fessConfig) {
             return queryHelper.build(searchRequestType, query, context -> {
@@ -1501,6 +2019,12 @@ public class SearchEngineClient implements Client {
             });
         }
 
+        /**
+         * Gets the collapse builder for result grouping.
+         *
+         * @param fessConfig the Fess configuration
+         * @return the collapse builder
+         */
         protected CollapseBuilder getCollapseBuilder(final FessConfig fessConfig) {
             final InnerHitBuilder innerHitBuilder = new InnerHitBuilder().setName(fessConfig.getQueryCollapseInnerHitsName())
                     .setSize(fessConfig.getQueryCollapseInnerHitsSizeAsInteger());
@@ -1512,6 +2036,14 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Stores a document in the specified index.
+     *
+     * @param index the index name
+     * @param obj   the document object to store
+     * @return true if the document was stored successfully, false otherwise
+     * @throws SearchEngineClientException if the store operation fails
+     */
     public boolean store(final String index, final Object obj) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         @SuppressWarnings("unchecked")
@@ -1546,10 +2078,27 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Deletes a document from the specified index.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return true if the document was deleted successfully, false otherwise
+     */
     public boolean delete(final String index, final String id) {
         return delete(index, id, null, null);
     }
 
+    /**
+     * Deletes a document from the specified index with optimistic concurrency control.
+     *
+     * @param index       the index name
+     * @param id          the document ID
+     * @param seqNo       the sequence number for optimistic concurrency control
+     * @param primaryTerm the primary term for optimistic concurrency control
+     * @return true if the document was deleted successfully, false otherwise
+     * @throws SearchEngineClientException if the delete operation fails
+     */
     public boolean delete(final String index, final String id, final Number seqNo, final Number primaryTerm) {
         try {
             final DeleteRequestBuilder builder = client.prepareDelete().setIndex(index).setId(id).setRefreshPolicy(RefreshPolicy.IMMEDIATE);
@@ -1566,26 +2115,82 @@ public class SearchEngineClient implements Client {
         }
     }
 
+    /**
+     * Sets the path to index configuration resources.
+     *
+     * @param indexConfigPath the path to index configuration resources
+     */
     public void setIndexConfigPath(final String indexConfigPath) {
         this.indexConfigPath = indexConfigPath;
     }
 
+    /**
+     * Interface for defining search condition logic.
+     *
+     * @param <B> the type of request builder
+     */
     public interface SearchCondition<B> {
+        /**
+         * Builds the search condition into the request builder.
+         *
+         * @param requestBuilder the request builder to configure
+         * @return true if the condition was successfully built, false otherwise
+         */
         boolean build(B requestBuilder);
     }
 
+    /**
+     * Interface for building search results from response data.
+     *
+     * @param <T> the result type
+     * @param <B> the request builder type
+     * @param <R> the response type
+     */
     public interface SearchResult<T, B, R> {
+        /**
+         * Builds a result object from the request builder, execution time, and response.
+         *
+         * @param requestBuilder the request builder that was executed
+         * @param execTime       the execution time in milliseconds
+         * @param response       the optional response from the search engine
+         * @return the built result object
+         */
         T build(B requestBuilder, long execTime, OptionalEntity<R> response);
     }
 
+    /**
+     * Interface for creating entities from search response hits.
+     *
+     * @param <T> the entity type
+     * @param <R> the response type
+     * @param <H> the hit type
+     */
     public interface EntityCreator<T, R, H> {
+        /**
+         * Creates an entity from a search response and hit.
+         *
+         * @param response the search response
+         * @param hit      the individual search hit
+         * @return the created entity
+         */
         T build(R response, H hit);
     }
 
+    /**
+     * Sets the name of the search engine cluster.
+     *
+     * @param clusterName the cluster name
+     */
     public void setClusterName(final String clusterName) {
         this.clusterName = clusterName;
     }
 
+    /**
+     * Gets information about the search engine.
+     *
+     * @return the engine information
+     * @throws SearchEngineClientException if the client is not an HttpClient
+     */
     public EngineInfo getEngineInfo() {
         if (client instanceof final HttpClient httpClient) {
             return httpClient.getEngineInfo();
@@ -1597,343 +2202,752 @@ public class SearchEngineClient implements Client {
     // Fesen Client
     //
 
+    /**
+     * Gets the thread pool used by the client.
+     *
+     * @return the thread pool
+     */
     @Override
     public ThreadPool threadPool() {
         return client.threadPool();
     }
 
+    /**
+     * Gets the admin client for cluster and index administration.
+     *
+     * @return the admin client
+     */
     @Override
     public AdminClient admin() {
         return client.admin();
     }
 
+    /**
+     * Indexes a document asynchronously.
+     *
+     * @param request the index request
+     * @return a future for the index response
+     */
     @Override
     public ActionFuture<IndexResponse> index(final IndexRequest request) {
         return client.index(request);
     }
 
+    /**
+     * Indexes a document asynchronously with a callback.
+     *
+     * @param request  the index request
+     * @param listener the response listener
+     */
     @Override
     public void index(final IndexRequest request, final ActionListener<IndexResponse> listener) {
         client.index(request, listener);
     }
 
+    /**
+     * Prepares an index request builder.
+     *
+     * @return the index request builder
+     */
     @Override
     public IndexRequestBuilder prepareIndex() {
         return client.prepareIndex();
     }
 
+    /**
+     * Updates a document asynchronously.
+     *
+     * @param request the update request
+     * @return a future for the update response
+     */
     @Override
     public ActionFuture<UpdateResponse> update(final UpdateRequest request) {
         return client.update(request);
     }
 
+    /**
+     * Updates a document asynchronously with a callback.
+     *
+     * @param request  the update request
+     * @param listener the response listener
+     */
     @Override
     public void update(final UpdateRequest request, final ActionListener<UpdateResponse> listener) {
         client.update(request, listener);
     }
 
+    /**
+     * Prepares an update request builder.
+     *
+     * @return the update request builder
+     */
     @Override
     public UpdateRequestBuilder prepareUpdate() {
         return client.prepareUpdate();
     }
 
+    /**
+     * Prepares an update request builder for a specific document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return the update request builder
+     */
     @Override
     public UpdateRequestBuilder prepareUpdate(final String index, final String id) {
         return client.prepareUpdate(index, id);
     }
 
+    /**
+     * Prepares an index request builder for a specific index.
+     *
+     * @param index the index name
+     * @return the index request builder
+     */
     @Override
     public IndexRequestBuilder prepareIndex(final String index) {
         return client.prepareIndex(index);
     }
 
+    /**
+     * Deletes a document asynchronously.
+     *
+     * @param request the delete request
+     * @return a future for the delete response
+     */
     @Override
     public ActionFuture<DeleteResponse> delete(final DeleteRequest request) {
         return client.delete(request);
     }
 
+    /**
+     * Deletes a document asynchronously with a callback.
+     *
+     * @param request  the delete request
+     * @param listener the response listener
+     */
     @Override
     public void delete(final DeleteRequest request, final ActionListener<DeleteResponse> listener) {
         client.delete(request, listener);
     }
 
+    /**
+     * Prepares a delete request builder.
+     *
+     * @return the delete request builder
+     */
     @Override
     public DeleteRequestBuilder prepareDelete() {
         return client.prepareDelete();
     }
 
+    /**
+     * Prepares a delete request builder for a specific document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return the delete request builder
+     */
     @Override
     public DeleteRequestBuilder prepareDelete(final String index, final String id) {
         return client.prepareDelete(index, id);
     }
 
+    /**
+     * Executes a bulk request asynchronously.
+     *
+     * @param request the bulk request
+     * @return a future for the bulk response
+     */
     @Override
     public ActionFuture<BulkResponse> bulk(final BulkRequest request) {
         return client.bulk(request);
     }
 
+    /**
+     * Executes a bulk request asynchronously with a callback.
+     *
+     * @param request  the bulk request
+     * @param listener the response listener
+     */
     @Override
     public void bulk(final BulkRequest request, final ActionListener<BulkResponse> listener) {
         client.bulk(request, listener);
     }
 
+    /**
+     * Prepares a bulk request builder.
+     *
+     * @return the bulk request builder
+     */
     @Override
     public BulkRequestBuilder prepareBulk() {
         return client.prepareBulk();
     }
 
+    /**
+     * Gets a document asynchronously.
+     *
+     * @param request the get request
+     * @return a future for the get response
+     */
     @Override
     public ActionFuture<GetResponse> get(final GetRequest request) {
         return client.get(request);
     }
 
+    /**
+     * Gets a document asynchronously with a callback.
+     *
+     * @param request  the get request
+     * @param listener the response listener
+     */
     @Override
     public void get(final GetRequest request, final ActionListener<GetResponse> listener) {
         client.get(request, listener);
     }
 
+    /**
+     * Prepares a get request builder.
+     *
+     * @return the get request builder
+     */
     @Override
     public GetRequestBuilder prepareGet() {
         return client.prepareGet();
     }
 
+    /**
+     * Prepares a get request builder for a specific document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return the get request builder
+     */
     @Override
     public GetRequestBuilder prepareGet(final String index, final String id) {
         return client.prepareGet(index, id);
     }
 
+    /**
+     * Gets multiple documents asynchronously.
+     *
+     * @param request the multi-get request
+     * @return a future for the multi-get response
+     */
     @Override
     public ActionFuture<MultiGetResponse> multiGet(final MultiGetRequest request) {
         return client.multiGet(request);
     }
 
+    /**
+     * Gets multiple documents asynchronously with a callback.
+     *
+     * @param request  the multi-get request
+     * @param listener the response listener
+     */
     @Override
     public void multiGet(final MultiGetRequest request, final ActionListener<MultiGetResponse> listener) {
         client.multiGet(request, listener);
     }
 
+    /**
+     * Prepares a multi-get request builder.
+     *
+     * @return the multi-get request builder
+     */
     @Override
     public MultiGetRequestBuilder prepareMultiGet() {
         return client.prepareMultiGet();
     }
 
+    /**
+     * Executes a search request asynchronously.
+     *
+     * @param request the search request
+     * @return a future for the search response
+     */
     @Override
     public ActionFuture<SearchResponse> search(final SearchRequest request) {
         return client.search(request);
     }
 
+    /**
+     * Executes a search request asynchronously with a callback.
+     *
+     * @param request  the search request
+     * @param listener the response listener
+     */
     @Override
     public void search(final SearchRequest request, final ActionListener<SearchResponse> listener) {
         client.search(request, listener);
     }
 
+    /**
+     * Prepares a search request builder for specific indices.
+     *
+     * @param indices the indices to search
+     * @return the search request builder
+     */
     @Override
     public SearchRequestBuilder prepareSearch(final String... indices) {
         return client.prepareSearch(indices);
     }
 
+    /**
+     * Executes a search scroll request asynchronously.
+     *
+     * @param request the search scroll request
+     * @return a future for the search response
+     */
     @Override
     public ActionFuture<SearchResponse> searchScroll(final SearchScrollRequest request) {
         return client.searchScroll(request);
     }
 
+    /**
+     * Executes a search scroll request asynchronously with a callback.
+     *
+     * @param request  the search scroll request
+     * @param listener the response listener
+     */
     @Override
     public void searchScroll(final SearchScrollRequest request, final ActionListener<SearchResponse> listener) {
         client.searchScroll(request, listener);
     }
 
+    /**
+     * Prepares a search scroll request builder.
+     *
+     * @param scrollId the scroll ID
+     * @return the search scroll request builder
+     */
     @Override
     public SearchScrollRequestBuilder prepareSearchScroll(final String scrollId) {
         return client.prepareSearchScroll(scrollId);
     }
 
+    /**
+     * Executes a multi-search request asynchronously.
+     *
+     * @param request the multi-search request
+     * @return a future for the multi-search response
+     */
     @Override
     public ActionFuture<MultiSearchResponse> multiSearch(final MultiSearchRequest request) {
         return client.multiSearch(request);
     }
 
+    /**
+     * Executes a multi-search request asynchronously with a callback.
+     *
+     * @param request  the multi-search request
+     * @param listener the response listener
+     */
     @Override
     public void multiSearch(final MultiSearchRequest request, final ActionListener<MultiSearchResponse> listener) {
         client.multiSearch(request, listener);
     }
 
+    /**
+     * Prepares a multi-search request builder.
+     *
+     * @return the multi-search request builder
+     */
     @Override
     public MultiSearchRequestBuilder prepareMultiSearch() {
         return client.prepareMultiSearch();
     }
 
+    /**
+     * Prepares an explain request builder for a specific document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return the explain request builder
+     */
     @Override
     public ExplainRequestBuilder prepareExplain(final String index, final String id) {
         return client.prepareExplain(index, id);
     }
 
+    /**
+     * Executes an explain request asynchronously.
+     *
+     * @param request the explain request
+     * @return a future for the explain response
+     */
     @Override
     public ActionFuture<ExplainResponse> explain(final ExplainRequest request) {
         return client.explain(request);
     }
 
+    /**
+     * Executes an explain request asynchronously with a callback.
+     *
+     * @param request  the explain request
+     * @param listener the response listener
+     */
     @Override
     public void explain(final ExplainRequest request, final ActionListener<ExplainResponse> listener) {
         client.explain(request, listener);
     }
 
+    /**
+     * Prepares a clear scroll request builder.
+     *
+     * @return the clear scroll request builder
+     */
     @Override
     public ClearScrollRequestBuilder prepareClearScroll() {
         return client.prepareClearScroll();
     }
 
+    /**
+     * Clears scroll contexts asynchronously.
+     *
+     * @param request the clear scroll request
+     * @return a future for the clear scroll response
+     */
     @Override
     public ActionFuture<ClearScrollResponse> clearScroll(final ClearScrollRequest request) {
         return client.clearScroll(request);
     }
 
+    /**
+     * Clears scroll contexts asynchronously with a callback.
+     *
+     * @param request  the clear scroll request
+     * @param listener the response listener
+     */
     @Override
     public void clearScroll(final ClearScrollRequest request, final ActionListener<ClearScrollResponse> listener) {
         client.clearScroll(request, listener);
     }
 
+    /**
+     * Gets the client settings.
+     *
+     * @return the client settings
+     */
     @Override
     public Settings settings() {
         return client.settings();
     }
 
+    /**
+     * Gets term vectors for a document asynchronously.
+     *
+     * @param request the term vectors request
+     * @return a future for the term vectors response
+     */
     @Override
     public ActionFuture<TermVectorsResponse> termVectors(final TermVectorsRequest request) {
         return client.termVectors(request);
     }
 
+    /**
+     * Gets term vectors for a document asynchronously with a callback.
+     *
+     * @param request  the term vectors request
+     * @param listener the response listener
+     */
     @Override
     public void termVectors(final TermVectorsRequest request, final ActionListener<TermVectorsResponse> listener) {
         client.termVectors(request, listener);
     }
 
+    /**
+     * Prepares a term vectors request builder.
+     *
+     * @return the term vectors request builder
+     */
     @Override
     public TermVectorsRequestBuilder prepareTermVectors() {
         return client.prepareTermVectors();
     }
 
+    /**
+     * Prepares a term vectors request builder for a specific document.
+     *
+     * @param index the index name
+     * @param id    the document ID
+     * @return the term vectors request builder
+     */
     @Override
     public TermVectorsRequestBuilder prepareTermVectors(final String index, final String id) {
         return client.prepareTermVectors(index, id);
     }
 
+    /**
+     * Gets term vectors for multiple documents asynchronously.
+     *
+     * @param request the multi-term vectors request
+     * @return a future for the multi-term vectors response
+     */
     @Override
     public ActionFuture<MultiTermVectorsResponse> multiTermVectors(final MultiTermVectorsRequest request) {
         return client.multiTermVectors(request);
     }
 
+    /**
+     * Gets term vectors for multiple documents asynchronously with a callback.
+     *
+     * @param request  the multi-term vectors request
+     * @param listener the response listener
+     */
     @Override
     public void multiTermVectors(final MultiTermVectorsRequest request, final ActionListener<MultiTermVectorsResponse> listener) {
         client.multiTermVectors(request, listener);
     }
 
+    /**
+     * Prepares a multi-term vectors request builder.
+     *
+     * @return the multi-term vectors request builder
+     */
     @Override
     public MultiTermVectorsRequestBuilder prepareMultiTermVectors() {
         return client.prepareMultiTermVectors();
     }
 
+    /**
+     * Sets the batch size for update operations.
+     *
+     * @param sizeForUpdate the batch size for updates
+     */
     public void setSizeForUpdate(final int sizeForUpdate) {
         this.sizeForUpdate = sizeForUpdate;
     }
 
+    /**
+     * Sets the scroll timeout for update operations.
+     *
+     * @param scrollForUpdate the scroll timeout string
+     */
     public void setScrollForUpdate(final String scrollForUpdate) {
         this.scrollForUpdate = scrollForUpdate;
     }
 
+    /**
+     * Sets the batch size for delete operations.
+     *
+     * @param sizeForDelete the batch size for deletes
+     */
     public void setSizeForDelete(final int sizeForDelete) {
         this.sizeForDelete = sizeForDelete;
     }
 
+    /**
+     * Sets the scroll timeout for delete operations.
+     *
+     * @param scrollForDelete the scroll timeout string
+     */
     public void setScrollForDelete(final String scrollForDelete) {
         this.scrollForDelete = scrollForDelete;
     }
 
+    /**
+     * Sets the scroll timeout for search operations.
+     *
+     * @param scrollForSearch the scroll timeout string
+     */
     public void setScrollForSearch(final String scrollForSearch) {
         this.scrollForSearch = scrollForSearch;
     }
 
+    /**
+     * Sets the maximum retry attempts for configuration synchronization status checks.
+     *
+     * @param maxConfigSyncStatusRetry the maximum retry attempts
+     */
     public void setMaxConfigSyncStatusRetry(final int maxConfigSyncStatusRetry) {
         this.maxConfigSyncStatusRetry = maxConfigSyncStatusRetry;
     }
 
+    /**
+     * Sets the maximum retry attempts for search engine status checks.
+     *
+     * @param maxEsStatusRetry the maximum retry attempts
+     */
     public void setMaxEsStatusRetry(final int maxEsStatusRetry) {
         this.maxEsStatusRetry = maxEsStatusRetry;
     }
 
+    /**
+     * Creates a client filtered with additional headers.
+     *
+     * @param headers the headers to add to requests
+     * @return the filtered client
+     */
     @Override
     public Client filterWithHeader(final Map<String, String> headers) {
         return client.filterWithHeader(headers);
     }
 
+    /**
+     * Executes an action asynchronously.
+     *
+     * @param <Request>  the request type
+     * @param <Response> the response type
+     * @param action     the action to execute
+     * @param request    the action request
+     * @return a future for the action response
+     */
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse> ActionFuture<Response> execute(
             final ActionType<Response> action, final Request request) {
         return client.execute(action, request);
     }
 
+    /**
+     * Executes an action asynchronously with a callback.
+     *
+     * @param <Request>  the request type
+     * @param <Response> the response type
+     * @param action     the action to execute
+     * @param request    the action request
+     * @param listener   the response listener
+     */
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse> void execute(final ActionType<Response> action,
             final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 
+    /**
+     * Prepares a field capabilities request builder.
+     *
+     * @param indices the indices to check field capabilities for
+     * @return the field capabilities request builder
+     */
     @Override
     public FieldCapabilitiesRequestBuilder prepareFieldCaps(final String... indices) {
         return client.prepareFieldCaps(indices);
     }
 
+    /**
+     * Gets field capabilities asynchronously.
+     *
+     * @param request the field capabilities request
+     * @return a future for the field capabilities response
+     */
     @Override
     public ActionFuture<FieldCapabilitiesResponse> fieldCaps(final FieldCapabilitiesRequest request) {
         return client.fieldCaps(request);
     }
 
+    /**
+     * Gets field capabilities asynchronously with a callback.
+     *
+     * @param request  the field capabilities request
+     * @param listener the response listener
+     */
     @Override
     public void fieldCaps(final FieldCapabilitiesRequest request, final ActionListener<FieldCapabilitiesResponse> listener) {
         client.fieldCaps(request, listener);
     }
 
+    /**
+     * Prepares a bulk request builder with a global index.
+     *
+     * @param globalIndex the global index for all operations
+     * @return the bulk request builder
+     */
     @Override
     public BulkRequestBuilder prepareBulk(final String globalIndex) {
         return client.prepareBulk(globalIndex);
     }
 
+    /**
+     * Creates a point-in-time context asynchronously.
+     *
+     * @param createPITRequest the create PIT request
+     * @param listener         the response listener
+     */
     @Override
     public void createPit(final CreatePitRequest createPITRequest, final ActionListener<CreatePitResponse> listener) {
         client.createPit(createPITRequest, listener);
     }
 
+    /**
+     * Deletes point-in-time contexts asynchronously.
+     *
+     * @param deletePITRequest the delete PITs request
+     * @param listener         the response listener
+     */
     @Override
     public void deletePits(final DeletePitRequest deletePITRequest, final ActionListener<DeletePitResponse> listener) {
         client.deletePits(deletePITRequest, listener);
     }
 
+    /**
+     * Gets all point-in-time contexts asynchronously.
+     *
+     * @param getAllPitNodesRequest the get all PITs request
+     * @param listener              the response listener
+     */
     @Override
     public void getAllPits(final GetAllPitNodesRequest getAllPitNodesRequest, final ActionListener<GetAllPitNodesResponse> listener) {
         client.getAllPits(getAllPitNodesRequest, listener);
     }
 
+    /**
+     * Gets point-in-time segments information asynchronously.
+     *
+     * @param pitSegmentsRequest the PIT segments request
+     * @param listener           the response listener
+     */
     @Override
     public void pitSegments(final PitSegmentsRequest pitSegmentsRequest, final ActionListener<IndicesSegmentResponse> listener) {
         client.pitSegments(pitSegmentsRequest, listener);
     }
 
+    /**
+     * Searches a view asynchronously (not implemented).
+     *
+     * @param request  the search view request
+     * @param listener the response listener
+     * @throws UnsupportedOperationException always thrown as this operation is not implemented
+     */
     @Override
     public void searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request,
             ActionListener<SearchResponse> listener) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Searches a view asynchronously (not implemented).
+     *
+     * @param request the search view request
+     * @return never returns as this operation is not implemented
+     * @throws UnsupportedOperationException always thrown as this operation is not implemented
+     */
     @Override
     public ActionFuture<SearchResponse> searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Lists view names asynchronously (not implemented).
+     *
+     * @param request  the list view names request
+     * @param listener the response listener
+     * @throws UnsupportedOperationException always thrown as this operation is not implemented
+     */
     @Override
     public void listViewNames(org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request,
             ActionListener<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listener) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Lists view names asynchronously (not implemented).
+     *
+     * @param request the list view names request
+     * @return never returns as this operation is not implemented
+     * @throws UnsupportedOperationException always thrown as this operation is not implemented
+     */
     @Override
     public ActionFuture<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listViewNames(
             org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {

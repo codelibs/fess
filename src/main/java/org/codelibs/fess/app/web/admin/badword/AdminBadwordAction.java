@@ -52,10 +52,21 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * Admin action for Bad Word management.
+ *
  */
 public class AdminBadwordAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminBadwordAction() {
+        super();
+    }
+
+    /**
+     * The role for this action.
+     */
     public static final String ROLE = "admin-badword";
 
     private static final Logger logger = LogManager.getLogger(AdminBadwordAction.class);
@@ -67,6 +78,10 @@ public class AdminBadwordAction extends FessAdminAction {
     private BadWordService badWordService;
     @Resource
     private BadWordPager badWordPager;
+
+    /**
+     * The suggest helper.
+     */
     @Resource
     protected SuggestHelper suggestHelper;
 
@@ -87,12 +102,22 @@ public class AdminBadwordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -106,6 +131,11 @@ public class AdminBadwordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search the bad words.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -115,6 +145,11 @@ public class AdminBadwordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -124,6 +159,11 @@ public class AdminBadwordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "badWordItems", badWordService.getBadWordList(badWordPager)); // page navi
 
@@ -137,6 +177,10 @@ public class AdminBadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -149,6 +193,11 @@ public class AdminBadwordAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -172,6 +221,12 @@ public class AdminBadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param crudMode The CRUD mode.
+     * @param id The ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -194,6 +249,10 @@ public class AdminBadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Show the download page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage() {
@@ -201,6 +260,11 @@ public class AdminBadwordAction extends FessAdminAction {
         return asDownloadHtml();
     }
 
+    /**
+     * Download the bad words.
+     * @param form The download form.
+     * @return The action response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -227,6 +291,10 @@ public class AdminBadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Show the upload page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage() {
@@ -237,6 +305,11 @@ public class AdminBadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a bad word.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -259,6 +332,11 @@ public class AdminBadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Update a bad word.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -281,6 +359,11 @@ public class AdminBadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Delete a bad word.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -304,6 +387,11 @@ public class AdminBadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Upload the bad words.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -343,6 +431,11 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Get the bad word.
+     * @param form The create form.
+     * @return The bad word.
+     */
     public static OptionalEntity<BadWord> getBadWord(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -358,6 +451,11 @@ public class AdminBadwordAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

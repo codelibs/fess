@@ -18,10 +18,19 @@ package org.codelibs.fess.app.web.admin.dict.protwords;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author ma2tani
+ * The search form for Protected Words.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The dictionary ID field for protected words dictionary operations.
+     */
     @Required
     public String dictId;
 }

@@ -33,17 +33,41 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing roles.
+ */
 public class RoleService {
 
+    /**
+     * The behavior for roles.
+     */
     @Resource
     protected RoleBhv roleBhv;
 
+    /**
+     * The Fess configuration.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * The behavior for users.
+     */
     @Resource
     protected UserBhv userBhv;
 
+    /**
+     * Constructor.
+     */
+    public RoleService() {
+        super();
+    }
+
+    /**
+     * Gets a list of roles based on the pager.
+     * @param rolePager The pager for roles.
+     * @return A list of roles.
+     */
     public List<Role> getRoleList(final RolePager rolePager) {
 
         final PagingResultBean<Role> roleList = roleBhv.selectPage(cb -> {
@@ -60,10 +84,19 @@ public class RoleService {
         return roleList;
     }
 
+    /**
+     * Gets a role by its ID.
+     * @param id The ID of the role.
+     * @return An optional entity of the role.
+     */
     public OptionalEntity<Role> getRole(final String id) {
         return roleBhv.selectByPK(id);
     }
 
+    /**
+     * Stores a role.
+     * @param role The role to store.
+     */
     public void store(final Role role) {
         ComponentUtil.getLdapManager().insert(role);
 
@@ -73,6 +106,10 @@ public class RoleService {
 
     }
 
+    /**
+     * Deletes a role.
+     * @param role The role to delete.
+     */
     public void delete(final Role role) {
         ComponentUtil.getLdapManager().delete(role);
 
@@ -87,6 +124,11 @@ public class RoleService {
         });
     }
 
+    /**
+     * Sets up the list condition for the role query.
+     * @param cb The role condition bean.
+     * @param rolePager The role pager.
+     */
     protected void setupListCondition(final RoleCB cb, final RolePager rolePager) {
         if (rolePager.id != null) {
             cb.query().docMeta().setId_Equal(rolePager.id);
@@ -100,6 +142,10 @@ public class RoleService {
 
     }
 
+    /**
+     * Gets a list of available roles.
+     * @return A list of available roles.
+     */
     public List<Role> getAvailableRoleList() {
         return roleBhv.selectList(cb -> {
             cb.query().matchAll();

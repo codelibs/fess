@@ -15,18 +15,39 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when an error occurs during job processing.
+ * This exception is used to indicate problems that arise during
+ * the execution or processing of jobs in the system.
+ */
 public class JobProcessingException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new JobProcessingException with the specified cause.
+     *
+     * @param e the cause of the exception
+     */
     public JobProcessingException(final Throwable e) {
         super(e);
     }
 
+    /**
+     * Constructs a new JobProcessingException with the specified detail message and cause.
+     *
+     * @param message the detail message explaining the exception
+     * @param e the cause of the exception
+     */
     public JobProcessingException(final String message, final Throwable e) {
         super(message, e);
     }
 
+    /**
+     * Constructs a new JobProcessingException with the specified detail message.
+     *
+     * @param message the detail message explaining the exception
+     */
     public JobProcessingException(final String message) {
         super(message);
     }

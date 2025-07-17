@@ -28,15 +28,25 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * Admin action for Dictionary management.
+ *
  */
 public class AdminDictAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictAction() {
+        super();
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** The dictionary manager. */
     @Resource
     protected DictionaryManager dictionaryManager;
 
@@ -57,6 +67,10 @@ public class AdminDictAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {

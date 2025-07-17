@@ -15,10 +15,19 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when an unsupported search operation is requested.
+ * This exception indicates that the requested search functionality is not available or supported.
+ */
 public class UnsupportedSearchException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new UnsupportedSearchException with the specified message.
+     *
+     * @param msg the exception message
+     */
     public UnsupportedSearchException(final String msg) {
         super(msg);
     }

@@ -73,6 +73,13 @@ import jakarta.annotation.PostConstruct;
 public class SearchLogHelper {
     private static final Logger logger = LogManager.getLogger(SearchLogHelper.class);
 
+    /**
+     * Default constructor for SearchLogHelper.
+     */
+    public SearchLogHelper() {
+        // Default constructor
+    }
+
     /** Interval for checking user information in milliseconds (default: 10 minutes). */
     protected long userCheckInterval = 10 * 60 * 1000L; // 10 min
 

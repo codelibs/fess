@@ -40,17 +40,35 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin web authentication management.
+ *
  */
 public class ApiAdminWebauthAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminWebauthAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminWebauthAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    /** The web authentication service for managing web authentication settings. */
     @Resource
     private WebAuthenticationService webAuthService;
+    /** The web config service for validating web configuration references. */
     @Resource
     private WebConfigService webConfigService;
 
@@ -58,6 +76,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves web authentication settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing web authentication settings list
+     */
     // GET /api/admin/webauth/settings
     // PUT /api/admin/webauth/settings
     @Execute
@@ -70,6 +94,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific web authentication setting by ID.
+     *
+     * @param id the ID of the web authentication setting to retrieve
+     * @return JSON response containing the web authentication setting
+     */
     // GET /api/admin/webauth/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -79,6 +109,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new web authentication setting.
+     *
+     * @param body the web authentication data to create
+     * @return JSON response containing the created web authentication setting ID
+     */
     // POST /api/admin/webauth/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -104,6 +140,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webAuth.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing web authentication setting.
+     *
+     * @param body the web authentication data to update
+     * @return JSON response containing the updated web authentication setting ID
+     */
     // PUT /api/admin/webauth/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -124,6 +166,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webAuth.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a web authentication setting by ID.
+     *
+     * @param id the ID of the web authentication setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/webauth/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -141,6 +189,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a WebAuthentication entity.
+     *
+     * @param entity the web authentication entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final WebAuthentication entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {
@@ -149,6 +203,12 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         return body;
     }
 
+    /**
+     * Validates if the given web configuration ID exists.
+     *
+     * @param webconfigId the web configuration ID to validate
+     * @return true if the web configuration exists, false otherwise
+     */
     protected Boolean isValidWebConfigId(final String webconfigId) {
         return webConfigService.getWebConfig(webconfigId).isPresent();
     }

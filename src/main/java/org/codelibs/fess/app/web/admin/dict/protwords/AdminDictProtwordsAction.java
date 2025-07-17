@@ -47,10 +47,19 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
- * @author ma2tani
+ * Admin action for Protected Words management.
+ *
  */
 public class AdminDictProtwordsAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDictProtwordsAction() {
+        super();
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictProtwordsAction.class);
@@ -80,6 +89,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -90,6 +104,12 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -104,6 +124,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search the protected words.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -114,6 +139,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -124,6 +154,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "protwordsItemItems", protwordsService.getProtwordsList(form.dictId, protwordsPager));
@@ -140,6 +175,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Show the create new page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -153,6 +193,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -176,6 +221,13 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param dictId The dictionary ID.
+     * @param crudMode The CRUD mode.
+     * @param id The ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -199,6 +251,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Show the download page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -216,6 +273,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Download the protected words.
+     * @param form The download form.
+     * @return The action response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -234,6 +296,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Show the upload page.
+     * @param dictId The dictionary ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -251,6 +318,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Upload the protected words.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -276,6 +348,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Create a protected word item.
+     * @param form The create form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -289,6 +366,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Update a protected word item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -303,6 +385,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Delete a protected word item.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -338,6 +425,12 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Get the protected word item.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return The protected word item.
+     */
     protected OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
         try {
             return createProtwordsItem(this, form, hook);
@@ -347,6 +440,13 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Get the protected word item.
+     * @param action The action.
+     * @param form The create form.
+     * @param hook The error hook.
+     * @return The protected word item.
+     */
     public static OptionalEntity<ProtwordsItem> createProtwordsItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
@@ -360,6 +460,12 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     * @param dictId The dictionary ID.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -368,6 +474,13 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Validate the protected word string.
+     * @param action The action.
+     * @param values The values.
+     * @param propertyName The property name.
+     * @param hook The error hook.
+     */
     private static void validateProtwordsString(final FessBaseAction action, final String values, final String propertyName,
             final VaErrorHook hook) {
         // TODO validation
@@ -377,6 +490,10 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Get the HTML response for the dictionary index page.
+     * @return The HTML response.
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }

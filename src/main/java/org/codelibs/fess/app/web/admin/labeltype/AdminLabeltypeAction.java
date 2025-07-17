@@ -46,35 +46,58 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
+ * Admin action for Label Type management.
+ *
  */
 public class AdminLabeltypeAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminLabeltypeAction() {
+        super();
+    }
+
+    /** The role name for label type administration. */
     public static final String ROLE = "admin-labeltype";
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(AdminLabeltypeAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for label type operations. */
     @Resource
     private LabelTypeService labelTypeService;
+
+    /** Pager for label type list pagination. */
     @Resource
     private LabelTypePager labelTypePager;
+
+    /** Service for role type operations. */
     @Resource
     private RoleTypeService roleTypeService;
 
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Sets up HTML data for rendering, including help link.
+     *
+     * @param runtime the action runtime
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameLabeltype()));
     }
 
+    /**
+     * Returns the action role for this admin action.
+     *
+     * @return the role name
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
@@ -83,12 +106,25 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the label type list page.
+     *
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays the label type list with pagination.
+     *
+     * @param pageNumber the page number
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -102,6 +138,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches label types based on the form criteria.
+     *
+     * @param form the search form
+     * @return HTML response for the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -111,6 +153,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays the default list.
+     *
+     * @param form the search form
+     * @return HTML response for the reset list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -120,6 +168,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up data for search result pagination.
+     *
+     * @param data the render data
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
@@ -133,6 +187,11 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the create new label type page.
+     *
+     * @return HTML response for the create page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -147,6 +206,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the edit label type page.
+     *
+     * @param form the edit form
+     * @return HTML response for the edit page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -176,6 +241,13 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the label type details page.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the label type ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -204,6 +276,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new label type.
+     *
+     * @param form the create form
+     * @return HTML response after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -225,6 +303,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing label type.
+     *
+     * @param form the edit form
+     * @return HTML response after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -246,6 +330,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a label type.
+     *
+     * @param form the edit form
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -272,6 +362,14 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
+    /**
+     * Gets a label type entity based on the form and current user info.
+     *
+     * @param form the create form
+     * @param username the current username
+     * @param currentTime the current time
+     * @return optional label type entity
+     */
     public static OptionalEntity<LabelType> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -291,6 +389,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Gets a label type entity from the form with system info.
+     *
+     * @param form the create form
+     * @return optional label type entity
+     */
     public static OptionalEntity<LabelType> getLabelType(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -307,6 +411,11 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers role type items for the dropdown list.
+     *
+     * @param data the render data
+     */
     protected void registerRoleTypeItems(final RenderData data) {
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
     }
@@ -314,6 +423,12 @@ public class AdminLabeltypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -326,6 +441,11 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Returns HTML response for the list page.
+     *
+     * @return HTML response for the list page
+     */
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
@@ -336,12 +456,22 @@ public class AdminLabeltypeAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the edit page.
+     *
+     * @return HTML response for the edit page
+     */
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminLabeltype_AdminLabeltypeEditJsp).renderWith(data -> {
             registerRoleTypeItems(data);
         });
     }
 
+    /**
+     * Returns HTML response for the details page.
+     *
+     * @return HTML response for the details page
+     */
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).renderWith(data -> {
             registerRoleTypeItems(data);

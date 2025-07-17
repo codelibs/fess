@@ -30,11 +30,32 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Utility class for document data manipulation and type conversion.
+ * This class provides static methods for extracting typed values from document maps,
+ * URL encoding, and other document-related operations. It's designed as a final
+ * utility class with only static methods.
+ *
+ */
 public final class DocumentUtil {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private DocumentUtil() {
+        // Utility class - no instantiation
     }
 
+    /**
+     * Gets a typed value from a document map with a default value.
+     *
+     * @param <T> the type to convert the value to
+     * @param doc the document map to extract the value from
+     * @param key the key to look up in the document map
+     * @param clazz the class type to convert the value to
+     * @param defaultValue the default value to return if the key is not found or conversion fails
+     * @return the converted value or the default value if not found
+     */
     public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz, final T defaultValue) {
         final T value = getValue(doc, key, clazz);
         if (value == null) {
@@ -43,6 +64,17 @@ public final class DocumentUtil {
         return value;
     }
 
+    /**
+     * Gets a typed value from a document map.
+     * Supports conversion to String, Date, Long, Integer, Double, Float, Boolean,
+     * List, and String array types. Handles both single values and arrays/lists.
+     *
+     * @param <T> the type to convert the value to
+     * @param doc the document map to extract the value from
+     * @param key the key to look up in the document map
+     * @param clazz the class type to convert the value to
+     * @return the converted value or null if not found or conversion fails
+     */
     @SuppressWarnings("unchecked")
     public static <T> T getValue(final Map<String, Object> doc, final String key, final Class<T> clazz) {
         if (doc == null || key == null) {
@@ -88,6 +120,15 @@ public final class DocumentUtil {
         return convertObj(value, clazz);
     }
 
+    /**
+     * Converts an object to the specified type.
+     * Supports conversion to String, Date, Long, Integer, Double, Float, and Boolean types.
+     *
+     * @param <T> the type to convert the value to
+     * @param value the value to convert
+     * @param clazz the target class type
+     * @return the converted value or null if conversion is not supported
+     */
     @SuppressWarnings("unchecked")
     private static <T> T convertObj(final Object value, final Class<T> clazz) {
         if (value == null) {
@@ -136,6 +177,14 @@ public final class DocumentUtil {
         return null;
     }
 
+    /**
+     * Encodes a URL by encoding non-URL-safe characters.
+     * Uses the request's character encoding if available, otherwise defaults to UTF-8.
+     * Only encodes characters that are not considered URL-safe according to CharUtil.
+     *
+     * @param url the URL to encode
+     * @return the encoded URL with non-URL-safe characters properly encoded
+     */
     public static String encodeUrl(final String url) {
         final String enc = LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null)
                 .map(HttpServletRequest::getCharacterEncoding).orElse(Constants.UTF_8);

@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.role;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for role administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Role ID */
     public String id;
 }

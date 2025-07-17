@@ -21,20 +21,49 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
+ * Form class for editing related content configurations in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing related content entries,
+ * including tracking information for optimistic locking and audit trails.
+ * Related content configurations define relationships between documents for enhanced search results.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the related content configuration being edited.
+     * This is a required field for identifying which related content entry to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this related content configuration.
+     * Used for audit trail purposes to track who made changes.
+     */
     @Size(max = 1000)
     public String updatedBy;
 
+    /**
+     * The timestamp when this related content configuration was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the related content configuration for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the configuration hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

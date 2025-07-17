@@ -26,19 +26,39 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * A thread that reads from an input stream line by line and maintains a buffer of recent lines.
+ * This class provides functionality to read input stream data asynchronously,
+ * optionally process each line with a callback function, and maintain a circular buffer
+ * of recent lines for retrieval.
+ */
 public class InputStreamThread extends Thread {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(InputStreamThread.class);
 
+    /** Buffered reader for reading from the input stream */
     private final BufferedReader br;
 
+    /** Maximum buffer size constant */
     public static final int MAX_BUFFER_SIZE = 1000;
 
+    /** List storing recent lines from the input stream */
     private final List<String> list = new LinkedList<>();
 
+    /** Maximum number of lines to keep in the buffer */
     private final int bufferSize;
 
+    /** Callback function to process each line as it's read */
     private final Consumer<String> outputCallback;
 
+    /**
+     * Creates a new input stream thread.
+     *
+     * @param is the input stream to read from
+     * @param charset the character encoding to use for reading
+     * @param bufferSize the maximum number of lines to keep in the buffer (0 to disable buffering)
+     * @param outputCallback optional callback function to process each line (can be null)
+     */
     public InputStreamThread(final InputStream is, final Charset charset, final int bufferSize, final Consumer<String> outputCallback) {
         super("InputStreamThread");
         this.bufferSize = bufferSize;
@@ -47,6 +67,11 @@ public class InputStreamThread extends Thread {
         br = new BufferedReader(new InputStreamReader(is, charset));
     }
 
+    /**
+     * Runs the thread to continuously read lines from the input stream.
+     * Each line is processed by the output callback (if provided) and added to the buffer.
+     * The buffer is maintained as a circular buffer with the specified size.
+     */
     @Override
     public void run() {
         boolean running = true;
@@ -78,6 +103,11 @@ public class InputStreamThread extends Thread {
         }
     }
 
+    /**
+     * Returns all buffered lines as a single string, separated by newlines.
+     *
+     * @return the concatenated output of all buffered lines
+     */
     public String getOutput() {
         final StringBuilder buf = new StringBuilder(100);
         for (final String value : list) {
@@ -86,6 +116,12 @@ public class InputStreamThread extends Thread {
         return buf.toString();
     }
 
+    /**
+     * Checks if the buffer contains a line that matches the specified value (after trimming).
+     *
+     * @param value the value to search for in the buffered lines
+     * @return true if a matching line is found, false otherwise
+     */
     public boolean contains(final String value) {
         for (final String line : list) {
             if (line.trim().equals(value)) {

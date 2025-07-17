@@ -158,7 +158,12 @@
 					<locale>en_US</locale>
 					<windowtitle>Open Source Enterprise Search: Fess API</windowtitle>
 					<header>&lt;a href="https://fess.codelibs.org/" target="_blank"&gt;Enterprise Search Server: Fess&lt;/a&gt;</header>
-					<doclint>none</doclint>
+					<excludePackageNames>
+						org.codelibs.fess.mylasta.*,
+						org.codelibs.fess.opensearch.config.*,
+						org.codelibs.fess.opensearch.common.*,
+						org.codelibs.fess.opensearch.log.*,
+						org.codelibs.fess.opensearch.user.*</excludePackageNames>
 				</configuration>
 			</plugin>
 			<plugin>

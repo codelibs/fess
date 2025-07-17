@@ -22,25 +22,40 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Form class for creating new stemmer override dictionary entries.
+ * This form handles the creation of stemmer override rules that modify
+ * the stemming behavior for specific words.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /** The dictionary ID to which this stemmer override entry belongs */
     @Required
     public String dictId;
 
+    /** The CRUD operation mode for form processing */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** The input word that should be stemmed differently */
     @Required
     @Size(max = 1000)
     public String input;
 
+    /** The desired stem output for the input word */
     @Required
     @Size(max = 1000)
     public String output;
 
+    /**
+     * Initializes the form with default values for creating a new stemmer override entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

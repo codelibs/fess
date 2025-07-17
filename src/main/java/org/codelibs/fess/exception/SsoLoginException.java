@@ -15,14 +15,33 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when SSO (Single Sign-On) login operations fail.
+ *
+ * This exception is used to indicate various SSO authentication failures
+ * including configuration errors, authentication token validation failures,
+ * communication issues with SSO providers, and other SSO-related problems.
+ */
 public class SsoLoginException extends FessSystemException {
 
+    /** Serial version UID for serialization compatibility. */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new SsoLoginException with the specified detail message.
+     *
+     * @param message The detail message explaining the SSO login failure
+     */
     public SsoLoginException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new SsoLoginException with the specified detail message and cause.
+     *
+     * @param message The detail message explaining the SSO login failure
+     * @param e The underlying exception that caused this SSO login failure
+     */
     public SsoLoginException(final String message, final Exception e) {
         super(message, e);
     }

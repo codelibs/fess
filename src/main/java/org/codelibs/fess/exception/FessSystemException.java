@@ -15,22 +15,51 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * System exception class for the Fess search engine.
+ * This exception is thrown when system-level errors occur in the Fess application,
+ * such as configuration errors, initialization failures, or critical runtime issues.
+ */
 public class FessSystemException extends RuntimeException {
 
+    /** Serial version UID for serialization compatibility */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new FessSystemException with the specified detail message and cause.
+     *
+     * @param message the detail message describing the exception
+     * @param cause the cause of this exception
+     */
     public FessSystemException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new FessSystemException with the specified detail message.
+     *
+     * @param message the detail message describing the exception
+     */
     public FessSystemException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new FessSystemException with the specified cause.
+     *
+     * @param cause the cause of this exception
+     */
     public FessSystemException(final Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new FessSystemException with the specified detail message and suppression settings.
+     *
+     * @param message the detail message describing the exception
+     * @param enableSuppression whether suppression is enabled or disabled
+     * @param writableStackTrace whether the stack trace should be writable
+     */
     protected FessSystemException(final String message, final boolean enableSuppression, final boolean writableStackTrace) {
         super(message, null, enableSuppression, writableStackTrace);
     }

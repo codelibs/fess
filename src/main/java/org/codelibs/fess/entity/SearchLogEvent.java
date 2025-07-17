@@ -17,12 +17,39 @@ package org.codelibs.fess.entity;
 
 import java.util.Map;
 
+/**
+ * Interface for search log events in the Fess search system.
+ *
+ * This interface defines the contract for search log event objects that can be
+ * written to log files or stored in the search index. Implementations include
+ * search logs, click logs, favorite logs, and user information logs.
+ */
 public interface SearchLogEvent {
+    /**
+     * Gets the unique identifier for this search log event.
+     *
+     * @return The event ID
+     */
     String getId();
 
+    /**
+     * Gets the version number for this search log event.
+     *
+     * @return The version number, or null if not versioned
+     */
     Long getVersionNo();
 
+    /**
+     * Converts this search log event to a source map for indexing or logging.
+     *
+     * @return Map representation of the event data
+     */
     Map<String, Object> toSource();
 
+    /**
+     * Gets the type of this search log event.
+     *
+     * @return The event type (e.g., "search", "click", "favorite", "user_info")
+     */
     String getEventType();
 }

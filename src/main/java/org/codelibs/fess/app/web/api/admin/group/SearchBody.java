@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.group;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for group administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Group ID */
     public String id;
 }

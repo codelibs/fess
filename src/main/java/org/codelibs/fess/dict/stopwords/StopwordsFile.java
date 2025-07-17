@@ -39,11 +39,28 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * Manages a dictionary file for stopwords.
+ * This class handles reading, parsing, and updating files that contain
+ * a list of stopwords. Each line in the file represents a single stopword.
+ *
+ * The class provides methods for retrieving, adding, updating, and
+ * deleting stopword items, as well as reloading the dictionary
+ * from its source file.
+ */
 public class StopwordsFile extends DictionaryFile<StopwordsItem> {
     private static final String STOPWORDS = "stopwords";
 
+    /** The list of stopword items loaded from the dictionary file. */
     List<StopwordsItem> stopwordsItemList;
 
+    /**
+     * Constructs a new stopwords file.
+     *
+     * @param id        The unique identifier for this dictionary file.
+     * @param path      The path to the dictionary file.
+     * @param timestamp The last modified timestamp of the file.
+     */
     public StopwordsFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
@@ -92,28 +109,34 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
 
     @Override
     public synchronized void insert(final StopwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        try (StopwordsUpdater updater = new StopwordsUpdater(item)) {
             reload(updater);
         }
     }
 
     @Override
     public synchronized void update(final StopwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        try (StopwordsUpdater updater = new StopwordsUpdater(item)) {
             reload(updater);
         }
     }
 
     @Override
     public synchronized void delete(final StopwordsItem item) {
-        final StopwordsItem StopwordsItem = item;
-        StopwordsItem.setNewInput(StringUtil.EMPTY);
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+        final StopwordsItem stopwordsItem = item;
+        stopwordsItem.setNewInput(StringUtil.EMPTY);
+        try (StopwordsUpdater updater = new StopwordsUpdater(item)) {
             reload(updater);
         }
     }
 
-    protected void reload(final SynonymUpdater updater) {
+    /**
+     * Reloads the stopwords dictionary from its source file.
+     *
+     * @param updater An optional updater to apply changes during reload.
+     * @throws DictionaryException if the dictionary file cannot be read.
+     */
+    protected void reload(final StopwordsUpdater updater) {
         try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
             reload(updater, curlResponse.getContentAsStream());
         } catch (final IOException e) {
@@ -121,7 +144,14 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
         }
     }
 
-    protected void reload(final SynonymUpdater updater, final InputStream in) {
+    /**
+     * Reloads the stopwords dictionary from an input stream.
+     *
+     * @param updater An optional updater to apply changes.
+     * @param in      The input stream to read the dictionary from.
+     * @throws DictionaryException if the input stream cannot be parsed.
+     */
+    protected void reload(final StopwordsUpdater updater, final InputStream in) {
         final List<StopwordsItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
@@ -181,32 +211,58 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
         return s;
     }
 
+    /**
+     * Returns the simple name of the dictionary file.
+     *
+     * @return The file name without the path.
+     */
     public String getSimpleName() {
         return new File(path).getName();
     }
 
+    /**
+     * Updates the dictionary file with content from an input stream.
+     *
+     * @param in The input stream containing the new dictionary content.
+     * @throws IOException if an I/O error occurs.
+     */
     public synchronized void update(final InputStream in) throws IOException {
-        try (SynonymUpdater updater = new SynonymUpdater(null)) {
+        try (StopwordsUpdater updater = new StopwordsUpdater(null)) {
             reload(updater, in);
         }
     }
 
     @Override
     public String toString() {
-        return "SynonymFile [path=" + path + ", stopwordsItemList=" + stopwordsItemList + ", id=" + id + "]";
+        return "StopwordsFile [path=" + path + ", stopwordsItemList=" + stopwordsItemList + ", id=" + id + "]";
     }
 
-    protected class SynonymUpdater implements Closeable {
+    /**
+     * An inner class for updating the stopwords file.
+     * This class handles the process of writing changes to a temporary file
+     * and then replacing the original file upon successful commit.
+     */
+    protected class StopwordsUpdater implements Closeable {
 
+        /** A flag indicating whether the changes have been committed. */
         protected boolean isCommit = false;
 
+        /** The temporary file to write changes to. */
         protected File newFile;
 
+        /** The writer for the temporary file. */
         protected Writer writer;
 
+        /** The stopword item being added or updated. */
         protected StopwordsItem item;
 
-        protected SynonymUpdater(final StopwordsItem newItem) {
+        /**
+         * Constructs a new updater for a stopword item.
+         *
+         * @param newItem The item to be added or updated.
+         * @throws DictionaryException if the temporary file cannot be created.
+         */
+        protected StopwordsUpdater(final StopwordsItem newItem) {
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(STOPWORDS, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
@@ -219,6 +275,14 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
             item = newItem;
         }
 
+        /**
+         * Writes a stopword item to the temporary file.
+         * If the item is being updated, it writes the new version.
+         *
+         * @param oldItem The original item from the dictionary.
+         * @return The written item, or null if the item was deleted.
+         * @throws DictionaryException if the file was updated concurrently.
+         */
         public StopwordsItem write(final StopwordsItem oldItem) {
             try {
                 if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
@@ -245,6 +309,12 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
             }
         }
 
+        /**
+         * Writes a raw line to the temporary file.
+         *
+         * @param line The line to write.
+         * @throws DictionaryException if an I/O error occurs.
+         */
         public void write(final String line) {
             try {
                 writer.write(line);
@@ -254,6 +324,13 @@ public class StopwordsFile extends DictionaryFile<StopwordsItem> {
             }
         }
 
+        /**
+         * Commits the changes to the dictionary file.
+         * If there is a pending new item, it is written to the file.
+         *
+         * @return The committed item, or null if no item was committed.
+         * @throws DictionaryException if an I/O error occurs.
+         */
         public StopwordsItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {

@@ -15,6 +15,21 @@
  */
 package org.codelibs.fess.app.web.admin.wizard;
 
+/**
+ * Form class for starting crawling operations in the admin wizard.
+ *
+ * This form is used to collect user input and parameters needed to initiate
+ * crawling operations through the administrative interface wizard workflow.
+ * It serves as a data transfer object between the web layer and the crawling
+ * service components.
+ */
 public class StartCrawlingForm {
+
+    /**
+     * Default constructor.
+     */
+    public StartCrawlingForm() {
+        // Default constructor
+    }
 
 }

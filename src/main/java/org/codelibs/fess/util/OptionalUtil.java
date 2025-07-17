@@ -17,8 +17,25 @@ package org.codelibs.fess.util;
 
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * Utility class for Optional operations.
+ */
 public class OptionalUtil {
 
+    /**
+     * Default constructor.
+     */
+    private OptionalUtil() {
+        // Default constructor
+    }
+
+    /**
+     * Creates an OptionalEntity from a nullable entity.
+     *
+     * @param <T> the type of the entity
+     * @param entity the entity (can be null)
+     * @return the OptionalEntity
+     */
     public static <T> OptionalEntity<T> ofNullable(final T entity) {
         return OptionalEntity.ofNullable(entity, () -> {});
     }

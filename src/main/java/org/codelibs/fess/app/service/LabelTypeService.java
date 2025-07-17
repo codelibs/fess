@@ -32,14 +32,32 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for label types.
+ */
 public class LabelTypeService extends FessAppService {
 
+    /** The LabelType behavior. */
     @Resource
     protected LabelTypeBhv labelTypeBhv;
 
+    /** The Fess config. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Default constructor.
+     */
+    public LabelTypeService() {
+        super();
+    }
+
+    /**
+     * Get a list of label types.
+     *
+     * @param labelTypePager The pager for label types.
+     * @return A list of label types.
+     */
     public List<LabelType> getLabelTypeList(final LabelTypePager labelTypePager) {
 
         final PagingResultBean<LabelType> labelTypeList = labelTypeBhv.selectPage(cb -> {
@@ -56,6 +74,11 @@ public class LabelTypeService extends FessAppService {
         return labelTypeList;
     }
 
+    /**
+     * Delete a label type.
+     *
+     * @param labelType The label type to delete.
+     */
     public void delete(final LabelType labelType) {
 
         labelTypeBhv.delete(labelType, op -> {
@@ -68,6 +91,12 @@ public class LabelTypeService extends FessAppService {
         }
     }
 
+    /**
+     * Set up list conditions.
+     *
+     * @param cb The condition bean.
+     * @param labelTypePager The pager for label types.
+     */
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
         if (StringUtil.isNotBlank(labelTypePager.name)) {
             cb.query().setName_Wildcard(wrapQuery(labelTypePager.name));
@@ -84,6 +113,11 @@ public class LabelTypeService extends FessAppService {
 
     }
 
+    /**
+     * Get a list of all label types.
+     *
+     * @return A list of all label types.
+     */
     public List<LabelType> getLabelTypeList() {
         return labelTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
@@ -92,6 +126,11 @@ public class LabelTypeService extends FessAppService {
         });
     }
 
+    /**
+     * Store a label type.
+     *
+     * @param labelType The label type to store.
+     */
     public void store(final LabelType labelType) {
         labelTypeBhv.insertOrUpdate(labelType, op -> {
             op.setRefreshPolicy(Constants.TRUE);
@@ -103,6 +142,12 @@ public class LabelTypeService extends FessAppService {
         }
     }
 
+    /**
+     * Get a label type.
+     *
+     * @param id The ID of the label type.
+     * @return An optional entity of the label type.
+     */
     public OptionalEntity<LabelType> getLabelType(final String id) {
         return labelTypeBhv.selectByPK(id);
     }

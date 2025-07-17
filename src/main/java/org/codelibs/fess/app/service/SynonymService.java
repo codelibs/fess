@@ -30,13 +30,34 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service for managing synonyms.
+ * This class provides methods to interact with synonym dictionaries,
+ * including retrieving, storing, and deleting synonyms.
+ */
 public class SynonymService {
+    /** The dictionary manager for accessing dictionary files. */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /** The Fess configuration for accessing system settings. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Constructs a new synonym service.
+     */
+    public SynonymService() {
+        // do nothing
+    }
+
+    /**
+     * Retrieves a list of synonyms for a given dictionary and pager.
+     *
+     * @param dictId       The ID of the dictionary.
+     * @param synonymPager The pager for controlling pagination.
+     * @return A list of synonyms.
+     */
     public List<SynonymItem> getSynonymList(final String dictId, final SynonymPager synonymPager) {
         return getSynonymFile(dictId).map(file -> {
             final int pageSize = synonymPager.getPageSize();
@@ -51,15 +72,34 @@ public class SynonymService {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Retrieves a synonym file for a given dictionary ID.
+     *
+     * @param dictId The ID of the dictionary.
+     * @return An optional entity containing the synonym file, or empty if not found.
+     */
     public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(SynonymFile.class::isInstance)
                 .map(file -> OptionalEntity.of((SynonymFile) file)).orElse(OptionalEntity.empty());
     }
 
+    /**
+     * Retrieves a specific synonym item by its ID.
+     *
+     * @param dictId The ID of the dictionary.
+     * @param id     The ID of the synonym item.
+     * @return An optional entity containing the synonym item, or empty if not found.
+     */
     public OptionalEntity<SynonymItem> getSynonymItem(final String dictId, final long id) {
         return getSynonymFile(dictId).map(file -> file.get(id).get());
     }
 
+    /**
+     * Stores a synonym item in the specified dictionary.
+     *
+     * @param dictId      The ID of the dictionary.
+     * @param synonymItem The synonym item to store.
+     */
     public void store(final String dictId, final SynonymItem synonymItem) {
         getSynonymFile(dictId).ifPresent(file -> {
             if (synonymItem.getId() == 0) {
@@ -70,6 +110,12 @@ public class SynonymService {
         });
     }
 
+    /**
+     * Deletes a synonym item from the specified dictionary.
+     *
+     * @param dictId      The ID of the dictionary.
+     * @param synonymItem The synonym item to delete.
+     */
     public void delete(final String dictId, final SynonymItem synonymItem) {
         getSynonymFile(dictId).ifPresent(file -> {
             file.delete(synonymItem);

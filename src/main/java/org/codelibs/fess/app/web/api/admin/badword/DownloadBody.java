@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.badword;
 
 import org.codelibs.fess.app.web.admin.badword.DownloadForm;
 
+/**
+ * Download body for Bad Word API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading bad word dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        super();
+    }
 }

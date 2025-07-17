@@ -28,11 +28,29 @@ import org.opensearch.search.aggregations.bucket.terms.Terms;
 
 import com.google.common.io.BaseEncoding;
 
+/**
+ * Response object for faceted search results containing query counts and field facets.
+ * This class processes OpenSearch aggregations to provide structured facet information
+ * for search result filtering and navigation.
+ */
 public class FacetResponse {
+    /**
+     * Map containing query facet counts, where keys are decoded query strings
+     * and values are document counts for each query.
+     */
     protected Map<String, Long> queryCountMap = new LinkedHashMap<>();
 
+    /**
+     * List of field facets containing aggregated field values and their counts.
+     */
     protected List<Field> fieldList = new ArrayList<>();
 
+    /**
+     * Constructs a FacetResponse from OpenSearch aggregations.
+     * Processes both field facets and query facets from the aggregation results.
+     *
+     * @param aggregations the OpenSearch aggregations containing facet data
+     */
     public FacetResponse(final Aggregations aggregations) {
         aggregations.forEach(aggregation -> {
             if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
@@ -47,15 +65,38 @@ public class FacetResponse {
         });
     }
 
+    /**
+     * Checks if this response contains any facet information.
+     *
+     * @return true if either query count map or field list is not null
+     */
     public boolean hasFacetResponse() {
         return queryCountMap != null || fieldList != null;
     }
 
+    /**
+     * Represents a field facet with its name and value counts.
+     * Each field facet contains multiple values with their respective document counts.
+     */
     public static class Field {
+        /**
+         * Map containing field values and their document counts.
+         * Keys are field values as strings, values are document counts.
+         */
         protected Map<String, Long> valueCountMap = new LinkedHashMap<>();
 
+        /**
+         * The decoded name of the field.
+         */
         protected String name;
 
+        /**
+         * Constructs a Field from OpenSearch Terms aggregation.
+         * Decodes the field name and processes all term buckets to extract
+         * field values and their document counts.
+         *
+         * @param termFacet the OpenSearch Terms aggregation containing field facet data
+         */
         public Field(final Terms termFacet) {
             final String encodedField = termFacet.getName().substring(Constants.FACET_FIELD_PREFIX.length());
             name = new String(BaseEncoding.base64().decode(encodedField), StandardCharsets.UTF_8);
@@ -65,14 +106,18 @@ public class FacetResponse {
         }
 
         /**
-         * @return the valueCountMap
+         * Gets the map of field values and their document counts.
+         *
+         * @return the valueCountMap containing field values and counts
          */
         public Map<String, Long> getValueCountMap() {
             return valueCountMap;
         }
 
         /**
-         * @return the name
+         * Gets the decoded name of this field facet.
+         *
+         * @return the field name
          */
         public String getName() {
             return name;
@@ -81,14 +126,18 @@ public class FacetResponse {
     }
 
     /**
-     * @return the queryCountMap
+     * Gets the map of query facet counts.
+     *
+     * @return the queryCountMap containing decoded query strings and their counts
      */
     public Map<String, Long> getQueryCountMap() {
         return queryCountMap;
     }
 
     /**
-     * @return the fieldList
+     * Gets the list of field facets.
+     *
+     * @return the fieldList containing all field facet information
      */
     public List<Field> getFieldList() {
         return fieldList;

@@ -18,8 +18,22 @@ package org.codelibs.fess.app.web.admin.backup;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
+/**
+ * Form class for backup file upload.
+ * This form handles file uploads for backup and restore operations.
+ */
 public class UploadForm {
 
+    /**
+     * The backup file to be uploaded.
+     */
     @Required
     public MultipartFormFile bulkFile;
+
+    /**
+     * Default constructor for UploadForm.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 }

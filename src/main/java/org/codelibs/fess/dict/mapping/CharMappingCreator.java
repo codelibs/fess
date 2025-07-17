@@ -25,13 +25,23 @@ import org.codelibs.fess.dict.DictionaryItem;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Creator for character mapping dictionary files.
+ * Handles the creation and management of character mapping dictionaries used for text normalization.
+ */
 public class CharMappingCreator extends DictionaryCreator {
     private static final Logger logger = LogManager.getLogger(CharMappingCreator.class);
 
+    /**
+     * Constructs a new CharMappingCreator with the mapping file pattern.
+     */
     public CharMappingCreator() {
         super("mapping.*\\.txt");
     }
 
+    /**
+     * Registers this creator with the dictionary manager after construction.
+     */
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {

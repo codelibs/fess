@@ -28,10 +28,28 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin dictionary management.
+ * Provides REST endpoints for managing dictionaries in the Fess search engine.
+ */
 public class ApiAdminDictAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDictAction() {
+        super();
+    }
+
+    /** Dictionary manager for handling dictionary file operations */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /**
+     * Retrieves all available dictionary files.
+     *
+     * @return JSON response containing list of dictionary files
+     */
     // GET /api/admin/dict
     @Execute
     public JsonResponse<ApiResult> get$index() {
@@ -41,6 +59,12 @@ public class ApiAdminDictAction extends FessApiAdminAction {
                 .result());
     }
 
+    /**
+     * Creates a ListBody from a DictionaryFile for API responses.
+     *
+     * @param dictionaryFile the dictionary file to convert
+     * @return the converted ListBody object
+     */
     protected ListBody createListBody(final DictionaryFile<? extends DictionaryItem> dictionaryFile) {
         final ListBody body = new ListBody();
         body.id = dictionaryFile.getId();

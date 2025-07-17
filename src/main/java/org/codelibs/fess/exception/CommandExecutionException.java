@@ -15,14 +15,27 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when command execution fails.
+ * This exception indicates that an external command or process execution encountered an error.
+ */
 public class CommandExecutionException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor with error message.
+     * @param message The error message describing the command execution failure.
+     */
     public CommandExecutionException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructor with error message and cause.
+     * @param message The error message describing the command execution failure.
+     * @param e The cause of the exception.
+     */
     public CommandExecutionException(final String message, final Throwable e) {
         super(message, e);
     }

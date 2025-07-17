@@ -21,20 +21,49 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author Keiichi Watanabe
+ * Form class for editing user groups in the admin interface.
+ * This form extends CreateForm to include fields necessary for updating existing group entries,
+ * including tracking information for optimistic locking and audit trails.
+ * Groups are used to organize users and define access permissions.
+ *
  */
 public class EditForm extends CreateForm {
 
+    /**
+     * Creates a new EditForm instance.
+     */
+    public EditForm() {
+        super();
+    }
+
+    /**
+     * The unique identifier of the group being edited.
+     * This is a required field for identifying which group to update.
+     */
     @Required
     @Size(max = 1000)
     public String id;
 
+    /**
+     * The username of the user who last updated this group.
+     * Used for audit trail purposes to track who made changes.
+     */
     @Size(max = 1000)
     public String updatedBy;
 
+    /**
+     * The timestamp when this group was last updated.
+     * Stored as a long value representing milliseconds since epoch.
+     * Used for audit trail and concurrency control.
+     */
     @ValidateTypeFailure
     public Long updatedTime;
 
+    /**
+     * The version number of the group for optimistic locking.
+     * This field is required to prevent concurrent modification conflicts
+     * by ensuring the group hasn't been modified by another process.
+     */
     @Required
     @ValidateTypeFailure
     public Integer versionNo;

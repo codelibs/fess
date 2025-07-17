@@ -32,9 +32,25 @@ import org.lastaflute.core.message.UserMessages;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Query command for handling wildcard queries.
+ * Converts Lucene WildcardQuery objects to OpenSearch QueryBuilder objects,
+ * supporting wildcard pattern matching with configurable case sensitivity.
+ */
 public class WildcardQueryCommand extends QueryCommand {
+
+    /**
+     * Default constructor.
+     */
+    public WildcardQueryCommand() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(WildcardQueryCommand.class);
 
+    /**
+     * Flag indicating whether wildcard terms should be converted to lowercase.
+     */
     protected boolean lowercaseWildcard = true;
 
     @Override
@@ -54,6 +70,14 @@ public class WildcardQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a wildcard query to an appropriate OpenSearch QueryBuilder.
+     *
+     * @param context The query context containing field and search information
+     * @param wildcardQuery The Lucene wildcard query to convert
+     * @param boost The boost factor to apply to the query
+     * @return The converted OpenSearch QueryBuilder
+     */
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), wildcardQuery.getField());
@@ -96,6 +120,12 @@ public class WildcardQueryCommand extends QueryCommand {
         return buildDefaultQueryBuilder(fessConfig, context, (f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
     }
 
+    /**
+     * Converts a wildcard value to lowercase if configured to do so.
+     *
+     * @param value The wildcard value to potentially convert
+     * @return The value in lowercase if lowercaseWildcard is true, otherwise the original value
+     */
     protected String toLowercaseWildcard(final String value) {
         if (lowercaseWildcard) {
             return value.toLowerCase(Locale.ROOT);
@@ -103,6 +133,11 @@ public class WildcardQueryCommand extends QueryCommand {
         return value;
     }
 
+    /**
+     * Sets whether wildcard terms should be converted to lowercase.
+     *
+     * @param lowercaseWildcard True to convert wildcard terms to lowercase, false otherwise
+     */
     public void setLowercaseWildcard(final boolean lowercaseWildcard) {
         this.lowercaseWildcard = lowercaseWildcard;
     }

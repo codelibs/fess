@@ -17,28 +17,65 @@ package org.codelibs.fess.exception;
 
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 
+/**
+ * Exception thrown when an error occurs during data store crawling operations.
+ * This exception provides information about the URL where the error occurred
+ * and whether the crawling process should be aborted.
+ */
 public class DataStoreCrawlingException extends CrawlingAccessException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The URL where the crawling error occurred.
+     */
     private final String url;
 
+    /**
+     * Flag indicating whether the crawling process should be aborted.
+     */
     private final boolean abort;
 
+    /**
+     * Creates a new DataStoreCrawlingException with the specified URL, message, and cause.
+     * The abort flag is set to false by default.
+     *
+     * @param url the URL where the crawling error occurred
+     * @param message the error message
+     * @param e the underlying exception that caused this error
+     */
     public DataStoreCrawlingException(final String url, final String message, final Exception e) {
         this(url, message, e, false);
     }
 
+    /**
+     * Creates a new DataStoreCrawlingException with the specified URL, message, cause, and abort flag.
+     *
+     * @param url the URL where the crawling error occurred
+     * @param message the error message
+     * @param e the underlying exception that caused this error
+     * @param abort whether the crawling process should be aborted due to this error
+     */
     public DataStoreCrawlingException(final String url, final String message, final Exception e, final boolean abort) {
         super(message, e);
         this.url = url;
         this.abort = abort;
     }
 
+    /**
+     * Gets the URL where the crawling error occurred.
+     *
+     * @return the URL associated with this exception
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Checks whether the crawling process should be aborted due to this exception.
+     *
+     * @return true if the crawling should be aborted, false otherwise
+     */
     public boolean aborted() {
         return abort;
     }

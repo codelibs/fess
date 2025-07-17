@@ -40,11 +40,21 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.KuromojiCSVUtil;
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * A dictionary file for Kuromoji.
+ */
 public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     private static final String KUROMOJI = "kuromoji";
 
     List<KuromojiItem> kuromojiItemList;
 
+    /**
+     * Constructs a new Kuromoji file.
+     *
+     * @param id The ID of the dictionary file.
+     * @param path The path of the dictionary file.
+     * @param timestamp The timestamp of the dictionary file.
+     */
     public KuromojiFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
@@ -114,6 +124,11 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         }
     }
 
+    /**
+     * Reloads the dictionary file.
+     *
+     * @param updater The updater.
+     */
     protected void reload(final KuromojiUpdater updater) {
         try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
             reload(updater, curlResponse.getContentAsStream());
@@ -122,6 +137,12 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         }
     }
 
+    /**
+     * Reloads the dictionary file.
+     *
+     * @param updater The updater.
+     * @param in The input stream.
+     */
     protected void reload(final KuromojiUpdater updater, final InputStream in) {
         final List<KuromojiItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
@@ -182,10 +203,21 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         }
     }
 
+    /**
+     * Returns the simple name of the file.
+     *
+     * @return The simple name of the file.
+     */
     public String getSimpleName() {
         return new File(path).getName();
     }
 
+    /**
+     * Updates the dictionary file with the given input stream.
+     *
+     * @param in The input stream.
+     * @throws IOException If an I/O error occurs.
+     */
     public synchronized void update(final InputStream in) throws IOException {
         try (KuromojiUpdater updater = new KuromojiUpdater(null)) {
             reload(updater, in);
@@ -197,16 +229,28 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         return "KuromojiFile [path=" + path + ", kuromojiItemList=" + kuromojiItemList + ", id=" + id + "]";
     }
 
+    /**
+     * An updater for Kuromoji files.
+     */
     protected class KuromojiUpdater implements Closeable {
 
+        /** True if the changes have been committed. */
         protected boolean isCommit = false;
 
+        /** The new file. */
         protected File newFile;
 
+        /** The writer for the new file. */
         protected Writer writer;
 
+        /** The item to be added or updated. */
         protected KuromojiItem item;
 
+        /**
+         * Constructs a new Kuromoji updater.
+         *
+         * @param newItem The new item to be added or updated.
+         */
         protected KuromojiUpdater(final KuromojiItem newItem) {
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(KUROMOJI, ".txt");
@@ -220,6 +264,12 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             item = newItem;
         }
 
+        /**
+         * Writes the old item to the new file.
+         *
+         * @param oldItem The old item.
+         * @return The new item if it was updated, otherwise the old item.
+         */
         public KuromojiItem write(final KuromojiItem oldItem) {
             try {
                 if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
@@ -247,6 +297,11 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             }
         }
 
+        /**
+         * Writes a line to the new file.
+         *
+         * @param line The line to write.
+         */
         public void write(final String line) {
             try {
                 writer.write(line);
@@ -256,6 +311,11 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             }
         }
 
+        /**
+         * Commits the changes.
+         *
+         * @return The new item if it was committed, otherwise null.
+         */
         public KuromojiItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {

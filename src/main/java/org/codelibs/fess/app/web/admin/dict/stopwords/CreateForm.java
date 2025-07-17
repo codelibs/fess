@@ -22,20 +22,35 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author ma2tani
+ * Form class for creating new stopwords dictionary entries.
+ * This form handles the creation of stopwords that should be
+ * excluded from search indexing and analysis.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /** The dictionary ID to which this stopword entry belongs */
     @Required
     public String dictId;
 
+    /** The CRUD operation mode for form processing */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** The stopword to be added to the dictionary */
     @Required
     @Size(max = 1000)
     public String input;
 
+    /**
+     * Initializes the form with default values for creating a new stopword entry.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

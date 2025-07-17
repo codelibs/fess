@@ -19,16 +19,38 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * The form for maintenance actions.
+ */
 public class ActionForm {
+    /**
+     * Default constructor.
+     */
+    public ActionForm() {
+        // nothing
+    }
+
+    /**
+     * The flag to replace aliases.
+     */
     @Size(max = 10)
     public String replaceAliases;
 
+    /**
+     * The flag to reset dictionaries.
+     */
     @Size(max = 10)
     public String resetDictionaries;
 
+    /**
+     * The number of shards for doc.
+     */
     @Size(max = 10)
     public String numberOfShardsForDoc = ComponentUtil.getFessConfig().getIndexNumberOfShards();
 
+    /**
+     * The auto expand replicas for doc.
+     */
     @Size(max = 10)
     public String autoExpandReplicasForDoc = ComponentUtil.getFessConfig().getIndexAutoExpandReplicas();
 }

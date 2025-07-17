@@ -41,6 +41,8 @@ import org.lastaflute.web.response.XmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
+ * The provider of action adjustment.
+ *
  * @author jflute
  */
 public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {

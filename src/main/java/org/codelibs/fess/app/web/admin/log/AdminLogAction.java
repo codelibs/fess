@@ -43,11 +43,18 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * Admin action for Log.
  */
 public class AdminLogAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminLogAction() {
+        super();
+    }
+
+    /** The role name for log administration. */
     public static final String ROLE = "admin-log";
 
     @Override
@@ -61,12 +68,23 @@ public class AdminLogAction extends FessAdminAction {
         return ROLE;
     }
 
+    /**
+     * Displays the log management index page.
+     *
+     * @return HTML response for the log list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asIndexHtml();
     }
 
+    /**
+     * Downloads a log file by its encoded ID.
+     *
+     * @param id the Base64 encoded filename of the log file to download
+     * @return ActionResponse containing the log file stream
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
@@ -84,6 +102,11 @@ public class AdminLogAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
+    /**
+     * Gets a list of log file items for display in the admin interface.
+     *
+     * @return list of maps containing log file information (id, name, lastModified, size)
+     */
     public static List<Map<String, Object>> getLogFileItems() {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final List<Map<String, Object>> logFileItems = new ArrayList<>();
@@ -110,6 +133,12 @@ public class AdminLogAction extends FessAdminAction {
         return logFileItems;
     }
 
+    /**
+     * Checks if the given filename is a log file.
+     *
+     * @param name the filename to check
+     * @return true if the filename ends with .log or .log.gz, false otherwise
+     */
     public static boolean isLogFilename(final String name) {
         return name.endsWith(".log") || name.endsWith(".log.gz");
     }

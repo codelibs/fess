@@ -38,28 +38,72 @@ import org.codelibs.fess.util.SystemUtil;
 
 import jakarta.servlet.ServletContext;
 
+/**
+ * Job for executing Python scripts within the Fess search engine environment.
+ * This job extends ExecJob to provide Python-specific functionality for running
+ * Python scripts with proper environment setup and argument passing.
+ *
+ * <p>Python scripts are executed in the WEB-INF/env/python/resources directory
+ * and have access to the Fess system environment including OpenSearch URL and session ID.</p>
+ */
 public class PythonJob extends ExecJob {
+    /** Logger instance for this class */
     static final Logger logger = LogManager.getLogger(PythonJob.class);
 
+    /**
+     * Default constructor for PythonJob.
+     * Creates a new instance of the Python job with default settings.
+     */
+    public PythonJob() {
+        super();
+    }
+
+    /** The Python script filename to execute */
     protected String filename;
 
+    /** List of command-line arguments to pass to the Python script */
     protected List<String> argList = new ArrayList<>();
 
+    /**
+     * Sets the Python script filename to execute.
+     *
+     * @param filename the Python script filename (relative to WEB-INF/env/python/resources)
+     * @return this PythonJob instance for method chaining
+     */
     public PythonJob filename(final String filename) {
         this.filename = filename;
         return this;
     }
 
+    /**
+     * Adds a single command-line argument to pass to the Python script.
+     *
+     * @param value the argument value to add
+     * @return this PythonJob instance for method chaining
+     */
     public PythonJob arg(final String value) {
         argList.add(value);
         return this;
     }
 
+    /**
+     * Adds multiple command-line arguments to pass to the Python script.
+     *
+     * @param values the argument values to add
+     * @return this PythonJob instance for method chaining
+     */
     public PythonJob args(final String... values) {
         stream(values).of(stream -> stream.forEach(argList::add));
         return this;
     }
 
+    /**
+     * Executes the Python script job.
+     * Creates a session ID, sets up the execution environment, and runs the Python script
+     * with the configured filename and arguments.
+     *
+     * @return a string containing the execution result and any error messages
+     */
     @Override
     public String execute() {
         final StringBuilder resultBuf = new StringBuilder();
@@ -88,6 +132,13 @@ public class PythonJob extends ExecJob {
 
     }
 
+    /**
+     * Executes the Python script with the configured parameters.
+     * Sets up the command list, working directory, and environment variables,
+     * then starts the Python process and waits for completion.
+     *
+     * @throws JobProcessingException if the Python script execution fails
+     */
     protected void executePython() {
         final List<String> cmdList = new ArrayList<>();
         final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
@@ -151,6 +202,13 @@ public class PythonJob extends ExecJob {
         }
     }
 
+    /**
+     * Constructs the file path for the Python script to execute.
+     * The path is relative to the web application root and follows the pattern:
+     * WEB-INF/env/python/resources/{filename}
+     *
+     * @return the constructed file path for the Python script
+     */
     protected String getPyFilePath() {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("WEB-INF");
@@ -165,6 +223,11 @@ public class PythonJob extends ExecJob {
         return buf.toString();
     }
 
+    /**
+     * Returns the execution type identifier for Python jobs.
+     *
+     * @return the execution type constant for Python jobs
+     */
     @Override
     protected String getExecuteType() {
         return Constants.EXECUTE_TYPE_PYTHON;

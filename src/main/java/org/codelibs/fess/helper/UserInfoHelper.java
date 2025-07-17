@@ -35,23 +35,53 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Helper class for managing user information and session tracking in Fess search system.
+ * This class handles user identification through cookies, session management, and query tracking.
+ * It provides functionality for generating unique user codes, managing user sessions,
+ * and tracking search result document IDs for analytics and personalization.
+ *
+ */
 public class UserInfoHelper {
+
+    /**
+     * Default constructor for UserInfoHelper.
+     */
+    public UserInfoHelper() {
+        // Default constructor
+    }
+
+    /** The session attribute key for storing user bean information */
     protected static final String USER_BEAN = "lastaflute.action.USER_BEAN.FessUserBean";
 
+    /** The maximum size of the result document IDs cache */
     protected int resultDocIdsCacheSize = 20;
 
+    /** The name of the cookie used for user identification */
     protected String cookieName = "fsid";
 
+    /** The domain for the user identification cookie */
     protected String cookieDomain;
 
+    /** The maximum age of the user identification cookie in seconds (default: 1 month) */
     protected int cookieMaxAge = 30 * 24 * 60 * 60;// 1 month
 
+    /** The path for the user identification cookie */
     protected String cookiePath = "/";
 
+    /** Whether the user identification cookie should be secure (HTTPS only) */
     protected Boolean cookieSecure;
 
+    /** Whether the user identification cookie should be HTTP-only */
     protected boolean httpOnly = true;
 
+    /**
+     * Retrieves the user code for the current request.
+     * The user code is used to uniquely identify users across sessions and requests.
+     * It checks multiple sources in order: request attribute, request parameter, cookie, user bean, or generates a new one.
+     *
+     * @return the user code string, or null if no valid session exists
+     */
     public String getUserCode() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
             String userCode = (String) request.getAttribute(Constants.USER_CODE);
@@ -83,6 +113,13 @@ public class UserInfoHelper {
         }).orElse(null);
     }
 
+    /**
+     * Extracts the user code from the user bean stored in the session.
+     * This method retrieves the authenticated user information and creates an encrypted user code.
+     *
+     * @param request the HTTP servlet request
+     * @return the user code from the user bean, or null if not found or invalid
+     */
     protected String getUserCodeFromUserBean(final HttpServletRequest request) {
         final SessionManager sessionManager = ComponentUtil.getComponent(SessionManager.class);
         String userCode = sessionManager.getAttribute(USER_BEAN, TypicalUserBean.class)
@@ -97,6 +134,13 @@ public class UserInfoHelper {
         return userCode;
     }
 
+    /**
+     * Creates an encrypted user code from a user ID.
+     * The user ID is encrypted using the primary cipher and validated against the configuration.
+     *
+     * @param userCode the raw user ID to encrypt
+     * @return the encrypted and validated user code, or null if invalid
+     */
     protected String createUserCodeFromUserId(String userCode) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final PrimaryCipher cipher = ComponentUtil.getPrimaryCipher();
@@ -107,6 +151,12 @@ public class UserInfoHelper {
         return null;
     }
 
+    /**
+     * Deletes the user code cookie from the client browser.
+     * This method removes the user identification cookie by setting it to an empty value with zero max age.
+     *
+     * @param request the HTTP servlet request
+     */
     public void deleteUserCodeFromCookie(final HttpServletRequest request) {
         final String cookieValue = getUserCodeFromCookie(request);
         if (cookieValue != null) {
@@ -114,6 +164,13 @@ public class UserInfoHelper {
         }
     }
 
+    /**
+     * Extracts the user code from request parameters.
+     * This method looks for the user code in the request parameters and validates it.
+     *
+     * @param request the HTTP servlet request
+     * @return the user code from request parameters, or null if not found or invalid
+     */
     protected String getUserCodeFromRequest(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String userCode = request.getParameter(fessConfig.getUserCodeRequestParameter());
@@ -128,10 +185,22 @@ public class UserInfoHelper {
         return null;
     }
 
+    /**
+     * Generates a new unique identifier for user tracking.
+     * Creates a UUID and removes hyphens to create a clean identifier string.
+     *
+     * @return a new unique identifier string
+     */
     protected String getId() {
         return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
     }
 
+    /**
+     * Updates the user session with the provided user code.
+     * This method registers the user info with the search log helper and updates the cookie.
+     *
+     * @param userCode the user code to associate with the session
+     */
     protected void updateUserSessionId(final String userCode) {
         ComponentUtil.getSearchLogHelper().getUserInfo(userCode);
 
@@ -140,6 +209,13 @@ public class UserInfoHelper {
         updateCookie(userCode, cookieMaxAge);
     }
 
+    /**
+     * Updates the user identification cookie with the specified user code and max age.
+     * Configures the cookie with security settings including domain, path, secure flag, and HTTP-only flag.
+     *
+     * @param userCode the user code to store in the cookie
+     * @param age the maximum age of the cookie in seconds
+     */
     protected void updateCookie(final String userCode, final int age) {
         final Cookie cookie = new Cookie(cookieName, userCode);
         cookie.setMaxAge(age);
@@ -154,6 +230,12 @@ public class UserInfoHelper {
         LaResponseUtil.getResponse().addCookie(cookie);
     }
 
+    /**
+     * Determines whether the user identification cookie should be marked as secure.
+     * Checks the configured secure setting or examines request headers to detect HTTPS.
+     *
+     * @return true if the cookie should be secure, false otherwise
+     */
     protected boolean isSecureCookie() {
         if (cookieSecure != null) {
             return cookieSecure;
@@ -168,6 +250,13 @@ public class UserInfoHelper {
         }).orElse(false);
     }
 
+    /**
+     * Extracts the user code from the user identification cookie.
+     * Searches through all request cookies to find the user identification cookie and validates its value.
+     *
+     * @param request the HTTP servlet request
+     * @return the user code from the cookie, or null if not found or invalid
+     */
     protected String getUserCodeFromCookie(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Cookie[] cookies = request.getCookies();
@@ -181,6 +270,13 @@ public class UserInfoHelper {
         return null;
     }
 
+    /**
+     * Stores the document IDs associated with a search query for tracking purposes.
+     * This method caches the document IDs returned for a specific query to enable click tracking and analytics.
+     *
+     * @param queryId the unique identifier for the search query
+     * @param documentItems the list of document maps containing search results
+     */
     public void storeQueryId(final String queryId, final List<Map<String, Object>> documentItems) {
         LaRequestUtil.getOptionalRequest().map(req -> req.getSession(false)).ifPresent(session -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -200,6 +296,13 @@ public class UserInfoHelper {
         });
     }
 
+    /**
+     * Retrieves the document IDs associated with a specific query ID.
+     * Used for tracking which documents were displayed for a particular search query.
+     *
+     * @param queryId the unique identifier for the search query
+     * @return an array of document IDs, or an empty array if not found
+     */
     public String[] getResultDocIds(final String queryId) {
         return LaRequestUtil.getOptionalRequest().map(req -> req.getSession(false)).map(session -> {
             final Map<String, String[]> resultUrlCache = getResultDocIdsCache(session);
@@ -211,6 +314,13 @@ public class UserInfoHelper {
         }).orElse(StringUtil.EMPTY_STRINGS);
     }
 
+    /**
+     * Retrieves or creates the result document IDs cache from the session.
+     * The cache is implemented as an LRU map to limit memory usage.
+     *
+     * @param session the HTTP session
+     * @return the result document IDs cache map
+     */
     private Map<String, String[]> getResultDocIdsCache(final HttpSession session) {
         @SuppressWarnings("unchecked")
         Map<String, String[]> resultDocIdsCache = (Map<String, String[]>) session.getAttribute(Constants.RESULT_DOC_ID_CACHE);
@@ -221,30 +331,65 @@ public class UserInfoHelper {
         return resultDocIdsCache;
     }
 
+    /**
+     * Sets the maximum size of the result document IDs cache.
+     *
+     * @param resultDocIdsCacheSize the maximum number of entries in the cache
+     */
     public void setResultDocIdsCacheSize(final int resultDocIdsCacheSize) {
         this.resultDocIdsCacheSize = resultDocIdsCacheSize;
     }
 
+    /**
+     * Sets the name of the user identification cookie.
+     *
+     * @param cookieName the name to use for the user identification cookie
+     */
     public void setCookieName(final String cookieName) {
         this.cookieName = cookieName;
     }
 
+    /**
+     * Sets the domain for the user identification cookie.
+     *
+     * @param cookieDomain the domain to use for the user identification cookie
+     */
     public void setCookieDomain(final String cookieDomain) {
         this.cookieDomain = cookieDomain;
     }
 
+    /**
+     * Sets the maximum age of the user identification cookie in seconds.
+     *
+     * @param cookieMaxAge the maximum age in seconds
+     */
     public void setCookieMaxAge(final int cookieMaxAge) {
         this.cookieMaxAge = cookieMaxAge;
     }
 
+    /**
+     * Sets the path for the user identification cookie.
+     *
+     * @param cookiePath the path to use for the user identification cookie
+     */
     public void setCookiePath(final String cookiePath) {
         this.cookiePath = cookiePath;
     }
 
+    /**
+     * Sets whether the user identification cookie should be marked as secure.
+     *
+     * @param cookieSecure true if the cookie should be secure (HTTPS only), false otherwise, or null for auto-detection
+     */
     public void setCookieSecure(final Boolean cookieSecure) {
         this.cookieSecure = cookieSecure;
     }
 
+    /**
+     * Sets whether the user identification cookie should be HTTP-only.
+     *
+     * @param httpOnly true if the cookie should be HTTP-only (not accessible via JavaScript), false otherwise
+     */
     public void setCookieHttpOnly(final boolean httpOnly) {
         this.httpOnly = httpOnly;
     }

@@ -39,11 +39,21 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 
+/**
+ * Dictionary file for protected words.
+ * This class manages the reading, writing, and updating of protected words dictionary files.
+ */
 public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     private static final String PROTWORDS = "protwords";
 
     List<ProtwordsItem> protwordsItemList;
 
+    /**
+     * Constructor for ProtwordsFile.
+     * @param id the file identifier
+     * @param path the file path
+     * @param timestamp the file timestamp
+     */
     public ProtwordsFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
@@ -113,6 +123,10 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         }
     }
 
+    /**
+     * Reloads the dictionary file with the specified updater.
+     * @param updater the updater to use for processing items
+     */
     protected void reload(final ProtwordsUpdater updater) {
         try (CurlResponse curlResponse = dictionaryManager.getContentResponse(this)) {
             reload(updater, curlResponse.getContentAsStream());
@@ -121,6 +135,11 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         }
     }
 
+    /**
+     * Reloads the dictionary file with the specified updater and input stream.
+     * @param updater the updater to use for processing items
+     * @param in the input stream containing the file content
+     */
     protected void reload(final ProtwordsUpdater updater, final InputStream in) {
         final List<ProtwordsItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
@@ -181,10 +200,19 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         return s;
     }
 
+    /**
+     * Gets the simple name of this dictionary file.
+     * @return the simple name of the file
+     */
     public String getSimpleName() {
         return new File(path).getName();
     }
 
+    /**
+     * Updates the dictionary file with content from the input stream.
+     * @param in the input stream containing the new content
+     * @throws IOException if an I/O error occurs
+     */
     public synchronized void update(final InputStream in) throws IOException {
         try (ProtwordsUpdater updater = new ProtwordsUpdater(null)) {
             reload(updater, in);
@@ -196,16 +224,28 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
         return "ProtwordsFile [path=" + path + ", protwordsItemList=" + protwordsItemList + ", id=" + id + "]";
     }
 
+    /**
+     * Updater class for processing protwords items during dictionary updates.
+     * This class handles the writing and committing of changes to the dictionary file.
+     */
     protected class ProtwordsUpdater implements Closeable {
 
+        /** Flag indicating if the update should be committed */
         protected boolean isCommit = false;
 
+        /** Temporary file for storing updates */
         protected File newFile;
 
+        /** Writer for writing to the temporary file */
         protected Writer writer;
 
+        /** The item being updated */
         protected ProtwordsItem item;
 
+        /**
+         * Constructor for ProtwordsUpdater.
+         * @param newItem the item to be updated
+         */
         protected ProtwordsUpdater(final ProtwordsItem newItem) {
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(PROTWORDS, ".txt");
@@ -219,6 +259,11 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             item = newItem;
         }
 
+        /**
+         * Writes a protwords item to the temporary file.
+         * @param oldItem the item to write
+         * @return the written item or null if deleted
+         */
         public ProtwordsItem write(final ProtwordsItem oldItem) {
             try {
                 if (item == null || item.getId() != oldItem.getId() || !item.isUpdated()) {
@@ -245,6 +290,10 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             }
         }
 
+        /**
+         * Writes a string line to the temporary file.
+         * @param line the line to write
+         */
         public void write(final String line) {
             try {
                 writer.write(line);
@@ -254,6 +303,10 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             }
         }
 
+        /**
+         * Commits the current item to the temporary file.
+         * @return the committed item or null if no item to commit
+         */
         public ProtwordsItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {

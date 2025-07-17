@@ -17,5 +17,15 @@ package org.codelibs.fess.app.web.api.admin.user;
 
 import org.codelibs.fess.app.web.admin.user.CreateForm;
 
+/**
+ * Request body for creating user via REST API.
+ * Extends CreateForm to inherit validation and field definitions.
+ */
 public class CreateBody extends CreateForm {
+
+    /**
+     * Creates a new CreateBody instance.
+     */
+    public CreateBody() {
+    }
 }

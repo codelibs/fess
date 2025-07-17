@@ -26,17 +26,26 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for Dashboard.
+ *
  */
 public class AdminDashboardAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminDashboardAction() {
+        super();
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-dashboard";
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
 
+    /** The search engine API manager. */
     @Resource
     protected SearchEngineApiManager searchEngineApiManager;
 
@@ -57,6 +66,10 @@ public class AdminDashboardAction extends FessAdminAction {
     // ===================================================================================
     //                                                                              Index
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse index() {

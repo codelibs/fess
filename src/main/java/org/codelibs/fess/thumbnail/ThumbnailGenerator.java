@@ -20,17 +20,50 @@ import java.util.Map;
 
 import org.codelibs.core.misc.Tuple3;
 
+/**
+ * Interface for thumbnail generation implementations.
+ * Provides methods for creating thumbnails from various document types.
+ */
 public interface ThumbnailGenerator {
 
+    /**
+     * Gets the name of this thumbnail generator.
+     * @return The generator name.
+     */
     String getName();
 
+    /**
+     * Generates a thumbnail for the given thumbnail ID and saves it to the output file.
+     *
+     * @param thumbnailId the unique identifier for the thumbnail
+     * @param outputFile the file where the generated thumbnail will be saved
+     * @return true if the thumbnail was successfully generated, false otherwise
+     */
     boolean generate(String thumbnailId, File outputFile);
 
+    /**
+     * Checks if this generator can handle the given document.
+     * @param docMap The document map containing metadata.
+     * @return True if this generator can handle the document, false otherwise.
+     */
     boolean isTarget(Map<String, Object> docMap);
 
+    /**
+     * Checks if this thumbnail generator is available for use.
+     * @return True if available, false otherwise.
+     */
     boolean isAvailable();
 
+    /**
+     * Destroys this thumbnail generator and releases any resources.
+     */
     void destroy();
 
+    /**
+     * Creates a thumbnail generation task.
+     * @param path The path to the source document.
+     * @param docMap The document map containing metadata.
+     * @return A tuple containing task information.
+     */
     Tuple3<String, String, String> createTask(String path, Map<String, Object> docMap);
 }

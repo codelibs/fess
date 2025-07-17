@@ -37,22 +37,33 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.exception.CommandExecutionException;
 import org.codelibs.fess.opensearch.user.exentity.User;
 
+/**
+ * Authentication chain implementation that executes external commands for user operations.
+ * Provides user management through command-line tool execution for password changes and user deletion.
+ */
 public class CommandChain implements AuthenticationChain {
 
     private static final Logger logger = LogManager.getLogger(CommandChain.class);
 
+    /** Working directory for command execution. */
     protected File workingDirectory = null;
 
+    /** Maximum number of output lines to capture. */
     protected int maxOutputLine = 1000;
 
+    /** Command execution timeout in milliseconds. */
     protected long executionTimeout = 30L * 1000L; // 30sec
 
+    /** Character encoding for command output. */
     protected String commandOutputEncoding = Charset.defaultCharset().displayName();
 
+    /** Command array for user update operations. */
     protected String[] updateCommand;
 
+    /** Command array for user deletion operations. */
     protected String[] deleteCommand;
 
+    /** Array of target usernames for command execution. */
     protected String[] targetUsers;
 
     @Override
@@ -83,6 +94,18 @@ public class CommandChain implements AuthenticationChain {
         return user;
     }
 
+    /**
+     * Default constructor for CommandChain.
+     */
+    public CommandChain() {
+        // Default constructor
+    }
+
+    /**
+     * Checks if the given username is a target user for command execution.
+     * @param username The username to check.
+     * @return True if the user is a target user, false otherwise.
+     */
     protected boolean isTargetUser(final String username) {
         if (targetUsers == null) {
             return true;
@@ -90,6 +113,13 @@ public class CommandChain implements AuthenticationChain {
         return stream(targetUsers).get(stream -> stream.anyMatch(s -> s.equals(username)));
     }
 
+    /**
+     * Executes an external command with the given parameters.
+     * @param commands The command array to execute.
+     * @param username The username parameter for the command.
+     * @param password The password parameter for the command.
+     * @return The exit code of the executed command.
+     */
     protected int executeCommand(final String[] commands, final String username, final String password) {
         if (commands == null || commands.length == 0) {
             throw new CommandExecutionException("command is empty.");
@@ -172,20 +202,36 @@ public class CommandChain implements AuthenticationChain {
         }
     }
 
+    /**
+     * Monitor thread that handles process timeout and termination.
+     * This thread sleeps for the specified timeout duration and terminates the process if it hasn't finished.
+     */
     protected static class MonitorThread extends Thread {
+        /** The process to monitor. */
         private final Process process;
 
+        /** The timeout duration in milliseconds. */
         private final long timeout;
 
+        /** Flag indicating if the process has finished. */
         private boolean finished = false;
 
+        /** Flag indicating if the process has been terminated. */
         private boolean teminated = false;
 
+        /**
+         * Constructor for MonitorThread.
+         * @param process The process to monitor.
+         * @param timeout The timeout duration in milliseconds.
+         */
         public MonitorThread(final Process process, final long timeout) {
             this.process = process;
             this.timeout = timeout;
         }
 
+        /**
+         * Runs the monitor thread, sleeping for the timeout duration and terminating the process if needed.
+         */
         @Override
         public void run() {
             ThreadUtil.sleepQuietly(timeout);
@@ -203,29 +249,43 @@ public class CommandChain implements AuthenticationChain {
         }
 
         /**
-         * @param finished
-         *            The finished to set.
+         * Sets the finished flag to indicate whether the process has completed.
+         * @param finished True if the process has finished, false otherwise.
          */
         public void setFinished(final boolean finished) {
             this.finished = finished;
         }
 
         /**
-         * @return Returns the teminated.
+         * Checks if the process has been terminated due to timeout.
+         * @return True if the process was terminated, false otherwise.
          */
         public boolean isTeminated() {
             return teminated;
         }
     }
 
+    /**
+     * Thread that reads input stream data and buffers it for later retrieval.
+     * Captures output from command execution with configurable line buffering.
+     */
     protected static class InputStreamThread extends Thread {
 
+        /** Buffered reader for input stream. */
         private BufferedReader br;
 
+        /** List to store captured output lines. */
         private final List<String> list = new LinkedList<>();
 
+        /** Maximum number of lines to buffer. */
         private final int maxLineBuffer;
 
+        /**
+         * Constructor for InputStreamThread.
+         * @param is The input stream to read from.
+         * @param charset The character encoding to use.
+         * @param maxOutputLineBuffer The maximum number of lines to buffer.
+         */
         public InputStreamThread(final InputStream is, final String charset, final int maxOutputLineBuffer) {
             try {
                 br = new BufferedReader(new InputStreamReader(is, charset));
@@ -235,6 +295,9 @@ public class CommandChain implements AuthenticationChain {
             maxLineBuffer = maxOutputLineBuffer;
         }
 
+        /**
+         * Runs the input stream thread, reading lines and buffering them.
+         */
         @Override
         public void run() {
             for (;;) {
@@ -256,6 +319,10 @@ public class CommandChain implements AuthenticationChain {
             }
         }
 
+        /**
+         * Gets the captured output as a single string.
+         * @return The captured output with newlines.
+         */
         public String getOutput() {
             final StringBuilder buf = new StringBuilder(100);
             for (final String value : list) {
@@ -266,30 +333,58 @@ public class CommandChain implements AuthenticationChain {
 
     }
 
+    /**
+     * Sets the working directory for command execution.
+     * @param workingDirectory The working directory.
+     */
     public void setWorkingDirectory(final File workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
+    /**
+     * Sets the maximum number of output lines to capture.
+     * @param maxOutputLine The maximum output line count.
+     */
     public void setMaxOutputLine(final int maxOutputLine) {
         this.maxOutputLine = maxOutputLine;
     }
 
+    /**
+     * Sets the command execution timeout.
+     * @param executionTimeout The execution timeout in milliseconds.
+     */
     public void setExecutionTimeout(final long executionTimeout) {
         this.executionTimeout = executionTimeout;
     }
 
+    /**
+     * Sets the character encoding for command output.
+     * @param commandOutputEncoding The character encoding.
+     */
     public void setCommandOutputEncoding(final String commandOutputEncoding) {
         this.commandOutputEncoding = commandOutputEncoding;
     }
 
+    /**
+     * Sets the command array for user update operations.
+     * @param updateCommand The update command array.
+     */
     public void setUpdateCommand(final String[] updateCommand) {
         this.updateCommand = updateCommand;
     }
 
+    /**
+     * Sets the command array for user deletion operations.
+     * @param deleteCommand The delete command array.
+     */
     public void setDeleteCommand(final String[] deleteCommand) {
         this.deleteCommand = deleteCommand;
     }
 
+    /**
+     * Sets the array of target usernames for command execution.
+     * @param targetUsers The target users array.
+     */
     public void setTargetUsers(final String[] targetUsers) {
         this.targetUsers = targetUsers;
     }

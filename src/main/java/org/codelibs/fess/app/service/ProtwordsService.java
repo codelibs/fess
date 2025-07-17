@@ -30,13 +30,33 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service for managing protected words dictionary.
+ * This service provides operations for managing protected words dictionary files and items.
+ */
 public class ProtwordsService {
+
+    /**
+     * Default constructor.
+     */
+    public ProtwordsService() {
+        // Default constructor
+    }
+
+    /** Dictionary manager for handling dictionary files */
     @Resource
     protected DictionaryManager dictionaryManager;
 
+    /** Configuration for Fess */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a paginated list of protected words items.
+     * @param dictId the dictionary ID
+     * @param protwordsPager the pager for pagination
+     * @return the list of protected words items
+     */
     public List<ProtwordsItem> getProtwordsList(final String dictId, final ProtwordsPager protwordsPager) {
         return getProtwordsFile(dictId).map(file -> {
             final int pageSize = protwordsPager.getPageSize();
@@ -52,15 +72,31 @@ public class ProtwordsService {
         }).orElse(Collections.emptyList());
     }
 
+    /**
+     * Gets the protected words file for the specified dictionary ID.
+     * @param dictId the dictionary ID
+     * @return the protected words file if found
+     */
     public OptionalEntity<ProtwordsFile> getProtwordsFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(ProtwordsFile.class::isInstance)
                 .map(file -> OptionalEntity.of((ProtwordsFile) file)).orElse(OptionalEntity.empty());
     }
 
+    /**
+     * Gets a specific protected words item by ID.
+     * @param dictId the dictionary ID
+     * @param id the item ID
+     * @return the protected words item if found
+     */
     public OptionalEntity<ProtwordsItem> getProtwordsItem(final String dictId, final long id) {
         return getProtwordsFile(dictId).map(file -> file.get(id).get());
     }
 
+    /**
+     * Stores a protected words item (insert or update).
+     * @param dictId the dictionary ID
+     * @param protwordsItem the item to store
+     */
     public void store(final String dictId, final ProtwordsItem protwordsItem) {
         getProtwordsFile(dictId).ifPresent(file -> {
             if (protwordsItem.getId() == 0) {
@@ -71,6 +107,11 @@ public class ProtwordsService {
         });
     }
 
+    /**
+     * Deletes a protected words item.
+     * @param dictId the dictionary ID
+     * @param protwordsItem the item to delete
+     */
     public void delete(final String dictId, final ProtwordsItem protwordsItem) {
         getProtwordsFile(dictId).ifPresent(file -> {
             file.delete(protwordsItem);

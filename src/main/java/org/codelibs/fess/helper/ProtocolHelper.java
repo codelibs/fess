@@ -41,13 +41,33 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for managing and validating URL protocols in Fess crawling system.
+ * This class handles the initialization and validation of web and file protocols
+ * used by the crawler to determine which URLs can be crawled.
+ */
 public class ProtocolHelper {
     private static final Logger logger = LogManager.getLogger(ProtocolHelper.class);
 
+    /** Array of supported web protocols with colon suffix (e.g., "http:", "https:") */
     protected String[] webProtocols = StringUtil.EMPTY_STRINGS;
 
+    /** Array of supported file protocols with colon suffix (e.g., "file:", "ftp:") */
     protected String[] fileProtocols = StringUtil.EMPTY_STRINGS;
 
+    /**
+     * Default constructor for ProtocolHelper.
+     * Initializes the helper with empty protocol arrays that will be populated during init().
+     */
+    public ProtocolHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the protocol helper by loading configured protocols from FessConfig
+     * and scanning for available protocol handlers in the classpath.
+     * This method is called automatically after bean construction.
+     */
     @PostConstruct
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -64,6 +84,13 @@ public class ProtocolHelper {
         }
     }
 
+    /**
+     * Loads protocol handlers from the specified base package by scanning for
+     * Handler classes in subpackages and registering them as web or file protocols
+     * based on their PROTOCOL_TYPE field.
+     *
+     * @param basePackage the base package to scan for protocol handlers
+     */
     protected void loadProtocols(final String basePackage) {
         final List<String> subPackages = new ArrayList<>();
         final String path = basePackage.replace('.', '/');
@@ -131,22 +158,50 @@ public class ProtocolHelper {
         });
     }
 
+    /**
+     * Returns the array of supported web protocols.
+     *
+     * @return array of web protocol strings with colon suffix (e.g., "http:", "https:")
+     */
     public String[] getWebProtocols() {
         return webProtocols;
     }
 
+    /**
+     * Returns the array of supported file protocols.
+     *
+     * @return array of file protocol strings with colon suffix (e.g., "file:", "ftp:")
+     */
     public String[] getFileProtocols() {
         return fileProtocols;
     }
 
+    /**
+     * Checks if the given URL uses a valid web protocol.
+     *
+     * @param url the URL to validate
+     * @return true if the URL starts with a supported web protocol, false otherwise
+     */
     public boolean isValidWebProtocol(final String url) {
         return stream(webProtocols).get(stream -> stream.anyMatch(s -> url.startsWith(s)));
     }
 
+    /**
+     * Checks if the given URL uses a valid file protocol.
+     *
+     * @param url the URL to validate
+     * @return true if the URL starts with a supported file protocol, false otherwise
+     */
     public boolean isValidFileProtocol(final String url) {
         return stream(fileProtocols).get(stream -> stream.anyMatch(s -> url.startsWith(s)));
     }
 
+    /**
+     * Adds a new web protocol to the supported protocols list.
+     * If the protocol already exists, it will not be added again.
+     *
+     * @param protocol the protocol name to add (without colon suffix)
+     */
     public void addWebProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(webProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {
@@ -157,6 +212,12 @@ public class ProtocolHelper {
         webProtocols[webProtocols.length - 1] = prefix;
     }
 
+    /**
+     * Adds a new file protocol to the supported protocols list.
+     * If the protocol already exists, it will not be added again.
+     *
+     * @param protocol the protocol name to add (without colon suffix)
+     */
     public void addFileProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(fileProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {

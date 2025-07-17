@@ -35,11 +35,22 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin failure URL.
+ *
  */
 public class ApiAdminFailureurlAction extends FessApiAdminAction {
 
     private static final Logger logger = LogManager.getLogger(ApiAdminFailureurlAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminFailureurlAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -48,6 +59,7 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     private FailureUrlService failureUrlService;
     @Resource
     private FailureUrlPager failureUrlPager;
+    /** Helper for managing crawler processes */
     @Resource
     protected ProcessHelper processHelper;
 
@@ -57,6 +69,12 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
 
     // GET /api/admin/failureurl/logs
     // PUT /api/admin/failureurl/logs
+    /**
+     * Retrieves failure URL logs with pagination.
+     *
+     * @param body the search criteria
+     * @return JSON response containing the failure URL logs
+     */
     @Execute
     public JsonResponse<ApiResult> logs(final SearchBody body) {
         validateApi(body, messages -> {});
@@ -67,6 +85,12 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     }
 
     // GET /api/admin/failureurl/log/{id}
+    /**
+     * Retrieves a specific failure URL log by ID.
+     *
+     * @param id the failure URL log ID
+     * @return JSON response containing the failure URL log
+     */
     @Execute
     public JsonResponse<ApiResult> get$log(final String id) {
         return asJson(new ApiLogResponse().log(failureUrlService.getFailureUrl(id).map(this::createEditBody).orElseGet(() -> {
@@ -76,6 +100,12 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/failureurl/log/{id}
+    /**
+     * Deletes a failure URL log by ID.
+     *
+     * @param id the failure URL log ID to delete
+     * @return JSON response with result status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$log(final String id) {
         failureUrlService.getFailureUrl(id).ifPresent(entity -> {
@@ -93,6 +123,11 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
     }
 
     // DELETE /api/admin/failureurl/all
+    /**
+     * Deletes all failure URL logs.
+     *
+     * @return JSON response with result status
+     */
     @Execute
     public JsonResponse<ApiResult> delete$all() {
         try {
@@ -106,6 +141,12 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a FailureUrl entity.
+     *
+     * @param entity the FailureUrl entity
+     * @return the EditBody representation
+     */
     protected EditBody createEditBody(final FailureUrl entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

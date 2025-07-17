@@ -25,20 +25,38 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * The create form for Role.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The name of the role.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * The attributes map for the role.
+     */
     public Map<String, String> attributes = new HashMap<>();
 
+    /**
+     * Initializes the form with default values for creating a new role.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

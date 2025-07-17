@@ -17,6 +17,23 @@ package org.codelibs.fess.app.web.api.admin.scheduler;
 
 import org.codelibs.fess.app.web.admin.scheduler.EditForm;
 
+/**
+ * Request body class for scheduler edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for scheduler management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Flag indicating whether the scheduler job is currently running.
+     */
     public Boolean running;
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

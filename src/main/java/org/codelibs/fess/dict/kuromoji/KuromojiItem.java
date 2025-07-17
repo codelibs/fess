@@ -19,6 +19,9 @@ import java.util.Objects;
 
 import org.codelibs.fess.dict.DictionaryItem;
 
+/**
+ * An item in a Kuromoji dictionary.
+ */
 public class KuromojiItem extends DictionaryItem {
     private final String token;
 
@@ -36,6 +39,15 @@ public class KuromojiItem extends DictionaryItem {
 
     private String newPos;
 
+    /**
+     * Constructs a new Kuromoji item.
+     *
+     * @param id The ID of the item.
+     * @param token The token.
+     * @param segmentation The segmentation.
+     * @param reading The reading.
+     * @param pos The part of speech.
+     */
     public KuromojiItem(final long id, final String token, final String segmentation, final String reading, final String pos) {
         this.id = id;
         this.token = token;
@@ -52,58 +64,128 @@ public class KuromojiItem extends DictionaryItem {
         }
     }
 
+    /**
+     * Returns the new token.
+     *
+     * @return The new token.
+     */
     public String getNewToken() {
         return newToken;
     }
 
+    /**
+     * Sets the new token.
+     *
+     * @param newToken The new token.
+     */
     public void setNewToken(final String newToken) {
         this.newToken = newToken;
     }
 
+    /**
+     * Returns the new segmentation.
+     *
+     * @return The new segmentation.
+     */
     public String getNewSegmentation() {
         return newSegmentation;
     }
 
+    /**
+     * Sets the new segmentation.
+     *
+     * @param newSegmentation The new segmentation.
+     */
     public void setNewSegmentation(final String newSegmentation) {
         this.newSegmentation = newSegmentation;
     }
 
+    /**
+     * Returns the new reading.
+     *
+     * @return The new reading.
+     */
     public String getNewReading() {
         return newReading;
     }
 
+    /**
+     * Sets the new reading.
+     *
+     * @param newReading The new reading.
+     */
     public void setNewReading(final String newReading) {
         this.newReading = newReading;
     }
 
+    /**
+     * Returns the new part of speech.
+     *
+     * @return The new part of speech.
+     */
     public String getNewPos() {
         return newPos;
     }
 
+    /**
+     * Sets the new part of speech.
+     *
+     * @param newPos The new part of speech.
+     */
     public void setNewPos(final String newPos) {
         this.newPos = newPos;
     }
 
+    /**
+     * Returns the token.
+     *
+     * @return The token.
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * Returns the segmentation.
+     *
+     * @return The segmentation.
+     */
     public String getSegmentation() {
         return segmentation;
     }
 
+    /**
+     * Returns the reading.
+     *
+     * @return The reading.
+     */
     public String getReading() {
         return reading;
     }
 
+    /**
+     * Returns the part of speech.
+     *
+     * @return The part of speech.
+     */
     public String getPos() {
         return pos;
     }
 
+    /**
+     * Returns true if the item has been updated.
+     *
+     * @return True if the item has been updated.
+     */
     public boolean isUpdated() {
         return newToken != null;
     }
 
+    /**
+     * Returns true if the item has been deleted.
+     *
+     * @return True if the item has been deleted.
+     */
     public boolean isDeleted() {
         return isUpdated() && newToken.length() == 0;
     }
@@ -135,6 +217,11 @@ public class KuromojiItem extends DictionaryItem {
                 + newToken + ", newSegmentation=" + newSegmentation + ", newReading=" + newReading + ", newPos=" + newPos + "]";
     }
 
+    /**
+     * Returns the item as a line string.
+     *
+     * @return The item as a line string.
+     */
     public String toLineString() {
         final StringBuilder buf = new StringBuilder(100);
         if (isUpdated()) {

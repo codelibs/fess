@@ -29,14 +29,35 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing role types.
+ */
 public class RoleTypeService {
 
+    /**
+     * Constructor.
+     */
+    public RoleTypeService() {
+        super();
+    }
+
+    /**
+     * The behavior for role types.
+     */
     @Resource
     protected RoleTypeBhv roleTypeBhv;
 
+    /**
+     * The Fess configuration.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a list of role types based on the pager.
+     * @param roleTypePager The pager for role types.
+     * @return A list of role types.
+     */
     public List<RoleType> getRoleTypeList(final RoleTypePager roleTypePager) {
 
         final PagingResultBean<RoleType> roleTypeList = roleTypeBhv.selectPage(cb -> {
@@ -53,10 +74,19 @@ public class RoleTypeService {
         return roleTypeList;
     }
 
+    /**
+     * Gets a role type by its ID.
+     * @param id The ID of the role type.
+     * @return An optional entity of the role type.
+     */
     public OptionalEntity<RoleType> getRoleType(final String id) {
         return roleTypeBhv.selectByPK(id);
     }
 
+    /**
+     * Stores a role type.
+     * @param roleType The role type to store.
+     */
     public void store(final RoleType roleType) {
 
         roleTypeBhv.insertOrUpdate(roleType, op -> {
@@ -65,6 +95,10 @@ public class RoleTypeService {
 
     }
 
+    /**
+     * Deletes a role type.
+     * @param roleType The role type to delete.
+     */
     public void delete(final RoleType roleType) {
 
         roleTypeBhv.delete(roleType, op -> {
@@ -73,6 +107,11 @@ public class RoleTypeService {
 
     }
 
+    /**
+     * Sets up the list condition for the role type query.
+     * @param cb The role type condition bean.
+     * @param roleTypePager The role type pager.
+     */
     protected void setupListCondition(final RoleTypeCB cb, final RoleTypePager roleTypePager) {
         if (roleTypePager.id != null) {
             cb.query().docMeta().setId_Equal(roleTypePager.id);
@@ -86,6 +125,10 @@ public class RoleTypeService {
 
     }
 
+    /**
+     * Gets a list of all role types.
+     * @return A list of all role types.
+     */
     public List<RoleType> getRoleTypeList() {
         return roleTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();

@@ -38,15 +38,28 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin key match management.
+ *
  */
 public class ApiAdminKeymatchAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminKeymatchAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminKeymatchAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** The key match service for managing key match settings. */
     @Resource
     private KeyMatchService keyMatchService;
 
@@ -54,6 +67,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves key match settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing key match settings list
+     */
     // GET /api/admin/keymatch/settings
     // PUT /api/admin/keymatch/settings
     @Execute
@@ -66,6 +85,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific key match setting by ID.
+     *
+     * @param id the ID of the key match setting to retrieve
+     * @return JSON response containing the key match setting
+     */
     // GET /api/admin/keymatch/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -75,6 +100,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new key match setting.
+     *
+     * @param body the key match data to create
+     * @return JSON response containing the created key match setting ID
+     */
     // POST /api/admin/keymatch/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -96,6 +127,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(keyMatch.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing key match setting.
+     *
+     * @param body the key match data to update
+     * @return JSON response containing the updated key match setting ID
+     */
     // PUT /api/admin/keymatch/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -116,6 +153,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(keyMatch.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a key match setting by ID.
+     *
+     * @param id the ID of the key match setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/keymatch/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -133,6 +176,12 @@ public class ApiAdminKeymatchAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a KeyMatch entity.
+     *
+     * @param entity the key match entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final KeyMatch entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

@@ -18,8 +18,25 @@ package org.codelibs.fess.app.web.admin.sereq;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
+/**
+ * Form for uploading search request files to the Fess search engine.
+ * This form is used in the admin interface to upload search request configuration files
+ * that define search behaviors and request handling.
+ */
 public class UploadForm {
 
+    /**
+     * The multipart file containing the search request configurations to be uploaded.
+     * This file should contain search request definitions and configurations.
+     */
     @Required
     public MultipartFormFile requestFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 }

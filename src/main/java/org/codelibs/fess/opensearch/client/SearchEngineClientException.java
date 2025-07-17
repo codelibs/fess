@@ -17,14 +17,30 @@ package org.codelibs.fess.opensearch.client;
 
 import org.codelibs.fess.exception.FessSystemException;
 
+/**
+ * Exception thrown when search engine client operations fail.
+ * This exception wraps underlying search engine errors and provides
+ * meaningful error messages for troubleshooting.
+ */
 public class SearchEngineClientException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new SearchEngineClientException with the specified message and cause.
+     *
+     * @param message the detail message explaining the exception
+     * @param cause   the underlying cause of the exception
+     */
     public SearchEngineClientException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new SearchEngineClientException with the specified message.
+     *
+     * @param message the detail message explaining the exception
+     */
     public SearchEngineClientException(final String message) {
         super(message);
     }

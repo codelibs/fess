@@ -52,11 +52,19 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for Search List.
+ *
  */
 public class AdminSearchlistAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSearchlistAction() {
+        super();
+    }
+
+    /** Role name for admin search list operations */
     public static final String ROLE = "admin-searchlist";
 
     // ===================================================================================
@@ -68,38 +76,53 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Attribute
     // =========
 
+    /** Client for interacting with the search engine. */
     @Resource
     protected SearchEngineClient searchEngineClient;
 
+    /** Helper for building and parsing search queries. */
     @Resource
     protected QueryHelper queryHelper;
 
+    /** Helper for executing search operations. */
     @Resource
     protected SearchHelper searchHelper;
 
+    /** HTTP servlet request for accessing request parameters. */
     @Resource
     protected HttpServletRequest request;
 
+    /** List of document items returned from search */
     public List<Map<String, Object>> documentItems;
 
+    /** Number of results per page */
     public String pageSize;
 
+    /** Current page number for pagination */
     public String currentPageNumber;
 
+    /** Total number of records found */
     public String allRecordCount;
 
+    /** Total number of pages for pagination */
     public String allPageCount;
 
+    /** Flag indicating if there is a next page */
     public boolean existNextPage;
 
+    /** Flag indicating if there is a previous page */
     public boolean existPrevPage;
 
+    /** Starting record number for current page */
     public String currentStartRecordNumber;
 
+    /** Ending record number for current page */
     public String currentEndRecordNumber;
 
+    /** List of page numbers for pagination */
     public List<String> pageNumberList;
 
+    /** Search execution time in milliseconds */
     public String execTime;
 
     // ===================================================================================
@@ -120,6 +143,12 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     // Search Execute
     // ==============
+    /**
+     * Displays the search list management index page.
+     *
+     * @param form the list form for filtering
+     * @return HTML response for the search list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final ListForm form) {
@@ -128,6 +157,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Performs a search operation with the provided form data.
+     *
+     * @param form the list form containing search criteria
+     * @return HTML response with search results
+     */
     protected HtmlResponse doSearch(final ListForm form) {
         validate(form, messages -> {}, this::asListHtml);
 
@@ -159,6 +194,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return null; // ignore
     }
 
+    /**
+     * Executes a search based on the provided search criteria.
+     *
+     * @param form the list form containing search criteria
+     * @return HTML response with search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final ListForm form) {
@@ -166,6 +207,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return doSearch(form);
     }
 
+    /**
+     * Navigates to the previous page of search results.
+     *
+     * @param form the list form containing current search criteria
+     * @return HTML response with previous page results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse prev(final ListForm form) {
@@ -173,6 +220,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return doMove(form, -1);
     }
 
+    /**
+     * Navigates to the next page of search results.
+     *
+     * @param form the list form containing current search criteria
+     * @return HTML response with next page results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse next(final ListForm form) {
@@ -180,6 +233,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return doMove(form, 1);
     }
 
+    /**
+     * Navigates to a specific page of search results.
+     *
+     * @param form the list form containing target page information
+     * @return HTML response with specified page results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse move(final ListForm form) {
@@ -187,6 +246,13 @@ public class AdminSearchlistAction extends FessAdminAction {
         return doMove(form, 0);
     }
 
+    /**
+     * Handles pagination movement logic.
+     *
+     * @param form the list form containing current state
+     * @param move the direction to move (-1 for previous, 0 for specific page, 1 for next)
+     * @return HTML response with moved page results
+     */
     protected HtmlResponse doMove(final ListForm form, final int move) {
         form.initialize();
         Integer pageNumber = form.pn;
@@ -204,6 +270,12 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Confirm
     // -------
 
+    /**
+     * Deletes a single document from the search index.
+     *
+     * @param form the delete form containing document ID
+     * @return HTML response redirecting to the list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final DeleteForm form) {
@@ -221,6 +293,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Deletes all documents matching the current search query.
+     *
+     * @param form the list form containing search criteria
+     * @return HTML response redirecting to the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall(final ListForm form) {
@@ -238,6 +316,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Displays the form for creating a new document.
+     *
+     * @param form the create form
+     * @return HTML response for the document creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final CreateForm form) {
@@ -250,6 +334,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asEditHtml();
     }
 
+    /**
+     * Displays the form for editing an existing document.
+     *
+     * @param form the edit form containing document ID
+     * @return HTML response for the document edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -266,6 +356,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asEditHtml();
     }
 
+    /**
+     * Creates a new document in the search index.
+     *
+     * @param form the create form containing document data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -294,6 +390,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing document in the search index.
+     *
+     * @param form the edit form containing updated document data
+     * @return HTML response redirecting to the search results after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -334,6 +436,12 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     //                                                                       Validation
     //                                                                           =========
+    /**
+     * Validates document fields according to index field requirements.
+     *
+     * @param doc the document to validate
+     * @param throwError consumer to handle validation errors
+     */
     public static void validateFields(final Map<String, Object> doc, final Consumer<VaMessenger<FessMessages>> throwError) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -375,6 +483,12 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -383,6 +497,12 @@ public class AdminSearchlistAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Retrieves or creates a document entity based on the form data.
+     *
+     * @param form the form containing document information
+     * @return optional entity containing the document data, or empty if not found
+     */
     public static OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -420,8 +540,23 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp);
     }
 
+    /**
+     * Web-specific implementation of SearchRenderData for rendering search results in the admin interface.
+     */
     protected static class WebRenderData extends SearchRenderData {
 
+        /**
+         * Default constructor.
+         */
+        protected WebRenderData() {
+            super();
+        }
+
+        /**
+         * Registers all search-related data for rendering in the web interface.
+         *
+         * @param data the render data to populate
+         */
         public void register(final RenderData data) {
             RenderDataUtil.register(data, "queryId", queryId);
             RenderDataUtil.register(data, "documentItems", documentItems);

@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.duplicatehost;
 
 import org.codelibs.fess.app.web.admin.duplicatehost.EditForm;
 
+/**
+ * Request body class for duplicate host edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for duplicate host management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
 
 }

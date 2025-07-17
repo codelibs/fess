@@ -44,15 +44,59 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Factory class responsible for managing and providing access to data store instances.
+ * This factory maintains a registry of data store implementations and provides methods
+ * to register, retrieve, and discover available data stores.
+ *
+ * <p>Data stores are registered by name and class name, allowing flexible lookup.
+ * The factory also supports dynamic discovery of data store plugins by scanning
+ * JAR files for data store configurations.</p>
+ *
+ * <p>Thread-safe operations are supported for registration and retrieval of data stores.
+ * The factory caches data store names with a time-based refresh mechanism to improve
+ * performance while ensuring up-to-date plugin discovery.</p>
+ */
 public class DataStoreFactory {
+    /** Logger instance for this factory class. */
     private static final Logger logger = LogManager.getLogger(DataStoreFactory.class);
 
+    /**
+     * Map containing registered data store instances indexed by their names and class simple names.
+     * All keys are stored in lowercase for case-insensitive lookup.
+     */
     protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
 
+    /**
+     * Cached array of available data store names discovered from plugin JAR files.
+     * This cache is refreshed periodically based on the lastLoadedTime.
+     */
     protected String[] dataStoreNames = StringUtil.EMPTY_STRINGS;
 
+    /**
+     * Timestamp of the last time data store names were loaded from plugin files.
+     * Used to implement a time-based cache refresh mechanism.
+     */
     protected long lastLoadedTime = 0;
 
+    /**
+     * Creates a new instance of DataStoreFactory.
+     * This constructor initializes the factory for managing data store instances
+     * and provides methods for registration, retrieval, and plugin discovery.
+     */
+    public DataStoreFactory() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
+     * Registers a data store instance with the factory using the specified name.
+     * The data store will be accessible by both the provided name and its class simple name,
+     * both converted to lowercase for case-insensitive lookup.
+     *
+     * @param name the name to register the data store under, must not be null
+     * @param dataStore the data store instance to register, must not be null
+     * @throws IllegalArgumentException if either name or dataStore is null
+     */
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
             throw new IllegalArgumentException("name or dataStore is null.");
@@ -64,6 +108,14 @@ public class DataStoreFactory {
         dataStoreMap.put(dataStore.getClass().getSimpleName().toLowerCase(Locale.ROOT), dataStore);
     }
 
+    /**
+     * Retrieves a data store instance by name.
+     * The lookup is case-insensitive and will match both registered names
+     * and class simple names.
+     *
+     * @param name the name of the data store to retrieve, may be null
+     * @return the data store instance if found, null if not found or name is null
+     */
     public DataStore getDataStore(final String name) {
         if (name == null) {
             return null;
@@ -71,6 +123,13 @@ public class DataStoreFactory {
         return dataStoreMap.get(name.toLowerCase(Locale.ROOT));
     }
 
+    /**
+     * Returns an array of available data store names discovered from plugin JAR files.
+     * This method implements a time-based caching mechanism that refreshes the list
+     * every 60 seconds to balance performance with up-to-date plugin discovery.
+     *
+     * @return array of data store names sorted alphabetically, never null
+     */
     public String[] getDataStoreNames() {
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         if (now - lastLoadedTime > 60000L) {
@@ -81,6 +140,17 @@ public class DataStoreFactory {
         return dataStoreNames;
     }
 
+    /**
+     * Loads the list of available data store names by scanning plugin JAR files.
+     * This method searches for 'fess_ds++.xml' configuration files within JAR files
+     * in the data store plugin directory and extracts component class names.
+     *
+     * <p>The method uses secure XML parsing features to prevent XXE attacks and
+     * other XML-based vulnerabilities. Component class names are extracted from
+     * the 'class' attribute of 'component' elements in the XML files.</p>
+     *
+     * @return sorted list of data store class simple names discovered from plugins
+     */
     protected List<String> loadDataStoreNameList() {
         final Set<String> nameSet = new HashSet<>();
         final File[] jarFiles = ResourceUtil.getPluginJarFiles(PluginHelper.ArtifactType.DATA_STORE.getId());

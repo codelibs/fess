@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.relatedquery;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for related query administration API.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Search term for related queries */
     public String term;
 
+    /** Related queries text */
     public String queries;
 
 }

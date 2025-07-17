@@ -41,8 +41,20 @@ import org.opensearch.monitor.os.OsProbe;
 import org.opensearch.monitor.os.OsStats;
 import org.opensearch.monitor.process.ProcessProbe;
 
+/**
+ * This class is a timer target for monitoring system-level statistics.
+ * It collects and logs information about the operating system, process,
+ * JVM, and search engine.
+ */
 public class SystemMonitorTarget extends MonitorTarget {
     private static final Logger logger = LogManager.getLogger(SystemMonitorTarget.class);
+
+    /**
+     * Constructs a new system monitor target.
+     */
+    public SystemMonitorTarget() {
+        super();
+    }
 
     @Override
     public void expired() {

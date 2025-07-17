@@ -31,19 +31,45 @@ import org.dbflute.cbean.result.ListResultBean;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing favorite log operations.
+ * Provides functionality to add URLs to user favorites and retrieve favorite URL lists.
+ * This service handles the persistence and retrieval of favorite log entries in the search system.
+ */
 public class FavoriteLogService {
+
+    /**
+     * Default constructor.
+     */
+    public FavoriteLogService() {
+        // Default constructor
+    }
+
+    /** System helper for common system operations and utilities. */
     @Resource
     protected SystemHelper systemHelper;
 
+    /** Behavior class for user information database operations. */
     @Resource
     protected UserInfoBhv userInfoBhv;
 
+    /** Behavior class for favorite log database operations. */
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
+    /** Configuration settings for the Fess search system. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Adds a URL to a user's favorite list.
+     * This method looks up the user by their code and creates a new favorite log entry
+     * using the provided lambda function to populate the favorite log data.
+     *
+     * @param userCode the unique code identifying the user
+     * @param favoriteLogLambda a lambda function that accepts UserInfo and FavoriteLog to populate the favorite log data
+     * @return true if the URL was successfully added to favorites, false if the user was not found
+     */
     public boolean addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
         return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
@@ -56,6 +82,15 @@ public class FavoriteLogService {
         }).orElse(false);
     }
 
+    /**
+     * Retrieves a list of URLs that are in the user's favorites from the provided URL list.
+     * This method filters the input URL list to return only those URLs that the specified user
+     * has marked as favorites.
+     *
+     * @param userCode the unique code identifying the user
+     * @param urlList the list of URLs to check against the user's favorites
+     * @return a list of URLs from the input list that are in the user's favorites, or an empty list if the user is not found or has no matching favorites
+     */
     public List<String> getUrlList(final String userCode, final List<String> urlList) {
         if (urlList.isEmpty()) {
             return urlList;

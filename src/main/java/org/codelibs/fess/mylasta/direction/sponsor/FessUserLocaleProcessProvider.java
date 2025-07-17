@@ -31,6 +31,8 @@ import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserLocaleProcessProvider;
 
 /**
+ * The provider of user locale process.
+ *
  * @author jflute
  */
 public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider {

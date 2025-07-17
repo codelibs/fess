@@ -37,15 +37,24 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
+ * Admin action for Path Map management.
+ *
  */
 public class AdminPathmapAction extends FessAdminAction {
 
+    /**
+     * Role identifier for admin path mapping operations.
+     */
     public static final String ROLE = "admin-pathmap";
 
     private static final Logger logger = LogManager.getLogger(AdminPathmapAction.class);
+
+    /**
+     * Default constructor for AdminPathmapAction.
+     */
+    public AdminPathmapAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -72,12 +81,25 @@ public class AdminPathmapAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the main path mapping administration page.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response for the path mapping list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays the path mapping list with pagination support.
+     *
+     * @param pageNumber the optional page number for pagination
+     * @param form the search form containing search criteria
+     * @return HTML response for the path mapping list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -91,6 +113,12 @@ public class AdminPathmapAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Performs a search for path mappings based on the provided criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -100,6 +128,12 @@ public class AdminPathmapAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all path mappings.
+     *
+     * @param form the search form to be reset
+     * @return HTML response for the path mapping list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -109,6 +143,12 @@ public class AdminPathmapAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Handles search pagination and data preparation for rendering.
+     *
+     * @param data the render data to populate with path mapping items
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
 
@@ -122,6 +162,11 @@ public class AdminPathmapAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new path mapping.
+     *
+     * @return HTML response for the path mapping creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -134,6 +179,12 @@ public class AdminPathmapAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing path mapping.
+     *
+     * @param form the edit form containing the path mapping ID and data
+     * @return HTML response for the path mapping edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -157,6 +208,13 @@ public class AdminPathmapAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a specific path mapping.
+     *
+     * @param crudMode the CRUD operation mode
+     * @param id the ID of the path mapping to display
+     * @return HTML response for the path mapping details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -179,6 +237,12 @@ public class AdminPathmapAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new path mapping based on the provided form data.
+     *
+     * @param form the create form containing the new path mapping data
+     * @return HTML response redirecting to the path mapping list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -200,6 +264,12 @@ public class AdminPathmapAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing path mapping with the provided form data.
+     *
+     * @param form the edit form containing the updated path mapping data
+     * @return HTML response redirecting to the path mapping list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -221,6 +291,12 @@ public class AdminPathmapAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a path mapping based on the provided form data.
+     *
+     * @param form the edit form containing the path mapping ID to delete
+     * @return HTML response redirecting to the path mapping list page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -265,6 +341,12 @@ public class AdminPathmapAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a PathMapping entity from the provided form data.
+     *
+     * @param form the create form containing path mapping data
+     * @return optional PathMapping entity populated with form data
+     */
     public static OptionalEntity<PathMapping> getPathMapping(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -280,6 +362,12 @@ public class AdminPathmapAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

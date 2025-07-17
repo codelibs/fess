@@ -34,13 +34,38 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin user management.
+ */
 public class ApiAdminUserAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminUserAction.class);
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminUserAction() {
+        super();
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+
+    /** The user service for managing user settings. */
     @Resource
     private UserService userService;
 
+    /**
+     * Retrieves user settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing user settings list
+     */
     // GET /api/admin/user/settings
     // PUT /api/admin/user/settings
     @Execute
@@ -53,6 +78,12 @@ public class ApiAdminUserAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific user setting by ID.
+     *
+     * @param id the ID of the user setting to retrieve
+     * @return JSON response containing the user setting
+     */
     // GET /api/admin/user/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -62,6 +93,12 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates a new user setting.
+     *
+     * @param body the user data to create
+     * @return JSON response containing the created user setting ID
+     */
     // POST /api/admin/user/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -83,6 +120,12 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Updates an existing user setting.
+     *
+     * @param body the user data to update
+     * @return JSON response containing the updated user setting ID
+     */
     // PUT /api/admin/user/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -104,6 +147,12 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes a user setting by ID.
+     *
+     * @param id the ID of the user setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/user/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -126,6 +175,12 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a User entity.
+     *
+     * @param entity the user entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final User entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

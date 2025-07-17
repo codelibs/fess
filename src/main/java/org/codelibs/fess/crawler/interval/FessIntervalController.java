@@ -19,40 +19,98 @@ import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * FessIntervalController extends DefaultIntervalController to provide
+ * Fess-specific interval control functionality for web crawling operations.
+ * This controller manages delays and timing for various crawling states
+ * including processing delays, queue waiting times, and new URL discovery.
+ */
 public class FessIntervalController extends DefaultIntervalController {
 
+    /**
+     * Default constructor.
+     */
+    public FessIntervalController() {
+        super();
+    }
+
+    /**
+     * Gets the delay time in milliseconds after processing a URL.
+     *
+     * @return the delay time in milliseconds after processing
+     */
     public long getDelayMillisAfterProcessing() {
         return delayMillisAfterProcessing;
     }
 
+    /**
+     * Sets the delay time in milliseconds after processing a URL.
+     *
+     * @param delayMillisAfterProcessing the delay time in milliseconds after processing
+     */
     public void setDelayMillisAfterProcessing(final long delayMillisAfterProcessing) {
         this.delayMillisAfterProcessing = delayMillisAfterProcessing;
     }
 
+    /**
+     * Gets the delay time in milliseconds when there are no URLs in the queue.
+     *
+     * @return the delay time in milliseconds when no URLs are available
+     */
     public long getDelayMillisAtNoUrlInQueue() {
         return delayMillisAtNoUrlInQueue;
     }
 
+    /**
+     * Sets the delay time in milliseconds when there are no URLs in the queue.
+     *
+     * @param delayMillisAtNoUrlInQueue the delay time in milliseconds when no URLs are available
+     */
     public void setDelayMillisAtNoUrlInQueue(final long delayMillisAtNoUrlInQueue) {
         this.delayMillisAtNoUrlInQueue = delayMillisAtNoUrlInQueue;
     }
 
+    /**
+     * Gets the delay time in milliseconds before processing a URL.
+     *
+     * @return the delay time in milliseconds before processing
+     */
     public long getDelayMillisBeforeProcessing() {
         return delayMillisBeforeProcessing;
     }
 
+    /**
+     * Sets the delay time in milliseconds before processing a URL.
+     *
+     * @param delayMillisBeforeProcessing the delay time in milliseconds before processing
+     */
     public void setDelayMillisBeforeProcessing(final long delayMillisBeforeProcessing) {
         this.delayMillisBeforeProcessing = delayMillisBeforeProcessing;
     }
 
+    /**
+     * Gets the delay time in milliseconds for waiting for new URLs.
+     *
+     * @return the delay time in milliseconds for waiting for new URLs
+     */
     public long getDelayMillisForWaitingNewUrl() {
         return delayMillisForWaitingNewUrl;
     }
 
+    /**
+     * Sets the delay time in milliseconds for waiting for new URLs.
+     *
+     * @param delayMillisForWaitingNewUrl the delay time in milliseconds for waiting for new URLs
+     */
     public void setDelayMillisForWaitingNewUrl(final long delayMillisForWaitingNewUrl) {
         this.delayMillisForWaitingNewUrl = delayMillisForWaitingNewUrl;
     }
 
+    /**
+     * Delays the crawler while waiting for new URLs to be available.
+     * This method calibrates CPU load, checks crawler status, applies
+     * interval control rules, and then calls the parent implementation.
+     */
     @Override
     protected void delayForWaitingNewUrl() {
         ComponentUtil.getSystemHelper().calibrateCpuLoad();

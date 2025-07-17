@@ -27,6 +27,11 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 
+/**
+ * A utility class for building query strings with proper escaping and parameters.
+ * This class provides methods to construct search queries from various parameters,
+ * handle special characters, and format the final query string for search operations.
+ */
 public class QueryStringBuilder {
 
     private static final String OR_ALT = " || ";
@@ -41,6 +46,21 @@ public class QueryStringBuilder {
 
     private String sortField;
 
+    /**
+     * Default constructor for QueryStringBuilder.
+     * Initializes a new instance with default settings for escape and sortField.
+     */
+    public QueryStringBuilder() {
+        // Default constructor
+    }
+
+    /**
+     * Quotes a string value if it contains spaces.
+     * Multi-word values are wrapped in double quotes with internal quotes replaced by spaces.
+     *
+     * @param value the string value to quote
+     * @return the quoted string if it contains spaces, otherwise the original value
+     */
     protected String quote(final String value) {
         if (value.split("\\s").length > 1) {
             return new StringBuilder().append('"').append(value.replace('"', ' ')).append('"').toString();
@@ -48,6 +68,13 @@ public class QueryStringBuilder {
         return value;
     }
 
+    /**
+     * Escapes special characters in a query string if escaping is enabled.
+     * Replaces reserved characters with their escaped equivalents based on the Constants.RESERVED array.
+     *
+     * @param value the query string to escape
+     * @return the escaped query string, or the original value if escaping is disabled
+     */
     protected String escapeQuery(final String value) {
         if (!escape) {
             return value;
@@ -61,6 +88,12 @@ public class QueryStringBuilder {
         return newValue;
     }
 
+    /**
+     * Builds the complete query string from the configured parameters.
+     * Combines base query, extra queries, field filters, and sort field into a single query string.
+     *
+     * @return the complete formatted query string
+     */
     public String build() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxQueryLength = fessConfig.getQueryMaxLengthAsInteger();
@@ -105,6 +138,13 @@ public class QueryStringBuilder {
         return baseQuery + " sort:" + sortField;
     }
 
+    /**
+     * Appends a query string to the query buffer with proper formatting.
+     * Handles OR operators and wraps complex queries in parentheses when necessary.
+     *
+     * @param queryBuf the StringBuilder to append to
+     * @param query the query string to append
+     */
     protected void appendQuery(final StringBuilder queryBuf, final String query) {
         String q = query;
         for (final String s : ComponentUtil.getFessConfig().getCrawlerDocumentSpaces()) {
@@ -121,6 +161,12 @@ public class QueryStringBuilder {
         }
     }
 
+    /**
+     * Builds the base query string from search parameters.
+     * Handles both condition-based queries and simple text queries, including related query expansion.
+     *
+     * @return the base query string
+     */
     protected String buildBaseQuery() {
         final StringBuilder queryBuf = new StringBuilder(255);
         if (params.hasConditionQuery()) {
@@ -150,6 +196,14 @@ public class QueryStringBuilder {
         return queryBuf.toString().trim();
     }
 
+    /**
+     * Appends various search conditions to the query buffer.
+     * Processes advanced search parameters like occurrence, phrases, OR queries, NOT queries,
+     * file types, site searches, and timestamp filters.
+     *
+     * @param queryBuf the StringBuilder to append conditions to
+     * @param conditions a map of condition types to their values
+     */
     protected void appendConditions(final StringBuilder queryBuf, final Map<String, String[]> conditions) {
         if (conditions == null) {
             return;
@@ -189,10 +243,25 @@ public class QueryStringBuilder {
                         .forEach(q -> queryBuf.append(" timestamp:").append(q.trim())));
     }
 
+    /**
+     * Checks if a value represents an occurrence-based search modifier.
+     * Currently supports "allintitle" and "allinurl" modifiers.
+     *
+     * @param value the value to check
+     * @return true if the value is an occurrence modifier, false otherwise
+     */
     protected boolean isOccurrence(final String value) {
         return "allintitle".equals(value) || "allinurl".equals(value);
     }
 
+    /**
+     * Escapes specific characters in a query string.
+     * Replaces each specified character with its escaped version (prefixed with backslash).
+     *
+     * @param q the query string to escape
+     * @param values the characters to escape
+     * @return the escaped query string
+     */
     protected String escape(final String q, final String... values) {
         String value = q;
         for (final String s : values) {
@@ -201,16 +270,37 @@ public class QueryStringBuilder {
         return value;
     }
 
+    /**
+     * Sets the search request parameters for this builder.
+     * This method follows the builder pattern for method chaining.
+     *
+     * @param params the search request parameters to use
+     * @return this QueryStringBuilder instance for method chaining
+     */
     public QueryStringBuilder params(final SearchRequestParams params) {
         this.params = params;
         return this;
     }
 
+    /**
+     * Sets the sort field for the query.
+     * This method follows the builder pattern for method chaining.
+     *
+     * @param sortField the field name to sort by
+     * @return this QueryStringBuilder instance for method chaining
+     */
     public QueryStringBuilder sortField(final String sortField) {
         this.sortField = sortField;
         return this;
     }
 
+    /**
+     * Sets whether to escape special characters in queries.
+     * This method follows the builder pattern for method chaining.
+     *
+     * @param escape true to enable escaping, false to disable
+     * @return this QueryStringBuilder instance for method chaining
+     */
     public QueryStringBuilder escape(final boolean escape) {
         this.escape = escape;
         return this;

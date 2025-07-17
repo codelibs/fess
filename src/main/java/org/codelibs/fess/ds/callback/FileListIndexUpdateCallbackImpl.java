@@ -61,23 +61,47 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Implementation of IndexUpdateCallback that handles file list index updates with concurrent processing.
+ * This callback processes file events (create, modify, delete) and manages document indexing and deletion
+ * operations in the search engine. It supports recursive crawling with configurable depth and access count limits.
+ *
+ * <p>The implementation uses an executor service for concurrent processing of file operations and maintains
+ * a cache of URLs to be deleted for batch processing. It handles redirect following and child URL discovery
+ * during the crawling process.</p>
+ */
 public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(FileListIndexUpdateCallbackImpl.class);
 
+    /** The underlying index update callback to delegate operations to. */
     protected IndexUpdateCallback indexUpdateCallback;
 
+    /** Factory for creating crawler clients to handle different URL schemes. */
     protected CrawlerClientFactory crawlerClientFactory;
 
+    /** List of URLs to be deleted, cached for batch processing. */
     protected List<String> deleteUrlList = new ArrayList<>(100);
 
+    /** Maximum size of the delete URL cache before batch deletion is triggered. */
     protected int maxDeleteDocumentCacheSize;
 
+    /** Maximum number of redirects to follow when processing URLs. */
     protected int maxRedirectCount;
 
+    /** Executor service for concurrent processing of file operations. */
     private final ExecutorService executor;
 
+    /** Timeout in seconds for executor service termination during shutdown. */
     private int executorTerminationTimeout = 300;
 
+    /**
+     * Constructs a new FileListIndexUpdateCallbackImpl with the specified parameters.
+     *
+     * @param indexUpdateCallback the underlying index update callback to delegate to
+     * @param crawlerClientFactory the factory for creating crawler clients
+     * @param nThreads the number of threads for the executor service (minimum 1)
+     */
     public FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback, final CrawlerClientFactory crawlerClientFactory,
             final int nThreads) {
         this.indexUpdateCallback = indexUpdateCallback;
@@ -88,6 +112,12 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         maxRedirectCount = fessConfig.getIndexerDataMaxRedirectCountAsInteger();
     }
 
+    /**
+     * Creates a new fixed thread pool executor with the specified number of threads.
+     *
+     * @param nThreads the number of threads in the pool
+     * @return a new ThreadPoolExecutor configured for this callback
+     */
     protected ExecutorService newFixedThreadPool(final int nThreads) {
         if (logger.isDebugEnabled()) {
             logger.debug("Executor Thread Pool: {}", nThreads);
@@ -125,10 +155,26 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         });
     }
 
+    /**
+     * Retrieves a parameter value from the data store parameters map.
+     *
+     * @param paramMap the parameter map to search
+     * @param key the parameter key to look up
+     * @param defaultValue the default value to return if key is not found
+     * @return the parameter value as a string, or the default value if not found
+     */
     protected String getParamValue(final DataStoreParams paramMap, final String key, final String defaultValue) {
         return paramMap.getAsString(key, defaultValue);
     }
 
+    /**
+     * Adds a document to the search index by crawling the specified URL and processing the content.
+     * This method handles recursive crawling with depth and access count limits, follows redirects,
+     * and processes child URLs discovered during crawling.
+     *
+     * @param paramMap the data store parameters containing crawling configuration
+     * @param dataMap the data map containing the document information including the URL
+     */
     protected void addDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlerStatsHelper crawlerStatsHelper = ComponentUtil.getCrawlerStatsHelper();
@@ -210,19 +256,41 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Represents a crawl request containing a URL and its depth in the crawling hierarchy.
+     * Used for managing recursive crawling operations.
+     */
     private static class CrawlRequest {
+        /** The URL to be crawled. */
         private final String url;
+        /** The depth of this URL in the crawling hierarchy. */
         private final int depth;
 
+        /**
+         * Constructs a new crawl request.
+         *
+         * @param url the URL to crawl
+         * @param depth the depth of this URL in the crawling hierarchy
+         */
         CrawlRequest(final String url, final int depth) {
             this.url = url;
             this.depth = depth;
         }
 
+        /**
+         * Gets the URL of this crawl request.
+         *
+         * @return the URL to be crawled
+         */
         public String getUrl() {
             return url;
         }
 
+        /**
+         * Gets the depth of this crawl request in the crawling hierarchy.
+         *
+         * @return the crawling depth
+         */
         public int getDepth() {
             return depth;
         }
@@ -250,6 +318,14 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Determines the maximum number of URLs to access during crawling.
+     * This method checks for explicit max_access_count parameter or recursive flag.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the data map containing crawling configuration
+     * @return the maximum access count (-1 for unlimited, 1 for single access, or specified count)
+     */
     protected long getMaxAccessCount(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         if (dataMap.remove(getParamValue(paramMap, "field.max_access_count", "max_access_count")) instanceof final String maxAccessCount
                 && StringUtil.isNotBlank(maxAccessCount)) {
@@ -275,6 +351,13 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         return 1L;
     }
 
+    /**
+     * Determines the maximum crawling depth from the configuration parameters.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the data map containing crawling configuration
+     * @return the maximum crawling depth (-1 for unlimited depth)
+     */
     protected int getMaxDepth(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
         if (dataMap.remove(getParamValue(paramMap, "field.max_depth", "max_depth")) instanceof final String maxDepth
                 && StringUtil.isNotBlank(maxDepth)) {
@@ -292,6 +375,18 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         return -1;
     }
 
+    /**
+     * Processes a single crawl request by executing the HTTP request, handling redirects,
+     * transforming the response data, and indexing the document.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the data map to be updated with response data
+     * @param url the URL to process
+     * @param client the crawler client to use for the request
+     * @return the redirect URL if a redirect occurred, null otherwise
+     * @throws ChildUrlsException if child URLs are discovered during processing
+     * @throws DataStoreCrawlingException if an error occurs during crawling
+     */
     protected String processRequest(final DataStoreParams paramMap, final Map<String, Object> dataMap, final String url,
             final CrawlerClient client) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -363,6 +458,13 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
     }
 
+    /**
+     * Merges response data from the crawler into the original data map.
+     * Handles special ".overwrite" suffix fields by removing the suffix and overwriting the base field.
+     *
+     * @param dataMap the original data map to merge into
+     * @param responseDataMap the response data map from the crawler
+     */
     protected void mergeResponseData(final Map<String, Object> dataMap, final Map<String, Object> responseDataMap) {
         dataMap.putAll(responseDataMap);
         dataMap.keySet().stream().filter(key -> key.endsWith(".overwrite")) //
@@ -373,6 +475,15 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 });
     }
 
+    /**
+     * Deletes a document from the search index based on the URL in the data map.
+     * For recursive operations, performs immediate deletion. For single documents,
+     * adds to the delete cache for batch processing.
+     *
+     * @param paramMap the data store parameters
+     * @param dataMap the data map containing the URL to delete
+     * @return true if the deletion was processed successfully, false otherwise
+     */
     protected boolean deleteDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
 
         if (logger.isDebugEnabled()) {
@@ -431,6 +542,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         indexUpdateCallback.commit();
     }
 
+    /**
+     * Performs batch deletion of all URLs in the delete cache.
+     * Clears the delete URL list after processing.
+     */
     protected void deleteDocuments() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
@@ -453,14 +568,29 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         return indexUpdateCallback.getExecuteTime();
     }
 
+    /**
+     * Sets the maximum size of the delete document cache.
+     *
+     * @param maxDeleteDocumentCacheSize the maximum cache size before batch deletion is triggered
+     */
     public void setMaxDeleteDocumentCacheSize(final int maxDeleteDocumentCacheSize) {
         this.maxDeleteDocumentCacheSize = maxDeleteDocumentCacheSize;
     }
 
+    /**
+     * Sets the maximum number of redirects to follow when processing URLs.
+     *
+     * @param maxRedirectCount the maximum redirect count
+     */
     public void setMaxRedirectCount(final int maxRedirectCount) {
         this.maxRedirectCount = maxRedirectCount;
     }
 
+    /**
+     * Sets the timeout for executor service termination during shutdown.
+     *
+     * @param executorTerminationTimeout the timeout in seconds
+     */
     public void setExecutorTerminationTimeout(final int executorTerminationTimeout) {
         this.executorTerminationTimeout = executorTerminationTimeout;
     }

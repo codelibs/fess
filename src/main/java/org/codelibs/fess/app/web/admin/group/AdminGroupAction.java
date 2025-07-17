@@ -42,32 +42,54 @@ import org.lastaflute.web.validation.VaMessenger;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for Group management.
+ *
  */
 public class AdminGroupAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminGroupAction() {
+        super();
+    }
+
+    /** The role name for group administration. */
     public static final String ROLE = "admin-group";
 
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(AdminGroupAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for group operations. */
     @Resource
     private GroupService groupService;
+
+    /** Pager for group list pagination. */
     @Resource
     private GroupPager groupPager;
 
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Sets up HTML data for rendering, including help link.
+     *
+     * @param runtime the action runtime
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameGroup()));
     }
 
+    /**
+     * Returns the action role for this admin action.
+     *
+     * @return the role name
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
@@ -76,12 +98,24 @@ public class AdminGroupAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the group list page.
+     *
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays the group list with pagination.
+     *
+     * @param pageNumber the page number
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -95,6 +129,12 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches groups based on the form criteria.
+     *
+     * @param form the search form
+     * @return HTML response for the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -104,6 +144,12 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays the default list.
+     *
+     * @param form the search form
+     * @return HTML response for the reset list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -113,6 +159,12 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up data for search result pagination.
+     *
+     * @param data the render data
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "groupItems", groupService.getGroupList(groupPager)); // page navi
 
@@ -126,6 +178,11 @@ public class AdminGroupAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the create new group page.
+     *
+     * @return HTML response for the create page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -138,6 +195,12 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the edit group page.
+     *
+     * @param form the edit form
+     * @return HTML response for the edit page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -161,6 +224,13 @@ public class AdminGroupAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the group details page.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the group ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -183,6 +253,12 @@ public class AdminGroupAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new group.
+     *
+     * @param form the create form
+     * @return HTML response after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -205,6 +281,12 @@ public class AdminGroupAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing group.
+     *
+     * @param form the edit form
+     * @return HTML response after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -227,6 +309,12 @@ public class AdminGroupAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a group.
+     *
+     * @param form the edit form
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -252,6 +340,12 @@ public class AdminGroupAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Gets a group entity based on the form.
+     *
+     * @param form the create form
+     * @return optional group entity
+     */
     private static OptionalEntity<Group> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -270,6 +364,12 @@ public class AdminGroupAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Gets a group entity from the form with attributes.
+     *
+     * @param form the create form
+     * @return optional group entity
+     */
     public static OptionalEntity<Group> getGroup(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
@@ -281,6 +381,12 @@ public class AdminGroupAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -289,6 +395,12 @@ public class AdminGroupAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Validates group attributes using LDAP manager.
+     *
+     * @param attributes the attributes to validate
+     * @param throwError the error handler
+     */
     public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
         ComponentUtil.getLdapManager().validateGroupAttributes(Long.class, attributes,
                 s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));
@@ -298,6 +410,11 @@ public class AdminGroupAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Returns HTML response for the list page.
+     *
+     * @return HTML response for the list page
+     */
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
             RenderDataUtil.register(data, "groupItems", groupService.getGroupList(groupPager)); // page navi
@@ -308,10 +425,20 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the edit page.
+     *
+     * @return HTML response for the edit page
+     */
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminGroup_AdminGroupEditJsp);
     }
 
+    /**
+     * Returns HTML response for the details page.
+     *
+     * @return HTML response for the details page
+     */
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminGroup_AdminGroupDetailsJsp);
     }

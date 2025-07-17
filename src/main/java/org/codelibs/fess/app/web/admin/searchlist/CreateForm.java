@@ -21,17 +21,36 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
- * @author shinsuke
+ * The create form for Search List.
+ *
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+    }
+
+    /**
+     * The CRUD mode for the form.
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The document data for search list operations.
+     */
     public Map<String, Object> doc;
 
+    /**
+     * The search query string.
+     */
     public String q;
 
+    /**
+     * Initializes the form with default values for search list operations.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

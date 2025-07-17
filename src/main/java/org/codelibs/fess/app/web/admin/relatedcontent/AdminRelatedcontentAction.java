@@ -38,10 +38,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
+ * Admin action for Related Content management.
+ *
  */
 public class AdminRelatedcontentAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminRelatedcontentAction() {
+        super();
+    }
+
+    /** Role name for admin related content operations */
     public static final String ROLE = "admin-relatedcontent";
 
     private static final Logger logger = LogManager.getLogger(AdminRelatedcontentAction.class);
@@ -71,12 +80,24 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the related content management index page.
+     *
+     * @return HTML response for the related content list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of related content items.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the related content list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -90,6 +111,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for related content items based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered related content results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -99,6 +126,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all related content items.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset related content list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -108,6 +141,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up search paging data for rendering the related content list.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing current search criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "relatedContentItems", relatedContentService.getRelatedContentList(relatedContentPager)); // page navi
 
@@ -121,6 +160,11 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new related content item.
+     *
+     * @return HTML response for the create form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -133,6 +177,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing related content item.
+     *
+     * @param form the edit form containing the ID of the item to edit
+     * @return HTML response for the edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -156,6 +206,13 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a related content item.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the related content item to display
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -178,6 +235,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new related content item.
+     *
+     * @param form the create form containing the new item data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -199,6 +262,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing related content item.
+     *
+     * @param form the edit form containing the updated item data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -220,6 +289,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a related content item.
+     *
+     * @param form the edit form containing the ID of the item to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -265,6 +340,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a RelatedContent entity from the provided form data.
+     *
+     * @param form the form containing the related content data
+     * @return optional entity containing the related content data, or empty if creation fails
+     */
     public static OptionalEntity<RelatedContent> getRelatedContent(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -280,6 +361,12 @@ public class AdminRelatedcontentAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

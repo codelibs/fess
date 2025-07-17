@@ -18,14 +18,34 @@ package org.codelibs.fess.api;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
+/**
+ * Wrapper for HTTP servlet requests in web API context.
+ * This class extends HttpServletRequestWrapper to provide custom servlet path handling
+ * for web API requests.
+ */
 public class WebApiRequest extends HttpServletRequestWrapper {
+    /**
+     * The custom servlet path for this web API request.
+     */
     protected String servletPath;
 
+    /**
+     * Constructs a WebApiRequest with the specified request and servlet path.
+     *
+     * @param request The original HTTP servlet request
+     * @param servletPath The custom servlet path for this web API request
+     */
     public WebApiRequest(final HttpServletRequest request, final String servletPath) {
         super(request);
         this.servletPath = servletPath;
     }
 
+    /**
+     * Gets the servlet path for this request.
+     * Returns the custom servlet path unless the query string contains SAStruts.method.
+     *
+     * @return The servlet path
+     */
     @Override
     public String getServletPath() {
         if (getQueryString() != null && getQueryString().indexOf("SAStruts.method") != -1) {

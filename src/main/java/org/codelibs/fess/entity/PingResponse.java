@@ -30,6 +30,9 @@ import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.opensearch.cluster.health.ClusterHealthStatus;
 import org.opensearch.common.xcontent.XContentType;
 
+/**
+ * Response entity for ping operations.
+ */
 public class PingResponse {
     private static final String CLUSTER_NAME = "cluster_name";
     private static final String STATUS = "status";
@@ -55,6 +58,11 @@ public class PingResponse {
 
     private String message = StringUtil.EMPTY;
 
+    /**
+     * Creates a ping response from cluster health response.
+     *
+     * @param response the cluster health response
+     */
     public PingResponse(final ClusterHealthResponse response) {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
         clusterName = response.getClusterName();
@@ -119,18 +127,38 @@ public class PingResponse {
         }
     }
 
+    /**
+     * Gets the status.
+     *
+     * @return the status
+     */
     public int getStatus() {
         return status;
     }
 
+    /**
+     * Gets the cluster name.
+     *
+     * @return the cluster name
+     */
     public String getClusterName() {
         return clusterName;
     }
 
+    /**
+     * Gets the cluster status.
+     *
+     * @return the cluster status
+     */
     public String getClusterStatus() {
         return clusterStatus;
     }
 
+    /**
+     * Gets the message.
+     *
+     * @return the message
+     */
     public String getMessage() {
         return message;
     }

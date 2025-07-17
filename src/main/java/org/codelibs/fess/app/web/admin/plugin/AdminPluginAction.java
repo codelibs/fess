@@ -41,8 +41,23 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.exception.ValidationErrorException;
 
+/**
+ * Admin action for Plugin management.
+ * This class provides functionality for installing, deleting, and managing plugins in the Fess system.
+ *
+ */
 public class AdminPluginAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminPluginAction() {
+        super();
+    }
+
+    /**
+     * Role identifier for plugin administration.
+     */
     public static final String ROLE = "admin-plugin";
 
     private static final Logger logger = LogManager.getLogger(AdminPluginAction.class);
@@ -55,11 +70,21 @@ public class AdminPluginAction extends FessAdminAction {
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNamePlugin()));
     }
 
+    /**
+     * Returns the action role for this controller.
+     *
+     * @return the role identifier for plugin administration
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
     }
 
+    /**
+     * Displays the plugin management index page.
+     *
+     * @return HTML response for the index page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -67,6 +92,12 @@ public class AdminPluginAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Deletes the specified plugin.
+     *
+     * @param form the delete form containing plugin information
+     * @return HTML response redirecting to the plugin list
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final DeleteForm form) {
@@ -78,6 +109,12 @@ public class AdminPluginAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Installs a plugin from either an uploaded JAR file or from the available artifacts.
+     *
+     * @param form the install form containing plugin installation details
+     * @return HTML response redirecting to the plugin list
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse install(final InstallForm form) {
@@ -134,6 +171,11 @@ public class AdminPluginAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Displays the plugin installation page with available plugins.
+     *
+     * @return HTML response for the plugin installation page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse installplugin() {
@@ -160,6 +202,11 @@ public class AdminPluginAction extends FessAdminAction {
                 .renderWith(data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
     }
 
+    /**
+     * Retrieves all available artifacts from all plugin types.
+     *
+     * @return list of maps containing artifact information
+     */
     public static List<Map<String, String>> getAllAvailableArtifacts() {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
@@ -170,6 +217,11 @@ public class AdminPluginAction extends FessAdminAction {
         return result;
     }
 
+    /**
+     * Retrieves all installed artifacts from all plugin types.
+     *
+     * @return list of maps containing installed artifact information
+     */
     public static List<Map<String, String>> getAllInstalledArtifacts() {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
@@ -180,6 +232,12 @@ public class AdminPluginAction extends FessAdminAction {
         return result;
     }
 
+    /**
+     * Converts an Artifact object to a Map representation.
+     *
+     * @param artifact the artifact to convert
+     * @return map containing artifact properties
+     */
     public static Map<String, String> beanToMap(final Artifact artifact) {
         final Map<String, String> item = new HashMap<>();
         item.put("type", artifact.getType().getId());
@@ -195,6 +253,12 @@ public class AdminPluginAction extends FessAdminAction {
         return ComponentUtil.getPluginHelper().getArtifact(values[0], values[1]);
     }
 
+    /**
+     * Installs the specified artifact in a background thread.
+     * Also removes any previously installed versions of the same plugin.
+     *
+     * @param artifact the artifact to install
+     */
     public static void installArtifact(final Artifact artifact) {
         new Thread(() -> {
             final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
@@ -216,6 +280,11 @@ public class AdminPluginAction extends FessAdminAction {
         }).start();
     }
 
+    /**
+     * Deletes the specified artifact in a background thread.
+     *
+     * @param artifact the artifact to delete
+     */
     public static void deleteArtifact(final Artifact artifact) {
         new Thread(() -> {
             try {

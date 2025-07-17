@@ -23,24 +23,45 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * The create form for Bad Word.
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /**
+     * The CRUD mode for form processing (create, update, delete operations).
+     */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /**
+     * The bad word to be filtered from search suggestions.
+     */
     @Required
     @Pattern(regexp = "[^\\s]+")
     public String suggestWord;
 
+    /**
+     * The username of the user who created this bad word entry.
+     */
     @Size(max = 1000)
     public String createdBy;
 
+    /**
+     * The timestamp when this bad word entry was created.
+     */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values including current user and timestamp.
+     */
     public void initialize() {
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

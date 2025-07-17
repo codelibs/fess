@@ -16,15 +16,29 @@
 package org.codelibs.fess.app.web.admin.fileconfig;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * The search form for File Config.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The name field for searching file configurations.
+     */
     public String name;
 
+    /**
+     * The paths field for searching file configurations.
+     */
     public String paths;
 
+    /**
+     * The description field for searching file configurations.
+     */
     public String description;
 
 }

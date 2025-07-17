@@ -15,14 +15,28 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * An exception thrown when an LDAP operation fails.
+ */
 public class LdapOperationException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new LDAP operation exception with the specified detail message and cause.
+     *
+     * @param message The detail message.
+     * @param cause The cause.
+     */
     public LdapOperationException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new LDAP operation exception with the specified detail message.
+     *
+     * @param message The detail message.
+     */
     public LdapOperationException(final String message) {
         super(message);
     }

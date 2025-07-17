@@ -42,15 +42,23 @@ import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
- * @author codelibs
- * @author jflute
+ * Admin action for Design management.
+ *
  */
 public class AdminDesignAction extends FessAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public AdminDesignAction() {
+        super();
+    }
 
     private static final String CACHE_AND_SESSION_INVALIDATE_STATEMENT = "<!--CACHE_AND_SESSION_INVALIDATE-->";
 
     private static final String TRY_STATEMENT = "<!--TRY-->";
 
+    /** The role for this action. */
     public static final String ROLE = "admin-design";
 
     private static final Logger logger = LogManager.getLogger(AdminDesignAction.class);
@@ -106,6 +114,10 @@ public class AdminDesignAction extends FessAdminAction {
     // ===================================================================================
     //                                                                             Execute
     //                                                                             =======
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -113,6 +125,10 @@ public class AdminDesignAction extends FessAdminAction {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
+    /**
+     * Go back to the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back() {
@@ -120,6 +136,11 @@ public class AdminDesignAction extends FessAdminAction {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
+    /**
+     * Upload a design file.
+     * @param form The upload form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -198,6 +219,11 @@ public class AdminDesignAction extends FessAdminAction {
         return false;
     }
 
+    /**
+     * Download a design file.
+     * @param form The file access form.
+     * @return The stream response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public StreamResponse download(final FileAccessForm form) {
@@ -215,6 +241,11 @@ public class AdminDesignAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Delete a design file.
+     * @param form The file access form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final FileAccessForm form) {
@@ -235,6 +266,11 @@ public class AdminDesignAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                 Edit
     //                                                ------
+    /**
+     * Show the edit page.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -249,6 +285,11 @@ public class AdminDesignAction extends FessAdminAction {
         return asEditHtml(form);
     }
 
+    /**
+     * Show the edit page with the default content.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse editAsUseDefault(final EditForm form) {
@@ -263,6 +304,11 @@ public class AdminDesignAction extends FessAdminAction {
         return asEditHtml(form);
     }
 
+    /**
+     * Update a design file.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -356,12 +402,22 @@ public class AdminDesignAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Decode the JSP content.
+     * @param value The value.
+     * @return The decoded value.
+     */
     public static String decodeJsp(final String value) {
         return value.replaceAll("<%(?![@-])([\\s\\S]*?)%>", "&lt;%$1%&gt;").replaceAll("<%=([\\s\\S]*?)%>", "&lt;%=$1%&gt;")
                 .replace(TRY_STATEMENT, "<% try{ %>")
                 .replace(CACHE_AND_SESSION_INVALIDATE_STATEMENT, "<% }catch(Exception e){session.invalidate();} %>");
     }
 
+    /**
+     * Encode the JSP content.
+     * @param value The value.
+     * @return The encoded value.
+     */
     public static String encodeJsp(final String value) {
         return value.replace("<% try{ %>", TRY_STATEMENT).replace("<% }catch(Exception e){session.invalidate();} %>",
                 CACHE_AND_SESSION_INVALIDATE_STATEMENT);

@@ -49,12 +49,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
- * @author Keiichi Watanabe
+ * Admin action for Web Config management.
+ *
  */
 public class AdminWebconfigAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminWebconfigAction() {
+        super();
+    }
+
+    /** Role name for admin web config operations */
     public static final String ROLE = "admin-webconfig";
 
     private static final Logger logger = LogManager.getLogger(AdminWebconfigAction.class);
@@ -90,12 +97,25 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the web config management index page.
+     *
+     * @param form the search form for filtering
+     * @return HTML response for the web config list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
         return asListHtml();
     }
 
+    /**
+     * Displays a paginated list of web crawler configurations.
+     *
+     * @param pageNumber the page number to display (optional)
+     * @param form the search form containing filter criteria
+     * @return HTML response with the web config list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -109,6 +129,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches for web crawler configurations based on the provided search criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with filtered web config results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -118,6 +144,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays all web crawler configurations.
+     *
+     * @param form the search form to reset
+     * @return HTML response with the reset web config list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -127,6 +159,13 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data for the web config search results.
+     * Registers web config items and restores search criteria from the pager.
+     *
+     * @param data the render data to populate with search results
+     * @param form the search form containing filter criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
 
@@ -140,6 +179,11 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new web crawler configuration.
+     *
+     * @return HTML response for the web config creation form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew() {
@@ -165,6 +209,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing web crawler configuration.
+     *
+     * @param form the edit form containing web config ID
+     * @return HTML response for the web config edit form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -196,6 +246,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details of a web crawler configuration.
+     *
+     * @param crudMode the CRUD mode for the operation
+     * @param id the ID of the web config to display
+     * @return HTML response for the web config details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -224,6 +281,12 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new web crawler configuration.
+     *
+     * @param form the create form containing the new web config data
+     * @return HTML response redirecting to the list page after creation
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -245,6 +308,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Updates an existing web crawler configuration.
+     *
+     * @param form the edit form containing the updated web config data
+     * @return HTML response redirecting to the list page after update
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -266,6 +335,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes a web crawler configuration.
+     *
+     * @param form the edit form containing the ID of the web config to delete
+     * @return HTML response redirecting to the list page after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -291,6 +366,14 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
+    /**
+     * Retrieves or creates a WebConfig entity based on the form's CRUD mode.
+     *
+     * @param form the form containing the web config data
+     * @param username the username of the current user
+     * @param currentTime the current timestamp
+     * @return an optional WebConfig entity
+     */
     public static OptionalEntity<WebConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
@@ -310,6 +393,13 @@ public class AdminWebconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Converts a form to a WebConfig entity with proper user and timestamp information.
+     * Also processes permissions and virtual hosts from form fields.
+     *
+     * @param form the form containing the web config data
+     * @return an optional WebConfig entity with updated metadata
+     */
     public static OptionalEntity<WebConfig> getWebConfig(final CreateForm form) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -330,6 +420,12 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Registers available roles and labels for use in web config forms.
+     * Includes role types, label types, and label setting configuration.
+     *
+     * @param data the render data to register the roles and labels with
+     */
     protected void registerRolesAndLabels(final RenderData data) {
         RenderDataUtil.register(data, "labelSettingEnabled", fessConfig.isFormAdminLabelInConfigEnabled());
         RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
@@ -339,6 +435,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the provided CRUD mode matches the expected mode.
+     * Throws a validation error if the modes do not match.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

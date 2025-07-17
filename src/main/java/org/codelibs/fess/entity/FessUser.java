@@ -17,20 +17,48 @@ package org.codelibs.fess.entity;
 
 import java.io.Serializable;
 
+/**
+ * Interface representing a Fess user with authentication and authorization information.
+ * Provides access to user name, roles, groups, and permissions.
+ */
 public interface FessUser extends Serializable {
 
+    /**
+     * Gets the user's display name.
+     * @return The user's name.
+     */
     String getName();
 
+    /**
+     * Gets the user's assigned role names.
+     * @return Array of role names.
+     */
     String[] getRoleNames();
 
+    /**
+     * Gets the user's assigned group names.
+     * @return Array of group names.
+     */
     String[] getGroupNames();
 
+    /**
+     * Gets the user's permissions.
+     * @return Array of permission strings.
+     */
     String[] getPermissions();
 
+    /**
+     * Determines if the user's information can be edited.
+     * @return True if the user's information is editable, false otherwise.
+     */
     default boolean isEditable() {
         return false;
     }
 
+    /**
+     * Refreshes the user's information from the underlying data source.
+     * @return True if refresh was successful, false otherwise.
+     */
     default boolean refresh() {
         return false;
     }

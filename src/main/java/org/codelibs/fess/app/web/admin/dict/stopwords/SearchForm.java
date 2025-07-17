@@ -18,10 +18,19 @@ package org.codelibs.fess.app.web.admin.dict.stopwords;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author ma2tani
+ * The search form for Stopwords.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The dictionary ID field for stopwords dictionary operations.
+     */
     @Required
     public String dictId;
 }

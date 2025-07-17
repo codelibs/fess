@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.searchlist;
 
 import org.codelibs.fess.app.web.admin.searchlist.EditForm;
 
+/**
+ * Request body class for search list edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for search list management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

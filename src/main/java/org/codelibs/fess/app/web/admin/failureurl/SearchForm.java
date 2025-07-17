@@ -16,17 +16,34 @@
 package org.codelibs.fess.app.web.admin.failureurl;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * The search form for Failure URL.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The URL field for searching failure URLs.
+     */
     public String url;
 
+    /**
+     * The minimum error count field for filtering failure URLs.
+     */
     public String errorCountMin;
 
+    /**
+     * The maximum error count field for filtering failure URLs.
+     */
     public String errorCountMax;
 
+    /**
+     * The error name field for searching failure URLs by error type.
+     */
     public String errorName;
 
 }

@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
 import org.codelibs.fess.app.web.admin.dict.mapping.EditForm;
 
+/**
+ * Request body class for mapping dictionary edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for mapping dictionary management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

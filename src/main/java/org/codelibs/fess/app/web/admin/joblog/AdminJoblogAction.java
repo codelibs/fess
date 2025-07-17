@@ -33,30 +33,51 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
+ * Admin action for Job Log.
+ *
  */
 public class AdminJoblogAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminJoblogAction() {
+        super();
+    }
+
+    /** The role name for job log administration. */
     public static final String ROLE = "admin-joblog";
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** Service for job log operations. */
     @Resource
     private JobLogService jobLogService;
+
+    /** Pager for job log list pagination. */
     @Resource
     private JobLogPager jobLogPager;
 
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
+    /**
+     * Sets up HTML data for rendering, including help link.
+     *
+     * @param runtime the action runtime
+     */
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameJoblog()));
     }
 
+    /**
+     * Returns the action role for this admin action.
+     *
+     * @return the role name
+     */
     @Override
     protected String getActionRole() {
         return ROLE;
@@ -65,6 +86,12 @@ public class AdminJoblogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the job log list page.
+     *
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -72,6 +99,13 @@ public class AdminJoblogAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Displays the job log list with pagination.
+     *
+     * @param pageNumber the page number
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
@@ -82,6 +116,12 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Searches job logs based on the form criteria.
+     *
+     * @param form the search form
+     * @return HTML response for the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -92,6 +132,12 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and displays the default list.
+     *
+     * @param form the search form
+     * @return HTML response for the reset list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -102,6 +148,12 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns to the job log list page.
+     *
+     * @param form the search form
+     * @return HTML response for the list page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
@@ -111,6 +163,12 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up data for search result pagination.
+     *
+     * @param data the render data
+     * @param form the search form
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
 
@@ -128,6 +186,13 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the job log details page.
+     *
+     * @param crudMode the CRUD mode
+     * @param id the job log ID
+     * @return HTML response for the details page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -150,6 +215,12 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Deletes a job log.
+     *
+     * @param form the edit form
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -164,6 +235,11 @@ public class AdminJoblogAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Deletes all job logs.
+     *
+     * @return HTML response after deletion
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse deleteall() {
@@ -184,6 +260,12 @@ public class AdminJoblogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -196,6 +278,11 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Returns HTML response for the list page.
+     *
+     * @return HTML response for the list page
+     */
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             RenderDataUtil.register(data, "jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
@@ -206,6 +293,11 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Returns HTML response for the details page.
+     *
+     * @return HTML response for the details page
+     */
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp);
     }

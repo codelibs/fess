@@ -17,6 +17,16 @@ package org.codelibs.fess.app.web.api.admin.dict.synonym;
 
 import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
+/**
+ * Search request body for synonym dictionary administration.
+ * Extends BaseSearchDictBody with synonym dictionary-specific search parameters.
+ */
 public class SearchBody extends BaseSearchDictBody {
 
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        super();
+    }
 }

@@ -19,14 +19,39 @@ import java.util.Map;
 
 import org.codelibs.fess.entity.DataStoreParams;
 
+/**
+ * Callback interface for handling index update operations during data store processing.
+ * This interface provides methods for storing documents, tracking processing metrics,
+ * and committing changes to the search index.
+ */
 public interface IndexUpdateCallback {
 
+    /**
+     * Stores a document in the search index with the specified parameters and data.
+     *
+     * @param paramMap the data store parameters containing configuration and metadata
+     * @param dataMap the document data to be indexed as key-value pairs
+     */
     void store(DataStoreParams paramMap, Map<String, Object> dataMap);
 
+    /**
+     * Returns the total number of documents processed by this callback.
+     *
+     * @return the document count
+     */
     long getDocumentSize();
 
+    /**
+     * Returns the total execution time for index update operations.
+     *
+     * @return the execution time in milliseconds
+     */
     long getExecuteTime();
 
+    /**
+     * Commits all pending index update operations to ensure data persistence.
+     * This method should be called after all documents have been stored.
+     */
     void commit();
 
 }

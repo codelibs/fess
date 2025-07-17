@@ -38,8 +38,19 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.sort.SortOrder;
 
+/**
+ * Command class for handling term query execution and conversion.
+ * This class processes Lucene TermQuery objects and converts them to OpenSearch QueryBuilder instances.
+ */
 public class TermQueryCommand extends QueryCommand {
     private static final Logger logger = LogManager.getLogger(TermQueryCommand.class);
+
+    /**
+     * Default constructor for TermQueryCommand.
+     */
+    public TermQueryCommand() {
+        super();
+    }
 
     private static final String SORT_FIELD = "sort";
 
@@ -60,6 +71,14 @@ public class TermQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a TermQuery to a QueryBuilder with the given boost value.
+     *
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
         final String field = getSearchField(context.getDefaultField(), termQuery.getTerm().field());
         final String text = termQuery.getTerm().text();
@@ -67,6 +86,17 @@ public class TermQueryCommand extends QueryCommand {
         return convertTermQuery(fessConfig, context, termQuery, boost, field, text);
     }
 
+    /**
+     * Converts a TermQuery to a QueryBuilder with field-specific handling.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertTermQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
@@ -95,6 +125,17 @@ public class TermQueryCommand extends QueryCommand {
         return convertTextQuery(fessConfig, context, termQuery, boost, field, text);
     }
 
+    /**
+     * Converts a term query to a text-based match phrase query.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertTextQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         context.addFieldLog(field, text);
@@ -102,6 +143,17 @@ public class TermQueryCommand extends QueryCommand {
         return buildMatchPhraseQuery(field, text).boost(boost);
     }
 
+    /**
+     * Converts a term query to a keyword-based exact term query.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertKeywordQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         context.addFieldLog(field, text);
@@ -109,6 +161,17 @@ public class TermQueryCommand extends QueryCommand {
         return QueryBuilders.termQuery(field, text).boost(boost);
     }
 
+    /**
+     * Converts a term query to a wildcard query for URL field matching.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertWildcardQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         final String urlField = fessConfig.getIndexFieldUrl();
@@ -118,11 +181,33 @@ public class TermQueryCommand extends QueryCommand {
         return QueryBuilders.wildcardQuery(urlField, queryString).boost(boost);
     }
 
+    /**
+     * Converts a term query ending with asterisk to a prefix query.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertPrefixQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         return getQueryProcessor().execute(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
     }
 
+    /**
+     * Converts a sort field query to add sort criteria to the context.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return null as this method only adds sort criteria
+     */
     protected QueryBuilder convertSortQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         split(text, ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(t -> {
@@ -156,6 +241,17 @@ public class TermQueryCommand extends QueryCommand {
         return null;
     }
 
+    /**
+     * Converts a term query for the default field with fuzzy matching support.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertDefaultTermQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         context.addFieldLog(field, text);
@@ -180,6 +276,17 @@ public class TermQueryCommand extends QueryCommand {
         return defaultQuery;
     }
 
+    /**
+     * Converts a site field query to a prefix query for site filtering.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param termQuery the term query to convert
+     * @param boost the boost value to apply
+     * @param field the field name
+     * @param text the query text
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertSiteQuery(final FessConfig fessConfig, final QueryContext context, final TermQuery termQuery,
             final float boost, final String field, final String text) {
         final String siteField = fessConfig.getIndexFieldSite();

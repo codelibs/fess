@@ -23,8 +23,26 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Default implementation of CORS (Cross-Origin Resource Sharing) handler.
+ * This handler automatically registers itself for origins configured in the system
+ * and applies standard CORS headers based on the application configuration.
+ */
 public class DefaultCorsHandler extends CorsHandler {
 
+    /**
+     * Creates a new instance of DefaultCorsHandler.
+     * This constructor initializes the default CORS handler for applying
+     * standard CORS headers based on application configuration.
+     */
+    public DefaultCorsHandler() {
+        super();
+    }
+
+    /**
+     * Registers this CORS handler with the factory for configured allowed origins.
+     * This method is automatically called after bean initialization.
+     */
     @PostConstruct
     public void register() {
         final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
@@ -32,6 +50,14 @@ public class DefaultCorsHandler extends CorsHandler {
         fessConfig.getApiCorsAllowOriginList().forEach(s -> factory.add(s, this));
     }
 
+    /**
+     * Processes the CORS request by adding standard CORS headers to the response.
+     * Headers include allowed origin, methods, headers, max age, and credentials setting.
+     *
+     * @param origin the origin of the request
+     * @param request the servlet request
+     * @param response the servlet response to add CORS headers to
+     */
     @Override
     public void process(final String origin, final ServletRequest request, final ServletResponse response) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

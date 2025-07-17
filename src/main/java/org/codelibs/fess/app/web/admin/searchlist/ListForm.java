@@ -34,36 +34,53 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * The list form for Search List.
  */
 public class ListForm extends SearchRequestParams {
 
+    /**
+     * Default constructor.
+     */
+    public ListForm() {
+        super();
+    }
+
+    /** The search query string. */
     @Size(max = 1000)
     public String q;
 
+    /** The sort field and direction. */
     public String sort;
 
+    /** The start position for search results. */
     @ValidateTypeFailure
     public Integer start;
 
+    /** The offset for pagination. */
     @ValidateTypeFailure
     public Integer offset;
 
+    /** The page number. */
     @ValidateTypeFailure
     public Integer pn;
 
+    /** The number of results to display. */
     @ValidateTypeFailure
     public Integer num;
 
+    /** The languages. */
     public String[] lang;
 
+    /** The fields. */
     public Map<String, String[]> fields = new HashMap<>();
 
+    /** The conditions. */
     public Map<String, String[]> as = new HashMap<>();
 
+    /** The extra queries. */
     public String[] ex_q;
 
+    /** The similar document hash. */
     public String sdh;
 
     @Override
@@ -139,6 +156,9 @@ public class ListForm extends SearchRequestParams {
         return sort;
     }
 
+    /**
+     * Initializes the form with default values from configuration.
+     */
     public void initialize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (start == null) {

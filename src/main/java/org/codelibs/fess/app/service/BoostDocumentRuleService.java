@@ -30,14 +30,31 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for boost document rule management operations.
+ * Provides CRUD operations for boost document rules.
+ */
 public class BoostDocumentRuleService extends FessAppService {
+    /**
+     * Default constructor for BoostDocumentRuleService.
+     */
+    public BoostDocumentRuleService() {
+        super();
+    }
 
+    /** Database behavior for boost document rule operations. */
     @Resource
     protected BoostDocumentRuleBhv boostDocumentRuleBhv;
 
+    /** Fess configuration. */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a paginated list of boost document rules.
+     * @param boostDocumentRulePager The pager with search criteria and pagination settings.
+     * @return List of boost document rules matching the criteria.
+     */
     public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocPager boostDocumentRulePager) {
 
         final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv.selectPage(cb -> {
@@ -53,22 +70,40 @@ public class BoostDocumentRuleService extends FessAppService {
         return boostDocumentRuleList;
     }
 
+    /**
+     * Gets a boost document rule by its ID.
+     * @param id The boost document rule ID.
+     * @return Optional entity containing the boost document rule if found.
+     */
     public OptionalEntity<BoostDocumentRule> getBoostDocumentRule(final String id) {
         return boostDocumentRuleBhv.selectByPK(id);
     }
 
+    /**
+     * Stores (inserts or updates) a boost document rule.
+     * @param boostDocumentRule The boost document rule to store.
+     */
     public void store(final BoostDocumentRule boostDocumentRule) {
 
         boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Deletes a boost document rule.
+     * @param boostDocumentRule The boost document rule to delete.
+     */
     public void delete(final BoostDocumentRule boostDocumentRule) {
 
         boostDocumentRuleBhv.delete(boostDocumentRule, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
+    /**
+     * Sets up search conditions for boost document rule list queries.
+     * @param cb The condition bean for the query.
+     * @param boostDocumentRulePager The pager containing search criteria.
+     */
     protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocPager boostDocumentRulePager) {
         if (StringUtil.isNotBlank(boostDocumentRulePager.urlExpr)) {
             cb.query().setUrlExpr_Wildcard(wrapQuery(boostDocumentRulePager.urlExpr));

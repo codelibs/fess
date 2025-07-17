@@ -33,18 +33,37 @@ import org.opensearch.index.query.functionscore.RandomScoreFunctionBuilder;
 import org.opensearch.search.sort.SortBuilders;
 import org.opensearch.search.sort.SortOrder;
 
+/**
+ * Fess-specific URL queue service that extends OpenSearch URL queue functionality.
+ * This service provides customized URL fetching strategies including sequential and random ordering
+ * based on crawling configuration parameters.
+ */
 public class FessUrlQueueService extends OpenSearchUrlQueueService {
 
     private static final Logger logger = LogManager.getLogger(FessUrlQueueService.class);
 
+    /** Configuration value for sequential URL processing order */
     protected static final String ORDER_SEQUENTIAL = "sequential";
 
+    /** Configuration value for random URL processing order */
     protected static final String ORDER_RANDOM = "random";
 
+    /**
+     * Constructs a new FessUrlQueueService with the specified crawler configuration.
+     *
+     * @param crawlerConfig the OpenSearch crawler configuration
+     */
     public FessUrlQueueService(final OpenSearchCrawlerConfig crawlerConfig) {
         super(crawlerConfig);
     }
 
+    /**
+     * Fetches URL queue list for the specified session with configurable ordering strategy.
+     * Supports sequential (default) and random ordering based on crawling configuration.
+     *
+     * @param sessionId the crawling session identifier
+     * @return list of URL queue entries for processing
+     */
     @Override
     protected List<OpenSearchUrlQueue> fetchUrlQueueList(final String sessionId) {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();

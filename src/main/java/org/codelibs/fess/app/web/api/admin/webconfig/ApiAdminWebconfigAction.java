@@ -43,15 +43,28 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin web configuration management.
+ *
  */
 public class ApiAdminWebconfigAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminWebconfigAction.class);
+
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminWebconfigAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** The web config service for managing web configuration settings. */
     @Resource
     private WebConfigService webConfigService;
 
@@ -59,6 +72,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves web configuration settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing web configuration settings list
+     */
     // GET /api/admin/webconfig/settings
     // PUT /api/admin/webconfig/settings
     @Execute
@@ -71,6 +90,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific web configuration setting by ID.
+     *
+     * @param id the ID of the web configuration setting to retrieve
+     * @return JSON response containing the web configuration setting
+     */
     // GET /api/admin/webconfig/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -80,6 +105,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Creates a new web configuration setting.
+     *
+     * @param body the web configuration data to create
+     * @return JSON response containing the created web configuration setting ID
+     */
     // POST /api/admin/webconfig/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -101,6 +132,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webConfig.getId()).created(true).status(Status.OK).result());
     }
 
+    /**
+     * Updates an existing web configuration setting.
+     *
+     * @param body the web configuration data to update
+     * @return JSON response containing the updated web configuration setting ID
+     */
     // PUT /api/admin/webconfig/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -121,6 +158,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         return asJson(new ApiUpdateResponse().id(webConfig.getId()).created(false).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a web configuration setting by ID.
+     *
+     * @param id the ID of the web configuration setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/webconfig/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -138,6 +181,12 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a WebConfig entity.
+     *
+     * @param entity the web configuration entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final WebConfig entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

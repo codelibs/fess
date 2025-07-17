@@ -17,6 +17,18 @@ package org.codelibs.fess.app.web.api.admin.webconfig;
 
 import org.codelibs.fess.app.web.admin.webconfig.EditForm;
 
+/**
+ * Request body class for web config edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for web configuration management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
 
 }

@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.pathmap;
 
 import org.codelibs.fess.app.web.admin.pathmap.EditForm;
 
+/**
+ * Request body class for path mapping edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for path mapping management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

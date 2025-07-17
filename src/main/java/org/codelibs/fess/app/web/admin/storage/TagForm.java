@@ -22,15 +22,35 @@ import org.apache.logging.log4j.core.config.plugins.validation.constraints.Requi
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for handling tag operations in storage management.
+ * This form represents tag data including path, name, and associated metadata.
+ */
 public class TagForm {
 
+    /**
+     * The file or directory path associated with this tag.
+     */
     @Required
     public String path;
 
+    /**
+     * The name of the tag with a maximum length of 100 characters.
+     */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * A map containing additional tag metadata as key-value pairs.
+     */
     public Map<String, String> tags = new HashMap<>();
+
+    /**
+     * Default constructor for TagForm.
+     */
+    public TagForm() {
+        // Default constructor
+    }
 
 }

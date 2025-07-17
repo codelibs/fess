@@ -17,6 +17,21 @@ package org.codelibs.fess.script;
 
 import java.util.Map;
 
+/**
+ * Interface for script engines that can evaluate templates with parameters.
+ * This interface provides a contract for different script engine implementations
+ * to process template strings with parameter substitution.
+ */
 public interface ScriptEngine {
+
+    /**
+     * Evaluates a template string with the provided parameter map.
+     * The template is processed using the script engine's templating mechanism,
+     * with parameters from the paramMap substituted into the template.
+     *
+     * @param template the template string to evaluate
+     * @param paramMap the map of parameters to substitute into the template
+     * @return the result of evaluating the template, or null if evaluation fails
+     */
     Object evaluate(final String template, final Map<String, Object> paramMap);
 }

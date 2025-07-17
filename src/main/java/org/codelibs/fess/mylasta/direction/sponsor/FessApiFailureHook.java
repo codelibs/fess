@@ -38,6 +38,8 @@ import org.lastaflute.web.response.ApiResponse;
 import org.lastaflute.web.response.JsonResponse;
 
 /**
+ * The hook for API failure.
+ *
  * @author jflute
  */
 public class FessApiFailureHook implements ApiFailureHook { // #change_it for handling API failure

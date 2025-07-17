@@ -23,7 +23,17 @@ import org.lastaflute.db.dbflute.accesscontext.AccessContextResource;
 
 import jakarta.annotation.Resource;
 
+/**
+ * The logic for access context.
+ */
 public class AccessContextLogic {
+
+    /**
+     * Default constructor.
+     */
+    public AccessContextLogic() {
+        // nothing
+    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -34,24 +44,53 @@ public class AccessContextLogic {
     // ===================================================================================
     //                                                                  Resource Interface
     //                                                                  ==================
+    /**
+     * The supplier of user type.
+     */
     @FunctionalInterface
     public interface UserTypeSupplier {
+        /**
+         * Supply the user type.
+         * @return The user type.
+         */
         OptionalThing<String> supply();
     }
 
+    /**
+     * The supplier of user bean.
+     */
     @FunctionalInterface
     public interface UserBeanSupplier {
+        /**
+         * Supply the user bean.
+         * @return The user bean.
+         */
         OptionalThing<FessUserBean> supply();
     }
 
+    /**
+     * The supplier of application type.
+     */
     @FunctionalInterface
     public interface AppTypeSupplier {
+        /**
+         * Supply the application type.
+         * @return The application type.
+         */
         String supply();
     }
 
     // ===================================================================================
     //                                                                      Create Context
     //                                                                      ==============
+    /**
+     * Create the access context.
+     * @param resource The access context resource.
+     * @param userTypeSupplier The supplier of user type.
+     * @param userBeanSupplier The supplier of user bean.
+     * @param appTypeSupplier The supplier of application type.
+     * @return The access context.
+     */
     public AccessContext create(final AccessContextResource resource, final UserTypeSupplier userTypeSupplier,
             final UserBeanSupplier userBeanSupplier, final AppTypeSupplier appTypeSupplier) {
         final AccessContext context = new AccessContext();

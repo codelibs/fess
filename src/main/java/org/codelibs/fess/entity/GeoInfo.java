@@ -32,10 +32,25 @@ import org.opensearch.index.query.QueryBuilders;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Entity class that handles geographic information for search queries.
+ * This class processes geographic query parameters from HTTP requests and converts them
+ * into OpenSearch geo-distance queries for location-based search functionality.
+ *
+ */
 public class GeoInfo {
 
+    /** The OpenSearch query builder for geographic queries. */
     private QueryBuilder builder;
 
+    /**
+     * Constructs a GeoInfo instance by parsing geographic parameters from the HTTP request.
+     * Extracts geo.{field}.point and geo.{field}.distance parameters to create
+     * geo-distance queries for each configured geographic field.
+     *
+     * @param request the HTTP servlet request containing geographic parameters
+     * @throws InvalidQueryException if geo point format is invalid or parsing fails
+     */
     public GeoInfo(final HttpServletRequest request) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -100,6 +115,11 @@ public class GeoInfo {
 
     }
 
+    /**
+     * Returns the OpenSearch QueryBuilder for geographic queries.
+     *
+     * @return the QueryBuilder containing geo-distance queries, or null if no valid geo parameters were found
+     */
     public QueryBuilder toQueryBuilder() {
         return builder;
     }

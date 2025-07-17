@@ -21,10 +21,30 @@ import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Factory class for managing and retrieving web API managers.
+ * This factory maintains a collection of web API managers and provides
+ * functionality to find the appropriate manager for incoming requests.
+ */
 public class WebApiManagerFactory {
 
+    /**
+     * Default constructor.
+     */
+    public WebApiManagerFactory() {
+        // Default constructor
+    }
+
+    /**
+     * Array of registered web API managers.
+     */
     protected WebApiManager[] webApiManagers = {};
 
+    /**
+     * Adds a web API manager to the factory.
+     *
+     * @param webApiManager The web API manager to add
+     */
     public void add(final WebApiManager webApiManager) {
         final List<WebApiManager> list = new ArrayList<>();
         Collections.addAll(list, webApiManagers);
@@ -32,6 +52,12 @@ public class WebApiManagerFactory {
         webApiManagers = list.toArray(new WebApiManager[list.size()]);
     }
 
+    /**
+     * Gets the appropriate web API manager for the given request.
+     *
+     * @param request The HTTP servlet request
+     * @return The matching web API manager, or null if no match found
+     */
     public WebApiManager get(final HttpServletRequest request) {
         for (final WebApiManager webApiManager : webApiManagers) {
             if (webApiManager.matches(request)) {

@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
 import org.codelibs.fess.app.web.admin.dict.mapping.DownloadForm;
 
+/**
+ * Download body for mapping dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading mapping dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        super();
+    }
 }

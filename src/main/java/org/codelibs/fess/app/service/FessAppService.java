@@ -15,8 +15,28 @@
  */
 package org.codelibs.fess.app.service;
 
+/**
+ * Abstract base class for Fess application services.
+ * This class provides common functionality and utilities for service implementations
+ * throughout the Fess search application.
+ */
 public abstract class FessAppService {
 
+    /**
+     * Default constructor.
+     */
+    public FessAppService() {
+        // Default constructor
+    }
+
+    /**
+     * Wraps a query string with wildcard characters to enable partial matching.
+     * This method ensures that the query string is surrounded by asterisks (*)
+     * to support prefix and suffix matching in search operations.
+     *
+     * @param query the query string to wrap with wildcards
+     * @return the wrapped query string with leading and trailing asterisks
+     */
     protected static String wrapQuery(final String query) {
         final StringBuilder sb = new StringBuilder();
         if (!query.startsWith("*")) {

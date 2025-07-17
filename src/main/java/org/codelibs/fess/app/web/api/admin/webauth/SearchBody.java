@@ -17,7 +17,19 @@ package org.codelibs.fess.app.web.api.admin.webauth;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for web authentication administration API.
+ */
 public class SearchBody extends BaseSearchBody {
+
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Web authentication configuration ID */
     public String id;
 
 }

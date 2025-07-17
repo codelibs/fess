@@ -38,13 +38,30 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for CRUD and file operations on dictionary character mappings.
+ */
 public class ApiAdminDictMappingAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminDictMappingAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictMappingAction.class);
 
     @Resource
     private CharMappingService charMappingService;
 
+    /**
+     * Retrieve list of character mapping entries for the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param body search criteria and paging parameters
+     * @return JSON response containing list of mapping entries
+     */
     // GET /api/admin/dict/mapping/settings/{dictId}
     @Execute
     public JsonResponse<ApiResult> get$settings(final String dictId, final SearchBody body) {
@@ -57,6 +74,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                 .status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieve a single character mapping entry by ID for the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param id identifier of the mapping entry
+     * @return JSON response containing the mapping entry
+     */
     // GET /api/admin/dict/mapping/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String dictId, final long id) {
@@ -67,6 +91,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                 })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Create a new character mapping entry for the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param body create request payload
+     * @return JSON response containing creation result and new entry ID
+     */
     // POST /api/admin/dict/mapping/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> post$setting(final String dictId, final CreateBody body) {
@@ -85,6 +116,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Update an existing character mapping entry in the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param body update request payload
+     * @return JSON response containing update result and entry ID
+     */
     // PUT /api/admin/dict/mapping/setting/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$setting(final String dictId, final EditBody body) {
@@ -103,6 +141,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                 new ApiResult.ApiUpdateResponse().id(String.valueOf(entity.getId())).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Delete a character mapping entry by ID from the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param id identifier of the mapping entry to delete
+     * @return JSON response containing deletion result and entry ID
+     */
     // DELETE /api/admin/dict/mapping/setting/{dictId}/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String dictId, final long id) {
@@ -115,6 +160,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(String.valueOf(id)).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Upload character mapping file for the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary to upload mapping for
+     * @param form upload form containing the file and metadata
+     * @return JSON response indicating the API result status
+     */
     // PUT /api/admin/dict/mapping/upload/{dictId}
     @Execute
     public JsonResponse<ApiResult> put$upload(final String dictId, final UploadForm form) {
@@ -133,6 +185,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiResponse().status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Download the character mapping file for the specified dictionary.
+     *
+     * @param dictId identifier of the dictionary
+     * @param body download request payload
+     * @return stream response with file content
+     */
     // GET /api/admin/dict/mapping/download/{dictId}
     @Execute
     public StreamResponse get$download(final String dictId, final DownloadBody body) {
@@ -147,6 +206,13 @@ public class ApiAdminDictMappingAction extends FessApiAdminAction {
                 });
     }
 
+    /**
+     * Create an EditBody DTO from a CharMappingItem entity.
+     *
+     * @param entity source entity with mapping data
+     * @param dictId identifier of the dictionary
+     * @return populated EditBody for API responses
+     */
     protected EditBody createEditBody(final CharMappingItem entity, final String dictId) {
         final EditBody body = new EditBody();
         body.id = entity.getId();

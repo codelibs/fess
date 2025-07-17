@@ -33,11 +33,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Shunji Makino
+ * Admin action for Crawling Info management.
+ *
  */
 public class AdminCrawlinginfoAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminCrawlinginfoAction() {
+        super();
+    }
+
+    /** The role for this action. */
     public static final String ROLE = "admin-crawlinginfo";
 
     private static final Logger logger = LogManager.getLogger(AdminCrawlinginfoAction.class);
@@ -49,6 +57,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     private CrawlingInfoService crawlingInfoService;
     @Resource
     private CrawlingInfoPager crawlingInfoPager;
+    /** The process helper. */
     @Resource
     protected ProcessHelper processHelper;
 
@@ -69,6 +78,10 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Show the index page.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -76,6 +89,12 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         return asListHtml();
     }
 
+    /**
+     * Show the list page.
+     * @param pageNumber The page number.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
@@ -86,6 +105,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search crawling info.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -96,6 +120,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Reset the search form.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -106,6 +135,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Go back to the list page.
+     * @param form The search form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse back(final SearchForm form) {
@@ -115,6 +149,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Search with paging.
+     * @param data The render data.
+     * @param form The search form.
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
 
@@ -129,6 +168,12 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Show the details page.
+     * @param crudMode The CRUD mode.
+     * @param id The crawling info ID.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
@@ -151,6 +196,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                 });
     }
 
+    /**
+     * Print a thread dump.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse threaddump(final EditForm form) {
@@ -175,6 +225,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Delete a crawling info.
+     * @param form The edit form.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -189,6 +244,10 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    /**
+     * Delete all crawling info.
+     * @return The HTML response.
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse deleteall() {
@@ -206,6 +265,11 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verify the CRUD mode.
+     * @param crudMode The CRUD mode.
+     * @param expectedMode The expected mode.
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {

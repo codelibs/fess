@@ -49,11 +49,14 @@ import org.lastaflute.web.validation.exception.ValidationErrorException;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Admin action for Synonym management.
+ *
  */
 public class AdminDictSynonymAction extends FessAdminAction {
 
+    /**
+     * Role name required for accessing synonym dictionary administration features.
+     */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictSynonymAction.class);
@@ -65,6 +68,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
     private SynonymService synonymService;
     @Resource
     private SynonymPager synonymPager;
+
+    /**
+     * Default constructor.
+     */
+    public AdminDictSynonymAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                               Hook
@@ -83,6 +93,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Displays the main synonym dictionary index page.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response for the synonym dictionary index page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index(final SearchForm form) {
@@ -93,6 +109,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays a paginated list of synonym items.
+     *
+     * @param pageNumber the optional page number for pagination
+     * @param form the search form containing search criteria
+     * @return HTML response with the synonym items list
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
@@ -107,6 +130,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Performs a search for synonym items based on the provided criteria.
+     *
+     * @param form the search form containing search criteria
+     * @return HTML response with the search results
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse search(final SearchForm form) {
@@ -117,6 +146,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Resets the search criteria and returns to the default view.
+     *
+     * @param form the search form to reset
+     * @return HTML response with reset search criteria
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse reset(final SearchForm form) {
@@ -127,6 +162,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Sets up pagination data for search results.
+     *
+     * @param data the render data to populate
+     * @param form the search form containing criteria
+     */
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         RenderDataUtil.register(data, "synonymItemItems", synonymService.getSynonymList(form.dictId, synonymPager));
@@ -143,6 +184,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    /**
+     * Displays the form for creating a new synonym item.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the create new synonym form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse createnew(final String dictId) {
@@ -156,6 +203,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Displays the form for editing an existing synonym item.
+     *
+     * @param form the edit form containing synonym item data
+     * @return HTML response for the edit synonym form
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse edit(final EditForm form) {
@@ -180,6 +233,14 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
+    /**
+     * Displays the details view for a specific synonym item.
+     *
+     * @param dictId the dictionary ID
+     * @param crudMode the CRUD operation mode
+     * @param id the synonym item ID
+     * @return HTML response for the synonym item details
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
@@ -204,6 +265,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
+    /**
+     * Displays the download page for synonym dictionary files.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the download page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse downloadpage(final String dictId) {
@@ -221,6 +288,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Downloads the synonym dictionary file.
+     *
+     * @param form the download form containing download parameters
+     * @return ActionResponse with the file download stream
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final DownloadForm form) {
@@ -239,6 +312,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
+    /**
+     * Displays the upload page for synonym dictionary files.
+     *
+     * @param dictId the dictionary ID
+     * @return HTML response for the upload page
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse uploadpage(final String dictId) {
@@ -256,6 +335,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
+    /**
+     * Handles the upload of synonym dictionary files.
+     *
+     * @param form the upload form containing the file to upload
+     * @return HTML response after processing the upload
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final UploadForm form) {
@@ -281,6 +366,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
+    /**
+     * Creates a new synonym item.
+     *
+     * @param form the create form containing synonym item data
+     * @return HTML response after creating the synonym item
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
@@ -302,6 +393,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Updates an existing synonym item.
+     *
+     * @param form the edit form containing updated synonym item data
+     * @return HTML response after updating the synonym item
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
@@ -324,6 +421,12 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
+    /**
+     * Deletes an existing synonym item.
+     *
+     * @param form the edit form containing the synonym item to delete
+     * @return HTML response after deleting the synonym item
+     */
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
@@ -365,6 +468,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
+    /**
+     * Creates a synonym item from the provided form data with validation.
+     *
+     * @param form the create form containing synonym data
+     * @param hook the validation error hook for handling errors
+     * @return OptionalEntity containing the created synonym item or empty if creation failed
+     */
     protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
         try {
             return createSynonymItem(this, form, hook);
@@ -374,6 +484,14 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Static method to create a synonym item from form data with validation.
+     *
+     * @param action the base action for validation operations
+     * @param form the create form containing synonym data
+     * @param hook the validation error hook for handling errors
+     * @return OptionalEntity containing the created synonym item or empty if creation failed
+     */
     public static OptionalEntity<SynonymItem> createSynonymItem(final FessBaseAction action, final CreateForm form,
             final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
@@ -390,6 +508,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the current CRUD mode
+     * @param expectedMode the expected CRUD mode
+     * @param dictId the dictionary ID for error handling
+     */
     protected void verifyCrudMode(final int crudMode, final int expectedMode, final String dictId) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
@@ -435,6 +560,11 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                                                              JSP
     //                                                                           =========
 
+    /**
+     * Redirects to the dictionary index page.
+     *
+     * @return HTML response redirecting to the dictionary index
+     */
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }

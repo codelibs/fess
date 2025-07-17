@@ -44,12 +44,31 @@ import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * KeyMatchHelper is a helper class for KeyMatch feature.
+ * It manages KeyMatch instances and provides methods to build queries for boosting documents.
+ */
 public class KeyMatchHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(KeyMatchHelper.class);
 
+    /**
+     * Default constructor.
+     */
+    public KeyMatchHelper() {
+        super();
+    }
+
+    /**
+     * A map containing query information for KeyMatch.
+     * The key is a virtual host, and the value is a map of terms and boost information.
+     */
     protected volatile Map<String, Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>>> keyMatchQueryMap =
             Collections.emptyMap();
 
+    /**
+     * Initializes the helper.
+     * It loads KeyMatch settings from the database.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -58,6 +77,11 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         load();
     }
 
+    /**
+     * Returns a list of available KeyMatch instances.
+     *
+     * @return A list of KeyMatch instances.
+     */
     public List<KeyMatch> getAvailableKeyMatchList() {
         return ComponentUtil.getComponent(KeyMatchBhv.class).selectList(cb -> {
             cb.query().matchAll();
@@ -65,6 +89,11 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         });
     }
 
+    /**
+     * Loads KeyMatch settings from the database and builds a query map.
+     *
+     * @return The number of loaded KeyMatch settings.
+     */
     @Override
     public int load() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -118,6 +147,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         return keyMatchQueryMap.size();
     }
 
+    /**
+     * Retrieves a list of documents based on the KeyMatch query.
+     *
+     * @param keyMatch The KeyMatch instance.
+     * @return A list of documents.
+     */
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -128,6 +163,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
                         .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build());
     }
 
+    /**
+     * Returns a query map for the specified virtual host.
+     *
+     * @param key The virtual host key.
+     * @return A map of terms and boost information.
+     */
     protected Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> getQueryMap(final String key) {
         final Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> map = keyMatchQueryMap.get(key);
         if (map != null) {
@@ -136,6 +177,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         return Collections.emptyMap();
     }
 
+    /**
+     * Builds a query for boosting documents based on the keyword list.
+     *
+     * @param keywordList The list of keywords.
+     * @param list The list of filter function builders to add to.
+     */
     public void buildQuery(final List<String> keywordList, final List<FilterFunctionBuilder> list) {
         final String key = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
         keywordList.stream().forEach(keyword -> {
@@ -146,6 +193,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         });
     }
 
+    /**
+     * Retrieves a list of boosted documents for the specified KeyMatch.
+     *
+     * @param keyMatch The KeyMatch instance.
+     * @return A list of boosted documents.
+     */
     public List<Map<String, Object>> getBoostedDocumentList(final KeyMatch keyMatch) {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         String virtualHost = keyMatch.getVirtualHost();
@@ -171,6 +224,12 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         return Collections.emptyList();
     }
 
+    /**
+     * Converts a string to lowercase.
+     *
+     * @param term The string to convert.
+     * @return The lowercase string.
+     */
     private String toLowerCase(final String term) {
         return term != null ? term.toLowerCase(Locale.ROOT) : term;
     }

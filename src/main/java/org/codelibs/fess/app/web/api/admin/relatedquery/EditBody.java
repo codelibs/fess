@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.relatedquery;
 
 import org.codelibs.fess.app.web.admin.relatedquery.EditForm;
 
+/**
+ * Request body class for related query edit operations in the admin REST API.
+ * This class extends EditForm to inherit the necessary form validation and binding capabilities
+ * for related query management operations.
+ */
 public class EditBody extends EditForm {
+
+    /**
+     * Default constructor.
+     */
+    public EditBody() {
+        super();
+    }
+
 }

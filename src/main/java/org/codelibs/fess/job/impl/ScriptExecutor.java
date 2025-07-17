@@ -21,7 +21,17 @@ import java.util.Map;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * This class executes a script.
+ */
 public class ScriptExecutor extends JobExecutor {
+
+    /**
+     * Constructor.
+     */
+    public ScriptExecutor() {
+        super();
+    }
 
     @Override
     public Object execute(final String scriptType, final String script) {

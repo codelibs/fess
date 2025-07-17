@@ -18,11 +18,32 @@ package org.codelibs.fess.app.web.api.admin.storage;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
+/**
+ * Form for uploading files to the storage system via the admin API.
+ * This form is used in the admin API interface to upload files to the storage backend
+ * with optional path specification for file organization.
+ */
 public class UploadForm {
 
+    /**
+     * The storage path where the file should be uploaded.
+     * If not specified, the file will be stored in the default location.
+     */
     public String path;
 
+    /**
+     * The multipart file to be uploaded to the storage system.
+     * This file will be stored in the specified path or default location.
+     */
     @Required
     public MultipartFormFile file;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

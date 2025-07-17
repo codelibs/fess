@@ -58,16 +58,35 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Authenticator for SAML.
+ */
 public class SamlAuthenticator implements SsoAuthenticator {
+
+    /**
+     * Constructor.
+     */
+    public SamlAuthenticator() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(SamlAuthenticator.class);
 
+    /**
+     * The prefix for SAML properties.
+     */
     protected static final String SAML_PREFIX = "saml.";
 
+    /**
+     * The key for the SAML state in the session.
+     */
     protected static final String SAML_STATE = "SAML_STATE";
 
     private Map<String, Object> defaultSettings;
 
+    /**
+     * Initializes the SamlAuthenticator.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -112,6 +131,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@@example.com");
     }
 
+    /**
+     * Gets the SAML settings.
+     * @return The SAML settings.
+     */
     protected Saml2Settings getSettings() {
         final Map<String, Object> params = new HashMap<>(defaultSettings);
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -183,6 +206,13 @@ public class SamlAuthenticator implements SsoAuthenticator {
         }).orElseGet(() -> null);
     }
 
+    /**
+     * Creates a login credential.
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     * @param auth The SAML authentication.
+     * @return The login credential.
+     */
     protected LoginCredential createLoginCredential(final HttpServletRequest request, final HttpServletResponse response, final Auth auth) {
         final SamlCredential samlCredential = new SamlCredential(auth);
         if (logger.isDebugEnabled()) {
@@ -228,6 +258,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
         };
     }
 
+    /**
+     * Gets the metadata response.
+     * @return The metadata response.
+     */
     protected ActionResponse getMetadataResponse() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
             if (logger.isDebugEnabled()) {
@@ -263,6 +297,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 "Failed to process metadata.", new SsoProcessException("Invalid state.")));
     }
 
+    /**
+     * Gets the logout response.
+     * @return The logout response.
+     */
     protected ActionResponse getLogoutResponse() {
         LaRequestUtil.getOptionalRequest().map(request -> {
             if (logger.isDebugEnabled()) {

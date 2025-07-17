@@ -39,13 +39,28 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Helper class for label types.
+ */
 public class LabelTypeHelper extends AbstractConfigHelper {
     private static final Logger logger = LogManager.getLogger(LabelTypeHelper.class);
 
+    /** A list of label type items. */
     protected volatile List<LabelTypeItem> labelTypeItemList;
 
+    /** A list of label type patterns. */
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
+    /**
+     * Default constructor.
+     */
+    public LabelTypeHelper() {
+        super();
+    }
+
+    /**
+     * Initializes the helper.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -62,11 +77,21 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         return labelTypeList.size();
     }
 
+    /**
+     * Refreshes the label type items and patterns.
+     *
+     * @param labelTypeList The list of label types.
+     */
     public void refresh(final List<LabelType> labelTypeList) {
         buildLabelTypeItems(labelTypeList);
         buildLabelTypePatternList(labelTypeList);
     }
 
+    /**
+     * Builds a list of label type items.
+     *
+     * @param labelTypeList The list of label types.
+     */
     protected void buildLabelTypeItems(final List<LabelType> labelTypeList) {
         final List<LabelTypeItem> itemList = new ArrayList<>();
         for (final LabelType labelType : labelTypeList) {
@@ -81,10 +106,23 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         labelTypeItemList = itemList;
     }
 
+    /**
+     * Returns a list of label type items.
+     *
+     * @param searchRequestType The search request type.
+     * @return A list of label type items.
+     */
     public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType) {
         return getLabelTypeItemList(searchRequestType, Locale.ROOT);
     }
 
+    /**
+     * Returns a list of label type items.
+     *
+     * @param searchRequestType The search request type.
+     * @param requestLocale The request locale.
+     * @return A list of label type items.
+     */
     public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType, final Locale requestLocale) {
         if (labelTypeItemList == null) {
             init();
@@ -130,6 +168,13 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         return itemList;
     }
 
+    /**
+     * Matches the request locale with the target locale.
+     *
+     * @param requestLocale The request locale.
+     * @param targetLocale The target locale.
+     * @return True if the locales match, otherwise false.
+     */
     protected boolean matchLocale(final Locale requestLocale, final Locale targetLocale) {
         if (targetLocale.equals(requestLocale) || targetLocale.equals(Locale.ROOT)) {
             return true;
@@ -141,6 +186,12 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         return true;
     }
 
+    /**
+     * Returns a set of matched label values.
+     *
+     * @param path The path to match.
+     * @return A set of matched label values.
+     */
     public Set<String> getMatchedLabelValueSet(final String path) {
         if (labelTypePatternList == null) {
             synchronized (this) {
@@ -163,6 +214,11 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         return valueSet;
     }
 
+    /**
+     * Builds a list of label type patterns.
+     *
+     * @param labelTypeList The list of label types.
+     */
     protected void buildLabelTypePatternList(final List<LabelType> labelTypeList) {
         final List<LabelTypePattern> list = new ArrayList<>();
         for (final LabelType labelType : labelTypeList) {
@@ -180,7 +236,17 @@ public class LabelTypeHelper extends AbstractConfigHelper {
         labelTypePatternList = list;
     }
 
+    /**
+     * An item of a label type.
+     */
     protected static class LabelTypeItem {
+        /**
+         * Default constructor.
+         */
+        public LabelTypeItem() {
+            // do nothing
+        }
+
         private String label;
 
         private String value;
@@ -191,47 +257,100 @@ public class LabelTypeHelper extends AbstractConfigHelper {
 
         private Locale locale;
 
+        /**
+         * Returns the label.
+         *
+         * @return The label.
+         */
         public String getLabel() {
             return label;
         }
 
+        /**
+         * Sets the label.
+         *
+         * @param label The label.
+         */
         public void setLabel(final String label) {
             this.label = label;
         }
 
+        /**
+         * Returns the value.
+         *
+         * @return The value.
+         */
         public String getValue() {
             return value;
         }
 
+        /**
+         * Sets the value.
+         *
+         * @param value The value.
+         */
         public void setValue(final String value) {
             this.value = value;
         }
 
+        /**
+         * Returns the permissions.
+         *
+         * @return The permissions.
+         */
         public String[] getPermissions() {
             return permissions;
         }
 
+        /**
+         * Sets the permissions.
+         *
+         * @param permissions The permissions.
+         */
         public void setPermissions(final String[] permissions) {
             this.permissions = permissions;
         }
 
+        /**
+         * Returns the virtual host.
+         *
+         * @return The virtual host.
+         */
         public String getVirtualHost() {
             return virtualHost;
         }
 
+        /**
+         * Sets the virtual host.
+         *
+         * @param virtualHost The virtual host.
+         */
         public void setVirtualHost(final String virtualHost) {
             this.virtualHost = virtualHost;
         }
 
+        /**
+         * Returns the locale.
+         *
+         * @return The locale.
+         */
         public Locale getLocale() {
             return locale;
         }
 
+        /**
+         * Sets the locale.
+         *
+         * @param locale The locale.
+         */
         public void setLocale(final Locale locale) {
             this.locale = locale;
         }
     }
 
+    /**
+     * A pattern of a label type.
+     */
     public static class LabelTypePattern {
 
         private final String value;
@@ -240,6 +359,13 @@ public class LabelTypeHelper extends AbstractConfigHelper {
 
         private Pattern excludedPaths;
 
+        /**
+         * Constructs a new label type pattern.
+         *
+         * @param value The value.
+         * @param includedPaths The included paths.
+         * @param excludedPaths The excluded paths.
+         */
         public LabelTypePattern(final String value, final String includedPaths, final String excludedPaths) {
             this.value = value;
 
@@ -279,10 +405,21 @@ public class LabelTypeHelper extends AbstractConfigHelper {
             }
         }
 
+        /**
+         * Returns the value.
+         *
+         * @return The value.
+         */
         public String getValue() {
             return value;
         }
 
+        /**
+         * Matches the given path.
+         *
+         * @param path The path to match.
+         * @return True if the path matches, otherwise false.
+         */
         public boolean match(final String path) {
             if (includedPaths == null) {
                 if (excludedPaths != null && excludedPaths.matcher(path).matches()) {

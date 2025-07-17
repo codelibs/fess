@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.keymatch;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for key match administration API.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Search term for key matching */
     public String term;
 
+    /** Query pattern for key matching */
     public String query;
 
 }

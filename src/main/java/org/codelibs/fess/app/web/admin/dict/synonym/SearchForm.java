@@ -18,11 +18,19 @@ package org.codelibs.fess.app.web.admin.dict.synonym;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * The search form for Synonym.
  */
 public class SearchForm {
 
+    /**
+     * Default constructor for SearchForm.
+     */
+    public SearchForm() {
+    }
+
+    /**
+     * The dictionary ID field for synonym dictionary operations.
+     */
     @Required
     public String dictId;
 }

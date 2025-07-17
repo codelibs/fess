@@ -15,7 +15,17 @@
  */
 package org.codelibs.fess.util;
 
+/**
+ * Functional interface for boolean functions.
+ * Represents a function that accepts one argument and produces a boolean result.
+ * @param <T> the type of the input to the function
+ */
 @FunctionalInterface
 public interface BooleanFunction<T> {
+    /**
+     * Applies this function to the given argument.
+     * @param t the function argument
+     * @return the function result
+     */
     boolean apply(T t);
 }

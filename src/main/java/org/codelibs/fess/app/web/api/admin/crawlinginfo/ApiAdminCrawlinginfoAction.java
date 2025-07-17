@@ -35,9 +35,17 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * API action for admin crawling info.
+ *
  */
 public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
+
+    /**
+     * Default constructor.
+     */
+    public ApiAdminCrawlinginfoAction() {
+        super();
+    }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminCrawlinginfoAction.class);
 
@@ -46,6 +54,8 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     //                                                                           =========
     @Resource
     private CrawlingInfoService crawlingInfoService;
+
+    /** Helper for managing crawling processes and session information */
     @Resource
     protected ProcessHelper processHelper;
 
@@ -53,6 +63,12 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
 
+    /**
+     * Retrieves crawling info logs with pagination support.
+     *
+     * @param body the search body containing pagination and filter parameters
+     * @return JSON response containing list of crawling info logs
+     */
     // GET /api/admin/crawlinginfo/logs
     // PUT /api/admin/crawlinginfo/logs
     @Execute
@@ -64,6 +80,12 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
                 .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific crawling info log by ID.
+     *
+     * @param id the ID of the crawling info log to retrieve
+     * @return JSON response containing the crawling info log data
+     */
     // GET /api/admin/crawlinginfo/log/{id}
     @Execute
     public JsonResponse<ApiResult> get$log(final String id) {
@@ -73,6 +95,12 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
         })).status(Status.OK).result());
     }
 
+    /**
+     * Deletes a specific crawling info log by ID.
+     *
+     * @param id the ID of the crawling info log to delete
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/crawlinginfo/log/{id}
     @Execute
     public JsonResponse<ApiResult> delete$log(final String id) {
@@ -90,6 +118,11 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Deletes all old crawling info sessions except currently running ones.
+     *
+     * @return JSON response indicating the deletion status
+     */
     // DELETE /api/admin/crawlinginfo/all
     @Execute
     public JsonResponse<ApiResult> delete$all() {
@@ -103,6 +136,12 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
         return asJson(new ApiResponse().status(Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a CrawlingInfo entity for API responses.
+     *
+     * @param entity the CrawlingInfo entity to convert
+     * @return the converted EditBody object
+     */
     protected EditBody createEditBody(final CrawlingInfo entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

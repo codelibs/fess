@@ -17,10 +17,22 @@ package org.codelibs.fess.exception;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 
+/**
+ * Exception thrown when a query parsing error occurs.
+ * This exception wraps Lucene's ParseException to provide consistent error handling
+ * within the Fess search framework.
+ *
+ */
 public class QueryParseException extends FessSystemException {
 
+    /** Serial version UID for serialization compatibility */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new QueryParseException with the specified ParseException as the cause.
+     *
+     * @param cause the ParseException that caused this exception
+     */
     public QueryParseException(final ParseException cause) {
         super(cause);
     }

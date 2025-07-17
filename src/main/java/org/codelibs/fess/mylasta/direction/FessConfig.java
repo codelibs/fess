@@ -18,6 +18,8 @@ package org.codelibs.fess.mylasta.direction;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
+ * The config for Fess.
+ *
  * @author FreeGen
  */
 public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction.FessProp {

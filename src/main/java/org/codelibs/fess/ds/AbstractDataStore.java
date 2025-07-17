@@ -38,20 +38,46 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * The abstract class for DataStore.
+ */
 public abstract class AbstractDataStore implements DataStore {
+
+    /**
+     * Default constructor.
+     */
+    public AbstractDataStore() {
+        // nothing
+    }
 
     private static final Logger logger = LogManager.getLogger(AbstractDataStore.class);
 
+    /**
+     * The script type.
+     */
     protected static final String SCRIPT_TYPE = "script_type";
 
+    /**
+     * The mime type.
+     */
     public String mimeType = "application/datastore";
 
+    /**
+     * The flag to check if the data store is alive.
+     */
     protected boolean alive = true;
 
+    /**
+     * Register this data store.
+     */
     public void register() {
         ComponentUtil.getDataStoreFactory().add(getName(), this);
     }
 
+    /**
+     * Get the name of this data store.
+     * @return The name of this data store.
+     */
     protected abstract String getName();
 
     @Override
@@ -123,6 +149,11 @@ public abstract class AbstractDataStore implements DataStore {
 
     }
 
+    /**
+     * Get the script type.
+     * @param paramMap The parameters.
+     * @return The script type.
+     */
     protected String getScriptType(final DataStoreParams paramMap) {
         final String value = paramMap.getAsString(SCRIPT_TYPE);
         if (StringUtil.isBlank(value)) {
@@ -131,6 +162,13 @@ public abstract class AbstractDataStore implements DataStore {
         return value;
     }
 
+    /**
+     * Convert the value.
+     * @param scriptType The script type.
+     * @param template The template.
+     * @param paramMap The parameters.
+     * @return The converted value.
+     */
     protected Object convertValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
@@ -143,6 +181,11 @@ public abstract class AbstractDataStore implements DataStore {
         return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(template, paramMap);
     }
 
+    /**
+     * Get the read interval.
+     * @param paramMap The parameters.
+     * @return The read interval.
+     */
     protected long getReadInterval(final DataStoreParams paramMap) {
         long readInterval = 0;
         final String value = paramMap.getAsString("readInterval");
@@ -156,10 +199,22 @@ public abstract class AbstractDataStore implements DataStore {
         return readInterval;
     }
 
+    /**
+     * Sleep for the specified interval.
+     * @param interval The interval.
+     */
     protected void sleep(final long interval) {
         ThreadUtil.sleepQuietly(interval);
     }
 
+    /**
+     * Store the data.
+     * @param dataConfig The data configuration.
+     * @param callback The callback.
+     * @param paramMap The parameters.
+     * @param scriptMap The script map.
+     * @param defaultDataMap The default data map.
+     */
     protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, DataStoreParams paramMap,
             Map<String, String> scriptMap, Map<String, Object> defaultDataMap);
 }

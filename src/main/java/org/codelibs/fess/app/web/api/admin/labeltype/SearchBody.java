@@ -17,10 +17,22 @@ package org.codelibs.fess.app.web.api.admin.labeltype;
 
 import org.codelibs.fess.app.web.api.admin.BaseSearchBody;
 
+/**
+ * Search request body for label type administration API.
+ */
 public class SearchBody extends BaseSearchBody {
 
+    /**
+     * Default constructor.
+     */
+    public SearchBody() {
+        super();
+    }
+
+    /** Name of the label type */
     public String name;
 
+    /** Value of the label type */
     public String value;
 
 }

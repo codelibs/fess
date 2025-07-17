@@ -17,7 +17,15 @@ package org.codelibs.fess.tomcat.valve;
 
 import org.apache.catalina.valves.ErrorReportValve;
 
+/**
+ * This class is a valve to suppress error reports.
+ * It extends {@link ErrorReportValve} and disables the display of
+ * error reports and server information.
+ */
 public class SuppressErrorReportValve extends ErrorReportValve {
+    /**
+     * Constructs a new valve to suppress error reports.
+     */
     public SuppressErrorReportValve() {
         setShowReport(false);
         setShowServerInfo(false);

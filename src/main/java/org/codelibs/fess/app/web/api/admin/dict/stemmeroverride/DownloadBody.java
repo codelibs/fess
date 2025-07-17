@@ -17,5 +17,18 @@ package org.codelibs.fess.app.web.api.admin.dict.stemmeroverride;
 
 import org.codelibs.fess.app.web.admin.dict.stemmeroverride.DownloadForm;
 
+/**
+ * Download body for stemmer override dictionary API operations.
+ * This class extends the DownloadForm to provide request body handling
+ * for downloading stemmer override dictionaries via REST API.
+ *
+ */
 public class DownloadBody extends DownloadForm {
+
+    /**
+     * Default constructor.
+     */
+    public DownloadBody() {
+        super();
+    }
 }

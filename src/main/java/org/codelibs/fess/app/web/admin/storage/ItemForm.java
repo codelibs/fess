@@ -19,12 +19,26 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form class for storage item operations in the admin interface.
+ * This form handles file upload and management operations for storage items.
+ */
 public class ItemForm {
 
+    /** The path of the storage item */
     public String path;
 
+    /**
+     * Default constructor.
+     */
+    public ItemForm() {
+        // Default constructor
+    }
+
+    /** The name of the storage item, limited to 100 characters */
     @Size(max = 100)
     public String name;
 
+    /** The file to be uploaded for the storage item */
     public MultipartFormFile uploadFile;
 }

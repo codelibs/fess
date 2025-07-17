@@ -15,6 +15,18 @@
  */
 package org.codelibs.fess.app.web.admin.wizard;
 
+/**
+ * Form class for the admin wizard index page.
+ * This form handles the initial setup and configuration
+ * in the administrative wizard interface.
+ */
 public class IndexForm {
 
+    /**
+     * Default constructor for index form.
+     * Creates a new instance with default values.
+     */
+    public IndexForm() {
+        // Default constructor
+    }
 }

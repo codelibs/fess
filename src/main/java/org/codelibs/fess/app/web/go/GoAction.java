@@ -42,13 +42,27 @@ import org.lastaflute.web.response.StreamResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Action class for handling document redirection requests.
+ * This action processes "go" requests that redirect users to specific documents
+ * while tracking click events and handling various URL types including file system paths.
+ */
 public class GoAction extends FessSearchAction {
+
+    /**
+     * Default constructor for GoAction.
+     */
+    public GoAction() {
+        super();
+    }
 
     // ===================================================================================
     //                                                                            Constant
     //
+    /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(GoAction.class);
 
+    /** Helper for URL path mapping and transformation. */
     @Resource
     protected PathMappingHelper pathMappingHelper;
 
@@ -63,6 +77,15 @@ public class GoAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+    /**
+     * Handles document redirection requests.
+     * Validates the document ID, logs click events if enabled, and redirects
+     * to the target URL or serves file content directly if configured.
+     *
+     * @param form the go form containing document ID and tracking parameters
+     * @return action response for redirection or content streaming
+     * @throws IOException if an I/O error occurs during content retrieval
+     */
     @Execute
     public ActionResponse index(final GoForm form) throws IOException {
         validate(form, messages -> {}, () -> asHtml(virtualHost(path_Error_ErrorJsp)));
@@ -154,6 +177,14 @@ public class GoAction extends FessSearchAction {
         }
     }
 
+    /**
+     * Checks if the given URL represents a file system path.
+     * Determines if the URL uses file system protocols that may require
+     * special handling for content serving.
+     *
+     * @param url the URL to check
+     * @return true if the URL is a file system path, false otherwise
+     */
     protected boolean isFileSystemPath(final String url) {
         return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
                 || url.startsWith("storage:");

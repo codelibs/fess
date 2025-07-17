@@ -25,6 +25,8 @@ import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserTimeZoneProcessProvider;
 
 /**
+ * The provider of user time-zone process.
+ *
  * @author jflute
  */
 public class FessUserTimeZoneProcessProvider implements UserTimeZoneProcessProvider {

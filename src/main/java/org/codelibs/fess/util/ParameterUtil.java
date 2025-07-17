@@ -25,27 +25,46 @@ import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.lastaflute.core.security.PrimaryCipher;
 
+/**
+ * Utility class for parameter operations.
+ */
 public class ParameterUtil {
     private static final String CIPHER_PREFIX = "{cipher}";
 
+    /** The XPath field prefix. */
     protected static final String XPATH_PREFIX = "field.xpath.";
 
+    /** The meta field prefix. */
     protected static final String META_PREFIX = "field.meta.";
 
+    /** The value field prefix. */
     protected static final String VALUE_PREFIX = "field.value.";
 
+    /** The script field prefix. */
     protected static final String SCRIPT_PREFIX = "field.script.";
 
+    /** The client prefix. */
     protected static final String CLIENT_PREFIX = "client.";
 
+    /** The config prefix. */
     protected static final String CONFIG_PREFIX = "config.";
 
+    /** The field config prefix. */
     protected static final String FIELD_PREFIX = "field.config.";
 
+    /**
+     * Protected constructor.
+     */
     protected ParameterUtil() {
         // nothing
     }
 
+    /**
+     * Parses parameter string into a map.
+     *
+     * @param value the parameter string
+     * @return the parameter map
+     */
     public static Map<String, String> parse(final String value) {
         final Map<String, String> paramMap = new LinkedHashMap<>();
         if (value != null) {
@@ -79,6 +98,12 @@ public class ParameterUtil {
         return paramMap;
     }
 
+    /**
+     * Encrypts sensitive parameter values.
+     *
+     * @param value the parameter string
+     * @return the encrypted parameter string
+     */
     public static String encrypt(final String value) {
         final StringBuilder buf = new StringBuilder();
         final Pattern properyPattern = Pattern.compile(ComponentUtil.getFessConfig().getAppEncryptPropertyPattern());
@@ -101,6 +126,12 @@ public class ParameterUtil {
         return buf.toString();
     }
 
+    /**
+     * Loads configuration parameters into a map.
+     *
+     * @param paramMap the parameter map
+     * @param configParam the configuration parameter string
+     */
     public static void loadConfigParams(final Map<String, Object> paramMap, final String configParam) {
         final Map<String, String> map = ParameterUtil.parse(configParam);
         if (!map.isEmpty()) {
@@ -108,6 +139,12 @@ public class ParameterUtil {
         }
     }
 
+    /**
+     * Creates a configuration parameter map.
+     *
+     * @param configParameters the configuration parameters
+     * @return the configuration parameter map
+     */
     public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters) {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
         final Map<String, String> configConfigMap = new LinkedHashMap<>();

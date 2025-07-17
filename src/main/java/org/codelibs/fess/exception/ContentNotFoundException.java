@@ -15,10 +15,20 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when requested content cannot be found.
+ * Typically used when a document or resource is not available during crawling or indexing.
+ */
 public class ContentNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new ContentNotFoundException with the specified parent URL and URL.
+     *
+     * @param parentUrl the URL of the parent document
+     * @param url the URL of the content that was not found
+     */
     public ContentNotFoundException(final String parentUrl, final String url) {
         super("Not Found: " + url + " Parent: " + parentUrl, false, false);
     }

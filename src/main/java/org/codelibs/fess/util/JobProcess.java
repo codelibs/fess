@@ -19,24 +19,58 @@ import java.util.function.Consumer;
 
 import org.codelibs.fess.Constants;
 
+/**
+ * A wrapper class that manages a system process for job execution.
+ * This class provides access to the underlying process and manages
+ * the input stream thread for capturing process output.
+ */
 public class JobProcess {
+    /**
+     * The underlying system process.
+     */
     protected Process process;
 
+    /**
+     * The thread that handles reading from the process input stream.
+     */
     protected InputStreamThread inputStreamThread;
 
+    /**
+     * Constructs a new JobProcess with the specified process.
+     * Uses the default buffer size and no output callback.
+     *
+     * @param process the system process to wrap
+     */
     public JobProcess(final Process process) {
         this(process, InputStreamThread.MAX_BUFFER_SIZE, null);
     }
 
+    /**
+     * Constructs a new JobProcess with the specified process, buffer size, and output callback.
+     *
+     * @param process the system process to wrap
+     * @param bufferSize the buffer size for reading process output
+     * @param outputCallback the callback function to handle process output lines
+     */
     public JobProcess(final Process process, final int bufferSize, final Consumer<String> outputCallback) {
         this.process = process;
         inputStreamThread = new InputStreamThread(process.getInputStream(), Constants.CHARSET_UTF_8, bufferSize, outputCallback);
     }
 
+    /**
+     * Returns the underlying system process.
+     *
+     * @return the wrapped process
+     */
     public Process getProcess() {
         return process;
     }
 
+    /**
+     * Returns the input stream thread that handles process output.
+     *
+     * @return the input stream thread
+     */
     public InputStreamThread getInputStreamThread() {
         return inputStreamThread;
     }

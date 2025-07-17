@@ -20,8 +20,22 @@ import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.validation.ActionValidator;
 
+/**
+ * Fess-specific action validator that extends the LastaFlute ActionValidator.
+ * This validator provides validation functionality for Fess web actions with custom
+ * message handling and runtime group validation.
+ *
+ * @param <MESSAGES> the type of user messages used by this validator
+ */
 public class FessActionValidator<MESSAGES extends UserMessages> extends ActionValidator<MESSAGES> {
 
+    /**
+     * Constructs a new FessActionValidator with the specified components.
+     *
+     * @param requestManager the request manager for handling HTTP requests
+     * @param messagesCreator the creator for user messages
+     * @param runtimeGroups the runtime validation groups
+     */
     public FessActionValidator(final RequestManager requestManager, final UserMessagesCreator<MESSAGES> messagesCreator,
             final Class<?>[] runtimeGroups) {
         super(requestManager, messagesCreator, runtimeGroups);

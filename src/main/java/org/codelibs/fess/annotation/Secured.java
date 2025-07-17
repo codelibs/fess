@@ -41,7 +41,6 @@ import java.lang.annotation.Target;
  * &#064;Secured({ &quot;ROLE_ADMIN&quot; })
  * public void delete(Contact contact);
  * </pre>
- * @author Mark St.Godard
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

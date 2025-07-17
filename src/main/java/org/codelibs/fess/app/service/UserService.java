@@ -33,17 +33,40 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing user operations in the Fess search system.
+ * This service provides CRUD operations for user management, including user authentication,
+ * password management, and user listing with pagination support.
+ *
+ */
 public class UserService {
 
+    /**
+     * Default constructor for UserService.
+     */
+    public UserService() {
+        // Default constructor
+    }
+
+    /** User behavior for database operations */
     @Resource
     protected UserBhv userBhv;
 
+    /** Login assistance for authentication operations */
     @Resource
     protected FessLoginAssist fessLoginAssist;
 
+    /** Fess configuration for system settings */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of users based on the provided pager criteria.
+     * Updates the pager with pagination information including total count and page navigation.
+     *
+     * @param userPager the pager containing search criteria and pagination settings
+     * @return a list of users matching the criteria
+     */
     public List<User> getUserList(final UserPager userPager) {
 
         final PagingResultBean<User> userList = userBhv.selectPage(cb -> {
@@ -60,16 +83,36 @@ public class UserService {
         return userList;
     }
 
+    /**
+     * Retrieves a user by their unique identifier.
+     * Loads the user through the authentication manager for complete user data.
+     *
+     * @param id the unique identifier of the user
+     * @return an OptionalEntity containing the user if found
+     */
     public OptionalEntity<User> getUser(final String id) {
         return userBhv.selectByPK(id).map(u -> ComponentUtil.getAuthenticationManager().load(u));
     }
 
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username the username to search for
+     * @return an OptionalEntity containing the user if found
+     */
     public OptionalEntity<User> getUserByName(final String username) {
         return userBhv.selectEntity(cb -> {
             cb.query().setName_Equal(username);
         });
     }
 
+    /**
+     * Stores (inserts or updates) a user in the system.
+     * Handles user authentication setup and database persistence.
+     * If the surname is blank, it will be set to the user's name.
+     *
+     * @param user the user entity to store
+     */
     public void store(final User user) {
         if (StringUtil.isBlank(user.getSurname())) {
             user.setSurname(user.getName());
@@ -83,6 +126,14 @@ public class UserService {
 
     }
 
+    /**
+     * Changes the password for a user identified by username.
+     * Updates both the authentication manager and the database with the new encrypted password.
+     *
+     * @param username the username of the user
+     * @param password the new password in plain text
+     * @throws FessUserNotFoundException if the user is not found
+     */
     public void changePassword(final String username, final String password) {
         final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
         if (changed) {
@@ -97,6 +148,12 @@ public class UserService {
 
     }
 
+    /**
+     * Deletes a user from the system.
+     * Removes the user from both the authentication manager and the database.
+     *
+     * @param user the user entity to delete
+     */
     public void delete(final User user) {
         ComponentUtil.getAuthenticationManager().delete(user);
 
@@ -106,6 +163,13 @@ public class UserService {
 
     }
 
+    /**
+     * Sets up the search conditions for user list queries based on pager criteria.
+     * Configures the condition bean with search filters and ordering.
+     *
+     * @param cb the condition bean for the user query
+     * @param userPager the pager containing search criteria
+     */
     protected void setupListCondition(final UserCB cb, final UserPager userPager) {
         if (userPager.id != null) {
             cb.query().docMeta().setId_Equal(userPager.id);
@@ -119,6 +183,12 @@ public class UserService {
 
     }
 
+    /**
+     * Retrieves a list of all available users in the system.
+     * Returns up to the maximum configured number of users.
+     *
+     * @return a list of all available users
+     */
     public List<User> getAvailableUserList() {
         return userBhv.selectList(cb -> {
             cb.query().matchAll();

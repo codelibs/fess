@@ -17,11 +17,28 @@ package org.codelibs.fess.script;
 
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * The abstract class for ScriptEngine.
+ */
 public abstract class AbstractScriptEngine implements ScriptEngine {
 
+    /**
+     * Default constructor.
+     */
+    public AbstractScriptEngine() {
+        // nothing
+    }
+
+    /**
+     * Register this script engine.
+     */
     public void register() {
         ComponentUtil.getScriptEngineFactory().add(getName(), this);
     }
 
+    /**
+     * Get the name of this script engine.
+     * @return The name of this script engine.
+     */
     protected abstract String getName();
 }

@@ -15,13 +15,29 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * This exception is thrown when a storage-related error occurs.
+ * It can be used to wrap underlying storage exceptions, providing a
+ * consistent error handling mechanism for storage operations.
+ */
 public class StorageException extends FessSystemException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new storage exception with the specified detail message and cause.
+     *
+     * @param message The detail message.
+     * @param cause   The cause of the exception.
+     */
     public StorageException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new storage exception with the specified detail message.
+     *
+     * @param message The detail message.
+     */
     public StorageException(final String message) {
         super(message);
     }

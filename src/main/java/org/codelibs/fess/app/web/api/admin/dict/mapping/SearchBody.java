@@ -17,5 +17,16 @@ package org.codelibs.fess.app.web.api.admin.dict.mapping;
 
 import org.codelibs.fess.app.web.api.admin.dict.BaseSearchDictBody;
 
+/**
+ * Search request body for mapping dictionary administration.
+ * Extends BaseSearchDictBody with mapping dictionary-specific search parameters.
+ */
 public class SearchBody extends BaseSearchDictBody {
+
+    /**
+     * Default constructor for SearchBody.
+     */
+    public SearchBody() {
+        super();
+    }
 }

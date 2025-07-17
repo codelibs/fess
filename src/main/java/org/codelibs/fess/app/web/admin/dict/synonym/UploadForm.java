@@ -19,15 +19,32 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author shinsuke
- * @author Keiichi Watanabe
+ * Form for uploading synonym files to the Fess search engine.
+ * Synonyms are words or phrases that should be treated as equivalent during search operations.
+ * This form is used in the admin interface to upload custom synonym dictionary files.
  */
 public class UploadForm {
 
+    /**
+     * The dictionary ID that identifies which synonym dictionary configuration to update.
+     * This ID corresponds to a specific synonym dictionary instance in the system.
+     */
     @Required
     public String dictId;
 
+    /**
+     * The multipart file containing the synonym mappings to be uploaded.
+     * This file should contain synonym definitions in the appropriate format.
+     */
     @Required
     public MultipartFormFile synonymFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

@@ -23,6 +23,8 @@ import org.lastaflute.core.direction.CurtainFinallyHook;
 import org.lastaflute.core.direction.FwAssistantDirector;
 
 /**
+ * The hook for curtain finally.
+ *
  * @author jflute
  */
 public class FessCurtainFinallyHook implements CurtainFinallyHook {

@@ -30,13 +30,27 @@ import org.lastaflute.web.response.JsonResponse;
 import jakarta.annotation.Resource;
 
 /**
- * @author shinsuke
+ * API action for admin general settings management.
+ * Provides RESTful API endpoints for managing general system configuration settings in the Fess search engine.
+ * General settings include system-wide parameters, LDAP configuration, and core application settings.
+ *
  */
 public class ApiAdminGeneralAction extends FessApiAdminAction {
 
     // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminGeneralAction() {
+        super();
+    }
+
+    // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** System properties for dynamic configuration management */
     @Resource
     protected DynamicProperties systemProperties;
 
@@ -44,6 +58,12 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
     //
 
     // GET /api/admin/general
+    /**
+     * Returns the current general system settings.
+     * Excludes sensitive information like LDAP security credentials from the response.
+     *
+     * @return JSON response containing the general settings configuration
+     */
     @Execute
     public JsonResponse<ApiResult> get$index() {
         final EditBody form = new EditBody();
@@ -53,6 +73,13 @@ public class ApiAdminGeneralAction extends FessApiAdminAction {
     }
 
     // PUT /api/admin/general
+    /**
+     * Updates the general system settings.
+     * Merges the provided settings with existing configuration and applies changes.
+     *
+     * @param body the general settings data to update
+     * @return JSON response with update status
+     */
     @Execute
     public JsonResponse<ApiResult> put$index(final EditBody body) {
         validateApi(body, messages -> {});

@@ -23,7 +23,18 @@ import org.codelibs.fess.entity.QueryContext;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
+/**
+ * Query command for match all documents query.
+ */
 public class MatchAllQueryCommand extends QueryCommand {
+
+    /**
+     * Default constructor.
+     */
+    public MatchAllQueryCommand() {
+        super();
+    }
+
     private static final Logger logger = LogManager.getLogger(MatchAllQueryCommand.class);
 
     @Override

@@ -39,16 +39,37 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing failure URLs that occur during web crawling.
+ * Provides functionality to store, retrieve, and manage failed crawling attempts
+ * with their associated error information.
+ */
 public class FailureUrlService {
 
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(FailureUrlService.class);
 
+    /**
+     * Default constructor.
+     */
+    public FailureUrlService() {
+        // Default constructor
+    }
+
+    /** Behavior class for FailureUrl entity operations */
     @Resource
     protected FailureUrlBhv failureUrlBhv;
 
+    /** Configuration settings for Fess */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Retrieves a paginated list of failure URLs based on the provided pager criteria.
+     *
+     * @param failureUrlPager the pager containing search criteria and pagination settings
+     * @return a list of FailureUrl entities matching the criteria
+     */
     public List<FailureUrl> getFailureUrlList(final FailureUrlPager failureUrlPager) {
 
         final PagingResultBean<FailureUrl> failureUrlList = failureUrlBhv.selectPage(cb -> {
@@ -65,10 +86,21 @@ public class FailureUrlService {
         return failureUrlList;
     }
 
+    /**
+     * Retrieves a specific failure URL by its ID.
+     *
+     * @param id the unique identifier of the failure URL
+     * @return an OptionalEntity containing the FailureUrl if found, empty otherwise
+     */
     public OptionalEntity<FailureUrl> getFailureUrl(final String id) {
         return failureUrlBhv.selectByPK(id);
     }
 
+    /**
+     * Stores or updates a failure URL entity in the data store.
+     *
+     * @param failureUrl the FailureUrl entity to store or update
+     */
     public void store(final FailureUrl failureUrl) {
 
         failureUrlBhv.insertOrUpdate(failureUrl, op -> {
@@ -77,6 +109,11 @@ public class FailureUrlService {
 
     }
 
+    /**
+     * Deletes a failure URL entity from the data store.
+     *
+     * @param failureUrl the FailureUrl entity to delete
+     */
     public void delete(final FailureUrl failureUrl) {
 
         failureUrlBhv.delete(failureUrl, op -> {
@@ -85,6 +122,12 @@ public class FailureUrlService {
 
     }
 
+    /**
+     * Sets up the condition builder for listing failure URLs with pagination and filtering.
+     *
+     * @param cb the condition builder to configure
+     * @param failureUrlPager the pager containing filter criteria
+     */
     protected void setupListCondition(final FailureUrlCB cb, final FailureUrlPager failureUrlPager) {
         if (failureUrlPager.id != null) {
             cb.query().docMeta().setId_Equal(failureUrlPager.id);
@@ -97,12 +140,23 @@ public class FailureUrlService {
         buildSearchCondition(failureUrlPager, cb);
     }
 
+    /**
+     * Deletes all failure URLs that match the criteria specified in the pager.
+     *
+     * @param failureUrlPager the pager containing deletion criteria
+     */
     public void deleteAll(final FailureUrlPager failureUrlPager) {
         failureUrlBhv.queryDelete(cb -> {
             buildSearchCondition(failureUrlPager, cb);
         });
     }
 
+    /**
+     * Builds search conditions for failure URL queries based on pager criteria.
+     *
+     * @param failureUrlPager the pager containing search criteria
+     * @param cb the condition builder to configure with search conditions
+     */
     private void buildSearchCondition(final FailureUrlPager failureUrlPager, final FailureUrlCB cb) {
         // search
         if (StringUtil.isNotBlank(failureUrlPager.url)) {
@@ -122,12 +176,27 @@ public class FailureUrlService {
 
     }
 
+    /**
+     * Deletes all failure URLs associated with a specific configuration ID.
+     *
+     * @param configId the configuration ID to delete failure URLs for
+     */
     public void deleteByConfigId(final String configId) {
         failureUrlBhv.queryDelete(cb -> {
             cb.query().setConfigId_Equal(configId);
         });
     }
 
+    /**
+     * Stores a new failure URL or updates an existing one with error information.
+     * Creates a new failure URL entry or increments the error count for an existing URL.
+     *
+     * @param crawlingConfig the crawling configuration associated with the failure
+     * @param errorName the name/type of the error that occurred
+     * @param url the URL that failed to be crawled
+     * @param e the exception that caused the failure
+     * @return the stored or updated FailureUrl entity, or null if the exception should be ignored
+     */
     public FailureUrl store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
         if (e instanceof ContainerNotAvailableException) {
             return null;
@@ -163,6 +232,13 @@ public class FailureUrlService {
         return failureUrl;
     }
 
+    /**
+     * Extracts and returns the stack trace from a throwable as a string.
+     * The stack trace is abbreviated if it exceeds the configured maximum length.
+     *
+     * @param t the throwable to extract the stack trace from
+     * @return the stack trace as a string, or empty string if extraction fails
+     */
     private String getStackTrace(final Throwable t) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {

@@ -19,11 +19,25 @@ import org.lastaflute.web.validation.Required;
 
 import jakarta.validation.constraints.Size;
 
+/**
+ * Request body for plugin installation API.
+ * This class represents the data structure for installing a plugin
+ * through the admin REST API.
+ */
 public class InstallBody {
+    /** Name of the plugin to install (required, max 100 characters) */
     @Required
     @Size(max = 100)
     public String name;
 
+    /**
+     * Default constructor.
+     */
+    public InstallBody() {
+        // Default constructor
+    }
+
+    /** Version of the plugin to install (required, max 100 characters) */
     @Required
     @Size(max = 100)
     public String version;

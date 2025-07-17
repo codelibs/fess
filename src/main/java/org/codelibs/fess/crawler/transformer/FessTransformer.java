@@ -36,14 +36,40 @@ import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
+/**
+ * Interface for transforming and processing crawled documents in Fess.
+ * Provides utility methods for URL processing, site extraction, data mapping,
+ * and field configuration handling during the document transformation process.
+ */
 public interface FessTransformer {
 
+    /**
+     * Synchronized LRU cache for storing parent URL encodings.
+     * Maps session+parent URL keys to their corresponding character encodings.
+     */
     Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<>(1000));
 
+    /**
+     * Gets the Fess configuration instance.
+     *
+     * @return the Fess configuration object
+     */
     FessConfig getFessConfig();
 
+    /**
+     * Gets the logger instance for this transformer.
+     *
+     * @return the logger instance
+     */
     Logger getLogger();
 
+    /**
+     * Extracts the host name from a URL string.
+     * Removes protocol and path components to return just the hostname.
+     *
+     * @param u the URL string to extract host from
+     * @return the host name, or empty string if URL is blank, or unknown hostname if parsing fails
+     */
     default String getHost(final String u) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
@@ -69,6 +95,14 @@ public interface FessTransformer {
         return url;
     }
 
+    /**
+     * Extracts and processes the site path from a URL with proper encoding handling.
+     * Removes protocol, query parameters, and applies URL decoding based on encoding settings.
+     *
+     * @param u the URL string to process
+     * @param encoding the character encoding to use for URL decoding
+     * @return the processed site path, abbreviated if necessary
+     */
     default String getSite(final String u, final String encoding) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
@@ -103,6 +137,14 @@ public interface FessTransformer {
         return abbreviateSite(url);
     }
 
+    /**
+     * Puts data into the result data map, handling value appending if configured.
+     * If data appending is enabled and the key already exists, values are combined into arrays.
+     *
+     * @param dataMap the data map to modify
+     * @param key the key to store the value under
+     * @param value the value to store
+     */
     default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getIndexFieldUrl().equals(key) || !dataMap.containsKey(key) || !getFessConfig().isCrawlerDocumentAppendData()) {
@@ -132,6 +174,16 @@ public interface FessTransformer {
         }
     }
 
+    /**
+     * Puts data into the result data map after processing it through a template script.
+     * The template is evaluated using the specified script engine with the value and context.
+     *
+     * @param dataMap the data map to modify
+     * @param key the key to store the processed value under
+     * @param value the original value to process
+     * @param template the template script to evaluate
+     * @param scriptType the type of script engine to use
+     */
     default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template,
             final String scriptType) {
         Object target = value;
@@ -149,6 +201,14 @@ public interface FessTransformer {
         }
     }
 
+    /**
+     * Evaluates a template script using the specified script engine and parameters.
+     *
+     * @param scriptType the type of script engine to use
+     * @param template the template script to evaluate
+     * @param paramMap the parameters to pass to the script
+     * @return the result of script evaluation, or empty string if template is empty
+     */
     default Object evaluateValue(final String scriptType, final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
@@ -157,10 +217,21 @@ public interface FessTransformer {
         return ComponentUtil.getScriptEngineFactory().getScriptEngine(scriptType).evaluate(template, paramMap);
     }
 
+    /**
+     * Gets the maximum allowed length for site strings from configuration.
+     *
+     * @return the maximum site length as configured
+     */
     default int getMaxSiteLength() {
         return getFessConfig().getCrawlerDocumentMaxSiteLengthAsInteger();
     }
 
+    /**
+     * Abbreviates a site string to the maximum allowed length if configured.
+     *
+     * @param value the site string to abbreviate
+     * @return the abbreviated string, or original if no length limit is set
+     */
     default String abbreviateSite(final String value) {
         final int maxSiteLength = getMaxSiteLength();
         if (maxSiteLength > -1) {
@@ -169,6 +240,14 @@ public interface FessTransformer {
         return value;
     }
 
+    /**
+     * Extracts the filename from a URL, handling various protocols and URL decoding.
+     * Processes HTTP, HTTPS, file, SMB, and FTP URLs appropriately.
+     *
+     * @param url the URL to extract filename from
+     * @param encoding the character encoding (currently unused in this method)
+     * @return the extracted filename, or empty string if none found
+     */
     default String getFileName(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY;
@@ -201,6 +280,14 @@ public interface FessTransformer {
         return u;
     }
 
+    /**
+     * Decodes a URL as a name using appropriate character encoding.
+     * Handles encoding detection from parent URLs and configuration settings.
+     *
+     * @param url the URL to decode
+     * @param escapePlus whether to escape plus signs before decoding
+     * @return the decoded URL name, or original URL if decoding fails
+     */
     default String decodeUrlAsName(final String url, final boolean escapePlus) {
         if (url == null) {
             return null;
@@ -234,6 +321,14 @@ public interface FessTransformer {
         }
     }
 
+    /**
+     * Gets the character encoding for a parent URL from cache or data service.
+     * Caches encoding information to improve performance on subsequent requests.
+     *
+     * @param parentUrl the parent URL to get encoding for
+     * @param sessionId the session ID for the crawling session
+     * @return the character encoding, or null if not found
+     */
     default String getParentEncoding(final String parentUrl, final String sessionId) {
         final String key = sessionId + ":" + parentUrl;
         String enc = parentEncodingMap.get(key);
@@ -253,6 +348,14 @@ public interface FessTransformer {
         return null;
     }
 
+    /**
+     * Processes field configurations to handle field overwriting rules.
+     * Creates a new data map with fields processed according to their configuration.
+     *
+     * @param dataMap the original data map to process
+     * @param fieldConfigs the field configurations to apply
+     * @return a new data map with configurations applied
+     */
     default Map<String, Object> processFieldConfigs(final Map<String, Object> dataMap, final FieldConfigs fieldConfigs) {
         final Map<String, Object> newDataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, Object> e : dataMap.entrySet()) {

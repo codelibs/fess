@@ -33,13 +33,38 @@ import org.lastaflute.web.response.JsonResponse;
 
 import jakarta.annotation.Resource;
 
+/**
+ * API action for admin role management.
+ */
 public class ApiAdminRoleAction extends FessApiAdminAction {
 
+    /** The logger for this class. */
     private static final Logger logger = LogManager.getLogger(ApiAdminRoleAction.class);
 
+    // ===================================================================================
+    //                                                                         Constructor
+    //                                                                         ===========
+    /**
+     * Default constructor.
+     */
+    public ApiAdminRoleAction() {
+        super();
+    }
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+
+    /** The role service for managing role settings. */
     @Resource
     private RoleService roleService;
 
+    /**
+     * Retrieves role settings with pagination.
+     *
+     * @param body the search parameters for filtering and pagination
+     * @return JSON response containing role settings list
+     */
     // GET /api/admin/role/settings
     // PUT /api/admin/role/settings
     @Execute
@@ -52,6 +77,12 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
                         .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Retrieves a specific role setting by ID.
+     *
+     * @param id the ID of the role setting to retrieve
+     * @return JSON response containing the role setting
+     */
     // GET /api/admin/role/setting/{id}
     @Execute
     public JsonResponse<ApiResult> get$setting(final String id) {
@@ -61,6 +92,12 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         })).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates a new role setting.
+     *
+     * @param body the role data to create
+     * @return JSON response containing the created role setting ID
+     */
     // POST /api/admin/role/setting
     @Execute
     public JsonResponse<ApiResult> post$setting(final CreateBody body) {
@@ -81,6 +118,12 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Updates an existing role setting.
+     *
+     * @param body the role data to update
+     * @return JSON response containing the updated role setting ID
+     */
     // PUT /api/admin/role/setting
     @Execute
     public JsonResponse<ApiResult> put$setting(final EditBody body) {
@@ -101,6 +144,12 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Deletes a role setting by ID.
+     *
+     * @param id the ID of the role setting to delete
+     * @return JSON response indicating success or failure
+     */
     // DELETE /api/admin/role/setting/{id}
     @Execute
     public JsonResponse<ApiResult> delete$setting(final String id) {
@@ -117,6 +166,12 @@ public class ApiAdminRoleAction extends FessApiAdminAction {
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());
     }
 
+    /**
+     * Creates an EditBody from a Role entity.
+     *
+     * @param entity the role entity to convert
+     * @return the converted EditBody
+     */
     protected EditBody createEditBody(final Role entity) {
         final EditBody body = new EditBody();
         copyBeanToBean(entity, body, copyOp -> {

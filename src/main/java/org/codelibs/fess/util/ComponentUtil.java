@@ -97,10 +97,15 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.ResponseManager;
 
+/**
+ * Utility class for accessing system components and dependencies.
+ * Provides centralized access to various helpers, managers, and services throughout the Fess application.
+ */
 public final class ComponentUtil {
 
     private static final Logger logger = LogManager.getLogger(ComponentUtil.class);
 
+    /** Component map for storing component instances. */
     private static Map<String, Object> componentMap = new HashMap<>();
 
     private static final String SCRIPT_ENGINE_FACTORY = "scriptEngineFactory";
@@ -227,11 +232,19 @@ public final class ComponentUtil {
 
     private static FessConfig fessConfig;
 
+    /** List of initialization processes to run after container initialization. */
     private static List<Runnable> initProcesses = new ArrayList<>();
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private ComponentUtil() {
     }
 
+    /**
+     * Processes a runnable after container initialization.
+     * @param process The process to run after container init.
+     */
     public static void processAfterContainerInit(final Runnable process) {
         if (available()) {
             process.run();
@@ -240,6 +253,10 @@ public final class ComponentUtil {
         }
     }
 
+    /**
+     * Executes all initialization processes.
+     * @param action The action to perform on each initialization process.
+     */
     public static void doInitProcesses(final Consumer<? super Runnable> action) {
         try {
             initProcesses.forEach(action);
@@ -248,14 +265,27 @@ public final class ComponentUtil {
         }
     }
 
+    /**
+     * Gets a cached cipher by name.
+     * @param cipherName The cipher name.
+     * @return The cached cipher.
+     */
     public static CachedCipher getCipher(final String cipherName) {
         return getComponent(cipherName);
     }
 
+    /**
+     * Gets the system properties.
+     * @return The dynamic properties.
+     */
     public static DynamicProperties getSystemProperties() {
         return getComponent(CRAWLER_PROPERTIES);
     }
 
+    /**
+     * Gets the system helper component.
+     * @return The system helper.
+     */
     public static SystemHelper getSystemHelper() {
         if (systemHelper == null || HotdeployUtil.isHotdeploy()) {
             systemHelper = getComponent(SYSTEM_HELPER);
@@ -263,34 +293,66 @@ public final class ComponentUtil {
         return systemHelper;
     }
 
+    /**
+     * Gets the view helper component.
+     * @return The view helper.
+     */
     public static ViewHelper getViewHelper() {
         return getComponent(VIEW_HELPER);
     }
 
+    /**
+     * Gets the Samba helper component.
+     * @return The Samba helper.
+     */
     public static SambaHelper getSambaHelper() {
         return getComponent(SAMBA_HELPER);
     }
 
+    /**
+     * Gets the query helper component.
+     * @return The query helper.
+     */
     public static QueryHelper getQueryHelper() {
         return getComponent(QUERY_HELPER);
     }
 
+    /**
+     * Gets the query field configuration.
+     * @return The query field config.
+     */
     public static QueryFieldConfig getQueryFieldConfig() {
         return getComponent(QUERY_FIELD_CONFIG);
     }
 
+    /**
+     * Gets the query processor component.
+     * @return The query processor.
+     */
     public static QueryProcessor getQueryProcessor() {
         return getComponent(QUERY_PROCESSOR);
     }
 
+    /**
+     * Gets the label type helper component.
+     * @return The label type helper.
+     */
     public static LabelTypeHelper getLabelTypeHelper() {
         return getComponent(LABEL_TYPE_HELPER);
     }
 
+    /**
+     * Gets the search log helper component.
+     * @return The search log helper.
+     */
     public static SearchLogHelper getSearchLogHelper() {
         return getComponent(SEARCH_LOG_HELPER);
     }
 
+    /**
+     * Gets the crawling configuration helper component.
+     * @return The crawling config helper.
+     */
     public static CrawlingConfigHelper getCrawlingConfigHelper() {
         if (crawlingConfigHelper == null || HotdeployUtil.isHotdeploy()) {
             crawlingConfigHelper = getComponent(CRAWLING_CONFIG_HELPER);
@@ -298,50 +360,99 @@ public final class ComponentUtil {
         return crawlingConfigHelper;
     }
 
+    /**
+     * Gets the crawling info helper component.
+     * @return The crawling info helper.
+     */
     public static CrawlingInfoHelper getCrawlingInfoHelper() {
         return getComponent(CRAWLING_INFO_HELPER);
     }
 
+    /**
+     * Gets the popular word helper component.
+     * @return The popular word helper.
+     */
     public static PopularWordHelper getPopularWordHelper() {
         return getComponent(POPULAR_WORD_HELPER);
     }
 
+    /**
+     * Gets the path mapping helper component.
+     * @return The path mapping helper.
+     */
     public static PathMappingHelper getPathMappingHelper() {
         return getComponent(PATH_MAPPING_HELPER);
     }
 
+    /**
+     * Gets the duplicate host helper component.
+     * @return The duplicate host helper.
+     */
     public static DuplicateHostHelper getDuplicateHostHelper() {
         return getComponent(DUPLICATE_HOST_HELPER);
     }
 
+    /**
+     * Gets the process helper component.
+     * @return The process helper.
+     */
     public static ProcessHelper getProcessHelper() {
         return getComponent(PROCESS_HELPER);
     }
 
+    /**
+     * Gets the job helper component.
+     * @return The job helper.
+     */
     public static JobHelper getJobHelper() {
         return getComponent(JOB_HELPER);
     }
 
+    /**
+     * Gets the web API manager factory component.
+     * @return The web API manager factory.
+     */
     public static WebApiManagerFactory getWebApiManagerFactory() {
         return getComponent(WEB_API_MANAGER_FACTORY);
     }
 
+    /**
+     * Gets the user agent helper component.
+     * @return The user agent helper.
+     */
     public static UserAgentHelper getUserAgentHelper() {
         return getComponent(USER_AGENT_HELPER);
     }
 
+    /**
+     * Gets the data store factory component.
+     * @return The data store factory.
+     */
     public static DataStoreFactory getDataStoreFactory() {
         return getComponent(DATA_STORE_FACTORY);
     }
 
+    /**
+     * Gets the interval control helper component.
+     * @return The interval control helper.
+     */
     public static IntervalControlHelper getIntervalControlHelper() {
         return getComponent(INTERVAL_CONTROL_HELPER);
     }
 
+    /**
+     * Gets the extractor factory component.
+     * @return The extractor factory.
+     */
     public static ExtractorFactory getExtractorFactory() {
         return getComponent(EXTRACTOR_FACTORY);
     }
 
+    /**
+     * Gets a job executor by name.
+     * @param name The name of the job executor.
+     * @return The job executor instance.
+     */
     public static JobExecutor getJobExecutor(final String name) {
         if (name.endsWith(JOB_EXECUTOR_SUFFIX)) {
             return getComponent(name);
@@ -349,18 +460,34 @@ public final class ComponentUtil {
         return getComponent("script" + JOB_EXECUTOR_SUFFIX);
     }
 
+    /**
+     * Gets the file type helper component.
+     * @return The file type helper.
+     */
     public static FileTypeHelper getFileTypeHelper() {
         return getComponent(FILE_TYPE_HELPER);
     }
 
+    /**
+     * Gets the index updater component.
+     * @return The index updater.
+     */
     public static IndexUpdater getIndexUpdater() {
         return getComponent(INDEX_UPDATER);
     }
 
+    /**
+     * Gets the key match helper component.
+     * @return The key match helper.
+     */
     public static KeyMatchHelper getKeyMatchHelper() {
         return getComponent(KEY_MATCH_HELPER);
     }
 
+    /**
+     * Gets the indexing helper component.
+     * @return The indexing helper.
+     */
     public static IndexingHelper getIndexingHelper() {
         if (indexingHelper == null || HotdeployUtil.isHotdeploy()) {
             indexingHelper = getComponent(INDEXING_HELPER);
@@ -368,26 +495,50 @@ public final class ComponentUtil {
         return indexingHelper;
     }
 
+    /**
+     * Gets the user info helper component.
+     * @return The user info helper.
+     */
     public static UserInfoHelper getUserInfoHelper() {
         return getComponent(USER_INFO_HELPER);
     }
 
+    /**
+     * Gets the message manager component.
+     * @return The message manager.
+     */
     public static MessageManager getMessageManager() {
         return getComponent(MESSAGE_MANAGER);
     }
 
+    /**
+     * Gets the dictionary manager component.
+     * @return The dictionary manager.
+     */
     public static DictionaryManager getDictionaryManager() {
         return getComponent(DICTIONARY_MANAGER);
     }
 
+    /**
+     * Gets the data service component.
+     * @return The data service.
+     */
     public static DataService<OpenSearchAccessResult> getDataService() {
         return getComponent(DATA_SERVICE);
     }
 
+    /**
+     * Gets the search engine client component.
+     * @return The search engine client.
+     */
     public static SearchEngineClient getSearchEngineClient() {
         return getComponent(SEARCH_ENGINE_CLIENT);
     }
 
+    /**
+     * Gets the Fess configuration component.
+     * @return The Fess config.
+     */
     public static FessConfig getFessConfig() {
         if (fessConfig != null) {
             return fessConfig;
@@ -396,138 +547,276 @@ public final class ComponentUtil {
         return fessConfig;
     }
 
+    /**
+     * Gets the suggest helper component.
+     * @return The suggest helper.
+     */
     public static SuggestHelper getSuggestHelper() {
         return getComponent(SUGGEST_HELPER);
     }
 
+    /**
+     * Gets the role query helper component.
+     * @return The role query helper.
+     */
     public static RoleQueryHelper getRoleQueryHelper() {
         return getComponent(ROLE_QUERY_HELPER);
     }
 
+    /**
+     * Gets the LDAP manager component.
+     * @return The LDAP manager.
+     */
     public static LdapManager getLdapManager() {
         return getComponent(LDAP_MANAGER);
     }
 
+    /**
+     * Gets the activity helper component.
+     * @return The activity helper.
+     */
     public static ActivityHelper getActivityHelper() {
         return getComponent(ACTIVITY_HELPER);
     }
 
+    /**
+     * Gets the request manager component.
+     * @return The request manager.
+     */
     public static RequestManager getRequestManager() {
         return getComponent(RequestManager.class);
     }
 
+    /**
+     * Gets the response manager component.
+     * @return The response manager.
+     */
     public static ResponseManager getResponseManager() {
         return getComponent(ResponseManager.class);
     }
 
+    /**
+     * Gets the job manager component.
+     * @return The job manager.
+     */
     public static JobManager getJobManager() {
         return getComponent(JobManager.class);
     }
 
+    /**
+     * Gets the document helper component.
+     * @return The document helper.
+     */
     public static DocumentHelper getDocumentHelper() {
         return getComponent(DOCUMENT_HELPER);
     }
 
+    /**
+     * Gets the query parser component.
+     * @return The query parser.
+     */
     public static QueryParser getQueryParser() {
         return getComponent(QUERY_PARSER);
     }
 
+    /**
+     * Gets the permission helper component.
+     * @return The permission helper.
+     */
     public static PermissionHelper getPermissionHelper() {
         return getComponent(PERMISSION_HELPER);
     }
 
+    /**
+     * Gets the SSO manager component.
+     * @return The SSO manager.
+     */
     public static SsoManager getSsoManager() {
         return getComponent(SSO_MANAGER);
     }
 
+    /**
+     * Gets the thumbnail manager component.
+     * @return The thumbnail manager.
+     */
     public static ThumbnailManager getThumbnailManager() {
         return getComponent(THUMBNAIL_MANAGER);
     }
 
+    /**
+     * Gets the authentication manager component.
+     * @return The authentication manager.
+     */
     public static AuthenticationManager getAuthenticationManager() {
         return getComponent(AUTHENTICATION_MANAGER);
     }
 
+    /**
+     * Gets the primary cipher component.
+     * @return The primary cipher.
+     */
     public static PrimaryCipher getPrimaryCipher() {
         return getComponent(PrimaryCipher.class);
     }
 
+    /**
+     * Gets the crawler client factory component.
+     * @return The crawler client factory.
+     */
     public static CrawlerClientFactory getCrawlerClientFactory() {
         return getComponent(CrawlerClientFactory.class);
     }
 
+    /**
+     * Gets the crawler client creator component.
+     * @return The crawler client creator.
+     */
     public static CrawlerClientCreator getCrawlerClientCreator() {
         return getComponent(CrawlerClientCreator.class);
     }
 
+    /**
+     * Gets the related query helper component.
+     * @return The related query helper.
+     */
     public static RelatedQueryHelper getRelatedQueryHelper() {
         return getComponent(RELATED_QUERY_HELPER);
     }
 
+    /**
+     * Gets the related content helper component.
+     * @return The related content helper.
+     */
     public static RelatedContentHelper getRelatedContentHelper() {
         return getComponent(RELATED_CONTENT_HELPER);
     }
 
+    /**
+     * Gets the virtual host helper component.
+     * @return The virtual host helper.
+     */
     public static VirtualHostHelper getVirtualHostHelper() {
         return getComponent(VIRTUAL_HOST_HELPER);
     }
 
+    /**
+     * Gets the access token helper component.
+     * @return The access token helper.
+     */
     public static AccessTokenHelper getAccessTokenHelper() {
         return getComponent(ACCESS_TOKEN_HELPER);
     }
 
+    /**
+     * Gets the query string builder component.
+     * @return The query string builder.
+     */
     public static QueryStringBuilder getQueryStringBuilder() {
         return getComponent(QUERY_STRING_BUILDER);
     }
 
+    /**
+     * Gets the curl helper component.
+     * @return The curl helper.
+     */
     public static CurlHelper getCurlHelper() {
         return getComponent(CURL_HELPER);
     }
 
+    /**
+     * Gets the language helper component.
+     * @return The language helper.
+     */
     public static LanguageHelper getLanguageHelper() {
         return getComponent(LANGUAGE_HELPER);
     }
 
+    /**
+     * Gets the plugin helper component.
+     * @return The plugin helper.
+     */
     public static PluginHelper getPluginHelper() {
         return getComponent(PLUGIN_HELPER);
     }
 
+    /**
+     * Gets the theme helper component.
+     * @return The theme helper.
+     */
     public static ThemeHelper getThemeHelper() {
         return getComponent(THEME_HELPER);
     }
 
+    /**
+     * Gets the search helper component.
+     * @return The search helper.
+     */
     public static SearchHelper getSearchHelper() {
         return getComponent(SEARCH_HELPER);
     }
 
+    /**
+     * Gets the notification helper component.
+     * @return The notification helper.
+     */
     public static NotificationHelper getNotificationHelper() {
         return getComponent(NOTIFICATION_HELPER);
     }
 
+    /**
+     * Gets the ingest factory component.
+     * @return The ingest factory.
+     */
     public static IngestFactory getIngestFactory() {
         return getComponent(INGEST_FACTORY);
     }
 
+    /**
+     * Gets the script engine factory component.
+     * @return The script engine factory.
+     */
     public static ScriptEngineFactory getScriptEngineFactory() {
         return getComponent(SCRIPT_ENGINE_FACTORY);
     }
 
+    /**
+     * Gets the crawler stats helper component.
+     * @return The crawler stats helper.
+     */
     public static CrawlerStatsHelper getCrawlerStatsHelper() {
         return getComponent(CRAWLER_STATS_HELPER);
     }
 
+    /**
+     * Gets the CORS handler factory component.
+     * @return The CORS handler factory.
+     */
     public static CorsHandlerFactory getCorsHandlerFactory() {
         return getComponent(CORS_HANDLER_FACTORY);
     }
 
+    /**
+     * Gets the rank fusion processor component.
+     * @return The rank fusion processor.
+     */
     public static RankFusionProcessor getRankFusionProcessor() {
         return getComponent(RANK_FUSION_PROCESSOR);
     }
 
+    /**
+     * Gets the protocol helper component.
+     * @return The protocol helper.
+     */
     public static ProtocolHelper getProtocolHelper() {
         return getComponent(PROTOCOL_HELPER);
     }
 
+    /**
+     * Gets a component by its class type.
+     * @param <T> The type of the component.
+     * @param clazz The class of the component to retrieve.
+     * @return The component instance.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T getComponent(final Class<T> clazz) {
         try {
@@ -545,6 +834,12 @@ public final class ComponentUtil {
         }
     }
 
+    /**
+     * Gets a component by its name.
+     * @param <T> The type of the component.
+     * @param componentName The name of the component to retrieve.
+     * @return The component instance.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T getComponent(final String componentName) {
         try {
@@ -562,6 +857,11 @@ public final class ComponentUtil {
         }
     }
 
+    /**
+     * Checks if a component is available.
+     * @param componentKey The key of the component to check.
+     * @return True if the component is available, false otherwise.
+     */
     public static boolean hasComponent(final String componentKey) {
         if (SingletonLaContainerFactory.getContainer().hasComponentDef(componentKey)) {
             return true;
@@ -569,30 +869,58 @@ public final class ComponentUtil {
         return componentMap.containsKey(componentKey);
     }
 
+    /**
+     * Checks if query parser is available.
+     * @return True if query parser is available, false otherwise.
+     */
     public static boolean hasQueryParser() {
         return hasComponent(QUERY_PARSER);
     }
 
+    /**
+     * Checks if view helper is available.
+     * @return True if view helper is available, false otherwise.
+     */
     public static boolean hasViewHelper() {
         return hasComponent(VIEW_HELPER);
     }
 
+    /**
+     * Checks if query helper is available.
+     * @return True if query helper is available, false otherwise.
+     */
     public static boolean hasQueryHelper() {
         return hasComponent(QUERY_HELPER);
     }
 
+    /**
+     * Checks if popular word helper is available.
+     * @return True if popular word helper is available, false otherwise.
+     */
     public static boolean hasPopularWordHelper() {
         return hasComponent(POPULAR_WORD_HELPER);
     }
 
+    /**
+     * Checks if related query helper is available.
+     * @return True if related query helper is available, false otherwise.
+     */
     public static boolean hasRelatedQueryHelper() {
         return hasComponent(RELATED_QUERY_HELPER);
     }
 
+    /**
+     * Checks if ingest factory is available.
+     * @return True if ingest factory is available, false otherwise.
+     */
     public static boolean hasIngestFactory() {
         return hasComponent(INGEST_FACTORY);
     }
 
+    /**
+     * Checks if the container is available.
+     * @return True if the container is available, false otherwise.
+     */
     public static boolean available() {
         try {
             return SingletonLaContainer.getComponent(SYSTEM_HELPER) != null;
@@ -616,6 +944,11 @@ public final class ComponentUtil {
         }
     }
 
+    /**
+     * Registers a component instance with a name.
+     * @param instance The component instance to register.
+     * @param name The name to register the component under.
+     */
     public static void register(final Object instance, final String name) {
         componentMap.put(name, instance);
     }

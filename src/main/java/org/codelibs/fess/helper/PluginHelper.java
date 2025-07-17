@@ -64,9 +64,19 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+/**
+ * Helper class for managing Fess plugins and artifacts.
+ * This class provides functionality to discover, install, and manage various types of plugins
+ * including data stores, themes, ingest processors, scripts, web applications, thumbnails, and crawlers.
+ */
 public class PluginHelper {
+    /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(PluginHelper.class);
 
+    /**
+     * Cache for storing available artifacts by type.
+     * The cache expires after 5 minutes and has a maximum size of 10 entries.
+     */
     protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder().maximumSize(10)
             .expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
                 @Override
@@ -85,6 +95,21 @@ public class PluginHelper {
                 }
             });
 
+    /**
+     * Default constructor for PluginHelper.
+     * Initializes the plugin helper with default settings.
+     */
+    public PluginHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Retrieves available artifacts of the specified type from configured repositories.
+     *
+     * @param artifactType the type of artifacts to retrieve
+     * @return an array of available artifacts
+     * @throws PluginException if failed to access the artifact repository
+     */
     public Artifact[] getAvailableArtifacts(final ArtifactType artifactType) {
         try {
             return availableArtifacts.get(artifactType);
@@ -93,11 +118,23 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Gets the list of configured plugin repositories.
+     *
+     * @return an array of repository URLs
+     */
     protected String[] getRepositories() {
         return split(ComponentUtil.getFessConfig().getPluginRepositories(), ",")
                 .get(stream -> stream.map(String::trim).toArray(n -> new String[n]));
     }
 
+    /**
+     * Loads artifacts from a YAML-based repository.
+     *
+     * @param url the URL of the YAML repository
+     * @return a list of artifacts loaded from the repository
+     * @throws PluginException if failed to parse the repository content
+     */
     protected List<Artifact> loadArtifactsFromRepository(final String url) {
         final String content = getRepositoryContent(url);
         final ObjectMapper objectMapper = new YAMLMapper();
@@ -114,6 +151,13 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Processes a Maven-style repository to extract artifacts of the specified type.
+     *
+     * @param artifactType the type of artifacts to process
+     * @param url the URL of the repository
+     * @return a list of artifacts found in the repository
+     */
     protected List<Artifact> processRepository(final ArtifactType artifactType, final String url) {
         final List<Artifact> list = new ArrayList<>();
         final String repoContent = getRepositoryContent(url);
@@ -163,6 +207,13 @@ public class PluginHelper {
         return list;
     }
 
+    /**
+     * Checks if an artifact name should be excluded from the results.
+     *
+     * @param artifactType the type of the artifact
+     * @param name the name of the artifact
+     * @return true if the artifact should be excluded, false otherwise
+     */
     protected boolean isExcludedName(final ArtifactType artifactType, final String name) {
         if (artifactType != ArtifactType.CRAWLER) {
             return false;
@@ -184,10 +235,26 @@ public class PluginHelper {
         return false;
     }
 
+    /**
+     * Checks if a plugin version is a target version for the current Fess installation.
+     *
+     * @param version the version to check
+     * @return true if the version is a target version, false otherwise
+     */
     protected boolean isTargetPluginVersion(final String version) {
         return ComponentUtil.getFessConfig().isTargetPluginVersion(version);
     }
 
+    /**
+     * Gets the actual version string for a SNAPSHOT artifact by parsing the snapshot metadata.
+     *
+     * @param builder the document builder to use for parsing XML
+     * @param pluginUrl the URL of the plugin
+     * @param version the snapshot version
+     * @return the actual version string with timestamp and build number, or null if not found
+     * @throws SAXException if XML parsing fails
+     * @throws IOException if I/O error occurs
+     */
     protected String getSnapshotActualVersion(final DocumentBuilder builder, final String pluginUrl, final String version)
             throws SAXException, IOException {
         String timestamp = null;
@@ -214,6 +281,13 @@ public class PluginHelper {
         return null;
     }
 
+    /**
+     * Retrieves the content of a repository URL.
+     *
+     * @param url the URL to retrieve content from
+     * @return the content as a string
+     * @throws IORuntimeException if I/O error occurs
+     */
     protected String getRepositoryContent(final String url) {
         if (logger.isDebugEnabled()) {
             logger.debug("Loading {}", url);
@@ -225,6 +299,12 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Gets the list of installed artifacts of the specified type.
+     *
+     * @param artifactType the type of artifacts to retrieve
+     * @return an array of installed artifacts
+     */
     public Artifact[] getInstalledArtifacts(final ArtifactType artifactType) {
         if (artifactType == ArtifactType.UNKNOWN) {
             final File[] jarFiles = ResourceUtil.getPluginJarFiles((d, n) -> {
@@ -252,10 +332,25 @@ public class PluginHelper {
         return list.toArray(new Artifact[list.size()]);
     }
 
+    /**
+     * Creates an artifact instance from a filename.
+     *
+     * @param artifactType the type of the artifact
+     * @param filename the filename to parse
+     * @return an artifact instance
+     */
     protected Artifact getArtifactFromFileName(final ArtifactType artifactType, final String filename) {
         return getArtifactFromFileName(artifactType, filename, null);
     }
 
+    /**
+     * Creates an artifact instance from a filename with a specified URL.
+     *
+     * @param artifactType the type of the artifact
+     * @param filename the filename to parse
+     * @param url the URL of the artifact
+     * @return an artifact instance
+     */
     public Artifact getArtifactFromFileName(final ArtifactType artifactType, final String filename, final String url) {
         final String baseName = StringUtils.removeEndIgnoreCase(filename, ".jar");
         final List<String> nameList = new ArrayList<>();
@@ -274,6 +369,11 @@ public class PluginHelper {
         return new Artifact(nameList.stream().collect(Collectors.joining("-")), versionList.stream().collect(Collectors.joining("-")), url);
     }
 
+    /**
+     * Installs an artifact based on its type.
+     *
+     * @param artifact the artifact to install
+     */
     public void installArtifact(final Artifact artifact) {
         switch (artifact.getType()) {
         case THEME:
@@ -286,6 +386,12 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Installs an artifact by downloading it from its URL.
+     *
+     * @param artifact the artifact to install
+     * @throws PluginException if installation fails
+     */
     protected void install(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         final String url = artifact.getUrl();
@@ -312,6 +418,12 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Creates a CURL request for the specified URL with proxy configuration if available.
+     *
+     * @param url the URL to create a request for
+     * @return a configured CURL request
+     */
     protected CurlRequest createCurlRequest(final String url) {
         final CurlRequest request = Curl.get(url);
         final Proxy proxy = ComponentUtil.getFessConfig().getHttpProxy();
@@ -321,6 +433,12 @@ public class PluginHelper {
         return request;
     }
 
+    /**
+     * Deletes an installed artifact.
+     *
+     * @param artifact the artifact to delete
+     * @throws PluginException if the artifact does not exist or deletion fails
+     */
     public void deleteInstalledArtifact(final Artifact artifact) {
         final String fileName = artifact.getFileName();
         final Path jarPath = Paths.get(ResourceUtil.getPluginPath().toString(), fileName);
@@ -340,6 +458,13 @@ public class PluginHelper {
 
     }
 
+    /**
+     * Uninstalls an artifact by deleting its JAR file.
+     *
+     * @param fileName the name of the file to delete
+     * @param jarPath the path to the JAR file
+     * @throws PluginException if deletion fails
+     */
     protected void uninstall(final String fileName, final Path jarPath) {
         try {
             Files.delete(jarPath);
@@ -348,6 +473,13 @@ public class PluginHelper {
         }
     }
 
+    /**
+     * Gets an artifact by name and version from available artifacts.
+     *
+     * @param name the name of the artifact
+     * @param version the version of the artifact
+     * @return the artifact if found, null otherwise
+     */
     public Artifact getArtifact(final String name, final String version) {
         if (StringUtil.isBlank(name) || StringUtil.isBlank(version)) {
             return null;
@@ -360,67 +492,145 @@ public class PluginHelper {
         return null;
     }
 
+    /**
+     * Represents a plugin artifact with name, version, and URL information.
+     */
     public static class Artifact {
+        /** The name of the artifact */
         protected final String name;
+        /** The version of the artifact */
         protected final String version;
+        /** The URL where the artifact can be downloaded */
         protected final String url;
 
+        /**
+         * Creates a new artifact with name, version, and URL.
+         *
+         * @param name the name of the artifact
+         * @param version the version of the artifact
+         * @param url the URL where the artifact can be downloaded
+         */
         public Artifact(final String name, final String version, final String url) {
             this.name = name;
             this.version = version;
             this.url = url;
         }
 
+        /**
+         * Creates a new artifact with name and version, but no URL.
+         *
+         * @param name the name of the artifact
+         * @param version the version of the artifact
+         */
         public Artifact(final String name, final String version) {
             this(name, version, null);
         }
 
+        /**
+         * Gets the name of the artifact.
+         *
+         * @return the artifact name
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Gets the version of the artifact.
+         *
+         * @return the artifact version
+         */
         public String getVersion() {
             return version;
         }
 
+        /**
+         * Gets the filename of the artifact JAR file.
+         *
+         * @return the filename in the format "name-version.jar"
+         */
         public String getFileName() {
             return name + "-" + version + ".jar";
         }
 
+        /**
+         * Gets the URL where the artifact can be downloaded.
+         *
+         * @return the artifact URL
+         */
         public String getUrl() {
             return url;
         }
 
+        /**
+         * Gets the type of the artifact based on its name.
+         *
+         * @return the artifact type
+         */
         public ArtifactType getType() {
             return ArtifactType.getType(name);
         }
 
+        /**
+         * Returns a string representation of the artifact.
+         *
+         * @return a string in the format "name:version"
+         */
         @Override
         public String toString() {
             return name + ":" + version;
         }
     }
 
+    /**
+     * Enumeration of different artifact types supported by Fess.
+     * Each type has a specific ID prefix used to identify artifacts of that type.
+     */
     public enum ArtifactType {
+        /** Data store plugins */
         DATA_STORE("fess-ds"), //
+        /** Theme plugins */
         THEME("fess-theme"), //
+        /** Ingest processor plugins */
         INGEST("fess-ingest"), //
+        /** Script plugins */
         SCRIPT("fess-script"), //
+        /** Web application plugins */
         WEBAPP("fess-webapp"), //
+        /** Thumbnail generator plugins */
         THUMBNAIL("fess-thumbnail"), //
+        /** Crawler plugins */
         CRAWLER("fess-crawler"), //
+        /** Unknown/generic JAR files */
         UNKNOWN("jar");
 
+        /** The ID prefix for this artifact type */
         private final String id;
 
+        /**
+         * Creates a new artifact type with the specified ID.
+         *
+         * @param id the ID prefix for this artifact type
+         */
         ArtifactType(final String id) {
             this.id = id;
         }
 
+        /**
+         * Gets the ID prefix for this artifact type.
+         *
+         * @return the ID prefix
+         */
         public String getId() {
             return id;
         }
 
+        /**
+         * Determines the artifact type based on the artifact name.
+         *
+         * @param name the name of the artifact
+         * @return the corresponding artifact type, or UNKNOWN if no match is found
+         */
         public static ArtifactType getType(final String name) {
             if (name.startsWith(DATA_STORE.getId())) {
                 return DATA_STORE;

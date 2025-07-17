@@ -15,20 +15,54 @@
  */
 package org.codelibs.fess.job;
 
+/**
+ * Abstract base class for job executors that handle script execution within the job system.
+ * This class provides a framework for executing scripts and managing shutdown operations.
+ */
 public abstract class JobExecutor {
+    /** Listener to handle shutdown events */
     protected ShutdownListener shutdownListener;
 
+    /**
+     * Default constructor.
+     */
+    public JobExecutor() {
+        // Default constructor
+    }
+
+    /**
+     * Executes a script with the specified script type and content.
+     *
+     * @param scriptType the type of script to execute
+     * @param script the script content to execute
+     * @return the result of script execution
+     */
     public abstract Object execute(String scriptType, String script);
 
+    /**
+     * Initiates shutdown of the job executor.
+     * This method notifies the shutdown listener to perform cleanup operations.
+     */
     public void shutdown() {
         shutdownListener.onShutdown();
     }
 
+    /**
+     * Adds a shutdown listener to be notified when the executor is shutting down.
+     *
+     * @param listener the shutdown listener to add
+     */
     public void addShutdownListener(final ShutdownListener listener) {
         shutdownListener = listener;
     }
 
+    /**
+     * Interface for listening to shutdown events.
+     */
     public interface ShutdownListener {
+        /**
+         * Called when the job executor is shutting down.
+         */
         void onShutdown();
     }
 }

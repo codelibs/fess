@@ -17,11 +17,33 @@ package org.codelibs.fess.app.web.admin.design;
 
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 
+/**
+ * Form class for design file management in the admin interface.
+ * Handles upload and management of design templates and CSS files.
+ */
 public class DesignForm {
 
+    /**
+     * Creates a new instance of DesignForm.
+     * This constructor initializes the form for design file management
+     * in the admin interface, handling upload and management of templates and CSS files.
+     */
+    public DesignForm() {
+        // Default constructor with explicit documentation
+    }
+
+    /**
+     * The multipart file containing the design content to upload.
+     */
     public MultipartFormFile designFile;
 
+    /**
+     * The name of the design file being uploaded.
+     */
     public String designFileName;
 
+    /**
+     * The target file name for the design file.
+     */
     public String fileName;
 }

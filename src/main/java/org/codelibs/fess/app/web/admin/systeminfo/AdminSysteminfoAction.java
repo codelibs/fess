@@ -37,10 +37,19 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import jakarta.annotation.Resource;
 
 /**
- * @author Keiichi Watanabe
+ * Admin action for System Info.
+ *
  */
 public class AdminSysteminfoAction extends FessAdminAction {
 
+    /**
+     * Default constructor.
+     */
+    public AdminSysteminfoAction() {
+        super();
+    }
+
+    /** Role name for admin system info operations */
     public static final String ROLE = "admin-systeminfo";
 
     private static final String MASKED_VALUE = "XXXXXXXX";
@@ -48,6 +57,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** System properties for retrieving configuration information. */
     @Resource
     protected DynamicProperties systemProperties;
 
@@ -72,6 +82,11 @@ public class AdminSysteminfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                              Index
     //                                                                      ==============
+    /**
+     * Displays the system information page with environment, properties, and configuration details.
+     *
+     * @return HTML response for the system info page
+     */
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse index() {
@@ -87,22 +102,47 @@ public class AdminSysteminfoAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
+    /**
+     * Registers environment variables for rendering.
+     *
+     * @param data the render data to populate
+     */
     protected void registerEnvItems(final RenderData data) {
         RenderDataUtil.register(data, "envItems", getEnvItems());
     }
 
+    /**
+     * Registers system properties for rendering.
+     *
+     * @param data the render data to populate
+     */
     protected void registerPropItems(final RenderData data) {
         RenderDataUtil.register(data, "propItems", getPropItems());
     }
 
+    /**
+     * Registers Fess-specific properties for rendering.
+     *
+     * @param data the render data to populate
+     */
     protected void registerFessPropItems(final RenderData data) {
         RenderDataUtil.register(data, "fessPropItems", getFessPropItems(fessConfig));
     }
 
+    /**
+     * Registers bug report items for rendering.
+     *
+     * @param data the render data to populate
+     */
     protected void registerBugReportItems(final RenderData data) {
         RenderDataUtil.register(data, "bugReportItems", getBugReportItems());
     }
 
+    /**
+     * Gets a list of environment variables as key-value pairs.
+     *
+     * @return list of environment variable items
+     */
     public static List<Map<String, String>> getEnvItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<String, String> entry : System.getenv().entrySet()) {
@@ -111,6 +151,11 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return itemList;
     }
 
+    /**
+     * Gets a list of system properties as key-value pairs.
+     *
+     * @return list of system property items
+     */
     public static List<Map<String, String>> getPropItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
@@ -119,6 +164,12 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return itemList;
     }
 
+    /**
+     * Gets a list of Fess-specific configuration properties as key-value pairs.
+     *
+     * @param fessConfig the Fess configuration object
+     * @return list of Fess property items
+     */
     public static List<Map<String, String>> getFessPropItems(final FessConfig fessConfig) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         ComponentUtil.getSystemProperties().entrySet().stream().forEach(e -> {
@@ -145,6 +196,12 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return itemList;
     }
 
+    /**
+     * Checks if a property value should be masked for security reasons.
+     *
+     * @param key the property key to check
+     * @return true if the value should be masked, false otherwise
+     */
     protected static boolean isMaskedValue(final String key) {
         return "http.proxy.password".equals(key) //
                 || "ldap.admin.security.credentials".equals(key) //
@@ -154,6 +211,11 @@ public class AdminSysteminfoAction extends FessAdminAction {
                 || "oic.client.secret".equals(key);
     }
 
+    /**
+     * Gets a list of items relevant for bug reports.
+     *
+     * @return list of bug report items
+     */
     public static List<Map<String, String>> getBugReportItems() {
         final List<Map<String, String>> itemList = new ArrayList<>();
         for (final String label : bugReportLabels) {
@@ -170,6 +232,12 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return itemList;
     }
 
+    /**
+     * Checks if a property should be included in bug reports.
+     *
+     * @param key the property key to check
+     * @return true if the property should be included, false otherwise
+     */
     private static boolean isBugReportTarget(final Object key) {
         if ("snapshot.path".equals(key) || "label.value".equals(key)) {
             return false;
@@ -177,10 +245,23 @@ public class AdminSysteminfoAction extends FessAdminAction {
         return true;
     }
 
+    /**
+     * Creates a property item from a system property key.
+     *
+     * @param key the property key
+     * @return map containing the key-value pair
+     */
     protected static Map<String, String> createPropItem(final String key) {
         return createItem(key, System.getProperty(key));
     }
 
+    /**
+     * Creates a key-value item map for display.
+     *
+     * @param label the item label
+     * @param value the item value
+     * @return map containing the formatted key-value pair
+     */
     protected static Map<String, String> createItem(final Object label, final Object value) {
         final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label != null ? label.toString() : StringUtil.EMPTY);

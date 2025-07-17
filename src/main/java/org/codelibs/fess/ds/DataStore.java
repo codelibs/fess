@@ -19,10 +19,22 @@ import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 
+/**
+ * The interface for DataStore.
+ */
 public interface DataStore {
 
+    /**
+     * Store the data.
+     * @param config The data configuration.
+     * @param callback The callback.
+     * @param initParamMap The initial parameters.
+     */
     void store(DataConfig config, IndexUpdateCallback callback, DataStoreParams initParamMap);
 
+    /**
+     * Stop the data store.
+     */
     void stop();
 
 }

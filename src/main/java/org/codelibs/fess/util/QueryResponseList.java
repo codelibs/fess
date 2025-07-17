@@ -22,47 +22,77 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+/**
+ * A response list that extends List functionality and includes pagination and search metadata.
+ * This class wraps search results with pagination information, facet responses, and query statistics.
+ * It implements the List interface to provide standard list operations while adding search-specific
+ * functionality such as page navigation, record counts, and query execution times.
+ */
 public class QueryResponseList implements List<Map<String, Object>> {
 
+    /** The underlying list that contains the actual search result documents. */
     protected final List<Map<String, Object>> parent;
 
+    /** The starting position of the current page in the overall result set. */
     protected final int start;
 
+    /** The offset value used for pagination calculations. */
     protected final int offset;
 
-    /** The value of current page number. */
+    /** The number of records per page. */
     protected final int pageSize;
 
-    /** The value of current page number. */
+    /** The current page number (1-based). */
     protected int currentPageNumber;
 
+    /** The total number of records in the search result set. */
     protected long allRecordCount;
 
+    /** The relation type for the total record count (e.g., "eq", "gte"). */
     protected String allRecordCountRelation;
 
+    /** The total number of pages based on the page size and total record count. */
     protected int allPageCount;
 
+    /** Flag indicating whether there is a next page available. */
     protected boolean existNextPage;
 
+    /** Flag indicating whether there is a previous page available. */
     protected boolean existPrevPage;
 
+    /** The record number of the first record on the current page (1-based). */
     protected long currentStartRecordNumber;
 
+    /** The record number of the last record on the current page (1-based). */
     protected long currentEndRecordNumber;
 
+    /** A list of page numbers for pagination display (typically a range around the current page). */
     protected List<String> pageNumberList;
 
+    /** The search query string that was used to generate these results. */
     protected String searchQuery;
 
+    /** The total execution time for the search request in milliseconds. */
     protected long execTime;
 
+    /** The facet response containing aggregated search facets and their counts. */
     protected FacetResponse facetResponse;
 
+    /** Flag indicating whether the search results are partial (not complete). */
     protected boolean partialResults = false;
 
+    /** The time taken to execute the search query in milliseconds. */
     protected long queryTime;
 
-    // for testing
+    /**
+     * Constructor for testing purposes.
+     * Creates a QueryResponseList with minimal pagination information.
+     *
+     * @param documentList the list of documents to wrap
+     * @param start the starting position of the current page
+     * @param pageSize the number of records per page
+     * @param offset the offset value for pagination
+     */
     protected QueryResponseList(final List<Map<String, Object>> documentList, final int start, final int pageSize, final int offset) {
         parent = documentList;
         this.offset = offset;
@@ -70,6 +100,19 @@ public class QueryResponseList implements List<Map<String, Object>> {
         this.pageSize = pageSize;
     }
 
+    /**
+     * Main constructor that creates a QueryResponseList with complete search metadata.
+     *
+     * @param documentList the list of documents returned by the search
+     * @param allRecordCount the total number of records in the search result set
+     * @param allRecordCountRelation the relation type for the total record count
+     * @param queryTime the time taken to execute the search query in milliseconds
+     * @param partialResults flag indicating whether the results are partial
+     * @param facetResponse the facet response containing aggregated search facets
+     * @param start the starting position of the current page
+     * @param pageSize the number of records per page
+     * @param offset the offset value for pagination
+     */
     public QueryResponseList(final List<Map<String, Object>> documentList, final long allRecordCount, final String allRecordCountRelation,
             final long queryTime, final boolean partialResults, final FacetResponse facetResponse, final int start, final int pageSize,
             final int offset) {
@@ -84,6 +127,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
         }
     }
 
+    /**
+     * Calculates pagination information based on the current parameters.
+     * This method computes page counts, navigation flags, record numbers, and page number lists.
+     */
     protected void calculatePageInfo() {
         int startWithOffset = start - offset;
         if (startWithOffset < 0) {
@@ -242,78 +289,174 @@ public class QueryResponseList implements List<Map<String, Object>> {
         return parent.toArray(a);
     }
 
+    /**
+     * Gets the starting position of the current page in the overall result set.
+     *
+     * @return the start position (0-based)
+     */
     public int getStart() {
         return start;
     }
 
+    /**
+     * Gets the offset value used for pagination calculations.
+     *
+     * @return the offset value
+     */
     public int getOffset() {
         return offset;
     }
 
+    /**
+     * Gets the number of records per page.
+     *
+     * @return the page size
+     */
     public int getPageSize() {
         return pageSize;
     }
 
+    /**
+     * Gets the current page number (1-based).
+     *
+     * @return the current page number
+     */
     public int getCurrentPageNumber() {
         return currentPageNumber;
     }
 
+    /**
+     * Gets the total number of records in the search result set.
+     *
+     * @return the total record count
+     */
     public long getAllRecordCount() {
         return allRecordCount;
     }
 
+    /**
+     * Gets the relation type for the total record count.
+     *
+     * @return the relation type (e.g., "eq" for exact count, "gte" for greater than or equal)
+     */
     public String getAllRecordCountRelation() {
         return allRecordCountRelation;
     }
 
+    /**
+     * Gets the total number of pages based on the page size and total record count.
+     *
+     * @return the total page count
+     */
     public int getAllPageCount() {
         return allPageCount;
     }
 
+    /**
+     * Checks whether there is a next page available.
+     *
+     * @return true if a next page exists, false otherwise
+     */
     public boolean isExistNextPage() {
         return existNextPage;
     }
 
+    /**
+     * Checks whether there is a previous page available.
+     *
+     * @return true if a previous page exists, false otherwise
+     */
     public boolean isExistPrevPage() {
         return existPrevPage;
     }
 
+    /**
+     * Gets the record number of the first record on the current page (1-based).
+     *
+     * @return the starting record number of the current page
+     */
     public long getCurrentStartRecordNumber() {
         return currentStartRecordNumber;
     }
 
+    /**
+     * Gets the record number of the last record on the current page (1-based).
+     *
+     * @return the ending record number of the current page
+     */
     public long getCurrentEndRecordNumber() {
         return currentEndRecordNumber;
     }
 
+    /**
+     * Gets a list of page numbers for pagination display.
+     * Typically returns a range of page numbers around the current page.
+     *
+     * @return a list of page numbers as strings
+     */
     public List<String> getPageNumberList() {
         return pageNumberList;
     }
 
+    /**
+     * Gets the search query string that was used to generate these results.
+     *
+     * @return the search query string
+     */
     public String getSearchQuery() {
         return searchQuery;
     }
 
+    /**
+     * Sets the search query string that was used to generate these results.
+     *
+     * @param searchQuery the search query string
+     */
     public void setSearchQuery(final String searchQuery) {
         this.searchQuery = searchQuery;
     }
 
+    /**
+     * Gets the total execution time for the search request in milliseconds.
+     *
+     * @return the execution time in milliseconds
+     */
     public long getExecTime() {
         return execTime;
     }
 
+    /**
+     * Sets the total execution time for the search request in milliseconds.
+     *
+     * @param execTime the execution time in milliseconds
+     */
     public void setExecTime(final long execTime) {
         this.execTime = execTime;
     }
 
+    /**
+     * Gets the facet response containing aggregated search facets and their counts.
+     *
+     * @return the facet response, or null if no facets were requested
+     */
     public FacetResponse getFacetResponse() {
         return facetResponse;
     }
 
+    /**
+     * Checks whether the search results are partial (not complete).
+     *
+     * @return true if the results are partial, false if complete
+     */
     public boolean isPartialResults() {
         return partialResults;
     }
 
+    /**
+     * Gets the time taken to execute the search query in milliseconds.
+     *
+     * @return the query execution time in milliseconds
+     */
     public long getQueryTime() {
         return queryTime;
     }

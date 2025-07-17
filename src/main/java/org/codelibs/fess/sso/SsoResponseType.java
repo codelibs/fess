@@ -15,6 +15,21 @@
  */
 package org.codelibs.fess.sso;
 
+/**
+ * Represents the type of SSO (Single Sign-On) response being requested.
+ * This enum is used to differentiate between various SSO operations,
+ * such as metadata requests and logout actions.
+ */
 public enum SsoResponseType {
-    METADATA, LOGOUT;
+    /**
+     * Indicates a request for SSO metadata, which is typically used for
+     * configuration and discovery in protocols like SAML.
+     */
+    METADATA,
+
+    /**
+     * Indicates a request to perform a logout operation, terminating the
+     * user's SSO session.
+     */
+    LOGOUT;
 }

@@ -26,57 +26,81 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * Form class for creating data store configurations.
+ * Data configs allow administrators to set up crawling of various data sources
+ * including databases, CSV files, and other structured data sources.
  */
 public class CreateForm {
 
+    /**
+     * Creates a new CreateForm instance.
+     */
+    public CreateForm() {
+        // Default constructor
+    }
+
+    /** CRUD operation mode (CREATE, EDIT, etc.) */
     @ValidateTypeFailure
     public Integer crudMode;
 
+    /** Configuration name for identifying this data source */
     @Required
     @Size(max = 200)
     public String name;
 
+    /** Optional description of this data configuration */
     @Size(max = 1000)
     public String description;
 
+    /** Handler class name for processing this data source */
     @Required
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String handlerName;
 
+    /** Parameters passed to the data handler */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String handlerParameter;
 
+    /** Script for custom data processing logic */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String handlerScript;
 
+    /** Boost value for documents from this data source */
     @Required
     @ValidateTypeFailure
     public Float boost;
 
+    /** Whether this configuration is enabled (true/false) */
     @Required
     @Size(max = 5)
     public String available;
 
+    /** Access permissions for documents from this data source */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
+    /** Virtual hosts where this configuration applies */
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String virtualHosts;
 
+    /** Sort order for displaying configurations */
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer sortOrder;
 
+    /** User who created this configuration */
     @Size(max = 1000)
     public String createdBy;
 
+    /** Timestamp when this configuration was created */
     @ValidateTypeFailure
     public Long createdTime;
 
+    /**
+     * Initializes the form with default values for creating a new data configuration.
+     */
     public void initialize() {
         crudMode = CrudMode.CREATE;
         boost = 1.0f;
