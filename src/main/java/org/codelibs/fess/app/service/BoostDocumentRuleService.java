@@ -39,7 +39,7 @@ public class BoostDocumentRuleService extends FessAppService {
      * Default constructor for BoostDocumentRuleService.
      */
     public BoostDocumentRuleService() {
-        // Default constructor
+        super();
     }
 
     /** Database behavior for boost document rule operations. */

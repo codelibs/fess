@@ -62,7 +62,7 @@ public class DataConfigService extends FessAppService {
      * including CRUD operations and search functionality.
      */
     public DataConfigService() {
-        // Default constructor with explicit documentation
+        super();
     }
 
     /**

@@ -48,7 +48,7 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictSynonymAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictSynonymAction.class);

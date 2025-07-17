@@ -96,7 +96,7 @@ public class AdminBackupAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminBackupAction() {
-        // nothing
+        super();
     }
 
     /**

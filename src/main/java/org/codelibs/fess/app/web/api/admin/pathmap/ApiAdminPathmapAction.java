@@ -50,7 +50,7 @@ public class ApiAdminPathmapAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminPathmapAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

@@ -62,7 +62,7 @@ public class DuplicateHostService extends FessAppService {
      * including CRUD operations and search functionality.
      */
     public DuplicateHostService() {
-        // Default constructor with explicit documentation
+        super();
     }
 
     /**

@@ -54,7 +54,7 @@ public class AdminWebauthAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminWebauthAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin web auth operations */
@@ -65,11 +65,11 @@ public class AdminWebauthAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
     /** Service for managing web authentication configurations */
-    private WebAuthenticationService webAuthenticationService;
     @Resource
+    private WebAuthenticationService webAuthenticationService;
     /** Pager for paginating web authentication results */
+    @Resource
     private WebAuthPager webAuthPager;
     /** Service for accessing and modifying web configuration settings */
     @Resource

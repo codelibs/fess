@@ -37,7 +37,7 @@ public class CrawlerEngineClient extends FesenClient {
      * Creates a new instance of CrawlerEngineClient.
      */
     public CrawlerEngineClient() {
-        // Default constructor
+        super();
     }
 
     @Override

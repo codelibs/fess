@@ -53,7 +53,7 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminRelatedcontentAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

@@ -53,7 +53,7 @@ public class AdminReqheaderAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminReqheaderAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin request header operations */

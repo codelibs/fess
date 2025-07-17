@@ -56,7 +56,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * Default constructor.
      */
     public FessLoginAssist() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

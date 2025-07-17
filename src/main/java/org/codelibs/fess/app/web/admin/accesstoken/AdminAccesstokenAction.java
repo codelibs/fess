@@ -55,7 +55,7 @@ public class AdminAccesstokenAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminAccesstokenAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(AdminAccesstokenAction.class);

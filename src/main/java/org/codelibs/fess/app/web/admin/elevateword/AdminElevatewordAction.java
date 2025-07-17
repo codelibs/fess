@@ -69,7 +69,7 @@ public class AdminElevatewordAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminElevatewordAction() {
-        // Default constructor
+        super();
     }
 
     /** Role constant for admin elevate word management access control. */

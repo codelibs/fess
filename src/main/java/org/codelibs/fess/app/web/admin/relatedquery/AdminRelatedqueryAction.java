@@ -54,7 +54,7 @@ public class AdminRelatedqueryAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminRelatedqueryAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin related query operations */

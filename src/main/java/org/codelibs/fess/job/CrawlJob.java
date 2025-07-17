@@ -110,7 +110,7 @@ public class CrawlJob extends ExecJob {
      * Initializes the job with default settings.
      */
     public CrawlJob() {
-        // Default constructor
+        super();
     }
 
     /**

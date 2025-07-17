@@ -37,7 +37,7 @@ public class AdminDictAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictAction() {
-        // nothing
+        super();
     }
 
     /** The role for this action. */

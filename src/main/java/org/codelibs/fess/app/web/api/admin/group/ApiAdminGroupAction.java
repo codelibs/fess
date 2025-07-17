@@ -51,7 +51,7 @@ public class ApiAdminGroupAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminGroupAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

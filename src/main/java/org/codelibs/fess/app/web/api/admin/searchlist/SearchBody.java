@@ -27,7 +27,7 @@ public class SearchBody extends ListForm {
      * Default constructor.
      */
     public SearchBody() {
-        // Default constructor
+        super();
     }
 
     // `size` is an alias of `num`.

@@ -44,7 +44,7 @@ public class HelpAction extends FessSearchAction {
      * Default constructor for HelpAction.
      */
     public HelpAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

@@ -47,7 +47,7 @@ public class AdminBoostdocAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminBoostdocAction() {
-        // nothing
+        super();
     }
 
     /** The role for this action. */

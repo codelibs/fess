@@ -41,7 +41,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
      * Creates a new instance of CrawlerLogHelper.
      */
     public CrawlerLogHelper() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(CrawlerLogHelper.class);

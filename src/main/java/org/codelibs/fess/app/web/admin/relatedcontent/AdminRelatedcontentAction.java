@@ -47,7 +47,7 @@ public class AdminRelatedcontentAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminRelatedcontentAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin related content operations */

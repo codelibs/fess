@@ -39,7 +39,7 @@ public class PrefixQueryCommand extends QueryCommand {
      * Default constructor.
      */
     public PrefixQueryCommand() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(PrefixQueryCommand.class);

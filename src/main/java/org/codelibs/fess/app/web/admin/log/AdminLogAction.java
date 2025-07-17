@@ -51,7 +51,7 @@ public class AdminLogAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminLogAction() {
-        // Default constructor
+        super();
     }
 
     /** The role name for log administration. */

@@ -56,7 +56,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
      * Default constructor for HtmlTagBasedGenerator.
      */
     public HtmlTagBasedGenerator() {
-        // Default constructor
+        super();
     }
 
     /**

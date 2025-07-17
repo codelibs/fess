@@ -48,7 +48,7 @@ public class EditForm extends CreateForm {
      * Default constructor for EditForm.
      */
     public EditForm() {
-        // Default constructor
+        super();
     }
 
 }

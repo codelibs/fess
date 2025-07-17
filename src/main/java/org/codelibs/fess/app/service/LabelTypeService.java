@@ -49,7 +49,7 @@ public class LabelTypeService extends FessAppService {
      * Default constructor.
      */
     public LabelTypeService() {
-        // do nothing
+        super();
     }
 
     /**

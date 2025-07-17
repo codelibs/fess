@@ -53,7 +53,7 @@ public class GoAction extends FessSearchAction {
      * Default constructor for GoAction.
      */
     public GoAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

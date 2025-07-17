@@ -39,7 +39,7 @@ public class AdminSearchlogAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSearchlogAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin search log operations */
@@ -51,11 +51,11 @@ public class AdminSearchlogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
     /** Service for managing search log data */
-    private SearchLogService searchLogService;
     @Resource
+    private SearchLogService searchLogService;
     /** Pager for paginating search log results */
+    @Resource
     private SearchLogPager searchLogPager;
 
     // ===================================================================================

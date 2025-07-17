@@ -44,7 +44,7 @@ public class LoginAction extends FessLoginAction {
      * Default constructor.
      */
     public LoginAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(LoginAction.class);

@@ -127,7 +127,7 @@ public class ApiResult {
          * Default constructor for ApiUpdateResponse.
          */
         public ApiUpdateResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -313,7 +313,7 @@ public class ApiResult {
          * Default constructor for ApiDocsResponse.
          */
         public ApiDocsResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -464,7 +464,7 @@ public class ApiResult {
          * Default constructor for ApiLogResponse.
          */
         public ApiLogResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -495,7 +495,7 @@ public class ApiResult {
          * Default constructor for ApiLogsResponse.
          */
         public ApiLogsResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -540,7 +540,7 @@ public class ApiResult {
          * Default constructor for ApiLogFilesResponse.
          */
         public ApiLogFilesResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -631,7 +631,7 @@ public class ApiResult {
          * Default constructor for ApiSystemInfoResponse.
          */
         public ApiSystemInfoResponse() {
-            // Default constructor
+            super();
         }
 
         /** System properties. */
@@ -698,7 +698,7 @@ public class ApiResult {
          * Default constructor for ApiErrorResponse.
          */
         public ApiErrorResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -737,7 +737,7 @@ public class ApiResult {
          * Default constructor for ApiPluginResponse.
          */
         public ApiPluginResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -767,7 +767,7 @@ public class ApiResult {
          * Default constructor for ApiStorageResponse.
          */
         public ApiStorageResponse() {
-            // Default constructor
+            super();
         }
 
         /**
@@ -797,7 +797,7 @@ public class ApiResult {
          * Default constructor for ApiStatsResponse.
          */
         public ApiStatsResponse() {
-            // Default constructor
+            super();
         }
 
         /**

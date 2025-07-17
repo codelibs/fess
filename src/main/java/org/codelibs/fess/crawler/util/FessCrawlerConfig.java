@@ -28,7 +28,7 @@ public class FessCrawlerConfig extends OpenSearchCrawlerConfig {
      * Default constructor.
      */
     public FessCrawlerConfig() {
-        // Default constructor
+        super();
     }
 
     /**

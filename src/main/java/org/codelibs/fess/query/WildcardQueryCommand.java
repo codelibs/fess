@@ -43,7 +43,7 @@ public class WildcardQueryCommand extends QueryCommand {
      * Default constructor.
      */
     public WildcardQueryCommand() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(WildcardQueryCommand.class);

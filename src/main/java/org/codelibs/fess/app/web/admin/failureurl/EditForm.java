@@ -31,7 +31,7 @@ public class EditForm {
      * Creates a new EditForm instance.
      */
     public EditForm() {
-        // Default constructor
+        super();
     }
 
     /**

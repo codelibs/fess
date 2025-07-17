@@ -56,7 +56,7 @@ public class ApiAdminRelatedqueryAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminRelatedqueryAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

@@ -82,7 +82,7 @@ public class FessCrawlerThread extends CrawlerThread {
      * Default constructor.
      */
     public FessCrawlerThread() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(FessCrawlerThread.class);

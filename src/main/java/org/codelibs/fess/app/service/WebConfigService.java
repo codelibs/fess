@@ -45,7 +45,7 @@ public class WebConfigService extends FessAppService {
      * Default constructor.
      */
     public WebConfigService() {
-        // Default constructor
+        super();
     }
 
     /**

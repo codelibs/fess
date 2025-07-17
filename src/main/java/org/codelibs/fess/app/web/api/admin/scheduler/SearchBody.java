@@ -26,7 +26,7 @@ public class SearchBody extends BaseSearchBody {
      * Default constructor.
      */
     public SearchBody() {
-        // Default constructor
+        super();
     }
 
     /** Scheduler ID */

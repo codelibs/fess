@@ -27,6 +27,6 @@ public class SearchBody extends BaseSearchDictBody {
      * Default constructor for SearchBody.
      */
     public SearchBody() {
-        // Default constructor
+        super();
     }
 }

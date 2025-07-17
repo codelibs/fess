@@ -57,7 +57,7 @@ public class AdminFileconfigAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminFileconfigAction() {
-        // Default constructor
+        super();
     }
 
     /** The role name for file configuration administration. */

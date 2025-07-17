@@ -35,7 +35,7 @@ public class AdminDashboardAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDashboardAction() {
-        // nothing
+        super();
     }
 
     /** The role for this action. */

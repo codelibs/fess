@@ -55,7 +55,7 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminReqheaderAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

@@ -55,7 +55,7 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDuplicatehostAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

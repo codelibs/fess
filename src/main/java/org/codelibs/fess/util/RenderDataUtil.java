@@ -33,10 +33,8 @@ public class RenderDataUtil {
 
     /**
      * Default constructor.
-     * This constructor is provided for utility class instantiation, though this class
-     * is designed to be used statically.
      */
-    public RenderDataUtil() {
+    private RenderDataUtil() {
         // Default constructor
     }
 

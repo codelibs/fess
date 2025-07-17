@@ -42,7 +42,7 @@ public class ListForm extends SearchRequestParams {
      * Default constructor.
      */
     public ListForm() {
-        // Default constructor
+        super();
     }
 
     /** The search query string. */

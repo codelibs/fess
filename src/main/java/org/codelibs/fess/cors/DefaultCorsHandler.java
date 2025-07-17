@@ -36,7 +36,7 @@ public class DefaultCorsHandler extends CorsHandler {
      * standard CORS headers based on application configuration.
      */
     public DefaultCorsHandler() {
-        // Default constructor with explicit documentation
+        super();
     }
 
     /**

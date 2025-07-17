@@ -49,7 +49,7 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminBoostdocAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminBoostdocAction.class);

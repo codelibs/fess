@@ -38,7 +38,7 @@ public class ApiAdminDictAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictAction() {
-        // Default constructor
+        super();
     }
 
     /** Dictionary manager for handling dictionary file operations */

@@ -51,7 +51,7 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminAccesstokenAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminAccesstokenAction.class);

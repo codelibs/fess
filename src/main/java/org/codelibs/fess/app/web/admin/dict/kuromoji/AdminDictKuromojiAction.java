@@ -56,7 +56,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictKuromojiAction() {
-        // nothing
+        super();
     }
 
     /** The role for this action. */

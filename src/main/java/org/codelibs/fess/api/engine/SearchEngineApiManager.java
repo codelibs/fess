@@ -66,6 +66,7 @@ public class SearchEngineApiManager extends BaseApiManager {
      * Initializes the API manager with the admin server path prefix.
      */
     public SearchEngineApiManager() {
+        super();
         setPathPrefix(ADMIN_SERVER);
     }
 

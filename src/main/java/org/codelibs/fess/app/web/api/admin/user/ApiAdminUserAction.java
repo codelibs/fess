@@ -49,7 +49,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminUserAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

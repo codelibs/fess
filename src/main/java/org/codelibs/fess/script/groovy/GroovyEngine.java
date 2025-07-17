@@ -40,7 +40,7 @@ public class GroovyEngine extends AbstractScriptEngine {
      * Default constructor for GroovyEngine.
      */
     public GroovyEngine() {
-        // Default constructor
+        super();
     }
 
     @Override

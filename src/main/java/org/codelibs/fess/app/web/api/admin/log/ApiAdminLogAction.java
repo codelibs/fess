@@ -47,7 +47,7 @@ public class ApiAdminLogAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminLogAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

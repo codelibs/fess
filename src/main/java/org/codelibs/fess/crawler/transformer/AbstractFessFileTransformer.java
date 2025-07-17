@@ -69,7 +69,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
      * Default constructor.
      */
     public AbstractFessFileTransformer() {
-        // nothing
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(AbstractFessFileTransformer.class);

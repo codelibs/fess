@@ -30,7 +30,7 @@ public class EditForm extends CreateForm {
      * Creates a new EditForm instance.
      */
     public EditForm() {
-        // Default constructor
+        super();
     }
 
     /**

@@ -25,7 +25,7 @@ public class OptionalUtil {
     /**
      * Default constructor.
      */
-    public OptionalUtil() {
+    private OptionalUtil() {
         // Default constructor
     }
 

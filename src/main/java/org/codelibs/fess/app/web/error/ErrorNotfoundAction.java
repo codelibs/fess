@@ -30,7 +30,7 @@ public class ErrorNotfoundAction extends FessSearchAction {
      * Default constructor for ErrorNotfoundAction.
      */
     public ErrorNotfoundAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

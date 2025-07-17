@@ -59,7 +59,7 @@ public class GenerateThumbnailJob extends ExecJob {
      * Default constructor for the GenerateThumbnailJob.
      */
     public GenerateThumbnailJob() {
-        // Default constructor
+        super();
     }
 
     /**

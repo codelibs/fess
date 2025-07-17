@@ -52,7 +52,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminSchedulerAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

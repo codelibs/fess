@@ -45,7 +45,7 @@ public abstract class FessAdminAction extends FessBaseAction {
      * Default constructor.
      */
     public FessAdminAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

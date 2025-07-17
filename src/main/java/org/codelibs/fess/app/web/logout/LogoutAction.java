@@ -33,7 +33,7 @@ public class LogoutAction extends FessSearchAction {
      * Default constructor.
      */
     public LogoutAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

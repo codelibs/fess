@@ -30,6 +30,6 @@ public class SearchBody extends BaseSearchBody {
      * Default constructor for SearchBody.
      */
     public SearchBody() {
-        // Default constructor
+        super();
     }
 }

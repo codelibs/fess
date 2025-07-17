@@ -142,7 +142,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * Default constructor.
      */
     public FessXpathTransformer() {
-        // Default constructor
+        super();
     }
 
     /**

@@ -51,7 +51,7 @@ public class AdminKeymatchAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminKeymatchAction() {
-        // Default constructor
+        super();
     }
 
     /** The role name for key match administration. */

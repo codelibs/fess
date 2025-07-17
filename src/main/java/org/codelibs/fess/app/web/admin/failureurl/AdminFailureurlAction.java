@@ -39,7 +39,7 @@ public class AdminFailureurlAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminFailureurlAction() {
-        // default constructor
+        super();
     }
 
     /**

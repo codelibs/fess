@@ -57,7 +57,7 @@ public class ApiAdminBackupAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminBackupAction() {
-        // Default constructor
+        super();
     }
 
     /**

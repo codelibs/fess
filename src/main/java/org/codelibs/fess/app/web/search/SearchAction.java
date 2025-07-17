@@ -56,7 +56,7 @@ public class SearchAction extends FessSearchAction {
      * Default constructor.
      */
     public SearchAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================
@@ -342,7 +342,7 @@ public class SearchAction extends FessSearchAction {
          * Default constructor.
          */
         public WebRenderData() {
-            // Default constructor
+            super();
         }
 
         /**

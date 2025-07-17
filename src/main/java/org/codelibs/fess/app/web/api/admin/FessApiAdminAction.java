@@ -37,7 +37,7 @@ public abstract class FessApiAdminAction extends FessApiAction {
      * Default constructor.
      */
     public FessApiAdminAction() {
-        // Default constructor
+        super();
     }
 
     /**

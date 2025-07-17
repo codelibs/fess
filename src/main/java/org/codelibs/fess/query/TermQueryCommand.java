@@ -49,7 +49,7 @@ public class TermQueryCommand extends QueryCommand {
      * Default constructor for TermQueryCommand.
      */
     public TermQueryCommand() {
-        // Default constructor
+        super();
     }
 
     private static final String SORT_FIELD = "sort";

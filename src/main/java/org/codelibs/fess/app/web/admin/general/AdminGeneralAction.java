@@ -51,7 +51,7 @@ public class AdminGeneralAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminGeneralAction() {
-        // Default constructor
+        super();
     }
 
     /** The role name for general settings administration. */

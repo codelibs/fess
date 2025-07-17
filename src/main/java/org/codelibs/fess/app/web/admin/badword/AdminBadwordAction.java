@@ -61,7 +61,7 @@ public class AdminBadwordAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminBadwordAction() {
-        // nothing
+        super();
     }
 
     /**

@@ -41,7 +41,7 @@ public class ApiAdminSysteminfoAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminSysteminfoAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

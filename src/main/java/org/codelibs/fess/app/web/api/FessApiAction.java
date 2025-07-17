@@ -46,7 +46,7 @@ public abstract class FessApiAction extends FessBaseAction {
      * Default constructor.
      */
     public FessApiAction() {
-        // Default constructor
+        super();
     }
 
     /**

@@ -51,7 +51,7 @@ public class AdminSchedulerAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSchedulerAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin scheduler operations */
@@ -62,11 +62,11 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
     /** Service for managing scheduled jobs */
-    private ScheduledJobService scheduledJobService;
     @Resource
+    private ScheduledJobService scheduledJobService;
     /** Pager for paginating scheduled job results */
+    @Resource
     private SchedulerPager schedulerPager;
     /** Helper for processing scheduled jobs. */
     @Resource

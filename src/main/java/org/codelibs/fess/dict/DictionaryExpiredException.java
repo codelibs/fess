@@ -31,7 +31,7 @@ public class DictionaryExpiredException extends RuntimeException {
      * has expired and is no longer valid for use.
      */
     public DictionaryExpiredException() {
-        // Default constructor with explicit documentation
+        super();
     }
 
     //    public DictionaryExpiredException() {

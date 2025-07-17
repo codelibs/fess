@@ -128,7 +128,7 @@ public class GsaConfigParser extends DefaultHandler {
      * Default constructor for GsaConfigParser.
      */
     public GsaConfigParser() {
-        // Default constructor
+        super();
     }
 
     /**

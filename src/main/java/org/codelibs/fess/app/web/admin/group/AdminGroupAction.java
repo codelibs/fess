@@ -51,7 +51,7 @@ public class AdminGroupAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminGroupAction() {
-        // Default constructor
+        super();
     }
 
     /** The role name for group administration. */

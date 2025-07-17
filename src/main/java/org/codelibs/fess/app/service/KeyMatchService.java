@@ -43,7 +43,7 @@ public class KeyMatchService extends FessAppService {
      * Default constructor.
      */
     public KeyMatchService() {
-        // Default constructor
+        super();
     }
 
     /** The Fess config. */

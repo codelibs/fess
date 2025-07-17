@@ -58,7 +58,7 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminWebconfigAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

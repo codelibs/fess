@@ -30,7 +30,7 @@ public class ErrorBadrequrestAction extends FessSearchAction {
      * Default constructor for ErrorBadrequrestAction.
      */
     public ErrorBadrequrestAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

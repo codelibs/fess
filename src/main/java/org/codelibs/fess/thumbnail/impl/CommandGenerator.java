@@ -62,7 +62,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
      * Default constructor for CommandGenerator.
      */
     public CommandGenerator() {
-        // Default constructor
+        super();
     }
 
     /**

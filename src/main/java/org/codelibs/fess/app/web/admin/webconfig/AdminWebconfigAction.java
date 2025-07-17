@@ -58,7 +58,7 @@ public class AdminWebconfigAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminWebconfigAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin web config operations */

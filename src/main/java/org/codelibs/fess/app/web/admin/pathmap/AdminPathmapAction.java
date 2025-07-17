@@ -53,7 +53,7 @@ public class AdminPathmapAction extends FessAdminAction {
      * Default constructor for AdminPathmapAction.
      */
     public AdminPathmapAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================

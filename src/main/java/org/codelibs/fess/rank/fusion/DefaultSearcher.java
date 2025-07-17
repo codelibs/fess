@@ -59,7 +59,7 @@ public class DefaultSearcher extends RankFusionSearcher {
      * standard OpenSearch queries with response processing and document highlighting.
      */
     public DefaultSearcher() {
-        // Default constructor with explicit documentation
+        super();
     }
 
     /**

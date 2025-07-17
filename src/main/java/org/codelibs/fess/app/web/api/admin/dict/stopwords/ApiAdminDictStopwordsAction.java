@@ -48,7 +48,7 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminDictStopwordsAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ApiAdminDictStopwordsAction.class);

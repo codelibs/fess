@@ -61,7 +61,7 @@ public class AdminSearchlistAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSearchlistAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin search list operations */

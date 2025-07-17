@@ -39,7 +39,7 @@ public class ProfileAction extends FessSearchAction {
      * Default constructor.
      */
     public ProfileAction() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(ProfileAction.class);

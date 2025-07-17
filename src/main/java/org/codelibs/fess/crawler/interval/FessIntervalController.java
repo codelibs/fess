@@ -31,7 +31,7 @@ public class FessIntervalController extends DefaultIntervalController {
      * Default constructor.
      */
     public FessIntervalController() {
-        // Default constructor
+        super();
     }
 
     /**

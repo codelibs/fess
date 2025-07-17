@@ -58,7 +58,7 @@ public class AdminDictMappingAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminDictMappingAction() {
-        // nothing
+        super();
     }
 
     /**

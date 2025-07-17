@@ -66,7 +66,7 @@ public class AdminStorageAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminStorageAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin storage operations */

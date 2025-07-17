@@ -36,7 +36,7 @@ public class BooleanQueryCommand extends QueryCommand {
      * Default constructor for BooleanQueryCommand.
      */
     public BooleanQueryCommand() {
-        // Default constructor
+        super();
     }
 
     private static final Logger logger = LogManager.getLogger(BooleanQueryCommand.class);

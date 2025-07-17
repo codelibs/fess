@@ -46,7 +46,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSysteminfoAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin system info operations */

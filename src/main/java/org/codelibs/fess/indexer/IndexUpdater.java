@@ -150,7 +150,7 @@ public class IndexUpdater extends Thread {
      * Initializes a new instance with default settings.
      */
     public IndexUpdater() {
-        // nothing
+        super();
     }
 
     /**

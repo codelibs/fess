@@ -49,7 +49,7 @@ public class AdminSereqAction extends FessAdminAction {
      * Default constructor.
      */
     public AdminSereqAction() {
-        // Default constructor
+        super();
     }
 
     /** Role name for admin search request operations */

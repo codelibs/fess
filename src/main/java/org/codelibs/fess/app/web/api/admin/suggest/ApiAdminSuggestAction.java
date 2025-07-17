@@ -35,7 +35,7 @@ public class ApiAdminSuggestAction extends FessApiAdminAction {
      * Default constructor.
      */
     public ApiAdminSuggestAction() {
-        // Default constructor
+        super();
     }
 
     // ===================================================================================
