@@ -62,7 +62,6 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
     /**
      * The role for this action.
      */
-    /** The role for this action. */
     public static final String ROLE = "admin-dict";
 
     private static final Logger logger = LogManager.getLogger(AdminDictStemmeroverrideAction.class);
