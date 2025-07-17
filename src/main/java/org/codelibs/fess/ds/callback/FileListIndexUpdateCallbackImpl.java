@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -71,8 +72,16 @@ import org.opensearch.index.query.QueryBuilders;
  * during the crawling process.</p>
  */
 public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
+
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(FileListIndexUpdateCallbackImpl.class);
+
+    /**
+     * The key used to specify the pattern for excluding URLs.
+     * This constant can be used to retrieve or set the URL exclusion pattern
+     * in configuration or processing logic.
+     */
+    protected static final String URL_EXCLUDE_PATTERN = "url_exclude_pattern";
 
     /** The underlying index update callback to delegate operations to. */
     protected IndexUpdateCallback indexUpdateCallback;
@@ -209,6 +218,9 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     }
                     continue;
                 }
+                if (!isUrlCrawlable(paramMap, crawlRequest.getUrl())) {
+                    continue;
+                }
                 counter++;
                 final Map<String, Object> localDataMap =
                         dataMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -254,6 +266,40 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 }
             }
         }
+    }
+
+    /**
+     * Determines whether the specified URL is crawlable based on the provided parameters.
+     * <p>
+     * If the {@code paramMap} contains a value for {@code URL_EXCLUDE_PATTERN}, this method checks if the URL matches
+     * the exclude pattern. If the pattern is provided as a {@link String}, it is compiled into a {@link Pattern} and
+     * stored back in the map for future use. If the URL matches the exclude pattern, the method returns {@code false},
+     * indicating that the URL should not be crawled. Otherwise, it returns {@code true}.
+     * </p>
+     *
+     * @param paramMap the parameters containing potential exclude patterns
+     * @param url the URL to check for crawlability
+     * @return {@code true} if the URL is crawlable; {@code false} if it matches the exclude pattern
+     */
+    protected boolean isUrlCrawlable(final DataStoreParams paramMap, final String url) {
+        if (paramMap.containsKey(URL_EXCLUDE_PATTERN)) {
+            if (paramMap.get(URL_EXCLUDE_PATTERN) instanceof final String value) {
+                final Pattern pattern = Pattern.compile(value);
+                paramMap.put(URL_EXCLUDE_PATTERN, pattern);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Using exclude pattern: {}", pattern);
+                }
+            }
+            if (paramMap.get(URL_EXCLUDE_PATTERN) instanceof final Pattern pattern) {
+                if (pattern.matcher(url).find()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Skipping URL {} due to exclude pattern: {}", url, pattern);
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

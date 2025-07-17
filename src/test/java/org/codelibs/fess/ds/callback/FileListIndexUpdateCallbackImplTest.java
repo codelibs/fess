@@ -17,7 +17,9 @@ package org.codelibs.fess.ds.callback;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
@@ -106,5 +108,82 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals("N1", dataMap.get("n"));
         assertEquals("P1", dataMap.get("p"));
         assertEquals(3, dataMap.size());
+    }
+
+    public void test_isUrlCrawlable_noExcludePattern() {
+        DataStoreParams paramMap = new DataStoreParams();
+        String url = "http://example.com/test.html";
+
+        boolean result = indexUpdateCallback.isUrlCrawlable(paramMap, url);
+
+        assertTrue(result);
+    }
+
+    public void test_isUrlCrawlable_excludePatternAsString() {
+        DataStoreParams paramMap = new DataStoreParams();
+        paramMap.put("url_exclude_pattern", ".*\\.pdf$");
+
+        boolean result1 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/test.html");
+        boolean result2 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/test.pdf");
+
+        assertTrue(result1);
+        assertFalse(result2);
+        assertTrue(paramMap.get("url_exclude_pattern") instanceof Pattern);
+    }
+
+    public void test_isUrlCrawlable_excludePatternAsPattern() {
+        DataStoreParams paramMap = new DataStoreParams();
+        Pattern pattern = Pattern.compile(".*\\.jpg$");
+        paramMap.put("url_exclude_pattern", pattern);
+
+        boolean result1 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/image.jpg");
+        boolean result2 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/image.png");
+
+        assertFalse(result1);
+        assertTrue(result2);
+    }
+
+    public void test_isUrlCrawlable_complexExcludePattern() {
+        DataStoreParams paramMap = new DataStoreParams();
+        paramMap.put("url_exclude_pattern", "(admin|private|temp)");
+
+        boolean result1 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/admin/config.html");
+        boolean result2 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/private/data.html");
+        boolean result3 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/temp/cache.html");
+        boolean result4 = indexUpdateCallback.isUrlCrawlable(paramMap, "http://example.com/public/index.html");
+
+        assertFalse(result1);
+        assertFalse(result2);
+        assertFalse(result3);
+        assertTrue(result4);
+    }
+
+    public void test_isUrlCrawlable_emptyUrl() {
+        DataStoreParams paramMap = new DataStoreParams();
+        paramMap.put("url_exclude_pattern", ".*");
+
+        boolean result = indexUpdateCallback.isUrlCrawlable(paramMap, "");
+
+        assertFalse(result);
+    }
+
+    public void test_isUrlCrawlable_nullUrl() {
+        DataStoreParams paramMap = new DataStoreParams();
+        paramMap.put("url_exclude_pattern", ".*");
+
+        try {
+            indexUpdateCallback.isUrlCrawlable(paramMap, null);
+            fail("Expected NullPointerException for null URL");
+        } catch (NullPointerException e) {
+            // Expected behavior - the method doesn't handle null URLs
+        }
+    }
+
+    public void test_isUrlCrawlable_nullUrlWithoutPattern() {
+        DataStoreParams paramMap = new DataStoreParams();
+
+        boolean result = indexUpdateCallback.isUrlCrawlable(paramMap, null);
+
+        assertTrue(result);
     }
 }
