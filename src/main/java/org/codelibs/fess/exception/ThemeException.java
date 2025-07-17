@@ -15,14 +15,29 @@
  */
 package org.codelibs.fess.exception;
 
+/**
+ * Exception thrown when theme-related operations fail.
+ * This exception is used for errors during theme installation, uninstallation, or configuration.
+ */
 public class ThemeException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs a new ThemeException with the specified message and cause.
+     *
+     * @param message the exception message
+     * @param cause the underlying cause of this exception
+     */
     public ThemeException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new ThemeException with the specified message.
+     *
+     * @param message the exception message
+     */
     public ThemeException(final String message) {
         super(message);
     }

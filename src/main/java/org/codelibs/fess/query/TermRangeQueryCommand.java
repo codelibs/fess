@@ -31,8 +31,19 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.RangeQueryBuilder;
 
+/**
+ * Command class for handling term range query execution and conversion.
+ * This class processes Lucene TermRangeQuery objects and converts them to OpenSearch QueryBuilder instances.
+ */
 public class TermRangeQueryCommand extends QueryCommand {
     private static final Logger logger = LogManager.getLogger(TermRangeQueryCommand.class);
+
+    /**
+     * Default constructor for TermRangeQueryCommand.
+     */
+    public TermRangeQueryCommand() {
+        // Default constructor
+    }
 
     @Override
     protected String getQueryClassName() {
@@ -51,6 +62,15 @@ public class TermRangeQueryCommand extends QueryCommand {
                 "Unknown q: " + query.getClass() + " => " + query);
     }
 
+    /**
+     * Converts a TermRangeQuery to a QueryBuilder with the given boost value.
+     * Handles both search fields and default field queries with proper range semantics.
+     *
+     * @param context the query context
+     * @param termRangeQuery the term range query to convert
+     * @param boost the boost value to apply
+     * @return the converted QueryBuilder
+     */
     protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String field = getSearchField(context.getDefaultField(), termRangeQuery.getField());

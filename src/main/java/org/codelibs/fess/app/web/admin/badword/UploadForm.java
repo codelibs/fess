@@ -19,11 +19,25 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * The upload form for Bad Word.
+ * Form for uploading bad word files to the Fess search engine.
+ * This form is used in the admin interface to upload bad word dictionary files
+ * that contain words to be filtered from search results.
  */
 public class UploadForm {
 
+    /**
+     * The multipart file containing bad words to be uploaded.
+     * This file should contain a list of words that will be filtered from search results.
+     */
     @Required
     public MultipartFormFile badWordFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

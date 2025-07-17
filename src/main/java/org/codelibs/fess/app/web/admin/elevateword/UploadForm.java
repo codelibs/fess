@@ -19,11 +19,25 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * The upload form for Elevate Word.
+ * Form for uploading elevate word files to the Fess search engine.
+ * Elevate words are terms that should be promoted or given higher ranking in search results.
+ * This form is used in the admin interface to upload elevate word configuration files.
  */
 public class UploadForm {
 
+    /**
+     * The multipart file containing the elevate word configurations to be uploaded.
+     * This file should contain definitions for words or documents that should be elevated in search results.
+     */
     @Required
     public MultipartFormFile elevateWordFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

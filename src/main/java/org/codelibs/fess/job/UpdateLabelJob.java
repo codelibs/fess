@@ -31,12 +31,32 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.script.Script;
 
+/**
+ * Job class for updating label information in the search index.
+ * This job processes documents and updates their label fields based on URL pattern matching.
+ */
 public class UpdateLabelJob {
 
     private static final Logger logger = LogManager.getLogger(UpdateLabelJob.class);
 
+    /**
+     * Query builder for filtering documents to be processed.
+     */
     protected QueryBuilder queryBuilder = null;
 
+    /**
+     * Default constructor for UpdateLabelJob.
+     */
+    public UpdateLabelJob() {
+        // Default constructor
+    }
+
+    /**
+     * Executes the label update job.
+     * Processes documents in the search index and updates their label fields.
+     *
+     * @return execution result message
+     */
     public String execute() {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -75,6 +95,12 @@ public class UpdateLabelJob {
         return resultBuf.toString();
     }
 
+    /**
+     * Sets the query builder for filtering documents.
+     *
+     * @param queryBuilder the query builder to filter documents
+     * @return this UpdateLabelJob instance for method chaining
+     */
     public UpdateLabelJob query(final QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
         return this;

@@ -95,74 +95,124 @@ import jakarta.servlet.SessionTrackingMode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Helper class for handling view-related operations in the Fess search system.
+ * This class provides utilities for content rendering, URL processing, highlighting,
+ * caching, pagination, and user interface functionality.
+ *
+ * @author FessProject
+ */
 public class ViewHelper {
+
+    /**
+     * Default constructor for ViewHelper.
+     */
+    public ViewHelper() {
+        // Default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(ViewHelper.class);
 
+    /** Request attribute key for screen width */
     protected static final String SCREEN_WIDTH = "screen_width";
 
+    /** Tablet width threshold for responsive design */
     protected static final int TABLET_WIDTH = 768;
 
+    /** HTTP header name for content disposition */
     protected static final String CONTENT_DISPOSITION = "Content-Disposition";
 
+    /** Cache key for highlighted cache content */
     protected static final String HL_CACHE = "hl_cache";
 
+    /** Cache key for search queries */
     protected static final String QUERIES = "queries";
 
+    /** Cache key for cache message */
     protected static final String CACHE_MSG = "cache_msg";
 
+    /** Pattern for matching local file paths */
     protected static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
 
+    /** Pattern for matching shared folder paths */
     protected static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
+    /** Ellipsis string for text truncation */
     protected static final String ELLIPSIS = "...";
 
+    /** Whether to encode URL links */
     protected boolean encodeUrlLink = false;
 
+    /** Character encoding for URL links */
     protected String urlLinkEncoding = Constants.UTF_8;
 
+    /** Fields that should be highlighted in search results */
     protected String[] highlightedFields;
 
+    /** Original highlight tag prefix */
     protected String originalHighlightTagPre = "<em>";
 
+    /** Original highlight tag suffix */
     protected String originalHighlightTagPost = "</em>";
 
+    /** Configured highlight tag prefix */
     protected String highlightTagPre;
 
+    /** Configured highlight tag suffix */
     protected String highlightTagPost;
 
+    /** Whether to use HTTP sessions */
     protected boolean useSession = true;
 
+    /** Cache for page paths */
     protected final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
 
+    /** Initial facet parameter mappings */
     protected final Map<String, String> initFacetParamMap = new HashMap<>();
 
+    /** Initial geographic parameter mappings */
     protected final Map<String, String> initGeoParamMap = new HashMap<>();
 
+    /** List of facet query views */
     protected final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
+    /** Template name for cache content */
     protected String cacheTemplateName = "cache";
 
+    /** HTML-escaped highlight prefix */
     protected String escapedHighlightPre = null;
 
+    /** HTML-escaped highlight suffix */
     protected String escapedHighlightPost = null;
 
+    /** Set of terminal characters for highlighting */
     protected Set<Integer> highlightTerminalCharSet = new HashSet<>();
 
+    /** Action hook for custom processing */
     protected ActionHook actionHook = new ActionHook();
 
+    /** Set of MIME types that should be displayed inline */
     protected final Set<String> inlineMimeTypeSet = new HashSet<>();
 
+    /** Cache for facet responses */
     protected Cache<String, FacetResponse> facetCache;
 
-    protected long facetCacheDuration = 60 * 10L; // 10min
+    /** Duration for facet cache in seconds (10 minutes) */
+    protected long facetCacheDuration = 60 * 10L;
 
+    /** Length of text fragment prefix */
     protected int textFragmentPrefixLength;
 
+    /** Length of text fragment suffix */
     protected int textFragmentSuffixLength;
 
+    /** Size of text fragments */
     protected int textFragmentSize;
 
+    /**
+     * Initializes the ViewHelper with configuration settings.
+     * Sets up highlighting, caching, and other view-related configurations.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -215,6 +265,14 @@ public class ViewHelper {
                 .of(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).forEach(inlineMimeTypeSet::add));
     }
 
+    /**
+     * Gets the display title for a document.
+     * Falls back to filename or URL if title is not available.
+     * Applies highlighting if enabled.
+     *
+     * @param document the document data map
+     * @return the content title with optional highlighting
+     */
     public String getContentTitle(final Map<String, Object> document) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
@@ -247,11 +305,23 @@ public class ViewHelper {
         }).orElse(value);
     }
 
+    /**
+     * Gets the set of highlight queries from the current request.
+     *
+     * @return OptionalThing containing the query set
+     */
     protected OptionalThing<Set<String>> getQuerySet() {
         return LaRequestUtil.getOptionalRequest().map(req -> ((Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES)))
                 .filter(s -> s != null);
     }
 
+    /**
+     * Gets the content description from highlighted fields.
+     * Returns the first non-blank highlighted field content.
+     *
+     * @param document the document data map
+     * @return the content description with highlighting
+     */
     public String getContentDescription(final Map<String, Object> document) {
         for (final String field : highlightedFields) {
             final String text = DocumentUtil.getValue(document, field, String.class);
@@ -263,6 +333,13 @@ public class ViewHelper {
         return StringUtil.EMPTY;
     }
 
+    /**
+     * Escapes HTML and applies highlighting to text.
+     * Handles boundary position detection if enabled.
+     *
+     * @param text the text to process
+     * @return the escaped and highlighted text
+     */
     protected String escapeHighlight(final String text) {
         final String escaped = LaFunctions.h(text);
         final String value;
@@ -283,10 +360,22 @@ public class ViewHelper {
         return value.replaceAll(escapedHighlightPre, highlightTagPre).replaceAll(escapedHighlightPost, highlightTagPost);
     }
 
+    /**
+     * Removes highlight tags from a string.
+     *
+     * @param str the string containing highlight tags
+     * @return the string with highlight tags removed
+     */
     protected String removeHighlightTag(final String str) {
         return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
+    /**
+     * Creates highlight information based on screen width.
+     * Adjusts fragment size for mobile devices.
+     *
+     * @return the highlight information
+     */
     public HighlightInfo createHighlightInfo() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
             final HighlightInfo highlightInfo = new HighlightInfo();
@@ -311,6 +400,13 @@ public class ViewHelper {
         }).orElse(new HighlightInfo());
     }
 
+    /**
+     * Updates highlight information based on screen width.
+     * Reduces fragment size for smaller screens.
+     *
+     * @param highlightInfo the highlight info to update
+     * @param width the screen width
+     */
     protected void updateHighlightInfo(final HighlightInfo highlightInfo, final int width) {
         if (width < TABLET_WIDTH) {
             float ratio = (float) width / (float) TABLET_WIDTH;
@@ -321,6 +417,13 @@ public class ViewHelper {
         }
     }
 
+    /**
+     * Gets the URL link for a document with proper protocol handling.
+     * Handles file, SMB, FTP, and HTTP protocols.
+     *
+     * @param document the document data map
+     * @return the processed URL link
+     */
     public String getUrlLink(final Map<String, Object> document) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String url = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
@@ -385,6 +488,13 @@ public class ViewHelper {
         return appendQueryParameter(document, url);
     }
 
+    /**
+     * Updates file protocol based on user agent type.
+     * Handles different browser-specific file protocol formats.
+     *
+     * @param url the file URL to update
+     * @return the updated URL with appropriate file protocol
+     */
     protected String updateFileProtocol(String url) {
         final int pos = url.indexOf(':', 5);
         final boolean isLocalFile = pos > 0 && pos < 12;
@@ -438,6 +548,14 @@ public class ViewHelper {
         return url;
     }
 
+    /**
+     * Appends query parameters to URLs based on document type.
+     * Adds search highlighting for HTML and PDF documents.
+     *
+     * @param document the document data map
+     * @param url the base URL
+     * @return the URL with appended query parameters
+     */
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.isAppendQueryParameter()) {
@@ -460,6 +578,13 @@ public class ViewHelper {
         return url;
     }
 
+    /**
+     * Appends text fragment parameters to HTML URLs for highlighting.
+     *
+     * @param document the document data map
+     * @param url the HTML URL
+     * @return the URL with text fragment parameters
+     */
     protected String appendHTMLSearchWord(final Map<String, Object> document, final String url) {
         final TextFragment[] textFragments = (TextFragment[]) document.get(Constants.TEXT_FRAGMENTS);
         if (textFragments != null) {
@@ -473,6 +598,13 @@ public class ViewHelper {
         return url;
     }
 
+    /**
+     * Appends search parameters to PDF URLs for highlighting.
+     *
+     * @param document the document data map
+     * @param url the PDF URL
+     * @return the URL with search parameters
+     */
     protected String appendPDFSearchWord(final Map<String, Object> document, final String url) {
         return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(Constants.REQUEST_QUERIES)).map(queries -> {
             try {
@@ -488,6 +620,13 @@ public class ViewHelper {
         }).filter(StringUtil::isNotBlank).orElse(url);
     }
 
+    /**
+     * Gets the localized page path for a given page name.
+     * Checks for locale-specific versions before falling back to default.
+     *
+     * @param page the page name
+     * @return the localized page path
+     */
     public String getPagePath(final String page) {
         final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         final String lang = locale.getLanguage();
@@ -526,6 +665,14 @@ public class ViewHelper {
         return "index.jsp";
     }
 
+    /**
+     * Constructs a localized page path with language and country.
+     *
+     * @param page the page name
+     * @param lang the language code
+     * @param country the country code
+     * @return the localized page path
+     */
     private String getLocalizedPagePath(final String page, final String lang, final String country) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("/WEB-INF/view/").append(page);
@@ -539,12 +686,26 @@ public class ViewHelper {
         return buf.toString();
     }
 
+    /**
+     * Checks if a page file exists at the given path.
+     *
+     * @param path the page path to check
+     * @return true if the page exists, false otherwise
+     */
     private boolean existsPage(final String path) {
         final String realPath = LaServletContextUtil.getServletContext().getRealPath(path);
         final File file = new File(realPath);
         return file.isFile();
     }
 
+    /**
+     * Creates cached content with highlighting for a document.
+     * Uses Handlebars templates to render the cached content.
+     *
+     * @param doc the document data map
+     * @param queries the search queries for highlighting
+     * @return the rendered cache content
+     */
     public String createCacheContent(final Map<String, Object> doc, final String[] queries) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getViewTemplatePath().toFile());
@@ -599,6 +760,14 @@ public class ViewHelper {
         return null;
     }
 
+    /**
+     * Replaces search queries with highlighted versions in cached content.
+     * Preserves HTML tags while highlighting text content.
+     *
+     * @param cache the cached content
+     * @param queries the search queries to highlight
+     * @return the content with highlighted queries
+     */
     protected String replaceHighlightQueries(final String cache, final String[] queries) {
         final StringBuffer buf = new StringBuffer(cache.length() + 100);
         final StringBuffer segBuf = new StringBuffer(1000);
@@ -630,6 +799,13 @@ public class ViewHelper {
         return buf.toString();
     }
 
+    /**
+     * Gets the site path for display purposes.
+     * Extracts and formats the site path from document URL.
+     *
+     * @param docMap the document data map
+     * @return the formatted site path
+     */
     public Object getSitePath(final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Object siteValue = docMap.get(fessConfig.getIndexFieldSite());
@@ -663,6 +839,14 @@ public class ViewHelper {
         return null;
     }
 
+    /**
+     * Creates a stream response for document content delivery.
+     * Handles content retrieval and streaming to the client.
+     *
+     * @param doc the document data map
+     * @return the stream response containing document content
+     * @throws FessSystemException if content cannot be retrieved
+     */
     public StreamResponse asContentResponse(final Map<String, Object> doc) {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: {}", doc);
@@ -690,6 +874,14 @@ public class ViewHelper {
         return writeContent(configId, url, client);
     }
 
+    /**
+     * Writes content from a crawler client to a stream response.
+     *
+     * @param configId the configuration ID
+     * @param url the document URL
+     * @param client the crawler client
+     * @return the stream response with document content
+     */
     protected StreamResponse writeContent(final String configId, final String url, final CrawlerClient client) {
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
@@ -718,12 +910,24 @@ public class ViewHelper {
         return response;
     }
 
+    /**
+     * Writes no-cache headers to the response.
+     *
+     * @param response the stream response
+     * @param responseData the response data
+     */
     protected void writeNoCache(final StreamResponse response, final ResponseData responseData) {
         response.header("Pragma", "no-cache");
         response.header("Cache-Control", "no-cache");
         response.header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
     }
 
+    /**
+     * Writes content disposition header with filename.
+     *
+     * @param response the stream response
+     * @param responseData the response data
+     */
     protected void writeFileName(final StreamResponse response, final ResponseData responseData) {
         String charset = responseData.getCharSet();
         if (charset == null) {
@@ -762,6 +966,12 @@ public class ViewHelper {
         }
     }
 
+    /**
+     * Writes content type header to the response.
+     *
+     * @param response the stream response
+     * @param responseData the response data
+     */
     protected void writeContentType(final StreamResponse response, final ResponseData responseData) {
         final String mimeType = responseData.getMimeType();
         if (logger.isDebugEnabled()) {
@@ -781,6 +991,13 @@ public class ViewHelper {
         response.contentType(mimeType);
     }
 
+    /**
+     * Gets the client IP address from the request.
+     * Checks X-Forwarded-For header before using remote address.
+     *
+     * @param request the HTTP servlet request
+     * @return the client IP address
+     */
     public String getClientIp(final HttpServletRequest request) {
         final String value = request.getHeader("x-forwarded-for");
         if (StringUtil.isNotBlank(value)) {
@@ -789,6 +1006,14 @@ public class ViewHelper {
         return request.getRemoteAddr();
     }
 
+    /**
+     * Gets a cached facet response for the given query.
+     * Creates and caches the response if not already cached.
+     *
+     * @param query the search query
+     * @return the facet response
+     * @throws FessSystemException if facet data cannot be loaded
+     */
     public FacetResponse getCachedFacetResponse(final String query) {
         final OptionalThing<FessUserBean> userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
         final String permissionKey = userBean.map(user -> StreamUtil.stream(user.getPermissions())
@@ -821,6 +1046,12 @@ public class ViewHelper {
         }
     }
 
+    /**
+     * Creates highlighted text from highlight field fragments.
+     *
+     * @param highlightField the highlight field containing fragments
+     * @return the combined highlighted text
+     */
     public String createHighlightText(final HighlightField highlightField) {
         final Text[] fragments = highlightField.fragments();
         if (fragments != null && fragments.length != 0) {
@@ -837,6 +1068,12 @@ public class ViewHelper {
         return null;
     }
 
+    /**
+     * Creates text fragments from highlight fields for URL fragment navigation.
+     *
+     * @param fields the highlight fields
+     * @return array of text fragments
+     */
     public TextFragment[] createTextFragmentsByHighlight(final HighlightField[] fields) {
         final List<TextFragment> list = new ArrayList<>();
         for (final HighlightField field : fields) {
@@ -858,6 +1095,11 @@ public class ViewHelper {
         return list.toArray(n -> new TextFragment[n]);
     }
 
+    /**
+     * Creates text fragments from search queries.
+     *
+     * @return array of text fragments based on current queries
+     */
     public TextFragment[] createTextFragmentsByQuery() {
         return LaRequestUtil.getOptionalRequest().map(req -> {
             @SuppressWarnings("unchecked")
@@ -869,104 +1111,250 @@ public class ViewHelper {
         }).orElse(new TextFragment[0]);
     }
 
+    /**
+     * Checks if HTTP sessions are enabled.
+     *
+     * @return true if sessions are used, false otherwise
+     */
     public boolean isUseSession() {
         return useSession;
     }
 
+    /**
+     * Sets whether to use HTTP sessions.
+     *
+     * @param useSession true to enable sessions, false to disable
+     */
     public void setUseSession(final boolean useSession) {
         this.useSession = useSession;
     }
 
+    /**
+     * Adds an initial facet parameter mapping.
+     *
+     * @param key the parameter key
+     * @param value the parameter value
+     */
     public void addInitFacetParam(final String key, final String value) {
         initFacetParamMap.put(value, key);
     }
 
+    /**
+     * Gets the initial facet parameter mappings.
+     *
+     * @return the facet parameter map
+     */
     public Map<String, String> getInitFacetParamMap() {
         return initFacetParamMap;
     }
 
+    /**
+     * Adds an initial geographic parameter mapping.
+     *
+     * @param key the parameter key
+     * @param value the parameter value
+     */
     public void addInitGeoParam(final String key, final String value) {
         initGeoParamMap.put(value, key);
     }
 
+    /**
+     * Gets the initial geographic parameter mappings.
+     *
+     * @return the geographic parameter map
+     */
     public Map<String, String> getInitGeoParamMap() {
         return initGeoParamMap;
     }
 
+    /**
+     * Adds a facet query view to the list.
+     *
+     * @param facetQueryView the facet query view to add
+     */
     public void addFacetQueryView(final FacetQueryView facetQueryView) {
         facetQueryViewList.add(facetQueryView);
     }
 
+    /**
+     * Gets the list of facet query views.
+     *
+     * @return the list of facet query views
+     */
     public List<FacetQueryView> getFacetQueryViewList() {
         return facetQueryViewList;
     }
 
+    /**
+     * Adds a MIME type to the inline display set.
+     *
+     * @param mimeType the MIME type to display inline
+     */
     public void addInlineMimeType(final String mimeType) {
         inlineMimeTypeSet.add(mimeType);
     }
 
+    /**
+     * Gets the action hook for custom processing.
+     *
+     * @return the action hook
+     */
     public ActionHook getActionHook() {
         return actionHook;
     }
 
+    /**
+     * Sets the action hook for custom processing.
+     *
+     * @param actionHook the action hook to set
+     */
     public void setActionHook(final ActionHook actionHook) {
         this.actionHook = actionHook;
     }
 
+    /**
+     * Sets whether to encode URL links.
+     *
+     * @param encodeUrlLink true to encode URL links, false otherwise
+     */
     public void setEncodeUrlLink(final boolean encodeUrlLink) {
         this.encodeUrlLink = encodeUrlLink;
     }
 
+    /**
+     * Sets the character encoding for URL links.
+     *
+     * @param urlLinkEncoding the character encoding to use
+     */
     public void setUrlLinkEncoding(final String urlLinkEncoding) {
         this.urlLinkEncoding = urlLinkEncoding;
     }
 
+    /**
+     * Sets the original highlight tag prefix.
+     *
+     * @param originalHighlightTagPre the highlight tag prefix
+     */
     public void setOriginalHighlightTagPre(final String originalHighlightTagPre) {
         this.originalHighlightTagPre = originalHighlightTagPre;
     }
 
+    /**
+     * Sets the original highlight tag suffix.
+     *
+     * @param originalHighlightTagPost the highlight tag suffix
+     */
     public void setOriginalHighlightTagPost(final String originalHighlightTagPost) {
         this.originalHighlightTagPost = originalHighlightTagPost;
     }
 
+    /**
+     * Sets the cache template name.
+     *
+     * @param cacheTemplateName the template name for cache content
+     */
     public void setCacheTemplateName(final String cacheTemplateName) {
         this.cacheTemplateName = cacheTemplateName;
     }
 
+    /**
+     * Sets the facet cache duration in seconds.
+     *
+     * @param facetCacheDuration the cache duration in seconds
+     */
     public void setFacetCacheDuration(final long facetCacheDuration) {
         this.facetCacheDuration = facetCacheDuration;
     }
 
+    /**
+     * Hook class for customizing action processing.
+     * Provides extension points for action lifecycle management.
+     */
     public static class ActionHook {
 
+        /**
+         * Default constructor for ActionHook.
+         */
+        public ActionHook() {
+            // Default constructor
+        }
+
+        /**
+         * Prologue hook for action processing.
+         *
+         * @param runtime the action runtime
+         * @param func the function to execute
+         * @return the action response
+         */
         public ActionResponse godHandPrologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
+        /**
+         * Monologue hook for action processing.
+         *
+         * @param runtime the action runtime
+         * @param func the function to execute
+         * @return the action response
+         */
         public ActionResponse godHandMonologue(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
+        /**
+         * Epilogue hook for action processing.
+         *
+         * @param runtime the action runtime
+         * @param consumer the consumer to execute
+         */
         public void godHandEpilogue(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
 
+        /**
+         * Before hook for action processing.
+         *
+         * @param runtime the action runtime
+         * @param func the function to execute
+         * @return the action response
+         */
         public ActionResponse hookBefore(final ActionRuntime runtime, final Function<ActionRuntime, ActionResponse> func) {
             return func.apply(runtime);
         }
 
+        /**
+         * Finally hook for action processing.
+         *
+         * @param runtime the action runtime
+         * @param consumer the consumer to execute
+         */
         public void hookFinally(final ActionRuntime runtime, final Consumer<ActionRuntime> consumer) {
             consumer.accept(runtime);
         }
     }
 
-    // #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
+    /**
+     * Represents a text fragment for URL-based text highlighting.
+     * Used for creating browser text fragment URLs (#:~:text=...).
+     */
     public static class TextFragment {
+        /** Optional prefix text before the target */
         private final String prefix;
+        /** Start of the target text */
         private final String textStart;
+        /** Optional end of the target text */
         private final String textEnd;
+        /** Optional suffix text after the target */
         private final String suffix;
 
+        /**
+         * Constructs a new TextFragment.
+         *
+         * @param prefix optional prefix text
+         * @param textStart start of the target text
+         * @param textEnd optional end of the target text
+         * @param suffix optional suffix text
+         */
         TextFragment(final String prefix, final String textStart, final String textEnd, final String suffix) {
             this.prefix = prefix;
             this.textStart = textStart == null ? StringUtil.EMPTY : textStart;
@@ -974,6 +1362,11 @@ public class ViewHelper {
             this.suffix = suffix;
         }
 
+        /**
+         * Converts this text fragment to a URL string parameter.
+         *
+         * @return the URL-encoded text fragment parameter
+         */
         public String toURLString() {
             final StringBuilder buf = new StringBuilder();
             buf.append("text=");
@@ -990,6 +1383,12 @@ public class ViewHelper {
             return buf.toString();
         }
 
+        /**
+         * URL-encodes text for use in text fragment parameters.
+         *
+         * @param text the text to encode
+         * @return the URL-encoded text
+         */
         private String encodeToString(final String text) {
             return URLEncoder.encode(text, Constants.CHARSET_UTF_8);
         }

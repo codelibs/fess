@@ -46,29 +46,64 @@ import org.opensearch.monitor.process.ProcessProbe;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Executable class for generating thumbnails for indexed documents.
+ * This class provides a command-line interface for thumbnail generation tasks.
+ */
 public class ThumbnailGenerator {
 
     private static final Logger logger = LogManager.getLogger(ThumbnailGenerator.class);
 
+    /**
+     * OpenSearch client for accessing indexed documents.
+     */
     @Resource
     public SearchEngineClient searchEngineClient;
 
+    /**
+     * Default constructor for ThumbnailGenerator.
+     */
+    public ThumbnailGenerator() {
+        // Default constructor
+    }
+
+    /**
+     * Command-line options for the thumbnail generator.
+     */
     protected static class Options {
+        /**
+         * Session ID for filtering thumbnail generation.
+         */
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
         protected String sessionId;
 
+        /**
+         * Name identifier for the thumbnail generation task.
+         */
         @Option(name = "-n", aliases = "--name", metaVar = "name", usage = "Name")
         protected String name;
 
+        /**
+         * Path to the properties file for configuration.
+         */
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
         protected String propertiesPath;
 
+        /**
+         * Number of threads to use for thumbnail generation.
+         */
         @Option(name = "-t", aliases = "--numOfThreads", metaVar = "numOfThreads", usage = "The number of threads")
         protected int numOfThreads = 1;
 
+        /**
+         * Whether to run in cleanup mode to remove old thumbnails.
+         */
         @Option(name = "-c", aliases = "--cleanup", usage = "Clean-Up mode")
         protected boolean cleanup;
 
+        /**
+         * Default constructor for command-line options.
+         */
         protected Options() {
             // nothing
         }
@@ -88,6 +123,11 @@ public class ThumbnailGenerator {
         JvmInfo.jvmInfo();
     }
 
+    /**
+     * Main entry point for the thumbnail generator application.
+     *
+     * @param args command-line arguments
+     */
     public static void main(final String[] args) {
         final Options options = new Options();
 

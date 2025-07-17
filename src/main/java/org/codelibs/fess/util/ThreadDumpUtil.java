@@ -28,25 +28,46 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
 
+/**
+ * Utility class for generating and writing thread dumps.
+ * Provides methods to capture thread information for debugging purposes.
+ */
 public class ThreadDumpUtil {
     private static final Logger logger = LogManager.getLogger(ThreadDumpUtil.class);
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     protected ThreadDumpUtil() {
         // noop
     }
 
+    /**
+     * Prints thread dump information to the logger at INFO level.
+     */
     public static void printThreadDump() {
         processThreadDump(logger::info);
     }
 
+    /**
+     * Prints thread dump information to the logger at WARN level.
+     */
     public static void printThreadDumpAsWarn() {
         processThreadDump(logger::warn);
     }
 
+    /**
+     * Prints thread dump information to the logger at ERROR level.
+     */
     public static void printThreadDumpAsError() {
         processThreadDump(logger::error);
     }
 
+    /**
+     * Writes thread dump information to the specified file.
+     *
+     * @param file the file path to write the thread dump to
+     */
     public static void writeThreadDump(final String file) {
         try (final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Constants.CHARSET_UTF_8))) {
             processThreadDump(s -> {
@@ -62,6 +83,11 @@ public class ThreadDumpUtil {
         }
     }
 
+    /**
+     * Processes all thread information and sends it to the provided consumer.
+     *
+     * @param writer the consumer that will handle each line of thread dump output
+     */
     public static void processThreadDump(final Consumer<String> writer) {
         for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
             writer.accept("Thread: " + entry.getKey());

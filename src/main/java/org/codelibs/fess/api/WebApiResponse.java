@@ -23,12 +23,29 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
+/**
+ * Wrapper for HTTP servlet responses in web API context.
+ * This class extends HttpServletResponseWrapper to provide custom response handling
+ * for web API responses, including dummy output stream management.
+ */
 public class WebApiResponse extends HttpServletResponseWrapper {
 
+    /**
+     * Constructs a WebApiResponse with the specified response.
+     *
+     * @param response The original HTTP servlet response
+     */
     public WebApiResponse(final HttpServletResponse response) {
         super(response);
     }
 
+    /**
+     * Gets a PrintWriter for writing response content.
+     * Returns a dummy PrintWriter that writes to a ByteArrayOutputStream.
+     *
+     * @return A PrintWriter for response output
+     * @throws IOException If an I/O error occurs
+     */
     @Override
     public PrintWriter getWriter() throws IOException {
         // dummy stream

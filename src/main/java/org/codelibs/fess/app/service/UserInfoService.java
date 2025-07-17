@@ -20,6 +20,10 @@ import org.codelibs.fess.opensearch.log.exbhv.UserInfoBhv;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing user information data.
+ * This service provides operations for maintaining and cleaning up user information records.
+ */
 public class UserInfoService {
 
     @Resource
@@ -28,6 +32,19 @@ public class UserInfoService {
     @Resource
     private SystemHelper systemHelper;
 
+    /**
+     * Default constructor for UserInfoService.
+     */
+    public UserInfoService() {
+        // Default constructor
+    }
+
+    /**
+     * Deletes user information records older than the specified number of days.
+     * This method is used for data cleanup and maintenance operations.
+     *
+     * @param days the number of days to keep user information records
+     */
     public void deleteBefore(final int days) {
         userInfoBhv.queryDelete(cb -> {
             cb.query().setUpdatedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));

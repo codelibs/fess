@@ -26,8 +26,26 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.util.LaRequestUtil;
 
+/**
+ * Helper class for managing virtual host configurations and routing.
+ * This class provides functionality to handle virtual host-based routing
+ * and path resolution based on HTTP headers.
+ */
 public class VirtualHostHelper {
 
+    /**
+     * Default constructor.
+     */
+    public VirtualHostHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Gets the virtual host path for the specified HTML page.
+     *
+     * @param page The HTML page to get the virtual host path for
+     * @return The HTML page with updated virtual host path
+     */
     public HtmlNext getVirtualHostPath(final HtmlNext page) {
         return processVirtualHost(s -> {
             final String basePath = getVirtualHostBasePath(s, page);
@@ -35,10 +53,23 @@ public class VirtualHostHelper {
         }, page);
     }
 
+    /**
+     * Gets the base path for virtual host based on the virtual host key and page.
+     *
+     * @param s The virtual host key
+     * @param page The HTML page
+     * @return The base path for the virtual host
+     */
     protected String getVirtualHostBasePath(final String s, final HtmlNext page) {
         return StringUtil.isBlank(s) ? StringUtil.EMPTY : "/" + s;
     }
 
+    /**
+     * Gets the virtual host key from the current request.
+     * The key is determined by matching HTTP headers against configured virtual hosts.
+     *
+     * @return The virtual host key, or empty string if no match found
+     */
     public String getVirtualHostKey() {
         return LaRequestUtil.getOptionalRequest().map(req -> (String) req.getAttribute(FessConfig.VIRTUAL_HOST_VALUE)).orElseGet(() -> {
             final String value = processVirtualHost(s -> s, StringUtil.EMPTY);
@@ -47,6 +78,14 @@ public class VirtualHostHelper {
         });
     }
 
+    /**
+     * Processes virtual host configuration by applying a function to the matched virtual host key.
+     *
+     * @param <T> The return type of the function
+     * @param func The function to apply to the virtual host key
+     * @param defaultValue The default value to return if no virtual host matches
+     * @return The result of applying the function, or the default value
+     */
     protected <T> T processVirtualHost(final Function<String, T> func, final T defaultValue) {
         final Tuple3<String, String, String>[] vHosts = ComponentUtil.getFessConfig().getVirtualHosts();
         return LaRequestUtil.getOptionalRequest().map(req -> {
@@ -60,6 +99,11 @@ public class VirtualHostHelper {
         }).orElse(defaultValue);
     }
 
+    /**
+     * Gets all configured virtual host paths.
+     *
+     * @return An array of virtual host paths
+     */
     public String[] getVirtualHostPaths() {
         return stream(ComponentUtil.getFessConfig().getVirtualHosts())
                 .get(stream -> stream.map(h -> "/" + h.getValue3()).toArray(n -> new String[n]));

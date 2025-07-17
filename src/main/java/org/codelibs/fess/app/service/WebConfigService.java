@@ -34,20 +34,50 @@ import org.dbflute.optional.OptionalEntity;
 
 import jakarta.annotation.Resource;
 
+/**
+ * Service class for managing web crawling configurations.
+ * Provides CRUD operations for web configuration settings including
+ * listing, retrieving, storing, and deleting web crawling configurations.
+ */
 public class WebConfigService extends FessAppService {
 
+    /**
+     * Default constructor.
+     */
+    public WebConfigService() {
+        // Default constructor
+    }
+
+    /**
+     * Behavior class for web configuration operations.
+     */
     @Resource
     protected WebConfigBhv webConfigBhv;
 
+    /**
+     * Behavior class for web authentication operations.
+     */
     @Resource
     protected WebAuthenticationBhv webAuthenticationBhv;
 
+    /**
+     * Behavior class for request header operations.
+     */
     @Resource
     protected RequestHeaderBhv requestHeaderBhv;
 
+    /**
+     * Fess configuration settings.
+     */
     @Resource
     protected FessConfig fessConfig;
 
+    /**
+     * Gets a paginated list of web configurations based on the provided pager.
+     *
+     * @param webConfigPager The pager containing pagination and search criteria
+     * @return List of web configuration objects
+     */
     public List<WebConfig> getWebConfigList(final WebConfigPager webConfigPager) {
 
         final PagingResultBean<WebConfig> webConfigList = webConfigBhv.selectPage(cb -> {
@@ -64,6 +94,12 @@ public class WebConfigService extends FessAppService {
         return webConfigList;
     }
 
+    /**
+     * Deletes a web configuration and all its related data.
+     * This includes removing associated web authentications and request headers.
+     *
+     * @param webConfig The web configuration to delete
+     */
     public void delete(final WebConfig webConfig) {
 
         final String webConfigId = webConfig.getId();
@@ -81,10 +117,23 @@ public class WebConfigService extends FessAppService {
         });
     }
 
+    /**
+     * Gets a web configuration by its ID.
+     *
+     * @param id The ID of the web configuration
+     * @return Optional containing the web configuration if found
+     */
     public OptionalEntity<WebConfig> getWebConfig(final String id) {
         return webConfigBhv.selectByPK(id);
     }
 
+    /**
+     * Gets a web configuration by its name.
+     * If multiple configurations have the same name, returns the first one ordered by sort order.
+     *
+     * @param name The name of the web configuration
+     * @return Optional containing the web configuration if found
+     */
     public OptionalEntity<WebConfig> getWebConfigByName(final String name) {
         final ListResultBean<WebConfig> list = webConfigBhv.selectList(cb -> {
             cb.query().setName_Equal(name);
@@ -96,6 +145,12 @@ public class WebConfigService extends FessAppService {
         return OptionalEntity.of(list.get(0));
     }
 
+    /**
+     * Stores a web configuration.
+     * Configuration parameters are encrypted before storage.
+     *
+     * @param webConfig The web configuration to store
+     */
     public void store(final WebConfig webConfig) {
         webConfig.setConfigParameter(ParameterUtil.encrypt(webConfig.getConfigParameter()));
         webConfigBhv.insertOrUpdate(webConfig, op -> {
@@ -103,6 +158,13 @@ public class WebConfigService extends FessAppService {
         });
     }
 
+    /**
+     * Sets up the list condition for querying web configurations.
+     * Applies search filters based on pager criteria such as name, URLs, and description.
+     *
+     * @param cb The condition bean for the query
+     * @param webConfigPager The pager containing search criteria
+     */
     protected void setupListCondition(final WebConfigCB cb, final WebConfigPager webConfigPager) {
         if (StringUtil.isNotBlank(webConfigPager.name)) {
             cb.query().setName_Wildcard(wrapQuery(webConfigPager.name));

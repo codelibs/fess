@@ -19,15 +19,32 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * The upload form for Mapping.
- *
+ * Form for uploading character mapping files to the Fess search engine.
+ * Character mapping allows for normalization and transformation of characters during text analysis.
+ * This form is used in the admin interface to upload custom character mapping dictionary files.
  */
 public class UploadForm {
 
+    /**
+     * The dictionary ID that identifies which character mapping dictionary configuration to update.
+     * This ID corresponds to a specific character mapping dictionary instance in the system.
+     */
     @Required
     public String dictId;
 
+    /**
+     * The multipart file containing the character mapping rules to be uploaded.
+     * This file should contain character mapping definitions for text normalization.
+     */
     @Required
     public MultipartFormFile charMappingFile;
+
+    /**
+     * Default constructor for UploadForm.
+     * Creates a new instance with default values.
+     */
+    public UploadForm() {
+        // Default constructor
+    }
 
 }

@@ -31,18 +31,42 @@ import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
+/**
+ * Validation annotation for URI type constraints.
+ * This annotation validates URI strings based on specified protocol types.
+ */
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = UriTypeValidator.class)
 public @interface UriType {
 
+    /**
+     * Specifies the protocol type to validate against.
+     *
+     * @return the protocol type
+     */
     ProtocolType protocolType();
 
+    /**
+     * The validation error message.
+     *
+     * @return the error message
+     */
     String message() default "{org.lastaflute.validator.constraints.UriType.message}";
 
+    /**
+     * The validation groups.
+     *
+     * @return the validation groups
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * The payload for constraint.
+     *
+     * @return the payload
+     */
     Class<? extends Payload>[] payload() default {};
 
 }

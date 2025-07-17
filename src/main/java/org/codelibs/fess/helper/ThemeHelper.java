@@ -34,9 +34,27 @@ import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.util.ResourceUtil;
 
+/**
+ * Helper class for managing theme installation and uninstallation.
+ * Handles the extraction and deployment of theme files from JAR artifacts.
+ */
 public class ThemeHelper {
     private static final Logger logger = LogManager.getLogger(ThemeHelper.class);
 
+    /**
+     * Default constructor for ThemeHelper.
+     */
+    public ThemeHelper() {
+        // Default constructor
+    }
+
+    /**
+     * Installs a theme from the given artifact.
+     * Extracts theme files from the JAR and deploys them to appropriate directories.
+     *
+     * @param artifact the theme artifact to install
+     * @throws ThemeException if installation fails
+     */
     public void install(final Artifact artifact) {
         final Path jarPath = getJarFile(artifact);
         final String themeName = getThemeName(artifact);
@@ -83,6 +101,11 @@ public class ThemeHelper {
         }
     }
 
+    /**
+     * Uninstalls a theme by removing all its associated files and directories.
+     *
+     * @param artifact the theme artifact to uninstall
+     */
     public void uninstall(final Artifact artifact) {
         final String themeName = getThemeName(artifact);
 
@@ -96,6 +119,13 @@ public class ThemeHelper {
         closeQuietly(jsPath);
     }
 
+    /**
+     * Extracts the theme name from the artifact name.
+     *
+     * @param artifact the theme artifact
+     * @return the theme name
+     * @throws ThemeException if theme name cannot be determined
+     */
     protected String getThemeName(final Artifact artifact) {
         final String themeName = artifact.getName().substring(ArtifactType.THEME.getId().length() + 1);
         if (StringUtil.isBlank(themeName)) {
@@ -104,6 +134,12 @@ public class ThemeHelper {
         return themeName;
     }
 
+    /**
+     * Recursively deletes a directory and all its contents.
+     * Does not throw exceptions, only logs warnings if deletion fails.
+     *
+     * @param dir the directory to delete
+     */
     protected void closeQuietly(final Path dir) {
         if (Files.notExists(dir)) {
             if (logger.isDebugEnabled()) {
@@ -128,6 +164,13 @@ public class ThemeHelper {
         }
     }
 
+    /**
+     * Gets the JAR file path for the given artifact.
+     *
+     * @param artifact the theme artifact
+     * @return the path to the JAR file
+     * @throws ThemeException if the JAR file does not exist
+     */
     protected Path getJarFile(final Artifact artifact) {
         final Path jarPath = ResourceUtil.getPluginPath(artifact.getFileName());
         if (!Files.exists(jarPath)) {

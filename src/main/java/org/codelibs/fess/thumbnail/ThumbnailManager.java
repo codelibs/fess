@@ -56,13 +56,23 @@ import com.google.common.collect.Lists;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+/**
+ * Manager class for handling thumbnail generation and management.
+ * Provides functionality to generate, cache, and serve thumbnail images for documents.
+ */
 public class ThumbnailManager {
     private static final String NOIMAGE_FILE_SUFFIX = ".txt";
 
+    /**
+     * Default directory name for thumbnails.
+     */
     protected static final String THUMBNAILS_DIR_NAME = "thumbnails";
 
     private static final Logger logger = LogManager.getLogger(ThumbnailManager.class);
 
+    /**
+     * Base directory for storing thumbnail files.
+     */
     protected File baseDir;
 
     private final List<ThumbnailGenerator> generatorList = new ArrayList<>();
@@ -73,22 +83,57 @@ public class ThumbnailManager {
 
     private Thread thumbnailQueueThread;
 
+    /**
+     * Size of the thumbnail path cache.
+     */
     protected int thumbnailPathCacheSize = 10;
 
+    /**
+     * File extension for generated thumbnail images.
+     */
     protected String imageExtention = "png";
 
+    /**
+     * Number of subdirectories for organizing thumbnails.
+     */
     protected int splitSize = 10;
 
+    /**
+     * Maximum size of the thumbnail generation task queue.
+     */
     protected int thumbnailTaskQueueSize = 10000;
 
+    /**
+     * Number of tasks to process in bulk operations.
+     */
     protected int thumbnailTaskBulkSize = 100;
 
+    /**
+     * Timeout in milliseconds for thumbnail task queue operations.
+     */
     protected long thumbnailTaskQueueTimeout = 10 * 1000L;
 
+    /**
+     * Expiration time in milliseconds for no-image placeholder files.
+     */
     protected long noImageExpired = 24 * 60 * 60 * 1000L; // 24 hours
 
+    /**
+     * Hash size for splitting thumbnail storage directories.
+     */
     protected int splitHashSize = 10;
 
+    /**
+     * Default constructor for ThumbnailManager.
+     */
+    public ThumbnailManager() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the thumbnail manager after construction.
+     * Sets up base directory and starts background processing.
+     */
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
@@ -150,6 +195,10 @@ public class ThumbnailManager {
         thumbnailQueueThread.start();
     }
 
+    /**
+     * Cleans up resources when the thumbnail manager is destroyed.
+     * Stops background processing and waits for threads to complete.
+     */
     @PreDestroy
     public void destroy() {
         generating = false;
@@ -168,10 +217,20 @@ public class ThumbnailManager {
         });
     }
 
+    /**
+     * Gets the system property option string for thumbnail path configuration.
+     *
+     * @return the property option string for JVM arguments
+     */
     public String getThumbnailPathOption() {
         return "-D" + Constants.FESS_THUMBNAIL_PATH + "=" + baseDir.getAbsolutePath();
     }
 
+    /**
+     * Stores thumbnail generation tasks to the queue for processing.
+     *
+     * @param taskList list of thumbnail tasks to store
+     */
     protected void storeQueue(final List<Tuple3<String, String, String>> taskList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -197,6 +256,13 @@ public class ThumbnailManager {
         thumbnailQueueBhv.batchInsert(list);
     }
 
+    /**
+     * Generates thumbnails using the provided executor service.
+     *
+     * @param executorService the executor service for parallel processing
+     * @param cleanup whether to run in cleanup mode
+     * @return the number of tasks processed
+     */
     public int generate(final ExecutorService executorService, final boolean cleanup) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> idList = new ArrayList<>();
@@ -235,6 +301,12 @@ public class ThumbnailManager {
         return idList.size();
     }
 
+    /**
+     * Processes a single thumbnail generation task.
+     *
+     * @param fessConfig the Fess configuration
+     * @param entity the thumbnail queue entity to process
+     */
     protected void process(final FessConfig fessConfig, final ThumbnailQueue entity) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         systemHelper.calibrateCpuLoad();
@@ -271,6 +343,12 @@ public class ThumbnailManager {
         }
     }
 
+    /**
+     * Offers a document for thumbnail generation.
+     *
+     * @param docMap the document data map
+     * @return true if the task was successfully added to the queue
+     */
     public boolean offer(final Map<String, Object> docMap) {
         for (final ThumbnailGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
@@ -294,12 +372,24 @@ public class ThumbnailManager {
         return false;
     }
 
+    /**
+     * Gets the image filename for a document based on its document map.
+     *
+     * @param docMap the document data map
+     * @return the generated image filename
+     */
     protected String getImageFilename(final Map<String, Object> docMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String docid = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldDocId(), String.class);
         return getImageFilename(docid);
     }
 
+    /**
+     * Gets the image filename for a document based on its document ID.
+     *
+     * @param docid the document ID
+     * @return the generated image filename
+     */
     protected String getImageFilename(final String docid) {
         final StringBuilder buf = new StringBuilder(50);
         for (int i = 0; i < docid.length(); i += splitSize) {
@@ -313,6 +403,12 @@ public class ThumbnailManager {
         return buf.toString();
     }
 
+    /**
+     * Gets the thumbnail file for a document if it exists.
+     *
+     * @param docMap the document data map
+     * @return the thumbnail file or null if not found
+     */
     public File getThumbnailFile(final Map<String, Object> docMap) {
         final String thumbnailPath = getImageFilename(docMap);
         if (StringUtil.isNotBlank(thumbnailPath)) {
@@ -324,6 +420,11 @@ public class ThumbnailManager {
         return null;
     }
 
+    /**
+     * Adds a thumbnail generator to the manager.
+     *
+     * @param generator the thumbnail generator to add
+     */
     public void add(final ThumbnailGenerator generator) {
         if (generator.isAvailable()) {
             if (logger.isDebugEnabled()) {
@@ -335,6 +436,12 @@ public class ThumbnailManager {
         }
     }
 
+    /**
+     * Purges old thumbnail files based on the expiry time.
+     *
+     * @param expiry the expiry time threshold
+     * @return the number of files purged
+     */
     public long purge(final long expiry) {
         if (!baseDir.exists()) {
             return 0;
@@ -348,22 +455,49 @@ public class ThumbnailManager {
         }
     }
 
+    /**
+     * File visitor for purging old thumbnail files.
+     */
     protected static class FilePurgeVisitor implements FileVisitor<Path> {
 
+        /**
+         * Expiry time threshold for file deletion.
+         */
         protected final long expiry;
 
+        /**
+         * Count of processed files.
+         */
         protected long count;
 
+        /**
+         * Maximum number of files to purge in a single operation.
+         */
         protected final int maxPurgeSize;
 
+        /**
+         * List of files marked for deletion.
+         */
         protected final List<Path> deletedFileList = new ArrayList<>();
 
+        /**
+         * Base path for thumbnail storage.
+         */
         protected final Path basePath;
 
+        /**
+         * Image file extension for filtering.
+         */
         protected final String imageExtention;
 
+        /**
+         * OpenSearch client for document validation.
+         */
         protected final SearchEngineClient searchEngineClient;
 
+        /**
+         * Fess configuration for settings.
+         */
         protected final FessConfig fessConfig;
 
         FilePurgeVisitor(final Path basePath, final String imageExtention, final long expiry) {
@@ -375,6 +509,9 @@ public class ThumbnailManager {
             searchEngineClient = ComponentUtil.getSearchEngineClient();
         }
 
+        /**
+         * Deletes files marked for deletion after checking if they exist in the search index.
+         */
         protected void deleteFiles() {
             final Map<String, Path> deleteFileMap = new HashMap<>();
             for (final Path path : deletedFileList) {
@@ -409,6 +546,11 @@ public class ThumbnailManager {
             }
         }
 
+        /**
+         * Deletes a single file and any empty parent directories.
+         *
+         * @param path the file path to delete
+         */
         protected void deleteFile(final Path path) {
             try {
                 Files.delete(path);
@@ -425,6 +567,12 @@ public class ThumbnailManager {
             }
         }
 
+        /**
+         * Extracts the document ID from a file path.
+         *
+         * @param file the file path
+         * @return the extracted document ID
+         */
         protected String getDocId(final Path file) {
             final String s = file.toUri().toString();
             final String b = basePath.toUri().toString();
@@ -435,6 +583,11 @@ public class ThumbnailManager {
             return id;
         }
 
+        /**
+         * Gets the count of processed files.
+         *
+         * @return the number of files processed
+         */
         public long getCount() {
             if (!deletedFileList.isEmpty()) {
                 deleteFiles();
@@ -492,6 +645,9 @@ public class ThumbnailManager {
 
     }
 
+    /**
+     * Migrates existing thumbnail files to the new directory structure.
+     */
     public void migrate() {
         new Thread(() -> {
             final Path basePath = baseDir.toPath();
@@ -524,26 +680,56 @@ public class ThumbnailManager {
         }, "ThumbnailMigrator").start();
     }
 
+    /**
+     * Sets the thumbnail path cache size.
+     *
+     * @param thumbnailPathCacheSize the cache size to set
+     */
     public void setThumbnailPathCacheSize(final int thumbnailPathCacheSize) {
         this.thumbnailPathCacheSize = thumbnailPathCacheSize;
     }
 
+    /**
+     * Sets the image file extension for thumbnails.
+     *
+     * @param imageExtention the file extension to set
+     */
     public void setImageExtention(final String imageExtention) {
         this.imageExtention = imageExtention;
     }
 
+    /**
+     * Sets the split size for directory organization.
+     *
+     * @param splitSize the split size to set
+     */
     public void setSplitSize(final int splitSize) {
         this.splitSize = splitSize;
     }
 
+    /**
+     * Sets the maximum size of the thumbnail task queue.
+     *
+     * @param thumbnailTaskQueueSize the queue size to set
+     */
     public void setThumbnailTaskQueueSize(final int thumbnailTaskQueueSize) {
         this.thumbnailTaskQueueSize = thumbnailTaskQueueSize;
     }
 
+    /**
+     * Sets the expiration time for no-image placeholder files.
+     *
+     * @param noImageExpired the expiration time in milliseconds
+     */
     public void setNoImageExpired(final long noImageExpired) {
         this.noImageExpired = noImageExpired;
     }
 
+    /**
+     * Sets the hash size for splitting thumbnail storage directories.
+     *
+     * @param splitHashSize the hash size to set
+     */
     public void setSplitHashSize(final int splitHashSize) {
         this.splitHashSize = splitHashSize;
     }

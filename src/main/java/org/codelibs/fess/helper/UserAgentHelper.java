@@ -17,11 +17,35 @@ package org.codelibs.fess.helper;
 
 import org.lastaflute.web.util.LaRequestUtil;
 
+/**
+ * Helper class for detecting and categorizing user agent types from HTTP requests.
+ * This class analyzes the User-Agent header to determine which browser type is being used
+ * and caches the result in the request attribute for performance optimization.
+ *
+ * @author FessProject
+ */
 public class UserAgentHelper {
+
+    /**
+     * Default constructor for UserAgentHelper.
+     */
+    public UserAgentHelper() {
+        // Default constructor
+    }
+
+    /** The HTTP header name for User-Agent */
     protected static final String USER_AGENT = "user-agent";
 
+    /** The request attribute key for storing cached user agent type */
     protected static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
 
+    /**
+     * Determines the user agent type from the current HTTP request.
+     * The method analyzes the User-Agent header to categorize the browser type
+     * and caches the result in the request attribute for subsequent calls.
+     *
+     * @return the detected user agent type, or OTHER if no specific type is detected
+     */
     public UserAgentType getUserAgentType() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
             UserAgentType uaType = (UserAgentType) request.getAttribute(USER_AGENT_TYPE);
@@ -49,8 +73,24 @@ public class UserAgentHelper {
         }).orElse(UserAgentType.OTHER);
     }
 
+    /**
+     * Enumeration of supported browser types for user agent detection.
+     * Each type represents a major browser family that can be detected
+     * from the User-Agent header string.
+     */
     public enum UserAgentType {
-        IE, FIREFOX, CHROME, SAFARI, OPERA, OTHER;
+        /** Internet Explorer and Trident-based browsers */
+        IE,
+        /** Mozilla Firefox browser */
+        FIREFOX,
+        /** Google Chrome browser */
+        CHROME,
+        /** Apple Safari browser */
+        SAFARI,
+        /** Opera browser */
+        OPERA,
+        /** Other or unrecognized browser types */
+        OTHER;
     }
 
 }

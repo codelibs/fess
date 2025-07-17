@@ -22,6 +22,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Interface for managing web API request processing.
+ * Implementations of this interface handle specific types of web API requests
+ * by matching incoming requests and processing them accordingly.
+ */
 public interface WebApiManager {
 
     /**
