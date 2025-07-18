@@ -181,7 +181,7 @@ public class ThumbnailGenerator {
 
             final int totalCount = process(options);
             if (totalCount != 0) {
-                logger.info("Created {} thumbnail files.", totalCount);
+                logger.info("Processed {} thumbnail task(s).", totalCount);
             } else {
                 logger.info("No new thumbnails found.");
             }
