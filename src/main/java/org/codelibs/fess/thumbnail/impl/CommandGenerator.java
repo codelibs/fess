@@ -144,7 +144,13 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                     cmdList.add(expandPath(value.replace("${url}", tempPath).replace("${outputFile}", outputPath)));
                 }
 
-                executeCommand(thumbnailId, cmdList);
+                if (executeCommand(thumbnailId, cmdList) != 0) {
+                    logger.warn("Failed to execute command for thumbnail ID: {}", thumbnailId);
+                    if (outputFile.isFile() && !outputFile.delete()) {
+                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath());
+                    }
+                    return false;
+                }
 
                 if (outputFile.isFile() && outputFile.length() == 0) {
                     logger.warn("Thumbnail File is empty. ID is {}", thumbnailId);
@@ -173,11 +179,19 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     }
 
     /**
-     * Executes the thumbnail generation command.
-     * @param thumbnailId The thumbnail ID being processed.
-     * @param cmdList The command list to execute.
+     * Executes a command to generate a thumbnail using the specified command list.
+     * <p>
+     * This method starts a process with the given command list, manages its execution,
+     * handles timeouts, and logs relevant information. It ensures the process is destroyed
+     * if it exceeds the allowed execution time or becomes unresponsive. The method also
+     * captures and logs the process output for debugging purposes.
+     * </p>
+     *
+     * @param thumbnailId the identifier for the thumbnail being generated
+     * @param cmdList the list of command arguments to execute
+     * @return the exit code of the process if it finishes normally; -1 if the process fails or is terminated
      */
-    protected void executeCommand(final String thumbnailId, final List<String> cmdList) {
+    protected int executeCommand(final String thumbnailId, final List<String> cmdList) {
         ProcessDestroyer task = null;
         Process p = null;
         InputStreamThread ist = null;
@@ -218,6 +232,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("{} is finished with exit code {}.", getName(), exitValue);
                     }
+                    return exitValue;
                 }
             } else {
                 // This is a secondary timeout, a safety net.
@@ -248,6 +263,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 ist.interrupt();
             }
         }
+        return -1; // Indicate failure
     }
 
     /**
