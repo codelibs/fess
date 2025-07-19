@@ -236,14 +236,14 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 final HttpServletResponse response = LaResponseUtil.getResponse();
                 final SamlUser samlUser = (SamlUser) user.getFessUser();
                 try {
-                    final Auth auth = new Auth(getSettings(), request, response);
-                    final Saml2Settings settings = auth.getSettings();
+                    final Saml2Settings settings = getSettings();
                     if (settings.getIdpSingleLogoutServiceUrl() == null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("IdP single logout service URL is not configured, skipping SLO for user: {}", samlUser);
                         }
                         return null;
                     }
+                    final Auth auth = new Auth(settings, request, response);
                     final LogoutRequestParams logoutRequestParams = new LogoutRequestParams(samlUser.getSessionIndex(), samlUser.getName(),
                             samlUser.getNameIdFormat(), samlUser.getNameidNameQualifier(), samlUser.getNameidSPNameQualifier());
                     return auth.logout(null, logoutRequestParams, true);
