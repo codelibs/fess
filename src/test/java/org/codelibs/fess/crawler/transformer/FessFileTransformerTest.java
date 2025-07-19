@@ -35,12 +35,6 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     private String encodeUrl(final String url) {
         try {
             return URLEncoder.encode(url, Constants.UTF_8);

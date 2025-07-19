@@ -52,12 +52,6 @@ public class SuggestHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockPopularWordHelper(), "popularWordHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_init() {
         SuggestHelper helper = new SuggestHelper();
         try {

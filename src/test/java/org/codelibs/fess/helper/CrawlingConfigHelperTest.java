@@ -119,12 +119,6 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         }, DataConfigService.class.getCanonicalName());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_getConfigType() {
         assertNull(crawlingConfigHelper.getConfigType(null));
         assertNull(crawlingConfigHelper.getConfigType(""));

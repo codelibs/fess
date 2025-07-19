@@ -44,12 +44,6 @@ public class SambaHelperTest extends UnitFessTestCase {
         sambaHelper = new SambaHelper();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_smb_account() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override

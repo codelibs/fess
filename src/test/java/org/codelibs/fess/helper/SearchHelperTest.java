@@ -48,12 +48,6 @@ public class SearchHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_serializeParameters() {
         RequestParameter[] params = new RequestParameter[] { new RequestParameter("q", new String[] { "test" }),
                 new RequestParameter("lang", new String[] { "en", "ja" }) };

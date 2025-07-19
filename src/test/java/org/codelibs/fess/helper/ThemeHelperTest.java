@@ -45,10 +45,10 @@ public class ThemeHelperTest extends UnitFessTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
         if (tempDir != null && Files.exists(tempDir)) {
             deleteDirectory(tempDir);
         }
+        super.tearDown();
     }
 
     private void deleteDirectory(Path dir) throws IOException {

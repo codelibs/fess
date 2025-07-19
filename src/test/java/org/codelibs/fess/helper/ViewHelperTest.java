@@ -67,7 +67,6 @@ public class ViewHelperTest extends UnitFessTestCase {
     @Override
     public void tearDown() throws Exception {
         propertiesFile.delete();
-        ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
