@@ -52,12 +52,6 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockPermissionHelper(), "permissionHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     private Set<String> buildByParameter(final RoleQueryHelper roleQueryHelperImpl, final HttpServletRequest request) {
         Set<String> roleSet = new HashSet<>();
         roleQueryHelperImpl.processParameter(request, roleSet);

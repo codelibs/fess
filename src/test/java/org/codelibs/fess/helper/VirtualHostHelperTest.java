@@ -32,12 +32,6 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         virtualHostHelper = new VirtualHostHelper();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_getVirtualHostPath() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;

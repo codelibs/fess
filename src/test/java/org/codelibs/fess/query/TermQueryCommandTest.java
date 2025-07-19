@@ -56,12 +56,6 @@ public class TermQueryCommandTest extends UnitFessTestCase {
         queryCommand = new TermQueryCommand();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     private void setQueryType(final String queryType) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {

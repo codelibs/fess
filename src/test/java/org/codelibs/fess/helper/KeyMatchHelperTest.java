@@ -42,12 +42,6 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_init() {
         try {
             keyMatchHelper.init();

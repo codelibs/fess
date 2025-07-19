@@ -43,12 +43,6 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockRoleQueryHelper(), "roleQueryHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_init() {
         try {
             labelTypeHelper.init();

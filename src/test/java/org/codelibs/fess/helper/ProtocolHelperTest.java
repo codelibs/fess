@@ -60,12 +60,6 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(2, protocolHelper.getFileProtocols().length);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_add_smbx() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override

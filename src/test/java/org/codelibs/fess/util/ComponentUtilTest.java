@@ -31,13 +31,11 @@ public class ComponentUtilTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
+    protected boolean isUseOneTimeContainer() {
+        return true;
     }
 
     public void test_setFessConfig_null() {
-        ComponentUtil.setFessConfig(null);
         assertTrue(FessProp.propMap.isEmpty());
     }
 
@@ -81,8 +79,6 @@ public class ComponentUtilTest extends UnitFessTestCase {
         List<String> results = new ArrayList<>();
         Runnable process = () -> results.add("executed");
 
-        ComponentUtil.setFessConfig(null);
-
         ComponentUtil.processAfterContainerInit(process);
 
         assertEquals(0, results.size());
@@ -91,7 +87,6 @@ public class ComponentUtilTest extends UnitFessTestCase {
     public void test_doInitProcesses() {
         List<String> executionOrder = new ArrayList<>();
 
-        ComponentUtil.setFessConfig(null);
         ComponentUtil.processAfterContainerInit(() -> executionOrder.add("first"));
         ComponentUtil.processAfterContainerInit(() -> executionOrder.add("second"));
 
@@ -114,8 +109,6 @@ public class ComponentUtilTest extends UnitFessTestCase {
     }
 
     public void test_available_withoutSystemHelper() {
-        ComponentUtil.setFessConfig(null);
-
         assertFalse(ComponentUtil.available());
     }
 

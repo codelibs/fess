@@ -39,12 +39,6 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_init() {
         SearchLogHelper helper = new SearchLogHelper();
         helper.init();

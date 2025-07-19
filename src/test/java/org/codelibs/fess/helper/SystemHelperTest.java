@@ -93,12 +93,6 @@ public class SystemHelperTest extends UnitFessTestCase {
         ComponentUtil.register(systemHelper, "systemHelper");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_getUsername() {
         assertEquals("guest", systemHelper.getUsername());
     }

@@ -77,12 +77,6 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ComponentUtil.setFessConfig(null);
-        super.tearDown();
-    }
-
     public void test_transform() throws Exception {
         String data = "<html><head><title>Test</title></head><body><h1>Header1</h1><p>This is a pen.</p></body></html>";
 
