@@ -1307,19 +1307,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>adal4j</artifactId>
-			<version>${adal4j.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.stephenc.jcip</groupId>
-					<artifactId>jcip-annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.mail</groupId>
-					<artifactId>javax.mail</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+			<version>${azure.identity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-core</artifactId>
+			<version>${azure.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.minio</groupId>

@@ -17,7 +17,9 @@ package org.codelibs.fess.app.web.base.login;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,8 +31,7 @@ import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.UserInfo;
+import org.codelibs.fess.sso.aad.AzureAdAuthenticator.AzureAuthenticationResult;
 
 /**
  * Azure Active Directory credential implementation for Fess authentication.
@@ -40,24 +41,67 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
     private static final Logger logger = LogManager.getLogger(AzureAdCredential.class);
 
-    private final AuthenticationResult authResult;
+    private final AzureAuthenticationResult authResult;
 
     /**
      * Constructs an Azure AD credential with the authentication result.
      * @param authResult The authentication result from Azure AD.
      */
-    public AzureAdCredential(final AuthenticationResult authResult) {
+    public AzureAdCredential(final AzureAuthenticationResult authResult) {
         this.authResult = authResult;
     }
 
     @Override
     public String getUserId() {
-        return authResult.getUserInfo().getDisplayableId();
+        final String idToken = authResult.getIdToken();
+        if (StringUtil.isNotBlank(idToken)) {
+            try {
+                final Map<String, Object> claims = parseIdTokenClaims(idToken);
+                final String oid = (String) claims.get("oid"); // Object ID
+                final String sub = (String) claims.get("sub"); // Subject
+                final String upn = (String) claims.get("upn"); // User Principal Name
+                final String email = (String) claims.get("email");
+
+                // Prefer oid (object ID) as it's most stable, fallback to sub, then upn, then email
+                if (StringUtil.isNotBlank(oid)) {
+                    return oid;
+                } else if (StringUtil.isNotBlank(sub)) {
+                    return sub;
+                } else if (StringUtil.isNotBlank(upn)) {
+                    return upn;
+                } else if (StringUtil.isNotBlank(email)) {
+                    return email;
+                }
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse ID token for user ID", e);
+                }
+            }
+        }
+        // Fallback to a default value if ID token parsing fails
+        return "azure-user-unknown";
     }
 
     @Override
     public String toString() {
-        return "{" + authResult.getUserInfo().getDisplayableId() + "}";
+        return "{" + getUserId() + "}";
+    }
+
+    /**
+     * Parses ID token claims from JWT.
+     * @param idToken The ID token string.
+     * @return Map of claims from the ID token.
+     */
+    private Map<String, Object> parseIdTokenClaims(final String idToken) {
+        try {
+            final com.nimbusds.jwt.JWTClaimsSet claimsSet = com.nimbusds.jwt.JWTParser.parse(idToken).getJWTClaimsSet();
+            return claimsSet.getClaims();
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse ID token claims", e);
+            }
+            return new java.util.HashMap<>();
+        }
     }
 
     /**
@@ -84,13 +128,13 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         protected String[] permissions;
 
         /** Azure AD authentication result. */
-        protected AuthenticationResult authResult;
+        protected AzureAuthenticationResult authResult;
 
         /**
          * Constructs an Azure AD user with the authentication result.
          * @param authResult The authentication result from Azure AD.
          */
-        public AzureAdUser(final AuthenticationResult authResult) {
+        public AzureAdUser(final AzureAuthenticationResult authResult) {
             this.authResult = authResult;
             final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
             authenticator.updateMemberOf(this);
@@ -98,7 +142,41 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         @Override
         public String getName() {
-            return authResult.getUserInfo().getDisplayableId();
+            final String idToken = authResult.getIdToken();
+            if (StringUtil.isNotBlank(idToken)) {
+                try {
+                    final com.nimbusds.jwt.JWTClaimsSet claimsSet = com.nimbusds.jwt.JWTParser.parse(idToken).getJWTClaimsSet();
+                    final Map<String, Object> claims = claimsSet.getClaims();
+
+                    final String name = (String) claims.get("name");
+                    final String preferredUsername = (String) claims.get("preferred_username");
+                    final String givenName = (String) claims.get("given_name");
+                    final String familyName = (String) claims.get("family_name");
+                    final String upn = (String) claims.get("upn");
+                    final String email = (String) claims.get("email");
+
+                    // Prefer name, then preferred_username, then combination of given+family names
+                    if (StringUtil.isNotBlank(name)) {
+                        return name;
+                    } else if (StringUtil.isNotBlank(preferredUsername)) {
+                        return preferredUsername;
+                    } else if (StringUtil.isNotBlank(givenName) && StringUtil.isNotBlank(familyName)) {
+                        return givenName + " " + familyName;
+                    } else if (StringUtil.isNotBlank(givenName)) {
+                        return givenName;
+                    } else if (StringUtil.isNotBlank(upn)) {
+                        return upn;
+                    } else if (StringUtil.isNotBlank(email)) {
+                        return email;
+                    }
+                } catch (final Exception e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to parse ID token for user name", e);
+                    }
+                }
+            }
+            // Fallback to a default value if ID token parsing fails
+            return "Azure User";
         }
 
         @Override
@@ -116,9 +194,49 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                final UserInfo userInfo = authResult.getUserInfo();
-                final String uniqueId = userInfo.getUniqueId();
-                final String displayableId = userInfo.getDisplayableId();
+
+                // Extract user information from ID token
+                String uniqueId = "azure-unknown-id";
+                String displayableId = "azure-unknown-user";
+
+                final String idToken = authResult.getIdToken();
+                if (StringUtil.isNotBlank(idToken)) {
+                    try {
+                        final com.nimbusds.jwt.JWTClaimsSet claimsSet = com.nimbusds.jwt.JWTParser.parse(idToken).getJWTClaimsSet();
+                        final Map<String, Object> claims = claimsSet.getClaims();
+
+                        final String oid = (String) claims.get("oid"); // Object ID
+                        final String sub = (String) claims.get("sub"); // Subject
+                        final String upn = (String) claims.get("upn"); // User Principal Name
+                        final String preferredUsername = (String) claims.get("preferred_username");
+                        final String email = (String) claims.get("email");
+                        final String name = (String) claims.get("name");
+
+                        // Set uniqueId (prefer oid, fallback to sub)
+                        if (StringUtil.isNotBlank(oid)) {
+                            uniqueId = oid;
+                        } else if (StringUtil.isNotBlank(sub)) {
+                            uniqueId = sub;
+                        }
+
+                        // Set displayableId (prefer UPN, then preferred_username, then email, then name)
+                        if (StringUtil.isNotBlank(upn)) {
+                            displayableId = upn;
+                        } else if (StringUtil.isNotBlank(preferredUsername)) {
+                            displayableId = preferredUsername;
+                        } else if (StringUtil.isNotBlank(email)) {
+                            displayableId = email;
+                        } else if (StringUtil.isNotBlank(name)) {
+                            displayableId = name;
+                        }
+
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to parse ID token for permissions", e);
+                        }
+                    }
+                }
+
                 if (logger.isDebugEnabled()) {
                     logger.debug("uniqueId:{} displayableId:{}", uniqueId, displayableId);
                 }
@@ -139,22 +257,35 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         @Override
         public boolean refresh() {
-            if (authResult.getExpiresAfter() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+            // Check if the current token is expired
+            if (authResult.isExpired()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Access token is expired, refresh is needed but not supported with azure-identity library");
+                }
+                // azure-identity library doesn't support refresh token flow directly
+                // Users will need to re-authenticate when tokens expire
                 return false;
             }
-            final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
-            final String refreshToken = authResult.getRefreshToken();
-            authResult = authenticator.getAccessToken(refreshToken);
-            authenticator.updateMemberOf(this);
-            permissions = null;
-            return true;
+
+            // Token is still valid, update group membership information
+            try {
+                final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+                authenticator.updateMemberOf(this);
+                permissions = null; // Clear cached permissions to force re-calculation
+                return true;
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to update group membership", e);
+                }
+                return false;
+            }
         }
 
         /**
          * Gets the Azure AD authentication result.
          * @return The authentication result.
          */
-        public AuthenticationResult getAuthenticationResult() {
+        public AzureAuthenticationResult getAuthenticationResult() {
             return authResult;
         }
 

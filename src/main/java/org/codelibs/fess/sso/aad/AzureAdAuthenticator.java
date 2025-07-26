@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.split;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,9 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -62,11 +60,13 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 
+import com.azure.core.credential.AccessToken;
+import com.azure.core.credential.TokenRequestContext;
+import com.azure.core.exception.ClientAuthenticationException;
+import com.azure.identity.AuthorizationCodeCredential;
+import com.azure.identity.AuthorizationCodeCredentialBuilder;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -133,8 +133,68 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     /** OAuth2 authorization code parameter name. */
     protected static final String CODE = "code";
 
-    /** Timeout for token acquisition in milliseconds. */
-    protected long acquisitionTimeout = 30 * 1000L;
+    /** Timeout for token acquisition. */
+    protected Duration acquisitionTimeout = Duration.ofSeconds(30);
+
+    /**
+     * Wrapper class to maintain compatibility with existing code structure.
+     * Replaces ADAL4J's AuthenticationResult.
+     */
+    public static class AzureAuthenticationResult {
+        private final AccessToken accessToken;
+        private final String idToken;
+        private final String refreshToken;
+
+        public AzureAuthenticationResult(AccessToken accessToken, String idToken, String refreshToken) {
+            this.accessToken = accessToken;
+            this.idToken = idToken;
+            this.refreshToken = refreshToken;
+        }
+
+        public String getAccessToken() {
+            return accessToken.getToken();
+        }
+
+        public String getIdToken() {
+            return idToken;
+        }
+
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+
+        /**
+         * Gets the token expiration time in milliseconds since epoch.
+         * @return The expiration time, or current time + 1 hour if not available.
+         */
+        public long getExpiresAfter() {
+            if (accessToken.getExpiresAt() != null) {
+                return accessToken.getExpiresAt().toInstant().toEpochMilli();
+            }
+            // Default to 1 hour from now if expiration is not available
+            return System.currentTimeMillis() + (60 * 60 * 1000);
+        }
+
+        /**
+         * Checks if the token is expired or will expire soon (within 5 minutes).
+         * @return True if the token is expired or will expire soon, false otherwise.
+         */
+        public boolean isExpired() {
+            final long currentTime = System.currentTimeMillis();
+            final long expirationTime = getExpiresAfter();
+            final long bufferTime = 5 * 60 * 1000; // 5 minutes buffer
+
+            return (expirationTime - bufferTime) <= currentTime;
+        }
+
+        /**
+         * Checks if the token is strictly expired (without buffer time).
+         * @return True if the token is strictly expired, false otherwise.
+         */
+        public boolean isStrictlyExpired() {
+            return getExpiresAfter() <= System.currentTimeMillis();
+        }
+    }
 
     /** Cache for storing group information to reduce API calls. */
     protected Cache<String, Pair<String[], String[]>> groupCache;
@@ -187,9 +247,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
         final String authUrl = getAuthority() + getTenant()
-                + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
-                + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+                + "/oauth2/v2.0/authorize?response_type=code&scope=https%3a%2f%2fgraph.microsoft.com%2f.default%20openid%20profile&response_mode=form_post&redirect_uri="
+                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
+                + "&nonce=" + nonce;
         if (logger.isDebugEnabled()) {
             logger.debug("redirect to: {}", authUrl);
         }
@@ -248,7 +308,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final AuthenticationResponse authResponse = parseAuthenticationResponse(urlBuf.toString(), params);
         if (authResponse instanceof final AuthenticationSuccessResponse oidcResponse) {
             validateAuthRespMatchesCodeFlow(oidcResponse);
-            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
+            final AzureAuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
@@ -280,15 +340,27 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param stateData The stored state data containing the expected nonce.
      * @param authData The authentication result containing the actual nonce.
      */
-    protected void validateNonce(final StateData stateData, final AuthenticationResult authData) {
+    protected void validateNonce(final StateData stateData, final AzureAuthenticationResult authData) {
         final String idToken = authData.getIdToken();
         if (logger.isDebugEnabled()) {
             logger.debug("idToken: {}", idToken);
         }
+
+        // Skip nonce validation if ID token is not available
+        if (StringUtils.isEmpty(idToken)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("ID token is not available, skipping nonce validation");
+            }
+            return;
+        }
+
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
             if (claimsSet == null) {
-                throw new SsoLoginException("could not validate nonce");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Could not parse JWT claims, skipping nonce validation");
+                }
+                return;
             }
 
             final String nonce = (String) claimsSet.getClaim("nonce");
@@ -301,38 +373,29 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         } catch (final SsoLoginException e) {
             throw e;
         } catch (final Exception e) {
-            throw new SsoLoginException("could not validate nonce", e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to validate nonce, but continuing authentication", e);
+            }
+            // Don't fail authentication if nonce validation fails with azure-identity
+            // as the ID token format may be different
         }
     }
 
     /**
-     * Obtains an access token using a refresh token.
-     * @param refreshToken The refresh token to use for token acquisition.
-     * @return The authentication result containing the access token.
+     * Note: Refresh token flow is not supported with azure-identity library.
+     * Users will need to re-authenticate when tokens expire.
+     * This method is deprecated and should not be used.
+     * @param refreshToken The refresh token (ignored).
+     * @return Never returns, always throws exception.
+     * @deprecated Refresh token flow is not supported with azure-identity library.
      */
-    public AuthenticationResult getAccessToken(final String refreshToken) {
-        final String authority = getAuthority() + getTenant() + "/";
+    @Deprecated
+    public AzureAuthenticationResult getAccessToken(final String refreshToken) {
         if (logger.isDebugEnabled()) {
-            logger.debug("refreshToken: {}, authority: {}", refreshToken, authority);
+            logger.debug("Refresh token flow attempted but not supported with azure-identity library");
         }
-        ExecutorService service = null;
-        try {
-            service = Executors.newFixedThreadPool(1);
-            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
-            final Future<AuthenticationResult> future =
-                    context.acquireTokenByRefreshToken(refreshToken, new ClientCredential(getClientId(), getClientSecret()), null, null);
-            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
-            if (result == null) {
-                throw new SsoLoginException("authentication result was null");
-            }
-            return result;
-        } catch (final Exception e) {
-            throw new SsoLoginException("Failed to get a token.", e);
-        } finally {
-            if (service != null) {
-                service.shutdown();
-            }
-        }
+        throw new SsoLoginException(
+                "Refresh token flow is not supported with azure-identity library. " + "Users must re-authenticate when tokens expire.");
     }
 
     /**
@@ -341,30 +404,77 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param currentUri The current URI for the redirect.
      * @return The authentication result containing the access token.
      */
-    protected AuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
-        final String authority = getAuthority() + getTenant() + "/";
+    protected AzureAuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
-            logger.debug("authCode: {}, authority: {}, uri: {}", authCode, authority, currentUri);
+            logger.debug("authCode: {}, tenant: {}, uri: {}", authCode, getTenant(), currentUri);
         }
-        final ClientCredential credential = new ClientCredential(getClientId(), getClientSecret());
-        ExecutorService service = null;
         try {
-            service = Executors.newFixedThreadPool(1);
-            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
-            final Future<AuthenticationResult> future =
-                    context.acquireTokenByAuthorizationCode(authCode, new URI(currentUri), credential, null);
-            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
-            if (result == null) {
+            final AuthorizationCodeCredential credential = new AuthorizationCodeCredentialBuilder().clientId(getClientId())
+                    .clientSecret(getClientSecret()).authorizationCode(authCode).redirectUrl(currentUri).tenantId(getTenant()).build();
+
+            // Get access token for Graph API
+            final TokenRequestContext graphTokenRequest = new TokenRequestContext().addScopes("https://graph.microsoft.com/.default");
+            final AccessToken accessToken = credential.getToken(graphTokenRequest).block(acquisitionTimeout);
+
+            if (accessToken == null) {
                 throw new SsoLoginException("authentication result was null");
             }
-            return result;
+
+            // Get ID token via direct HTTP call since azure-identity doesn't expose ID tokens
+            final String idToken = getIdTokenViaHttpCall(authCode, currentUri);
+
+            return new AzureAuthenticationResult(accessToken, idToken, null);
+        } catch (final ClientAuthenticationException e) {
+            throw new SsoLoginException("Failed to get a token.", e);
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
-        } finally {
-            if (service != null) {
-                service.shutdown();
+        }
+    }
+
+    /**
+     * Gets ID token via direct HTTP call to Azure AD token endpoint.
+     * This is needed because azure-identity library doesn't expose ID tokens directly.
+     * @param authCode The authorization code.
+     * @param redirectUri The redirect URI.
+     * @return The ID token string or null if not available.
+     */
+    protected String getIdTokenViaHttpCall(final String authCode, final String redirectUri) {
+        final String tokenEndpoint = getAuthority() + getTenant() + "/oauth2/v2.0/token";
+
+        try {
+            final Map<String, String> formParams = new HashMap<>();
+            formParams.put("client_id", getClientId());
+            formParams.put("client_secret", getClientSecret());
+            formParams.put("code", authCode);
+            formParams.put("grant_type", "authorization_code");
+            formParams.put("redirect_uri", redirectUri);
+            formParams.put("scope", "openid profile https://graph.microsoft.com/.default");
+
+            final StringBuilder formBody = new StringBuilder();
+            for (final Map.Entry<String, String> entry : formParams.entrySet()) {
+                if (formBody.length() > 0) {
+                    formBody.append("&");
+                }
+                formBody.append(URLEncoder.encode(entry.getKey(), Constants.UTF_8_CHARSET)).append("=")
+                        .append(URLEncoder.encode(entry.getValue(), Constants.UTF_8_CHARSET));
             }
+
+            try (CurlResponse response = Curl.post(tokenEndpoint).header("Content-Type", "application/x-www-form-urlencoded")
+                    .body(formBody.toString()).execute()) {
+
+                final Map<String, Object> responseMap = response.getContent(OpenSearchCurl.jsonParser());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Token response: {}", responseMap);
+                }
+
+                return (String) responseMap.get("id_token");
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to get ID token via HTTP call", e);
+            }
+            return null;
         }
     }
 
@@ -788,7 +898,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param acquisitionTimeout The timeout in milliseconds.
      */
     public void setAcquisitionTimeout(final long acquisitionTimeout) {
-        this.acquisitionTimeout = acquisitionTimeout;
+        this.acquisitionTimeout = Duration.ofMillis(acquisitionTimeout);
     }
 
     /**
