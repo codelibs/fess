@@ -140,12 +140,35 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         @Override
         public boolean refresh() {
             // MSAL4J handles token refresh internally through silent authentication
-            // Check if token is still valid
-            if (authResult.expiresOnDate().getTime() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+            // Check if token is still valid by comparing absolute timestamps
+            final long tokenExpiryTime = authResult.expiresOnDate().getTime(); // milliseconds since epoch
+            final long currentTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong(); // milliseconds since epoch
+            if (tokenExpiryTime < currentTime) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Token expired: expiryTime={}, currentTime={}", tokenExpiryTime, currentTime);
+                }
                 return false;
             }
-            // For MSAL4J, we rely on silent token acquisition during next authentication request
-            // This method returns true if token is still valid
+            // Attempt to refresh token using MSAL4J silent authentication
+            try {
+                final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+                final IAuthenticationResult newResult = authenticator.refreshTokenSilently(this);
+                if (newResult != null) {
+                    authResult = newResult;
+                    authenticator.updateMemberOf(this);
+                    permissions = null;
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Token refreshed successfully via silent authentication");
+                    }
+                    return true;
+                }
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Silent token refresh failed: {}", e.getMessage());
+                }
+            }
+            // For MSAL4J, if silent refresh fails, return true if token is still valid
+            // Actual refresh will happen during next authentication request
             return true;
         }
 

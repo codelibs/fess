@@ -186,12 +186,26 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String state = UuidUtil.create();
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
-        final String authUrl = getAuthority() + getTenant()
-                + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=form_post&redirect_uri="
-                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
-                + "&nonce=" + nonce;
+        // Support both v1.0 and v2.0 endpoints for backward compatibility
+        // Use v2.0 endpoint by default with MSAL4J (recommended for new deployments)
+        final boolean useV2Endpoint = true;
+        final String authUrl;
+
+        if (useV2Endpoint) {
+            // v2.0 endpoint with MSAL4J (recommended)
+            authUrl = getAuthority() + getTenant()
+                    + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=form_post&redirect_uri="
+                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
+                    + "&nonce=" + nonce;
+        } else {
+            // v1.0 endpoint for backward compatibility
+            authUrl = getAuthority() + getTenant()
+                    + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
+                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                    + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        }
         if (logger.isDebugEnabled()) {
-            logger.debug("redirect to: {}", authUrl);
+            logger.debug("redirect to: {} (using {} endpoint)", authUrl, useV2Endpoint ? "v2.0" : "v1.0");
         }
         return authUrl;
 
@@ -360,6 +374,35 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             return result;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
+        }
+    }
+
+    /**
+     * Attempts to refresh tokens silently using the MSAL4J silent authentication flow.
+     * @param user The Azure AD user whose tokens need to be refreshed.
+     * @return The new authentication result, or null if silent refresh failed.
+     */
+    public IAuthenticationResult refreshTokenSilently(final AzureAdCredential.AzureAdUser user) {
+        final String authority = getAuthority() + getTenant() + "/";
+        try {
+            final ConfidentialClientApplication app = ConfidentialClientApplication
+                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
+                    .authority(authority).build();
+
+            final SilentParameters parameters = SilentParameters
+                    .builder(Collections.singleton("https://graph.microsoft.com/.default"), user.getAuthenticationResult().account())
+                    .build();
+
+            final IAuthenticationResult result = app.acquireTokenSilently(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Silent token acquisition successful");
+            }
+            return result;
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Silent token acquisition failed: {}", e.getMessage());
+            }
+            return null;
         }
     }
 
