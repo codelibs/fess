@@ -142,6 +142,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     /** Group cache expiry time in seconds. */
     protected long groupCacheExpiry = 10 * 60L;
 
+    /** Use V2 endpoint. */
+    protected boolean useV2Endpoint = true;
+
     /**
      * Initializes the Azure AD authenticator.
      * Registers this authenticator with the SSO manager and sets up group cache.
@@ -186,9 +189,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String state = UuidUtil.create();
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
-        // Support both v1.0 and v2.0 endpoints for backward compatibility
-        // Use v2.0 endpoint by default with MSAL4J (recommended for new deployments)
-        final boolean useV2Endpoint = true;
         final String authUrl;
 
         if (useV2Endpoint) {
@@ -845,5 +845,13 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     @Override
     public String logout(final FessUserBean user) {
         return null;
+    }
+
+    /**
+     * Enable to use V2 endpoint.
+     * @param useV2Endpoint true if using V2 endpoint.
+     */
+    public void setUseV2Endpoint(boolean useV2Endpoint) {
+        this.useV2Endpoint = useV2Endpoint;
     }
 }
