@@ -29,8 +29,8 @@ import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.UserInfo;
+import com.microsoft.aad.msal4j.IAccount;
+import com.microsoft.aad.msal4j.IAuthenticationResult;
 
 /**
  * Azure Active Directory credential implementation for Fess authentication.
@@ -40,24 +40,24 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
     private static final Logger logger = LogManager.getLogger(AzureAdCredential.class);
 
-    private final AuthenticationResult authResult;
+    private final IAuthenticationResult authResult;
 
     /**
      * Constructs an Azure AD credential with the authentication result.
      * @param authResult The authentication result from Azure AD.
      */
-    public AzureAdCredential(final AuthenticationResult authResult) {
+    public AzureAdCredential(final IAuthenticationResult authResult) {
         this.authResult = authResult;
     }
 
     @Override
     public String getUserId() {
-        return authResult.getUserInfo().getDisplayableId();
+        return authResult.account().username();
     }
 
     @Override
     public String toString() {
-        return "{" + authResult.getUserInfo().getDisplayableId() + "}";
+        return "{" + authResult.account().username() + "}";
     }
 
     /**
@@ -84,13 +84,13 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         protected String[] permissions;
 
         /** Azure AD authentication result. */
-        protected AuthenticationResult authResult;
+        protected IAuthenticationResult authResult;
 
         /**
          * Constructs an Azure AD user with the authentication result.
          * @param authResult The authentication result from Azure AD.
          */
-        public AzureAdUser(final AuthenticationResult authResult) {
+        public AzureAdUser(final IAuthenticationResult authResult) {
             this.authResult = authResult;
             final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
             authenticator.updateMemberOf(this);
@@ -98,7 +98,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         @Override
         public String getName() {
-            return authResult.getUserInfo().getDisplayableId();
+            return authResult.account().username();
         }
 
         @Override
@@ -116,16 +116,16 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             if (permissions == null) {
                 final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
                 final Set<String> permissionSet = new HashSet<>();
-                final UserInfo userInfo = authResult.getUserInfo();
-                final String uniqueId = userInfo.getUniqueId();
-                final String displayableId = userInfo.getDisplayableId();
+                final IAccount account = authResult.account();
+                final String homeAccountId = account.homeAccountId();
+                final String username = account.username();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("uniqueId:{} displayableId:{}", uniqueId, displayableId);
+                    logger.debug("homeAccountId:{} username:{}", homeAccountId, username);
                 }
-                permissionSet.add(systemHelper.getSearchRoleByUser(uniqueId));
-                permissionSet.add(systemHelper.getSearchRoleByUser(displayableId));
-                if (ComponentUtil.getFessConfig().isAzureAdUseDomainServices() && displayableId.indexOf('@') >= 0) {
-                    final String[] values = displayableId.split("@");
+                permissionSet.add(systemHelper.getSearchRoleByUser(homeAccountId));
+                permissionSet.add(systemHelper.getSearchRoleByUser(username));
+                if (ComponentUtil.getFessConfig().isAzureAdUseDomainServices() && username.indexOf('@') >= 0) {
+                    final String[] values = username.split("@");
                     if (values.length > 1) {
                         permissionSet.add(systemHelper.getSearchRoleByUser(values[0]));
                     }
@@ -139,14 +139,13 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
 
         @Override
         public boolean refresh() {
-            if (authResult.getExpiresAfter() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
+            // MSAL4J handles token refresh internally through silent authentication
+            // Check if token is still valid
+            if (authResult.expiresOnDate().getTime() < ComponentUtil.getSystemHelper().getCurrentTimeAsLong()) {
                 return false;
             }
-            final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
-            final String refreshToken = authResult.getRefreshToken();
-            authResult = authenticator.getAccessToken(refreshToken);
-            authenticator.updateMemberOf(this);
-            permissions = null;
+            // For MSAL4J, we rely on silent token acquisition during next authentication request
+            // This method returns true if token is still valid
             return true;
         }
 
@@ -154,7 +153,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
          * Gets the Azure AD authentication result.
          * @return The authentication result.
          */
-        public AuthenticationResult getAuthenticationResult() {
+        public IAuthenticationResult getAuthenticationResult() {
             return authResult;
         }
 
