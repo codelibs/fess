@@ -156,8 +156,11 @@ public class AdminMaintenanceAction extends FessAdminAction {
             final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
             searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
                 logger.info("Close {}", docIndex);
-                searchEngineClient.admin().indices().prepareOpen(docIndex).execute(
-                        ActionListener.wrap(res2 -> logger.info("Open {}", docIndex), e -> logger.warn("Failed to open {}", docIndex, e)));
+                searchEngineClient.admin()
+                        .indices()
+                        .prepareOpen(docIndex)
+                        .execute(ActionListener.wrap(res2 -> logger.info("Open {}", docIndex),
+                                e -> logger.warn("Failed to open {}", docIndex, e)));
             }, e -> logger.warn("Failed to close {}", docIndex, e)));
         });
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -175,10 +178,12 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        searchEngineClient.admin().indices().prepareDelete(//
-                fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
-                fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
-                fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
+        searchEngineClient.admin()
+                .indices()
+                .prepareDelete(//
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
+                        fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
                 .execute(ActionListener.wrap(res -> logger.info("Deleted .crawler indices."),
                         e -> logger.warn("Failed to delete .crawler.* indices.", e)));
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));

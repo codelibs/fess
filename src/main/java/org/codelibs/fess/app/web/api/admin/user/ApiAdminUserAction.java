@@ -75,7 +75,9 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         final List<User> list = userService.getUserList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**

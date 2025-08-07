@@ -166,8 +166,13 @@ public class DocumentHelper {
         final boolean duplicateTermRemoved = isDuplicateTermRemoved();
         final int[] spaceChars = getSpaceChars();
         try (final Reader reader = new StringReader(content)) {
-            return TextUtil.normalizeText(reader).initialCapacity(content.length()).maxAlphanumTermSize(maxAlphanumTermSize)
-                    .maxSymbolTermSize(maxSymbolTermSize).duplicateTermRemoved(duplicateTermRemoved).spaceChars(spaceChars).execute();
+            return TextUtil.normalizeText(reader)
+                    .initialCapacity(content.length())
+                    .maxAlphanumTermSize(maxAlphanumTermSize)
+                    .maxSymbolTermSize(maxSymbolTermSize)
+                    .duplicateTermRemoved(duplicateTermRemoved)
+                    .spaceChars(spaceChars)
+                    .execute();
         } catch (final IOException e) {
             return StringUtil.EMPTY; // empty
         }

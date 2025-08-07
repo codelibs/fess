@@ -252,7 +252,8 @@ public class GsaConfigParser extends DefaultHandler {
                 final List<String> urlList = split(startUrls.toString(), "\n")
                         .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toList()));
 
-                final String webUrls = urlList.stream().filter(s -> Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p)))
+                final String webUrls = urlList.stream()
+                        .filter(s -> Arrays.stream(webProtocols).anyMatch(p -> s.startsWith(p)))
                         .collect(Collectors.joining("\n"));
                 if (StringUtil.isNotBlank(webUrls)) {
                     webConfig = new WebConfig();
@@ -276,7 +277,8 @@ public class GsaConfigParser extends DefaultHandler {
                     webConfig.setUpdatedTime(now);
                 }
 
-                final String fileUrls = urlList.stream().filter(s -> Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p)))
+                final String fileUrls = urlList.stream()
+                        .filter(s -> Arrays.stream(fileProtocols).anyMatch(p -> s.startsWith(p)))
                         .collect(Collectors.joining("\n"));
                 if (StringUtil.isNotBlank(fileUrls)) {
                     fileConfig = new FileConfig();

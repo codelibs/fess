@@ -214,8 +214,9 @@ public class QueryStringBuilder {
         stream(conditions.get(SearchRequestParams.AS_OCCURRENCE))
                 .of(stream -> stream.filter(this::isOccurrence).findFirst().ifPresent(q -> queryBuf.insert(0, q + ":")));
 
-        stream(conditions.get(SearchRequestParams.AS_Q)).of(stream -> stream
-                .filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength).forEach(q -> queryBuf.append(' ').append(q)));
+        stream(conditions.get(SearchRequestParams.AS_Q))
+                .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
+                        .forEach(q -> queryBuf.append(' ').append(q)));
         stream(conditions.get(SearchRequestParams.AS_EPQ))
                 .of(stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= maxQueryLength)
                         .forEach(q -> queryBuf.append(" \"").append(escape(q, "\"")).append('"')));

@@ -78,7 +78,9 @@ public class ApiAdminJoblogAction extends FessApiAdminAction {
         final JobLogPager pager = copyBeanToNewBean(body, JobLogPager.class);
         final List<JobLog> list = jobLogService.getJobLogList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>().logs(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     // GET /api/admin/joblog/log/{id}

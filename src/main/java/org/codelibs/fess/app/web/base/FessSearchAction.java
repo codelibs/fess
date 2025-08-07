@@ -185,8 +185,10 @@ public abstract class FessSearchAction extends FessBaseAction {
         final String username = systemHelper.getUsername();
         runtime.registerData("username", username);
         runtime.registerData("editableUser", fessLoginAssist.getSavedUserBean().map(FessUserBean::isEditable).orElse(false));
-        runtime.registerData("adminUser", fessConfig.isAdminUser(username) || fessLoginAssist.getSavedUserBean()
-                .map(user -> user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())).orElse(false));
+        runtime.registerData("adminUser",
+                fessConfig.isAdminUser(username) || fessLoginAssist.getSavedUserBean()
+                        .map(user -> user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray()))
+                        .orElse(false));
 
         runtime.registerData("pageLoginLink", fessConfig.isLoginLinkEnabled());
     }

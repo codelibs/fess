@@ -67,8 +67,11 @@ public class WebAuthentication extends BsWebAuthentication {
         }
         if (Constants.NTLM.equals(scheme)) {
             final Properties props = new Properties();
-            getWebConfig().getConfigParameterMap(ConfigName.CONFIG).entrySet().stream()
-                    .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX)).forEach(e -> {
+            getWebConfig().getConfigParameterMap(ConfigName.CONFIG)
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX))
+                    .forEach(e -> {
                         props.setProperty(e.getKey(), e.getValue());
                     });
             return new NTLMScheme(new JcifsEngine(props));

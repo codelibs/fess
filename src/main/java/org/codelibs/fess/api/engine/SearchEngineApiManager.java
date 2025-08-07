@@ -274,7 +274,8 @@ public class SearchEngineApiManager extends BaseApiManager {
      * @throws FessSystemException if no access token is available
      */
     public String getServerPath() {
-        return getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
+        return getSessionManager().getAttribute(Constants.SEARCH_ENGINE_API_ACCESS_TOKEN, String.class)
+                .map(token -> ADMIN_SERVER + token)
                 .orElseThrow(() -> new FessSystemException("Cannot create an access token."));
     }
 

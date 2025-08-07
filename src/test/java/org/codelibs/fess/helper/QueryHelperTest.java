@@ -513,7 +513,8 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     private QueryBuilder simpleQuery(String query, float titleBoost, float contentBoost) {
         if ("dismax".equals(ComponentUtil.getFessConfig().getQueryDefaultQueryType())) {
-            return QueryBuilders.disMaxQuery().tieBreaker(0.1f)//
+            return QueryBuilders.disMaxQuery()
+                    .tieBreaker(0.1f)//
                     .add(QueryBuilders.matchPhraseQuery("title", query).boost(titleBoost))//
                     .add(QueryBuilders.matchPhraseQuery("content", query).boost(contentBoost))//
                     .add(QueryBuilders.fuzzyQuery("title", query).boost(0.01f).maxExpansions(10))//

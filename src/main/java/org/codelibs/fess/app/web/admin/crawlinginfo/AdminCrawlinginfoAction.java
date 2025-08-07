@@ -190,7 +190,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                 }).renderWith(data -> {
                     RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
                     RenderDataUtil.register(data, "running", processHelper.isProcessRunning(entity.getSessionId()));
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
                     return null;
                 });

@@ -69,10 +69,10 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final SynonymPager pager = copyBeanToNewBean(body, SynonymPager.class);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(synonymService.getSynonymList(body.dictId, pager).stream()
-                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
-                .status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(synonymService.getSynonymList(body.dictId, pager)
+                .stream()
+                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
     }
 
     /**
@@ -89,7 +89,9 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
                 .setting(synonymService.getSynonymItem(dictId, id).map(entity -> createEditBody(entity, dictId)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(id)));
                     return null;
-                })).status(ApiResult.Status.OK).result());
+                }))
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**
@@ -201,7 +203,8 @@ public class ApiAdminDictSynonymAction extends FessApiAdminAction {
         return synonymService.getSynonymFile(body.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
                     return null;
                 });

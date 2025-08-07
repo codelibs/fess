@@ -84,14 +84,16 @@ public class LdapUser implements FessUser {
     public String[] getRoleNames() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(getPermissions()).get(stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchRolePrefix()))
-                .map(s -> s.substring(1)).toArray(n -> new String[n]));
+                .map(s -> s.substring(1))
+                .toArray(n -> new String[n]));
     }
 
     @Override
     public String[] getGroupNames() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return stream(getPermissions()).get(stream -> stream.filter(s -> s.startsWith(fessConfig.getRoleSearchGroupPrefix()))
-                .map(s -> s.substring(1)).toArray(n -> new String[n]));
+                .map(s -> s.substring(1))
+                .toArray(n -> new String[n]));
     }
 
     /**

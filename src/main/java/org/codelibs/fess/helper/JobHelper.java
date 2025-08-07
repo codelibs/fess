@@ -98,8 +98,10 @@ public class JobHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CronParamsSupplier paramsOp = () -> {
             final Map<String, Object> params = new HashMap<>();
-            ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(scheduledJob.getId())
-                    .ifPresent(e -> params.put(Constants.SCHEDULED_JOB, e)).orElse(() -> {
+            ComponentUtil.getComponent(ScheduledJobBhv.class)
+                    .selectByPK(scheduledJob.getId())
+                    .ifPresent(e -> params.put(Constants.SCHEDULED_JOB, e))
+                    .orElse(() -> {
                         logger.warn("Job {} is not found.", scheduledJob.getId());
                     });
             return params;
@@ -193,7 +195,9 @@ public class JobHelper {
      * @return true if the job is available, false otherwise
      */
     public boolean isAvailable(final String id) {
-        return ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(id).filter(e -> Boolean.TRUE.equals(e.getAvailable()))
+        return ComponentUtil.getComponent(ScheduledJobBhv.class)
+                .selectByPK(id)
+                .filter(e -> Boolean.TRUE.equals(e.getAvailable()))
                 .isPresent();
     }
 

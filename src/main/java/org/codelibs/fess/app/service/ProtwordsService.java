@@ -78,8 +78,10 @@ public class ProtwordsService {
      * @return the protected words file if found
      */
     public OptionalEntity<ProtwordsFile> getProtwordsFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(ProtwordsFile.class::isInstance)
-                .map(file -> OptionalEntity.of((ProtwordsFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(ProtwordsFile.class::isInstance)
+                .map(file -> OptionalEntity.of((ProtwordsFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

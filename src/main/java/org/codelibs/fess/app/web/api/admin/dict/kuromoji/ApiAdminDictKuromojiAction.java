@@ -69,10 +69,10 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final KuromojiPager pager = copyBeanToNewBean(body, KuromojiPager.class);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(kuromojiService.getKuromojiList(body.dictId, pager).stream()
-                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
-                .status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(kuromojiService.getKuromojiList(body.dictId, pager)
+                .stream()
+                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
     }
 
     /**
@@ -89,7 +89,9 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
                 .setting(kuromojiService.getKuromojiItem(dictId, id).map(entity -> createEditBody(entity, dictId)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(id)));
                     return null;
-                })).status(ApiResult.Status.OK).result());
+                }))
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**
@@ -201,7 +203,8 @@ public class ApiAdminDictKuromojiAction extends FessApiAdminAction {
         return kuromojiService.getKuromojiFile(body.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
                     return null;
                 });

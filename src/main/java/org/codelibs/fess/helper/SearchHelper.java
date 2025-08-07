@@ -212,8 +212,9 @@ public class SearchHelper {
 
         // search log
         if (fessConfig.isSearchLog()) {
-            ComponentUtil.getSearchLogHelper().addSearchLog(params, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query,
-                    params.getStartPosition(), params.getPageSize(), queryResponseList);
+            ComponentUtil.getSearchLogHelper()
+                    .addSearchLog(params, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, params.getStartPosition(),
+                            params.getPageSize(), queryResponseList);
         }
 
         // favorite
@@ -275,13 +276,18 @@ public class SearchHelper {
         final int pageSize = params.getPageSize();
         final String query = ComponentUtil.getQueryStringBuilder().params(params).sortField(params.getSort()).build();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getSearchEngineClient().<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(),
-                searchRequestBuilder -> {
+        return ComponentUtil.getSearchEngineClient()
+                .<Map<String, Object>> scrollSearch(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
                     final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                     final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
                     queryHelper.processSearchPreference(searchRequestBuilder, userBean, query);
-                    return SearchConditionBuilder.builder(searchRequestBuilder).scroll().query(query).size(pageSize)
-                            .responseFields(queryFieldConfig.getScrollResponseFields()).searchRequestType(params.getType()).build();
+                    return SearchConditionBuilder.builder(searchRequestBuilder)
+                            .scroll()
+                            .query(query)
+                            .size(pageSize)
+                            .responseFields(queryFieldConfig.getScrollResponseFields())
+                            .searchRequestType(params.getType())
+                            .build();
                 }, (searchResponse, hit) -> {
                     final Map<String, Object> docMap = new HashMap<>();
                     final Map<String, Object> source = hit.getSourceAsMap();
@@ -290,7 +296,8 @@ public class SearchHelper {
                     }
                     final Map<String, DocumentField> fields = hit.getFields();
                     if (fields != null) {
-                        docMap.putAll(fields.entrySet().stream()
+                        docMap.putAll(fields.entrySet()
+                                .stream()
                                 .collect(Collectors.toMap(Entry::getKey, e -> (Object) e.getValue().getValues())));
                     }
 
@@ -330,8 +337,8 @@ public class SearchHelper {
         final QueryContext queryContext = ComponentUtil.getQueryHelper().build(params.getType(), query, context -> {
             context.skipRoleQuery();
         });
-        return ComponentUtil.getSearchEngineClient().deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(),
-                queryContext.getQueryBuilder());
+        return ComponentUtil.getSearchEngineClient()
+                .deleteByQuery(ComponentUtil.getFessConfig().getIndexDocumentUpdateIndex(), queryContext.getQueryBuilder());
     }
 
     /**

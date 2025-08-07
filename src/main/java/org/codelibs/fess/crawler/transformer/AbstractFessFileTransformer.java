@@ -254,7 +254,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         responseData.addMetaData(Extractor.class.getSimpleName(), extractor);
         final String body = documentHelper.getContent(crawlingConfig, responseData, bodyBase, dataMap);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
-        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache())
+                .map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
                 .orElse(false) || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {

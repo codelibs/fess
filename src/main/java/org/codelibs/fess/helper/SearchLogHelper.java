@@ -533,22 +533,28 @@ public class SearchLogHelper {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             try {
                 final UpdateRequest[] updateRequests =
-                        searchHelper.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                                new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
-                                OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH).stream().map(doc -> {
+                        searchHelper
+                                .getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
+                                        new String[] { fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldLang() },
+                                        OptionalThing.of(FessUserBean.empty()), SearchRequestType.ADMIN_SEARCH)
+                                .stream()
+                                .map(doc -> {
                                     final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                     final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                                     if (id != null && docId != null && clickCountMap.containsKey(docId)) {
                                         final Integer count = clickCountMap.get(docId);
-                                        final Script script = ComponentUtil.getLanguageHelper().createScript(doc,
-                                                "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
+                                        final Script script = ComponentUtil.getLanguageHelper()
+                                                .createScript(doc,
+                                                        "ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                         final Map<String, Object> upsertMap = new HashMap<>();
                                         upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
                                         return new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), id).script(script)
                                                 .upsert(upsertMap);
                                     }
                                     return null;
-                                }).filter(req -> req != null).toArray(n -> new UpdateRequest[n]);
+                                })
+                                .filter(req -> req != null)
+                                .toArray(n -> new UpdateRequest[n]);
                 if (updateRequests.length > 0) {
                     searchHelper.bulkUpdate(builder -> {
                         for (final UpdateRequest req : updateRequests) {
@@ -616,7 +622,8 @@ public class SearchLogHelper {
      * @return The converted map.
      */
     protected Map<String, Object> toLowerHyphen(final Map<String, Object> source) {
-        return source.entrySet().stream()
+        return source.entrySet()
+                .stream()
                 .collect(Collectors.toMap(e -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, e.getKey()), e -> {
                     final Object value = e.getValue();
                     if (value instanceof Map) {

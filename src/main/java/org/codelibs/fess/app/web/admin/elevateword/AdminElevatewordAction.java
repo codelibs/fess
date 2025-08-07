@@ -224,7 +224,9 @@ public class AdminElevatewordAction extends FessAdminAction {
             });
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
             form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                    .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    .filter(StringUtil::isNotBlank)
+                    .distinct()
+                    .collect(Collectors.joining("\n")));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
         });
@@ -261,7 +263,9 @@ public class AdminElevatewordAction extends FessAdminAction {
                     copyOp.exclude(Constants.PERMISSIONS);
                 });
                 form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
-                        .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                        .filter(StringUtil::isNotBlank)
+                        .distinct()
+                        .collect(Collectors.joining("\n")));
                 form.crudMode = crudMode;
             }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
         })).renderWith(this::registerLabels);
@@ -482,8 +486,9 @@ public class AdminElevatewordAction extends FessAdminAction {
         return getEntity(form, username, currentTime).map(entity -> {
             entity.setUpdatedBy(username);
             entity.setUpdatedTime(currentTime);
-            BeanUtil.copyBeanToBean(form, entity, op -> op.exclude(Stream
-                    .concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
+            BeanUtil.copyBeanToBean(form, entity,
+                    op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS))
+                            .toArray(n -> new String[n])));
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
             entity.setPermissions(split(form.permissions, "\n").get(
                     stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));

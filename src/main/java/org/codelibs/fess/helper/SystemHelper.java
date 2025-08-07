@@ -174,7 +174,9 @@ public class SystemHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         filterPathEncoding = fessConfig.getPathEncoding();
         supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
-        langItemsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
+        langItemsCache = CacheBuilder.newBuilder()
+                .maximumSize(20)
+                .expireAfterAccess(1, TimeUnit.HOURS)
                 .build(new CacheLoader<String, List<Map<String, String>>>() {
                     @Override
                     public List<Map<String, String>> load(final String key) throws Exception {

@@ -87,7 +87,9 @@ public class ApiAdminBadwordAction extends FessApiAdminAction {
         final List<BadWord> list = badWordService.getBadWordList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**

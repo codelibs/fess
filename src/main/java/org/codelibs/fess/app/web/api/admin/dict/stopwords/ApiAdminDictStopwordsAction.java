@@ -69,10 +69,10 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final StopwordsPager pager = copyBeanToNewBean(body, StopwordsPager.class);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(stopwordsService.getStopwordsList(body.dictId, pager).stream()
-                        .map(stopwordsItem -> createEditBody(stopwordsItem, dictId)).collect(Collectors.toList()))
-                .status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(stopwordsService.getStopwordsList(body.dictId, pager)
+                .stream()
+                .map(stopwordsItem -> createEditBody(stopwordsItem, dictId))
+                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
     }
 
     /**
@@ -89,7 +89,9 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
                 .setting(stopwordsService.getStopwordsItem(dictId, id).map(entity -> createEditBody(entity, dictId)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(id)));
                     return null;
-                })).status(ApiResult.Status.OK).result());
+                }))
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**
@@ -201,7 +203,8 @@ public class ApiAdminDictStopwordsAction extends FessApiAdminAction {
         return stopwordsService.getStopwordsFile(body.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL));
                     return null;
                 });

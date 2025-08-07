@@ -451,11 +451,13 @@ public class AdminBackupAction extends FessAdminAction {
                     ((LocalDateTime) value).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")).format(ISO_8601_FORMATTER);
             buf.append('"').append(StringEscapeUtils.escapeJson(format)).append('"');
         } else if (value instanceof String[]) {
-            final String json = Arrays.stream((String[]) value).map(s -> "\"" + StringEscapeUtils.escapeJson(s) + "\"")
+            final String json = Arrays.stream((String[]) value)
+                    .map(s -> "\"" + StringEscapeUtils.escapeJson(s) + "\"")
                     .collect(Collectors.joining(","));
             buf.append('[').append(json).append(']');
         } else if (value instanceof List) {
-            final String json = ((List<?>) value).stream().map(s -> "\"" + StringEscapeUtils.escapeJson(s.toString()) + "\"")
+            final String json = ((List<?>) value).stream()
+                    .map(s -> "\"" + StringEscapeUtils.escapeJson(s.toString()) + "\"")
                     .collect(Collectors.joining(","));
             buf.append('[').append(json).append(']');
         } else if (value instanceof Map) {
@@ -513,10 +515,12 @@ public class AdminBackupAction extends FessAdminAction {
                     appendJson("query-time", entity.getQueryTime(), buf).append(',');
                     appendJson("response-time", entity.getResponseTime(), buf).append(',');
                     appendJson("requested-at", entity.getRequestedAt(), buf).append(',');
-                    final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList().stream()
+                    final Map<String, List<String>> searchFieldMap = entity.getSearchFieldLogList()
+                            .stream()
                             .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
                     appendJson("search-field", searchFieldMap, buf).append(',');
-                    final Map<String, List<String>> requestHeaderMap = entity.getRequestHeaderList().stream()
+                    final Map<String, List<String>> requestHeaderMap = entity.getRequestHeaderList()
+                            .stream()
                             .collect(Collectors.groupingBy(Pair::getFirst, Collectors.mapping(Pair::getSecond, Collectors.toList())));
                     appendJson("headers", requestHeaderMap, buf);
                     buf.append('}');

@@ -287,7 +287,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return kuromojiService.getKuromojiFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL),
                             () -> downloadpage(form.dictId));
                     return null;

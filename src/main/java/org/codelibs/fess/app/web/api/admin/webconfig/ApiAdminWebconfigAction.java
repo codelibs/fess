@@ -87,7 +87,9 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         final List<WebConfig> list = webConfigService.getWebConfigList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**
@@ -195,7 +197,9 @@ public class ApiAdminWebconfigAction extends FessApiAdminAction {
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .collect(Collectors.joining("\n")));
         body.virtualHosts = stream(entity.getVirtualHosts())
                 .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).collect(Collectors.joining("\n")));
         return body;

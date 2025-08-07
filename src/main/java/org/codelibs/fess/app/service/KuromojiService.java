@@ -77,8 +77,10 @@ public class KuromojiService {
      * @return An optional entity of the Kuromoji file.
      */
     public OptionalEntity<KuromojiFile> getKuromojiFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(KuromojiFile.class::isInstance)
-                .map(file -> OptionalEntity.of((KuromojiFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(KuromojiFile.class::isInstance)
+                .map(file -> OptionalEntity.of((KuromojiFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

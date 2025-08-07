@@ -78,7 +78,9 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
         final BoostDocPager pager = copyBeanToNewBean(body, BoostDocPager.class);
         final List<BoostDocumentRule> list = boostDocumentRuleService.getBoostDocumentRuleList(pager);
         return asJson(new ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(Status.OK).result());
+                .total(pager.getAllRecordCount())
+                .status(Status.OK)
+                .result());
     }
 
     /**
@@ -94,7 +96,9 @@ public class ApiAdminBoostdocAction extends FessApiAdminAction {
                 .setting(boostDocumentRuleService.getBoostDocumentRule(id).map(this::createEditBody).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
-                })).status(Status.OK).result());
+                }))
+                .status(Status.OK)
+                .result());
     }
 
     /**

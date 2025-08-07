@@ -148,8 +148,11 @@ public class SearchApiTests extends CrawlTestBase {
         List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             for (String keyword : query.split(" ")) {
-                assertTrue(doc.entrySet().stream()
-                        .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keyword.toLowerCase())), doc.toString());
+                assertTrue(
+                        doc.entrySet()
+                                .stream()
+                                .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keyword.toLowerCase())),
+                        doc.toString());
             }
         }
     }
@@ -168,8 +171,11 @@ public class SearchApiTests extends CrawlTestBase {
                 if (keyword.equals("AND")) {
                     continue;
                 }
-                assertTrue(doc.entrySet().stream()
-                        .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keyword.toLowerCase())), doc.toString());
+                assertTrue(
+                        doc.entrySet()
+                                .stream()
+                                .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keyword.toLowerCase())),
+                        doc.toString());
             }
         }
     }
@@ -216,10 +222,16 @@ public class SearchApiTests extends CrawlTestBase {
         List<Map<String, Object>> docs = JsonPath.from(response).getList("data");
         for (Map<String, Object> doc : docs) {
             String[] keywords = query.split(" ");
-            assertTrue(doc.entrySet().stream()
-                    .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keywords[0].toLowerCase())), doc.toString());
-            assertFalse(doc.entrySet().stream()
-                    .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keywords[2].toLowerCase())), doc.toString());
+            assertTrue(
+                    doc.entrySet()
+                            .stream()
+                            .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keywords[0].toLowerCase())),
+                    doc.toString());
+            assertFalse(
+                    doc.entrySet()
+                            .stream()
+                            .anyMatch(entry -> entry.getValue().toString().toLowerCase().contains(keywords[2].toLowerCase())),
+                    doc.toString());
         }
     }
 

@@ -91,7 +91,9 @@ public class ApiAdminWebauthAction extends FessApiAdminAction {
         final List<WebAuthentication> list = webAuthService.getWebAuthenticationList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**
