@@ -277,8 +277,10 @@ public interface FessProp {
                         return new Pair<>(pair[0].trim(), pair[1].trim());
                     }
                     return null;
-                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(HashMap<String, List<String>>::new,
-                        (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))), HashMap::putAll));
+                })
+                        .filter(o -> o != null && keySet.add(o.getFirst()))
+                        .collect(HashMap<String, List<String>>::new, (m, d) -> m.put(d.getFirst(), Arrays.asList(d.getSecond().split(","))),
+                                HashMap::putAll));
             }
             propMap.put(DEFAULT_LABEL_VALUES, map);
         }
@@ -334,7 +336,10 @@ public interface FessProp {
     }
 
     default boolean isResultCollapsed() {
-        return switch(getFesenType()){case Constants.FESEN_TYPE_CLOUD,Constants.FESEN_TYPE_AWS->false;default->getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY,false);};
+        return switch (getFesenType()) {
+        case Constants.FESEN_TYPE_CLOUD, Constants.FESEN_TYPE_AWS -> false;
+        default -> getSystemPropertyAsBoolean(Constants.RESULT_COLLAPSED_PROPERTY, false);
+        };
     }
 
     default void setLoginLinkEnabled(final boolean value) {
@@ -1202,7 +1207,9 @@ public interface FessProp {
     default String[] getSearchDefaultPermissionsAsArray() {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         return split(getRoleSearchDefaultPermissions(), ",").get(stream -> stream.map(p -> permissionHelper.encode(p))
-                .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .toArray(n -> new String[n]));
     }
 
     String getRoleSearchDefaultDisplayPermissions();
@@ -1210,7 +1217,9 @@ public interface FessProp {
     default String[] getSearchDefaultDisplayEncodedPermissions() {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         return split(getRoleSearchDefaultDisplayPermissions(), ",").get(stream -> stream.map(p -> permissionHelper.encode(p))
-                .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .toArray(n -> new String[n]));
     }
 
     default String getSearchDefaultDisplayPermission() {
@@ -1279,8 +1288,10 @@ public interface FessProp {
 
     default List<String> invalidIndexArrayFields(final Map<String, Object> source) {
         // TODO always returns empty list
-        return split(getIndexAdminArrayFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
-                .filter(s -> isNonEmptyValue(source.get(s))).filter(s -> false) // TODO
+        return split(getIndexAdminArrayFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank)
+                .map(String::trim)
+                .filter(s -> isNonEmptyValue(source.get(s)))
+                .filter(s -> false) // TODO
                 .collect(Collectors.toList()));
     }
 
@@ -1534,8 +1545,10 @@ public interface FessProp {
 
     default List<String> invalidIndexRequiredFields(final Map<String, Object> source) {
         final RequiredValidator requiredValidator = new RequiredValidator();
-        return split(getIndexAdminRequiredFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim)
-                .filter(s -> !requiredValidator.isValid(source.get(s), null)).collect(Collectors.toList()));
+        return split(getIndexAdminRequiredFields(), ",").get(stream -> stream.filter(StringUtil::isNotBlank)
+                .map(String::trim)
+                .filter(s -> !requiredValidator.isValid(source.get(s), null))
+                .collect(Collectors.toList()));
     }
 
     default boolean isNonEmptyValue(final Object value) {
@@ -1872,8 +1885,10 @@ public interface FessProp {
 
         String[] excludeExtensions = (String[]) propMap.get(THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS);
         if (excludeExtensions == null) {
-            excludeExtensions = split(getThumbnailHtmlImageExcludeExtensions(), ",").get(stream -> stream
-                    .map(s -> s.toLowerCase(Locale.ROOT).trim()).filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
+            excludeExtensions =
+                    split(getThumbnailHtmlImageExcludeExtensions(), ",").get(stream -> stream.map(s -> s.toLowerCase(Locale.ROOT).trim())
+                            .filter(StringUtil::isNotBlank)
+                            .toArray(n -> new String[n]));
             propMap.put(THUMBNAIL_HTML_IMAGE_EXCLUDE_EXTENSIONS, excludeExtensions);
         }
 
@@ -1888,7 +1903,8 @@ public interface FessProp {
         Set<String> gsaResponseFieldSet = (Set<String>) propMap.get(QUERY_GSA_RESPONSE_FIELDS);
         if (gsaResponseFieldSet == null) {
             gsaResponseFieldSet = split(getQueryGsaResponseFields(), ",").get(stream -> stream.map(s -> s.toLowerCase(Locale.ROOT).trim())
-                    .filter(StringUtil::isNotBlank).collect(Collectors.toSet()));
+                    .filter(StringUtil::isNotBlank)
+                    .collect(Collectors.toSet()));
             propMap.put(QUERY_GSA_RESPONSE_FIELDS, gsaResponseFieldSet);
         }
         return gsaResponseFieldSet.contains(name.toLowerCase(Locale.ROOT));

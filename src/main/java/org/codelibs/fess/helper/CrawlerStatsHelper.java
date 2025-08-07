@@ -82,7 +82,9 @@ public class CrawlerStatsHelper {
     @PostConstruct
     public void init() {
         statsLogger = LogManager.getLogger(loggerName);
-        statsCache = CacheBuilder.newBuilder().maximumSize(maxCacheSize).expireAfterWrite(cacheExpireAfterWrite, TimeUnit.MILLISECONDS)
+        statsCache = CacheBuilder.newBuilder()
+                .maximumSize(maxCacheSize)
+                .expireAfterWrite(cacheExpireAfterWrite, TimeUnit.MILLISECONDS)
                 .build(new CacheLoader<String, StatsObject>() {
                     @Override
                     public StatsObject load(final String key) {
@@ -224,7 +226,10 @@ public class CrawlerStatsHelper {
         if (done) {
             buf.append('\t').append("done:").append(getCurrentTimeMillis() - begin);
         }
-        data.entrySet().stream().map(e -> escapeValue(e.getKey()) + ":" + (e.getValue().longValue() - begin)).map(s -> "\t" + s)
+        data.entrySet()
+                .stream()
+                .map(e -> escapeValue(e.getKey()) + ":" + (e.getValue().longValue() - begin))
+                .map(s -> "\t" + s)
                 .forEach(s -> buf.append(s));
         log(buf);
     }

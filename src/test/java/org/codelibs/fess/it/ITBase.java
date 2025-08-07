@@ -44,10 +44,12 @@ public class ITBase {
             return testToken;
         }
 
-        given().contentType("application/json").body("{\"index\":{\"_index\":\"fess_config.access_token\",\"_id\":\""
-                + DEFAULT_TEST_TOKEN_ID
-                + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\",\"Rguest\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
-                + DEFAULT_TEST_TOKEN + "\"}\n").when().post(getEsUrl() + "/_bulk");
+        given().contentType("application/json")
+                .body("{\"index\":{\"_index\":\"fess_config.access_token\",\"_id\":\"" + DEFAULT_TEST_TOKEN_ID
+                        + "\"}}\n{\"updatedTime\":1490250145200,\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"permissions\":[\"Radmin-api\",\"Rguest\"],\"name\":\"Admin API\",\"createdTime\":1490250145200,\"token\":\""
+                        + DEFAULT_TEST_TOKEN + "\"}\n")
+                .when()
+                .post(getEsUrl() + "/_bulk");
         given().contentType("application/json").when().post(getEsUrl() + "/_refresh");
         logger.info("Created Token: {}", DEFAULT_TEST_TOKEN);
         return DEFAULT_TEST_TOKEN;
@@ -74,7 +76,9 @@ public class ITBase {
     }
 
     protected static RequestSpecification checkMethodBase(final Map<String, Object> body) {
-        return given().contentType("application/json").header("Authorization", getTestToken()).body(body, ObjectMapperType.JACKSON_2)
+        return given().contentType("application/json")
+                .header("Authorization", getTestToken())
+                .body(body, ObjectMapperType.JACKSON_2)
                 .when();
     }
 }

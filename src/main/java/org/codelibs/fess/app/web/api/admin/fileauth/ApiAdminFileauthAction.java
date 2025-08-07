@@ -89,7 +89,9 @@ public class ApiAdminFileauthAction extends FessApiAdminAction {
         final List<FileAuthentication> list = fileAuthService.getFileAuthenticationList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     // GET /api/admin/fileauth/setting/{id}

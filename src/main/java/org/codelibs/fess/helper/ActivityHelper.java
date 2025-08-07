@@ -136,7 +136,8 @@ public class ActivityHelper {
         valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
         valueMap.put("permissions",
                 user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                        .filter(StringUtil::isNotBlank).orElse("-"));
+                        .filter(StringUtil::isNotBlank)
+                        .orElse("-"));
         log(valueMap);
     }
 
@@ -166,7 +167,8 @@ public class ActivityHelper {
         valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
         valueMap.put("permissions",
                 user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                        .filter(StringUtil::isNotBlank).orElse("-"));
+                        .filter(StringUtil::isNotBlank)
+                        .orElse("-"));
         log(valueMap);
     }
 
@@ -195,7 +197,8 @@ public class ActivityHelper {
         valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
         valueMap.put("permissions",
                 user.map(u -> stream(u.getPermissions()).get(stream -> stream.collect(Collectors.joining(permissionSeparator))))
-                        .filter(StringUtil::isNotBlank).orElse("-"));
+                        .filter(StringUtil::isNotBlank)
+                        .orElse("-"));
         log(valueMap);
     }
 
@@ -251,8 +254,13 @@ public class ActivityHelper {
         buf.append(",\"event.dataset\":\"").append(ecsEventDataset).append('"');
         buf.append(",\"process.thread.name\":\"").append(StringEscapeUtils.escapeJson(Thread.currentThread().getName())).append('"');
         buf.append(",\"log.logger\":\"").append(StringEscapeUtils.escapeJson(this.getClass().getName())).append('"');
-        valueMap.entrySet().stream().forEach(e -> buf.append(",\"labels.").append(e.getKey()).append("\":\"")
-                .append(StringEscapeUtils.escapeJson(e.getValue())).append('"'));
+        valueMap.entrySet()
+                .stream()
+                .forEach(e -> buf.append(",\"labels.")
+                        .append(e.getKey())
+                        .append("\":\"")
+                        .append(StringEscapeUtils.escapeJson(e.getValue()))
+                        .append('"'));
         buf.append('}');
         printLog(buf.toString());
     }

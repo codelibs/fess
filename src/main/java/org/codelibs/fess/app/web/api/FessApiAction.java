@@ -92,7 +92,8 @@ public abstract class FessApiAction extends FessBaseAction {
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         if (!isAccessAllowed()) {
             return asJson(new ApiErrorResponse().message(getMessage(messages -> messages.addErrorsUnauthorizedRequest(GLOBAL)))
-                    .status(Status.UNAUTHORIZED).result());
+                    .status(Status.UNAUTHORIZED)
+                    .result());
         }
         return super.godHandPrologue(runtime);
     }
@@ -107,7 +108,8 @@ public abstract class FessApiAction extends FessBaseAction {
     protected String getMessage(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = new FessMessages();
         validationMessagesLambda.message(messages);
-        return messageManager.toMessageList(request.getLocale() == null ? Locale.ENGLISH : request.getLocale(), messages).stream()
+        return messageManager.toMessageList(request.getLocale() == null ? Locale.ENGLISH : request.getLocale(), messages)
+                .stream()
                 .collect(Collectors.joining(" "));
     }
 

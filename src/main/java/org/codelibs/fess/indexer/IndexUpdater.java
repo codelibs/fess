@@ -253,9 +253,9 @@ public class IndexUpdater extends Thread {
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final Consumer<SearchRequestBuilder> cb = builder -> {
-                final QueryBuilder queryBuilder =
-                        QueryBuilders.boolQuery().filter(QueryBuilders.termsQuery(OpenSearchAccessResult.SESSION_ID, sessionIdList)).filter(
-                                QueryBuilders.termQuery(OpenSearchAccessResult.STATUS, org.codelibs.fess.crawler.Constants.OK_STATUS));
+                final QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                        .filter(QueryBuilders.termsQuery(OpenSearchAccessResult.SESSION_ID, sessionIdList))
+                        .filter(QueryBuilders.termQuery(OpenSearchAccessResult.STATUS, org.codelibs.fess.crawler.Constants.OK_STATUS));
                 builder.setQuery(queryBuilder);
                 builder.setFrom(0);
                 final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger();

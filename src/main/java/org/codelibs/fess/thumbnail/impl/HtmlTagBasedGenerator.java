@@ -174,9 +174,15 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
      * @return true if the MIME type represents a supported image format, false otherwise
      */
     protected boolean isImageMimeType(final ResponseData responseData) {
-        final String mimeType=responseData.getMimeType();if(mimeType==null){return true;}
+        final String mimeType = responseData.getMimeType();
+        if (mimeType == null) {
+            return true;
+        }
 
-        return switch(mimeType){case"image/png","image/gif","image/jpeg","image/bmp"->true;default->false;};
+        return switch (mimeType) {
+        case "image/png", "image/gif", "image/jpeg", "image/bmp" -> true;
+        default -> false;
+        };
     }
 
     /**
@@ -216,8 +222,9 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 final int thumbnailHeight = (int) ((height > width ? width : height)
                         * fessConfig.getThumbnailHtmlImageThumbnailWidthAsInteger().floatValue() / width);
                 final BufferedImage thumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
-                thumbnail.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0,
-                        0, thumbnailWidth, thumbnailHeight, null);
+                thumbnail.getGraphics()
+                        .drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0, 0,
+                                thumbnailWidth, thumbnailHeight, null);
                 ImageIO.write(thumbnail, fessConfig.getThumbnailHtmlImageFormat(), outputFile);
                 image.flush();
                 return Result.OK;

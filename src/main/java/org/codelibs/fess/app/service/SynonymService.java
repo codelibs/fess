@@ -79,8 +79,10 @@ public class SynonymService {
      * @return An optional entity containing the synonym file, or empty if not found.
      */
     public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(SynonymFile.class::isInstance)
-                .map(file -> OptionalEntity.of((SynonymFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(SynonymFile.class::isInstance)
+                .map(file -> OptionalEntity.of((SynonymFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

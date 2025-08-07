@@ -405,8 +405,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final Map<String, StateData> states = (Map<String, StateData>) session.getAttribute(STATES);
         if (states != null) {
             final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-            states.entrySet().stream().filter(e -> (now - e.getValue().getExpiration()) / 1000L > getStateTtl()).map(Map.Entry::getKey)
-                    .collect(Collectors.toList()).forEach(s -> {
+            states.entrySet()
+                    .stream()
+                    .filter(e -> (now - e.getValue().getExpiration()) / 1000L > getStateTtl())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList())
+                    .forEach(s -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug("remove old state: {}", s);
                         }
@@ -468,8 +472,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
         }
-        try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                .header("Accept", "application/json").execute()) {
+        try (CurlResponse response = Curl.get(url)
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Accept", "application/json")
+                .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);
@@ -583,10 +589,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 if (logger.isDebugEnabled()) {
                     logger.debug("url: {}", url);
                 }
-                try (CurlResponse response =
-                        Curl.post(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                                .header("Accept", "application/json").header("Content-type", "application/json")
-                                .body("{\"securityEnabledOnly\":false}").execute()) {
+                try (CurlResponse response = Curl.post(url)
+                        .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                        .header("Accept", "application/json")
+                        .header("Content-type", "application/json")
+                        .body("{\"securityEnabledOnly\":false}")
+                        .execute()) {
                     final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
                     if (logger.isDebugEnabled()) {
                         logger.debug("response: {}", contentMap);
@@ -636,8 +644,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
         }
-        try (CurlResponse response = Curl.get(url).header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
-                .header("Accept", "application/json").execute()) {
+        try (CurlResponse response = Curl.get(url)
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Accept", "application/json")
+                .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", contentMap);

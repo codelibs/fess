@@ -144,7 +144,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
         final List<ScheduledJob> list = scheduledJobService.getScheduledJobList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**
@@ -160,7 +162,9 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
                 .setting(scheduledJobService.getScheduledJob(id).map(this::createEditBody).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id));
                     return null;
-                })).status(ApiResult.Status.OK).result());
+                }))
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**

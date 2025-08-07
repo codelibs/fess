@@ -80,8 +80,11 @@ public class DictionaryManager {
      * @throws DictionaryException if there's an error accessing the dictionaries
      */
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
-        try (CurlResponse response = ComponentUtil.getCurlHelper().get("/_configsync/file").param("fields", "path,@timestamp")
-                .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper()
+                .get("/_configsync/file")
+                .param("fields", "path,@timestamp")
+                .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize())
+                .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -138,8 +141,11 @@ public class DictionaryManager {
             }
 
             // TODO use stream
-            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_configsync/file").param("path", dictFile.getPath())
-                    .body(FileUtil.readUTF8(file)).execute()) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper()
+                    .post("/_configsync/file")
+                    .param("path", dictFile.getPath())
+                    .body(FileUtil.readUTF8(file))
+                    .execute()) {
                 final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
                 if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                     throw new DictionaryException("Failed to update " + dictFile.getPath());

@@ -369,7 +369,9 @@ public class FessCrawlerThread extends CrawlerThread {
                 return e.getFirst();
             }
             return null;
-        }).filter(StringUtil::isNotBlank).findFirst()//
+        })
+                .filter(StringUtil::isNotBlank)
+                .findFirst()//
                 .map(s -> clientFactory.getClient(s + ":" + url))//
                 .orElseGet(() -> clientFactory.getClient(url));
         if (logger.isDebugEnabled()) {
@@ -397,6 +399,7 @@ public class FessCrawlerThread extends CrawlerThread {
                         return null;
                     }
                     return new Pair<>(values[0], Pattern.compile(values[1]));
-                })).toList());
+                }))
+                .toList());
     }
 }

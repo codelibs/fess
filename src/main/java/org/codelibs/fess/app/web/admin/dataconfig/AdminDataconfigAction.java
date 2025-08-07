@@ -194,7 +194,9 @@ public class AdminDataconfigAction extends FessAdminAction {
                     });
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .collect(Collectors.joining("\n")));
                     form.virtualHosts = stream(entity.getVirtualHosts())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                     form.name = null;
@@ -221,7 +223,9 @@ public class AdminDataconfigAction extends FessAdminAction {
             });
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
             form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(permissionHelper::decode)
-                    .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                    .filter(StringUtil::isNotBlank)
+                    .distinct()
+                    .collect(Collectors.joining("\n")));
             form.virtualHosts = stream(entity.getVirtualHosts())
                     .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
         }).orElse(() -> {
@@ -260,12 +264,15 @@ public class AdminDataconfigAction extends FessAdminAction {
                     });
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .collect(Collectors.joining("\n")));
                     form.virtualHosts = stream(entity.getVirtualHosts())
                             .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
                     form.crudMode = crudMode;
-                }).orElse(
-                        () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml));
+                })
+                        .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                                this::asListHtml));
             });
         });
     }
@@ -397,7 +404,9 @@ public class AdminDataconfigAction extends FessAdminAction {
                             .toArray(n -> new String[n])));
             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
             entity.setPermissions(split(form.permissions, "\n").get(stream -> stream.map(s -> permissionHelper.encode(s))
-                    .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n])));
+                    .filter(StringUtil::isNotBlank)
+                    .distinct()
+                    .toArray(n -> new String[n])));
             entity.setVirtualHosts(split(form.virtualHosts, "\n")
                     .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
             return entity;

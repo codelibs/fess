@@ -721,7 +721,8 @@ public class ApiResult {
             validationMessagesLambda.message(messages);
             message = ComponentUtil.getMessageManager()
                     .toMessageList(LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ENGLISH), messages)
-                    .stream().collect(Collectors.joining(" "));
+                    .stream()
+                    .collect(Collectors.joining(" "));
             return this;
         }
     }

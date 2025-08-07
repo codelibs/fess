@@ -102,7 +102,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         final List<ElevateWord> list = elevateWordService.getElevateWordList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     // GET /api/admin/elevateword/{id}
@@ -123,7 +125,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         final EditBody body = createEditBody(entity);
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .collect(Collectors.joining("\n")));
         return asJson(new ApiResult.ApiConfigResponse().setting(body).status(ApiResult.Status.OK).result());
     }
 
@@ -282,7 +286,9 @@ public class ApiAdminElevatewordAction extends FessApiAdminAction {
         });
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .collect(Collectors.joining("\n")));
         return body;
     }
 

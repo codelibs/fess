@@ -159,8 +159,11 @@ public class KeyMatchHelper extends AbstractConfigHelper {
         return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(),
                 searchRequestBuilder -> SearchConditionBuilder
                         .builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL))
-                        .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
-                        .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build());
+                        .searchRequestType(SearchRequestType.ADMIN_SEARCH)
+                        .size(keyMatch.getMaxSize())
+                        .query(keyMatch.getQuery())
+                        .responseFields(new String[] { fessConfig.getIndexFieldDocId() })
+                        .build());
     }
 
     /**
@@ -216,7 +219,8 @@ public class KeyMatchHelper extends AbstractConfigHelper {
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             return searchEngineClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), searchRequestBuilder -> {
-                searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL).setQuery(pair.getValue2())
+                searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL)
+                        .setQuery(pair.getValue2())
                         .setSize(keyMatch.getMaxSize());
                 return true;
             });

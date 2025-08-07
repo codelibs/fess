@@ -199,7 +199,8 @@ public class AdminPluginAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminPlugin_AdminPluginJsp)
-                .renderWith(data -> data.register("installedArtifactItems", getAllInstalledArtifacts())).useForm(DeleteForm.class);
+                .renderWith(data -> data.register("installedArtifactItems", getAllInstalledArtifacts()))
+                .useForm(DeleteForm.class);
     }
 
     /**
@@ -211,7 +212,8 @@ public class AdminPluginAction extends FessAdminAction {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
-            result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType)).map(AdminPluginAction::beanToMap)
+            result.addAll(Arrays.stream(pluginHelper.getAvailableArtifacts(artifactType))
+                    .map(AdminPluginAction::beanToMap)
                     .collect(Collectors.toList()));
         }
         return result;
@@ -226,7 +228,8 @@ public class AdminPluginAction extends FessAdminAction {
         final PluginHelper pluginHelper = ComponentUtil.getPluginHelper();
         final List<Map<String, String>> result = new ArrayList<>();
         for (final PluginHelper.ArtifactType artifactType : PluginHelper.ArtifactType.values()) {
-            result.addAll(Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType)).map(AdminPluginAction::beanToMap)
+            result.addAll(Arrays.stream(pluginHelper.getInstalledArtifacts(artifactType))
+                    .map(AdminPluginAction::beanToMap)
                     .collect(Collectors.toList()));
         }
         return result;

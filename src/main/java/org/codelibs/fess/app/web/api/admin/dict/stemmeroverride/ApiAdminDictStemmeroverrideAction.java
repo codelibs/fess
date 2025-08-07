@@ -69,10 +69,11 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final StemmerOverridePager pager = copyBeanToNewBean(body, StemmerOverridePager.class);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(stemmerOverrideService.getStemmerOverrideList(body.dictId, pager).stream()
-                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
-                .status(ApiResult.Status.OK).result());
+        return asJson(
+                new ApiResult.ApiConfigsResponse<EditBody>().settings(stemmerOverrideService.getStemmerOverrideList(body.dictId, pager)
+                        .stream()
+                        .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                        .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
     }
 
     /**
@@ -201,7 +202,8 @@ public class ApiAdminDictStemmeroverrideAction extends FessApiAdminAction {
         return stemmerOverrideService.getStemmerOverrideFile(body.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
                     return null;
                 });

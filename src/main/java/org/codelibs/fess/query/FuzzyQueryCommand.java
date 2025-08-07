@@ -91,7 +91,9 @@ public class FuzzyQueryCommand extends QueryCommand {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder(fessConfig, context,
-                    (f, b) -> QueryBuilders.fuzzyQuery(f, text).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
+                    (f, b) -> QueryBuilders.fuzzyQuery(f, text)
+                            .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+                            .boost(b * boost)
                             .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                             .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
                             .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));
@@ -101,7 +103,9 @@ public class FuzzyQueryCommand extends QueryCommand {
             final String text = term.text();
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return QueryBuilders.fuzzyQuery(field, text).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+            return QueryBuilders.fuzzyQuery(field, text)
+                    .boost(boost)
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
                     .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                     .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
                     .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions()));
@@ -111,7 +115,9 @@ public class FuzzyQueryCommand extends QueryCommand {
         context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
         context.addHighlightedQuery(origQuery);
         return buildDefaultQueryBuilder(fessConfig, context,
-                (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost)
+                (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
+                        .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()))
+                        .boost(b * boost)
                         .maxExpansions(fessConfig.getQueryFuzzyExpansionsAsInteger())
                         .prefixLength(fessConfig.getQueryFuzzyPrefixLengthAsInteger())
                         .transpositions(Constants.TRUE.equalsIgnoreCase(fessConfig.getQueryFuzzyTranspositions())));

@@ -386,7 +386,11 @@ public class IndexingHelper {
     protected long getDocumentSizeByQuery(final SearchEngineClient searchEngineClient, final QueryBuilder queryBuilder,
             final FessConfig fessConfig) {
         final SearchResponse countResponse = searchEngineClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex())
-                .setQuery(queryBuilder).setSize(0).setTrackTotalHits(true).execute().actionGet(fessConfig.getIndexSearchTimeout());
+                .setQuery(queryBuilder)
+                .setSize(0)
+                .setTrackTotalHits(true)
+                .execute()
+                .actionGet(fessConfig.getIndexSearchTimeout());
         final TotalHits totalHits = countResponse.getHits().getTotalHits();
         if (totalHits != null) {
             return totalHits.value();

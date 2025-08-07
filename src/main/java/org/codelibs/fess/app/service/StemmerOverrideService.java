@@ -87,8 +87,10 @@ public class StemmerOverrideService {
      * @return An OptionalEntity containing the stemmer override file if found, empty otherwise
      */
     public OptionalEntity<StemmerOverrideFile> getStemmerOverrideFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(StemmerOverrideFile.class::isInstance)
-                .map(file -> OptionalEntity.of((StemmerOverrideFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(StemmerOverrideFile.class::isInstance)
+                .map(file -> OptionalEntity.of((StemmerOverrideFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

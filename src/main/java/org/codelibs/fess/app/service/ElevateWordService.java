@@ -251,7 +251,9 @@ public class ElevateWordService {
                 }
                 try {
                     final String[] permissions = split(getValue(list, 2), ",").get(stream -> stream.map(permissionHelper::encode)
-                            .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .toArray(n -> new String[n]));
                     final String[] labels = split(getValue(list, 3), ",")
                             .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
@@ -350,11 +352,18 @@ public class ElevateWordService {
                 public void handle(final ElevateWord entity) {
                     final List<String> list = new ArrayList<>();
                     final String permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
-                            .filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining(",")));
-                    final String labels = elevateWordToLabelBhv
-                            .selectList(cb -> cb.query().setElevateWordId_Equal(entity.getId())).stream().map(e -> labelTypeBhv
-                                    .selectByPK(e.getLabelTypeId()).map(LabelType::getValue).filter(StringUtil::isNotBlank).orElse(null))
-                            .distinct().sorted().collect(Collectors.joining(","));
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .collect(Collectors.joining(",")));
+                    final String labels = elevateWordToLabelBhv.selectList(cb -> cb.query().setElevateWordId_Equal(entity.getId()))
+                            .stream()
+                            .map(e -> labelTypeBhv.selectByPK(e.getLabelTypeId())
+                                    .map(LabelType::getValue)
+                                    .filter(StringUtil::isNotBlank)
+                                    .orElse(null))
+                            .distinct()
+                            .sorted()
+                            .collect(Collectors.joining(","));
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
                     addToList(list, permissions);

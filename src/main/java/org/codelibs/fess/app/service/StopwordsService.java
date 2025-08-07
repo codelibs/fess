@@ -80,8 +80,10 @@ public class StopwordsService {
      * @return An optional entity containing the stopwords file, or empty if not found.
      */
     public OptionalEntity<StopwordsFile> getStopwordsFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(StopwordsFile.class::isInstance)
-                .map(file -> OptionalEntity.of((StopwordsFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(StopwordsFile.class::isInstance)
+                .map(file -> OptionalEntity.of((StopwordsFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

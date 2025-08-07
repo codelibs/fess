@@ -408,7 +408,8 @@ public class AdminDesignAction extends FessAdminAction {
      * @return The decoded value.
      */
     public static String decodeJsp(final String value) {
-        return value.replaceAll("<%(?![@-])([\\s\\S]*?)%>", "&lt;%$1%&gt;").replaceAll("<%=([\\s\\S]*?)%>", "&lt;%=$1%&gt;")
+        return value.replaceAll("<%(?![@-])([\\s\\S]*?)%>", "&lt;%$1%&gt;")
+                .replaceAll("<%=([\\s\\S]*?)%>", "&lt;%=$1%&gt;")
                 .replace(TRY_STATEMENT, "<% try{ %>")
                 .replace(CACHE_AND_SESSION_INVALIDATE_STATEMENT, "<% }catch(Exception e){session.invalidate();} %>");
     }
@@ -419,7 +420,7 @@ public class AdminDesignAction extends FessAdminAction {
      * @return The encoded value.
      */
     public static String encodeJsp(final String value) {
-        return value.replace("<% try{ %>", TRY_STATEMENT).replace("<% }catch(Exception e){session.invalidate();} %>",
-                CACHE_AND_SESSION_INVALIDATE_STATEMENT);
+        return value.replace("<% try{ %>", TRY_STATEMENT)
+                .replace("<% }catch(Exception e){session.invalidate();} %>", CACHE_AND_SESSION_INVALIDATE_STATEMENT);
     }
 }

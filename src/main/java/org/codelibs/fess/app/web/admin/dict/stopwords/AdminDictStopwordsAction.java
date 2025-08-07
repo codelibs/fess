@@ -294,7 +294,8 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         return stopwordsService.getStopwordsFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadStopwordsFile(GLOBAL),
                             () -> downloadpage(form.dictId));
                     return null;
@@ -392,8 +393,9 @@ public class AdminDictStopwordsAction extends FessAdminAction {
         createStopwordsItem(form, this::asEditHtml).ifPresent(entity -> {
             stopwordsService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                this::asEditHtml));
+        })
+                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                        this::asEditHtml));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 

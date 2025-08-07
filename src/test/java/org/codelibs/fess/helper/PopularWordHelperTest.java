@@ -78,8 +78,10 @@ public class PopularWordHelperTest extends UnitFessTestCase {
                         return 1;
                     }
                 };
-                cache = CacheBuilder.newBuilder().maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
-                        .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES).build();
+                cache = CacheBuilder.newBuilder()
+                        .maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
+                        .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES)
+                        .build();
             }
         };
         popularWordHelper.init();

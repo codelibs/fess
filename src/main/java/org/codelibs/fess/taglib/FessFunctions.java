@@ -354,7 +354,8 @@ public class FessFunctions {
                 } else {
                     prefix = null;
                 }
-                return pagingQueryList.stream().filter(s -> prefix == null || !s.startsWith(prefix))
+                return pagingQueryList.stream()
+                        .filter(s -> prefix == null || !s.startsWith(prefix))
                         .collect(Collectors.joining("&", "&", StringUtil.EMPTY));
             }
             return null;

@@ -299,9 +299,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
                         messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()),
                         "Failed to process metadata.", e);
             }
-        }).orElseThrow(() -> new SsoMessageException(
-                messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
-                "Failed to process metadata.", new SsoProcessException("Invalid state.")));
+        })
+                .orElseThrow(() -> new SsoMessageException(
+                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
+                        "Failed to process metadata.", new SsoProcessException("Invalid state.")));
     }
 
     /**
@@ -332,9 +333,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
                         messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, e.getMessage()),
                         "Failed to log out.", e);
             }
-        }).orElseThrow(() -> new SsoMessageException(
-                messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
-                "Failed to log out.", new SsoProcessException("Invalid state.")));
+        })
+                .orElseThrow(() -> new SsoMessageException(
+                        messages -> messages.addErrorsFailedToProcessSsoRequest(UserMessages.GLOBAL_PROPERTY_KEY, "Invalid state."),
+                        "Failed to log out.", new SsoProcessException("Invalid state.")));
         return null;
     }
 }

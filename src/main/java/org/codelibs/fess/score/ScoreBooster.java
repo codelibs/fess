@@ -88,8 +88,12 @@ public abstract class ScoreBooster {
         if (url == null) {
             return StringUtil.EMPTY_STRINGS;
         }
-        final SearchResponse response = client.prepareSearch(index).setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url))
-                .setFetchSource(false).setSize(fessConfig.getPageScoreBoosterMaxFetchSizeAsInteger()).execute().actionGet(requestTimeout);
+        final SearchResponse response = client.prepareSearch(index)
+                .setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), url))
+                .setFetchSource(false)
+                .setSize(fessConfig.getPageScoreBoosterMaxFetchSizeAsInteger())
+                .execute()
+                .actionGet(requestTimeout);
         return Arrays.stream(response.getHits().getHits()).map(SearchHit::getId).toArray(n -> new String[n]);
     };
 
@@ -108,7 +112,9 @@ public abstract class ScoreBooster {
         }
         final String index = fessConfig.getIndexDocumentUpdateIndex();
         for (final String id : ids) {
-            bulkRequestBuilder.add(client.prepareUpdate().setIndex(index).setId(id)
+            bulkRequestBuilder.add(client.prepareUpdate()
+                    .setIndex(index)
+                    .setId(id)
                     .setScript(new Script(ScriptType.INLINE, scriptLang, scriptCode, params)));
         }
         if (bulkRequestBuilder.numberOfActions() > requestCacheSize) {

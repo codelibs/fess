@@ -447,32 +447,46 @@ public class AdminSearchlistAction extends FessAdminAction {
 
         try {
             if (!fessConfig.validateIndexRequiredFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
             }
 
             if (!fessConfig.validateIndexArrayFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexArrayFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexArrayFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
             }
             if (!fessConfig.validateIndexDateFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexDateFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexDateFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeDate(s, s)));
             }
             if (!fessConfig.validateIndexIntegerFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeInteger(s, s)));
             }
             if (!fessConfig.validateIndexLongFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexLongFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexLongFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeLong(s, s)));
             }
             if (!fessConfig.validateIndexFloatFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexFloatFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexFloatFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeFloat(s, s)));
             }
             if (!fessConfig.validateIndexDoubleFields(doc)) {
-                throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(doc).stream().map(s -> "doc." + s)
+                throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(doc)
+                        .stream()
+                        .map(s -> "doc." + s)
                         .forEach(s -> messages.addErrorsPropertyTypeDouble(s, s)));
             }
         } catch (final Exception e) {

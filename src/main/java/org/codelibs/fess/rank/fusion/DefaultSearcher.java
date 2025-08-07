@@ -147,20 +147,25 @@ public class DefaultSearcher extends RankFusionSearcher {
     protected OptionalEntity<SearchResponse> sendRequest(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return ComponentUtil.getSearchEngineClient().search(fessConfig.getIndexDocumentSearchIndex(),
-                createSearchCondition(query, params, userBean), (searchRequestBuilder, execTime, searchResponse) -> {
-                    searchResponse.ifPresent(r -> {
-                        if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
-                            // partial results
-                            final StringBuilder buf = new StringBuilder(1000);
-                            buf.append("[SEARCH TIMEOUT] {\"exec_time\":").append(execTime)//
-                                    .append(",\"request\":").append(searchRequestBuilder.toString())//
-                                    .append(",\"response\":").append(r.toString()).append('}');
-                            logger.warn(buf.toString());
-                        }
-                    });
-                    return searchResponse;
-                });
+        return ComponentUtil.getSearchEngineClient()
+                .search(fessConfig.getIndexDocumentSearchIndex(), createSearchCondition(query, params, userBean),
+                        (searchRequestBuilder, execTime, searchResponse) -> {
+                            searchResponse.ifPresent(r -> {
+                                if (r.getTotalShards() != r.getSuccessfulShards() && fessConfig.isQueryTimeoutLogging()) {
+                                    // partial results
+                                    final StringBuilder buf = new StringBuilder(1000);
+                                    buf.append("[SEARCH TIMEOUT] {\"exec_time\":")
+                                            .append(execTime)//
+                                            .append(",\"request\":")
+                                            .append(searchRequestBuilder.toString())//
+                                            .append(",\"response\":")
+                                            .append(r.toString())
+                                            .append('}');
+                                    logger.warn(buf.toString());
+                                }
+                            });
+                            return searchResponse;
+                        });
     }
 
     /**
@@ -175,11 +180,19 @@ public class DefaultSearcher extends RankFusionSearcher {
             final OptionalThing<FessUserBean> userBean) {
         return searchRequestBuilder -> {
             ComponentUtil.getQueryHelper().processSearchPreference(searchRequestBuilder, userBean, query);
-            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(params.getStartPosition())
-                    .size(params.getPageSize()).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
-                    .highlightInfo(params.getHighlightInfo()).similarDocHash(params.getSimilarDocHash())
-                    .responseFields(params.getResponseFields()).searchRequestType(params.getType())
-                    .trackTotalHits(params.getTrackTotalHits()).minScore(params.getMinScore()).build();
+            return SearchConditionBuilder.builder(searchRequestBuilder)
+                    .query(query)
+                    .offset(params.getStartPosition())
+                    .size(params.getPageSize())
+                    .facetInfo(params.getFacetInfo())
+                    .geoInfo(params.getGeoInfo())
+                    .highlightInfo(params.getHighlightInfo())
+                    .similarDocHash(params.getSimilarDocHash())
+                    .responseFields(params.getResponseFields())
+                    .searchRequestType(params.getType())
+                    .trackTotalHits(params.getTrackTotalHits())
+                    .minScore(params.getMinScore())
+                    .build();
         };
     }
 

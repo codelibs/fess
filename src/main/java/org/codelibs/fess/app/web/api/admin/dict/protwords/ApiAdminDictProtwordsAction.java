@@ -68,10 +68,10 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         body.dictId = dictId;
         validateApi(body, messages -> {});
         final ProtwordsPager pager = copyBeanToNewBean(body, ProtwordsPager.class);
-        return asJson(new ApiResult.ApiConfigsResponse<EditBody>()
-                .settings(protwordsService.getProtwordsList(body.dictId, pager).stream()
-                        .map(protwordsItem -> createEditBody(protwordsItem, dictId)).collect(Collectors.toList()))
-                .status(ApiResult.Status.OK).result());
+        return asJson(new ApiResult.ApiConfigsResponse<EditBody>().settings(protwordsService.getProtwordsList(body.dictId, pager)
+                .stream()
+                .map(protwordsItem -> createEditBody(protwordsItem, dictId))
+                .collect(Collectors.toList())).status(ApiResult.Status.OK).result());
     }
 
     /**
@@ -88,7 +88,9 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
                 .setting(protwordsService.getProtwordsItem(dictId, id).map(entity -> createEditBody(entity, dictId)).orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, String.valueOf(id)));
                     return null;
-                })).status(ApiResult.Status.OK).result());
+                }))
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**
@@ -200,7 +202,8 @@ public class ApiAdminDictProtwordsAction extends FessApiAdminAction {
         return protwordsService.getProtwordsFile(body.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationErrorApi(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL));
                     return null;
                 });

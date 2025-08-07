@@ -343,7 +343,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         // X-Robots-Tag
-        responseData.getMetaDataMap().entrySet().stream().filter(e -> X_ROBOTS_TAG.equalsIgnoreCase(e.getKey()) && e.getValue() != null)
+        responseData.getMetaDataMap()
+                .entrySet()
+                .stream()
+                .filter(e -> X_ROBOTS_TAG.equalsIgnoreCase(e.getKey()) && e.getValue() != null)
                 .forEach(e -> {
                     boolean noindex = false;
                     boolean nofollow = false;
@@ -503,7 +506,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 prunedContent ? node -> pruneNode(node, crawlingConfig) : node -> node);
         final String fileName = getFileName(url, urlEncoding);
         putResultDataContent(dataMap, responseData, fessConfig, crawlingConfig, documentHelper, body, fileName);
-        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache()).map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
+        if ((fieldConfigs.getConfig(fessConfig.getIndexFieldCache())
+                .map(org.codelibs.fess.crawler.util.FieldConfigs.Config::isCache)
                 .orElse(false) || fessConfig.isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
@@ -1025,7 +1029,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         if (StringUtil.isBlank(ruleString)) {
             return childUrlRuleMap.entrySet().stream().map(e -> new Pair<>(e.getKey(), e.getValue()));
         }
-        return Arrays.stream(ruleString.split(",")).map(s -> s.split(":")).filter(v -> v.length == 2)
+        return Arrays.stream(ruleString.split(","))
+                .map(s -> s.split(":"))
+                .filter(v -> v.length == 2)
                 .map(v -> new Pair<String, String>(v[0].trim(), v[1].trim()));
     }
 

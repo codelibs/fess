@@ -172,7 +172,8 @@ public class SearchForm extends SearchRequestParams {
 
     @Override
     public GeoInfo getGeoInfo() {
-        return LaRequestUtil.getOptionalRequest().map(this::createGeoInfo)
+        return LaRequestUtil.getOptionalRequest()
+                .map(this::createGeoInfo)
                 .orElseGet(() -> ComponentUtil.getQueryHelper().getDefaultGeoInfo());
     }
 

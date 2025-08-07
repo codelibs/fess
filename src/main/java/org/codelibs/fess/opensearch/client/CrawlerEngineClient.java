@@ -45,7 +45,9 @@ public class CrawlerEngineClient extends FesenClient {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String[] hosts =
                 split(address, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
-        final Builder builder = Settings.builder().putList("http.hosts", hosts).put("processors", fessConfig.getCrawlerHttpProcessors())
+        final Builder builder = Settings.builder()
+                .putList("http.hosts", hosts)
+                .put("processors", fessConfig.getCrawlerHttpProcessors())
                 .put("http.heartbeat_interval", fessConfig.getFesenHeartbeatInterval());
         final String username = fessConfig.getFesenUsername();
         final String password = fessConfig.getFesenPassword();

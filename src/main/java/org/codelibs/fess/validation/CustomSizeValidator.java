@@ -62,7 +62,9 @@ public class CustomSizeValidator implements ConstraintValidator<CustomSize, Char
 
         final HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
         hibernateContext.disableDefaultConstraintViolation();
-        hibernateContext.addMessageParameter("min", min).addMessageParameter("max", max).buildConstraintViolationWithTemplate(message)
+        hibernateContext.addMessageParameter("min", min)
+                .addMessageParameter("max", max)
+                .buildConstraintViolationWithTemplate(message)
                 .addConstraintViolation();
         final int length = value.length();
         return length >= min && length <= max;

@@ -42,8 +42,8 @@ public class DuplicateHost extends BsDuplicateHost {
 
     public String convert(final String url) {
         final String targetStr = getDuplicateHostName().replace(".", "\\.");
-        return url.replaceFirst("://" + targetStr + "$", "://" + getRegularName()).replaceFirst("://" + targetStr + "([:/])",
-                "://" + getRegularName() + "$1");
+        return url.replaceFirst("://" + targetStr + "$", "://" + getRegularName())
+                .replaceFirst("://" + targetStr + "([:/])", "://" + getRegularName() + "$1");
     }
 
     @Override

@@ -373,8 +373,9 @@ public class Crawler {
             }, "ProcessCommand");
             commandThread.start();
 
-            systemMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                    ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(), true);
+            systemMonitorTask = TimeoutManager.getInstance()
+                    .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(),
+                            true);
 
             if (options.hotThread != null) {
                 hotThreadMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new HotThreadMonitorTarget(), options.hotThread, true);
