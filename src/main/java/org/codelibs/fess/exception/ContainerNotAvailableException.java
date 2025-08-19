@@ -49,7 +49,7 @@ public class ContainerNotAvailableException extends FessSystemException {
      * @param cause The cause of the exception.
      */
     public ContainerNotAvailableException(final Throwable cause) {
-        super("Container is not avaiable.");
+        super("Container is not available.");
         componentName = "container";
     }
 

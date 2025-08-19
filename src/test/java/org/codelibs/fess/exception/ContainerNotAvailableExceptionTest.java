@@ -46,8 +46,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         Throwable cause = new IllegalStateException("Container initialization failed");
         ContainerNotAvailableException exception = new ContainerNotAvailableException(cause);
 
-        // Note: There's a typo in the message: "avaiable" should be "available"
-        assertEquals("Container is not avaiable.", exception.getMessage());
+        assertEquals("Container is not available.", exception.getMessage());
         // The cause is not passed to super constructor in the implementation
         assertNull(exception.getCause());
         assertEquals("container", exception.getComponentName());
@@ -96,7 +95,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         // Test constructor with null cause only
         ContainerNotAvailableException exception = new ContainerNotAvailableException((Throwable) null);
 
-        assertEquals("Container is not avaiable.", exception.getMessage());
+        assertEquals("Container is not available.", exception.getMessage());
         // The cause is not passed to super constructor in the implementation
         assertNull(exception.getCause());
         assertEquals("container", exception.getComponentName());
@@ -196,7 +195,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("service2 is not available.", exception2.getMessage());
 
         ContainerNotAvailableException exception3 = new ContainerNotAvailableException(new RuntimeException());
-        assertEquals("Container is not avaiable.", exception3.getMessage());
+        assertEquals("Container is not available.", exception3.getMessage());
     }
 
     public void test_causeOnlyConstructorWithMessage() {
@@ -205,7 +204,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         RuntimeException cause = new RuntimeException(causeMessage);
         ContainerNotAvailableException exception = new ContainerNotAvailableException(cause);
 
-        assertEquals("Container is not avaiable.", exception.getMessage());
+        assertEquals("Container is not available.", exception.getMessage());
         // The cause is not passed to super constructor in the implementation
         assertNull(exception.getCause());
         assertEquals("container", exception.getComponentName());
