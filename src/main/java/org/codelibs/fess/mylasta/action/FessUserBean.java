@@ -122,12 +122,12 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
             @Override
             public String[] getPermissions() {
-                return null;
+                return StringUtil.EMPTY_STRINGS;
             }
 
             @Override
             public String[] getGroups() {
-                return null;
+                return StringUtil.EMPTY_STRINGS;
             }
 
             @Override

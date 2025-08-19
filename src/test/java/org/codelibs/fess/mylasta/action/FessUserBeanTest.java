@@ -238,15 +238,21 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertNotNull(roles);
         assertEquals(0, roles.length);
 
+        // Test getPermissions returns empty array
+        String[] permissions = emptyBean.getPermissions();
+        assertNotNull(permissions);
+        assertEquals(0, permissions.length);
+
+        // Test getGroups returns empty array
+        String[] groups = emptyBean.getGroups();
+        assertNotNull(groups);
+        assertEquals(0, groups.length);
+
         // Test isEditable returns false
         assertFalse(emptyBean.isEditable());
 
         // Test getFessUser returns null
         assertNull(emptyBean.getFessUser());
-
-        // Test other methods still work with null user
-        assertNull(emptyBean.getPermissions());
-        assertNull(emptyBean.getGroups());
 
         // Test hasRole and hasGroup methods with null user
         assertFalse(emptyBean.hasRole("admin"));
