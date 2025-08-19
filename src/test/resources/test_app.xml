@@ -4,4 +4,7 @@
 <components>
 	<include path="convention.xml" />
 	<include path="lastaflute.xml" />
+	
+	<!-- Register systemProperties for test environment -->
+	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
 </components>

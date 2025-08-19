@@ -47,7 +47,7 @@ public class MatchAllQueryCommand extends QueryCommand {
         if (logger.isDebugEnabled()) {
             logger.debug("{}:{}", query, boost);
         }
-        return QueryBuilders.matchAllQuery();
+        return QueryBuilders.matchAllQuery().boost(boost);
     }
 
 }

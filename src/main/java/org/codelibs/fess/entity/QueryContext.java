@@ -252,4 +252,20 @@ public class QueryContext {
     public void setDefaultField(final String defaultField) {
         this.defaultField = defaultField;
     }
+
+    /**
+     * Gets the set of highlighted query terms.
+     * @return The set of highlighted query terms, or empty set if not initialized.
+     */
+    public Set<String> getHighlightedQuerySet() {
+        return highlightedQuerySet != null ? highlightedQuerySet : new HashSet<>();
+    }
+
+    /**
+     * Gets the field log map containing field names and their associated query terms.
+     * @return The field log map, or empty map if not initialized.
+     */
+    public Map<String, List<String>> getFieldLogMap() {
+        return fieldLogMap != null ? fieldLogMap : new HashMap<>();
+    }
 }

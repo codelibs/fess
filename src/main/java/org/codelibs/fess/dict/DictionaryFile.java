@@ -196,7 +196,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
             this.allRecordCount = allRecordCount;
             pageSize = size;
             currentPageNumber = offset / size + 1;
-            allPageCount = (allRecordCount - 1) / size + 1;
+            allPageCount = allRecordCount == 0 ? 0 : (allRecordCount - 1) / size + 1;
         }
 
         @Override
