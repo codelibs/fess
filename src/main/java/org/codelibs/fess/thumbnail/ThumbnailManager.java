@@ -68,18 +68,30 @@ public class ThumbnailManager {
      */
     protected static final String THUMBNAILS_DIR_NAME = "thumbnails";
 
-    private static final Logger logger = LogManager.getLogger(ThumbnailManager.class);
+    /**
+     * Logger instance for this class.
+     */
+    protected static final Logger logger = LogManager.getLogger(ThumbnailManager.class);
 
     /**
      * Base directory for storing thumbnail files.
      */
     protected File baseDir;
 
-    private final List<ThumbnailGenerator> generatorList = new ArrayList<>();
+    /**
+     * List of available thumbnail generators.
+     */
+    protected final List<ThumbnailGenerator> generatorList = new ArrayList<>();
 
-    private BlockingQueue<Tuple3<String, String, String>> thumbnailTaskQueue;
+    /**
+     * Queue for thumbnail generation tasks containing URL, content, and path tuples.
+     */
+    protected BlockingQueue<Tuple3<String, String, String>> thumbnailTaskQueue;
 
-    private volatile boolean generating;
+    /**
+     * Flag indicating whether thumbnail generation is currently in progress.
+     */
+    protected volatile boolean generating;
 
     private Thread thumbnailQueueThread;
 

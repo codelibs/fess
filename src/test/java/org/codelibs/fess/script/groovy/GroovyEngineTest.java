@@ -18,21 +18,11 @@ package org.codelibs.fess.script.groovy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.utflute.lastaflute.LastaFluteTestCase;
 
-public class GroovyEngineTest extends LastaFluteTestCase {
+public class GroovyEngineTest extends UnitFessTestCase {
     public GroovyEngine groovyEngine;
-
-    @Override
-    protected String prepareConfigFile() {
-        return "test_app.xml";
-    }
-
-    @Override
-    protected boolean isSuppressTestCaseTransaction() {
-        return true;
-    }
 
     @Override
     public void setUp() throws Exception {

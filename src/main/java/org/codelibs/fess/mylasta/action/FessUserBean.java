@@ -119,6 +119,31 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
             public boolean isEditable() {
                 return false;
             }
+
+            @Override
+            public String[] getPermissions() {
+                return StringUtil.EMPTY_STRINGS;
+            }
+
+            @Override
+            public String[] getGroups() {
+                return StringUtil.EMPTY_STRINGS;
+            }
+
+            @Override
+            public boolean hasRole(final String role) {
+                return false;
+            }
+
+            @Override
+            public boolean hasGroup(final String group) {
+                return false;
+            }
+
+            @Override
+            public boolean hasGroups(final String[] acceptedGroups) {
+                return false;
+            }
         };
     }
 }

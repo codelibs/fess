@@ -715,8 +715,10 @@ public class IndexUpdater extends Thread {
      */
     private void forceStop() {
         systemHelper.setForceStop(true);
-        for (final Crawler crawler : crawlerList) {
-            crawler.stop();
+        if (crawlerList != null) {
+            for (final Crawler crawler : crawlerList) {
+                crawler.stop();
+            }
         }
     }
 
