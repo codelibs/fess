@@ -28,9 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -64,9 +61,11 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
+import com.microsoft.aad.msal4j.AuthorizationCodeParameters;
+import com.microsoft.aad.msal4j.ConfidentialClientApplication;
+import com.microsoft.aad.msal4j.IAuthenticationResult;
+import com.microsoft.aad.msal4j.RefreshTokenParameters;
+import com.microsoft.aad.msal4j.SilentParameters;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -142,6 +141,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     /** Group cache expiry time in seconds. */
     protected long groupCacheExpiry = 10 * 60L;
 
+    /** Use V2 endpoint. */
+    protected boolean useV2Endpoint = true;
+
     /**
      * Initializes the Azure AD authenticator.
      * Registers this authenticator with the SSO manager and sets up group cache.
@@ -186,12 +188,23 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final String state = UuidUtil.create();
         final String nonce = UuidUtil.create();
         storeStateInSession(request.getSession(), state, nonce);
-        final String authUrl = getAuthority() + getTenant()
-                + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
-                + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
-                + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        final String authUrl;
+
+        if (useV2Endpoint) {
+            // v2.0 endpoint with MSAL4J (recommended)
+            authUrl = getAuthority() + getTenant()
+                    + "/oauth2/v2.0/authorize?response_type=code&scope=https://graph.microsoft.com/.default&response_mode=form_post&redirect_uri="
+                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId() + "&state=" + state
+                    + "&nonce=" + nonce;
+        } else {
+            // v1.0 endpoint for backward compatibility
+            authUrl = getAuthority() + getTenant()
+                    + "/oauth2/authorize?response_type=code&scope=directory.read.all&response_mode=form_post&redirect_uri="
+                    + URLEncoder.encode(getReplyUrl(request), Constants.UTF_8_CHARSET) + "&client_id=" + getClientId()
+                    + "&resource=https%3a%2f%2fgraph.microsoft.com" + "&state=" + state + "&nonce=" + nonce;
+        }
         if (logger.isDebugEnabled()) {
-            logger.debug("redirect to: {}", authUrl);
+            logger.debug("redirect to: {} (using {} endpoint)", authUrl, useV2Endpoint ? "v2.0" : "v1.0");
         }
         return authUrl;
 
@@ -248,7 +261,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         final AuthenticationResponse authResponse = parseAuthenticationResponse(urlBuf.toString(), params);
         if (authResponse instanceof final AuthenticationSuccessResponse oidcResponse) {
             validateAuthRespMatchesCodeFlow(oidcResponse);
-            final AuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
+            final IAuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);
 
             return new AzureAdCredential(authData);
@@ -280,8 +293,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param stateData The stored state data containing the expected nonce.
      * @param authData The authentication result containing the actual nonce.
      */
-    protected void validateNonce(final StateData stateData, final AuthenticationResult authData) {
-        final String idToken = authData.getIdToken();
+    protected void validateNonce(final StateData stateData, final IAuthenticationResult authData) {
+        final String idToken = authData.idToken();
         if (logger.isDebugEnabled()) {
             logger.debug("idToken: {}", idToken);
         }
@@ -310,28 +323,27 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param refreshToken The refresh token to use for token acquisition.
      * @return The authentication result containing the access token.
      */
-    public AuthenticationResult getAccessToken(final String refreshToken) {
+    public IAuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
             logger.debug("refreshToken: {}, authority: {}", refreshToken, authority);
         }
-        ExecutorService service = null;
         try {
-            service = Executors.newFixedThreadPool(1);
-            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
-            final Future<AuthenticationResult> future =
-                    context.acquireTokenByRefreshToken(refreshToken, new ClientCredential(getClientId(), getClientSecret()), null, null);
-            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
+            final ConfidentialClientApplication app = ConfidentialClientApplication
+                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
+                    .authority(authority)
+                    .build();
+
+            final RefreshTokenParameters parameters =
+                    RefreshTokenParameters.builder(Collections.singleton("https://graph.microsoft.com/.default"), refreshToken).build();
+
+            final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
             return result;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
-        } finally {
-            if (service != null) {
-                service.shutdown();
-            }
         }
     }
 
@@ -341,30 +353,59 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param currentUri The current URI for the redirect.
      * @return The authentication result containing the access token.
      */
-    protected AuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
+    protected IAuthenticationResult getAccessToken(final AuthorizationCode authorizationCode, final String currentUri) {
         final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
             logger.debug("authCode: {}, authority: {}, uri: {}", authCode, authority, currentUri);
         }
-        final ClientCredential credential = new ClientCredential(getClientId(), getClientSecret());
-        ExecutorService service = null;
         try {
-            service = Executors.newFixedThreadPool(1);
-            final AuthenticationContext context = new AuthenticationContext(authority, true, service);
-            final Future<AuthenticationResult> future =
-                    context.acquireTokenByAuthorizationCode(authCode, new URI(currentUri), credential, null);
-            final AuthenticationResult result = future.get(acquisitionTimeout, TimeUnit.MILLISECONDS);
+            final ConfidentialClientApplication app = ConfidentialClientApplication
+                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
+                    .authority(authority)
+                    .build();
+
+            final AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(authCode, new URI(currentUri))
+                    .scopes(Collections.singleton("https://graph.microsoft.com/.default"))
+                    .build();
+
+            final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
                 throw new SsoLoginException("authentication result was null");
             }
             return result;
         } catch (final Exception e) {
             throw new SsoLoginException("Failed to get a token.", e);
-        } finally {
-            if (service != null) {
-                service.shutdown();
+        }
+    }
+
+    /**
+     * Attempts to refresh tokens silently using the MSAL4J silent authentication flow.
+     * @param user The Azure AD user whose tokens need to be refreshed.
+     * @return The new authentication result, or null if silent refresh failed.
+     */
+    public IAuthenticationResult refreshTokenSilently(final AzureAdCredential.AzureAdUser user) {
+        final String authority = getAuthority() + getTenant() + "/";
+        try {
+            final ConfidentialClientApplication app = ConfidentialClientApplication
+                    .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
+                    .authority(authority)
+                    .build();
+
+            final SilentParameters parameters = SilentParameters
+                    .builder(Collections.singleton("https://graph.microsoft.com/.default"), user.getAuthenticationResult().account())
+                    .build();
+
+            final IAuthenticationResult result = app.acquireTokenSilently(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Silent token acquisition successful");
             }
+            return result;
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Silent token acquisition failed: {}", e.getMessage());
+            }
+            return null;
         }
     }
 
@@ -473,7 +514,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.debug("url: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
@@ -590,7 +631,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     logger.debug("url: {}", url);
                 }
                 try (CurlResponse response = Curl.post(url)
-                        .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                        .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                         .header("Accept", "application/json")
                         .header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
@@ -645,7 +686,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.debug("url: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
@@ -817,5 +858,13 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     @Override
     public String logout(final FessUserBean user) {
         return null;
+    }
+
+    /**
+     * Enable to use V2 endpoint.
+     * @param useV2Endpoint true if using V2 endpoint.
+     */
+    public void setUseV2Endpoint(boolean useV2Endpoint) {
+        this.useV2Endpoint = useV2Endpoint;
     }
 }

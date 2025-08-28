@@ -1308,8 +1308,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
-			<artifactId>adal4j</artifactId>
-			<version>${adal4j.version}</version>
+			<artifactId>msal4j</artifactId>
+			<version>${msal4j.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.stephenc.jcip</groupId>
