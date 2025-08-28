@@ -62,7 +62,6 @@ import org.lastaflute.web.util.LaRequestUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.microsoft.aad.msal4j.AuthorizationCodeParameters;
-import com.microsoft.aad.msal4j.ClientCredentialParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.RefreshTokenParameters;
@@ -332,7 +331,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
                     .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority).build();
+                    .authority(authority)
+                    .build();
 
             final RefreshTokenParameters parameters =
                     RefreshTokenParameters.builder(Collections.singleton("https://graph.microsoft.com/.default"), refreshToken).build();
@@ -362,10 +362,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
                     .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority).build();
+                    .authority(authority)
+                    .build();
 
             final AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(authCode, new URI(currentUri))
-                    .scopes(Collections.singleton("https://graph.microsoft.com/.default")).build();
+                    .scopes(Collections.singleton("https://graph.microsoft.com/.default"))
+                    .build();
 
             final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
@@ -387,7 +389,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
                     .builder(getClientId(), com.microsoft.aad.msal4j.ClientCredentialFactory.createFromSecret(getClientSecret()))
-                    .authority(authority).build();
+                    .authority(authority)
+                    .build();
 
             final SilentParameters parameters = SilentParameters
                     .builder(Collections.singleton("https://graph.microsoft.com/.default"), user.getAuthenticationResult().account())
@@ -511,7 +514,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.debug("url: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
@@ -628,7 +631,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     logger.debug("url: {}", url);
                 }
                 try (CurlResponse response = Curl.post(url)
-                        .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                        .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                         .header("Accept", "application/json")
                         .header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
@@ -683,7 +686,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             logger.debug("url: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
-                .header("Authorization", "Bearer " + user.getAuthenticationResult().getAccessToken())
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
