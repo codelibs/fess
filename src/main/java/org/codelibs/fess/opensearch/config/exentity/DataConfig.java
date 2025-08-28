@@ -311,7 +311,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             authScheme = new NTLMScheme(new JcifsEngine(props));
         } else if (Constants.FORM.equals(scheme)) {
             final String prefix = CRAWLER_WEB_AUTH + "." + webAuthName + ".";
-            final Map<String, String> parameterMap = paramMap.entrySet().stream().filter(e -> e.getKey().startsWith(prefix))
+            final Map<String, String> parameterMap = paramMap.entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().startsWith(prefix))
                     .collect(Collectors.toMap(e -> e.getKey().substring(prefix.length()), Entry::getValue));
             authScheme = new FormScheme(parameterMap);
         }

@@ -309,7 +309,8 @@ public class AdminDictStemmeroverrideAction extends FessAdminAction {
         return stemmerOverrideService.getStemmerOverrideFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadStemmeroverrideFile(GLOBAL),
                             () -> downloadpage(form.dictId));
                     return null;

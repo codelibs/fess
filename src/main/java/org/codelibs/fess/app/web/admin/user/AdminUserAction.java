@@ -462,8 +462,9 @@ public class AdminUserAction extends FessAdminAction {
      * @param throwError callback to report any validation errors
      */
     public static void validateAttributes(final Map<String, String> attributes, final Consumer<VaMessenger<FessMessages>> throwError) {
-        ComponentUtil.getLdapManager().validateUserAttributes(Long.class, attributes,
-                s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));
+        ComponentUtil.getLdapManager()
+                .validateUserAttributes(Long.class, attributes,
+                        s -> throwError.accept(messages -> messages.addErrorsPropertyTypeLong("attributes." + s, "attributes." + s)));
     }
 
     // ===================================================================================

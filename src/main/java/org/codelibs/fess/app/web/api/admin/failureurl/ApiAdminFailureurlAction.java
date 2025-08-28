@@ -81,7 +81,9 @@ public class ApiAdminFailureurlAction extends FessApiAdminAction {
         final FailureUrlPager pager = copyBeanToNewBean(body, FailureUrlPager.class);
         final List<FailureUrl> list = failureUrlService.getFailureUrlList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>().logs(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     // GET /api/admin/failureurl/log/{id}

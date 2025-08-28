@@ -124,7 +124,11 @@ public class SuggestHelper {
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
-        searchEngineClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+        searchEngineClient.admin()
+                .cluster()
+                .prepareHealth()
+                .setWaitForYellowStatus()
+                .execute()
                 .actionGet(fessConfig.getIndexHealthTimeout());
 
         final SuggestSettingsBuilder settingsBuilder = SuggestSettings.builder();
@@ -244,8 +248,9 @@ public class SuggestHelper {
                 final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
                 stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
                 if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
-                    suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
-                            tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
+                    suggester.indexer()
+                            .indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
+                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
                     duplicateSessionMap.put(sessionId, requestedAt);
                 }
             }
@@ -274,7 +279,8 @@ public class SuggestHelper {
 
             final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
             flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction()
-                    .seed(ComponentUtil.getSystemHelper().getCurrentTimeAsLong()).setField(fessConfig.getIndexFieldDocId())));
+                    .seed(ComponentUtil.getSystemHelper().getCurrentTimeAsLong())
+                    .setField(fessConfig.getIndexFieldDocId())));
             reader.setQuery(QueryBuilders
                     .functionScoreQuery(QueryBuilders.matchAllQuery(),
                             flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()]))
@@ -473,8 +479,9 @@ public class SuggestHelper {
             Collections.addAll(roleList, permissions);
         }
 
-        suggester.indexer().addElevateWord(new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings),
-                contentFieldList, labelList, roleList), apply);
+        suggester.indexer()
+                .addElevateWord(new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Arrays.asList(readings), contentFieldList,
+                        labelList, roleList), apply);
 
         refresh();
     }

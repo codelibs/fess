@@ -85,7 +85,9 @@ public class ApiAdminDuplicatehostAction extends FessApiAdminAction {
         final List<DuplicateHost> list = duplicateHostService.getDuplicateHostList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     // GET /api/admin/duplicatehost/setting/{id}

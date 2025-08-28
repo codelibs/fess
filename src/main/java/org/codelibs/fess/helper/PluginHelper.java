@@ -77,8 +77,10 @@ public class PluginHelper {
      * Cache for storing available artifacts by type.
      * The cache expires after 5 minutes and has a maximum size of 10 entries.
      */
-    protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder().maximumSize(10)
-            .expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<ArtifactType, Artifact[]>() {
+    protected LoadingCache<ArtifactType, Artifact[]> availableArtifacts = CacheBuilder.newBuilder()
+            .maximumSize(10)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build(new CacheLoader<ArtifactType, Artifact[]>() {
                 @Override
                 public Artifact[] load(final ArtifactType key) {
                     final List<Artifact> list = new ArrayList<>();
@@ -142,7 +144,8 @@ public class PluginHelper {
             @SuppressWarnings("unchecked")
             final List<Map<?, ?>> result = objectMapper.readValue(content, List.class);
             if (result != null) {
-                return result.stream().map(o -> new Artifact((String) o.get("name"), (String) o.get("version"), (String) o.get("url")))
+                return result.stream()
+                        .map(o -> new Artifact((String) o.get("name"), (String) o.get("version"), (String) o.get("url")))
                         .collect(Collectors.toList());
             }
             return Collections.emptyList();

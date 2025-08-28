@@ -302,7 +302,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return synonymService.getSynonymFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL),
                             () -> downloadpage(form.dictId));
                     return null;

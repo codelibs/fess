@@ -78,7 +78,9 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
         final AccessTokenPager pager = copyBeanToNewBean(body, AccessTokenPager.class);
         final List<AccessToken> list = accessTokenService.getAccessTokenList(pager);
         return asJson(new ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(Status.OK).result());
+                .total(pager.getAllRecordCount())
+                .status(Status.OK)
+                .result());
     }
 
     // GET /api/admin/accesstoken/setting/{id}
@@ -181,8 +183,10 @@ public class ApiAdminAccesstokenAction extends FessApiAdminAction {
      */
     protected EditBody createEditBody(final AccessToken entity) {
         final EditBody body = new EditBody();
-        copyBeanToBean(entity, body, copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME).excludeNull()
-                .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
+        copyBeanToBean(entity, body,
+                copyOp -> copyOp.exclude(Constants.PERMISSIONS, AdminAccesstokenAction.EXPIRED_TIME)
+                        .excludeNull()
+                        .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, AdminAccesstokenAction.EXPIRES));
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         body.permissions = stream(entity.getPermissions()).get(
                 stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));

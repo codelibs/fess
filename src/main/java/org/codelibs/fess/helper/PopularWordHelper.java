@@ -72,8 +72,10 @@ public class PopularWordHelper {
             logger.debug("Initialize {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
-        cache = CacheBuilder.newBuilder().maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
-                .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES).build();
+        cache = CacheBuilder.newBuilder()
+                .maximumSize(fessConfig.getSuggestPopularWordCacheSizeAsInteger().longValue())
+                .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES)
+                .build();
     }
 
     /**
@@ -93,7 +95,10 @@ public class PopularWordHelper {
         final String baseSeed = seed != null ? seed : fessConfig.getSuggestPopularWordSeed();
         final String[] baseTags = tags != null ? tags : fessConfig.getSuggestPopularWordTagsAsArray();
         final String[] baseRoles = roles != null ? roles
-                : ComponentUtil.getRoleQueryHelper().build(searchRequestType).stream().filter(StringUtil::isNotBlank)
+                : ComponentUtil.getRoleQueryHelper()
+                        .build(searchRequestType)
+                        .stream()
+                        .filter(StringUtil::isNotBlank)
                         .toArray(n -> new String[n]);
         final String[] baseFields = fields != null ? fields : fessConfig.getSuggestPopularWordFieldsAsArray();
         final String[] baseExcludes = excludes != null ? excludes : fessConfig.getSuggestPopularWordExcludesAsArray();
@@ -101,10 +106,11 @@ public class PopularWordHelper {
             return cache.get(getCacheKey(baseSeed, baseTags, baseRoles, baseFields, baseExcludes), () -> {
                 final List<String> wordList = new ArrayList<>();
                 final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-                final PopularWordsRequestBuilder popularWordsRequestBuilder =
-                        suggestHelper.suggester().popularWords().setSize(fessConfig.getSuggestPopularWordSizeAsInteger())
-                                .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger())
-                                .setQueryFreqThreshold(fessConfig.getSuggestPopularWordQueryFreqAsInteger());
+                final PopularWordsRequestBuilder popularWordsRequestBuilder = suggestHelper.suggester()
+                        .popularWords()
+                        .setSize(fessConfig.getSuggestPopularWordSizeAsInteger())
+                        .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger())
+                        .setQueryFreqThreshold(fessConfig.getSuggestPopularWordQueryFreqAsInteger());
                 popularWordsRequestBuilder.setSeed(baseSeed);
                 stream(baseTags).of(stream -> stream.forEach(tag -> popularWordsRequestBuilder.addTag(tag)));
                 stream(baseRoles).of(stream -> stream.forEach(role -> popularWordsRequestBuilder.addRole(role)));

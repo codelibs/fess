@@ -186,8 +186,10 @@ public final class DocumentUtil {
      * @return the encoded URL with non-URL-safe characters properly encoded
      */
     public static String encodeUrl(final String url) {
-        final String enc = LaRequestUtil.getOptionalRequest().filter(req -> req.getCharacterEncoding() != null)
-                .map(HttpServletRequest::getCharacterEncoding).orElse(Constants.UTF_8);
+        final String enc = LaRequestUtil.getOptionalRequest()
+                .filter(req -> req.getCharacterEncoding() != null)
+                .map(HttpServletRequest::getCharacterEncoding)
+                .orElse(Constants.UTF_8);
         final StringBuilder buf = new StringBuilder(url.length() + 100);
         for (final char c : url.toCharArray()) {
             if (CharUtil.isUrlChar(c)) {

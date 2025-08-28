@@ -288,7 +288,11 @@ public class SearchEngineClient implements Client {
      * @return the cluster health status name
      */
     public String getStatus() {
-        return admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout()).getStatus()
+        return admin().cluster()
+                .prepareHealth()
+                .execute()
+                .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout())
+                .getStatus()
                 .name();
     }
 
@@ -418,11 +422,18 @@ public class SearchEngineClient implements Client {
                         createIndex(configIndex, indexName);
                         createAlias(configIndex, indexName);
                     } else {
-                        client.admin().cluster().prepareHealth(fessConfig.getIndexDocumentUpdateIndex()).setWaitForYellowStatus().execute()
+                        client.admin()
+                                .cluster()
+                                .prepareHealth(fessConfig.getIndexDocumentUpdateIndex())
+                                .setWaitForYellowStatus()
+                                .execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
-                        final GetIndexResponse response =
-                                client.admin().indices().prepareGetIndex().addIndices(fessConfig.getIndexDocumentUpdateIndex()).execute()
-                                        .actionGet(fessConfig.getIndexIndicesTimeout());
+                        final GetIndexResponse response = client.admin()
+                                .indices()
+                                .prepareGetIndex()
+                                .addIndices(fessConfig.getIndexDocumentUpdateIndex())
+                                .execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
                         final String[] indices = response.indices();
                         if (indices.length == 1) {
                             indexName = indices[0];
@@ -467,7 +478,9 @@ public class SearchEngineClient implements Client {
     protected Client createHttpClient(final FessConfig fessConfig, final String host) {
         final String[] hosts =
                 split(host, ",").get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).toArray(n -> new String[n]));
-        final Builder builder = Settings.builder().putList("http.hosts", hosts).put("processors", fessConfig.availableProcessors())
+        final Builder builder = Settings.builder()
+                .putList("http.hosts", hosts)
+                .put("processors", fessConfig.availableProcessors())
                 .put("http.heartbeat_interval", fessConfig.getFesenHeartbeatInterval());
         final String username = fessConfig.getFesenUsername();
         final String password = fessConfig.getFesenPassword();
@@ -554,9 +567,15 @@ public class SearchEngineClient implements Client {
         final String requestsPerSecond = getReindexRequestsPerSecound(fessConfig);
         final String scroll = StringUtil.isNotBlank(fessConfig.getIndexReindexScroll()) ? fessConfig.getIndexReindexScroll() : null;
         final String maxDocs = StringUtil.isNotBlank(fessConfig.getIndexReindexMaxDocs()) ? fessConfig.getIndexReindexMaxDocs() : null;
-        try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_reindex").param("refresh", refresh)
-                .param("requests_per_second", requestsPerSecond).param("scroll", scroll).param("max_docs", maxDocs)
-                .param("wait_for_completion", Boolean.toString(waitForCompletion)).body(source).execute()) {
+        try (CurlResponse response = ComponentUtil.getCurlHelper()
+                .post("/_reindex")
+                .param("refresh", refresh)
+                .param("requests_per_second", requestsPerSecond)
+                .param("scroll", scroll)
+                .param("max_docs", maxDocs)
+                .param("wait_for_completion", Boolean.toString(waitForCompletion))
+                .body(source)
+                .execute()) {
             if (response.getHttpStatusCode() == 200) {
                 return true;
             }
@@ -632,8 +651,12 @@ public class SearchEngineClient implements Client {
         final String indexConfigFile = getResourcePath(indexConfigPath, fesenType, "/" + index + ".json");
         try {
             final String source = readIndexSetting(fesenType, indexConfigFile, numberOfShards, autoExpandReplicas);
-            final CreateIndexResponse indexResponse = client.admin().indices().prepareCreate(indexName).setSource(source, XContentType.JSON)
-                    .execute().actionGet(fessConfig.getIndexIndicesTimeout());
+            final CreateIndexResponse indexResponse = client.admin()
+                    .indices()
+                    .prepareCreate(indexName)
+                    .setSource(source, XContentType.JSON)
+                    .execute()
+                    .actionGet(fessConfig.getIndexIndicesTimeout());
             if (indexResponse.isAcknowledged()) {
                 logger.info("Created {} index.", indexName);
                 return true;
@@ -745,8 +768,12 @@ public class SearchEngineClient implements Client {
                 logger.warn("{} is not found.", mappingFile, e);
             }
             try {
-                final AcknowledgedResponse putMappingResponse = client.admin().indices().preparePutMapping(indexName)
-                        .setSource(source, XContentType.JSON).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+                final AcknowledgedResponse putMappingResponse = client.admin()
+                        .indices()
+                        .preparePutMapping(indexName)
+                        .setSource(source, XContentType.JSON)
+                        .execute()
+                        .actionGet(fessConfig.getIndexIndicesTimeout());
                 if (putMappingResponse.isAcknowledged()) {
                     logger.info("Created {}/{} mapping.", indexName, docType);
                 } else {
@@ -849,8 +876,12 @@ public class SearchEngineClient implements Client {
                     if ("{}".equals(source.trim())) {
                         source = null;
                     }
-                    final AcknowledgedResponse response = client.admin().indices().prepareAliases()
-                            .addAlias(createdIndexName, aliasName, source).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+                    final AcknowledgedResponse response = client.admin()
+                            .indices()
+                            .prepareAliases()
+                            .addAlias(createdIndexName, aliasName, source)
+                            .execute()
+                            .actionGet(fessConfig.getIndexIndicesTimeout());
                     if (response.isAcknowledged()) {
                         logger.info("Created {} alias for {}", aliasName, createdIndexName);
                     } else if (logger.isDebugEnabled()) {
@@ -961,10 +992,12 @@ public class SearchEngineClient implements Client {
             final BulkRequestBuilder builder = client.prepareBulk();
             final ObjectMapper mapper = new ObjectMapper();
             final String userIndex = fessConfig.getIndexUserIndex() + ".user";
-            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).map(line -> line//
-                    .replace("\"_index\":\"fess_config.", "\"_index\":\"" + fessConfig.getIndexConfigIndex() + ".")//
-                    .replace("\"_index\":\"fess_user.", "\"_index\":\"" + fessConfig.getIndexUserIndex() + ".")//
-                    .replace("\"_index\":\"fess_log.", "\"_index\":\"" + fessConfig.getIndexLogIndex() + ".")).reduce((prev, line) -> {
+            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n"))
+                    .map(line -> line//
+                            .replace("\"_index\":\"fess_config.", "\"_index\":\"" + fessConfig.getIndexConfigIndex() + ".")//
+                            .replace("\"_index\":\"fess_user.", "\"_index\":\"" + fessConfig.getIndexUserIndex() + ".")//
+                            .replace("\"_index\":\"fess_log.", "\"_index\":\"" + fessConfig.getIndexLogIndex() + "."))
+                    .reduce((prev, line) -> {
                         try {
                             if (StringUtil.isBlank(prev)) {
                                 final Map<String, Map<String, String>> result =
@@ -987,8 +1020,10 @@ public class SearchEngineClient implements Client {
                                                 ComponentUtil.getComponent(FessLoginAssist.class)
                                                         .encryptPassword(fessConfig.getIndexUserInitialPassword()));
                                     }
-                                    final IndexRequestBuilder requestBuilder = client.prepareIndex().setIndex(configIndex)
-                                            .setId(result.get("index").get("_id")).setSource(source, XContentType.JSON);
+                                    final IndexRequestBuilder requestBuilder = client.prepareIndex()
+                                            .setIndex(configIndex)
+                                            .setId(result.get("index").get("_id"))
+                                            .setSource(source, XContentType.JSON);
                                     builder.add(requestBuilder);
                                 }
                             }
@@ -1018,7 +1053,11 @@ public class SearchEngineClient implements Client {
         final long startTime = systemHelper.getCurrentTimeAsLong();
         for (int i = 0; i < maxEsStatusRetry; i++) {
             try {
-                final ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                final ClusterHealthResponse response = client.admin()
+                        .cluster()
+                        .prepareHealth()
+                        .setWaitForYellowStatus()
+                        .execute()
                         .actionGet(fessConfig.getIndexHealthTimeout());
                 if (logger.isDebugEnabled()) {
                     logger.debug("Fesen Cluster Status: {}", response.getStatus());
@@ -1083,7 +1122,11 @@ public class SearchEngineClient implements Client {
     public void close() {
         if (runner != null) {
             try {
-                client.admin().indices().prepareFlush().setForce(true).execute()
+                client.admin()
+                        .indices()
+                        .prepareFlush()
+                        .setForce(true)
+                        .execute()
                         .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
             } catch (final Exception e) {
                 logger.warn("Failed to flush indices.", e);
@@ -1108,7 +1151,9 @@ public class SearchEngineClient implements Client {
             final BiFunction<UpdateRequestBuilder, SearchHit, UpdateRequestBuilder> builder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        SearchResponse response = option.apply(client.prepareSearch(index).setScroll(scrollForUpdate).setSize(sizeForUpdate)
+        SearchResponse response = option.apply(client.prepareSearch(index)
+                .setScroll(scrollForUpdate)
+                .setSize(sizeForUpdate)
                 .setPreference(Constants.SEARCH_PREFERENCE_LOCAL)).execute().actionGet(fessConfig.getIndexScrollSearchTimeout());
 
         int count = 0;
@@ -1135,7 +1180,9 @@ public class SearchEngineClient implements Client {
                     throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
                 }
 
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForUpdate).execute()
+                response = client.prepareSearchScroll(scrollId)
+                        .setScroll(scrollForUpdate)
+                        .execute()
                         .actionGet(fessConfig.getIndexBulkTimeout());
                 if (!scrollId.equals(response.getScrollId())) {
                     deleteScrollContext(scrollId);
@@ -1158,9 +1205,14 @@ public class SearchEngineClient implements Client {
     public long deleteByQuery(final String index, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        SearchResponse response = client.prepareSearch(index).setScroll(scrollForDelete).setSize(sizeForDelete)
-                .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null).setQuery(queryBuilder)
-                .setPreference(Constants.SEARCH_PREFERENCE_LOCAL).execute().actionGet(fessConfig.getIndexScrollSearchTimeout());
+        SearchResponse response = client.prepareSearch(index)
+                .setScroll(scrollForDelete)
+                .setSize(sizeForDelete)
+                .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null)
+                .setQuery(queryBuilder)
+                .setPreference(Constants.SEARCH_PREFERENCE_LOCAL)
+                .execute()
+                .actionGet(fessConfig.getIndexScrollSearchTimeout());
 
         int count = 0;
         String scrollId = response.getScrollId();
@@ -1182,7 +1234,9 @@ public class SearchEngineClient implements Client {
                     throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
                 }
 
-                response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute()
+                response = client.prepareSearchScroll(scrollId)
+                        .setScroll(scrollForDelete)
+                        .execute()
                         .actionGet(fessConfig.getIndexBulkTimeout());
                 if (!scrollId.equals(response.getScrollId())) {
                     deleteScrollContext(scrollId);
@@ -1202,7 +1256,8 @@ public class SearchEngineClient implements Client {
      */
     protected void deleteScrollContext(final String scrollId) {
         if (scrollId != null) {
-            client.prepareClearScroll().addScrollId(scrollId)
+            client.prepareClearScroll()
+                    .addScrollId(scrollId)
                     .execute(wrap(res -> {}, e -> logger.warn("Failed to clear the scroll context.", e)));
         }
     }
@@ -1333,7 +1388,9 @@ public class SearchEngineClient implements Client {
                         }
                     }
 
-                    response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute()
+                    response = client.prepareSearchScroll(scrollId)
+                            .setScroll(scrollForDelete)
+                            .execute()
                             .actionGet(fessConfig.getIndexBulkTimeout());
                     if (!scrollId.equals(response.getScrollId())) {
                         deleteScrollContext(scrollId);
@@ -1372,7 +1429,8 @@ public class SearchEngineClient implements Client {
             }
             final Map<String, DocumentField> fields = hit.getFields();
             if (fields != null) {
-                final Map<String, Object> docMap = fields.entrySet().stream()
+                final Map<String, Object> docMap = fields.entrySet()
+                        .stream()
                         .collect(Collectors.toMap(Entry<String, DocumentField>::getKey, e -> (Object) e.getValue().getValues()));
                 docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                 docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
@@ -1434,7 +1492,8 @@ public class SearchEngineClient implements Client {
             }
             final Map<String, DocumentField> fields = hit.getFields();
             if (fields != null) {
-                final Map<String, Object> docMap = fields.entrySet().stream()
+                final Map<String, Object> docMap = fields.entrySet()
+                        .stream()
                         .collect(Collectors.toMap(Entry<String, DocumentField>::getKey, e -> (Object) e.getValue().getValues()));
                 docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                 return docMap;
@@ -1479,8 +1538,13 @@ public class SearchEngineClient implements Client {
             return updateByIdWithScript(index, id, field, value);
         }
         try {
-            final Result result = client.prepareUpdate().setIndex(index).setId(id).setDoc(field, value).execute()
-                    .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).getResult();
+            final Result result = client.prepareUpdate()
+                    .setIndex(index)
+                    .setId(id)
+                    .setDoc(field, value)
+                    .execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout())
+                    .getResult();
             return result == Result.CREATED || result == Result.UPDATED;
         } catch (final OpenSearchException e) {
             throw new SearchEngineClientException("[" + index + "] Failed to set " + value + " to " + field + " for doc " + id, e);
@@ -1509,8 +1573,12 @@ public class SearchEngineClient implements Client {
                 logger.debug("update script by id: {}", source);
             }
             final String refresh = StringUtil.isNotBlank(fessConfig.getIndexReindexRefresh()) ? fessConfig.getIndexReindexRefresh() : null;
-            try (CurlResponse response = ComponentUtil.getCurlHelper().post("/" + index + "/_update_by_query").param("refresh", refresh)
-                    .param("max_docs", "1").body(source).execute()) {
+            try (CurlResponse response = ComponentUtil.getCurlHelper()
+                    .post("/" + index + "/_update_by_query")
+                    .param("refresh", refresh)
+                    .param("max_docs", "1")
+                    .body(source)
+                    .execute()) {
                 if (response.getHttpStatusCode() == 200) {
                     return true;
                 }
@@ -1961,12 +2029,19 @@ public class SearchEngineClient implements Client {
             final int phraseLimit = fessConfig.getQueryHighlightPhraseLimitAsInteger();
             final String encoder = fessConfig.getQueryHighlightEncoder();
             final HighlightBuilder highlightBuilder = new HighlightBuilder();
-            queryFieldConfig.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder
-                    .field(new HighlightBuilder.Field(hf).highlighterType(highlighterType).fragmentSize(fragmentSize)
-                            .numOfFragments(numOfFragments).boundaryChars(boundaryChars).boundaryMaxScan(boundaryMaxScan)
-                            .boundaryScannerType(boundaryScannerType).forceSource(forceSource).fragmenter(fragmenter)
-                            .fragmentOffset(fragmentOffset).noMatchSize(noMatchSize).order(order).phraseLimit(phraseLimit))
-                    .encoder(encoder)));
+            queryFieldConfig.highlightedFields(
+                    stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf).highlighterType(highlighterType)
+                            .fragmentSize(fragmentSize)
+                            .numOfFragments(numOfFragments)
+                            .boundaryChars(boundaryChars)
+                            .boundaryMaxScan(boundaryMaxScan)
+                            .boundaryScannerType(boundaryScannerType)
+                            .forceSource(forceSource)
+                            .fragmenter(fragmenter)
+                            .fragmentOffset(fragmentOffset)
+                            .noMatchSize(noMatchSize)
+                            .order(order)
+                            .phraseLimit(phraseLimit)).encoder(encoder)));
             searchRequestBuilder.highlighter(highlightBuilder);
         }
 
@@ -2057,12 +2132,21 @@ public class SearchEngineClient implements Client {
             if (id == null) {
                 // TODO throw Exception in next release
                 // create
-                response = client.prepareIndex().setIndex(index).setSource(new DocMap(source)).setRefreshPolicy(RefreshPolicy.IMMEDIATE)
-                        .setOpType(OpType.CREATE).execute().actionGet(fessConfig.getIndexIndexTimeout());
+                response = client.prepareIndex()
+                        .setIndex(index)
+                        .setSource(new DocMap(source))
+                        .setRefreshPolicy(RefreshPolicy.IMMEDIATE)
+                        .setOpType(OpType.CREATE)
+                        .execute()
+                        .actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
-                final IndexRequestBuilder builder = client.prepareIndex().setIndex(index).setId(id).setSource(new DocMap(source))
-                        .setRefreshPolicy(RefreshPolicy.IMMEDIATE).setOpType(OpType.INDEX);
+                final IndexRequestBuilder builder = client.prepareIndex()
+                        .setIndex(index)
+                        .setId(id)
+                        .setSource(new DocMap(source))
+                        .setRefreshPolicy(RefreshPolicy.IMMEDIATE)
+                        .setOpType(OpType.INDEX);
                 if (seqNo != null) {
                     builder.setIfSeqNo(seqNo.longValue());
                 }

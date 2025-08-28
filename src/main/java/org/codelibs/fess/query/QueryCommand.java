@@ -120,8 +120,9 @@ public abstract class QueryCommand {
      * @return An optional containing the query languages array, or empty if not available.
      */
     protected OptionalThing<String[]> getQueryLanguages() {
-        return LaRequestUtil.getOptionalRequest().map(request -> ComponentUtil.getFessConfig().getQueryLanguages(request.getLocales(),
-                (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
+        return LaRequestUtil.getOptionalRequest()
+                .map(request -> ComponentUtil.getFessConfig()
+                        .getQueryLanguages(request.getLocales(), (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
     /**

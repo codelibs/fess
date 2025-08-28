@@ -92,7 +92,10 @@ public class PingSearchEngineJob {
                     SMailCallbackContext.clearPreparedMessageHookOnThread();
                 }
             }
-            resultBuf.append("Status of ").append(ping.getClusterName()).append(" is changed to ").append(ping.getClusterStatus())
+            resultBuf.append("Status of ")
+                    .append(ping.getClusterName())
+                    .append(" is changed to ")
+                    .append(ping.getClusterStatus())
                     .append('.');
         } else if (status == 0) {
             resultBuf.append(ping.getClusterName()).append(" is alive.");

@@ -280,7 +280,9 @@ public class CrawlingInfoHelper {
         return searchEngineClient.search(fessConfig.getIndexDocumentSearchIndex(), queryRequestBuilder -> {
             queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
             final TermsAggregationBuilder termsBuilder = AggregationBuilders.terms(fessConfig.getIndexFieldSegment())
-                    .field(fessConfig.getIndexFieldSegment()).size(maxSessionIdsInList).order(BucketOrder.key(false));
+                    .field(fessConfig.getIndexFieldSegment())
+                    .size(maxSessionIdsInList)
+                    .order(BucketOrder.key(false));
             queryRequestBuilder.addAggregation(termsBuilder);
             queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_LOCAL);
             return true;

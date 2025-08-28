@@ -54,7 +54,10 @@ public class FessPropTest extends UnitFessTestCase {
         file.deleteOnExit();
         FileUtil.writeBytes(file.getAbsolutePath(), "ldap.security.principal=%s@fess.codelibs.local".getBytes("UTF-8"));
         DynamicProperties systemProps = new DynamicProperties(file);
-        SingletonLaContainerFactory.getContainer().register(systemProps, "systemProperties");
+
+        // Get existing component and update it instead of registering new one
+        DynamicProperties existingProps = SingletonLaContainerFactory.getContainer().getComponent("systemProperties");
+        existingProps.setProperty("ldap.security.principal", "%s@fess.codelibs.local");
 
         assertEquals("@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal(null));
         assertEquals("@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal(""));
@@ -76,7 +79,10 @@ public class FessPropTest extends UnitFessTestCase {
         file.deleteOnExit();
         FileUtil.writeBytes(file.getAbsolutePath(), "ldap.security.principal=%s@fess.codelibs.local".getBytes("UTF-8"));
         DynamicProperties systemProps = new DynamicProperties(file);
-        SingletonLaContainerFactory.getContainer().register(systemProps, "systemProperties");
+
+        // Get existing component and update it instead of registering new one
+        DynamicProperties existingProps = SingletonLaContainerFactory.getContainer().getComponent("systemProperties");
+        existingProps.setProperty("ldap.security.principal", "%s@fess.codelibs.local");
 
         assertEquals("@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal(null));
         assertEquals("@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal(""));

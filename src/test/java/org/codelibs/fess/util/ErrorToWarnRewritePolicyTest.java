@@ -45,8 +45,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger.sublogger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test error message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger.sublogger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test error message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -60,8 +63,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test error message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test error message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -74,8 +80,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("different.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test error message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("different.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test error message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -87,8 +96,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent warnEvent = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.WARN)
-                .setMessage(new SimpleMessage("test warn message")).build();
+        LogEvent warnEvent = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.WARN)
+                .setMessage(new SimpleMessage("test warn message"))
+                .build();
 
         LogEvent result = policy.rewrite(warnEvent);
 
@@ -100,8 +112,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent infoEvent = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.INFO)
-                .setMessage(new SimpleMessage("test info message")).build();
+        LogEvent infoEvent = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.INFO)
+                .setMessage(new SimpleMessage("test info message"))
+                .build();
 
         LogEvent result = policy.rewrite(infoEvent);
 
@@ -113,8 +128,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent debugEvent = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.DEBUG)
-                .setMessage(new SimpleMessage("test debug message")).build();
+        LogEvent debugEvent = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.DEBUG)
+                .setMessage(new SimpleMessage("test debug message"))
+                .build();
 
         LogEvent result = policy.rewrite(debugEvent);
 
@@ -126,14 +144,23 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger", "another.logger", "third.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event1 = Log4jLogEvent.newBuilder().setLoggerName("test.logger.sub").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message 1")).build();
+        LogEvent event1 = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger.sub")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message 1"))
+                .build();
 
-        LogEvent event2 = Log4jLogEvent.newBuilder().setLoggerName("another.logger.sub").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message 2")).build();
+        LogEvent event2 = Log4jLogEvent.newBuilder()
+                .setLoggerName("another.logger.sub")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message 2"))
+                .build();
 
-        LogEvent event3 = Log4jLogEvent.newBuilder().setLoggerName("third.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message 3")).build();
+        LogEvent event3 = Log4jLogEvent.newBuilder()
+                .setLoggerName("third.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message 3"))
+                .build();
 
         LogEvent result1 = policy.rewrite(event1);
         LogEvent result2 = policy.rewrite(event2);
@@ -148,8 +175,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("prefix.test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("prefix.test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -161,8 +191,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = {};
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("any.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("any.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -175,8 +208,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("any.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("any.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -189,8 +225,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("any.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("any.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -202,8 +241,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -215,11 +257,17 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event1 = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message 1")).build();
+        LogEvent event1 = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message 1"))
+                .build();
 
-        LogEvent event2 = Log4jLogEvent.newBuilder().setLoggerName("another.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message 2")).build();
+        LogEvent event2 = Log4jLogEvent.newBuilder()
+                .setLoggerName("another.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message 2"))
+                .build();
 
         LogEvent result1 = policy.rewrite(event1);
         LogEvent result2 = policy.rewrite(event2);
@@ -233,8 +281,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -246,8 +297,11 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
         assertNotNull(policy);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .build();
 
         LogEvent result = policy.rewrite(event);
 
@@ -258,8 +312,13 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
 
-        LogEvent event = Log4jLogEvent.newBuilder().setLoggerName("test.logger").setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("test message")).setLoggerFqcn("test.class").setThreadName("test-thread").build();
+        LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("test.logger")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("test message"))
+                .setLoggerFqcn("test.class")
+                .setThreadName("test-thread")
+                .build();
 
         LogEvent result = policy.rewrite(event);
 

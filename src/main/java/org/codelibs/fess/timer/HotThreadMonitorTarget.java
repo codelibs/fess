@@ -60,9 +60,16 @@ public class HotThreadMonitorTarget extends MonitorTarget {
         final String type = fessConfig.getCrawlerHotthreadType();
         try {
             final SearchEngineClient esClient = ComponentUtil.getSearchEngineClient();
-            final NodesHotThreadsResponse response =
-                    esClient.admin().cluster().prepareNodesHotThreads().setIgnoreIdleThreads(ignoreIdleThreads).setInterval(interval)
-                            .setThreads(threads).setTimeout(timeout).setType(type).execute().actionGet(timeout);
+            final NodesHotThreadsResponse response = esClient.admin()
+                    .cluster()
+                    .prepareNodesHotThreads()
+                    .setIgnoreIdleThreads(ignoreIdleThreads)
+                    .setInterval(interval)
+                    .setThreads(threads)
+                    .setTimeout(timeout)
+                    .setType(type)
+                    .execute()
+                    .actionGet(timeout);
             append(buf, "cluster_name", () -> response.getClusterName().value()).append(',');
             final String hotThreads = response.getNodesMap().entrySet().stream().map(e -> {
                 final StringBuilder tempBuf = new StringBuilder();

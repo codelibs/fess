@@ -689,8 +689,10 @@ public class SearchApiManager extends BaseApiManager {
                 throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, "No searched urls.");
             }
 
-            searchHelper.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() },
-                    OptionalThing.empty()).ifPresent(doc -> {
+            searchHelper
+                    .getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldLang() },
+                            OptionalThing.empty())
+                    .ifPresent(doc -> {
                         final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                         final String userCode = userInfoHelper.getUserCode();
 
@@ -724,8 +726,8 @@ public class SearchApiManager extends BaseApiManager {
 
                         final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                         searchHelper.update(id, builder -> {
-                            final Script script = ComponentUtil.getLanguageHelper().createScript(doc,
-                                    "ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
+                            final Script script = ComponentUtil.getLanguageHelper()
+                                    .createScript(doc, "ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
                             builder.setScript(script);
                             final Map<String, Object> upsertMap = new HashMap<>();
                             upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
@@ -735,7 +737,8 @@ public class SearchApiManager extends BaseApiManager {
 
                         writeJsonResponse(HttpServletResponse.SC_CREATED, escapeJsonKeyValue(RESULT_FIELD, "created"));
 
-                    }).orElse(() -> {
+                    })
+                    .orElse(() -> {
                         throw new WebApiException(HttpServletResponse.SC_NOT_FOUND, "Not found: " + docId);
                     });
 

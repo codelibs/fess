@@ -279,7 +279,10 @@ public abstract class ExecJob {
      * @param cmdList the command list to add properties to
      */
     protected void addFessConfigProperties(final List<String> cmdList) {
-        System.getProperties().keySet().stream().filter(k -> k != null && k.toString().startsWith(Constants.FESS_CONFIG_PREFIX))
+        System.getProperties()
+                .keySet()
+                .stream()
+                .filter(k -> k != null && k.toString().startsWith(Constants.FESS_CONFIG_PREFIX))
                 .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
     }
 
@@ -290,7 +293,10 @@ public abstract class ExecJob {
      * @param cmdList the command list to add properties to
      */
     protected void addFessSystemProperties(final List<String> cmdList) {
-        System.getProperties().keySet().stream().filter(k -> k != null && k.toString().startsWith(Constants.SYSTEM_PROP_PREFIX))
+        System.getProperties()
+                .keySet()
+                .stream()
+                .filter(k -> k != null && k.toString().startsWith(Constants.SYSTEM_PROP_PREFIX))
                 .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
     }
 
@@ -303,7 +309,10 @@ public abstract class ExecJob {
     protected void addFessCustomSystemProperties(final List<String> cmdList, final String regex) {
         if (StringUtil.isNotBlank(regex)) {
             final Pattern pattern = Pattern.compile(regex);
-            System.getProperties().keySet().stream().filter(k -> k != null && pattern.matcher(k.toString()).matches())
+            System.getProperties()
+                    .keySet()
+                    .stream()
+                    .filter(k -> k != null && pattern.matcher(k.toString()).matches())
                     .forEach(k -> addSystemProperty(cmdList, k.toString(), null, null));
         }
     }

@@ -83,7 +83,9 @@ public class ApiAdminRelatedcontentAction extends FessApiAdminAction {
         final List<RelatedContent> list = relatedContentService.getRelatedContentList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     // GET /api/admin/relatedcontent/setting/{id}

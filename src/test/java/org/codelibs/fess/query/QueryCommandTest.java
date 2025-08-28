@@ -17,7 +17,10 @@ package org.codelibs.fess.query;
 
 import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
@@ -28,6 +31,231 @@ public class QueryCommandTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        // Setup FessConfig with proper initialization
+        FessConfig.SimpleImpl fessConfig = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            {
+                // Force initialize the ObjectiveConfig's prop field using reflection
+                try {
+                    java.lang.reflect.Field propField = org.lastaflute.core.direction.ObjectiveConfig.class.getDeclaredField("prop");
+                    propField.setAccessible(true);
+                    propField.set(this, new org.dbflute.helper.jprop.ObjectiveProperties("test"));
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to initialize prop field", e);
+                }
+            }
+
+            @Override
+            public String getIndexFieldTitle() {
+                return "title";
+            }
+
+            @Override
+            public String getIndexFieldContent() {
+                return "content";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldDocId() {
+                return "doc_id";
+            }
+
+            @Override
+            public String getIndexFieldBoost() {
+                return "boost";
+            }
+
+            @Override
+            public String getIndexFieldContentLength() {
+                return "content_length";
+            }
+
+            @Override
+            public String getIndexFieldHost() {
+                return "host";
+            }
+
+            @Override
+            public String getIndexFieldSite() {
+                return "site";
+            }
+
+            @Override
+            public String getIndexFieldLastModified() {
+                return "last_modified";
+            }
+
+            @Override
+            public String getIndexFieldTimestamp() {
+                return "timestamp";
+            }
+
+            @Override
+            public String getIndexFieldMimetype() {
+                return "mimetype";
+            }
+
+            @Override
+            public String getIndexFieldFiletype() {
+                return "filetype";
+            }
+
+            @Override
+            public String getIndexFieldFilename() {
+                return "filename";
+            }
+
+            @Override
+            public String getIndexFieldCreated() {
+                return "created";
+            }
+
+            @Override
+            public String getIndexFieldDigest() {
+                return "digest";
+            }
+
+            @Override
+            public String getIndexFieldUrl() {
+                return "url";
+            }
+
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+
+            @Override
+            public String getIndexFieldClickCount() {
+                return "click_count";
+            }
+
+            @Override
+            public String getIndexFieldFavoriteCount() {
+                return "favorite_count";
+            }
+
+            @Override
+            public String getIndexFieldConfigId() {
+                return "config_id";
+            }
+
+            @Override
+            public String getIndexFieldLang() {
+                return "lang";
+            }
+
+            @Override
+            public String getIndexFieldHasCache() {
+                return "has_cache";
+            }
+
+            @Override
+            public String getQueryAdditionalDefaultFields() {
+                return "";
+            }
+
+            @Override
+            public String getQueryAdditionalSearchFields() {
+                return "";
+            }
+
+            @Override
+            public String getQueryLanguageMapping() {
+                return "en:en,ja:ja";
+            }
+
+            @Override
+            public String getQueryDefaultLanguages() {
+                return "en,ja";
+            }
+
+            @Override
+            public String[] getQueryAdditionalResponseFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalScrollResponseFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalCacheResponseFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalHighlightedFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalSearchFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalFacetFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalSortFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String[] getQueryAdditionalApiResponseFields(String... fields) {
+                return fields;
+            }
+
+            @Override
+            public String getIndexFieldCache() {
+                return "cache";
+            }
+
+            @Override
+            public String getIndexFieldLabel() {
+                return "label";
+            }
+
+            @Override
+            public String getIndexFieldSegment() {
+                return "segment";
+            }
+
+            @Override
+            public String get(String key) {
+                // Return empty string instead of null
+                return "";
+            }
+        };
+
+        ComponentUtil.setFessConfig(fessConfig);
+
+        // Initialize QueryFieldConfig
+        QueryFieldConfig queryFieldConfig = new QueryFieldConfig();
+        queryFieldConfig.init();
+        ComponentUtil.register(queryFieldConfig, "queryFieldConfig");
+
+        // Initialize QueryParser
+        QueryParser queryParser = new QueryParser();
+        queryParser.init();
+        ComponentUtil.register(queryParser, "queryParser");
+
+        // Initialize QueryProcessor
+        QueryProcessor queryProcessor = new QueryProcessor();
+        queryProcessor.init();
+        ComponentUtil.register(queryProcessor, "queryProcessor");
+
         queryCommand = new QueryCommand() {
             @Override
             public QueryBuilder execute(QueryContext context, Query query, float boost) {

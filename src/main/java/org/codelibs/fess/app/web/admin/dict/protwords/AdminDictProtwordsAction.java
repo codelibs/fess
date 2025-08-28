@@ -286,7 +286,8 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return protwordsService.getProtwordsFile(form.dictId)
                 .map(file -> asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                     file.writeOut(out);
-                })).orElseGet(() -> {
+                }))
+                .orElseGet(() -> {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL),
                             () -> downloadpage(form.dictId));
                     return null;
@@ -380,8 +381,9 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         createProtwordsItem(form, this::asEditHtml).ifPresent(entity -> {
             protwordsService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                this::asEditHtml));
+        })
+                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                        this::asEditHtml));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 

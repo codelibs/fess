@@ -294,7 +294,8 @@ public class SearchAction extends FessSearchAction {
     protected void createPagingQuery(final SearchForm form) {
         final List<String> pagingQueryList = new ArrayList<>();
         if (form.ex_q != null) {
-            stream(form.ex_q).of(stream -> stream.filter(StringUtil::isNotBlank).distinct()
+            stream(form.ex_q).of(stream -> stream.filter(StringUtil::isNotBlank)
+                    .distinct()
                     .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q))));
         }
         if (StringUtil.isNotBlank(form.sort)) {

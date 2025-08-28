@@ -96,8 +96,10 @@ public class CharMappingService {
      * @return an OptionalEntity containing the character mapping file if found and valid, empty otherwise
      */
     public OptionalEntity<CharMappingFile> getCharMappingFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(CharMappingFile.class::isInstance)
-                .map(file -> OptionalEntity.of((CharMappingFile) file)).orElse(OptionalEntity.empty());
+        return dictionaryManager.getDictionaryFile(dictId)
+                .filter(CharMappingFile.class::isInstance)
+                .map(file -> OptionalEntity.of((CharMappingFile) file))
+                .orElse(OptionalEntity.empty());
     }
 
     /**

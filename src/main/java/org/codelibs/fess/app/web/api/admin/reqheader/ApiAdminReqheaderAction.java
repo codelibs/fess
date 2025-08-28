@@ -91,7 +91,9 @@ public class ApiAdminReqheaderAction extends FessApiAdminAction {
         final List<RequestHeader> list = reqHeaderService.getRequestHeaderList(pager);
         return asJson(
                 new ApiResult.ApiConfigsResponse<EditBody>().settings(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                        .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                        .total(pager.getAllRecordCount())
+                        .status(ApiResult.Status.OK)
+                        .result());
     }
 
     /**

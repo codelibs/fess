@@ -75,7 +75,9 @@ public class ReqHeaderTests extends CrudTestBase {
         requestBody.put("boost", 100.0);
         requestBody.put("available", true);
         requestBody.put("sort_order", 1);
-        checkMethodBase(requestBody).post("/api/admin/webconfig/setting").then().body("response.created", equalTo(true))
+        checkMethodBase(requestBody).post("/api/admin/webconfig/setting")
+                .then()
+                .body("response.created", equalTo(true))
                 .body("response.status", equalTo(0));
     }
 

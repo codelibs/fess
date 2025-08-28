@@ -302,8 +302,12 @@ public class AdminStorageAction extends FessAdminAction {
         try (final InputStream in = uploadFile.getInputStream()) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final MinioClient minioClient = createClient(fessConfig);
-            final PutObjectArgs args = PutObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName)
-                    .stream(in, uploadFile.getFileSize(), -1).contentType("application/octet-stream").build();
+            final PutObjectArgs args = PutObjectArgs.builder()
+                    .bucket(fessConfig.getStorageBucket())
+                    .object(objectName)
+                    .stream(in, uploadFile.getFileSize(), -1)
+                    .contentType("application/octet-stream")
+                    .build();
             minioClient.putObject(args);
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
@@ -353,8 +357,10 @@ public class AdminStorageAction extends FessAdminAction {
      */
     protected static MinioClient createClient(final FessConfig fessConfig) {
         try {
-            return MinioClient.builder().endpoint(fessConfig.getStorageEndpoint())
-                    .credentials(fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey()).build();
+            return MinioClient.builder()
+                    .endpoint(fessConfig.getStorageEndpoint())
+                    .credentials(fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey())
+                    .build();
         } catch (final Exception e) {
             throw new StorageException("Failed to create MinioClient: " + fessConfig.getStorageEndpoint(), e);
         }
@@ -372,9 +378,13 @@ public class AdminStorageAction extends FessAdminAction {
         final List<Map<String, Object>> fileList = new ArrayList<>();
         try {
             final MinioClient minioClient = createClient(fessConfig);
-            final ListObjectsArgs args = ListObjectsArgs.builder().bucket(fessConfig.getStorageBucket())
-                    .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix).recursive(false).includeUserMetadata(false)
-                    .useApiVersion1(false).build();
+            final ListObjectsArgs args = ListObjectsArgs.builder()
+                    .bucket(fessConfig.getStorageBucket())
+                    .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix)
+                    .recursive(false)
+                    .includeUserMetadata(false)
+                    .useApiVersion1(false)
+                    .build();
             for (final Result<Item> result : minioClient.listObjects(args)) {
                 final Map<String, Object> map = new HashMap<>();
                 final Item item = result.get();

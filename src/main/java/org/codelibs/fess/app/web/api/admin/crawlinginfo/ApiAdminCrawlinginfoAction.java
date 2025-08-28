@@ -77,7 +77,9 @@ public class ApiAdminCrawlinginfoAction extends FessApiAdminAction {
         final CrawlingInfoPager pager = copyBeanToNewBean(body, CrawlingInfoPager.class);
         final List<CrawlingInfo> list = crawlingInfoService.getCrawlingInfoList(pager);
         return asJson(new ApiResult.ApiLogsResponse<EditBody>().logs(list.stream().map(this::createEditBody).collect(Collectors.toList()))
-                .total(pager.getAllRecordCount()).status(ApiResult.Status.OK).result());
+                .total(pager.getAllRecordCount())
+                .status(ApiResult.Status.OK)
+                .result());
     }
 
     /**

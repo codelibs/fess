@@ -310,7 +310,8 @@ public class ViewHelper {
      * @return OptionalThing containing the query set
      */
     protected OptionalThing<Set<String>> getQuerySet() {
-        return LaRequestUtil.getOptionalRequest().map(req -> ((Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES)))
+        return LaRequestUtil.getOptionalRequest()
+                .map(req -> ((Set<String>) req.getAttribute(Constants.HIGHLIGHT_QUERIES)))
                 .filter(s -> s != null);
     }
 

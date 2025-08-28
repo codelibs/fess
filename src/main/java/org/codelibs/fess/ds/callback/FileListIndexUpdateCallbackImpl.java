@@ -245,7 +245,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 } catch (final ChildUrlsException e) {
                     crawlerStatsHelper.record(keyObj, StatsAction.CHILD_URLS);
                     if (maxDepth == -1 || crawlRequest.getDepth() < maxDepth) {
-                        e.getChildUrlList().stream() //
+                        e.getChildUrlList()
+                                .stream() //
                                 .filter(data -> !processedUrls.contains(data.getUrl())) //
                                 .map(data -> new CrawlRequest(data.getUrl(), crawlRequest.getDepth() + 1)) //
                                 .forEach(requestQueue::offer);
@@ -255,7 +256,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     final Throwable cause = e.getCause();
                     if (cause instanceof ChildUrlsException) {
                         if (maxDepth == -1 || crawlRequest.getDepth() < maxDepth) {
-                            ((ChildUrlsException) cause).getChildUrlList().stream() //
+                            ((ChildUrlsException) cause).getChildUrlList()
+                                    .stream() //
                                     .filter(data -> !processedUrls.contains(data.getUrl())) //
                                     .map(data -> new CrawlRequest(data.getUrl(), crawlRequest.getDepth() + 1)) //
                                     .forEach(requestQueue::offer);
@@ -511,8 +513,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
      */
     protected void mergeResponseData(final Map<String, Object> dataMap, final Map<String, Object> responseDataMap) {
         dataMap.putAll(responseDataMap);
-        dataMap.keySet().stream().filter(key -> key.endsWith(".overwrite")) //
-                .collect(Collectors.toList()).forEach(key -> {
+        dataMap.keySet()
+                .stream()
+                .filter(key -> key.endsWith(".overwrite")) //
+                .collect(Collectors.toList())
+                .forEach(key -> {
                     final String baseKey = key.substring(0, key.length() - ".overwrite".length());
                     final Object value = dataMap.remove(key);
                     dataMap.put(baseKey, value);

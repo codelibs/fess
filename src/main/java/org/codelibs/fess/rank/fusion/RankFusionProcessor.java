@@ -188,7 +188,8 @@ public class RankFusionProcessor implements AutoCloseable {
             return searchers;
         }
         final RankFusionSearcher[] availableSearchers = Arrays.stream(searchers)
-                .filter(searcher -> availableSearcherNameSet.contains(searcher.getName())).toArray(n -> new RankFusionSearcher[n]);
+                .filter(searcher -> availableSearcherNameSet.contains(searcher.getName()))
+                .toArray(n -> new RankFusionSearcher[n]);
         if (availableSearchers.length == 0) {
             if (logger.isDebugEnabled()) {
                 logger.debug("No available searchers from {}", availableSearcherNameSet);
@@ -317,8 +318,10 @@ public class RankFusionProcessor implements AutoCloseable {
             }
         }
 
-        final var docs = scoreDocMap.values().stream()
-                .sorted((e1, e2) -> Float.compare(toFloat(e2.get(scoreField)), toFloat(e1.get(scoreField)))).toList();
+        final var docs = scoreDocMap.values()
+                .stream()
+                .sorted((e1, e2) -> Float.compare(toFloat(e2.get(scoreField)), toFloat(e1.get(scoreField))))
+                .toList();
         int offset = 0;
         for (int i = 0; i < windowSize / 2 && i < docs.size(); i++) {
             if (!mainIdSet.contains(docs.get(i).get(idField))) {

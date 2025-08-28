@@ -158,8 +158,9 @@ public class SuggestCreator {
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
-            systemMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new SystemMonitorTarget(),
-                    ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(), true);
+            systemMonitorTask = TimeoutManager.getInstance()
+                    .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(),
+                            true);
 
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
