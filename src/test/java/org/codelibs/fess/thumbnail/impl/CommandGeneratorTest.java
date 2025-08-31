@@ -157,9 +157,9 @@ public class CommandGeneratorTest extends UnitFessTestCase {
 
     public void test_generate_invalid_parent_directory() throws Exception {
         // Create a path that's guaranteed to be invalid
-        final File invalidParent =
-                System.getProperty("os.name").toLowerCase().startsWith("windows") ? new File("Q:\\invalid\\path\\that\\does\\not\\exist")
-                        : new File("/invalid/path/that/does/not/exist");
+        final File invalidParent = System.getProperty("os.name", "linux").toLowerCase().startsWith("windows")
+                ? new File("Q:\\invalid\\path\\that\\does\\not\\exist")
+                : new File("/invalid/path/that/does/not/exist");
         final File outputFile = new File(invalidParent, "output.txt");
 
         generator.setCommandList(Collections.singletonList("echo test"));

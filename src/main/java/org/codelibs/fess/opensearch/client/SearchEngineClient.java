@@ -2579,6 +2579,17 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Prepares a stream search request builder for specific indices.
+     *
+     * @param indices the indices to search
+     * @return the search request builder
+     */
+    @Override
+    public SearchRequestBuilder prepareStreamSearch(final String... indices) {
+        return client.prepareStreamSearch(indices);
+    }
+
+    /**
      * Executes a search scroll request asynchronously.
      *
      * @param request the search scroll request

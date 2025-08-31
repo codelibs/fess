@@ -38,4 +38,5 @@ src/main/resources/ga_client_secrets.p12
 src/main/webapp/WEB-INF/project.properties
 /.apt_generated/
 /.apt_generated_tests/
-.serena/
+/.serena
+/.claude
