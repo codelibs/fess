@@ -23,7 +23,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
-import jcifs.SID;
+import org.codelibs.jcifs.smb.SID;
 
 /**
  * Helper class for Samba-related operations.
@@ -129,7 +129,7 @@ public class SambaHelper {
      * @param sid The SID.
      * @return The account ID.
      */
-    public String getAccountId(final jcifs.smb1.smb1.SID sid) {
+    public String getAccountId(final org.codelibs.jcifs.smb1.SID sid) {
         final int type = sid.getType();
         if (logger.isDebugEnabled()) {
             try {
