@@ -38,7 +38,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.Resource;
-import jcifs.SID;
+import org.codelibs.jcifs.smb.SID;
 
 /**
  * Helper class for handling permission-related operations in Fess.
@@ -230,20 +230,20 @@ public class PermissionHelper {
                     logger.debug("smbUrl:{} roleType:{}", responseData.getUrl(), roleTypeList);
                 }
             } else if (responseData.getUrl().startsWith("smb1:")) {
-                final jcifs.smb1.smb1.SID[] allowedSids =
-                        (jcifs.smb1.smb1.SID[]) metaDataMap.get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_ALLOWED_SID_ENTRIES);
+                final org.codelibs.jcifs.smb1.SID[] allowedSids = (org.codelibs.jcifs.smb1.SID[]) metaDataMap
+                        .get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_ALLOWED_SID_ENTRIES);
                 if (allowedSids != null) {
-                    for (final jcifs.smb1.smb1.SID sid : allowedSids) {
+                    for (final org.codelibs.jcifs.smb1.SID sid : allowedSids) {
                         final String accountId = sambaHelper.getAccountId(sid);
                         if (accountId != null) {
                             roleTypeList.add(accountId);
                         }
                     }
                 }
-                final jcifs.smb1.smb1.SID[] deniedSids =
-                        (jcifs.smb1.smb1.SID[]) metaDataMap.get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_DENIED_SID_ENTRIES);
+                final org.codelibs.jcifs.smb1.SID[] deniedSids = (org.codelibs.jcifs.smb1.SID[]) metaDataMap
+                        .get(org.codelibs.fess.crawler.client.smb1.SmbClient.SMB_DENIED_SID_ENTRIES);
                 if (deniedSids != null) {
-                    for (final jcifs.smb1.smb1.SID sid : deniedSids) {
+                    for (final org.codelibs.jcifs.smb1.SID sid : deniedSids) {
                         final String accountId = sambaHelper.getAccountId(sid);
                         if (accountId != null) {
                             roleTypeList.add(fessConfig.getRoleSearchDeniedPrefix() + accountId);

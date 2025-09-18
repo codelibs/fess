@@ -23,8 +23,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 
-import jcifs.SID;
-import jcifs.smb.SmbException;
+import org.codelibs.jcifs.smb.SID;
+import org.codelibs.jcifs.smb.impl.SmbException;
 
 public class SambaHelperTest extends UnitFessTestCase {
 
