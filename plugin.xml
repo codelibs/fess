@@ -5,7 +5,7 @@
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
-	<property name="maven.release.repo.url" value="https://oss.sonatype.org/content/repositories/releases" />
+	<property name="maven.release.repo.url" value="https://repo1.maven.org/maven2" />
 
 	<target name="install.plugins">
 		<mkdir dir="${target.dir}" />
