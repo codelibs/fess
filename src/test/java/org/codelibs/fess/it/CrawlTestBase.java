@@ -46,7 +46,7 @@ public class CrawlTestBase extends ITBase {
     }
 
     protected static void startJob(final String namePrefix) {
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 300; i++) {
             final Map<String, Object> requestBody = new HashMap<>();
             final String schedulerId = getSchedulerIds(namePrefix).get(0);
             final Response response = checkMethodBase(requestBody).put("/api/admin/scheduler/" + schedulerId + "/start");
