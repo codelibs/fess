@@ -118,8 +118,13 @@ public class ProcessHelperTest extends UnitFessTestCase {
             assertNotNull(jobProcess);
             assertTrue(processHelper.isProcessRunning(sessionId));
 
-            // Wait a bit for the process to complete
-            Thread.sleep(200);
+            // Poll for process to complete
+            for (int i = 0; i < 50; i++) {
+                if (!jobProcess.getProcess().isAlive()) {
+                    break;
+                }
+                Thread.sleep(100);
+            }
 
             // Clean up
             processHelper.destroyProcess(sessionId);
@@ -215,7 +220,17 @@ public class ProcessHelperTest extends UnitFessTestCase {
         try {
             JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pbCall);
             assertNotNull(jobProcess);
-            assertTrue(processHelper.isProcessRunning(sessionId));
+
+            // Poll for process to be running (max 50 times, 100ms interval)
+            boolean isRunning = false;
+            for (int i = 0; i < 50; i++) {
+                if (processHelper.isProcessRunning(sessionId)) {
+                    isRunning = true;
+                    break;
+                }
+                Thread.sleep(100);
+            }
+            assertTrue("Process did not become running within timeout", isRunning);
 
             // Wait a bit for the process to start
             Thread.sleep(50);

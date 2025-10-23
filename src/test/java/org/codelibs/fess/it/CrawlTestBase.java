@@ -54,7 +54,7 @@ public class CrawlTestBase extends ITBase {
                 logger.info("Start scheduler \"{}\"", schedulerId);
                 return;
             }
-            ThreadUtil.sleep(1000L);
+            ThreadUtil.sleep(100L);
         }
         fail("could not start job.");
     }
@@ -63,14 +63,14 @@ public class CrawlTestBase extends ITBase {
         Boolean isRunning = false;
         int count = 0;
 
-        while (count < 300 && !isRunning) { // Wait until the crawler starts
-            ThreadUtil.sleep(500);
+        while (count < 1500 && !isRunning) { // Wait until the crawler starts
+            ThreadUtil.sleep(100);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
             isRunning = (Boolean) scheduler.get("running");
         }
-        if (300 <= count) {
+        if (1500 <= count) {
             logger.info("Time out: Failed to start crawler)");
             fail(); // Time Out
         }
@@ -78,15 +78,15 @@ public class CrawlTestBase extends ITBase {
         logger.info("Crawler is running");
         count = 0;
         isRunning = true;
-        while (count < 300 && isRunning) { // Wait until the crawler terminates
-            ThreadUtil.sleep(1000);
+        while (count < 3000 && isRunning) { // Wait until the crawler terminates
+            ThreadUtil.sleep(100);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
             isRunning = (Boolean) scheduler.get("running");
 
         }
-        if (300 <= count) {
+        if (3000 <= count) {
             logger.info("Time out: Crawler takes too much time");
             //TODO fail(); // Time Out
         }

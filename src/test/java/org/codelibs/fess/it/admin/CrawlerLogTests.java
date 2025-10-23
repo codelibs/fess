@@ -71,8 +71,6 @@ public class CrawlerLogTests extends CrawlTestBase {
 
         waitJob(NAME_PREFIX);
         refresh();
-
-        ThreadUtil.sleep(3000);
     }
 
     @BeforeEach

@@ -477,8 +477,14 @@ public class IndexUpdaterTest extends UnitFessTestCase {
 
         indexUpdater.start();
 
-        // Give the thread time to process exceptions
-        Thread.sleep(2000);
+        // Poll for thread to process exceptions
+        for (int i = 0; i < 20; i++) {
+            if (!indexUpdater.isAlive() || indexUpdater.getState() == Thread.State.WAITING
+                    || indexUpdater.getState() == Thread.State.TIMED_WAITING) {
+                break;
+            }
+            Thread.sleep(100);
+        }
 
         // Clean up the thread
         indexUpdater.setFinishCrawling(true);
@@ -496,7 +502,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
 
         // Set component availability to false after some time
         new Thread(() -> {
-            ThreadUtil.sleep(200);
+            ThreadUtil.sleep(50);
             ((TestSystemHelper) systemHelper).setComponentAvailable(false);
         }).start();
 

@@ -151,7 +151,7 @@ public class PluginTests extends CrudTestBase {
                         .map(this::getArtifactFromMap)
                         .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (!exists) {
-                    ThreadUtil.sleep(500);
+                    ThreadUtil.sleep(100);
                     continue;
                 }
                 assertTrue("plugin(" + target + ") is included in " + installed, exists);
@@ -174,7 +174,7 @@ public class PluginTests extends CrudTestBase {
                         .map(this::getArtifactFromMap)
                         .anyMatch(a -> a.getName().equals(target.getName()) && a.getVersion().equals(target.getVersion()));
                 if (exists) {
-                    ThreadUtil.sleep(500);
+                    ThreadUtil.sleep(100);
                     continue;
                 }
                 assertFalse("plugin(" + target + ") is not included in " + installed, exists);
