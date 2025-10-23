@@ -95,7 +95,6 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
 
         System.gc();
-        Thread.sleep(1000L);
         long current = MemoryUtil.getUsedMemory();
         for (int i = 0; i < 10000; i++) {
             if (i % 1000 == 0) {
@@ -120,12 +119,12 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
         long margin = 5000000L;
         System.gc();
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 300; i++) {
             if (MemoryUtil.getUsedMemory() < current + margin) {
                 break;
             }
             System.gc();
-            Thread.sleep(1000L);
+            Thread.sleep(100L);
         }
         final long usedMemory = MemoryUtil.getUsedMemory();
         assertTrue(usedMemory + " < " + current + " + " + margin + ", " + MemoryUtil.getMemoryUsageLog(), usedMemory < current + margin);
