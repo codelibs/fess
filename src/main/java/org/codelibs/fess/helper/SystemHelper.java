@@ -71,6 +71,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
+import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.validation.FessActionValidator;
@@ -616,7 +617,7 @@ public class SystemHelper {
             return env.get("HOSTNAME");
         }
         try {
-            return InetAddress.getLocalHost().getHostAddress();
+            return IpAddressUtil.getUrlHost(InetAddress.getLocalHost());
         } catch (final UnknownHostException e) {
             logger.debug("Unknown hostname.", e);
         }

@@ -34,11 +34,15 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.IpAddressUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
@@ -360,7 +364,23 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @return the redirect URL
      */
     protected String getOicRedirectUrl() {
-        return ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL, "http://localhost:8080/sso/");
+        return ComponentUtil.getSystemProperties().getProperty(OIC_REDIRECT_URL, buildDefaultRedirectUrl());
+    }
+
+    /**
+     * Builds a default redirect URL for OpenID Connect based on the environment.
+     * Automatically handles IPv6 addresses by wrapping them in brackets.
+     *
+     * @return the default redirect URL with proper IPv6 handling
+     */
+    protected String buildDefaultRedirectUrl() {
+        try {
+            final InetAddress localhost = InetAddress.getByName("localhost");
+            return IpAddressUtil.buildUrl("http", localhost, 8080, "/sso/");
+        } catch (final UnknownHostException e) {
+            // Fallback to hardcoded localhost if resolution fails
+            return "http://localhost:8080/sso/";
+        }
     }
 
     /**
