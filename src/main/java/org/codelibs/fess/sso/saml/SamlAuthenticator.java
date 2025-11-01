@@ -39,6 +39,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
@@ -52,6 +53,9 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,10 +101,10 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings = new HashMap<>();
         defaultSettings.put("onelogin.saml2.strict", "true");
         defaultSettings.put("onelogin.saml2.debug", "false");
-        defaultSettings.put("onelogin.saml2.sp.entityid", "http://localhost:8080/sso/metadata");
-        defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", "http://localhost:8080/sso/");
+        defaultSettings.put("onelogin.saml2.sp.entityid", buildDefaultUrl("/sso/metadata"));
+        defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", buildDefaultUrl("/sso/"));
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-        defaultSettings.put("onelogin.saml2.sp.single_logout_service.url", "http://localhost:8080/sso/logout");
+        defaultSettings.put("onelogin.saml2.sp.single_logout_service.url", buildDefaultUrl("/sso/logout"));
         defaultSettings.put("onelogin.saml2.sp.single_logout_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect");
         defaultSettings.put("onelogin.saml2.sp.nameidformat", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress");
         defaultSettings.put("onelogin.saml2.sp.x509cert", "");
@@ -129,6 +133,23 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings.put("onelogin.saml2.contacts.technical.email_address", "technical@example.com");
         defaultSettings.put("onelogin.saml2.contacts.support.given_name", "Support Guy");
         defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@@example.com");
+    }
+
+    /**
+     * Builds a default URL for SAML endpoints based on the environment.
+     * Automatically handles IPv6 addresses by wrapping them in brackets.
+     *
+     * @param path the path to append to the base URL
+     * @return the complete URL with proper IPv6 handling
+     */
+    protected String buildDefaultUrl(final String path) {
+        try {
+            final InetAddress localhost = InetAddress.getByName("localhost");
+            return IpAddressUtil.buildUrl("http", localhost, 8080, path);
+        } catch (final UnknownHostException e) {
+            // Fallback to hardcoded localhost if resolution fails
+            return "http://localhost:8080" + path;
+        }
     }
 
     /**

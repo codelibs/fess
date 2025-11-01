@@ -72,6 +72,7 @@ import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.util.BooleanFunction;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocMap;
+import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.opensearch.runner.OpenSearchRunner;
@@ -394,7 +395,12 @@ public class SearchEngineClient implements Client {
                 runner.build(config);
 
                 final int port = runner.node().settings().getAsInt("http.port", 9200);
-                httpAddress = "http://localhost:" + port;
+                try {
+                    final InetAddress localhost = InetAddress.getByName("localhost");
+                    httpAddress = IpAddressUtil.buildUrl("http", localhost, port, "");
+                } catch (final UnknownHostException e) {
+                    httpAddress = "http://localhost:" + port; // Fallback
+                }
                 logger.warn("Embedded OpenSearch is running. This configuration is not recommended for production use.");
                 break;
             }
