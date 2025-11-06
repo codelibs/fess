@@ -40,6 +40,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.fess.util.SearchEngineUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -379,7 +380,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
             if (StringUtil.isNotBlank(hostname)) {
                 buf.append(hostname);
             }
-            final String ip = ia.getHostAddress();
+            final String ip = IpAddressUtil.getUrlHost(ia);
             if (StringUtil.isNotBlank(ip)) {
                 if (buf.length() > 0) {
                     buf.append(" : ");
