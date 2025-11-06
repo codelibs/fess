@@ -34,16 +34,21 @@ public final class IpAddressUtil {
 
     /**
      * Determines if the given address string represents an IPv6 address.
-     * This method checks if the address contains colons, which is characteristic of IPv6.
+     * This method validates the address using InetAddress to ensure it's a valid IPv6 address.
      *
      * @param address the IP address string to check
-     * @return true if the address appears to be IPv6, false otherwise
+     * @return true if the address is a valid IPv6 address, false otherwise
      */
     public static boolean isIPv6Address(final String address) {
         if (address == null) {
             return false;
         }
-        return address.contains(":");
+        try {
+            final InetAddress inetAddress = InetAddress.getByName(address);
+            return inetAddress instanceof Inet6Address;
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -80,13 +85,35 @@ public final class IpAddressUtil {
             return ipv6Address;
         }
 
-        // If already compressed (contains ::), return as-is
+        // Expand :: if present to get full address for normalization
+        final String expandedAddress;
         if (ipv6Address.contains("::")) {
-            return ipv6Address;
+            final String[] parts = ipv6Address.split("::");
+            final String leftPart = parts.length > 0 && !parts[0].isEmpty() ? parts[0] : "";
+            final String rightPart = parts.length > 1 && !parts[1].isEmpty() ? parts[1] : "";
+            final int leftCount = leftPart.isEmpty() ? 0 : leftPart.split(":").length;
+            final int rightCount = rightPart.isEmpty() ? 0 : rightPart.split(":").length;
+            final int zerosCount = 8 - leftCount - rightCount;
+            final StringBuilder expanded = new StringBuilder(leftPart);
+            for (int i = 0; i < zerosCount; i++) {
+                if (expanded.length() > 0) {
+                    expanded.append(":");
+                }
+                expanded.append("0");
+            }
+            if (!rightPart.isEmpty()) {
+                if (expanded.length() > 0) {
+                    expanded.append(":");
+                }
+                expanded.append(rightPart);
+            }
+            expandedAddress = expanded.toString();
+        } else {
+            expandedAddress = ipv6Address;
         }
 
         // Split address into parts
-        final String[] parts = ipv6Address.split(":");
+        final String[] parts = expandedAddress.split(":");
         if (parts.length != 8) {
             // Not a standard IPv6 address, return as-is
             return ipv6Address;
@@ -145,7 +172,7 @@ public final class IpAddressUtil {
             } else {
                 // Normal part
                 inCompression = false;
-                if (result.length() > 0 && !result.toString().endsWith(":")) {
+                if (result.length() > 0 && result.charAt(result.length() - 1) != ':') {
                     result.append(":");
                 }
                 result.append(normalized[i]);
