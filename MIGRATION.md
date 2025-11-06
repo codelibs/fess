@@ -121,45 +121,24 @@ See the GSA parser implementation: [GsaConfigParser.java](/src/main/java/org/cod
 
 #### API Compatibility Mode
 
-For applications still sending queries to GSA endpoints:
+> **Note**: GSA-compatible search API support may vary by Fess version. The configuration import feature is fully supported, but for GSA-compatible search endpoints, please consult the official Fess documentation for your specific version.
 
-**Step 1: Enable GSA API**
+For applications still sending queries to GSA endpoints, Fess provides a configuration option:
+
+**Enable GSA API**
 
 Add to `system.properties`:
 ```properties
 web.api.gsa=true
 ```
 
-**Step 2: Update Client Applications**
+After enabling this setting and restarting Fess, check your Fess version's documentation for the specific GSA-compatible endpoint configuration. The primary migration path is to:
 
-Change GSA endpoint URLs from:
-```
-http://<gsa-appliance>/search?q=QUERY
-```
+1. **Import your GSA configuration** using the method described above
+2. **Update client applications** to use Fess's JSON Search API (see [API Reference](#api-reference) section)
+3. **Gradually migrate** from GSA query format to Fess's native API
 
-To Fess GSA-compatible endpoint:
-```
-http://<fess-server>:8080/gsa/search?q=QUERY
-```
-
-**Step 3: Test Search Queries**
-
-Fess returns GSA-compatible XML responses:
-```bash
-curl "http://localhost:8080/gsa/search?q=test&num=10&start=0"
-```
-
-**Supported GSA Query Parameters**
-
-- `q` - Query string
-- `num` - Number of results per page
-- `start` - Starting offset
-- `site` - Collection/site filter
-- `client` - Client identifier
-- `output` - Output format (xml)
-- `filter` - Duplicate filtering
-
-**For more details**: [GsaApiManager.java](/src/main/java/org/codelibs/fess/api/gsa/GsaApiManager.java)
+**Alternative Approach**: Instead of relying on GSA API compatibility, we recommend migrating client applications to use Fess's modern JSON API (`/api/v1/documents`), which provides more features and better performance.
 
 ---
 
@@ -288,7 +267,7 @@ Option A: Via Admin UI
 
 Option B: Via Bulk API
 ```bash
-curl -X POST "http://localhost:8080/api/admin/documents/bulk" \
+curl -X PUT "http://localhost:8080/api/admin/documents/bulk" \
   -H "Content-Type: application/x-ndjson" \
   -u admin:admin \
   --data-binary @fess-documents.json
@@ -392,7 +371,7 @@ Create NDJSON file with required Fess fields:
 **Step 3: Bulk Import**
 
 ```bash
-curl -X POST "http://localhost:8080/api/admin/documents/bulk" \
+curl -X PUT "http://localhost:8080/api/admin/documents/bulk" \
   -H "Content-Type: application/x-ndjson" \
   -u admin:admin \
   --data-binary @documents.ndjson
@@ -433,7 +412,7 @@ Fess provides multiple methods for importing data:
 
 #### Bulk Document API
 
-**Endpoint**: `POST /api/admin/documents/bulk`
+**Endpoint**: `PUT /api/admin/documents/bulk`
 
 **Format**: NDJSON (Newline-Delimited JSON)
 
@@ -446,7 +425,7 @@ cat > documents.ndjson << 'EOF'
 EOF
 
 # Import via API
-curl -X POST "http://localhost:8080/api/admin/documents/bulk" \
+curl -X PUT "http://localhost:8080/api/admin/documents/bulk" \
   -H "Content-Type: application/x-ndjson" \
   -u admin:admin \
   --data-binary @documents.ndjson
@@ -605,7 +584,9 @@ After editing `system.properties`, restart Fess.
 
 #### JSON Search API
 
-**Endpoint**: `GET /json/?q={query}`
+**Endpoints**:
+- `GET /api/v1/documents?q={query}` (recommended)
+- `GET /json/?q={query}` (legacy, for backward compatibility)
 
 **Parameters**:
 - `q` - Query string
@@ -616,6 +597,10 @@ After editing `system.properties`, restart Fess.
 
 **Example**:
 ```bash
+# Using the recommended endpoint
+curl "http://localhost:8080/api/v1/documents?q=search&num=10"
+
+# Or using the legacy endpoint
 curl "http://localhost:8080/json/?q=search&num=10"
 ```
 
@@ -646,9 +631,11 @@ curl "http://localhost:8080/json/?q=search&num=10"
 
 #### GSA-Compatible Search API
 
-**Endpoint**: `GET /gsa/search?q={query}`
+> **Note**: GSA-compatible search API availability may vary by Fess version. Please refer to the official Fess documentation for your specific version.
 
-Requires `web.api.gsa=true` in `system.properties`.
+**Configuration**: Set `web.api.gsa=true` in `system.properties` to enable GSA compatibility features.
+
+For most migration scenarios, we recommend using the modern JSON Search API (`/api/v1/documents`) instead.
 
 ### Admin APIs
 
@@ -659,7 +646,7 @@ All admin APIs require authentication (`-u admin:admin` or Bearer token).
 **Available Endpoints**:
 - `POST /backup/upload` - Upload backup/import files
 - `GET /backup/export` - Export configurations
-- `POST /documents/bulk` - Bulk document import
+- `PUT /documents/bulk` - Bulk document import
 - `GET /webconfig` - List web crawl configs
 - `POST /webconfig` - Create web crawl config
 - `PUT /webconfig/{id}` - Update web crawl config
