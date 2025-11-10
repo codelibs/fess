@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.it.admin;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,7 +68,8 @@ public class DocumentsTests extends CrudTestBase {
 
         for (Map<String, Object> doc : docs) {
             String docId = doc.get("doc_id").toString();
-            deleteMethod(SEARCHLIST_API_PATH + "/doc/" + docId);
+            given().contentType("application/json").header("Authorization", getTestToken())
+                    .delete(SEARCHLIST_API_PATH + "/doc/" + docId);
         }
         refresh();
 
@@ -281,7 +283,8 @@ public class DocumentsTests extends CrudTestBase {
         // Clean up large set
         for (Map<String, Object> doc : docs) {
             String docId = doc.get("doc_id").toString();
-            deleteMethod(SEARCHLIST_API_PATH + "/doc/" + docId);
+            given().contentType("application/json").header("Authorization", getTestToken())
+                    .delete(SEARCHLIST_API_PATH + "/doc/" + docId);
         }
         refresh();
 
