@@ -232,14 +232,14 @@ public class DocumentsTests extends CrudTestBase {
     void bulkCreateEmptyListTest() {
         logger.info("[BEGIN] bulkCreateEmptyListTest");
 
-        // Test with empty document list
+        // Test with empty document list - should return error status
         final Map<String, Object> requestBody = new HashMap<>();
         final List<Map<String, Object>> documents = new ArrayList<>();
         requestBody.put("documents", documents);
 
-        // Execute bulk create with empty list
+        // Execute bulk create with empty list - expect error status (1)
         checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then()
-                .body("response.status", equalTo(0));
+                .body("response.status", equalTo(1));
 
         logger.info("[END] bulkCreateEmptyListTest");
     }
