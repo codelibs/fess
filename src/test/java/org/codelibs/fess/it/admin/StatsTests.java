@@ -38,16 +38,12 @@ import io.restassured.path.json.JsonPath;
 public class StatsTests extends CrudTestBase {
     private static final Logger logger = LogManager.getLogger(StatsTests.class);
 
-    private static final String NAME_PREFIX = "statsTest_";
     private static final String API_PATH = "/api/admin/stats";
-    private static final String LIST_ENDPOINT_SUFFIX = "";
-    private static final String ITEM_ENDPOINT_SUFFIX = "";
-
-    private static final String KEY_PROPERTY = "name";
 
     @Override
     protected String getNamePrefix() {
-        return NAME_PREFIX;
+        fail("getNamePrefix is not supported for StatsTests");
+        return null;
     }
 
     @Override
@@ -57,17 +53,20 @@ public class StatsTests extends CrudTestBase {
 
     @Override
     protected String getKeyProperty() {
-        return KEY_PROPERTY;
+        fail("getKeyProperty is not supported for StatsTests");
+        return null;
     }
 
     @Override
     protected String getListEndpointSuffix() {
-        return LIST_ENDPOINT_SUFFIX;
+        fail("getListEndpointSuffix is not supported for StatsTests");
+        return null;
     }
 
     @Override
     protected String getItemEndpointSuffix() {
-        return ITEM_ENDPOINT_SUFFIX;
+        fail("getItemEndpointSuffix is not supported for StatsTests");
+        return null;
     }
 
     @Override
