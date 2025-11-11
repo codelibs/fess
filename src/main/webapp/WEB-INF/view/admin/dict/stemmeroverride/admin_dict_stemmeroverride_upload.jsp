@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="dict"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -51,27 +51,27 @@
                                     <div class="btn-group">
                                         <la:link href="/admin/dict"
                                                  styleClass="btn btn-default btn-xs">
-                                            <em class="fa fa-book"></em>
+                                            <i class="fa fa-book" aria-hidden="true"></i>
                                             <la:message key="labels.dict_list_link"/>
                                         </la:link>
                                         <la:link href="../list/0/?dictId=${f:u(dictId)}"
                                                  styleClass="btn btn-primary btn-xs">
-                                            <em class="fa fa-th-list"></em>
+                                            <i class="fa fa-th-list" aria-hidden="true"></i>
                                             <la:message key="labels.dict_stemmeroverride_list_link"/>
                                         </la:link>
                                         <la:link href="../createnew/${f:u(dictId)}"
                                                  styleClass="btn btn-success btn-xs">
-                                            <em class="fa fa-plus"></em>
+                                            <i class="fa fa-plus" aria-hidden="true"></i>
                                             <la:message key="labels.dict_stemmeroverride_link_create"/>
                                         </la:link>
                                         <la:link href="../downloadpage/${f:u(dictId)}"
                                                  styleClass="btn btn-primary btn-xs">
-                                            <em class="fa fa-download"></em>
+                                            <i class="fa fa-download" aria-hidden="true"></i>
                                             <la:message key="labels.dict_stemmeroverride_link_download"/>
                                         </la:link>
                                         <la:link href="../uploadpage/${f:u(dictId)}"
                                                  styleClass="btn btn-success btn-xs">
-                                            <em class="fa fa-upload"></em>
+                                            <i class="fa fa-upload" aria-hidden="true"></i>
                                             <la:message key="labels.dict_stemmeroverride_link_upload"/>
                                         </la:link>
                                     </div>
@@ -96,7 +96,7 @@
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-success"
                                         value="<la:message key="labels.dict_stemmeroverride_button_upload" />">
-                                    <em class="fa fa-upload"></em>
+                                    <i class="fa fa-upload" aria-hidden="true"></i>
                                     <la:message key="labels.dict_stemmeroverride_button_upload"/>
                                 </button>
                             </div>
@@ -105,7 +105,7 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

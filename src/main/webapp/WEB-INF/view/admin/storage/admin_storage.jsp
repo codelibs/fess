@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="storage"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -48,7 +48,7 @@
                             <c:if test="${editable}">
 								<div class="card-tools">
                                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
-                                        <em class="fa fa-upload" aria-hidden="true"></em>
+                                        <i class="fa fa-upload" aria-hidden="true"></i>
                                         <la:message key="labels.storage_button_upload"/>
                                     </a>
                                 </div>
@@ -95,7 +95,7 @@
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
                                                     <button type="submit" class="btn btn-success" name="createDir">
-                                                        <em class="fa fa-make"></em>
+                                                        <i class="fa fa-make" aria-hidden="true"></i>
                                                         <la:message key="labels.crud_button_create"/>
                                                     </button>
                                                 </div>
@@ -132,7 +132,7 @@
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
                                                     <button type="submit" class="btn btn-success" name="upload">
-                                                        <em class="fa fa-upload"></em>
+                                                        <i class="fa fa-upload" aria-hidden="true"></i>
                                                         <la:message key="labels.storage_button_upload"/>
                                                     </button>
                                                 </div>
@@ -143,7 +143,7 @@
 
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.storage_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.storage_name"/></th>
@@ -155,7 +155,7 @@
                                             </thead>
                                             <tbody>
                                             <c:if test="${not empty path and not empty parentId}">
-                                                <tr data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/">
+                                                <tr data-href="${contextPath}/admin/storage/list/${f:u(data.parentId)}/" role="button" tabindex="0">
                                                     <td>..</td>
                                                     <td></td>
                                                     <td></td>
@@ -163,7 +163,7 @@
                                                 </tr>
                                             </c:if>
                                             <c:if test="${not empty path and empty parentId}">
-                                                <tr data-href="${contextPath}/admin/storage/">
+                                                <tr data-href="${contextPath}/admin/storage/" role="button" tabindex="0">
                                                     <td>..</td>
                                                     <td></td>
                                                     <td></td>
@@ -174,16 +174,16 @@
                                                 <c:if test="${not data.directory}">
                                                 <tr>
                                                     <td>
-                                                        <em class="far fa-file"></em>
+                                                        <i class="far fa-file" aria-hidden="true"></i>
                                                             ${f:h(data.name)}
                                                     </td>
                                                     <td>${f:h(data.size)}</td>
                                                     <td>${fe:formatDate(data.lastModified, 'yyyy-MM-dd HH:mm:ss')}</td>
                                                 </c:if>
                                                 <c:if test="${data.directory.booleanValue()}">
-                                                <tr data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/">
+                                                <tr data-href="${contextPath}/admin/storage/list/${f:h(data.id)}/" role="button" tabindex="0">
                                                     <td>
-                                                        <em class="fa fa-folder-open" style="color:#F7C502;"></em>
+                                                        <i class="fa fa-folder-open" aria-hidden="true" style="color:#F7C502;"></em>
                                                             ${f:h(data.name)}
                                                     </td>
                                                     <td></td>
@@ -195,7 +195,7 @@
                                                            href="${contextPath}/admin/storage/download/${f:h(data.id)}/"
                                                            value="<la:message key="labels.storage_button_download" />"
                                                         >
-                                                            <em class="fa fa-download"></em>
+                                                            <i class="fa fa-download" aria-hidden="true"></i>
                                                             <la:message key="labels.storage_button_download"/>
                                                         </a>
                                                         <c:if test="${editable}">
@@ -203,7 +203,7 @@
 	                                                           href="${contextPath}/admin/storage/editTags?path=${f:u(data.path)}&name=${f:u(data.name)}"
 	                                                           value="<la:message key="labels.storage_button_tags" />"
 	                                                        >
-	                                                            <em class="fa fa-tags"></em>
+	                                                            <i class="fa fa-tags" aria-hidden="true"></i>
 	                                                            <la:message key="labels.storage_button_tags"/>
 	                                                        </a>
                                                             <button type="button" class="btn btn-danger btn-xs"
@@ -211,7 +211,7 @@
                                                                     data-target="#confirmToDelete-${f:h(data.hashCode)}"
                                                                     value="<la:message key="labels.crud_button_delete" />"
                                                             >
-                                                                <em class="fa fa-times"></em>
+                                                                <i class="fa fa-times" aria-hidden="true"></i>
                                                                 <la:message key="labels.crud_button_delete"/>
                                                             </button>
                                                             <div class="modal fade"
@@ -252,7 +252,7 @@
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >
-                                                                                    <em class="fa fa-trash"></em>
+                                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                                                     <la:message
                                                                                             key="labels.crud_button_delete"/>
                                                                                 </button>
@@ -276,7 +276,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="suggest"/>
         <jsp:param name="menuType" value="elevateWord"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -44,21 +44,21 @@
                                 <div class="btn-group">
                                     <la:link href="/admin/elevateword"
                                              styleClass="btn btn-default btn-xs">
-                                        <em class="fa fa-th-list"></em>
+                                        <i class="fa fa-th-list" aria-hidden="true"></i>
                                         <la:message key="labels.elevate_word_link_list"/>
                                     </la:link>
                                     <la:link href="createnew" styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-                                        <em class="fa fa-plus"></em>
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.elevate_word_link_create"/>
                                     </la:link>
                                     <la:link href="downloadpage"
                                              styleClass="btn btn-primary btn-xs">
-                                        <em class="fa fa-download"></em>
+                                        <i class="fa fa-download" aria-hidden="true"></i>
                                         <la:message key="labels.elevate_word_link_download"/>
                                     </la:link>
                                     <la:link href="uploadpage"
                                              styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-                                        <em class="fa fa-upload"></em>
+                                        <i class="fa fa-upload" aria-hidden="true"></i>
                                         <la:message key="labels.elevate_word_link_upload"/>
                                     </la:link>
                                 </div>
@@ -76,7 +76,7 @@
                             <c:if test="${elevateWordPager.allRecordCount == 0}">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <em class="fa fa-info-circle text-primary"></em>
+                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                             <c:if test="${elevateWordPager.allRecordCount > 0}">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.elevate_word_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message
@@ -115,7 +115,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

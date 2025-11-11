@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message key="labels.storage_configuration" /></title>
@@ -12,7 +12,7 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="storage" />
 		</jsp:include>
-		<div class="content-wrapper">
+		<main class="content-wrapper">
 			<div class="content-header">
 				<div class="container-fluid">
 					<div class="row mb-2">
@@ -85,14 +85,14 @@
 								</div>
 								<div class="card-footer">
 									<la:link styleClass="btn btn-default" href="list/${parentId}">
-										<em class="fa fa-arrow-circle-left"></em>
+										<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 										<la:message key="labels.crud_button_back" />
 									</la:link>
 									<c:if test="${editable}">
 										<button type="submit" class="btn btn-success" name="updateTags"
 											value="<la:message key="labels.crud_button_update" />"
 										>
-											<em class="fa fa-pencil-alt"></em>
+											<i class="fa fa-pencil-alt" aria-hidden="true"></i>
 											<la:message key="labels.crud_button_update" />
 										</button>
 									</c:if>
@@ -102,7 +102,7 @@
 					</div>
 				</la:form>
 			</section>
-		</div>
+		</main>
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

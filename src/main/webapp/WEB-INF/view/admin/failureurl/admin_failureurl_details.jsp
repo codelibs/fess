@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="failureUrl"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -57,7 +57,7 @@
                                     <div class="btn-group">
                                         <la:link href="/admin/failureurl"
                                                  styleClass="btn btn-primary btn-xs">
-                                            <em class="fa fa-th-list"></em>
+                                            <i class="fa fa-th-list" aria-hidden="true"></i>
                                             <la:message key="labels.failure_url_link_list"/>
                                         </la:link>
                                     </div>
@@ -72,7 +72,7 @@
                                     <la:errors/>
                                 </div>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered">
+                                    <table class="table table-bordered" aria-label="<la:message key="labels.failure_url_details" />">
                                         <tbody>
                                         <c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
                                             <tr>
@@ -119,14 +119,14 @@
                                 <c:if test="${crudMode == 4}">
                                     <button type="submit" class="btn btn-default" name="back"
                                             value="<la:message key="labels.crud_button_back" />">
-                                        <em class="fa fa-arrow-circle-left"></em>
+                                        <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_back"/>
                                     </button>
                                     <c:if test="${editable}">
                                         <button type="button" class="btn btn-danger" name="delete"
                                                 data-toggle="modal" data-target="#confirmToDelete"
                                                 value="<la:message key="labels.crud_button_delete" />">
-                                            <em class="fa fa-trash"></em>
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                             <la:message key="labels.crud_button_delete"/>
                                         </button>
                                         <div class="modal fade" id="confirmToDelete"
@@ -155,7 +155,7 @@
                                                         <button type="submit" class="btn btn-outline-light"
                                                                 name="delete"
                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.crud_button_delete"/>
                                                         </button>
                                                     </div>
@@ -170,7 +170,7 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

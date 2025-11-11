@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="crawlingInfo"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -64,7 +64,7 @@
                                             <button type="submit" class="btn btn-primary" id="submit"
                                                     name="search"
                                                     value="<la:message key="labels.crawling_info_search" />">
-                                                <em class="fa fa-search"></em>
+                                                <i class="fa fa-search" aria-hidden="true"></i>
                                                 <la:message key="labels.crawling_info_search"/>
                                             </button>
                                         </div>
@@ -81,7 +81,7 @@
                             <c:if test="${crawlingInfoPager.allRecordCount == 0}">
                                 <div class="row top20">
                                     <div class="col-sm-12">
-                                        <em class="fa fa-info-circle text-primary"></em>
+                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@
                             <c:if test="${crawlingInfoPager.allRecordCount > 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.crawling_info_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message
@@ -102,7 +102,7 @@
                                             <c:forEach var="data" varStatus="s"
                                                        items="${crawlingInfoItems}">
                                                 <tr
-                                                        data-href="${contextPath}/admin/crawlinginfo/details/4/${f:u(data.id)}">
+                                                        data-href="${contextPath}/admin/crawlinginfo/details/4/${f:u(data.id)}" role="button" tabindex="0">
                                                     <td>${f:h(data.sessionId)}</td>
                                                     <td><fmt:formatDate
                                                             value="${fe:date(data.createdTime)}"
@@ -125,7 +125,7 @@
                                             <div class="col-sm-12 center">
                                                 <button type="button" class="btn btn-danger"
                                                         data-toggle="modal" data-target="#confirmToDeleteAll">
-                                                    <em class="fa fa-trash"></em>
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                     <la:message key="labels.crawling_info_delete_all_link"/>
                                                 </button>
                                             </div>
@@ -158,7 +158,7 @@
                                                             <button type="submit" class="btn btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.crawling_info_delete_all_link" />">
-                                                                <em class="fa fa-trash"></em>
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 <la:message
                                                                         key="labels.crawling_info_delete_all_link"/>
                                                             </button>
@@ -175,7 +175,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

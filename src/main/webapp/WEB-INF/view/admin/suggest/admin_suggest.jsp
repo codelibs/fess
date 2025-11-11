@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="suggest"/>
         <jsp:param name="menuType" value="suggestWord"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -46,7 +46,7 @@
                             <div class="row">
                                 <div class="col-sm-12">
                                     <la:form action="/admin/suggest/">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.suggest_word_list" />">
                                             <thead>
                                             <tr>
                                                 <th style="width: 15%"><la:message key="labels.suggest_word_type"/></th>
@@ -65,7 +65,7 @@
                                                                 name="deleteAllWords"
                                                                 data-toggle="modal" data-target="#confirmToAllDelete"
                                                                 value="<la:message key="labels.design_delete_button" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.design_delete_button"/>
                                                         </button>
                                                         <div class="modal fade" id="confirmToAllDelete"
@@ -99,7 +99,7 @@
                                                                                 class="btn btn-outline-light"
                                                                                 name="deleteAllWords"
                                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                                            <em class="fa fa-trash"></em>
+                                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                                             <la:message
                                                                                     key="labels.crud_button_delete"/>
                                                                         </button>
@@ -120,7 +120,7 @@
                                                                 data-toggle="modal"
                                                                 data-target="#confirmToDocumentDelete"
                                                                 value="<la:message key="labels.design_delete_button" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.design_delete_button"/>
                                                         </button>
                                                         <div class="modal fade"
@@ -155,7 +155,7 @@
                                                                                 class="btn btn-outline-light"
                                                                                 name="deleteDocumentWords"
                                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                                            <em class="fa fa-trash"></em>
+                                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                                             <la:message
                                                                                     key="labels.crud_button_delete"/>
                                                                         </button>
@@ -175,7 +175,7 @@
                                                                 name="deleteQueryWords"
                                                                 data-toggle="modal" data-target="#confirmToQueryDelete"
                                                                 value="<la:message key="labels.design_delete_button" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.design_delete_button"/>
                                                         </button>
                                                         <div class="modal fade" id="confirmToQueryDelete"
@@ -209,7 +209,7 @@
                                                                                 class="btn btn-outline-light"
                                                                                 name="deleteQueryWords"
                                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                                            <em class="fa fa-trash"></em>
+                                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                                             <la:message
                                                                                     key="labels.crud_button_delete"/>
                                                                         </button>
@@ -230,7 +230,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

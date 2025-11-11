@@ -67,7 +67,7 @@ input[type="file"].form-control:not([type="file"]) {
 section.content table {
 	display: table;
 	table-layout: fixed;
-	width
+	width: 100%;
 }
 
 section.content table td {

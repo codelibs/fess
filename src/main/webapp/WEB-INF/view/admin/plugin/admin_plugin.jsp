@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.plugin_title"/></title>
@@ -12,7 +12,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="plugin"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -39,7 +39,7 @@
                                 <div class="btn-group">
                                     <la:link href="installplugin"
                                              styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-                                        <em class="fa fa-plus"></em>
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.plugin_install"/>
                                     </la:link>
                                 </div>
@@ -57,7 +57,7 @@
                             <div class="data-wrapper">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.plugin_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.plugin_type"/></th>
@@ -80,7 +80,7 @@
                                                                         data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                 >
-                                                                    <em class="fa fa-trash"></em>
+                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                                     <la:message key="labels.crud_button_delete"/>
                                                                 </button>
                                                             </div>
@@ -124,7 +124,7 @@
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >
-                                                                                    <em class="fa fa-trash"></em>
+                                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                                                     <la:message
                                                                                             key="labels.crud_button_delete"/>
                                                                                 </button>
@@ -147,7 +147,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
 ${fe:html(true)}
-<head profile="http://a9.com/-/spec/opensearch/1.1/">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -44,7 +44,7 @@ ${fe:html(true)}
 							class="form-control" placeholder="${ph_username}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
-								<em class="fa fa-user fa-fw"></em>
+								<i class="fa fa-user fa-fw" aria-hidden="true"></i>
             				</span>
 						</div>
 					</div>
@@ -56,7 +56,7 @@ ${fe:html(true)}
 							placeholder="${ph_password}" />
 						<div class="input-group-append">
 							<span class="input-group-text">
-								<em class="fa fa-lock fa-fw"></em>
+								<i class="fa fa-lock fa-fw" aria-hidden="true"></i>
 							</span>
 						</div>
 					</div>
@@ -64,7 +64,7 @@ ${fe:html(true)}
 						<button type="submit" name="login"
 							class="btn btn-primary btn-block"
 							value="<la:message key="labels.login"/>">
-							<em class="fa fa-sign-in"></em>
+							<i class="fa fa-sign-in" aria-hidden="true"></i>
 							<la:message key="labels.login" />
 						</button>
 					</div>

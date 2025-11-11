@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="searchLog"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -69,7 +69,7 @@
                                     <la:errors/>
                                 </div>
                                     <%-- Form Fields --%>
-                                <table class="table table-bordered">
+                                <table class="table table-bordered" aria-label="<la:message key="labels.search_log_details" />">
                                     <tbody>
                                     <c:forEach var="info" items="${logParamItems}">
                                         <tr>
@@ -100,14 +100,14 @@
                                 <c:if test="${crudMode == 4}">
                                     <button type="submit" class="btn btn-default" name="back"
                                             value="<la:message key="labels.searchlog_configuration_button_back" />">
-                                        <em class="fa fa-arrow-circle-left"></em>
+                                        <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                         <la:message key="labels.searchlog_configuration_button_back"/>
                                     </button>
                                     <c:if test="${editable}">
                                         <button type="button" class="btn btn-danger" name="delete"
                                                 data-toggle="modal" data-target="#confirmToDelete"
                                                 value="<la:message key="labels.searchlog_configuration_button_delete" />">
-                                            <em class="fa fa-trash"></em>
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                             <la:message key="labels.searchlog_configuration_button_delete"/>
                                         </button>
                                         <div class="modal fade" id="confirmToDelete"
@@ -136,7 +136,7 @@
                                                         <button type="submit" class="btn btn-outline-light"
                                                                 name="delete"
                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.crud_button_delete"/>
                                                         </button>
                                                     </div>
@@ -151,7 +151,7 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

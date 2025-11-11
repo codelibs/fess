@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="searchList"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -45,7 +45,7 @@
                                 <div class="btn-group">
                                     <la:link href="/admin/searchlist/createnew?q=${f:u(q)}"
                                              styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
-                                        <em class="fa fa-plus"></em>
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.crud_link_create"/>
                                     </la:link>
                                 </div>
@@ -69,7 +69,7 @@
                                 <div class="form-group ml-sm-2">
                                     <button type="submit" class="btn btn-primary" id="submit"
                                             name="search" value="<la:message key="labels.search"/>">
-                                        <em class="fa fa-search"></em>
+                                        <i class="fa fa-search" aria-hidden="true"></i>
                                         <la:message key="labels.search"/>
                                     </button>
                                 </div>
@@ -114,7 +114,7 @@
                                                             <la:link
                                                                     href="/admin/searchlist/edit?crudMode=2&amp;doc.doc_id=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
                                                                     styleClass="btn btn-primary btn-xs">
-                                                                <em class="fa fa-pencil-alt"></em>
+                                                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                                                 <la:message key="labels.crud_button_update"/>
                                                             </la:link>
                                                             <button type="button"
@@ -123,7 +123,7 @@
                                                                     data-docid="${f:u(doc.doc_id)}"
                                                                     data-title="${fe:replace(doc.content_title, '<[^>]+>', '')}"
                                                                     data-url="${f:h(doc.url_link)}">
-                                                                <em class="fa fa-trash"></em>
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 <la:message key="labels.search_list_button_delete"/>
                                                             </button>
                                                         </c:if>
@@ -219,7 +219,7 @@
                                                     <button type="submit" class="btn btn-outline-light"
                                                             name="delete"
                                                             value="<la:message key="labels.search_list_button_delete" />">
-                                                        <em class="fa fa-trash"></em>
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                                         <la:message key="labels.search_list_button_delete"/>
                                                     </button>
                                                 </la:form>
@@ -236,7 +236,7 @@
                                         <div class="col-sm-12 center">
                                             <button type="button" class="btn btn-danger"
                                                     data-toggle="modal" data-target="#confirmToDeleteAll">
-                                                <em class="fa fa-trash"></em>
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
                                                 <la:message key="labels.search_list_button_delete_all"/>
                                             </button>
                                         </div>
@@ -269,7 +269,7 @@
                                                             <button type="submit" class="btn btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.search_list_button_delete_all" />">
-                                                                <em class="fa fa-trash"></em>
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 <la:message key="labels.search_list_button_delete_all"/>
                                                             </button>
                                                     </div>
@@ -285,7 +285,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

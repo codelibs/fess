@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="dict"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -51,13 +51,13 @@
                             <c:if test="${fn:length(dictFiles) == 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <em class="fa fa-info-circle text-primary"></em>
+                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
                             </c:if>
                             <c:if test="${fn:length(dictFiles) > 0}">
-                                <table class="table table-bordered table-striped">
+                                <table class="table table-bordered table-striped" aria-label="<la:message key="labels.dict_list_title" />">
                                     <thead>
                                     <tr>
                                         <th><la:message key="labels.dictionary_name"/></th>
@@ -66,7 +66,7 @@
                                     </thead>
                                     <tbody>
                                     <c:forEach var="data" varStatus="s" items="${dictFiles}">
-                                        <tr data-href="${f:h(data.type)}/?dictId=${f:h(data.id)}">
+                                        <tr data-href="${f:h(data.type)}/?dictId=${f:h(data.id)}" role="button" tabindex="0">
                                             <td>${f:h(data.path)}</td>
                                             <td>${f:h(data.type)}</td>
                                         </tr>
@@ -79,7 +79,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

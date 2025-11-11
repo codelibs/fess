@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="crawl"/>
         <jsp:param name="menuType" value="webAuthentication"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -33,7 +33,7 @@
                 <div class="col-md-12">
                     <c:if test="${!displayCreateLink}">
                         <la:link href="../webconfig/" styleClass="btn btn-primary ${f:h(editableClass)}">
-                            <em class="fa fa-arrow-circle-right"></em>
+                            <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
                             <la:message key="labels.webauth_create_web_config"/>
                         </la:link>
                     </c:if>
@@ -54,7 +54,7 @@
                                 <c:if test="${webAuthPager.allRecordCount == 0}">
                                     <div class="row top10">
                                         <div class="col-sm-12">
-                                            <em class="fa fa-info-circle text-primary"></em>
+                                            <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                             <la:message key="labels.list_could_not_find_crud_table"/>
                                         </div>
                                     </div>
@@ -62,7 +62,7 @@
                                 <c:if test="${webAuthPager.allRecordCount > 0}">
                                     <div class="row top10">
                                         <div class="col-sm-12">
-                                            <table class="table table-bordered table-striped">
+                                            <table class="table table-bordered table-striped" aria-label="<la:message key="labels.web_auth_list" />">
                                                 <thead>
                                                 <tr>
                                                     <th><la:message key="labels.webauth_list_hostname"/></th>
@@ -101,7 +101,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

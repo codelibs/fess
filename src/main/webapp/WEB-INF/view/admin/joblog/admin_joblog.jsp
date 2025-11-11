@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<html lang="${f:lang()}">
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="jobLog"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -53,7 +53,7 @@
                             <c:if test="${jobLogPager.allRecordCount == 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <em class="fa fa-info-circle text-primary"></em>
+                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@
                             <c:if test="${jobLogPager.allRecordCount > 0}">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.job_log_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.joblog_jobName"/></th>
@@ -121,7 +121,7 @@
                                             <div class="col-sm-12 center">
                                                 <button type="button" class="btn btn-danger"
                                                         data-toggle="modal" data-target="#confirmToDeleteAll">
-                                                    <em class="fa fa-trash"></em>
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                     <la:message key="labels.joblog_delete_all_link"/>
                                                 </button>
                                             </div>
@@ -154,7 +154,7 @@
                                                             <button type="submit" class="btn btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.joblog_delete_all_link" />">
-                                                                <em class="fa fa-trash"></em>
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
                                                                 <la:message
                                                                         key="labels.joblog_delete_all_link"/>
                                                             </button>
@@ -170,7 +170,7 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
