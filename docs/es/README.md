@@ -1,14 +1,14 @@
 # Fess: Servidor de Búsqueda Empresarial
 [![Java CI with Maven](https://github.com/codelibs/fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess/actions/workflows/maven.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
+![GitHub Release](https://img.shields.io/github/v/release/codelibs/fess)
 
 ## Resumen
 
 Fess es un servidor de búsqueda empresarial muy potente y fácil de desplegar. Puedes instalar y ejecutar Fess rápidamente en cualquier plataforma que sea capaz de ejecutar el entorno de ejecución de Java (Java Runtime Environment). Fess se distribuye bajo la [Licencia Apache 2.0](LICENSE).
 
 Fess está basado en [OpenSearch](https://github.com/opensearch-project/OpenSearch), pero no se requiere conocimiento o experiencia en OpenSearch. Fess proporciona una GUI de administración fácil de usar para configurar el sistema a través de tu navegador.
-Fess también incluye un rastreador (crawler), que puede rastrear documentos en un [servidor web](https://fess.codelibs.org/14.17/admin/webconfig-guide.html), [sistema de archivos](https://fess.codelibs.org/14.17/admin/fileconfig-guide.html), o [almacenamiento de datos](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html) (como un archivo CSV o base de datos). Se admiten muchos formatos de archivos, incluidos (pero no limitados a): Microsoft Office, PDF y zip.
+Fess también incluye un rastreador (crawler), que puede rastrear documentos en un [servidor web](https://fess.codelibs.org/15.3/admin/webconfig-guide.html), [sistema de archivos](https://fess.codelibs.org/15.3/admin/fileconfig-guide.html), o [almacenamiento de datos](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html) (como un archivo CSV o base de datos). Se admiten muchos formatos de archivos, incluidos (pero no limitados a): Microsoft Office, PDF y zip.
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)* es una alternativa gratuita a [Google Site Search](https://enterprise.google.com/search/products/gss.html). Para más detalles, consulta la [documentación de FSS JS Generator](https://fss-generator.codelibs.org/docs/manual).
 
@@ -26,15 +26,15 @@ Hay dos maneras de probar Fess. La primera es descargar e instalarlo tú mismo. 
 
 ### Descargar e Instalar/Ejecutar
 
-Fess 14.17 ya está disponible y se puede descargar en la [página de lanzamientos](https://github.com/codelibs/fess/releases "download"). Las descargas están disponibles en 3 formatos: deb, rpm y zip.
+Fess 15.3 ya está disponible y se puede descargar en la [página de lanzamientos](https://github.com/codelibs/fess/releases "download"). Las descargas están disponibles en 3 formatos: deb, rpm y zip.
 
 Los siguientes comandos muestran cómo usar la descarga en formato zip:
 
-    $ unzip fess-14.17.x.zip
-    $ cd fess-14.17.x
+    $ unzip fess-15.3.x.zip
+    $ cd fess-15.3.x
     $ ./bin/fess
 
-Para más detalles, consulta la [Guía de Instalación](https://fess.codelibs.org/14.17/install/index.html).
+Para más detalles, consulta la [Guía de Instalación](https://fess.codelibs.org/15.3/install/index.html).
 
 ### Docker
 
@@ -50,7 +50,7 @@ Proporcionamos imágenes de Docker en [ghcr.io](https://github.com/orgs/codelibs
 
 ![Interfaz de Administración](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-Puedes registrar los objetivos de rastreo en la interfaz de administración en las páginas de configuración del rastreador (Web, Archivo, Almacenamiento de Datos), y luego iniciar el rastreador manualmente en la [página del Programador](https://fess.codelibs.org/14.17/admin/scheduler-guide.html).
+Puedes registrar los objetivos de rastreo en la interfaz de administración en las páginas de configuración del rastreador (Web, Archivo, Almacenamiento de Datos), y luego iniciar el rastreador manualmente en la [página del Programador](https://fess.codelibs.org/15.3/admin/scheduler-guide.html).
 
 ## Migración desde otro proveedor de búsqueda
 
@@ -58,7 +58,7 @@ Consulta [MIGRATION.md](MIGRATION.md).
 
 ## Almacenamiento de Datos
 
-Actualmente, Fess admite el rastreo de las siguientes [ubicaciones de almacenamiento y APIs](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html):
+Actualmente, Fess admite el rastreo de las siguientes [ubicaciones de almacenamiento y APIs](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html):
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
@@ -149,6 +149,16 @@ Si deseas agregar etiquetas/mensajes para tu idioma, por favor traduce el archiv
 Para el analizador de búsqueda/índices, si [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contiene lang\_[lang] para tu idioma, por favor modifica el analizador para tu idioma. Para más detalles sobre los analizadores, consulta la [documentación de OpenSearch](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
 
 Damos la bienvenida a pull requests para tu idioma.
+
+### Traducciones
+
+- [English](../../README.md)
+- [日本語 (Japanese)](../ja/README.md)
+- [简体中文 (Simplified Chinese)](../zh-CN/README.md)
+- [Português (Brazilian Portuguese)](../pt-BR/README.md)
+- [Français (French)](../fr/README.md)
+- [Deutsch (German)](../de/README.md)
+- [한국어 (Korean)](../ko/README.md)
 
 ## Impulsado por
 
