@@ -1,13 +1,13 @@
 # Fess: 엔터프라이즈 검색 서버
 [![Java CI with Maven](https://github.com/codelibs/fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess/actions/workflows/maven.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
+![GitHub Release](https://img.shields.io/github/v/release/codelibs/fess)
 
 ## 개요
 
 Fess는 매우 강력하고 쉽게 배포 가능한 엔터프라이즈 검색 서버입니다. 자바 런타임 환경(Java Runtime Environment)을 실행할 수 있는 모든 플랫폼에서 Fess를 빠르게 설치하고 실행할 수 있습니다. Fess는 [Apache License 2.0](LICENSE)에 따라 제공됩니다.
 
-Fess는 [OpenSearch](https://github.com/opensearch-project/OpenSearch)를 기반으로 하지만, OpenSearch에 대한 지식이나 경험은 필요하지 않습니다. Fess는 브라우저를 통해 시스템을 구성할 수 있는 사용하기 쉬운 관리 GUI를 제공합니다. 또한 Fess는 [웹 서버](https://fess.codelibs.org/14.17/admin/webconfig-guide.html), [파일 시스템](https://fess.codelibs.org/14.17/admin/fileconfig-guide.html), 또는 [데이터 저장소](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html)에서 문서를 크롤링할 수 있는 크롤러도 포함하고 있습니다(CSV 또는 데이터베이스와 같은). Microsoft Office, PDF, zip을 포함한 다양한 파일 형식을 지원합니다.
+Fess는 [OpenSearch](https://github.com/opensearch-project/OpenSearch)를 기반으로 하지만, OpenSearch에 대한 지식이나 경험은 필요하지 않습니다. Fess는 브라우저를 통해 시스템을 구성할 수 있는 사용하기 쉬운 관리 GUI를 제공합니다. 또한 Fess는 [웹 서버](https://fess.codelibs.org/15.3/admin/webconfig-guide.html), [파일 시스템](https://fess.codelibs.org/15.3/admin/fileconfig-guide.html), 또는 [데이터 저장소](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html)에서 문서를 크롤링할 수 있는 크롤러도 포함하고 있습니다(CSV 또는 데이터베이스와 같은). Microsoft Office, PDF, zip을 포함한 다양한 파일 형식을 지원합니다.
 
 *[Fess 사이트 검색](https://github.com/codelibs/fess-site-search)*은 [Google 사이트 검색](https://enterprise.google.com/search/products/gss.html)의 무료 대안입니다. 자세한 내용은 [FSS JS 생성기 문서](https://fss-generator.codelibs.org/docs/manual)를 참조하십시오.
 
@@ -25,15 +25,15 @@ Fess를 사용해보는 방법은 두 가지가 있습니다. 첫 번째는 직�
 
 ### 다운로드 및 설치/실행
 
-Fess 14.17이 현재 사용 가능하며, [릴리스 페이지](https://github.com/codelibs/fess/releases "download")에서 다운로드할 수 있습니다. 다운로드는 deb, rpm, zip의 세 가지 형식으로 제공됩니다.
+Fess 15.3이 현재 사용 가능하며, [릴리스 페이지](https://github.com/codelibs/fess/releases "download")에서 다운로드할 수 있습니다. 다운로드는 deb, rpm, zip의 세 가지 형식으로 제공됩니다.
 
 다음 명령은 zip 다운로드 사용 방법을 보여줍니다:
 
-    $ unzip fess-14.17.x.zip
-    $ cd fess-14.17.x
+    $ unzip fess-15.3.x.zip
+    $ cd fess-15.3.x
     $ ./bin/fess
 
-자세한 내용은 [설치 가이드](https://fess.codelibs.org/14.17/install/index.html)를 참조하십시오.
+자세한 내용은 [설치 가이드](https://fess.codelibs.org/15.3/install/index.html)를 참조하십시오.
 
 ### Docker
 
@@ -49,7 +49,7 @@ Fess 14.17이 현재 사용 가능하며, [릴리스 페이지](https://github.c
 
 ![관리자 UI](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-관리자 UI에서는 (웹, 파일, 데이터 저장소) 크롤러 구성 페이지에서 크롤링 대상을 등록한 다음, [스케줄러 페이지](https://fess.codelibs.org/14.17/admin/scheduler-guide.html)에서 크롤러를 수동으로 시작할 수 있습니다.
+관리자 UI에서는 (웹, 파일, 데이터 저장소) 크롤러 구성 페이지에서 크롤링 대상을 등록한 다음, [스케줄러 페이지](https://fess.codelibs.org/15.3/admin/scheduler-guide.html)에서 크롤러를 수동으로 시작할 수 있습니다.
 
 ## 다른 검색 제공자에서의 마이그레이션
 
@@ -57,7 +57,7 @@ Fess 14.17이 현재 사용 가능하며, [릴리스 페이지](https://github.c
 
 ## 데이터 저장소
 
-현재 Fess는 다음 [저장소 위치 및 API](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html)를 크롤링할 수 있습니다:
+현재 Fess는 다음 [저장소 위치 및 API](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html)를 크롤링할 수 있습니다:
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
@@ -148,6 +148,16 @@ Fess는 국제화된 소프트웨어입니다.
 검색/인덱스 분석기와 관련해서, [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json)이 귀하의 언어에 대한 lang\_[lang]을 포함하는 경우, 해당 언어에 맞게 분석기를 수정하십시오. 분석기에 대한 자세한 내용은 [OpenSearch 문서](https://opensearch.org/docs/latest/analyzers/search-analyzers/)를 참조하십시오.
 
 귀하의 언어로 된 풀 리퀘스트를 환영합니다.
+
+### 번역
+
+- [English](../../README.md)
+- [日本語 (Japanese)](../ja/README.md)
+- [简体中文 (Simplified Chinese)](../zh-CN/README.md)
+- [Español (Spanish)](../es/README.md)
+- [Português (Brazilian Portuguese)](../pt-BR/README.md)
+- [Français (French)](../fr/README.md)
+- [Deutsch (German)](../de/README.md)
 
 ## 제공된 기술
 

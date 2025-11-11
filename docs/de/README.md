@@ -1,14 +1,14 @@
 # Fess: Enterprise-Suchserver
 [![Java CI with Maven](https://github.com/codelibs/fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess/actions/workflows/maven.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gitbucket/gitbucket/blob/master/LICENSE)
+![GitHub Release](https://img.shields.io/github/v/release/codelibs/fess)
 
 ## Übersicht
 
 Fess ist ein sehr leistungsstarker und einfach zu implementierender Enterprise-Suchserver. Sie können Fess schnell auf jeder Plattform installieren und ausführen, auf der die Java-Laufzeitumgebung (JRE) läuft. Fess wird unter der [Apache-Lizenz 2.0](LICENSE) bereitgestellt.
 
 Fess basiert auf [OpenSearch](https://github.com/opensearch-project/OpenSearch), aber es ist kein Wissen oder Erfahrung mit OpenSearch erforderlich. Fess bietet eine einfach zu bedienende Administrations-GUI zur Konfiguration des Systems über Ihren Browser.
-Fess enthält auch einen Crawler, der Dokumente auf einem [Webserver](https://fess.codelibs.org/14.17/admin/webconfig-guide.html), [Dateisystem](https://fess.codelibs.org/14.17/admin/fileconfig-guide.html) oder [Datenspeicher](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html) (wie CSV oder Datenbank) durchsuchen kann. Viele Dateiformate werden unterstützt, einschließlich (aber nicht beschränkt auf): Microsoft Office, PDF und zip.
+Fess enthält auch einen Crawler, der Dokumente auf einem [Webserver](https://fess.codelibs.org/15.3/admin/webconfig-guide.html), [Dateisystem](https://fess.codelibs.org/15.3/admin/fileconfig-guide.html) oder [Datenspeicher](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html) (wie CSV oder Datenbank) durchsuchen kann. Viele Dateiformate werden unterstützt, einschließlich (aber nicht beschränkt auf): Microsoft Office, PDF und zip.
 
 *[Fess Site Search](https://github.com/codelibs/fess-site-search)* ist eine kostenlose Alternative zur [Google Site Search](https://enterprise.google.com/search/products/gss.html). Weitere Details finden Sie in der [Dokumentation des FSS JS Generators](https://fss-generator.codelibs.org/docs/manual).
 
@@ -26,15 +26,15 @@ Es gibt zwei Möglichkeiten, Fess auszuprobieren. Die erste besteht darin, es se
 
 ### Herunterladen und Installieren/Ausführen
 
-Fess 14.17 ist jetzt verfügbar und kann auf der [Release-Seite](https://github.com/codelibs/fess/releases "download") heruntergeladen werden. Downloads gibt es in drei Formaten: deb, rpm, zip.
+Fess 15.3 ist jetzt verfügbar und kann auf der [Release-Seite](https://github.com/codelibs/fess/releases "download") heruntergeladen werden. Downloads gibt es in drei Formaten: deb, rpm, zip.
 
 Die folgenden Befehle zeigen, wie der Zip-Download verwendet wird:
 
-    $ unzip fess-14.17.x.zip
-    $ cd fess-14.17.x
+    $ unzip fess-15.3.x.zip
+    $ cd fess-15.3.x
     $ ./bin/fess
 
-Weitere Informationen finden Sie im [Installationshandbuch](https://fess.codelibs.org/14.17/install/index.html).
+Weitere Informationen finden Sie im [Installationshandbuch](https://fess.codelibs.org/15.3/install/index.html).
 
 ### Docker
 
@@ -50,7 +50,7 @@ Wir bieten Docker-Images auf [ghcr.io](https://github.com/orgs/codelibs/packages
 
 ![Administrationsoberfläche](https://fess.codelibs.org/_images/fess_admin_dashboard.png)
 
-Sie können in der Administrationsoberfläche (Web, Datei, Datenspeicher) Crawling-Ziele in den Crawler-Konfigurationsseiten registrieren und den Crawler manuell auf der [Scheduler-Seite](https://fess.codelibs.org/14.17/admin/scheduler-guide.html) starten.
+Sie können in der Administrationsoberfläche (Web, Datei, Datenspeicher) Crawling-Ziele in den Crawler-Konfigurationsseiten registrieren und den Crawler manuell auf der [Scheduler-Seite](https://fess.codelibs.org/15.3/admin/scheduler-guide.html) starten.
 
 ## Migration von einem anderen Suchanbieter
 
@@ -58,7 +58,7 @@ Bitte lesen Sie [MIGRATION.md](MIGRATION.md).
 
 ## Datenspeicher
 
-Derzeit unterstützt Fess das Crawlen der folgenden [Speicherorte und APIs](https://fess.codelibs.org/14.17/admin/dataconfig-guide.html):
+Derzeit unterstützt Fess das Crawlen der folgenden [Speicherorte und APIs](https://fess.codelibs.org/15.3/admin/dataconfig-guide.html):
 
  - [Confluence/Jira](https://github.com/codelibs/fess-ds-atlassian)
  - [Box](https://github.com/codelibs/fess-ds-box)
@@ -149,6 +149,16 @@ Wenn Sie Labels/Nachrichten für Ihre Sprache hinzufügen möchten, übersetzen 
 Für den Such-/Index-Analyser: Wenn [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) lang\_[lang] für Ihre Sprache enthält, passen Sie bitte den Analyser für Ihre Sprache an. Weitere Informationen zu Analysatoren finden Sie in der [OpenSearch-Dokumentation](https://opensearch.org/docs/latest/analyzers/search-analyzers/).
 
 Wir begrüßen Pull-Requests für Ihre Sprache.
+
+### Übersetzungen
+
+- [English](../../README.md)
+- [日本語 (Japanese)](../ja/README.md)
+- [简体中文 (Simplified Chinese)](../zh-CN/README.md)
+- [Español (Spanish)](../es/README.md)
+- [Português (Brazilian Portuguese)](../pt-BR/README.md)
+- [Français (French)](../fr/README.md)
+- [한국어 (Korean)](../ko/README.md)
 
 ## Unterstützt von
 
