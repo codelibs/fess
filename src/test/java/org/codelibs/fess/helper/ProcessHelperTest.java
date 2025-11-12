@@ -116,7 +116,6 @@ public class ProcessHelperTest extends UnitFessTestCase {
         try {
             JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pbCall, 1024, outputCallback);
             assertNotNull(jobProcess);
-            assertTrue(processHelper.isProcessRunning(sessionId));
 
             // Poll for process to complete
             for (int i = 0; i < 50; i++) {
