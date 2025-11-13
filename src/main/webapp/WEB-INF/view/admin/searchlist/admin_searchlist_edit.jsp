@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html lang="${pageContext.response.locale}">
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.search_list_configuration"/></title>
@@ -364,4 +364,4 @@
         type="text/javascript"></script>
 <script src="${fe:url('/js/admin/searchlist.js')}" type="text/javascript"></script>
 </body>
-</html>
+${fe:html(false)}
