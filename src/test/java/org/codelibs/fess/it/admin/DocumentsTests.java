@@ -68,8 +68,7 @@ public class DocumentsTests extends CrudTestBase {
 
         for (Map<String, Object> doc : docs) {
             String docId = doc.get("doc_id").toString();
-            given().contentType("application/json").header("Authorization", getTestToken())
-                    .delete(SEARCHLIST_API_PATH + "/doc/" + docId);
+            given().contentType("application/json").header("Authorization", getTestToken()).delete(SEARCHLIST_API_PATH + "/doc/" + docId);
         }
         refresh();
 
@@ -147,8 +146,7 @@ public class DocumentsTests extends CrudTestBase {
         requestBody.put("documents", documents);
 
         // Execute bulk create
-        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then()
-                .body("response.status", equalTo(0));
+        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then().body("response.status", equalTo(0));
         refresh();
 
         // Verify documents were created
@@ -209,8 +207,7 @@ public class DocumentsTests extends CrudTestBase {
         requestBody.put("documents", documents);
 
         // Execute bulk update
-        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then()
-                .body("response.status", equalTo(0));
+        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then().body("response.status", equalTo(0));
         refresh();
 
         // Verify documents were updated
@@ -238,8 +235,7 @@ public class DocumentsTests extends CrudTestBase {
         requestBody.put("documents", documents);
 
         // Execute bulk create with empty list - expect error status (1)
-        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then()
-                .body("response.status", equalTo(1));
+        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then().body("response.status", equalTo(1));
 
         logger.info("[END] bulkCreateEmptyListTest");
     }
@@ -265,8 +261,7 @@ public class DocumentsTests extends CrudTestBase {
         requestBody.put("documents", documents);
 
         // Execute bulk create
-        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then()
-                .body("response.status", equalTo(0));
+        checkMethodBase(requestBody).put(API_PATH + "/" + BULK_ENDPOINT).then().body("response.status", equalTo(0));
         refresh();
 
         // Verify documents were created
@@ -283,8 +278,7 @@ public class DocumentsTests extends CrudTestBase {
         // Clean up large set
         for (Map<String, Object> doc : docs) {
             String docId = doc.get("doc_id").toString();
-            given().contentType("application/json").header("Authorization", getTestToken())
-                    .delete(SEARCHLIST_API_PATH + "/doc/" + docId);
+            given().contentType("application/json").header("Authorization", getTestToken()).delete(SEARCHLIST_API_PATH + "/doc/" + docId);
         }
         refresh();
 

@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="scheduler"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -55,7 +55,7 @@
                                     <la:errors/>
                                 </div>
                                     <%-- Form Fields --%>
-                                <table class="table table-bordered">
+                                <table class="table table-bordered" aria-label="<la:message key="labels.scheduledjob_details" />">
                                     <tbody>
                                     <tr>
                                         <th style="width: 25%"><la:message key="labels.scheduledjob_name"/></th>
@@ -113,20 +113,20 @@
                             </div>
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-default" name="list" value="back">
-                                    <em class="fa fa-arrow-circle-left"></em>
+                                    <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                     <la:message key="labels.crud_button_back"/>
                                 </button>
                                 <c:if test="${editable}">
                                     <button type="submit" class="btn btn-primary" name="edit"
                                             value="<la:message key="labels.crud_button_edit" />">
-                                        <em class="fa fa-pencil-alt"></em>
+                                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_edit"/>
                                     </button>
                                     <c:if test="${!running and !systemJobId}">
                                         <button type="button" class="btn btn-danger" name="delete"
                                                 data-toggle="modal" data-target="#confirmToDelete"
                                                 value="<la:message key="labels.crud_button_delete" />">
-                                            <em class="fa fa-trash"></em>
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                             <la:message key="labels.crud_button_delete"/>
                                         </button>
                                         <div class="modal fade" id="confirmToDelete" tabindex="-1"
@@ -155,7 +155,7 @@
                                                         <button type="submit" class="btn btn-outline-light"
                                                                 name="delete"
                                                                 value="<la:message key="labels.crud_button_delete" />">
-                                                            <em class="fa fa-trash"></em>
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                             <la:message key="labels.crud_button_delete"/>
                                                         </button>
                                                     </div>
@@ -166,14 +166,14 @@
                                     <c:if test="${running}">
                                         <button type="submit" class="btn btn-danger" name="stop"
                                                 value="<la:message key="labels.scheduledjob_button_stop" />">
-                                            <em class="fa fa-stop"></em>
+                                            <i class="fa fa-stop" aria-hidden="true"></i>
                                             <la:message key="labels.scheduledjob_button_stop"/>
                                         </button>
                                     </c:if>
                                     <c:if test="${!running && enabled}">
                                         <button type="submit" class="btn btn-success" name="start"
                                                 value="<la:message key="labels.scheduledjob_button_start" />">
-                                            <em class="fa fa-play-circle"></em>
+                                            <i class="fa fa-play-circle" aria-hidden="true"></i>
                                             <la:message key="labels.scheduledjob_button_start"/>
                                         </button>
                                     </c:if>
@@ -184,9 +184,9 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}

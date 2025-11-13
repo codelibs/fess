@@ -56,7 +56,7 @@
 					<div class="description">${doc.content_description}</div>
 				</div>
 				<div class="site text-truncate">
-					<c:if test="${clipboardCopyIcon}"><i class="far fa-copy url-copy d-print-none" data-clipboard-text="${doc.url_link}"></i></c:if>
+					<c:if test="${clipboardCopyIcon}"><i class="far fa-copy url-copy d-print-none" data-clipboard-text="${doc.url_link}" aria-hidden="true"></i></c:if>
 					<cite>${f:h(doc.site_path)}</cite>
 				</div>
 				<div class="more">
@@ -99,8 +99,8 @@
 					<c:if test="${favoriteSupport}">
 						<div class="d-sm-none"></div>
 						<span class="d-none d-sm-inline-block">&nbsp;</span>
-						<a href="#${doc.doc_id}" class="favorite"><i class="far fa-star"></i></a>
-						<span class="favorited"><i class="fas fa-star"></i></span>
+						<a href="#${doc.doc_id}" class="favorite"><i class="far fa-star" aria-hidden="true"></i></a>
+						<span class="favorited"><i class="fas fa-star" aria-hidden="true"></i></span>
 					</c:if>
 				</div>
 			</li>

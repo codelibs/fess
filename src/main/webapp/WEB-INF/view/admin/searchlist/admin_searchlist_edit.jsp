@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.search_list_configuration"/></title>
@@ -12,7 +12,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="searchList"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -66,14 +66,14 @@
                                         <c:choose>
                                             <c:when test="${crudMode == null}">
                                                 <la:link href="createnew" styleClass="btn btn-success btn-xs">
-                                                    <em class="fa fa-plus"></em>
+                                                    <i class="fa fa-plus" aria-hidden="true"></i>
                                                     <la:message key="labels.crud_link_create"/>
                                                 </la:link>
                                             </c:when>
                                             <c:otherwise>
                                                 <la:link href="/admin/searchlist/search?q=${f:u(q)}"
                                                          styleClass="btn btn-primary btn-xs">
-                                                    <em class="fa fa-th-list"></em>
+                                                    <i class="fa fa-th-list" aria-hidden="true"></i>
                                                     <la:message key="labels.crud_link_list"/>
                                                 </la:link>
                                             </c:otherwise>
@@ -330,23 +330,23 @@
                             <div class="card-footer">
                                 <c:if test="${crudMode == 1}">
                                     <la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
-                                        <em class="fa fa-arrow-circle-left"></em>
+                                        <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_back"/>
                                     </la:link>
                                     <button type="submit" class="btn btn-success" name="create"
                                             value="<la:message key="labels.crud_button_create" />">
-                                        <em class="fa fa-plus"></em>
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_create"/>
                                     </button>
                                 </c:if>
                                 <c:if test="${crudMode == 2}">
                                     <la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
-                                        <em class="fa fa-arrow-circle-left"></em>
+                                        <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_back"/>
                                     </la:link>
                                     <button type="submit" class="btn btn-success" name="update"
                                             value="<la:message key="labels.crud_button_update" />">
-                                        <em class="fa fa-pencil-alt"></em>
+                                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_update"/>
                                     </button>
                                 </c:if>
@@ -356,7 +356,7 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
@@ -364,4 +364,4 @@
         type="text/javascript"></script>
 <script src="${fe:url('/js/admin/searchlist.js')}" type="text/javascript"></script>
 </body>
-</html>
+${fe:html(false)}

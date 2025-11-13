@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="design"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -54,14 +54,14 @@
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary" name="download"
                                         value="<la:message key="labels.design_download_button" />">
-                                    <em class="fa fa-download"></em>
+                                    <i class="fa fa-download" aria-hidden="true"></i>
                                     <la:message key="labels.design_download_button"/>
                                 </button>
                                 <c:if test="${editable}">
                                     <button type="button" class="btn btn-danger" name="delete"
                                             data-toggle="modal" data-target="#confirmToDelete"
                                             value="<la:message key="labels.design_delete_button" />">
-                                        <em class="fa fa-trash"></em>
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                         <la:message key="labels.design_delete_button"/>
                                     </button>
                                     <div class="modal fade" id="confirmToDelete" tabindex="-1"
@@ -90,7 +90,7 @@
                                                     <button type="submit" class="btn btn-outline-light"
                                                             name="delete"
                                                             value="<la:message key="labels.crud_button_delete" />">
-                                                        <em class="fa fa-trash"></em>
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                                         <la:message key="labels.crud_button_delete"/>
                                                     </button>
                                                 </div>
@@ -124,13 +124,13 @@
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary" name="edit"
                                             value="<la:message key="labels.design_edit_button" />">
-                                        <em class="fa fa-pencil-alt"></em>
+                                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                         <la:message key="labels.design_edit_button"/>
                                     </button>
                                     <button type="submit" class="btn btn-warning"
                                             name="editAsUseDefault"
                                             value="<la:message key="labels.design_use_default_button" />">
-                                        <em class="fa fa-recycle"></em>
+                                        <i class="fa fa-recycle" aria-hidden="true"></i>
                                         <la:message key="labels.design_use_default_button"/>
                                     </button>
                                 </div>
@@ -170,7 +170,7 @@
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-success" name="upload"
                                             value="<la:message key="labels.design_button_upload" />">
-                                        <em class="fa fa-upload"></em>
+                                        <i class="fa fa-upload" aria-hidden="true"></i>
                                         <la:message key="labels.design_button_upload"/>
                                     </button>
                                 </div>
@@ -180,9 +180,9 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}

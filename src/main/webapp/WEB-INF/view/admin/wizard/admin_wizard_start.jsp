@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="wizard"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -60,12 +60,12 @@
                                 <button type="submit" class="btn btn-success"
                                         name="startCrawling"
                                         value="<la:message key="labels.wizard_button_start_crawling"/>">
-                                    <em class="fa fa-play-circle"></em>
+                                    <i class="fa fa-play-circle" aria-hidden="true"></i>
                                     <la:message key="labels.wizard_button_start_crawling"/>
                                 </button>
                                 <button type="submit" class="btn btn-default" name="index"
                                         value="<la:message key="labels.wizard_button_finish"/>">
-                                    <em class="fa fa-step-forward"></em>
+                                    <i class="fa fa-step-forward" aria-hidden="true"></i>
                                     <la:message key="labels.wizard_button_finish"/>
                                 </button>
                             </div>
@@ -74,9 +74,9 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}

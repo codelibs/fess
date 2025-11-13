@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="backup"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -58,7 +58,7 @@
                                                                                  name="bulkFile"
                                                                                  class="form-control-file"/></div>
                                                 <button type="submit" class="btn btn-success mb-2" name="upload">
-                                                    <em class="fa fa-upload"></em>
+                                                    <i class="fa fa-upload" aria-hidden="true"></i>
                                                     <la:message key="labels.backup_button_upload"/>
                                                 </button>
                                             </la:form>
@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.backup_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.backup_name"/></th>
@@ -91,10 +91,10 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}
 

@@ -2,45 +2,45 @@
 <c:if test="${crudMode == 1}">
 	<button type="submit" class="btn btn-default" name="list"
 		value="<la:message key="labels.crud_button_back" />">
-		<em class="fa fa-arrow-circle-left"></em>
+		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
 	<button type="submit" class="btn btn-success" name="create"
 		value="<la:message key="labels.crud_button_create" />">
-		<em class="fa fa-plus"></em>
+		<i class="fa fa-plus" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_create" />
 	</button>
 	</c:if>
 </c:if>
 <c:if test="${crudMode == 2}">
 	<button type="submit" class="btn btn-default" name="edit" value="back">
-		<em class="fa fa-arrow-circle-left"></em>
+		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
 	<button type="submit" class="btn btn-success" name="update"
 		value="<la:message key="labels.crud_button_update" />">
-		<em class="fa fa-pencil-alt"></em>
+		<i class="fa fa-pencil-alt" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_update" />
 	</button>
 	</c:if>
 </c:if>
 <c:if test="${crudMode == 4}">
 	<button type="submit" class="btn btn-default" name="list" value="back">
-		<em class="fa fa-arrow-circle-left"></em>
+		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
 	<button type="submit" class="btn btn-primary" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
-		<em class="fa fa-pencil-alt"></em>
+		<i class="fa fa-pencil-alt" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_edit" />
 	</button>
 	<button type="button" class="btn btn-danger" name="delete"
 		data-toggle="modal" data-target="#confirmToDelete"
 		value="<la:message key="labels.crud_button_delete" />">
-		<em class="fa fa-trash"></em>
+		<i class="fa fa-trash" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_delete" />
 	</button>
 	<div class="modal fade" id="confirmToDelete" tabindex="-1"
@@ -69,7 +69,7 @@
 					<button type="submit" class="btn btn-outline-light"
 						name="delete"
 						value="<la:message key="labels.crud_button_delete" />">
-						<em class="fa fa-trash"></em>
+						<i class="fa fa-trash" aria-hidden="true"></i>
 						<la:message key="labels.crud_button_delete" />
 					</button>
 				</div>

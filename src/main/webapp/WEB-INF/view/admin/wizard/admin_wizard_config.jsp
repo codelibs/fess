@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="wizard"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -95,13 +95,13 @@
                                 <button type="submit" class="btn btn-primary"
                                         name="crawlingConfig"
                                         value="<la:message key="labels.wizard_button_register_again"/>">
-                                    <em class="fa fa-redo-alt"></em>
+                                    <i class="fa fa-redo-alt" aria-hidden="true"></i>
                                     <la:message key="labels.wizard_button_register_again"/>
                                 </button>
                                 <button type="submit" class="btn btn-success"
                                         name="crawlingConfigNext"
                                         value="<la:message key="labels.wizard_button_register_next"/>">
-                                    <em class="fa fa-arrow-circle-right"></em>
+                                    <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
                                     <la:message key="labels.wizard_button_register_next"/>
                                 </button>
                             </div>
@@ -110,9 +110,9 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}

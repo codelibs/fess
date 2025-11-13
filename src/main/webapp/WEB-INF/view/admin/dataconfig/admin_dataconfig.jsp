@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="crawl"/>
         <jsp:param name="menuType" value="dataConfig"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -82,7 +82,7 @@
                                             <button type="submit" class="btn btn-primary" id="submit"
                                                     name="search"
                                                     value="<la:message key="labels.crud_button_search" />">
-                                                <em class="fa fa-search"></em>
+                                                <i class="fa fa-search" aria-hidden="true"></i>
                                                 <la:message key="labels.crud_button_search"/>
                                             </button>
                                             <button type="submit" class="btn btn-default" name="reset"
@@ -97,7 +97,7 @@
                             <c:if test="${dataConfigPager.allRecordCount == 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <em class="fa fa-info-circle text-primary"></em>
+                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
@@ -105,7 +105,7 @@
                             <c:if test="${dataConfigPager.allRecordCount > 0}">
                                 <div class="row top10">
                                     <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.data_config_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.name"/></th>
@@ -117,7 +117,7 @@
                                             <c:forEach var="data" varStatus="s"
                                                        items="${dataConfigItems}">
                                                 <tr
-                                                        data-href="${contextPath}/admin/dataconfig/details/4/${f:u(data.id)}">
+                                                        data-href="${contextPath}/admin/dataconfig/details/4/${f:u(data.id)}" role="button" tabindex="0">
                                                     <td>${f:h(data.name)}</td>
                                                     <td class="text-center"><c:if
                                                             test="${data.available=='true'}">
@@ -144,10 +144,10 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}
 

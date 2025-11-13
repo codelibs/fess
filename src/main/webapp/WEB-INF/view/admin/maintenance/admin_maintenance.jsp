@@ -1,5 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html>
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+${fe:html(true)}
 <head>
     <meta charset="UTF-8">
     <title><la:message key="labels.admin_brand_title"/> | <la:message
@@ -13,7 +13,7 @@
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="maintenance"/>
     </jsp:include>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
@@ -94,7 +94,7 @@
                                 <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
                                         name="reindexOnly"
                                         value="<la:message key="labels.reindex_start_button"/>">
-                                    <em class="fa fa-arrow-circle-right"></em>
+                                    <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
                                     <la:message key="labels.reindex_start_button"/>
                                 </button>
                             </div>
@@ -111,7 +111,7 @@
                                 <button type="submit" class="btn btn-primary"
                                         name="reloadDocIndex"
                                         value="<la:message key="labels.reload_doc_index_button"/>">
-                                    <em class="fa fa-sync"></em>
+                                    <i class="fa fa-sync" aria-hidden="true"></i>
                                     <la:message key="labels.reload_doc_index_button"/>
                                 </button>
                             </div>
@@ -126,7 +126,7 @@
                             </div>
                             <div class="card-footer">
                                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmToClearCrawlerIndex">
-                                    <em class="fa fa-trash"></em>
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                     <la:message key="labels.clear_crawler_index_button"/>
                                 </button>
                                 <div class="modal fade" id="confirmToClearCrawlerIndex"
@@ -155,7 +155,7 @@
                                                 <button type="submit" class="btn btn-outline-light"
                                                         name="clearCrawlerIndex"
                                                         value="<la:message key="labels.crud_button_delete" />">
-                                                    <em class="fa fa-trash"></em>
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                                     <la:message key="labels.crud_button_delete"/>
                                                 </button>
                                             </div>
@@ -177,7 +177,7 @@
                             <button type="submit" class="btn btn-primary"
                                     name="downloadLogs"
                                     value="<la:message key="labels.download_diagnostic_logs_button"/>">
-                                <em class="fa fa-download"></em>
+                                <i class="fa fa-download" aria-hidden="true"></i>
                                 <la:message key="labels.download_diagnostic_logs_button"/>
                             </button>
                         </div>
@@ -185,9 +185,9 @@
                 </div>
             </la:form>
         </section>
-    </div>
+    </main>
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 </div>
 <jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
-</html>
+${fe:html(false)}

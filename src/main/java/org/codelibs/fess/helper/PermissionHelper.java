@@ -36,9 +36,9 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.jcifs.smb.SID;
 
 import jakarta.annotation.Resource;
-import org.codelibs.jcifs.smb.SID;
 
 /**
  * Helper class for handling permission-related operations in Fess.
