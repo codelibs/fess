@@ -31,8 +31,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
@@ -45,6 +48,7 @@ import io.restassured.path.json.JsonPath;
  * - /api/admin/searchlist
  * */
 @Tag("it")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CrawlerLogTests extends CrawlTestBase {
     private static final Logger logger = LogManager.getLogger(CrawlerLogTests.class);
 
@@ -116,6 +120,7 @@ public class CrawlerLogTests extends CrawlTestBase {
     }
 
     @Test
+    @Order(1)
     void jobLogTest() {
         logger.info("start jobLogTest");
         testReadJobLog();
@@ -123,6 +128,7 @@ public class CrawlerLogTests extends CrawlTestBase {
     }
 
     @Test
+    @Order(2)
     void crawlingInfoTest() {
         logger.info("start crawlingInfoTest");
         testReadCrawlingInfo();
@@ -130,6 +136,14 @@ public class CrawlerLogTests extends CrawlTestBase {
     }
 
     @Test
+    @Order(3)
+    void crawlingInfoDeleteAllTest() {
+        logger.info("start crawlingInfoDeleteAllTest");
+        testDeleteAllCrawlingInfo();
+    }
+
+    @Test
+    @Order(4)
     void failureUrlTest() {
         logger.info("start failureUrlTest");
         testReadFailureUrl();
@@ -137,6 +151,7 @@ public class CrawlerLogTests extends CrawlTestBase {
     }
 
     @Test
+    @Order(5)
     void searchListTest() {
         logger.info("start searchListTest");
         testReadSearchList();
@@ -267,5 +282,33 @@ public class CrawlerLogTests extends CrawlTestBase {
         final String response = checkMethodBase(requestBody).get("/api/admin/searchlist/docs").asString();
         final List<Map<String, Object>> results = JsonPath.from(response).getList("response.docs");
         return results;
+    }
+
+    /**
+     * Test for DELETE /api/admin/crawlinginfo/all
+     * This endpoint deletes all old crawling sessions except currently running ones
+     * */
+    private void testDeleteAllCrawlingInfo() {
+        // Read crawling info before deletion
+        final List<Map<String, Object>> logListBefore = readCrawlingInfo(webConfigId);
+        logger.info("logListBefore: {}", logListBefore);
+        final int sizeBeforeDeletion = logListBefore.size();
+        logger.info("Number of crawling info logs before deletion: {}", sizeBeforeDeletion);
+
+        // Delete all old crawling sessions
+        deleteMethod("/api/admin/crawlinginfo/all").then().body("response.status", equalTo(0));
+        refresh();
+
+        // Verify all old sessions are deleted (size should be 0 after deletion)
+        final List<Map<String, Object>> logListAfter = readCrawlingInfo(webConfigId);
+        logger.info("logListAfter: {}", logListAfter);
+        assertEquals(0, logListAfter.size(), "All crawling info logs should be deleted after calling delete all endpoint");
+
+        // Log the result
+        if (sizeBeforeDeletion > 0) {
+            logger.info("Successfully deleted {} crawling info log(s) using bulk delete", sizeBeforeDeletion);
+        } else {
+            logger.info("No crawling info logs to delete (may have been deleted by previous test)");
+        }
     }
 }
