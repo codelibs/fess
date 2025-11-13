@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %><!DOCTYPE html>
-<html lang="${f:lang()}">
+<html lang="${pageContext.response.locale}">
 <head>
     <meta charset="UTF-8">
     <title><<la:message ke="labels.admin_brand_title"/> | <<la:message ke="labels.error_title"/></title>
