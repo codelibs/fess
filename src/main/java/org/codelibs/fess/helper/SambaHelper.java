@@ -21,9 +21,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.jcifs.smb.SID;
 
 import jakarta.annotation.PostConstruct;
-import org.codelibs.jcifs.smb.SID;
 
 /**
  * Helper class for Samba-related operations.
