@@ -377,6 +377,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Protwords File */
     public static final String LABELS_PROTWORDS_FILE = "{labels.protwordsFile}";
 
+    /** The key of the message: Kuromoji File */
+    public static final String LABELS_KUROMOJI_FILE = "{labels.kuromojiFile}";
+
     /** The key of the message: Elevate Word File */
     public static final String LABELS_ELEVATE_WORD_FILE = "{labels.elevateWordFile}";
 
@@ -415,9 +418,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Hash */
     public static final String LABELS_HASH = "{labels.hash}";
-
-    /** The key of the message: Kuromoji File */
-    public static final String LABELS_KUROMOJI_FILE = "{labels.kuromojiFile}";
 
     /** The key of the message: Max Size */
     public static final String LABELS_MAX_SIZE = "{labels.maxSize}";
@@ -626,7 +626,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Popular Words: */
     public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
 
-    /** The key of the message: Related Queries: */
+    /** The key of the message: Related Words: */
     public static final String LABELS_search_related_queries = "{labels.search_related_queries}";
 
     /** The key of the message: -  Sort  - */
@@ -1583,6 +1583,15 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Details */
     public static final String LABELS_crawling_info_link_details = "{labels.crawling_info_link_details}";
 
+    /** The key of the message: Create */
+    public static final String LABELS_crawling_info_link_create = "{labels.crawling_info_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_crawling_info_link_update = "{labels.crawling_info_link_update}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_crawling_info_link_delete = "{labels.crawling_info_link_delete}";
+
     /** The key of the message: Session ID */
     public static final String LABELS_crawling_info_session_id_search = "{labels.crawling_info_session_id_search}";
 
@@ -1945,6 +1954,12 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Delete */
     public static final String LABELS_failure_url_link_delete = "{labels.failure_url_link_delete}";
+
+    /** The key of the message: Create */
+    public static final String LABELS_failure_url_link_create = "{labels.failure_url_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_failure_url_link_update = "{labels.failure_url_link_update}";
 
     /** The key of the message: Delete All */
     public static final String LABELS_failure_url_delete_all_link = "{labels.failure_url_delete_all_link}";
@@ -2346,11 +2361,77 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Protwords Word List */
     public static final String LABELS_dict_protwords_configuration = "{labels.dict_protwords_configuration}";
 
+    /** The key of the message: Protwords Word List */
+    public static final String LABELS_dict_protwords_title = "{labels.dict_protwords_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_protwords_list_link = "{labels.dict_protwords_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_protwords_link_create = "{labels.dict_protwords_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_protwords_link_edit = "{labels.dict_protwords_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_protwords_link_delete = "{labels.dict_protwords_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_protwords_link_details = "{labels.dict_protwords_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_protwords_link_download = "{labels.dict_protwords_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_protwords_link_upload = "{labels.dict_protwords_link_upload}";
+
+    /** The key of the message: Word Info */
+    public static final String LABELS_dict_protwords_source = "{labels.dict_protwords_source}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_protwords_button_download = "{labels.dict_protwords_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_protwords_button_upload = "{labels.dict_protwords_button_upload}";
+
     /** The key of the message: Protwords File */
     public static final String LABELS_dict_protwords_file = "{labels.dict_protwords_file}";
 
     /** The key of the message: Stopwords Word List */
     public static final String LABELS_dict_stopwords_configuration = "{labels.dict_stopwords_configuration}";
+
+    /** The key of the message: Stopwords Word List */
+    public static final String LABELS_dict_stopwords_title = "{labels.dict_stopwords_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_stopwords_list_link = "{labels.dict_stopwords_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_stopwords_link_create = "{labels.dict_stopwords_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_stopwords_link_edit = "{labels.dict_stopwords_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_stopwords_link_delete = "{labels.dict_stopwords_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_stopwords_link_details = "{labels.dict_stopwords_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stopwords_link_download = "{labels.dict_stopwords_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stopwords_link_upload = "{labels.dict_stopwords_link_upload}";
+
+    /** The key of the message: Word Info */
+    public static final String LABELS_dict_stopwords_source = "{labels.dict_stopwords_source}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_stopwords_button_download = "{labels.dict_stopwords_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_stopwords_button_upload = "{labels.dict_stopwords_button_upload}";
 
     /** The key of the message: Stopwords File */
     public static final String LABELS_dict_stopwords_file = "{labels.dict_stopwords_file}";
@@ -3320,87 +3401,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Update */
     public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
-
-    /** The key of the message: Delete */
-    public static final String LABELS_dict_protwords_link_delete = "{labels.dict_protwords_link_delete}";
-
-    /** The key of the message: Create */
-    public static final String LABELS_failure_url_link_create = "{labels.failure_url_link_create}";
-
-    /** The key of the message: List */
-    public static final String LABELS_dict_stopwords_list_link = "{labels.dict_stopwords_list_link}";
-
-    /** The key of the message: Upload */
-    public static final String LABELS_dict_protwords_button_upload = "{labels.dict_protwords_button_upload}";
-
-    /** The key of the message: Download */
-    public static final String LABELS_dict_protwords_link_download = "{labels.dict_protwords_link_download}";
-
-    /** The key of the message: Delete */
-    public static final String LABELS_crawling_info_link_delete = "{labels.crawling_info_link_delete}";
-
-    /** The key of the message: Download */
-    public static final String LABELS_dict_stopwords_button_download = "{labels.dict_stopwords_button_download}";
-
-    /** The key of the message: Download */
-    public static final String LABELS_dict_protwords_button_download = "{labels.dict_protwords_button_download}";
-
-    /** The key of the message: Upload */
-    public static final String LABELS_dict_stopwords_button_upload = "{labels.dict_stopwords_button_upload}";
-
-    /** The key of the message: Delete */
-    public static final String LABELS_dict_stopwords_link_delete = "{labels.dict_stopwords_link_delete}";
-
-    /** The key of the message: Source */
-    public static final String LABELS_dict_protwords_source = "{labels.dict_protwords_source}";
-
-    /** The key of the message: Create New */
-    public static final String LABELS_dict_protwords_link_create = "{labels.dict_protwords_link_create}";
-
-    /** The key of the message: Upload */
-    public static final String LABELS_dict_stopwords_link_upload = "{labels.dict_stopwords_link_upload}";
-
-    /** The key of the message: Upload */
-    public static final String LABELS_dict_protwords_link_upload = "{labels.dict_protwords_link_upload}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_crawling_info_link_update = "{labels.crawling_info_link_update}";
-
-    /** The key of the message: Create */
-    public static final String LABELS_crawling_info_link_create = "{labels.crawling_info_link_create}";
-
-    /** The key of the message: Source */
-    public static final String LABELS_dict_stopwords_source = "{labels.dict_stopwords_source}";
-
-    /** The key of the message: Create New */
-    public static final String LABELS_dict_stopwords_link_create = "{labels.dict_stopwords_link_create}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_dict_protwords_link_edit = "{labels.dict_protwords_link_edit}";
-
-    /** The key of the message: Details */
-    public static final String LABELS_dict_protwords_link_details = "{labels.dict_protwords_link_details}";
-
-    /** The key of the message: Stop Words */
-    public static final String LABELS_dict_stopwords_title = "{labels.dict_stopwords_title}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_dict_stopwords_link_edit = "{labels.dict_stopwords_link_edit}";
-
-    /** The key of the message: Protected Words */
-    public static final String LABELS_dict_protwords_title = "{labels.dict_protwords_title}";
-
-    /** The key of the message: Details */
-    public static final String LABELS_dict_stopwords_link_details = "{labels.dict_stopwords_link_details}";
-
-    /** The key of the message: List */
-    public static final String LABELS_dict_protwords_list_link = "{labels.dict_protwords_list_link}";
-
-    /** The key of the message: Download */
-    public static final String LABELS_dict_stopwords_link_download = "{labels.dict_stopwords_link_download}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_failure_url_link_update = "{labels.failure_url_link_update}";
 
     /**
      * Assert the property is not null.
