@@ -17,7 +17,7 @@ ${fe:html(true)}
     <main class="content-wrapper position-relative">
         <iframe class="w-100 h-100 position-absolute" style="border: 0;"
                 src="<%=request.getContextPath()%>${serverPath}<%= response.encodeURL("/_plugin/kopf/") %>"
-                title="Dashboard"></iframe>
+                title="<la:message key="labels.dashboard_plugin" />"></iframe>
     </main>
 
     <jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
