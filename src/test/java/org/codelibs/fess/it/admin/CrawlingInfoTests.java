@@ -189,7 +189,8 @@ public class CrawlingInfoTests extends CrawlTestBase {
     void getCrawlingInfoLogByIdTest() {
         assertNotNull(testCrawlingInfoId, "Test crawling info ID should be set");
 
-        final Response response = checkMethodBase(null).get(API_PATH + "/log/" + testCrawlingInfoId);
+        final Map<String, Object> searchBody = new HashMap<>();
+        final Response response = checkMethodBase(searchBody).get(API_PATH + "/log/" + testCrawlingInfoId);
 
         response.then()
                 .body("response.status", equalTo(0))
@@ -206,7 +207,8 @@ public class CrawlingInfoTests extends CrawlTestBase {
     void getCrawlingInfoLogByNonExistentIdTest() {
         final String nonExistentId = "nonexistent_id_12345";
 
-        final Response response = checkMethodBase(null).get(API_PATH + "/log/" + nonExistentId);
+        final Map<String, Object> searchBody = new HashMap<>();
+        final Response response = checkMethodBase(searchBody).get(API_PATH + "/log/" + nonExistentId);
 
         response.then()
                 .body("response.status", equalTo(1));
@@ -265,7 +267,8 @@ public class CrawlingInfoTests extends CrawlTestBase {
         assertTrue(logsBefore.size() > 0, "Should have at least one crawling info log");
 
         // Delete all old sessions
-        final Response deleteResponse = checkMethodBase(null).delete(API_PATH + "/all");
+        final Map<String, Object> requestBody = new HashMap<>();
+        final Response deleteResponse = checkMethodBase(requestBody).delete(API_PATH + "/all");
 
         deleteResponse.then().body("response.status", equalTo(0));
 
