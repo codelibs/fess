@@ -219,6 +219,51 @@ public class CrawlerLogTests extends CrawlTestBase {
         final List<Map<String, Object>> logList = readCrawlingInfo(webConfigId);
         logger.info("logList: {}", logList);
         assertEquals(1, logList.size());
+
+        // Test GET /api/admin/crawlinginfo/logs
+        final Map<String, Object> searchBody = new HashMap<>();
+        String response = checkMethodBase(searchBody).get("/api/admin/crawlinginfo/logs").asString();
+        JsonPath jsonPath = JsonPath.from(response);
+        assertEquals(0, jsonPath.getInt("response.status"));
+        List<Map<String, Object>> logs = jsonPath.getList("response.logs");
+        assertTrue(logs.size() >= 1);
+
+        // Test with pagination
+        searchBody.put("size", 10);
+        searchBody.put("page", 1);
+        response = checkMethodBase(searchBody).get("/api/admin/crawlinginfo/logs").asString();
+        assertEquals(0, JsonPath.from(response).getInt("response.status"));
+
+        // Test with session ID filter
+        if (!logList.isEmpty()) {
+            final String sessionId = (String) logList.get(0).get("session_id");
+            final Map<String, Object> filterBody = new HashMap<>();
+            filterBody.put("session_id", sessionId);
+            response = checkMethodBase(filterBody).get("/api/admin/crawlinginfo/logs").asString();
+            assertEquals(0, JsonPath.from(response).getInt("response.status"));
+            logger.info("Session ID filter test completed");
+        }
+
+        // Test GET /api/admin/crawlinginfo/log/{id}
+        if (!logList.isEmpty()) {
+            final String logId = (String) logList.get(0).get("id");
+            response = checkMethodBase(new HashMap<>()).get("/api/admin/crawlinginfo/log/" + logId).asString();
+            jsonPath = JsonPath.from(response);
+            assertEquals(0, jsonPath.getInt("response.status"));
+            assertEquals(logId, jsonPath.getString("response.log.id"));
+            logger.info("Get crawling info log by ID test completed");
+        }
+
+        // Test GET with non-existent ID
+        response = checkMethodBase(new HashMap<>()).get("/api/admin/crawlinginfo/log/nonexistent_id").asString();
+        assertEquals(1, JsonPath.from(response).getInt("response.status"));
+
+        // Test PUT /api/admin/crawlinginfo/logs
+        final Map<String, Object> putBody = new HashMap<>();
+        putBody.put("size", 10);
+        response = checkMethodBase(putBody).put("/api/admin/crawlinginfo/logs").asString();
+        assertEquals(0, JsonPath.from(response).getInt("response.status"));
+        logger.info("PUT list crawling info logs test completed");
     }
 
     private void testDeleteCrawlingInfo() {
