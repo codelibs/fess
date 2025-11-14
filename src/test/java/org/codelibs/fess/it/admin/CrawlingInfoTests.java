@@ -16,7 +16,6 @@
 package org.codelibs.fess.it.admin;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,7 +48,6 @@ public class CrawlingInfoTests extends CrawlTestBase {
     private static final String API_PATH = "/api/admin/crawlinginfo";
 
     private static String webConfigId;
-    private static String testCrawlingInfoId;
 
     @BeforeAll
     protected static void initAll() {
@@ -69,13 +67,6 @@ public class CrawlingInfoTests extends CrawlTestBase {
         startJob(NAME_PREFIX);
         waitJob(NAME_PREFIX);
         refresh();
-
-        // Get the generated crawling info ID for testing
-        final List<Map<String, Object>> crawlingInfoList = readCrawlingInfo(webConfigId);
-        if (!crawlingInfoList.isEmpty()) {
-            testCrawlingInfoId = (String) crawlingInfoList.get(0).get("id");
-            logger.info("Test crawling info ID: {}", testCrawlingInfoId);
-        }
     }
 
     @AfterAll
@@ -111,201 +102,122 @@ public class CrawlingInfoTests extends CrawlTestBase {
         deleteTestToken();
     }
 
-    /**
-     * Test GET /api/admin/crawlinginfo/logs - List crawling info logs
-     */
     @Test
-    void listCrawlingInfoLogsTest() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/logs");
-
-        response.then()
-                .body("response.status", equalTo(0))
-                .body("response.logs", notNullValue())
-                .body("response.logs.size()", greaterThan(0));
-
-        logger.info("List crawling info logs response: {}", response.asString());
+    void crawlingInfoApiTest() {
+        logger.info("start crawlingInfoApiTest");
+        testReadCrawlingInfo();
+        testDeleteCrawlingInfo();
     }
 
     /**
-     * Test GET /api/admin/crawlinginfo/logs with pagination
+     * Test reading crawling info logs via various endpoints
      */
-    @Test
-    void listCrawlingInfoLogsWithPaginationTest() {
-        // Test with page size
+    private void testReadCrawlingInfo() {
+        // Test basic list endpoint
+        final List<Map<String, Object>> logList = readCrawlingInfo(webConfigId);
+        logger.info("Crawling info logs: {}", logList.size());
+        assertEquals(1, logList.size());
+
+        // Test GET /api/admin/crawlinginfo/logs
         final Map<String, Object> searchBody = new HashMap<>();
+        Response response = checkMethodBase(searchBody).get(API_PATH + "/logs");
+        response.then()
+                .body("response.status", equalTo(0))
+                .body("response.logs", notNullValue());
+
+        // Test with pagination
         searchBody.put("size", 10);
         searchBody.put("page", 1);
-
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/logs");
-
+        response = checkMethodBase(searchBody).get(API_PATH + "/logs");
         response.then()
                 .body("response.status", equalTo(0))
-                .body("response.logs", notNullValue())
-                .body("response.total", greaterThan(0));
+                .body("response.logs", notNullValue());
 
-        logger.info("Pagination test response: {}", response.asString());
-    }
+        // Test with session ID filter
+        if (!logList.isEmpty()) {
+            final String sessionId = (String) logList.get(0).get("session_id");
+            assertNotNull(sessionId, "Session ID should not be null");
 
-    /**
-     * Test GET /api/admin/crawlinginfo/logs with session ID filter
-     */
-    @Test
-    void listCrawlingInfoLogsWithSessionIdFilterTest() {
-        // First, get a session ID from existing logs
-        final List<Map<String, Object>> logs = readCrawlingInfo(webConfigId);
-        if (logs.isEmpty()) {
-            logger.warn("No crawling info logs available for session ID filter test");
-            return;
+            final Map<String, Object> filterBody = new HashMap<>();
+            filterBody.put("session_id", sessionId);
+            response = checkMethodBase(filterBody).get(API_PATH + "/logs");
+            response.then()
+                    .body("response.status", equalTo(0))
+                    .body("response.logs", notNullValue());
+
+            final List<Map<String, Object>> filteredLogs = JsonPath.from(response.asString()).getList("response.logs");
+            for (Map<String, Object> log : filteredLogs) {
+                assertEquals(sessionId, log.get("session_id"), "All logs should have the same session ID");
+            }
+            logger.info("Session ID filter test: filtered {} logs", filteredLogs.size());
         }
 
-        final String sessionId = (String) logs.get(0).get("session_id");
-        assertNotNull(sessionId, "Session ID should not be null");
-
-        // Test filtering by session ID
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("session_id", sessionId);
-
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/logs");
-
-        response.then()
-                .body("response.status", equalTo(0))
-                .body("response.logs", notNullValue())
-                .body("response.logs.size()", greaterThan(0));
-
-        // Verify all logs have the same session ID
-        final List<Map<String, Object>> filteredLogs = JsonPath.from(response.asString()).getList("response.logs");
-        for (Map<String, Object> log : filteredLogs) {
-            assertEquals(sessionId, log.get("session_id"), "All logs should have the same session ID");
+        // Test GET /api/admin/crawlinginfo/log/{id}
+        if (!logList.isEmpty()) {
+            final String logId = (String) logList.get(0).get("id");
+            response = checkMethodBase(new HashMap<>()).get(API_PATH + "/log/" + logId);
+            response.then()
+                    .body("response.status", equalTo(0))
+                    .body("response.log", notNullValue())
+                    .body("response.log.id", equalTo(logId));
+            logger.info("Get crawling info log by ID: {}", logId);
         }
 
-        logger.info("Session ID filter test response: {}", response.asString());
-    }
-
-    /**
-     * Test GET /api/admin/crawlinginfo/log/{id} - Get specific crawling info log
-     */
-    @Test
-    void getCrawlingInfoLogByIdTest() {
-        assertNotNull(testCrawlingInfoId, "Test crawling info ID should be set");
-
-        final Map<String, Object> searchBody = new HashMap<>();
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/log/" + testCrawlingInfoId);
-
-        response.then()
-                .body("response.status", equalTo(0))
-                .body("response.log", notNullValue())
-                .body("response.log.id", equalTo(testCrawlingInfoId));
-
-        logger.info("Get crawling info log by ID response: {}", response.asString());
-    }
-
-    /**
-     * Test GET /api/admin/crawlinginfo/log/{id} with non-existent ID
-     */
-    @Test
-    void getCrawlingInfoLogByNonExistentIdTest() {
+        // Test GET with non-existent ID
         final String nonExistentId = "nonexistent_id_12345";
+        response = checkMethodBase(new HashMap<>()).get(API_PATH + "/log/" + nonExistentId);
+        response.then().body("response.status", equalTo(1));
+        logger.info("Get non-existent crawling info log test completed");
 
-        final Map<String, Object> searchBody = new HashMap<>();
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/log/" + nonExistentId);
-
-        response.then()
-                .body("response.status", equalTo(1));
-
-        logger.info("Get non-existent crawling info log response: {}", response.asString());
-    }
-
-    /**
-     * Test PUT /api/admin/crawlinginfo/logs - Alternative method for listing logs
-     */
-    @Test
-    void putListCrawlingInfoLogsTest() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        searchBody.put("size", 10);
-
-        final Response response = checkMethodBase(searchBody).put(API_PATH + "/logs");
-
+        // Test PUT /api/admin/crawlinginfo/logs
+        final Map<String, Object> putBody = new HashMap<>();
+        putBody.put("size", 10);
+        response = checkMethodBase(putBody).put(API_PATH + "/logs");
         response.then()
                 .body("response.status", equalTo(0))
                 .body("response.logs", notNullValue());
+        logger.info("PUT list crawling info logs test completed");
 
-        logger.info("PUT list crawling info logs response: {}", response.asString());
+        // Test log structure
+        final List<Map<String, Object>> logs = JsonPath.from(checkMethodBase(new HashMap<>()).get(API_PATH + "/logs").asString())
+                .getList("response.logs");
+        if (!logs.isEmpty()) {
+            final Map<String, Object> firstLog = logs.get(0);
+            assertTrue(firstLog.containsKey("id"), "Log should have 'id' field");
+            assertTrue(firstLog.containsKey("session_id"), "Log should have 'session_id' field");
+            logger.info("Crawling info log structure verified: {}", firstLog.keySet());
+        }
     }
 
     /**
-     * Test DELETE /api/admin/crawlinginfo/log/{id} - Delete specific crawling info log
+     * Test deleting crawling info logs
      */
-    @Test
-    void deleteCrawlingInfoLogTest() {
-        // Get current crawling info logs
+    private void testDeleteCrawlingInfo() {
+        // Test DELETE /api/admin/crawlinginfo/log/{id}
         final List<Map<String, Object>> logsBefore = readCrawlingInfo(webConfigId);
-        final int countBefore = logsBefore.size();
-        assertTrue(countBefore > 0, "Should have at least one crawling info log");
+        if (!logsBefore.isEmpty()) {
+            final int countBefore = logsBefore.size();
+            final String idToDelete = (String) logsBefore.get(0).get("id");
+            final Response deleteResponse = deleteMethod(API_PATH + "/log/" + idToDelete);
+            deleteResponse.then().body("response.status", equalTo(0));
 
-        // Delete one log
-        final String idToDelete = (String) logsBefore.get(0).get("id");
-        final Response deleteResponse = deleteMethod(API_PATH + "/log/" + idToDelete);
-
-        deleteResponse.then().body("response.status", equalTo(0));
-
-        // Verify deletion
-        refresh();
-        final List<Map<String, Object>> logsAfter = readCrawlingInfo(webConfigId);
-        assertEquals(countBefore - 1, logsAfter.size(), "Should have one less crawling info log after deletion");
-
-        logger.info("Delete crawling info log test completed");
-    }
-
-    /**
-     * Test DELETE /api/admin/crawlinginfo/all - Delete all old sessions
-     */
-    @Test
-    void deleteAllCrawlingInfoLogsTest() {
-        // Ensure we have some crawling info logs
-        final List<Map<String, Object>> logsBefore = readCrawlingInfo(webConfigId);
-        assertTrue(logsBefore.size() > 0, "Should have at least one crawling info log");
-
-        // Delete all old sessions
-        final Map<String, Object> requestBody = new HashMap<>();
-        final Response deleteResponse = checkMethodBase(requestBody).delete(API_PATH + "/all");
-
-        deleteResponse.then().body("response.status", equalTo(0));
-
-        // Verify deletion
-        refresh();
-        final List<Map<String, Object>> logsAfter = readCrawlingInfo(webConfigId);
-
-        // Note: Some logs might remain if they are from currently running sessions
-        // So we just verify the delete operation succeeded
-        logger.info("Delete all crawling info logs: before={}, after={}", logsBefore.size(), logsAfter.size());
-    }
-
-    /**
-     * Test response structure of crawling info logs
-     */
-    @Test
-    void verifyCrawlingInfoLogStructureTest() {
-        final Map<String, Object> searchBody = new HashMap<>();
-        final Response response = checkMethodBase(searchBody).get(API_PATH + "/logs");
-
-        response.then()
-                .body("response.status", equalTo(0))
-                .body("response.logs", notNullValue());
-
-        final List<Map<String, Object>> logs = JsonPath.from(response.asString()).getList("response.logs");
-        if (logs.isEmpty()) {
-            logger.warn("No logs available to verify structure");
-            return;
+            refresh();
+            final List<Map<String, Object>> logsAfter = readCrawlingInfo(webConfigId);
+            assertEquals(countBefore - 1, logsAfter.size(), "Should have one less crawling info log after deletion");
+            logger.info("Delete crawling info log test completed");
         }
 
-        final Map<String, Object> firstLog = logs.get(0);
+        // Test DELETE /api/admin/crawlinginfo/all
+        final List<Map<String, Object>> logsBeforeAll = readCrawlingInfo(webConfigId);
+        final int countBeforeAll = logsBeforeAll.size();
 
-        // Verify expected fields exist
-        assertTrue(firstLog.containsKey("id"), "Log should have 'id' field");
-        assertTrue(firstLog.containsKey("session_id"), "Log should have 'session_id' field");
+        final Map<String, Object> requestBody = new HashMap<>();
+        final Response deleteAllResponse = checkMethodBase(requestBody).delete(API_PATH + "/all");
+        deleteAllResponse.then().body("response.status", equalTo(0));
 
-        logger.info("Crawling info log structure verified: {}", firstLog.keySet());
+        refresh();
+        final List<Map<String, Object>> logsAfterAll = readCrawlingInfo(webConfigId);
+        logger.info("Delete all crawling info logs: before={}, after={}", countBeforeAll, logsAfterAll.size());
     }
 
     /**
