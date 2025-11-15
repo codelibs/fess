@@ -205,9 +205,6 @@ public class JobLogTests extends CrawlTestBase {
     private void testSearchByJobName() {
         logger.info("[BEGIN] testSearchByJobName");
 
-        // Recreate job logs for testing
-        recreateJobLogs();
-
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("job_name", NAME_PREFIX);
         searchBody.put("size", 100);
@@ -257,15 +254,16 @@ public class JobLogTests extends CrawlTestBase {
      */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.test.url";
-        final String includedUrls = "https://www.codelibs.org/.*" + "\n" + "http://failure.test.url.*";
+        final String urls = "https://www.codelibs.org/";
+        final String includedUrls = "https://www.codelibs.org/.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
-        requestBody.put("depth", 1);
+        requestBody.put("depth", 0);
+        requestBody.put("max_access_count", 1L);
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 1000);
+        requestBody.put("interval_time", 0);
         requestBody.put("boost", 100);
         requestBody.put("available", true);
         requestBody.put("sort_order", 0);
@@ -286,15 +284,5 @@ public class JobLogTests extends CrawlTestBase {
         requestBody.put("available", true);
         requestBody.put("script_data", buildWebConfigJobScript(webConfigId));
         createJob(requestBody);
-    }
-
-    /**
-     * Helper: Recreate job logs for testing
-     */
-    private void recreateJobLogs() {
-        // Run another crawl job to generate more logs
-        startJob(NAME_PREFIX);
-        waitJob(NAME_PREFIX);
-        refresh();
     }
 }

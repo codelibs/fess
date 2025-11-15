@@ -233,9 +233,6 @@ public class FailureUrlTests extends CrawlTestBase {
     private void testSearchByUrl() {
         logger.info("[BEGIN] testSearchByUrl");
 
-        // Recreate failure URLs for testing
-        recreateFailureUrls();
-
         final Map<String, Object> searchBody = new HashMap<>();
         searchBody.put("url", "failure");
         searchBody.put("size", 100);
@@ -322,15 +319,16 @@ public class FailureUrlTests extends CrawlTestBase {
      */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.test.url";
-        final String includedUrls = "https://www.codelibs.org/.*" + "\n" + "http://failure.test.url.*";
+        final String urls = "http://failure.test.url";
+        final String includedUrls = "http://failure.test.url.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
-        requestBody.put("depth", 1);
+        requestBody.put("depth", 0);
+        requestBody.put("max_access_count", 1L);
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 1000);
+        requestBody.put("interval_time", 0);
         requestBody.put("boost", 100);
         requestBody.put("available", true);
         requestBody.put("sort_order", 0);
@@ -351,20 +349,5 @@ public class FailureUrlTests extends CrawlTestBase {
         requestBody.put("available", true);
         requestBody.put("script_data", buildWebConfigJobScript(webConfigId));
         createJob(requestBody);
-    }
-
-    /**
-     * Helper: Recreate failure URLs for testing
-     */
-    private void recreateFailureUrls() {
-        // Clean up first
-        final Map<String, Object> requestBody = new HashMap<>();
-        checkMethodBase(requestBody).delete(API_PATH + "/all");
-        refresh();
-
-        // Recreate by running another crawl job
-        startJob(NAME_PREFIX);
-        waitJob(NAME_PREFIX);
-        refresh();
     }
 }
