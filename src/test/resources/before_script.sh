@@ -28,6 +28,9 @@ done
 
 pushd /tmp >/dev/null
 git clone https://github.com/codelibs/fess-testdata.git
+cd fess-testdata
+git checkout f19176ab1b7ddc0a40393a8cbbb8d1c17b27c3ce
+cd ..
 popd >/dev/null
 
 cat ${temp_log_file} ./fess-*/logs/*.log
