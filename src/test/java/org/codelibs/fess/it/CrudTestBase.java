@@ -81,16 +81,14 @@ public abstract class CrudTestBase extends ITBase {
     @AfterEach
     protected void tearDown() {
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
+        int count = 0;
         List<String> idList = getIdList(searchBody);
-        int deleteCount = Math.min(idList.size(), NUM);
-
-        for (int i = 0; i < deleteCount; i++) {
-            checkDeleteMethod(getItemEndpointSuffix() + "/" + idList.get(i).toString());
-        }
-
-        if (deleteCount > 0) {
-            // Refresh once after all deletes
+        while (idList.size() > 0 && count < NUM) {
+            final String id = idList.get(0);
+            checkDeleteMethod(getItemEndpointSuffix() + "/" + id.toString());
             refresh();
+            idList = getIdList(searchBody);
+            count += 1;
         }
     }
 
@@ -112,10 +110,8 @@ public abstract class CrudTestBase extends ITBase {
                     .body("response.status", equalTo(0));
 
             //logger.info("create {}{}", i, checkPutMethod(requestBody, getItemEndpointSuffix()).asString()); // for debugging
+            refresh();
         }
-
-        // Refresh once after all creates
-        refresh();
 
         // Test: number of settings.
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
@@ -174,10 +170,8 @@ public abstract class CrudTestBase extends ITBase {
             }
 
             checkPutMethod(requestBody, getItemEndpointSuffix()).then().body("response.status", equalTo(0));
+            refresh();
         }
-
-        // Refresh once after all updates
-        refresh();
 
         checkUpdate();
         logger.info("[END] testUpdate");
@@ -198,14 +192,12 @@ public abstract class CrudTestBase extends ITBase {
     protected void testDelete() {
         logger.info("[BEGIN] testDelete");
         final Map<String, Object> searchBody = createSearchBody(SEARCH_ALL_NUM);
-        List<String> idList = getIdList(searchBody);
 
-        for (String id : idList) {
+        for (int count = 0; count < NUM; count++) {
+            final String id = getIdList(searchBody).get(0);
             checkDeleteMethod(getItemEndpointSuffix() + "/" + id.toString()).then().body("response.status", equalTo(0));
+            refresh();
         }
-
-        // Refresh once after all deletes
-        refresh();
 
         // Test: number of settings.
         checkGetMethod(searchBody, getListEndpointSuffix()).then().body(getJsonPath() + ".size()", equalTo(0));
