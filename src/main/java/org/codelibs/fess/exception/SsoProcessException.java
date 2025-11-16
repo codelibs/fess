@@ -41,10 +41,10 @@ public class SsoProcessException extends FessSystemException {
      * Constructs a new SSO process exception with the specified detailed message and cause.
      *
      * @param message The detailed error message explaining the cause of the exception
-     * @param e The underlying exception that caused this SSO process exception
+     * @param cause The underlying exception that caused this SSO process exception
      */
-    public SsoProcessException(final String message, final Exception e) {
-        super(message, e);
+    public SsoProcessException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
 }

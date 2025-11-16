@@ -29,7 +29,7 @@ public class ThumbnailGenerationException extends FessSystemException {
      * @param message the exception message
      * @param cause the underlying cause of this exception
      */
-    public ThumbnailGenerationException(final String message, final Exception cause) {
+    public ThumbnailGenerationException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

@@ -28,14 +28,14 @@ public class UserRoleLoginException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     /** The action class that requires specific user roles */
-    private final Class<?> actionClass;
+    private final Class<? extends RootAction> actionClass;
 
     /**
      * Constructs a new UserRoleLoginException with the specified action class.
      *
      * @param actionClass the action class that requires specific user roles
      */
-    public UserRoleLoginException(final Class<RootAction> actionClass) {
+    public UserRoleLoginException(final Class<? extends RootAction> actionClass) {
         this.actionClass = actionClass;
     }
 
@@ -44,7 +44,7 @@ public class UserRoleLoginException extends RuntimeException {
      *
      * @return the action class that requires specific user roles
      */
-    public Class<?> getActionClass() {
+    public Class<? extends RootAction> getActionClass() {
         return actionClass;
     }
 
