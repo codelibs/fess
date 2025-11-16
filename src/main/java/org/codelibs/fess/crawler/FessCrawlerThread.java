@@ -90,6 +90,12 @@ public class FessCrawlerThread extends CrawlerThread {
     /** Configuration key for crawler clients used in parameter maps */
     protected static final String CRAWLER_CLIENTS = "crawlerClients";
 
+    /** HTTP status code for Not Found */
+    private static final int HTTP_STATUS_NOT_FOUND = 404;
+
+    /** HTTP status code for OK */
+    private static final int HTTP_STATUS_OK = 200;
+
     /**
      * Cache for client rules mapping client names to their corresponding URL patterns.
      * This cache improves performance by avoiding repeated parsing of client configuration rules.
@@ -189,17 +195,17 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Accessing document: {}, status: {}", url, httpStatusCode);
                 }
-                if (httpStatusCode == 404) {
+                if (httpStatusCode == HTTP_STATUS_NOT_FOUND) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(searchEngineClient, id)) {
-                        logger.debug("Failed to delete 404 document: {}", url);
+                        logger.debug("Failed to delete {} document: {}", HTTP_STATUS_NOT_FOUND, url);
                     }
                     return false;
                 }
                 if (responseData.getLastModified() == null) {
                     return true;
                 }
-                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
+                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == HTTP_STATUS_OK) {
 
                     log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 
@@ -258,11 +264,15 @@ public class FessCrawlerThread extends CrawlerThread {
      * @return a set of RequestData objects for the anchor URLs, or null if no valid URLs found
      */
     protected Set<RequestData> getAnchorSet(final Object obj) {
+        if (obj == null) {
+            return null;
+        }
+
         List<String> anchorList;
         if (obj instanceof final String s) {
             anchorList = List.of(s);
         } else if (obj instanceof final List<?> l) {
-            anchorList = l.stream().map(String::valueOf).toList();
+            anchorList = l.stream().filter(item -> item != null).map(String::valueOf).toList();
         } else {
             return null;
         }
@@ -273,9 +283,11 @@ public class FessCrawlerThread extends CrawlerThread {
 
         final Set<RequestData> childUrlSet = new LinkedHashSet<>();
         for (final String anchor : anchorList) {
-            childUrlSet.add(RequestDataBuilder.newRequestData().get().url(anchor).build());
+            if (StringUtil.isNotBlank(anchor)) {
+                childUrlSet.add(RequestDataBuilder.newRequestData().get().url(anchor).build());
+            }
         }
-        return childUrlSet;
+        return childUrlSet.isEmpty() ? null : childUrlSet;
     }
 
     /**

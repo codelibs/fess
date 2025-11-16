@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
+import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -131,7 +132,12 @@ public interface FessTransformer {
 
             try {
                 url = URLDecoder.decode(url, enc);
-            } catch (final Exception e) {}
+            } catch (final Exception e) {
+                // Failed to decode URL, using original URL as-is
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("Failed to decode URL with encoding {}: {}", enc, url, e);
+                }
+            }
         }
 
         return abbreviateSite(url);
@@ -160,10 +166,11 @@ public interface FessTransformer {
                 oldValues = new Object[] { oldValue };
             }
             if (value.getClass().isArray()) {
-                final Object[] newValues = (Object[]) value;
-                final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
-                for (int i = 0; i < newValues.length; i++) {
-                    values[values.length - 1 + i] = newValues[i];
+                // Handle both Object[] and primitive arrays safely
+                final int newLength = Array.getLength(value);
+                final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newLength);
+                for (int i = 0; i < newLength; i++) {
+                    values[oldValues.length + i] = Array.get(value, i);
                 }
                 dataMap.put(key, values);
             } else {

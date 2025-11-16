@@ -67,7 +67,11 @@ public class DataSerializer {
     public DataSerializer() {
         kryoThreadLocal = ThreadLocal.withInitial(() -> {
             final Kryo kryo = new Kryo();
-            // TODO use kryo.register
+            // TODO use kryo.register for security
+            // SECURITY WARNING: setRegistrationRequired(false) allows deserialization of arbitrary classes
+            // which could potentially lead to remote code execution vulnerabilities.
+            // This should be replaced with explicit class registration using kryo.register()
+            // for all classes that need to be serialized/deserialized.
             kryo.setRegistrationRequired(false);
             if (logger.isDebugEnabled()) {
                 kryo.setWarnUnregisteredClasses(true);

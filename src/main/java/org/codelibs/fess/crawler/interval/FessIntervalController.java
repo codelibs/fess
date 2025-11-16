@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.crawler.interval;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -26,6 +28,8 @@ import org.codelibs.fess.util.ComponentUtil;
  * including processing delays, queue waiting times, and new URL discovery.
  */
 public class FessIntervalController extends DefaultIntervalController {
+
+    private static final Logger logger = LogManager.getLogger(FessIntervalController.class);
 
     /**
      * Default constructor.
@@ -118,7 +122,11 @@ public class FessIntervalController extends DefaultIntervalController {
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
             intervalControlHelper.delayByRules();
-        } catch (final Exception e) {}
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to apply interval control rules", e);
+            }
+        }
 
         super.delayForWaitingNewUrl();
     }
