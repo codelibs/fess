@@ -15,20 +15,21 @@
  */
 package org.codelibs.fess.api;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.codelibs.core.lang.StringUtil;
 
 /**
  * Utility class for determining MIME content types based on file extensions.
  * Provides a centralized mapping of file extensions to content types.
+ * Thread-safe implementation using ConcurrentHashMap for runtime registration.
  */
 public class ContentTypeUtil {
 
-    /** Map of file extensions to MIME types */
-    private static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<>();
+    /** Thread-safe map of file extensions to MIME types */
+    private static final Map<String, String> CONTENT_TYPE_MAP = new ConcurrentHashMap<>();
 
     static {
         // Text formats
