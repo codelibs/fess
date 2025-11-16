@@ -84,11 +84,20 @@ public class QueryFieldConfig {
     /** Array of fields that can be searched against */
     protected String[] searchFields;
 
+    /** Set of fields that can be searched against for O(1) lookup */
+    protected Set<String> searchFieldSet;
+
     /** Array of fields that can be used for faceted search */
     protected String[] facetFields;
 
+    /** Set of fields that can be used for faceted search for O(1) lookup */
+    protected Set<String> facetFieldSet;
+
     /** Array of fields that can be used for sorting search results */
     protected String[] sortFields;
+
+    /** Set of fields that can be used for sorting for O(1) lookup */
+    protected Set<String> sortFieldSet;
 
     /** Set of fields that are allowed in API responses */
     protected Set<String> apiResponseFieldSet;
@@ -210,6 +219,9 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldLang());
+            // Initialize Set for O(1) lookup performance
+            searchFieldSet = new HashSet<>();
+            Collections.addAll(searchFieldSet, searchFields);
         }
         if (facetFields == null) {
             facetFields = fessConfig.getQueryAdditionalFacetFields(//
@@ -224,6 +236,9 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldFiletype(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment());
+            // Initialize Set for O(1) lookup performance
+            facetFieldSet = new HashSet<>();
+            Collections.addAll(facetFieldSet, facetFields);
         }
         if (sortFields == null) {
             sortFields = fessConfig.getQueryAdditionalSortFields(//
@@ -235,6 +250,9 @@ public class QueryFieldConfig {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount());
+            // Initialize Set for O(1) lookup performance
+            sortFieldSet = new HashSet<>();
+            Collections.addAll(sortFieldSet, sortFields);
         }
         if (apiResponseFieldSet == null) {
             setApiResponseFields(fessConfig.getQueryAdditionalApiResponseFields(//
@@ -319,21 +337,18 @@ public class QueryFieldConfig {
 
     /**
      * Checks if the specified field can be used for sorting.
+     * Uses O(1) Set lookup for improved performance.
      *
      * @param field the field name to check
      * @return true if the field can be used for sorting, false otherwise
      */
     protected boolean isSortField(final String field) {
-        for (final String f : sortFields) {
-            if (f.equals(field)) {
-                return true;
-            }
-        }
-        return false;
+        return sortFieldSet != null && sortFieldSet.contains(field);
     }
 
     /**
      * Checks if the specified field can be used for faceted search.
+     * Uses O(1) Set lookup for improved performance.
      *
      * @param field the field name to check
      * @return true if the field can be used for faceted search, false otherwise
@@ -342,13 +357,7 @@ public class QueryFieldConfig {
         if (StringUtil.isBlank(field)) {
             return false;
         }
-        boolean flag = false;
-        for (final String f : facetFields) {
-            if (field.equals(f)) {
-                flag = true;
-            }
-        }
-        return flag;
+        return facetFieldSet != null && facetFieldSet.contains(field);
     }
 
     /**
@@ -473,11 +482,14 @@ public class QueryFieldConfig {
 
     /**
      * Sets the fields that can be searched against.
+     * Also updates the searchFieldSet for O(1) lookup performance.
      *
      * @param supportedFields array of field names that can be searched
      */
     public void setSearchFields(final String[] supportedFields) {
         searchFields = supportedFields;
+        searchFieldSet = new HashSet<>();
+        Collections.addAll(searchFieldSet, supportedFields);
     }
 
     /**
@@ -491,11 +503,14 @@ public class QueryFieldConfig {
 
     /**
      * Sets the fields that can be used for faceted search.
+     * Also updates the facetFieldSet for O(1) lookup performance.
      *
      * @param facetFields array of field names that can be used for faceted search
      */
     public void setFacetFields(final String[] facetFields) {
         this.facetFields = facetFields;
+        facetFieldSet = new HashSet<>();
+        Collections.addAll(facetFieldSet, facetFields);
     }
 
     /**
@@ -509,11 +524,14 @@ public class QueryFieldConfig {
 
     /**
      * Sets the fields that can be used for sorting search results.
+     * Also updates the sortFieldSet for O(1) lookup performance.
      *
      * @param sortFields array of field names that can be used for sorting
      */
     public void setSortFields(final String[] sortFields) {
         this.sortFields = sortFields;
+        sortFieldSet = new HashSet<>();
+        Collections.addAll(sortFieldSet, sortFields);
     }
 
 }

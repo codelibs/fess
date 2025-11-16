@@ -151,10 +151,11 @@ public class QueryParser {
     /**
      * Adds a filter to the query processing chain.
      * The filter chain is recreated after adding the filter.
+     * This method is synchronized to ensure thread-safe filter chain creation.
      *
      * @param filter the filter to add
      */
-    public void addFilter(final Filter filter) {
+    public synchronized void addFilter(final Filter filter) {
         filterList.add(filter);
         createFilterChain();
     }
@@ -162,8 +163,9 @@ public class QueryParser {
     /**
      * Creates the filter chain by combining all registered filters.
      * The chain starts with the default filter chain and appends each registered filter.
+     * This method is synchronized to ensure thread-safe filter chain creation.
      */
-    protected void createFilterChain() {
+    protected synchronized void createFilterChain() {
         FilterChain chain = createDefaultFilterChain();
         for (final Filter element : filterList) {
             chain = appendFilterChain(element, chain);

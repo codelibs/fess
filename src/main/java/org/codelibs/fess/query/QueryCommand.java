@@ -103,16 +103,13 @@ public abstract class QueryCommand {
 
     /**
      * Checks if the specified field is a search field.
+     * Uses O(1) Set lookup for improved performance.
      * @param field The field name to check.
      * @return True if the field is a search field, false otherwise.
      */
     protected boolean isSearchField(final String field) {
-        for (final String searchField : getQueryFieldConfig().searchFields) {
-            if (searchField.equals(field)) {
-                return true;
-            }
-        }
-        return false;
+        final QueryFieldConfig config = getQueryFieldConfig();
+        return config.searchFieldSet != null && config.searchFieldSet.contains(field);
     }
 
     /**
@@ -228,5 +225,57 @@ public abstract class QueryCommand {
          * @return The created query builder.
          */
         QueryBuilder apply(String field, float boost);
+    }
+
+    /**
+     * Functional interface for building field-specific query builders.
+     */
+    protected interface FieldQueryBuilder {
+        /**
+         * Builds a query builder for the specified field and text.
+         * @param field The field name.
+         * @param text The query text.
+         * @param boost The boost value.
+         * @return The created query builder.
+         */
+        QueryBuilder buildQuery(String field, String text, float boost);
+    }
+
+    /**
+     * Template method that handles the common pattern of query conversion:
+     * 1. Check if field is DEFAULT_FIELD and apply default query builder
+     * 2. Check if field is a search field and apply field-specific query
+     * 3. Fall back to default query builder for unsupported fields
+     *
+     * This reduces code duplication across query command implementations.
+     *
+     * @param fessConfig the Fess configuration
+     * @param context the query context
+     * @param field the field name
+     * @param text the query text
+     * @param boost the boost value
+     * @param defaultBuilder function to build default queries
+     * @param fieldBuilder function to build field-specific queries
+     * @return the constructed query builder
+     */
+    protected QueryBuilder convertWithFieldCheck(final FessConfig fessConfig, final QueryContext context,
+            final String field, final String text, final float boost,
+            final DefaultQueryBuilderFunction defaultBuilder,
+            final FieldQueryBuilder fieldBuilder) {
+
+        context.addFieldLog(field, text);
+        context.addHighlightedQuery(text);
+
+        if (Constants.DEFAULT_FIELD.equals(field)) {
+            return buildDefaultQueryBuilder(fessConfig, context, defaultBuilder);
+        }
+
+        if (isSearchField(field)) {
+            return fieldBuilder.buildQuery(field, text, boost);
+        }
+
+        // Fallback: treat as default field query
+        context.addFieldLog(Constants.DEFAULT_FIELD, text);
+        return buildDefaultQueryBuilder(fessConfig, context, defaultBuilder);
     }
 }
