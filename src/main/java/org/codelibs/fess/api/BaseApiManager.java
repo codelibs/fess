@@ -34,8 +34,6 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public abstract class BaseApiManager implements WebApiManager {
 
-    private static final String API_FORMAT_TYPE = "apiFormatType";
-
     /** Path prefix for API endpoints. */
     protected String pathPrefix;
 
@@ -92,13 +90,13 @@ public abstract class BaseApiManager implements WebApiManager {
      * @return The format type.
      */
     protected FormatType getFormatType(final HttpServletRequest request) {
-        FormatType formatType = (FormatType) request.getAttribute(API_FORMAT_TYPE);
+        FormatType formatType = (FormatType) request.getAttribute(ApiConstants.API_FORMAT_TYPE);
         if (formatType != null) {
             return formatType;
         }
 
         formatType = detectFormatType(request);
-        request.setAttribute(API_FORMAT_TYPE, formatType);
+        request.setAttribute(ApiConstants.API_FORMAT_TYPE, formatType);
         return formatType;
     }
 
@@ -120,33 +118,12 @@ public abstract class BaseApiManager implements WebApiManager {
             return FormatType.SEARCH;
         }
         final String type = value.toUpperCase(Locale.ROOT);
-        if (FormatType.SEARCH.name().equals(type)) {
-            return FormatType.SEARCH;
+        try {
+            return FormatType.valueOf(type);
+        } catch (final IllegalArgumentException e) {
+            // If the type is not recognized, return OTHER
+            return FormatType.OTHER;
         }
-        if (FormatType.LABEL.name().equals(type)) {
-            return FormatType.LABEL;
-        }
-        if (FormatType.POPULARWORD.name().equals(type)) {
-            return FormatType.POPULARWORD;
-        }
-        if (FormatType.FAVORITE.name().equals(type)) {
-            return FormatType.FAVORITE;
-        }
-        if (FormatType.FAVORITES.name().equals(type)) {
-            return FormatType.FAVORITES;
-        }
-        if (FormatType.PING.name().equals(type)) {
-            return FormatType.PING;
-        }
-        if (FormatType.SCROLL.name().equals(type)) {
-            return FormatType.SCROLL;
-        }
-        if (FormatType.SUGGEST.name().equals(type)) {
-            return FormatType.SUGGEST;
-        }
-
-        // default
-        return FormatType.OTHER;
     }
 
     /**
