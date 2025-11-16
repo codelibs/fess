@@ -108,7 +108,7 @@ public class RankFusionProcessor implements AutoCloseable {
         final int minimumWindowSize = maxPageSize * 2;
 
         if (configuredWindowSize < minimumWindowSize) {
-            logger.warn("Configured rank.fusion.window_size ({}) is less than minimum recommended size ({}). " +
+            logger.warn("Configured rank.fusion.window_size ({}) is less than required minimum size ({}). " +
                     "Using minimum size instead.", configuredWindowSize, minimumWindowSize);
             this.windowSize = minimumWindowSize;
         } else {
@@ -203,7 +203,7 @@ public class RankFusionProcessor implements AutoCloseable {
                 .toArray(RankFusionSearcher[]::new);
         if (availableSearchers.length == 0) {
             if (logger.isDebugEnabled()) {
-                logger.debug("No available searchers from {}, using first searcher", availableSearcherNameSet);
+                logger.debug("No available searchers from {}, falling back to default searcher", availableSearcherNameSet);
             }
             return new RankFusionSearcher[] { searchers.get(0) };
         }
