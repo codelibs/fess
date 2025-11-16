@@ -117,7 +117,7 @@ public class DefaultSearcher extends RankFusionSearcher {
                                     docMap.put(fessConfig.getQueryCollapseInnerHitsName() + "_hash", bitsField.getValues().get(0));
                                 }
                                 docMap.put(fessConfig.getQueryCollapseInnerHitsName(), StreamUtil.stream(innerSearchHits.getHits())
-                                        .get(stream -> stream.map(v -> parseSearchHit(fessConfig, hlPrefix, v)).toArray(n -> new Map[n])));
+                                        .get(stream -> stream.map(hit -> parseSearchHit(fessConfig, hlPrefix, hit)).toArray(Map[]::new)));
                             }
                         }
                     }
@@ -227,7 +227,7 @@ public class DefaultSearcher extends RankFusionSearcher {
                 });
                 if (Constants.TEXT_FRAGMENT_TYPE_HIGHLIGHT.equals(fessConfig.getQueryHighlightTextFragmentType())) {
                     docMap.put(Constants.TEXT_FRAGMENTS,
-                            viewHelper.createTextFragmentsByHighlight(highlightFields.values().toArray(n -> new HighlightField[n])));
+                            viewHelper.createTextFragmentsByHighlight(highlightFields.values().toArray(HighlightField[]::new)));
                 }
             }
         } catch (final Exception e) {

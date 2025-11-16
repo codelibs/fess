@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,8 +74,8 @@ public class RankFusionProcessor implements AutoCloseable {
 
     private static final Logger logger = LogManager.getLogger(RankFusionProcessor.class);
 
-    /** Array of rank fusion searchers available for processing search requests */
-    protected RankFusionSearcher[] searchers = new RankFusionSearcher[1];
+    /** Thread-safe list of rank fusion searchers available for processing search requests */
+    protected final List<RankFusionSearcher> searchers = new CopyOnWriteArrayList<>();
 
     /** Executor service for concurrent search operations across multiple searchers */
     protected ExecutorService executorService;
@@ -103,13 +104,19 @@ public class RankFusionProcessor implements AutoCloseable {
     public void init() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxPageSize = fessConfig.getPagingSearchPageMaxSizeAsInteger();
-        final int windowSize = fessConfig.getRankFusionWindowSizeAsInteger();
-        if (maxPageSize * 2 < windowSize) {
-            logger.warn("rank.fusion.window_size is lower than paging.search.page.max.size. "
-                    + "The window size should be 2x more than the page size. ({} * 2 <= {})", maxPageSize, windowSize);
-            this.windowSize = 2 * maxPageSize;
+        final int configuredWindowSize = fessConfig.getRankFusionWindowSizeAsInteger();
+        final int minimumWindowSize = maxPageSize * 2;
+
+        if (configuredWindowSize < minimumWindowSize) {
+            logger.warn("Configured rank.fusion.window_size ({}) is less than minimum recommended size ({}). " +
+                    "Using minimum size instead.", configuredWindowSize, minimumWindowSize);
+            this.windowSize = minimumWindowSize;
         } else {
-            this.windowSize = windowSize;
+            this.windowSize = configuredWindowSize;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialized RankFusionProcessor with windowSize={}", this.windowSize);
         }
         load();
     }
@@ -178,23 +185,27 @@ public class RankFusionProcessor implements AutoCloseable {
 
     /**
      * Gets the array of available searchers based on configuration.
-     * Filters the searchers array to include only those specified in the available searcher name set.
+     * Filters the searchers list to include only those specified in the available searcher name set.
      * If no specific searchers are configured, returns all searchers.
      *
      * @return array of available RankFusionSearcher instances
      */
     protected RankFusionSearcher[] getAvailableSearchers() {
-        if (availableSearcherNameSet.isEmpty()) {
-            return searchers;
+        if (searchers.isEmpty()) {
+            logger.warn("No searchers registered");
+            return new RankFusionSearcher[0];
         }
-        final RankFusionSearcher[] availableSearchers = Arrays.stream(searchers)
+        if (availableSearcherNameSet.isEmpty()) {
+            return searchers.toArray(new RankFusionSearcher[0]);
+        }
+        final RankFusionSearcher[] availableSearchers = searchers.stream()
                 .filter(searcher -> availableSearcherNameSet.contains(searcher.getName()))
-                .toArray(n -> new RankFusionSearcher[n]);
+                .toArray(RankFusionSearcher[]::new);
         if (availableSearchers.length == 0) {
             if (logger.isDebugEnabled()) {
-                logger.debug("No available searchers from {}", availableSearcherNameSet);
+                logger.debug("No available searchers from {}, using first searcher", availableSearcherNameSet);
             }
-            return new RankFusionSearcher[] { searchers[0] };
+            return new RankFusionSearcher[] { searchers.get(0) };
         }
         return availableSearchers;
     }
@@ -270,73 +281,82 @@ public class RankFusionProcessor implements AutoCloseable {
                 }
             }));
         }
-        final SearchResult[] results = resultList.stream().map(f -> {
+        final SearchResult[] results = resultList.stream().map(future -> {
             try {
-                return f.get();
-            } catch (InterruptedException | ExecutionException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to process a search result.", e);
-                }
+                return future.get();
+            } catch (final InterruptedException e) {
+                logger.warn("Search operation was interrupted", e);
+                Thread.currentThread().interrupt(); // Restore interrupt status
+                return SearchResult.create().build();
+            } catch (final ExecutionException e) {
+                logger.error("Search operation failed with exception", e.getCause());
                 return SearchResult.create().build();
             }
-        }).toArray(n -> new SearchResult[n]);
+        }).toArray(SearchResult[]::new);
 
         final String scoreField = fessConfig.getRankFusionScoreField();
-        final Map<String, Map<String, Object>> scoreDocMap = new HashMap<>();
+        final Map<String, Map<String, Object>> documentsByIdMap = new HashMap<>();
         final String idField = fessConfig.getIndexFieldId();
-        final Set<Object> mainIdSet = new HashSet<>();
-        for (int i = 0; i < results.length; i++) {
-            final List<Map<String, Object>> docList = results[i].getDocumentList();
+        final Set<Object> mainSearcherIdSet = new HashSet<>();
+        for (int searcherIndex = 0; searcherIndex < results.length; searcherIndex++) {
+            final List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
             if (logger.isDebugEnabled()) {
-                logger.debug("[{}] {} docs / {} docs.", i, docList.size(), results[i].getAllRecordCount());
+                logger.debug("Searcher[{}]: retrieved {} docs / {} total docs",
+                        searcherIndex, docList.size(), results[searcherIndex].getAllRecordCount());
             }
-            for (int j = 0; j < docList.size(); j++) {
-                final Map<String, Object> doc = docList.get(j);
+            for (int docRank = 0; docRank < docList.size(); docRank++) {
+                final Map<String, Object> doc = docList.get(docRank);
                 if (doc.get(idField) instanceof final String id) {
-                    final float score = 1.0f / (rankConstant + j);
-                    if (scoreDocMap.containsKey(id)) {
-                        final Map<String, Object> baseDoc = scoreDocMap.get(id);
-                        final float oldScore = toFloat(baseDoc.get(scoreField));
-                        baseDoc.put(scoreField, oldScore + score);
+                    // Calculate RRF score: 1 / (rank_constant + rank)
+                    final float rrfScore = 1.0f / (rankConstant + docRank);
+                    if (documentsByIdMap.containsKey(id)) {
+                        final Map<String, Object> existingDoc = documentsByIdMap.get(id);
+                        final float currentScore = toFloat(existingDoc.get(scoreField));
+                        existingDoc.put(scoreField, currentScore + rrfScore);
+                        // Merge searcher names
                         final String[] searcherNames = DocumentUtil.getValue(doc, Constants.SEARCHER, String[].class);
                         if (searcherNames != null) {
-                            final String[] baseSearchers = DocumentUtil.getValue(baseDoc, Constants.SEARCHER, String[].class);
-                            if (baseSearchers != null) {
-                                baseDoc.put(Constants.SEARCHER, ArrayUtil.addAll(baseSearchers, searcherNames));
+                            final String[] existingSearchers = DocumentUtil.getValue(existingDoc, Constants.SEARCHER, String[].class);
+                            if (existingSearchers != null) {
+                                existingDoc.put(Constants.SEARCHER, ArrayUtil.addAll(existingSearchers, searcherNames));
                             } else {
-                                baseDoc.put(Constants.SEARCHER, searcherNames);
+                                existingDoc.put(Constants.SEARCHER, searcherNames);
                             }
                         }
                     } else {
-                        doc.put(scoreField, Float.valueOf(score));
-                        scoreDocMap.put(id, doc);
+                        doc.put(scoreField, Float.valueOf(rrfScore));
+                        documentsByIdMap.put(id, doc);
                     }
-                    if (i == 0 && j < windowSize / 2) {
-                        mainIdSet.add(id);
+                    // Track documents from main searcher (index 0) within window size
+                    if (searcherIndex == 0 && docRank < windowSize / 2) {
+                        mainSearcherIdSet.add(id);
                     }
                 }
             }
         }
 
-        final var docs = scoreDocMap.values()
+        // Sort all documents by fused RRF score (descending)
+        final var fusedDocs = documentsByIdMap.values()
                 .stream()
-                .sorted((e1, e2) -> Float.compare(toFloat(e2.get(scoreField)), toFloat(e1.get(scoreField))))
+                .sorted((doc1, doc2) -> Float.compare(toFloat(doc2.get(scoreField)), toFloat(doc1.get(scoreField))))
                 .toList();
+
+        // Calculate offset based on documents not in main searcher's top results
         int offset = 0;
-        for (int i = 0; i < windowSize / 2 && i < docs.size(); i++) {
-            if (!mainIdSet.contains(docs.get(i).get(idField))) {
+        for (int i = 0; i < windowSize / 2 && i < fusedDocs.size(); i++) {
+            if (!mainSearcherIdSet.contains(fusedDocs.get(i).get(idField))) {
                 offset++;
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("The offset is {} and the fused docs is {}.", offset, docs.size());
+            logger.debug("Calculated offset: {}, total fused documents: {}", offset, fusedDocs.size());
         }
         final SearchResult mainResult = results[0];
         long allRecordCount = mainResult.getAllRecordCount();
         if (Relation.EQUAL_TO.toString().equals(mainResult.getAllRecordCountRelation())) {
             allRecordCount += offset;
         }
-        return createResponseList(extractList(docs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
+        return createResponseList(extractList(fusedDocs, pageSize, startPosition), allRecordCount, mainResult.getAllRecordCountRelation(),
                 mainResult.getQueryTime(), mainResult.isPartialResults(), mainResult.getFacetResponse(), startPosition, pageSize, offset);
     }
 
@@ -569,18 +589,23 @@ public class RankFusionProcessor implements AutoCloseable {
     }
 
     /**
-     * Sets the main searcher at index 0 of the searchers array.
+     * Sets the main searcher at index 0 of the searchers list.
      * This method is used to configure the primary searcher for rank fusion processing.
+     * If searchers list is empty, adds the searcher; otherwise, replaces the first searcher.
      *
      * @param searcher the RankFusionSearcher to set as the main searcher
      */
-    public void setSeacher(final RankFusionSearcher searcher) {
-        searchers[0] = searcher;
+    public void setSearcher(final RankFusionSearcher searcher) {
+        if (searchers.isEmpty()) {
+            searchers.add(searcher);
+        } else {
+            searchers.set(0, searcher);
+        }
     }
 
     /**
      * Registers a new searcher with the rank fusion processor.
-     * Adds the searcher to the searchers array and initializes the executor service
+     * Adds the searcher to the searchers list and initializes the executor service
      * if it hasn't been created yet. The executor service is created with a thread pool
      * sized based on configuration or system capabilities.
      *
@@ -588,16 +613,17 @@ public class RankFusionProcessor implements AutoCloseable {
      */
     public void register(final RankFusionSearcher searcher) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Load {}", searcher.getClass().getSimpleName());
+            logger.debug("Registering searcher: {}", searcher.getClass().getSimpleName());
         }
-        final RankFusionSearcher[] newSearchers = Arrays.copyOf(searchers, searchers.length + 1);
-        newSearchers[newSearchers.length - 1] = searcher;
-        searchers = newSearchers;
+        searchers.add(searcher);
         synchronized (this) {
             if (executorService == null) {
                 int numThreads = ComponentUtil.getFessConfig().getRankFusionThreadsAsInteger();
                 if (numThreads <= 0) {
                     numThreads = Runtime.getRuntime().availableProcessors() * 3 / 2 + 1;
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Initializing executor service with {} threads", numThreads);
                 }
                 executorService = Executors.newFixedThreadPool(numThreads);
             }
