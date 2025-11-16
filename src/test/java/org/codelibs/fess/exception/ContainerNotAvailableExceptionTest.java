@@ -26,8 +26,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
 
         assertEquals(componentName + " is not available.", exception.getMessage());
         assertNull(exception.getCause());
-        // Note: This test reveals that componentName field is not set in this constructor
-        assertNull(exception.getComponentName());
+        assertEquals(componentName, exception.getComponentName());
     }
 
     public void test_constructor_withComponentNameAndCause() {
@@ -68,7 +67,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
 
         assertEquals(" is not available.", exception.getMessage());
         assertNull(exception.getCause());
-        assertNull(exception.getComponentName());
+        assertEquals(componentName, exception.getComponentName());
     }
 
     public void test_constructor_withNullComponentNameAndCause() {
@@ -111,7 +110,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("container", exception2.getComponentName());
 
         ContainerNotAvailableException exception3 = new ContainerNotAvailableException("anotherComponent");
-        assertNull(exception3.getComponentName());
+        assertEquals("anotherComponent", exception3.getComponentName());
     }
 
     public void test_exceptionChaining() {
@@ -134,7 +133,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         } catch (ContainerNotAvailableException e) {
             assertEquals(componentName + " is not available.", e.getMessage());
             assertNull(e.getCause());
-            assertNull(e.getComponentName());
+            assertEquals(componentName, e.getComponentName());
         }
     }
 
