@@ -50,6 +50,14 @@ public class CorsHandlerFactory {
      * @param handler the CORS handler to associate with the origin
      */
     public void add(final String origin, final CorsHandler handler) {
+        // ConcurrentHashMap does not allow null keys or values
+        if (origin == null || handler == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipping null origin or handler: origin={}, handler={}", origin, handler);
+            }
+            return;
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", origin);
         }
@@ -64,6 +72,11 @@ public class CorsHandlerFactory {
      * @return the CORS handler for the origin, or null if none found
      */
     public CorsHandler get(final String origin) {
+        // Return null for null origin (ConcurrentHashMap does not allow null keys)
+        if (origin == null) {
+            return handlerMap.get("*");
+        }
+
         final CorsHandler handler = handlerMap.get(origin);
         if (handler != null) {
             return handler;
