@@ -67,6 +67,7 @@ public class GroovyEngine extends AbstractScriptEngine {
     @Override
     public Object evaluate(final String template, final Map<String, Object> paramMap) {
         // Null-safety: return null for blank templates
+        // Early return is safe here as no resources have been allocated yet
         if (StringUtil.isBlank(template)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Template is blank, returning null");
@@ -84,7 +85,12 @@ public class GroovyEngine extends AbstractScriptEngine {
         // Create GroovyShell with custom class loader for proper resource management
         GroovyClassLoader classLoader = null;
         try {
-            classLoader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader());
+            // Get parent class loader with fallback to ensure robustness across threading contexts
+            ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+            if (parentClassLoader == null) {
+                parentClassLoader = GroovyEngine.class.getClassLoader();
+            }
+            classLoader = new GroovyClassLoader(parentClassLoader);
             final GroovyShell groovyShell = new GroovyShell(classLoader, new Binding(bindingMap));
 
             if (logger.isDebugEnabled()) {
