@@ -141,9 +141,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     /** Group cache expiry time in seconds. */
     protected long groupCacheExpiry = 10 * 60L;
 
-    /** HTTP request timeout in milliseconds. */
-    protected int httpRequestTimeout = 10 * 1000;
-
     /** Maximum depth for processing nested groups to prevent infinite loops. */
     protected int maxGroupDepth = 10;
 
@@ -522,7 +519,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
-                .timeout(httpRequestTimeout)
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
@@ -678,7 +674,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                         .header("Accept", "application/json")
                         .header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
-                        .timeout(httpRequestTimeout)
                         .execute()) {
                     final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
                     if (logger.isDebugEnabled()) {
@@ -732,7 +727,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
-                .timeout(httpRequestTimeout)
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
@@ -893,14 +887,6 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      */
     public void setGroupCacheExpiry(final long groupCacheExpiry) {
         this.groupCacheExpiry = groupCacheExpiry;
-    }
-
-    /**
-     * Sets the HTTP request timeout.
-     * @param httpRequestTimeout The HTTP request timeout in milliseconds.
-     */
-    public void setHttpRequestTimeout(final int httpRequestTimeout) {
-        this.httpRequestTimeout = httpRequestTimeout;
     }
 
     /**

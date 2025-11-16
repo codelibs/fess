@@ -105,9 +105,6 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     /** JSON factory for OpenID Connect response parsing. */
     protected final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
-    /** HTTP request timeout in milliseconds. */
-    protected int httpRequestTimeout = 30 * 1000;
-
     /**
      * Initializes the OpenID Connect authenticator.
      */
@@ -337,15 +334,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @throws IOException if an I/O error occurs
      */
     protected TokenResponse getTokenUrl(final String code) throws IOException {
-        final AuthorizationCodeTokenRequest request =
-                new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
-                        .setGrantType("authorization_code")//
-                        .setRedirectUri(getOicRedirectUrl())//
-                        .set("client_id", getOicClientId())//
-                        .set("client_secret", getOicClientSecret());
-        request.setConnectTimeout(httpRequestTimeout);
-        request.setReadTimeout(httpRequestTimeout);
-        return request.execute();
+        return new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
+                .setGrantType("authorization_code")//
+                .setRedirectUri(getOicRedirectUrl())//
+                .set("client_id", getOicClientId())//
+                .set("client_secret", getOicClientSecret())//
+                .execute();
     }
 
     /**
@@ -421,15 +415,6 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
         resolver.resolve(OpenIdConnectCredential.class, credential -> OptionalEntity.of(credential.getUser()));
-    }
-
-    /**
-     * Sets the HTTP request timeout.
-     *
-     * @param httpRequestTimeout the HTTP request timeout in milliseconds
-     */
-    public void setHttpRequestTimeout(final int httpRequestTimeout) {
-        this.httpRequestTimeout = httpRequestTimeout;
     }
 
     @Override
