@@ -141,6 +141,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     /** Group cache expiry time in seconds. */
     protected long groupCacheExpiry = 10 * 60L;
 
+    /** HTTP request timeout in milliseconds. */
+    protected int httpRequestTimeout = 10 * 1000;
+
+    /** Maximum depth for processing nested groups to prevent infinite loops. */
+    protected int maxGroupDepth = 10;
+
     /** Use V2 endpoint. */
     protected boolean useV2Endpoint = true;
 
@@ -236,7 +242,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @return The login credential or null if processing fails.
      */
     protected LoginCredential processAuthenticationData(final HttpServletRequest request) {
-        final StringBuffer urlBuf = request.getRequestURL();
+        final StringBuilder urlBuf = new StringBuilder(request.getRequestURL());
         final String queryStr = request.getQueryString();
         if (queryStr != null) {
             urlBuf.append('?').append(queryStr);
@@ -516,6 +522,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
+                .timeout(httpRequestTimeout)
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
@@ -610,7 +617,26 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @param id The group ID to process.
      */
     protected void processParentGroup(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String id) {
-        final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id);
+        processParentGroup(user, groupList, roleList, id, 0);
+    }
+
+    /**
+     * Processes parent group information for nested groups with depth tracking.
+     * @param user The Azure AD user.
+     * @param groupList The list to add group names to.
+     * @param roleList The list to add role names to.
+     * @param id The group ID to process.
+     * @param depth The current recursion depth.
+     */
+    protected void processParentGroup(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String id,
+            final int depth) {
+        if (depth >= maxGroupDepth) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Maximum group depth {} reached for group {}", maxGroupDepth, id);
+            }
+            return;
+        }
+        final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id, depth);
         StreamUtil.stream(groupsAndRoles.getFirst()).of(stream -> stream.forEach(groupList::add));
         StreamUtil.stream(groupsAndRoles.getSecond()).of(stream -> stream.forEach(roleList::add));
     }
@@ -622,6 +648,23 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * @return A pair containing group names and role names.
      */
     protected Pair<String[], String[]> getParentGroup(final AzureAdUser user, final String id) {
+        return getParentGroup(user, id, 0);
+    }
+
+    /**
+     * Retrieves parent group information for the specified group ID with depth tracking.
+     * @param user The Azure AD user.
+     * @param id The group ID to get parent information for.
+     * @param depth The current recursion depth.
+     * @return A pair containing group names and role names.
+     */
+    protected Pair<String[], String[]> getParentGroup(final AzureAdUser user, final String id, final int depth) {
+        if (depth >= maxGroupDepth) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Maximum group depth {} reached for group {}", maxGroupDepth, id);
+            }
+            return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
+        }
         try {
             return groupCache.get(id, () -> {
                 final List<String> groupList = new ArrayList<>();
@@ -635,6 +678,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                         .header("Accept", "application/json")
                         .header("Content-type", "application/json")
                         .body("{\"securityEnabledOnly\":false}")
+                        .timeout(httpRequestTimeout)
                         .execute()) {
                     final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
                     if (logger.isDebugEnabled()) {
@@ -646,7 +690,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                             for (final String value : values) {
                                 processGroup(user, groupList, roleList, value);
                                 if (!groupList.contains(value) && !roleList.contains(value)) {
-                                    final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value);
+                                    final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1);
                                     StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
                                     StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
                                 }
@@ -688,6 +732,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
                 .header("Accept", "application/json")
+                .timeout(httpRequestTimeout)
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
@@ -850,6 +895,22 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         this.groupCacheExpiry = groupCacheExpiry;
     }
 
+    /**
+     * Sets the HTTP request timeout.
+     * @param httpRequestTimeout The HTTP request timeout in milliseconds.
+     */
+    public void setHttpRequestTimeout(final int httpRequestTimeout) {
+        this.httpRequestTimeout = httpRequestTimeout;
+    }
+
+    /**
+     * Sets the maximum group depth for nested group processing.
+     * @param maxGroupDepth The maximum depth for nested groups.
+     */
+    public void setMaxGroupDepth(final int maxGroupDepth) {
+        this.maxGroupDepth = maxGroupDepth;
+    }
+
     @Override
     public ActionResponse getResponse(final SsoResponseType responseType) {
         return null;
@@ -864,7 +925,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      * Enable to use V2 endpoint.
      * @param useV2Endpoint true if using V2 endpoint.
      */
-    public void setUseV2Endpoint(boolean useV2Endpoint) {
+    public void setUseV2Endpoint(final boolean useV2Endpoint) {
         this.useV2Endpoint = useV2Endpoint;
     }
 }

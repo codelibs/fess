@@ -146,7 +146,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         }
         try {
             // set some System properties
-            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpengoConfig());
+            final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpnegoConfig());
 
             // pre-authenticate
             authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
@@ -225,7 +225,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 logger.debug("username: {}", Arrays.toString(username));
             }
             return new SpnegoCredential(username[0]);
-        }).orElseGet(() -> null);
+        }).orElse(null);
 
     }
 
@@ -237,12 +237,12 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      * various authentication settings including Kerberos configuration,
      * authentication modules, and security options.
      */
-    protected static class SpengoConfig implements FilterConfig {
+    protected static class SpnegoConfig implements FilterConfig {
 
         /**
          * Constructs a new SPNEGO filter configuration.
          */
-        public SpengoConfig() {
+        public SpnegoConfig() {
             // do nothing
         }
 
@@ -317,9 +317,15 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 return getProperty(SPNEGO_PREAUTH_PASSWORD, "password");
             }
             if (SpnegoHttpFilter.Constants.ALLOW_BASIC.equals(name)) {
+                // SECURITY NOTE: Basic authentication is enabled by default for compatibility.
+                // For production, consider setting spnego.allow.basic to false.
                 return getProperty(SPNEGO_ALLOW_BASIC, "true");
             }
             if (SpnegoHttpFilter.Constants.ALLOW_UNSEC_BASIC.equals(name)) {
+                // SECURITY WARNING: Unsecure basic authentication is enabled by default.
+                // This sends credentials in Base64 encoding over potentially unencrypted connections.
+                // For production, it is STRONGLY RECOMMENDED to set spnego.allow.unsecure.basic to false
+                // and use HTTPS or more secure authentication methods.
                 return getProperty(SPNEGO_ALLOW_UNSECURE_BASIC, "true");
             }
             if (SpnegoHttpFilter.Constants.PROMPT_NTLM.equals(name)) {

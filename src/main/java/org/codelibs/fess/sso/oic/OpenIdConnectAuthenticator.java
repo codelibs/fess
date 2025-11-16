@@ -105,6 +105,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     /** JSON factory for OpenID Connect response parsing. */
     protected final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
+    /** HTTP request timeout in milliseconds. */
+    protected int httpRequestTimeout = 30 * 1000;
+
     /**
      * Initializes the OpenID Connect authenticator.
      */
@@ -193,15 +196,18 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final String[] jwt = ((String) tr.get("id_token")).split("\\.");
             final String jwtHeader = new String(decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
             final String jwtClaim = new String(decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
-            final String jwtSigniture = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
+            final String jwtSignature = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("jwtHeader: {}", jwtHeader);
                 logger.debug("jwtClaim: {}", jwtClaim);
-                logger.debug("jwtSigniture: {}", jwtSigniture);
+                logger.debug("jwtSignature: {}", jwtSignature);
             }
 
-            // TODO validate signiture
+            // SECURITY WARNING: JWT signature validation is not implemented.
+            // This is a critical security vulnerability. The ID token should be validated
+            // to ensure it was issued by the expected OpenID Connect provider and has not been tampered with.
+            // TODO: Implement JWT signature validation using the provider's public key
 
             final Map<String, Object> attributes = new HashMap<>();
             attributes.put("accesstoken", tr.getAccessToken());
@@ -210,7 +216,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("expire", tr.getExpiresInSeconds());
             attributes.put("jwtheader", jwtHeader);
             attributes.put("jwtclaim", jwtClaim);
-            attributes.put("jwtsign", jwtSigniture);
+            attributes.put("jwtsignature", jwtSignature);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("attribute: {}", attributes);
@@ -331,12 +337,15 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
      * @throws IOException if an I/O error occurs
      */
     protected TokenResponse getTokenUrl(final String code) throws IOException {
-        return new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
-                .setGrantType("authorization_code")//
-                .setRedirectUri(getOicRedirectUrl())//
-                .set("client_id", getOicClientId())//
-                .set("client_secret", getOicClientSecret())//
-                .execute();
+        final AuthorizationCodeTokenRequest request =
+                new AuthorizationCodeTokenRequest(httpTransport, jsonFactory, new GenericUrl(getOicTokenServerUrl()), code)//
+                        .setGrantType("authorization_code")//
+                        .setRedirectUri(getOicRedirectUrl())//
+                        .set("client_id", getOicClientId())//
+                        .set("client_secret", getOicClientSecret());
+        request.setConnectTimeout(httpRequestTimeout);
+        request.setReadTimeout(httpRequestTimeout);
+        return request.execute();
     }
 
     /**
@@ -412,6 +421,15 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
         resolver.resolve(OpenIdConnectCredential.class, credential -> OptionalEntity.of(credential.getUser()));
+    }
+
+    /**
+     * Sets the HTTP request timeout.
+     *
+     * @param httpRequestTimeout the HTTP request timeout in milliseconds
+     */
+    public void setHttpRequestTimeout(final int httpRequestTimeout) {
+        this.httpRequestTimeout = httpRequestTimeout;
     }
 
     @Override
