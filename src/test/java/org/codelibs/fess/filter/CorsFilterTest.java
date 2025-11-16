@@ -175,7 +175,7 @@ public class CorsFilterTest extends UnitFessTestCase {
         assertTrue(corsHandlerFactory.wasGetCalled());
         assertTrue(handler.wasProcessCalled());
         assertEquals(origin, handler.getLastOrigin());
-        assertEquals(HttpServletResponse.SC_ACCEPTED, mockResponse.getStatus());
+        assertEquals(HttpServletResponse.SC_OK, mockResponse.getStatus());
     }
 
     // Test with OPTIONS request but no CorsHandler

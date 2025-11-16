@@ -285,6 +285,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String API_CORS_ALLOW_CREDENTIALS = "api.cors.allow.credentials";
 
+    /** The key of the configuration. e.g.  */
+    String API_CORS_EXPOSE_HEADERS = "api.cors.expose.headers";
+
     /** The key of the configuration. e.g. false */
     String API_JSONP_ENABLED = "api.jsonp.enabled";
 
@@ -2613,6 +2616,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isApiCorsAllowCredentials();
+
+    /**
+     * Get the value for the key 'api.cors.expose.headers'. <br>
+     * The value is, e.g.  <br>
+     * comment: Headers exposed to the client for CORS.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiCorsExposeHeaders();
 
     /**
      * Get the value for the key 'api.jsonp.enabled'. <br>
@@ -9116,6 +9127,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.API_CORS_ALLOW_CREDENTIALS);
         }
 
+        public String getApiCorsExposeHeaders() {
+            return get(FessConfig.API_CORS_EXPOSE_HEADERS);
+        }
+
         public String getApiJsonpEnabled() {
             return get(FessConfig.API_JSONP_ENABLED);
         }
@@ -12120,6 +12135,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_MAX_AGE, "3600");
             defaultMap.put(FessConfig.API_CORS_ALLOW_HEADERS, "Origin, Content-Type, Accept, Authorization, X-Requested-With");
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
+            defaultMap.put(FessConfig.API_CORS_EXPOSE_HEADERS, "");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.API_PING_search_engine_FIELDS, "status,timed_out");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");

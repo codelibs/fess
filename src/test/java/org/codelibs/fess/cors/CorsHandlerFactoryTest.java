@@ -241,8 +241,8 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
 
         // Verify
         assertNotNull(factory);
-        assertNotNull(factory.handerMap);
-        assertTrue(factory.handerMap.isEmpty());
+        assertNotNull(factory.handlerMap);
+        assertTrue(factory.handlerMap.isEmpty());
     }
 
     // Test implementation of CorsHandler for testing purposes
