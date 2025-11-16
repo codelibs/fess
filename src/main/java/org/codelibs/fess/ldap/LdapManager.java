@@ -195,15 +195,21 @@ public class LdapManager {
                 // no credentials
                 return !fessConfig.isLdapAuthValidation();
             }
-            final Hashtable<String, String> env = createAdminEnv();
-            try (DirContextHolder holder = getDirContext(() -> env)) {
-                final DirContext context = holder.get();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Logged in as Bind DN. {}", context);
+            try {
+                final Hashtable<String, String> env = createAdminEnv();
+                try (DirContextHolder holder = getDirContext(() -> env)) {
+                    final DirContext context = holder.get();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Logged in as Bind DN. {}", context);
+                    }
+                    isBind = true;
                 }
-                isBind = true;
+            } catch (final LdapConfigurationException e) {
+                logger.error("LDAP configuration error: {}", e.getMessage());
+            } catch (final LdapOperationException e) {
+                logger.warn("LDAP connection failed: {}", e.getMessage(), e);
             } catch (final Exception e) {
-                logger.warn("LDAP configuration is wrong.", e);
+                logger.warn("Unexpected error during LDAP validation: {}", e.getMessage(), e);
             }
         }
         return isBind;
@@ -217,26 +223,38 @@ public class LdapManager {
      * @return an optional containing the authenticated user if successful, empty otherwise
      */
     public OptionalEntity<FessUser> login(final String username, final String password) {
+        // Add defensive null/blank checks
+        if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Login failed: username or password is blank");
+            }
+            return OptionalEntity.empty();
+        }
+
         if (StringUtil.isBlank(fessConfig.getLdapProviderUrl()) || !validate()) {
             return OptionalEntity.empty();
         }
 
-        final Hashtable<String, String> env = createSearchEnv(username, password);
-        try (DirContextHolder holder = getDirContext(() -> env)) {
-            final DirContext context = holder.get();
-            final LdapUser ldapUser = createLdapUser(username, env);
-            if (!allowEmptyGroupAndRole(ldapUser)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Login failed. No permissions. {}", context);
+        try {
+            final Hashtable<String, String> env = createSearchEnv(username, password);
+            try (DirContextHolder holder = getDirContext(() -> env)) {
+                final DirContext context = holder.get();
+                final LdapUser ldapUser = createLdapUser(username, env);
+                if (!allowEmptyGroupAndRole(ldapUser)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Login failed. No permissions. {}", context);
+                    }
+                    return OptionalEntity.empty();
                 }
-                return OptionalEntity.empty();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Logged in. {}", context);
+                }
+                return OptionalEntity.of(ldapUser);
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Logged in. {}", context);
-            }
-            return OptionalEntity.of(ldapUser);
+        } catch (final LdapOperationException e) {
+            logger.debug("LDAP operation failed during login for user: {}", username, e);
         } catch (final Exception e) {
-            logger.debug("Login failed.", e);
+            logger.debug("Login failed for user: {}", username, e);
         }
         return OptionalEntity.empty();
     }
@@ -248,22 +266,34 @@ public class LdapManager {
      * @return an optional containing the authenticated user if successful, empty otherwise
      */
     public OptionalEntity<FessUser> login(final String username) {
-        final Hashtable<String, String> env = createSearchEnv();
-        try (DirContextHolder holder = getDirContext(() -> env)) {
-            final DirContext context = holder.get();
-            final LdapUser ldapUser = createLdapUser(username, env);
-            if (!allowEmptyGroupAndRole(ldapUser)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Login failed. No permissions. {}", context);
-                }
-                return OptionalEntity.empty();
-            }
+        // Add defensive null/blank check
+        if (StringUtil.isBlank(username)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Logged in. {}", context);
+                logger.debug("Login failed: username is blank");
             }
-            return OptionalEntity.of(ldapUser);
+            return OptionalEntity.empty();
+        }
+
+        try {
+            final Hashtable<String, String> env = createSearchEnv();
+            try (DirContextHolder holder = getDirContext(() -> env)) {
+                final DirContext context = holder.get();
+                final LdapUser ldapUser = createLdapUser(username, env);
+                if (!allowEmptyGroupAndRole(ldapUser)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Login failed. No permissions. {}", context);
+                    }
+                    return OptionalEntity.empty();
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Logged in. {}", context);
+                }
+                return OptionalEntity.of(ldapUser);
+            }
+        } catch (final LdapOperationException e) {
+            logger.debug("LDAP operation failed during login for user: {}", username, e);
         } catch (final Exception e) {
-            logger.debug("Login failed.", e);
+            logger.debug("Login failed for user: {}", username, e);
         }
         return OptionalEntity.empty();
     }
@@ -370,6 +400,14 @@ public class LdapManager {
      * @return an optional containing the sAMAccountName if found, empty otherwise
      */
     protected OptionalEntity<String> getSAMAccountGroupName(final String bindDn, final String groupName) {
+        // Add defensive null/blank checks
+        if (StringUtil.isBlank(bindDn) || StringUtil.isBlank(groupName)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("bindDn or groupName is blank: bindDn={}, groupName={}", bindDn, groupName);
+            }
+            return OptionalEntity.empty();
+        }
+
         final Hashtable<String, String> env = createSearchEnv();
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
@@ -390,8 +428,10 @@ public class LdapManager {
                     return OptionalEntity.of(sAMAccountName);
                 }
             }
+        } catch (final NamingException e) {
+            logger.warn("LDAP naming exception while getting sAMAccountName for group: {}", groupName, e);
         } catch (final Exception e) {
-            logger.warn("Failed to get sAMAccountName: {}", groupName, e);
+            logger.warn("Unexpected exception while getting sAMAccountName for group: {}", groupName, e);
         }
         return OptionalEntity.empty();
     }
@@ -463,15 +503,31 @@ public class LdapManager {
     }
 
     /**
-     * Escapes special characters in an LDAP search filter to prevent injection attacks.
+     * Escapes special characters in an LDAP search filter to prevent LDAP injection attacks.
      *
-     * @param filter the LDAP search filter to escape
-     * @return the escaped filter string
+     * <p>This method escapes the following characters as per RFC 4515:
+     * <ul>
+     * <li>\ (backslash) → \5c</li>
+     * <li>* (asterisk) → \2a</li>
+     * <li>( (left parenthesis) → \28</li>
+     * <li>) (right parenthesis) → \29</li>
+     * <li>\0 (null character) → \00</li>
+     * </ul>
+     *
+     * <p><strong>Security Note:</strong> This method MUST be called on all user-supplied
+     * input before using it in LDAP search filters to prevent LDAP injection vulnerabilities.
+     *
+     * @param filter the LDAP search filter to escape (must not be null)
+     * @return the escaped filter string safe for use in LDAP queries
+     * @see <a href="https://tools.ietf.org/html/rfc4515">RFC 4515 - LDAP String Representation of Search Filters</a>
      */
-    protected String escapeLDAPSearchFilter(String filter) {
-        final StringBuilder sb = new StringBuilder();
+    protected String escapeLDAPSearchFilter(final String filter) {
+        if (filter == null) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(filter.length() * 2);
         for (int i = 0; i < filter.length(); i++) {
-            char curChar = filter.charAt(i);
+            final char curChar = filter.charAt(i);
             switch (curChar) {
             case '\\':
                 sb.append("\\5c");
@@ -1458,26 +1514,51 @@ public class LdapManager {
     /**
      * Changes the password for a user in the LDAP directory.
      *
-     * @param username the username of the user
-     * @param password the new password
+     * <p>This method performs the following validations:
+     * <ul>
+     * <li>Checks if username and password are not blank</li>
+     * <li>Verifies LDAP admin is enabled for the user</li>
+     * <li>Confirms the user exists in LDAP directory</li>
+     * </ul>
+     *
+     * @param username the username of the user (must not be null or blank)
+     * @param password the new password (must not be null or blank)
      * @return true if the password was changed successfully, false otherwise
+     * @throws LdapOperationException if the user is not found in LDAP
      */
     public boolean changePassword(final String username, final String password) {
-        if (!fessConfig.isLdapAdminEnabled(username)) {
+        // Add defensive null/blank checks
+        if (StringUtil.isBlank(username) || StringUtil.isBlank(password)) {
+            logger.warn("Cannot change password: username or password is blank");
             return false;
         }
 
-        final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
-        final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(username);
-        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(username), null, adminEnv, result -> {
-            if (result.isEmpty()) {
-                throw new LdapOperationException("User is not found: " + username);
+        if (!fessConfig.isLdapAdminEnabled(username)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("LDAP admin not enabled for user: {}", username);
             }
-            final List<ModificationItem> modifyList = new ArrayList<>();
-            modifyReplaceEntry(modifyList, "userPassword", password);
-            modify(userDN, modifyList, adminEnv);
-        });
-        return true;
+            return false;
+        }
+
+        try {
+            final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
+            final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(username);
+            search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(username), null, adminEnv, result -> {
+                if (result.isEmpty()) {
+                    throw new LdapOperationException("User is not found: " + username);
+                }
+                final List<ModificationItem> modifyList = new ArrayList<>();
+                modifyReplaceEntry(modifyList, "userPassword", password);
+                modify(userDN, modifyList, adminEnv);
+            });
+            return true;
+        } catch (final LdapOperationException e) {
+            logger.error("Failed to change password for user: {}", username, e);
+            throw e;
+        } catch (final Exception e) {
+            logger.error("Unexpected error while changing password for user: {}", username, e);
+            return false;
+        }
     }
 
     /**
@@ -1671,13 +1752,19 @@ public class LdapManager {
             if (counter > 1) {
                 counter--;
             } else {
-                contextLocal.remove();
-                if (context != null) {
-                    try {
-                        context.close();
-                    } catch (final NamingException e) {
-                        // ignored
+                try {
+                    if (context != null) {
+                        try {
+                            context.close();
+                        } catch (final NamingException e) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Failed to close LDAP context", e);
+                            }
+                        }
                     }
+                } finally {
+                    // Ensure ThreadLocal is always cleaned up, even if context.close() fails
+                    contextLocal.remove();
                 }
             }
         }
