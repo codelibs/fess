@@ -517,8 +517,8 @@ public class LdapManager {
      * <p><strong>Security Note:</strong> This method MUST be called on all user-supplied
      * input before using it in LDAP search filters to prevent LDAP injection vulnerabilities.
      *
-     * @param filter the LDAP search filter to escape (must not be null)
-     * @return the escaped filter string safe for use in LDAP queries
+     * @param filter the LDAP search filter to escape (null is treated as empty string)
+     * @return the escaped filter string safe for use in LDAP queries (empty string if filter is null)
      * @see <a href="https://tools.ietf.org/html/rfc4515">RFC 4515 - LDAP String Representation of Search Filters</a>
      */
     protected String escapeLDAPSearchFilter(final String filter) {
