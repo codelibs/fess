@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -90,8 +89,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     /** Factory for creating crawler clients to handle different URL schemes. */
     protected CrawlerClientFactory crawlerClientFactory;
 
-    /** List of URLs to be deleted, cached for batch processing. Thread-safe using CopyOnWriteArrayList. */
-    protected List<String> deleteUrlList = new CopyOnWriteArrayList<>();
+    /**
+     * List of URLs to be deleted, cached for batch processing.
+     * All access is synchronized via indexUpdateCallback lock.
+     */
+    protected List<String> deleteUrlList = new ArrayList<>();
 
     /** Maximum size of the delete URL cache before batch deletion is triggered. */
     protected int maxDeleteDocumentCacheSize;
@@ -586,8 +588,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             executor.shutdownNow();
         }
 
-        if (!deleteUrlList.isEmpty()) {
-            deleteDocuments();
+        synchronized (indexUpdateCallback) {
+            if (!deleteUrlList.isEmpty()) {
+                deleteDocuments();
+            }
         }
         indexUpdateCallback.commit();
     }
