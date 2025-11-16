@@ -17,6 +17,7 @@ package org.codelibs.fess.cors;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Factory for managing CORS handlers based on origin.
  * Maintains a registry of CORS handlers for different origins and provides lookup functionality.
- * This class is thread-safe.
+ * This class is thread-safe and supports null origins.
  */
 public class CorsHandlerFactory {
 
@@ -44,16 +45,32 @@ public class CorsHandlerFactory {
     protected Map<String, CorsHandler> handlerMap = new ConcurrentHashMap<>();
 
     /**
+     * Handler for null origin.
+     * Since ConcurrentHashMap does not support null keys, we store null origin separately.
+     */
+    protected final AtomicReference<CorsHandler> nullOriginHandler = new AtomicReference<>();
+
+    /**
      * Adds a CORS handler for the specified origin.
      *
-     * @param origin the origin pattern (can be "*" for wildcard)
-     * @param handler the CORS handler to associate with the origin
+     * @param origin the origin pattern (can be "*" for wildcard, or null)
+     * @param handler the CORS handler to associate with the origin (can be null to remove)
      */
     public void add(final String origin, final CorsHandler handler) {
-        // ConcurrentHashMap does not allow null keys or values
-        if (origin == null || handler == null) {
+        if (origin == null) {
+            // Handle null origin separately since ConcurrentHashMap does not support null keys
+            nullOriginHandler.set(handler);
             if (logger.isDebugEnabled()) {
-                logger.debug("Skipping null origin or handler: origin={}, handler={}", origin, handler);
+                logger.debug("Loaded null origin");
+            }
+            return;
+        }
+
+        if (handler == null) {
+            // ConcurrentHashMap does not support null values, remove the entry instead
+            handlerMap.remove(origin);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Removed {}", origin);
             }
             return;
         }
@@ -72,8 +89,13 @@ public class CorsHandlerFactory {
      * @return the CORS handler for the origin, or null if none found
      */
     public CorsHandler get(final String origin) {
-        // Return null for null origin (ConcurrentHashMap does not allow null keys)
         if (origin == null) {
+            // Check null origin handler first
+            final CorsHandler handler = nullOriginHandler.get();
+            if (handler != null) {
+                return handler;
+            }
+            // Fall back to wildcard
             return handlerMap.get("*");
         }
 
