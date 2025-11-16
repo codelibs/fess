@@ -52,7 +52,8 @@ public class DefaultCorsHandler extends CorsHandler {
 
     /**
      * Processes the CORS request by adding standard CORS headers to the response.
-     * Headers include allowed origin, methods, headers, max age, and credentials setting.
+     * Headers include allowed origin, methods, headers, max age, credentials setting,
+     * expose headers, and vary header for proper caching.
      *
      * @param origin the origin of the request
      * @param request the servlet request
@@ -62,11 +63,31 @@ public class DefaultCorsHandler extends CorsHandler {
     public void process(final String origin, final ServletRequest request, final ServletResponse response) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        // Add standard CORS headers
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_METHODS, fessConfig.getApiCorsAllowMethods());
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, fessConfig.getApiCorsAllowHeaders());
         httpResponse.addHeader(ACCESS_CONTROL_MAX_AGE, fessConfig.getApiCorsMaxAge());
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, fessConfig.getApiCorsAllowCredentials());
+
+        // Add expose headers if configured
+        final String exposeHeaders = fessConfig.getApiCorsExposeHeaders();
+        if (exposeHeaders != null && !exposeHeaders.isEmpty()) {
+            httpResponse.addHeader(ACCESS_CONTROL_EXPOSE_HEADERS, exposeHeaders);
+        }
+
+        // Add Vary header for proper caching
+        httpResponse.addHeader(VARY, ORIGIN);
+
+        // Handle private network access request if present
+        if (request instanceof jakarta.servlet.http.HttpServletRequest) {
+            final jakarta.servlet.http.HttpServletRequest httpRequest = (jakarta.servlet.http.HttpServletRequest) request;
+            final String privateNetworkRequest = httpRequest.getHeader(ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK);
+            if ("true".equalsIgnoreCase(privateNetworkRequest)) {
+                httpResponse.addHeader(ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK, "true");
+            }
+        }
     }
 
 }

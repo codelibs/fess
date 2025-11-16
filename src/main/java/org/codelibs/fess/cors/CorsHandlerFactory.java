@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.cors;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Factory for managing CORS handlers based on origin.
  * Maintains a registry of CORS handlers for different origins and provides lookup functionality.
+ * This class is thread-safe.
  */
 public class CorsHandlerFactory {
 
@@ -38,8 +39,9 @@ public class CorsHandlerFactory {
 
     /**
      * Map of origin patterns to their corresponding CORS handlers.
+     * Thread-safe to support dynamic handler registration.
      */
-    protected Map<String, CorsHandler> handerMap = new HashMap<>();
+    protected Map<String, CorsHandler> handlerMap = new ConcurrentHashMap<>();
 
     /**
      * Adds a CORS handler for the specified origin.
@@ -51,7 +53,7 @@ public class CorsHandlerFactory {
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", origin);
         }
-        handerMap.put(origin, handler);
+        handlerMap.put(origin, handler);
     }
 
     /**
@@ -62,10 +64,10 @@ public class CorsHandlerFactory {
      * @return the CORS handler for the origin, or null if none found
      */
     public CorsHandler get(final String origin) {
-        final CorsHandler handler = handerMap.get(origin);
+        final CorsHandler handler = handlerMap.get(origin);
         if (handler != null) {
             return handler;
         }
-        return handerMap.get("*");
+        return handlerMap.get("*");
     }
 }

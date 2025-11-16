@@ -68,7 +68,7 @@ public class CorsFilter implements Filter {
 
                 if (OPTIONS.equals(httpRequest.getMethod())) {
                     final HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpResponse.setStatus(HttpServletResponse.SC_ACCEPTED);
+                    httpResponse.setStatus(HttpServletResponse.SC_OK);
                     return;
                 }
             } else if (logger.isDebugEnabled()) {
