@@ -337,4 +337,280 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
             // Test implementation
         }
     }
+
+    // ========== Thread Safety Tests ==========
+
+    /**
+     * Test concurrent add operations to verify ConcurrentHashMap thread safety.
+     * Multiple threads simultaneously add different data stores.
+     */
+    public void test_add_concurrentAccess() throws Exception {
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    TestDataStore dataStore = new TestDataStore("Store" + index);
+                    dataStoreFactory.add("store" + index, dataStore);
+                } catch (Exception e) {
+                    exceptions[index] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+        }
+
+        // Verify all data stores were registered
+        for (int i = 0; i < threadCount; i++) {
+            assertNotNull("DataStore " + i + " not found", dataStoreFactory.getDataStore("store" + i));
+        }
+    }
+
+    /**
+     * Test concurrent get operations while adding new data stores.
+     * Verifies that reads and writes can happen concurrently without issues.
+     */
+    public void test_getDataStore_concurrentWithAdd() throws Exception {
+        // Pre-populate with some data stores
+        for (int i = 0; i < 5; i++) {
+            TestDataStore dataStore = new TestDataStore("InitialStore" + i);
+            dataStoreFactory.add("initial" + i, dataStore);
+        }
+
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+        final int[] successCount = new int[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    for (int j = 0; j < 100; j++) {
+                        // Half threads read, half threads write
+                        if (index % 2 == 0) {
+                            DataStore ds = dataStoreFactory.getDataStore("initial" + (j % 5));
+                            if (ds != null) {
+                                successCount[index]++;
+                            }
+                        } else {
+                            TestDataStore dataStore = new TestDataStore("ConcurrentStore" + index + "_" + j);
+                            dataStoreFactory.add("concurrent" + index + "_" + j, dataStore);
+                            successCount[index]++;
+                        }
+                    }
+                } catch (Exception e) {
+                    exceptions[index] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertEquals("Thread " + i + " didn't complete all operations", 100, successCount[i]);
+        }
+    }
+
+    /**
+     * Test concurrent getDataStoreNames calls to verify synchronized method works correctly.
+     * Multiple threads call getDataStoreNames() simultaneously.
+     */
+    public void test_getDataStoreNames_concurrentAccess() throws Exception {
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+        final String[][] results = new String[threadCount][];
+
+        DataStoreFactory testFactory = new DataStoreFactory() {
+            @Override
+            protected List<String> loadDataStoreNameList() {
+                return List.of("Store1", "Store2", "Store3");
+            }
+        };
+
+        for (int i = 0; i < threadCount; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    results[index] = testFactory.getDataStoreNames();
+                } catch (Exception e) {
+                    exceptions[index] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNotNull("Thread " + i + " got null result", results[i]);
+            assertEquals("Thread " + i + " got wrong array length", 3, results[i].length);
+        }
+    }
+
+    /**
+     * Test that volatile fields ensure visibility across threads.
+     * Verify that changes to lastLoadedTime are visible to all threads.
+     */
+    public void test_volatileFields_visibility() throws Exception {
+        final DataStoreFactory testFactory = new DataStoreFactory() {
+            @Override
+            protected List<String> loadDataStoreNameList() {
+                return List.of("Store1");
+            }
+        };
+
+        // First call to initialize
+        testFactory.getDataStoreNames();
+
+        final long[] observedTimes = new long[10];
+        final Thread[] threads = new Thread[10];
+
+        // Trigger cache refresh by setting old time
+        testFactory.lastLoadedTime = System.currentTimeMillis() - 70000L;
+
+        // One thread updates
+        Thread updater = new Thread(() -> {
+            testFactory.getDataStoreNames();
+        });
+
+        updater.start();
+        updater.join();
+
+        // Multiple threads read the lastLoadedTime
+        for (int i = 0; i < 10; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                observedTimes[index] = testFactory.lastLoadedTime;
+            });
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // All threads should see the updated time (not 0 or the old value)
+        long firstTime = observedTimes[0];
+        assertTrue("Time should be updated", firstTime > 0);
+        for (int i = 1; i < 10; i++) {
+            assertEquals("All threads should see same time due to volatile", firstTime, observedTimes[i]);
+        }
+    }
+
+    /**
+     * Test cache refresh mechanism with concurrent access.
+     * Verifies that cache is refreshed correctly even with concurrent readers.
+     */
+    public void test_cacheRefresh_withConcurrentReads() throws Exception {
+        final int[] loadCount = { 0 };
+        final DataStoreFactory testFactory = new DataStoreFactory() {
+            @Override
+            protected List<String> loadDataStoreNameList() {
+                synchronized (loadCount) {
+                    loadCount[0]++;
+                }
+                return List.of("Store1", "Store2");
+            }
+        };
+
+        // First load
+        testFactory.getDataStoreNames();
+        assertEquals(1, loadCount[0]);
+
+        // Simulate cache expiry
+        testFactory.lastLoadedTime = System.currentTimeMillis() - 70000L;
+
+        // Multiple threads try to read simultaneously
+        final int threadCount = 5;
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            threads[i] = new Thread(() -> {
+                testFactory.getDataStoreNames();
+            });
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Due to synchronized method, only one thread should reload
+        // The count might be 2 (one initial + one reload) or slightly higher due to timing
+        assertTrue("Load count should be small due to synchronization", loadCount[0] <= 3);
+    }
+
+    /**
+     * Test null safety with concurrent access.
+     * Verifies that null checks work correctly under concurrent load.
+     */
+    public void test_nullSafety_concurrentAccess() throws Exception {
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final DataStore[] results = new DataStore[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            final int index = i;
+            threads[i] = new Thread(() -> {
+                // Try to get non-existent data store
+                results[index] = dataStoreFactory.getDataStore(null);
+            });
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // All should return null without exceptions
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " should get null", results[i]);
+        }
+    }
 }
