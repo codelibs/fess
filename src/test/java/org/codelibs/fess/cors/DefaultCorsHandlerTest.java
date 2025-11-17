@@ -859,5 +859,10 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         public String getSystemProperty(String key, String defaultValue) {
             return defaultValue;
         }
+
+        @Override
+        public List<String> getPasswordInvalidAdminPasswords() {
+            return new ArrayList<>();
+        }
     }
 }
