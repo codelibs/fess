@@ -184,7 +184,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String logType, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
@@ -209,7 +209,7 @@ public class AdminSearchlogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         searchLogService.getSearchLog(form.logType, form.id).alwaysPresent(e -> {
@@ -241,21 +241,6 @@ public class AdminSearchlogAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the CRUD mode matches the expected mode.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

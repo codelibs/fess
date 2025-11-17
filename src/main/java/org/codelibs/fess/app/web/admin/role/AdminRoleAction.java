@@ -191,7 +191,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asHtml(path_AdminRole_AdminRoleDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
@@ -219,15 +219,16 @@ public class AdminRoleAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getRole(form).ifPresent(entity -> {
             try {
                 roleService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                logger.info("Created role: {}", entity.getName());
             } catch (final Exception e) {
-                logger.warn("Failed to add {}", entity, e);
+                logger.warn("Failed to create role: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -246,7 +247,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -254,8 +255,9 @@ public class AdminRoleAction extends FessAdminAction {
             try {
                 roleService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                logger.info("Deleted role: {}", entity.getName());
             } catch (final Exception e) {
-                logger.warn("Failed to delete {}", entity, e);
+                logger.warn("Failed to delete role: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asDetailsHtml);
             }
         }).orElse(() -> {
@@ -308,21 +310,6 @@ public class AdminRoleAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the CRUD mode matches the expected mode.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

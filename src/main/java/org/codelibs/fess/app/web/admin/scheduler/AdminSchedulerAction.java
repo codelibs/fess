@@ -263,7 +263,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
             RenderDataUtil.register(data, "systemJobId", fessConfig.isSystemJobId(id));
@@ -295,7 +295,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getScheduledJob(form).ifPresent(entity -> {
@@ -322,7 +322,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getScheduledJob(form).ifPresent(entity -> {
@@ -349,7 +349,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         final String id = form.id;
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
@@ -377,7 +377,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse start(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         final String id = form.id;
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
@@ -413,7 +413,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse stop(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         final String id = form.id;
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
@@ -502,21 +502,6 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the CRUD mode matches the expected mode.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

@@ -273,7 +273,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).useForm(EditForm.class, op -> op.setup(form -> {
             fileConfigService.getFileConfig(id).ifPresent(entity -> {
@@ -305,7 +305,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getFileConfig(form).ifPresent(entity -> {
@@ -332,7 +332,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getFileConfig(form).ifPresent(entity -> {
@@ -359,7 +359,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -425,11 +425,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                     op -> op.exclude(Stream
                             .concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS))
                             .toArray(n -> new String[n])));
-            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-            entity.setPermissions(split(form.permissions, "\n").get(stream -> stream.map(s -> permissionHelper.encode(s))
-                    .filter(StringUtil::isNotBlank)
-                    .distinct()
-                    .toArray(n -> new String[n])));
+            entity.setPermissions(encodePermissions(form.permissions));
             entity.setVirtualHosts(split(form.virtualHosts, "\n")
                     .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
             return entity;
@@ -450,21 +446,6 @@ public class AdminFileconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the CRUD mode matches the expected mode.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

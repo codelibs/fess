@@ -85,7 +85,8 @@ public class ProfileAction extends FessSearchAction {
             return asIndexHtml();
         };
         validatePasswordForm(form, toIndexPage);
-        final String username = getUserBean().map(FessUserBean::getUserId).get();
+        final String username = getUserBean().map(FessUserBean::getUserId)
+                .orElseThrow(() -> new IllegalStateException("User session not found"));
         try {
             userService.changePassword(username, form.newPassword);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
@@ -107,7 +108,9 @@ public class ProfileAction extends FessSearchAction {
             }, validationErrorLambda);
         }
 
-        fessLoginAssist.findLoginUser(new LocalUserCredential(getUserBean().get().getUserId(), form.oldPassword)).orElseGet(() -> {
+        final String userId = getUserBean().map(FessUserBean::getUserId)
+                .orElseThrow(() -> new IllegalStateException("User session not found"));
+        fessLoginAssist.findLoginUser(new LocalUserCredential(userId, form.oldPassword)).orElseGet(() -> {
             throwValidationError(messages -> {
                 messages.addErrorsNoUserForChangingPassword(GLOBAL);
             }, validationErrorLambda);
