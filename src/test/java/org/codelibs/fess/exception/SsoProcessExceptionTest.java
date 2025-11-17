@@ -220,4 +220,87 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         String toStringResult = exception.toString();
         assertTrue(toStringResult.contains("SsoProcessException"));
     }
+
+    public void test_constructorWithThrowableCause_Error() {
+        // Test that constructor accepts Error as cause (verifies Throwable parameter change)
+        String message = "SSO process failed due to OutOfMemoryError";
+        OutOfMemoryError error = new OutOfMemoryError("Insufficient memory for SSO processing");
+        SsoProcessException exception = new SsoProcessException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof Error);
+        assertTrue(exception.getCause() instanceof OutOfMemoryError);
+        assertEquals("Insufficient memory for SSO processing", exception.getCause().getMessage());
+    }
+
+    public void test_constructorWithThrowableCause_StackOverflowError() {
+        // Test with StackOverflowError as cause
+        String message = "SSO recursive call exceeded stack limit";
+        StackOverflowError error = new StackOverflowError("Recursive SSO validation");
+        SsoProcessException exception = new SsoProcessException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof StackOverflowError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_AssertionError() {
+        // Test with AssertionError as cause
+        String message = "SSO assertion failed";
+        AssertionError error = new AssertionError("Invalid SSO state");
+        SsoProcessException exception = new SsoProcessException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof AssertionError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_VirtualMachineError() {
+        // Test with VirtualMachineError subclass
+        String message = "SSO failed due to VM error";
+        InternalError error = new InternalError("JVM internal error during SSO");
+        SsoProcessException exception = new SsoProcessException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof InternalError);
+        assertTrue(exception.getCause() instanceof VirtualMachineError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_BackwardCompatibilityWithException() {
+        // Test backward compatibility - verify RuntimeException still works
+        String message = "SSO runtime error";
+        RuntimeException runtimeException = new RuntimeException("SSO processing failed");
+        SsoProcessException exception = new SsoProcessException(message, runtimeException);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertEquals(runtimeException, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_CheckedException() {
+        // Test with checked exception
+        String message = "SSO I/O error";
+        java.io.IOException ioException = new java.io.IOException("Network connection failed");
+        SsoProcessException exception = new SsoProcessException(message, ioException);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof java.io.IOException);
+        assertEquals(ioException, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_MixedErrorAndException() {
+        // Test with mixed Error and Exception in cause chain
+        String message = "SSO complex failure";
+        IllegalStateException innerException = new IllegalStateException("Invalid state");
+        OutOfMemoryError middleError = new OutOfMemoryError("Memory exhausted");
+        // Note: OutOfMemoryError constructor doesn't accept cause, so we create a wrapper
+        RuntimeException outerException = new RuntimeException("Wrapper", middleError);
+        SsoProcessException exception = new SsoProcessException(message, outerException);
+
+        assertEquals(message, exception.getMessage());
+        assertEquals(outerException, exception.getCause());
+        assertTrue(exception.getCause().getCause() instanceof OutOfMemoryError);
+    }
 }
