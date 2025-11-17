@@ -848,4 +848,65 @@ public class Constants extends CoreLibConstants {
 
     /** Crawler statistics key identifier. */
     public static final String CRAWLER_STATS_KEY = "crawler.stats.key";
+
+    // ============================================================
+    // Web API Constants
+    // ============================================================
+
+    /** Request attribute key for storing API format type. */
+    public static final String API_FORMAT_TYPE = "apiFormatType";
+
+    /** Request attribute key for storing document ID in API requests. */
+    public static final String API_DOC_ID_FIELD = "doc_id";
+
+    /** JSON response field name for messages. */
+    public static final String API_RESPONSE_MESSAGE = "message";
+
+    /** JSON response field name for results. */
+    public static final String API_RESPONSE_RESULT = "result";
+
+    /** JSON response field name for error codes. */
+    public static final String API_RESPONSE_ERROR_CODE = "error_code";
+
+    /** JSON response field name for data. */
+    public static final String API_RESPONSE_DATA = "data";
+
+    /** JSON response field name for record count. */
+    public static final String API_RESPONSE_RECORD_COUNT = "record_count";
+
+    /** JSON response field name for query. */
+    public static final String API_RESPONSE_QUERY = "q";
+
+    /** JSON response field name for query ID. */
+    public static final String API_RESPONSE_QUERY_ID = "query_id";
+
+    /** MIME type for JSON. */
+    public static final String MIME_TYPE_JSON = "application/json";
+
+    /** MIME type for JSONP/JavaScript. */
+    public static final String MIME_TYPE_JAVASCRIPT = "application/javascript";
+
+    /** MIME type for NDJSON (newline-delimited JSON). */
+    public static final String MIME_TYPE_NDJSON = "application/x-ndjson";
+
+    /** MIME type for plain text. */
+    public static final String MIME_TYPE_TEXT = "text/plain";
+
+    /** API v1 path prefix. */
+    public static final String API_V1_PREFIX = "/api/v1";
+
+    /** Admin server path prefix for search engine API. */
+    public static final String ADMIN_SERVER_PREFIX = "/admin/server_";
+
+    /** Default number of suggestions to return in suggest API. */
+    public static final int DEFAULT_SUGGEST_NUM = 10;
+
+    /** Result value for created resources. */
+    public static final String API_RESULT_CREATED = "created";
+
+    /** Result value for updated resources. */
+    public static final String API_RESULT_UPDATED = "updated";
+
+    /** Result value for deleted resources. */
+    public static final String API_RESULT_DELETED = "deleted";
 }
