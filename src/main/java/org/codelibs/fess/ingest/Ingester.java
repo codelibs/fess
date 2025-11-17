@@ -29,12 +29,25 @@ import org.codelibs.fess.util.ComponentUtil;
  * extract additional metadata, or perform other transformations during the
  * indexing process.
  *
- * Ingesters are processed in priority order, with lower numbers having higher priority.
+ * <p>Ingesters are processed in priority order, with lower numbers having higher priority.
+ * Valid priority values range from 0 to 999, with a default value of 99.</p>
+ *
+ * <p>Implementations should override the appropriate {@code process()} methods
+ * to implement their specific document transformation logic.</p>
  */
 public abstract class Ingester {
 
+    /** Minimum allowed priority value */
+    public static final int MIN_PRIORITY = 0;
+
+    /** Maximum allowed priority value */
+    public static final int MAX_PRIORITY = 999;
+
+    /** Default priority value */
+    public static final int DEFAULT_PRIORITY = 99;
+
     /** Priority of this ingester (lower numbers = higher priority) */
-    protected int priority = 99;
+    protected int priority = DEFAULT_PRIORITY;
 
     /**
      * Default constructor.
@@ -57,9 +70,14 @@ public abstract class Ingester {
      * Sets the priority of this ingester.
      * Lower numbers indicate higher priority.
      *
-     * @param priority the priority value to set
+     * @param priority the priority value to set (must be between 0 and 999)
+     * @throws IllegalArgumentException if priority is outside valid range
      */
     public void setPriority(final int priority) {
+        if (priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+            throw new IllegalArgumentException(
+                    "Priority must be between " + MIN_PRIORITY + " and " + MAX_PRIORITY + ", but was: " + priority);
+        }
         this.priority = priority;
     }
 
@@ -126,6 +144,45 @@ public abstract class Ingester {
      */
     protected Map<String, Object> process(final Map<String, Object> target) {
         return target;
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * Two ingesters are considered equal if they are of the same class.
+     *
+     * @param obj the reference object with which to compare
+     * @return true if this object is the same as the obj argument; false otherwise
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     * The hash code is based on the class type.
+     *
+     * @return a hash code value for this object
+     */
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    /**
+     * Returns a string representation of this ingester.
+     *
+     * @return a string representation including class name and priority
+     */
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{priority=" + priority + "}";
     }
 
 }
