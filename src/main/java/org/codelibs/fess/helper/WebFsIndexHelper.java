@@ -132,7 +132,6 @@ public class WebFsIndexHelper {
         final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        ComponentUtil.getFessConfig();
         final ProtocolHelper protocolHelper = ComponentUtil.getProtocolHelper();
 
         final long startTime = systemHelper.getCurrentTimeAsLong();
@@ -140,264 +139,15 @@ public class WebFsIndexHelper {
         final List<String> sessionIdList = new ArrayList<>();
         crawlerList.clear();
         final List<String> crawlerStatusList = new ArrayList<>();
+
         // Web
         for (final WebConfig webConfig : webConfigList) {
-            final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, webConfig);
-
-            // create crawler
-            final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
-            crawler.setSessionId(sid);
-            sessionIdList.add(sid);
-
-            final String urlsStr = webConfig.getUrls();
-            if (StringUtil.isBlank(urlsStr)) {
-                logger.warn("No target urls. Skipped");
-                break;
-            }
-
-            // interval time
-            final int intervalTime =
-                    webConfig.getIntervalTime() != null ? webConfig.getIntervalTime() : Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
-            ((FessIntervalController) crawler.getIntervalController()).setDelayMillisForWaitingNewUrl(intervalTime);
-
-            final String includedUrlsStr = webConfig.getIncludedUrls() != null ? webConfig.getIncludedUrls() : StringUtil.EMPTY;
-            final String excludedUrlsStr = webConfig.getExcludedUrls() != null ? webConfig.getExcludedUrls() : StringUtil.EMPTY;
-
-            // num of threads
-            final CrawlerContext crawlerContext = crawler.getCrawlerContext();
-            final int numOfThread =
-                    webConfig.getNumOfThread() != null ? webConfig.getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
-            crawlerContext.setNumOfThread(numOfThread);
-
-            // depth
-            final int depth = webConfig.getDepth() != null ? webConfig.getDepth() : -1;
-            crawlerContext.setMaxDepth(depth);
-
-            // max count
-            final long maxCount = webConfig.getMaxAccessCount() != null ? webConfig.getMaxAccessCount() : maxAccessCount;
-            crawlerContext.setMaxAccessCount(maxCount);
-
-            webConfig.initializeClientFactory(() -> crawler.getClientFactory());
-            final Map<String, String> configParamMap = webConfig.getConfigParameterMap(ConfigName.CONFIG);
-
-            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
-                deleteCrawlData(sid);
-            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
-                final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
-                try {
-                    urlFilterService.delete(sid);
-                } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for {}", sid);
-                }
-            }
-
-            final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
-
-            // set urls
-            split(urlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
-                if (!urlValue.startsWith("#") && protocolHelper.isValidWebProtocol(urlValue)) {
-                    final String u = duplicateHostHelper.convert(urlValue);
-                    crawler.addUrl(u);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Target URL: {}", u);
-                    }
-                }
-            }));
-
-            // set included urls
-            final AtomicBoolean urlEncodeDisabled = new AtomicBoolean(false);
-            split(includedUrlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addIncludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Included URL: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
-                }
-            }));
-
-            // set excluded urls
-            urlEncodeDisabled.set(false);
-            split(excludedUrlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
-                }
-            }));
-
-            // failure url
-            final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(webConfig.getConfigId());
-            if (excludedUrlList != null) {
-                excludedUrlList.stream().filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(u -> {
-                    final String urlValue = Pattern.quote(u);
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL from failures: {}", urlValue);
-                    }
-                });
-            }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Crawling {}", urlsStr);
-            }
-
-            crawler.setBackground(true);
-            crawler.setThreadPriority(crawlerPriority);
-
-            crawlerList.add(crawler);
-            crawlerStatusList.add(Constants.READY);
+            setupWebCrawler(sessionId, webConfig, sessionIdList, crawlerStatusList, systemHelper, protocolHelper);
         }
 
         // File
         for (final FileConfig fileConfig : fileConfigList) {
-            final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, fileConfig);
-
-            // create crawler
-            final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
-            crawler.setSessionId(sid);
-            sessionIdList.add(sid);
-
-            final String pathsStr = fileConfig.getPaths();
-            if (StringUtil.isBlank(pathsStr)) {
-                logger.warn("No target uris. Skipped");
-                break;
-            }
-
-            final int intervalTime =
-                    fileConfig.getIntervalTime() != null ? fileConfig.getIntervalTime() : Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
-            ((FessIntervalController) crawler.getIntervalController()).setDelayMillisForWaitingNewUrl(intervalTime);
-
-            final String includedPathsStr = fileConfig.getIncludedPaths() != null ? fileConfig.getIncludedPaths() : StringUtil.EMPTY;
-            final String excludedPathsStr = fileConfig.getExcludedPaths() != null ? fileConfig.getExcludedPaths() : StringUtil.EMPTY;
-
-            // num of threads
-            final CrawlerContext crawlerContext = crawler.getCrawlerContext();
-            final int numOfThread =
-                    fileConfig.getNumOfThread() != null ? fileConfig.getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
-            crawlerContext.setNumOfThread(numOfThread);
-
-            // depth
-            final int depth = fileConfig.getDepth() != null ? fileConfig.getDepth() : -1;
-            crawlerContext.setMaxDepth(depth);
-
-            // max count
-            final long maxCount = fileConfig.getMaxAccessCount() != null ? fileConfig.getMaxAccessCount() : maxAccessCount;
-            crawlerContext.setMaxAccessCount(maxCount);
-
-            fileConfig.initializeClientFactory(() -> crawler.getClientFactory());
-            final Map<String, String> configParamMap = fileConfig.getConfigParameterMap(ConfigName.CONFIG);
-
-            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
-                deleteCrawlData(sid);
-            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
-                final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
-                try {
-                    urlFilterService.delete(sid);
-                } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for {}", sid);
-                }
-            }
-
-            // set paths
-            split(pathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
-                if (!urlValue.startsWith("#")) {
-                    final String u;
-                    if (!protocolHelper.isValidFileProtocol(urlValue)) {
-                        if (urlValue.startsWith("/")) {
-                            u = "file:" + urlValue;
-                        } else {
-                            u = "file:/" + urlValue;
-                        }
-                    } else {
-                        u = urlValue;
-                    }
-                    crawler.addUrl(u);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Target Path: {}", u);
-                    }
-                }
-            }));
-
-            // set included paths
-            final AtomicBoolean urlEncodeDisabled = new AtomicBoolean(false);
-            split(includedPathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addIncludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Included Path: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
-                }
-            }));
-
-            // set excluded paths
-            urlEncodeDisabled.set(false);
-            split(excludedPathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
-                if (!line.startsWith("#")) {
-                    final String urlValue;
-                    if (urlEncodeDisabled.get()) {
-                        urlValue = line;
-                        urlEncodeDisabled.set(false);
-                    } else {
-                        urlValue = systemHelper.encodeUrlFilter(line);
-                    }
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path: {}", urlValue);
-                    }
-                } else if (line.startsWith(DISABLE_URL_ENCODE)) {
-                    urlEncodeDisabled.set(true);
-                }
-            }));
-
-            // failure url
-            final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(fileConfig.getConfigId());
-            if (excludedUrlList != null) {
-                excludedUrlList.stream().filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(u -> {
-                    final String urlValue = Pattern.quote(u);
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded Path from failures: {}", urlValue);
-                    }
-                });
-            }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Crawling {}", pathsStr);
-            }
-
-            crawler.setBackground(true);
-            crawler.setThreadPriority(crawlerPriority);
-
-            crawlerList.add(crawler);
-            crawlerStatusList.add(Constants.READY);
+            setupFileCrawler(sessionId, fileConfig, sessionIdList, crawlerStatusList, systemHelper, protocolHelper);
         }
 
         // run index update
@@ -412,76 +162,10 @@ public class WebFsIndexHelper {
         });
         indexUpdater.start();
 
-        int startedCrawlerNum = 0;
-        int activeCrawlerNum = 0;
-        try {
-            while (startedCrawlerNum < crawlerList.size()) {
-                // Force to stop crawl
-                if (systemHelper.isForceStop()) {
-                    for (final Crawler crawler : crawlerList) {
-                        crawler.stop();
-                    }
-                    break;
-                }
+        // Execute and monitor crawlers
+        executeCrawlers(crawlerStatusList, multiprocessCrawlingCount, systemHelper, indexUpdater);
 
-                if (activeCrawlerNum < multiprocessCrawlingCount) {
-                    // start crawling
-                    crawlerList.get(startedCrawlerNum).execute();
-                    crawlerStatusList.set(startedCrawlerNum, Constants.RUNNING);
-                    startedCrawlerNum++;
-                    activeCrawlerNum++;
-                    ThreadUtil.sleep(crawlingExecutionInterval);
-                    continue;
-                }
-
-                // check status
-                for (int i = 0; i < startedCrawlerNum; i++) {
-                    if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
-                            && Constants.RUNNING.equals(crawlerStatusList.get(i))) {
-                        crawlerList.get(i).awaitTermination();
-                        crawlerStatusList.set(i, Constants.DONE);
-                        final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
-                        indexUpdater.addFinishedSessionId(sid);
-                        activeCrawlerNum--;
-                    }
-                }
-                ThreadUtil.sleep(crawlingExecutionInterval);
-            }
-
-            boolean finishedAll = false;
-            while (!finishedAll) {
-                finishedAll = true;
-                for (int i = 0; i < crawlerList.size(); i++) {
-                    final Crawler crawler = crawlerList.get(i);
-                    crawler.awaitTermination(crawlingExecutionInterval);
-                    if (crawler.getCrawlerContext().getStatus() == CrawlerStatus.DONE && !Constants.DONE.equals(crawlerStatusList.get(i))) {
-                        crawlerStatusList.set(i, Constants.DONE);
-                        final String sid = crawler.getCrawlerContext().getSessionId();
-                        indexUpdater.addFinishedSessionId(sid);
-                        try {
-                            crawler.close();
-                        } catch (final Exception e) {
-                            logger.warn("Failed to close the crawler.", e);
-                        }
-                    }
-                    if (!Constants.DONE.equals(crawlerStatusList.get(i))) {
-                        finishedAll = false;
-                    }
-                }
-            }
-        } finally {
-            crawlerList.forEach(crawler -> {
-                try {
-                    crawler.close();
-                } catch (final Exception e) {
-                    logger.warn("Failed to close the crawler.", e);
-                }
-            });
-        }
-        crawlerList.clear();
-        crawlerStatusList.clear();
-
-        // put cralwing info
+        // put crawling info
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
         final long execTime = systemHelper.getCurrentTimeAsLong() - startTime;
@@ -591,6 +275,349 @@ public class WebFsIndexHelper {
      */
     public void setCrawlerPriority(final int crawlerPriority) {
         this.crawlerPriority = crawlerPriority;
+    }
+
+    /**
+     * Executes and monitors multiple crawlers.
+     *
+     * @param crawlerStatusList List of crawler statuses
+     * @param multiprocessCrawlingCount Maximum number of concurrent crawlers
+     * @param systemHelper The system helper
+     * @param indexUpdater The index updater
+     */
+    protected void executeCrawlers(final List<String> crawlerStatusList, final int multiprocessCrawlingCount,
+            final SystemHelper systemHelper, final IndexUpdater indexUpdater) {
+        int startedCrawlerNum = 0;
+        int activeCrawlerNum = 0;
+        try {
+            while (startedCrawlerNum < crawlerList.size()) {
+                // Force to stop crawl
+                if (systemHelper.isForceStop()) {
+                    for (final Crawler crawler : crawlerList) {
+                        crawler.stop();
+                    }
+                    break;
+                }
+
+                if (activeCrawlerNum < multiprocessCrawlingCount) {
+                    // start crawling
+                    crawlerList.get(startedCrawlerNum).execute();
+                    crawlerStatusList.set(startedCrawlerNum, Constants.RUNNING);
+                    startedCrawlerNum++;
+                    activeCrawlerNum++;
+                    ThreadUtil.sleep(crawlingExecutionInterval);
+                    continue;
+                }
+
+                // check status
+                for (int i = 0; i < startedCrawlerNum; i++) {
+                    if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
+                            && Constants.RUNNING.equals(crawlerStatusList.get(i))) {
+                        crawlerList.get(i).awaitTermination();
+                        crawlerStatusList.set(i, Constants.DONE);
+                        final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
+                        indexUpdater.addFinishedSessionId(sid);
+                        activeCrawlerNum--;
+                    }
+                }
+                ThreadUtil.sleep(crawlingExecutionInterval);
+            }
+
+            boolean finishedAll = false;
+            while (!finishedAll) {
+                finishedAll = true;
+                for (int i = 0; i < crawlerList.size(); i++) {
+                    final Crawler crawler = crawlerList.get(i);
+                    crawler.awaitTermination(crawlingExecutionInterval);
+                    if (crawler.getCrawlerContext().getStatus() == CrawlerStatus.DONE && !Constants.DONE.equals(crawlerStatusList.get(i))) {
+                        crawlerStatusList.set(i, Constants.DONE);
+                        final String sid = crawler.getCrawlerContext().getSessionId();
+                        indexUpdater.addFinishedSessionId(sid);
+                        try {
+                            crawler.close();
+                        } catch (final Exception e) {
+                            logger.warn("Failed to close the crawler.", e);
+                        }
+                    }
+                    if (!Constants.DONE.equals(crawlerStatusList.get(i))) {
+                        finishedAll = false;
+                    }
+                }
+            }
+        } finally {
+            crawlerList.forEach(crawler -> {
+                try {
+                    crawler.close();
+                } catch (final Exception e) {
+                    logger.warn("Failed to close the crawler.", e);
+                }
+            });
+        }
+        crawlerList.clear();
+        crawlerStatusList.clear();
+    }
+
+    /**
+     * Sets up a web crawler for the given web configuration.
+     *
+     * @param sessionId The session ID for this crawling operation
+     * @param webConfig The web configuration to process
+     * @param sessionIdList List to add the session ID to
+     * @param crawlerStatusList List to add the crawler status to
+     * @param systemHelper The system helper
+     * @param protocolHelper The protocol helper
+     */
+    protected void setupWebCrawler(final String sessionId, final WebConfig webConfig, final List<String> sessionIdList,
+            final List<String> crawlerStatusList, final SystemHelper systemHelper, final ProtocolHelper protocolHelper) {
+        final String urlsStr = webConfig.getUrls();
+        if (StringUtil.isBlank(urlsStr)) {
+            logger.warn("No target urls for web config {}. Skipped", webConfig.getName());
+            return;
+        }
+
+        final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, webConfig);
+
+        // create crawler
+        final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
+        crawler.setSessionId(sid);
+        sessionIdList.add(sid);
+
+        final String includedUrlsStr = webConfig.getIncludedUrls() != null ? webConfig.getIncludedUrls() : StringUtil.EMPTY;
+        final String excludedUrlsStr = webConfig.getExcludedUrls() != null ? webConfig.getExcludedUrls() : StringUtil.EMPTY;
+
+        // Configure crawler settings
+        final int intervalTime =
+                webConfig.getIntervalTime() != null ? webConfig.getIntervalTime() : Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
+        final int numOfThread =
+                webConfig.getNumOfThread() != null ? webConfig.getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
+        final int depth = webConfig.getDepth() != null ? webConfig.getDepth() : -1;
+        final long maxCount = webConfig.getMaxAccessCount() != null ? webConfig.getMaxAccessCount() : maxAccessCount;
+        configureCrawler(crawler, intervalTime, numOfThread, depth, maxCount);
+
+        webConfig.initializeClientFactory(() -> crawler.getClientFactory());
+        final Map<String, String> configParamMap = webConfig.getConfigParameterMap(ConfigName.CONFIG);
+
+        // Handle cleanup configuration
+        handleCleanupConfig(sid, configParamMap);
+
+        final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+
+        // set urls
+        split(urlsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
+            if (!urlValue.startsWith("#") && protocolHelper.isValidWebProtocol(urlValue)) {
+                final String u = duplicateHostHelper.convert(urlValue);
+                crawler.addUrl(u);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Target URL: {}", u);
+                }
+            }
+        }));
+
+        // set included urls
+        processFilters(includedUrlsStr, crawler, systemHelper, true, "URL");
+
+        // set excluded urls
+        processFilters(excludedUrlsStr, crawler, systemHelper, false, "URL");
+
+        // failure url
+        addFailureExclusionFilters(crawler, webConfig.getConfigId(), "URL");
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Crawling {}", urlsStr);
+        }
+
+        crawlerList.add(crawler);
+        crawlerStatusList.add(Constants.READY);
+    }
+
+    /**
+     * Sets up a file system crawler for the given file configuration.
+     *
+     * @param sessionId The session ID for this crawling operation
+     * @param fileConfig The file configuration to process
+     * @param sessionIdList List to add the session ID to
+     * @param crawlerStatusList List to add the crawler status to
+     * @param systemHelper The system helper
+     * @param protocolHelper The protocol helper
+     */
+    protected void setupFileCrawler(final String sessionId, final FileConfig fileConfig, final List<String> sessionIdList,
+            final List<String> crawlerStatusList, final SystemHelper systemHelper, final ProtocolHelper protocolHelper) {
+        final String pathsStr = fileConfig.getPaths();
+        if (StringUtil.isBlank(pathsStr)) {
+            logger.warn("No target paths for file config {}. Skipped", fileConfig.getName());
+            return;
+        }
+
+        final String sid = ComponentUtil.getCrawlingConfigHelper().store(sessionId, fileConfig);
+
+        // create crawler
+        final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
+        crawler.setSessionId(sid);
+        sessionIdList.add(sid);
+
+        final String includedPathsStr = fileConfig.getIncludedPaths() != null ? fileConfig.getIncludedPaths() : StringUtil.EMPTY;
+        final String excludedPathsStr = fileConfig.getExcludedPaths() != null ? fileConfig.getExcludedPaths() : StringUtil.EMPTY;
+
+        // Configure crawler settings
+        final int intervalTime =
+                fileConfig.getIntervalTime() != null ? fileConfig.getIntervalTime() : Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
+        final int numOfThread =
+                fileConfig.getNumOfThread() != null ? fileConfig.getNumOfThread() : Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
+        final int depth = fileConfig.getDepth() != null ? fileConfig.getDepth() : -1;
+        final long maxCount = fileConfig.getMaxAccessCount() != null ? fileConfig.getMaxAccessCount() : maxAccessCount;
+        configureCrawler(crawler, intervalTime, numOfThread, depth, maxCount);
+
+        fileConfig.initializeClientFactory(() -> crawler.getClientFactory());
+        final Map<String, String> configParamMap = fileConfig.getConfigParameterMap(ConfigName.CONFIG);
+
+        // Handle cleanup configuration
+        handleCleanupConfig(sid, configParamMap);
+
+        // set paths
+        split(pathsStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(urlValue -> {
+            if (!urlValue.startsWith("#")) {
+                final String u;
+                if (!protocolHelper.isValidFileProtocol(urlValue)) {
+                    if (urlValue.startsWith("/")) {
+                        u = "file:" + urlValue;
+                    } else {
+                        u = "file:/" + urlValue;
+                    }
+                } else {
+                    u = urlValue;
+                }
+                crawler.addUrl(u);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Target Path: {}", u);
+                }
+            }
+        }));
+
+        // set included paths
+        processFilters(includedPathsStr, crawler, systemHelper, true, "Path");
+
+        // set excluded paths
+        processFilters(excludedPathsStr, crawler, systemHelper, false, "Path");
+
+        // failure url
+        addFailureExclusionFilters(crawler, fileConfig.getConfigId(), "Path");
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Crawling {}", pathsStr);
+        }
+
+        crawlerList.add(crawler);
+        crawlerStatusList.add(Constants.READY);
+    }
+
+    /**
+     * Configures basic crawler settings.
+     *
+     * @param crawler The crawler to configure
+     * @param intervalTime The interval time in milliseconds
+     * @param numOfThread The number of threads
+     * @param depth The maximum depth (-1 for unlimited)
+     * @param maxCount The maximum access count
+     */
+    protected void configureCrawler(final Crawler crawler, final int intervalTime, final int numOfThread, final int depth,
+            final long maxCount) {
+        // interval time
+        ((FessIntervalController) crawler.getIntervalController()).setDelayMillisForWaitingNewUrl(intervalTime);
+
+        // num of threads
+        final CrawlerContext crawlerContext = crawler.getCrawlerContext();
+        crawlerContext.setNumOfThread(numOfThread);
+
+        // depth
+        crawlerContext.setMaxDepth(depth);
+
+        // max count
+        crawlerContext.setMaxAccessCount(maxCount);
+
+        crawler.setBackground(true);
+        crawler.setThreadPriority(crawlerPriority);
+    }
+
+    /**
+     * Handles cleanup configuration based on config parameters.
+     *
+     * @param sid The session ID
+     * @param configParamMap The configuration parameter map
+     */
+    protected void handleCleanupConfig(final String sid, final Map<String, String> configParamMap) {
+        if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_ALL))) {
+            deleteCrawlData(sid);
+        } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Config.CLEANUP_URL_FILTERS))) {
+            final OpenSearchUrlFilterService urlFilterService = ComponentUtil.getComponent(OpenSearchUrlFilterService.class);
+            try {
+                urlFilterService.delete(sid);
+            } catch (final Exception e) {
+                logger.warn("Failed to delete url filters for {}", sid, e);
+            }
+        }
+    }
+
+    /**
+     * Processes filter lines and adds them to the crawler.
+     * Handles URL encoding and the #DISABLE_URL_ENCODE directive.
+     *
+     * @param filterStr The filter string containing newline-separated filters
+     * @param crawler The crawler to add filters to
+     * @param systemHelper The system helper for URL encoding
+     * @param isIncludeFilter True if adding include filters, false for exclude filters
+     * @param filterType Description of filter type for logging (e.g., "URL", "Path")
+     */
+    protected void processFilters(final String filterStr, final Crawler crawler, final SystemHelper systemHelper,
+            final boolean isIncludeFilter, final String filterType) {
+        if (StringUtil.isBlank(filterStr)) {
+            return;
+        }
+
+        final AtomicBoolean urlEncodeDisabled = new AtomicBoolean(false);
+        split(filterStr, "[\r\n]").of(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).forEach(line -> {
+            if (line.startsWith(DISABLE_URL_ENCODE)) {
+                urlEncodeDisabled.set(true);
+            } else if (!line.startsWith("#")) {
+                final String filterValue;
+                if (urlEncodeDisabled.get()) {
+                    filterValue = line;
+                    urlEncodeDisabled.set(false);
+                } else {
+                    filterValue = systemHelper.encodeUrlFilter(line);
+                }
+
+                if (isIncludeFilter) {
+                    crawler.addIncludeFilter(filterValue);
+                } else {
+                    crawler.addExcludeFilter(filterValue);
+                }
+
+                if (logger.isInfoEnabled()) {
+                    final String action = isIncludeFilter ? "Included" : "Excluded";
+                    logger.info("{} {}: {}", action, filterType, filterValue);
+                }
+            }
+        }));
+    }
+
+    /**
+     * Adds failure URL/Path exclusion filters to the crawler.
+     *
+     * @param crawler The crawler to add filters to
+     * @param configId The configuration ID to get excluded URLs for
+     * @param filterType Description of filter type for logging (e.g., "URL", "Path")
+     */
+    protected void addFailureExclusionFilters(final Crawler crawler, final String configId, final String filterType) {
+        final List<String> excludedUrlList = ComponentUtil.getCrawlingConfigHelper().getExcludedUrlList(configId);
+        if (excludedUrlList != null) {
+            excludedUrlList.stream().filter(StringUtil::isNotBlank).map(String::trim).distinct().forEach(u -> {
+                final String filterValue = Pattern.quote(u);
+                crawler.addExcludeFilter(filterValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Excluded {} from failures: {}", filterType, filterValue);
+                }
+            });
+        }
     }
 
 }
