@@ -246,21 +246,27 @@ public class ProcessHelper {
 
     /**
      * Sends a command to the process associated with the given session ID.
+     * Uses finer-grained locking to avoid blocking other operations during I/O.
      *
      * @param sessionId unique identifier for the process session
      * @param command the command to send to the process
      * @throws JobNotFoundException if no process is found for the given session ID
      * @throws JobProcessingException if there's an error sending the command
      */
-    public synchronized void sendCommand(final String sessionId, final String command) {
-        final JobProcess jobProcess = runningProcessMap.get(sessionId);
-        if (jobProcess == null) {
-            throw new JobNotFoundException("Job for " + sessionId + " is not found.");
+    public void sendCommand(final String sessionId, final String command) {
+        final Process process;
+        synchronized (this) {
+            final JobProcess jobProcess = runningProcessMap.get(sessionId);
+            if (jobProcess == null) {
+                throw new JobNotFoundException("Job for " + sessionId + " is not found.");
+            }
+            process = jobProcess.getProcess();
+            if (process == null || !process.isAlive()) {
+                throw new JobNotFoundException("Process for " + sessionId + " is not running.");
+            }
         }
-        final Process process = jobProcess.getProcess();
-        if (process == null || !process.isAlive()) {
-            throw new JobNotFoundException("Process for " + sessionId + " is not running.");
-        }
+
+        // Perform I/O operations outside synchronized block to avoid blocking other threads
         try {
             final OutputStream out = process.getOutputStream();
             IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
