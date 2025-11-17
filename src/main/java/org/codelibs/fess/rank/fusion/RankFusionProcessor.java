@@ -306,7 +306,7 @@ public class RankFusionProcessor implements AutoCloseable {
             }
             for (int docRank = 0; docRank < docList.size(); docRank++) {
                 final Map<String, Object> doc = docList.get(docRank);
-                if (doc.get(idField) instanceof final String id) {
+                if (doc != null && doc.get(idField) instanceof final String id) {
                     // Calculate RRF score: 1 / (rank_constant + rank)
                     final float rrfScore = 1.0f / (rankConstant + docRank);
                     if (documentsByIdMap.containsKey(id)) {

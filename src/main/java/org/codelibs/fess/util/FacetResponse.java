@@ -49,20 +49,22 @@ public class FacetResponse {
      * Constructs a FacetResponse from OpenSearch aggregations.
      * Processes both field facets and query facets from the aggregation results.
      *
-     * @param aggregations the OpenSearch aggregations containing facet data
+     * @param aggregations the OpenSearch aggregations containing facet data, may be null
      */
     public FacetResponse(final Aggregations aggregations) {
-        aggregations.forEach(aggregation -> {
-            if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
-                final Terms termFacet = (Terms) aggregation;
-                fieldList.add(new Field(termFacet));
-            } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
-                final Filter queryFacet = (Filter) aggregation;
-                final String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
-                queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), StandardCharsets.UTF_8), queryFacet.getDocCount());
-            }
+        if (aggregations != null) {
+            aggregations.forEach(aggregation -> {
+                if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
+                    final Terms termFacet = (Terms) aggregation;
+                    fieldList.add(new Field(termFacet));
+                } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
+                    final Filter queryFacet = (Filter) aggregation;
+                    final String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
+                    queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), StandardCharsets.UTF_8), queryFacet.getDocCount());
+                }
 
-        });
+            });
+        }
     }
 
     /**
