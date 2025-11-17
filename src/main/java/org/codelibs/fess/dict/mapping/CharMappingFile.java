@@ -321,10 +321,20 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
          * @param newItem the character mapping item to update, or null for read-only operations
          */
         protected MappingUpdater(final CharMappingItem newItem) {
+            FileOutputStream fos = null;
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(MAPPING, ".txt");
-                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
+                fos = new FileOutputStream(newFile);
+                writer = new BufferedWriter(new OutputStreamWriter(fos, Constants.UTF_8));
+                fos = null; // Successfully wrapped, no need to close explicitly
             } catch (final Exception e) {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (final IOException ioe) {
+                        // Ignore close exception
+                    }
+                }
                 if (newFile != null) {
                     newFile.delete();
                 }

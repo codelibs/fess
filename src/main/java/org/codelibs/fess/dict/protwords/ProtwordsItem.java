@@ -96,9 +96,7 @@ public class ProtwordsItem extends DictionaryItem {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        final int result = 1;
-        return prime * result + input.hashCode();
+        return java.util.Objects.hashCode(input);
     }
 
     @Override
@@ -110,10 +108,7 @@ public class ProtwordsItem extends DictionaryItem {
             return false;
         }
         final ProtwordsItem other = (ProtwordsItem) obj;
-        if (!input.equals(other.input)) {
-            return false;
-        }
-        return true;
+        return java.util.Objects.equals(input, other.input);
     }
 
     @Override

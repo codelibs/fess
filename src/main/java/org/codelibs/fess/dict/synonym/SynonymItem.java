@@ -62,11 +62,12 @@ public class SynonymItem extends DictionaryItem {
 
     /**
      * Gets the new input words.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return The new input words.
+     * @return The new input words (defensive copy).
      */
     public String[] getNewInputs() {
-        return newInputs;
+        return newInputs == null ? null : newInputs.clone();
     }
 
     /**
@@ -80,11 +81,12 @@ public class SynonymItem extends DictionaryItem {
 
     /**
      * Gets the new output synonyms.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return The new output synonyms.
+     * @return The new output synonyms (defensive copy).
      */
     public String[] getNewOutputs() {
-        return newOutputs;
+        return newOutputs == null ? null : newOutputs.clone();
     }
 
     /**
@@ -98,11 +100,12 @@ public class SynonymItem extends DictionaryItem {
 
     /**
      * Gets the original input words.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return The original input words.
+     * @return The original input words (defensive copy).
      */
     public String[] getInputs() {
-        return inputs;
+        return inputs == null ? null : inputs.clone();
     }
 
     /**
@@ -119,11 +122,12 @@ public class SynonymItem extends DictionaryItem {
 
     /**
      * Gets the original output synonyms.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return The original output synonyms.
+     * @return The original output synonyms (defensive copy).
      */
     public String[] getOutputs() {
-        return outputs;
+        return outputs == null ? null : outputs.clone();
     }
 
     /**

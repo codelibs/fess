@@ -77,11 +77,12 @@ public class CharMappingItem extends DictionaryItem {
 
     /**
      * Returns the array of new input character sequences for update operations.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return array of new input sequences, or null if no updates are pending
+     * @return array of new input sequences (defensive copy), or null if no updates are pending
      */
     public String[] getNewInputs() {
-        return newInputs;
+        return newInputs == null ? null : newInputs.clone();
     }
 
     /**
@@ -114,11 +115,12 @@ public class CharMappingItem extends DictionaryItem {
 
     /**
      * Returns the array of input character sequences that are mapped to the output.
+     * Returns a defensive copy to prevent external modification.
      *
-     * @return array of input sequences
+     * @return array of input sequences (defensive copy)
      */
     public String[] getInputs() {
-        return inputs;
+        return inputs == null ? null : inputs.clone();
     }
 
     /**
@@ -188,6 +190,7 @@ public class CharMappingItem extends DictionaryItem {
     /**
      * Compares this CharMappingItem with another object for equality.
      * Two CharMappingItem objects are equal if they have the same inputs and output.
+     * Note: inputs arrays are sorted in the constructor, so no sorting is needed here.
      *
      * @param obj the object to compare with
      * @return true if the objects are equal, false otherwise
@@ -201,12 +204,10 @@ public class CharMappingItem extends DictionaryItem {
             return false;
         }
         final CharMappingItem other = (CharMappingItem) obj;
-        sort();
-        other.sort();
-        if (!Arrays.equals(inputs, other.inputs) || !output.equals(other.getOutput())) {
+        if (!Arrays.equals(inputs, other.inputs)) {
             return false;
         }
-        return true;
+        return Objects.equals(output, other.output);
     }
 
     /**
