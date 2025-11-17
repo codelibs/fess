@@ -165,6 +165,7 @@ public class IngestFactory {
      * @return a copy of the sorted array of ingesters
      */
     public Ingester[] getIngesters() {
-        // Return the cached array (already a copy from toArray)
-        return cachedIngesters;
+        // Return a defensive copy of the cached array
+        return cachedIngesters.clone();
+    }
 }
