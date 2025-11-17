@@ -51,6 +51,9 @@ public class ProcessHelper {
     /** Timeout in seconds for process destruction */
     protected int processDestroyTimeout = 10;
 
+    /** Timeout in seconds for stream closing operations */
+    protected int streamCloseTimeout = 10;
+
     /**
      * Default constructor for ProcessHelper.
      * Initializes the process management system with default timeout values.
@@ -104,11 +107,17 @@ public class ProcessHelper {
             final int bufferSize, final Consumer<String> outputCallback) {
         final ProcessBuilder pb = new ProcessBuilder(cmdList);
         pbCall.accept(pb);
-        destroyProcess(sessionId);
-        JobProcess jobProcess;
+
+        // Remove and destroy any existing process for this session
+        final JobProcess oldProcess = runningProcessMap.remove(sessionId);
+        if (oldProcess != null) {
+            destroyProcess(sessionId, oldProcess);
+        }
+
+        // Start the new process and add it to the map
         try {
-            jobProcess = new JobProcess(pb.start(), bufferSize, outputCallback);
-            destroyProcess(sessionId, runningProcessMap.putIfAbsent(sessionId, jobProcess));
+            final JobProcess jobProcess = new JobProcess(pb.start(), bufferSize, outputCallback);
+            runningProcessMap.put(sessionId, jobProcess);
             return jobProcess;
         } catch (final IOException e) {
             throw new JobProcessingException("Crawler Process terminated.", e);
@@ -121,7 +130,7 @@ public class ProcessHelper {
      * @param sessionId unique identifier for the process session
      * @return exit code of the destroyed process, or -1 if the process was not found
      */
-    public int destroyProcess(final String sessionId) {
+    public synchronized int destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
         return destroyProcess(sessionId, jobProcess);
     }
@@ -194,7 +203,7 @@ public class ProcessHelper {
             }, "ProcessCloser-output-" + sessionId).start();
 
             try {
-                latch.await(10, TimeUnit.SECONDS);
+                latch.await(streamCloseTimeout, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 logger.warn("Interrupted to wait a process.", e);
             }
@@ -227,6 +236,15 @@ public class ProcessHelper {
     }
 
     /**
+     * Sets the timeout for stream closing operations.
+     *
+     * @param streamCloseTimeout timeout in seconds for stream closing operations
+     */
+    public void setStreamCloseTimeout(final int streamCloseTimeout) {
+        this.streamCloseTimeout = streamCloseTimeout;
+    }
+
+    /**
      * Sends a command to the process associated with the given session ID.
      *
      * @param sessionId unique identifier for the process session
@@ -234,13 +252,17 @@ public class ProcessHelper {
      * @throws JobNotFoundException if no process is found for the given session ID
      * @throws JobProcessingException if there's an error sending the command
      */
-    public void sendCommand(final String sessionId, final String command) {
+    public synchronized void sendCommand(final String sessionId, final String command) {
         final JobProcess jobProcess = runningProcessMap.get(sessionId);
         if (jobProcess == null) {
             throw new JobNotFoundException("Job for " + sessionId + " is not found.");
         }
+        final Process process = jobProcess.getProcess();
+        if (process == null || !process.isAlive()) {
+            throw new JobNotFoundException("Process for " + sessionId + " is not running.");
+        }
         try {
-            final OutputStream out = jobProcess.getProcess().getOutputStream();
+            final OutputStream out = process.getOutputStream();
             IOUtils.write(command + "\n", out, Constants.CHARSET_UTF_8);
             out.flush();
         } catch (final IOException e) {
