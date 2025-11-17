@@ -39,8 +39,8 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals(0L, item.getId());
         assertNotNull(item.getNewInputs());
         assertEquals("result", item.getNewOutput());
-        // NewInputs should be same as inputs for id=0
-        assertSame(inputs, item.getNewInputs());
+        // NewInputs should have same content as inputs for id=0 (defensive copy is returned)
+        assertArrayEquals(inputs, item.getNewInputs());
         assertEquals("result", item.getNewOutput());
     }
 
