@@ -20,7 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Test class for FessTransformer interface.
@@ -30,7 +34,17 @@ public class FessTransformerTest extends UnitFessTestCase {
 
     // Test implementation of FessTransformer for testing
     private static class TestFessTransformer implements FessTransformer {
-        // Minimal implementation for testing
+        private static final Logger logger = LogManager.getLogger(TestFessTransformer.class);
+
+        @Override
+        public FessConfig getFessConfig() {
+            return ComponentUtil.getFessConfig();
+        }
+
+        @Override
+        public Logger getLogger() {
+            return logger;
+        }
     }
 
     @Override
