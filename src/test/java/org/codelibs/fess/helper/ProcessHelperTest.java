@@ -597,18 +597,14 @@ public class ProcessHelperTest extends UnitFessTestCase {
         // Create a thread that sends commands
         final Exception[] sendException = new Exception[1];
         Thread sendThread = new Thread(() -> {
-            try {
-                for (int i = 0; i < 10; i++) {
-                    try {
-                        processHelper.sendCommand(sessionId, "test command " + i);
-                        Thread.sleep(20);
-                    } catch (Exception e) {
-                        sendException[0] = e;
-                        break;
-                    }
+            for (int i = 0; i < 10; i++) {
+                try {
+                    processHelper.sendCommand(sessionId, "test command " + i);
+                    Thread.sleep(20);
+                } catch (Exception e) {
+                    sendException[0] = e;
+                    break;
                 }
-            } catch (InterruptedException e) {
-                // Ignore
             }
         });
 
