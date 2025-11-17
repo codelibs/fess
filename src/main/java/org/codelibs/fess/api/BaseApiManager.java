@@ -90,13 +90,13 @@ public abstract class BaseApiManager implements WebApiManager {
      * @return The format type.
      */
     protected FormatType getFormatType(final HttpServletRequest request) {
-        FormatType formatType = (FormatType) request.getAttribute(ApiConstants.API_FORMAT_TYPE);
+        FormatType formatType = (FormatType) request.getAttribute(Constants.API_FORMAT_TYPE);
         if (formatType != null) {
             return formatType;
         }
 
         formatType = detectFormatType(request);
-        request.setAttribute(ApiConstants.API_FORMAT_TYPE, formatType);
+        request.setAttribute(Constants.API_FORMAT_TYPE, formatType);
         return formatType;
     }
 

@@ -37,6 +37,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ContentTypeUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
@@ -200,7 +201,7 @@ public class SearchEngineApiManager extends BaseApiManager {
      */
     protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         if (StringUtil.isNotBlank(path)) {
-            final String contentType = org.codelibs.fess.api.ContentTypeUtil.getContentType(path);
+            final String contentType = ContentTypeUtil.getContentType(path);
             if (contentType != null) {
                 response.setContentType(contentType);
             }
