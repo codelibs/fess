@@ -413,6 +413,7 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                        Small Helper
     //                                                                        ============
 
+    /**
      * Validates the password and confirmation fields in the form for user creation and update.
      *
      * @param form the form containing password and confirmation fields

@@ -497,6 +497,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
+    /**
      * Retrieves or creates a document entity based on the form data.
      *
      * @param form the form containing document information
