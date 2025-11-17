@@ -243,6 +243,132 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertNotNull(factory);
         assertNotNull(factory.handlerMap);
         assertTrue(factory.handlerMap.isEmpty());
+        assertNotNull(factory.nullOriginHandler);
+        assertNull(factory.nullOriginHandler.get());
+    }
+
+    // Test thread safety of ConcurrentHashMap
+    public void test_concurrentAccess() throws Exception {
+        final int threadCount = 10;
+        final int operationsPerThread = 100;
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            final int threadId = i;
+            threads[i] = new Thread(() -> {
+                for (int j = 0; j < operationsPerThread; j++) {
+                    String origin = "https://thread" + threadId + ".example.com";
+                    TestCorsHandler handler = new TestCorsHandler("handler-" + threadId + "-" + j);
+                    corsHandlerFactory.add(origin, handler);
+                    CorsHandler retrieved = corsHandlerFactory.get(origin);
+                    assertNotNull(retrieved);
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify all handlers were added
+        assertEquals(threadCount, corsHandlerFactory.handlerMap.size());
+    }
+
+    // Test null origin handler with AtomicReference
+    public void test_nullOriginHandler_threadSafety() throws Exception {
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final TestCorsHandler[] handlers = new TestCorsHandler[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            handlers[i] = new TestCorsHandler("handler-" + i);
+            final int threadId = i;
+            threads[i] = new Thread(() -> {
+                corsHandlerFactory.add(null, handlers[threadId]);
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify one handler is set (last one wins due to race condition)
+        CorsHandler result = corsHandlerFactory.get(null);
+        assertNotNull(result);
+        boolean foundMatch = false;
+        for (TestCorsHandler handler : handlers) {
+            if (result == handler) {
+                foundMatch = true;
+                break;
+            }
+        }
+        assertTrue("Result should be one of the handlers", foundMatch);
+    }
+
+    // Test removing handler by setting null value
+    public void test_removeHandlerBySettingNull() {
+        // Setup
+        String origin = "https://example.com";
+        TestCorsHandler handler = new TestCorsHandler("handler");
+        corsHandlerFactory.add(origin, handler);
+
+        // Verify handler is added
+        assertNotNull(corsHandlerFactory.get(origin));
+
+        // Remove by setting null
+        corsHandlerFactory.add(origin, null);
+
+        // Verify handler is removed (should fall back to wildcard)
+        CorsHandler result = corsHandlerFactory.get(origin);
+        // Result will be null if no wildcard handler is set
+        if (result != null) {
+            assertEquals(corsHandlerFactory.get("*"), result);
+        }
+    }
+
+    // Test nullOriginHandler field is accessible
+    public void test_nullOriginHandlerField() {
+        assertNotNull("nullOriginHandler field should be initialized", corsHandlerFactory.nullOriginHandler);
+    }
+
+    // Test get with null origin when wildcard exists
+    public void test_get_nullOriginWithWildcard() {
+        // Setup
+        TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
+        corsHandlerFactory.add("*", wildcardHandler);
+
+        // Execute - no null origin handler set
+        CorsHandler result = corsHandlerFactory.get(null);
+
+        // Verify - should return wildcard handler
+        assertEquals(wildcardHandler, result);
+    }
+
+    // Test get with null origin when null handler exists and wildcard exists
+    public void test_get_nullOriginWithNullHandlerAndWildcard() {
+        // Setup
+        TestCorsHandler nullHandler = new TestCorsHandler("null-handler");
+        TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
+        corsHandlerFactory.add(null, nullHandler);
+        corsHandlerFactory.add("*", wildcardHandler);
+
+        // Execute
+        CorsHandler result = corsHandlerFactory.get(null);
+
+        // Verify - null handler takes precedence over wildcard
+        assertEquals(nullHandler, result);
     }
 
     // Test implementation of CorsHandler for testing purposes
