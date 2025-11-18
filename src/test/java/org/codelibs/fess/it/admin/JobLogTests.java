@@ -254,16 +254,17 @@ public class JobLogTests extends CrawlTestBase {
      */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        final String urls = "https://www.codelibs.org/";
-        final String includedUrls = "https://www.codelibs.org/.*";
+        // Use localhost to avoid external network access
+        final String urls = "http://localhost:8080/";
+        final String includedUrls = "http://localhost:8080/.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
         requestBody.put("depth", 0);
-        requestBody.put("max_access_count", 1L);
+        requestBody.put("max_access_count", 1L); // Minimal access count
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 0);
+        requestBody.put("interval_time", 0); // No delay
         requestBody.put("boost", 100);
         requestBody.put("available", true);
         requestBody.put("sort_order", 0);

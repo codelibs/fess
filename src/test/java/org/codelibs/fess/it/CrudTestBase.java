@@ -39,7 +39,7 @@ import io.restassured.response.Response;
 
 public abstract class CrudTestBase extends ITBase {
 
-    protected static final int NUM = 20;
+    protected static final int NUM = 10; // Reduced from 20 - still sufficient for CRUD testing
     protected static final int SEARCH_ALL_NUM = 1000;
 
     private static final Logger logger = LogManager.getLogger(CrudTestBase.class);

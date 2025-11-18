@@ -326,9 +326,9 @@ public class FailureUrlTests extends CrawlTestBase {
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
         requestBody.put("depth", 0);
-        requestBody.put("max_access_count", 1L);
+        requestBody.put("max_access_count", 1L); // Already minimal
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 0);
+        requestBody.put("interval_time", 0); // No delay between requests
         requestBody.put("boost", 100);
         requestBody.put("available", true);
         requestBody.put("sort_order", 0);
