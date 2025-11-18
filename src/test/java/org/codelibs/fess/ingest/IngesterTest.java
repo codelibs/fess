@@ -96,6 +96,12 @@ public class IngesterTest extends UnitFessTestCase {
             public void setLastModified(Long lastModified) {
                 // Stub implementation for testing
             }
+
+            @Override
+            public Long getLastModified() {
+                // Stub implementation for testing
+                return null;
+            }
         };
 
         Map<String, Object> processed = ingester.process(target, accessResult);
