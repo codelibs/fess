@@ -864,5 +864,10 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         public String getPasswordInvalidAdminPasswords() {
             return "";
         }
+
+        @Override
+        public Integer getStorageMaxItemsInPageAsInteger() {
+            return 100;
+        }
     }
 }
