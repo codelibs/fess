@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.dict.mapping;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
