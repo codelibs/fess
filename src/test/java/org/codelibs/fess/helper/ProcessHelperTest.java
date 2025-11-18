@@ -149,8 +149,10 @@ public class ProcessHelperTest extends UnitFessTestCase {
 
     public void test_startProcess_replaceExistingProcess() {
         String sessionId = "test_replace";
-        List<String> cmdList1 = Arrays.asList("echo", "first");
-        List<String> cmdList2 = Arrays.asList("echo", "second");
+        // Use 'cat' which waits for input, making it a long-running process
+        // This is more reliable than 'echo' which completes immediately
+        List<String> cmdList1 = Arrays.asList("cat");
+        List<String> cmdList2 = Arrays.asList("cat");
         Consumer<ProcessBuilder> pbCall = pb -> {
             pb.redirectErrorStream(true);
         };
@@ -159,15 +161,32 @@ public class ProcessHelperTest extends UnitFessTestCase {
             // Start first process
             JobProcess jobProcess1 = processHelper.startProcess(sessionId, cmdList1, pbCall);
             assertNotNull(jobProcess1);
-            assertTrue(processHelper.isProcessRunning(sessionId));
+
+            // Poll for process to be running (max 50 times, 100ms interval = 5 seconds max)
+            boolean isRunning = false;
+            for (int i = 0; i < 50; i++) {
+                if (processHelper.isProcessRunning(sessionId)) {
+                    isRunning = true;
+                    break;
+                }
+                Thread.sleep(100);
+            }
+            assertTrue("First process did not become running within timeout", isRunning);
 
             // Start second process with same session ID (should replace first)
             JobProcess jobProcess2 = processHelper.startProcess(sessionId, cmdList2, pbCall);
             assertNotNull(jobProcess2);
-            assertTrue(processHelper.isProcessRunning(sessionId));
 
-            // Wait a bit for the processes to complete
-            Thread.sleep(100);
+            // Poll for the replacement process to be running
+            isRunning = false;
+            for (int i = 0; i < 50; i++) {
+                if (processHelper.isProcessRunning(sessionId)) {
+                    isRunning = true;
+                    break;
+                }
+                Thread.sleep(100);
+            }
+            assertTrue("Replacement process did not become running within timeout", isRunning);
 
             // Clean up
             processHelper.destroyProcess(sessionId);
