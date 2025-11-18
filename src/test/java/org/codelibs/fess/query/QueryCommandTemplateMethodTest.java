@@ -129,8 +129,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         assertTrue(result instanceof DefaultQueryBuilder);
 
         // Context should have field log
-        assertTrue(context.getFieldLogList().size() > 0);
-        assertTrue(context.getHighlightedQueryList().contains("test text"));
+        assertTrue(context.getFieldLogMap().size() > 0);
+        assertTrue(context.getHighlightedQuerySet().contains("test text"));
     }
 
     /**
@@ -153,8 +153,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         assertNotNull(result);
 
         // Context should have field log
-        assertEquals(1, context.getFieldLogList().size());
-        assertTrue(context.getHighlightedQueryList().contains("test text"));
+        assertEquals(1, context.getFieldLogMap().size());
+        assertTrue(context.getHighlightedQuerySet().contains("test text"));
     }
 
     /**
@@ -178,8 +178,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         assertTrue(result instanceof DefaultQueryBuilder);
 
         // Context should have field log with both original field and DEFAULT_FIELD
-        assertTrue(context.getFieldLogList().size() >= 2);
-        assertTrue(context.getHighlightedQueryList().contains("test text"));
+        assertTrue(context.getFieldLogMap().size() >= 2);
+        assertTrue(context.getHighlightedQuerySet().contains("test text"));
     }
 
     /**
@@ -200,11 +200,11 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
         // Verify context was updated
-        assertTrue("Query text should be in highlighted query list",
-                context.getHighlightedQueryList().contains(queryText));
+        assertTrue("Query text should be in highlighted query set",
+                context.getHighlightedQuerySet().contains(queryText));
 
         assertTrue("Field log should contain the field",
-                context.getFieldLogList().size() > 0);
+                context.getFieldLogMap().size() > 0);
     }
 
     /**
