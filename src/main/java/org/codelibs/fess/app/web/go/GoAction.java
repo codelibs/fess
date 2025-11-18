@@ -162,7 +162,7 @@ public class GoAction extends FessSearchAction {
                 return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
             } else {
                 logger.warn("Invalid redirect URL detected: {}", targetUrl);
-                saveError(messages -> messages.addErrorsInvalidUrlParameter(GLOBAL));
+                saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
                 return redirect(ErrorAction.class);
             }
         }

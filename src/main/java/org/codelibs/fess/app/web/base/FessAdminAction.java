@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Supplier;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
@@ -33,6 +34,7 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.lastaflute.web.validation.VaErrorHook;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletContext;
@@ -156,7 +158,7 @@ public abstract class FessAdminAction extends FessBaseAction {
      * @param expectedMode the expected CRUD mode
      * @param errorHook the error hook to call if verification fails
      */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode, final Supplier<HtmlResponse> errorHook) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode, final VaErrorHook errorHook) {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
@@ -170,7 +172,7 @@ public abstract class FessAdminAction extends FessBaseAction {
      * @param permissionsText the permissions text (newline-separated)
      * @return encoded permission array
      */
-    protected String[] encodePermissions(final String permissionsText) {
+    protected static String[] encodePermissions(final String permissionsText) {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         return split(permissionsText, "\n").get(stream -> stream.map(permissionHelper::encode)
                 .filter(StringUtil::isNotBlank)
