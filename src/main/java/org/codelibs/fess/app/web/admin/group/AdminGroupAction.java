@@ -384,6 +384,8 @@ public class AdminGroupAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+
+    /**
      * Validates group attributes using LDAP manager.
      *
      * @param attributes the attributes to validate
