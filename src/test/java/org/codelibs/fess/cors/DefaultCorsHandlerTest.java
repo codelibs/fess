@@ -861,8 +861,8 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
-        public List<String> getPasswordInvalidAdminPasswords() {
-            return new ArrayList<>();
+        public String getPasswordInvalidAdminPasswords() {
+            return "";
         }
     }
 }
