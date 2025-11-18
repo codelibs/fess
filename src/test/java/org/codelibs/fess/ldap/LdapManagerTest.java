@@ -447,6 +447,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         // Edge cases
         assertEquals("", ldapManager.replaceWithUnderscores(""));
         assertEquals("normal", ldapManager.replaceWithUnderscores("normal"));
-        assertEquals("__________", ldapManager.replaceWithUnderscores("//\\\\[]:;"));
+        // Input "//\\[]:;" has 8 special characters that should be replaced
+        assertEquals("________", ldapManager.replaceWithUnderscores("//\\\\[]:;"));
     }
 }
