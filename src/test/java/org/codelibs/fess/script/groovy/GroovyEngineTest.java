@@ -349,7 +349,9 @@ public class GroovyEngineTest extends UnitFessTestCase {
         assertEquals(1000000L, groovyEngine.evaluate("return 1000000L", params));
 
         // Double
-        assertEquals(3.14159, groovyEngine.evaluate("return 3.14159", params));
+        final Object doubleResult = groovyEngine.evaluate("return 3.14159", params);
+        assertTrue(doubleResult instanceof Number);
+        assertEquals(3.14159, ((Number) doubleResult).doubleValue(), 0.00001);
 
         // Boolean
         assertEquals(true, groovyEngine.evaluate("return true", params));
