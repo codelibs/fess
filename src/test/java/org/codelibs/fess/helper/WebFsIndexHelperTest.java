@@ -535,9 +535,12 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
 
     public void test_addFailureExclusionFilters_withNullList() {
         Crawler crawler = mock(Crawler.class);
-        CrawlingConfigHelper crawlingConfigHelper = mock(CrawlingConfigHelper.class);
-        when(crawlingConfigHelper.getExcludedUrlList(anyString())).thenReturn(null);
-        ComponentUtil.register(crawlingConfigHelper, "crawlingConfigHelper");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public List<String> getExcludedUrlList(String configId) {
+                return null;
+            }
+        }, "crawlingConfigHelper");
 
         webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
 
@@ -546,9 +549,12 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
 
     public void test_addFailureExclusionFilters_withEmptyList() {
         Crawler crawler = mock(Crawler.class);
-        CrawlingConfigHelper crawlingConfigHelper = mock(CrawlingConfigHelper.class);
-        when(crawlingConfigHelper.getExcludedUrlList(anyString())).thenReturn(Collections.emptyList());
-        ComponentUtil.register(crawlingConfigHelper, "crawlingConfigHelper");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public List<String> getExcludedUrlList(String configId) {
+                return Collections.emptyList();
+            }
+        }, "crawlingConfigHelper");
 
         webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
 
@@ -557,10 +563,13 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
 
     public void test_addFailureExclusionFilters_withUrls() {
         Crawler crawler = mock(Crawler.class);
-        CrawlingConfigHelper crawlingConfigHelper = mock(CrawlingConfigHelper.class);
-        List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://test.com/error");
-        when(crawlingConfigHelper.getExcludedUrlList(anyString())).thenReturn(excludedUrls);
-        ComponentUtil.register(crawlingConfigHelper, "crawlingConfigHelper");
+        final List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://test.com/error");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public List<String> getExcludedUrlList(String configId) {
+                return excludedUrls;
+            }
+        }, "crawlingConfigHelper");
 
         webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
 
@@ -569,10 +578,13 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
 
     public void test_addFailureExclusionFilters_withDuplicates() {
         Crawler crawler = mock(Crawler.class);
-        CrawlingConfigHelper crawlingConfigHelper = mock(CrawlingConfigHelper.class);
-        List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://example.com/failed", "http://test.com/error");
-        when(crawlingConfigHelper.getExcludedUrlList(anyString())).thenReturn(excludedUrls);
-        ComponentUtil.register(crawlingConfigHelper, "crawlingConfigHelper");
+        final List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://example.com/failed", "http://test.com/error");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public List<String> getExcludedUrlList(String configId) {
+                return excludedUrls;
+            }
+        }, "crawlingConfigHelper");
 
         webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
 
@@ -741,10 +753,13 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
 
     public void test_addFailureExclusionFilters_withBlankUrls() {
         Crawler crawler = mock(Crawler.class);
-        CrawlingConfigHelper crawlingConfigHelper = mock(CrawlingConfigHelper.class);
-        List<String> excludedUrls = Arrays.asList("", "  ", "http://example.com/failed");
-        when(crawlingConfigHelper.getExcludedUrlList(anyString())).thenReturn(excludedUrls);
-        ComponentUtil.register(crawlingConfigHelper, "crawlingConfigHelper");
+        final List<String> excludedUrls = Arrays.asList("", "  ", "http://example.com/failed");
+        ComponentUtil.register(new CrawlingConfigHelper() {
+            @Override
+            public List<String> getExcludedUrlList(String configId) {
+                return excludedUrls;
+            }
+        }, "crawlingConfigHelper");
 
         webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
 
