@@ -92,7 +92,10 @@ public class IngesterTest extends UnitFessTestCase {
         // AccessResult is abstract, so we create a simple concrete implementation for testing
         @SuppressWarnings("unchecked")
         AccessResult<String> accessResult = new AccessResult<String>() {
-            // Concrete implementation for testing
+            @Override
+            public void setLastModified(Long lastModified) {
+                // Stub implementation for testing
+            }
         };
 
         Map<String, Object> processed = ingester.process(target, accessResult);
