@@ -17,13 +17,17 @@ package org.codelibs.fess.api;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import static org.mockito.Mockito.*;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test class for WebApiManagerFactory.
- * Tests API manager registration and request matching.
+ * Tests API manager registration and request matching without using Mockito.
  */
 public class WebApiManagerFactoryTest extends UnitFessTestCase {
 
@@ -42,7 +46,7 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
     }
 
     public void test_add() {
-        WebApiManager manager = mock(WebApiManager.class);
+        TestWebApiManager manager = new TestWebApiManager(true);
 
         assertEquals(0, factory.size());
 
@@ -52,9 +56,9 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
     }
 
     public void test_add_multiple() {
-        WebApiManager manager1 = mock(WebApiManager.class);
-        WebApiManager manager2 = mock(WebApiManager.class);
-        WebApiManager manager3 = mock(WebApiManager.class);
+        TestWebApiManager manager1 = new TestWebApiManager(true);
+        TestWebApiManager manager2 = new TestWebApiManager(true);
+        TestWebApiManager manager3 = new TestWebApiManager(true);
 
         factory.add(manager1);
         factory.add(manager2);
@@ -73,12 +77,9 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
     }
 
     public void test_get_matchingManager() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        WebApiManager manager1 = mock(WebApiManager.class);
-        WebApiManager manager2 = mock(WebApiManager.class);
-
-        when(manager1.matches(request)).thenReturn(false);
-        when(manager2.matches(request)).thenReturn(true);
+        HttpServletRequest request = createMockRequest();
+        TestWebApiManager manager1 = new TestWebApiManager(false);
+        TestWebApiManager manager2 = new TestWebApiManager(true);
 
         factory.add(manager1);
         factory.add(manager2);
@@ -86,19 +87,15 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
         WebApiManager result = factory.get(request);
 
         assertSame(manager2, result);
-        verify(manager1).matches(request);
-        verify(manager2).matches(request);
+        assertEquals(1, manager1.getMatchesCallCount());
+        assertEquals(1, manager2.getMatchesCallCount());
     }
 
     public void test_get_firstMatchingManager() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        WebApiManager manager1 = mock(WebApiManager.class);
-        WebApiManager manager2 = mock(WebApiManager.class);
-        WebApiManager manager3 = mock(WebApiManager.class);
-
-        when(manager1.matches(request)).thenReturn(false);
-        when(manager2.matches(request)).thenReturn(true);
-        when(manager3.matches(request)).thenReturn(true);
+        HttpServletRequest request = createMockRequest();
+        TestWebApiManager manager1 = new TestWebApiManager(false);
+        TestWebApiManager manager2 = new TestWebApiManager(true);
+        TestWebApiManager manager3 = new TestWebApiManager(true);
 
         factory.add(manager1);
         factory.add(manager2);
@@ -108,18 +105,15 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
 
         // Should return the first matching manager (manager2)
         assertSame(manager2, result);
-        verify(manager1).matches(request);
-        verify(manager2).matches(request);
-        verify(manager3, never()).matches(request); // Should not check manager3
+        assertEquals(1, manager1.getMatchesCallCount());
+        assertEquals(1, manager2.getMatchesCallCount());
+        assertEquals(0, manager3.getMatchesCallCount()); // Should not check manager3
     }
 
     public void test_get_noMatchingManager() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        WebApiManager manager1 = mock(WebApiManager.class);
-        WebApiManager manager2 = mock(WebApiManager.class);
-
-        when(manager1.matches(request)).thenReturn(false);
-        when(manager2.matches(request)).thenReturn(false);
+        HttpServletRequest request = createMockRequest();
+        TestWebApiManager manager1 = new TestWebApiManager(false);
+        TestWebApiManager manager2 = new TestWebApiManager(false);
 
         factory.add(manager1);
         factory.add(manager2);
@@ -127,12 +121,12 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
         WebApiManager result = factory.get(request);
 
         assertNull(result);
-        verify(manager1).matches(request);
-        verify(manager2).matches(request);
+        assertEquals(1, manager1.getMatchesCallCount());
+        assertEquals(1, manager2.getMatchesCallCount());
     }
 
     public void test_get_emptyFactory() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletRequest request = createMockRequest();
 
         WebApiManager result = factory.get(request);
 
@@ -142,11 +136,11 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
     public void test_threadSafety() throws Exception {
         final int threadCount = 10;
         final Thread[] threads = new Thread[threadCount];
-        final WebApiManager[] managers = new WebApiManager[threadCount];
+        final TestWebApiManager[] managers = new TestWebApiManager[threadCount];
 
         // Create managers
         for (int i = 0; i < threadCount; i++) {
-            managers[i] = mock(WebApiManager.class);
+            managers[i] = new TestWebApiManager(true);
         }
 
         // Add managers concurrently
@@ -170,14 +164,13 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
         final Thread[] addThreads = new Thread[threadCount];
         final Thread[] getThreads = new Thread[threadCount];
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletRequest request = createMockRequest();
 
         // Add managers in separate threads
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
             addThreads[i] = new Thread(() -> {
-                WebApiManager manager = mock(WebApiManager.class);
-                when(manager.matches(any())).thenReturn(index == 0);
+                TestWebApiManager manager = new TestWebApiManager(index == 0);
                 factory.add(manager);
             });
             addThreads[i].start();
@@ -217,8 +210,390 @@ public class WebApiManagerFactoryTest extends UnitFessTestCase {
 
     public void test_size_afterAdditions() {
         for (int i = 1; i <= 5; i++) {
-            factory.add(mock(WebApiManager.class));
+            factory.add(new TestWebApiManager(true));
             assertEquals(i, factory.size());
+        }
+    }
+
+    /**
+     * Creates a minimal mock HttpServletRequest for testing.
+     * Only implements the methods actually needed by the tests.
+     */
+    private HttpServletRequest createMockRequest() {
+        return new HttpServletRequest() {
+            @Override
+            public String getAuthType() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.http.Cookie[] getCookies() {
+                return new jakarta.servlet.http.Cookie[0];
+            }
+
+            @Override
+            public long getDateHeader(String name) {
+                return 0;
+            }
+
+            @Override
+            public String getHeader(String name) {
+                return null;
+            }
+
+            @Override
+            public java.util.Enumeration<String> getHeaders(String name) {
+                return java.util.Collections.emptyEnumeration();
+            }
+
+            @Override
+            public java.util.Enumeration<String> getHeaderNames() {
+                return java.util.Collections.emptyEnumeration();
+            }
+
+            @Override
+            public int getIntHeader(String name) {
+                return 0;
+            }
+
+            @Override
+            public String getMethod() {
+                return "GET";
+            }
+
+            @Override
+            public String getPathInfo() {
+                return null;
+            }
+
+            @Override
+            public String getPathTranslated() {
+                return null;
+            }
+
+            @Override
+            public String getContextPath() {
+                return "";
+            }
+
+            @Override
+            public String getQueryString() {
+                return null;
+            }
+
+            @Override
+            public String getRemoteUser() {
+                return null;
+            }
+
+            @Override
+            public boolean isUserInRole(String role) {
+                return false;
+            }
+
+            @Override
+            public java.security.Principal getUserPrincipal() {
+                return null;
+            }
+
+            @Override
+            public String getRequestedSessionId() {
+                return null;
+            }
+
+            @Override
+            public String getRequestURI() {
+                return "/";
+            }
+
+            @Override
+            public StringBuffer getRequestURL() {
+                return new StringBuffer("http://localhost/");
+            }
+
+            @Override
+            public String getServletPath() {
+                return "/";
+            }
+
+            @Override
+            public jakarta.servlet.http.HttpSession getSession(boolean create) {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.http.HttpSession getSession() {
+                return null;
+            }
+
+            @Override
+            public String changeSessionId() {
+                return null;
+            }
+
+            @Override
+            public boolean isRequestedSessionIdValid() {
+                return false;
+            }
+
+            @Override
+            public boolean isRequestedSessionIdFromCookie() {
+                return false;
+            }
+
+            @Override
+            public boolean isRequestedSessionIdFromURL() {
+                return false;
+            }
+
+            @Override
+            public boolean authenticate(HttpServletResponse response) {
+                return false;
+            }
+
+            @Override
+            public void login(String username, String password) {
+            }
+
+            @Override
+            public void logout() {
+            }
+
+            @Override
+            public java.util.Collection<jakarta.servlet.http.Part> getParts() {
+                return java.util.Collections.emptyList();
+            }
+
+            @Override
+            public jakarta.servlet.http.Part getPart(String name) {
+                return null;
+            }
+
+            @Override
+            public <T extends jakarta.servlet.http.HttpUpgradeHandler> T upgrade(Class<T> handlerClass) {
+                return null;
+            }
+
+            @Override
+            public Object getAttribute(String name) {
+                return null;
+            }
+
+            @Override
+            public java.util.Enumeration<String> getAttributeNames() {
+                return java.util.Collections.emptyEnumeration();
+            }
+
+            @Override
+            public String getCharacterEncoding() {
+                return "UTF-8";
+            }
+
+            @Override
+            public void setCharacterEncoding(String env) {
+            }
+
+            @Override
+            public int getContentLength() {
+                return 0;
+            }
+
+            @Override
+            public long getContentLengthLong() {
+                return 0;
+            }
+
+            @Override
+            public String getContentType() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.ServletInputStream getInputStream() {
+                return null;
+            }
+
+            @Override
+            public String getParameter(String name) {
+                return null;
+            }
+
+            @Override
+            public java.util.Enumeration<String> getParameterNames() {
+                return java.util.Collections.emptyEnumeration();
+            }
+
+            @Override
+            public String[] getParameterValues(String name) {
+                return new String[0];
+            }
+
+            @Override
+            public java.util.Map<String, String[]> getParameterMap() {
+                return java.util.Collections.emptyMap();
+            }
+
+            @Override
+            public String getProtocol() {
+                return "HTTP/1.1";
+            }
+
+            @Override
+            public String getScheme() {
+                return "http";
+            }
+
+            @Override
+            public String getServerName() {
+                return "localhost";
+            }
+
+            @Override
+            public int getServerPort() {
+                return 80;
+            }
+
+            @Override
+            public java.io.BufferedReader getReader() {
+                return null;
+            }
+
+            @Override
+            public String getRemoteAddr() {
+                return "127.0.0.1";
+            }
+
+            @Override
+            public String getRemoteHost() {
+                return "localhost";
+            }
+
+            @Override
+            public void setAttribute(String name, Object o) {
+            }
+
+            @Override
+            public void removeAttribute(String name) {
+            }
+
+            @Override
+            public java.util.Locale getLocale() {
+                return java.util.Locale.getDefault();
+            }
+
+            @Override
+            public java.util.Enumeration<java.util.Locale> getLocales() {
+                return java.util.Collections.enumeration(java.util.Collections.singletonList(java.util.Locale.getDefault()));
+            }
+
+            @Override
+            public boolean isSecure() {
+                return false;
+            }
+
+            @Override
+            public jakarta.servlet.RequestDispatcher getRequestDispatcher(String path) {
+                return null;
+            }
+
+            @Override
+            public int getRemotePort() {
+                return 0;
+            }
+
+            @Override
+            public String getLocalName() {
+                return "localhost";
+            }
+
+            @Override
+            public String getLocalAddr() {
+                return "127.0.0.1";
+            }
+
+            @Override
+            public int getLocalPort() {
+                return 80;
+            }
+
+            @Override
+            public jakarta.servlet.ServletContext getServletContext() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.AsyncContext startAsync() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.AsyncContext startAsync(jakarta.servlet.ServletRequest servletRequest,
+                    jakarta.servlet.ServletResponse servletResponse) {
+                return null;
+            }
+
+            @Override
+            public boolean isAsyncStarted() {
+                return false;
+            }
+
+            @Override
+            public boolean isAsyncSupported() {
+                return false;
+            }
+
+            @Override
+            public jakarta.servlet.AsyncContext getAsyncContext() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.DispatcherType getDispatcherType() {
+                return jakarta.servlet.DispatcherType.REQUEST;
+            }
+
+            @Override
+            public String getRequestId() {
+                return null;
+            }
+
+            @Override
+            public String getProtocolRequestId() {
+                return null;
+            }
+
+            @Override
+            public jakarta.servlet.ServletConnection getServletConnection() {
+                return null;
+            }
+        };
+    }
+
+    /**
+     * Test implementation of WebApiManager for testing purposes.
+     */
+    private static class TestWebApiManager implements WebApiManager {
+        private final boolean shouldMatch;
+        private final AtomicInteger matchesCallCount = new AtomicInteger(0);
+
+        public TestWebApiManager(boolean shouldMatch) {
+            this.shouldMatch = shouldMatch;
+        }
+
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            matchesCallCount.incrementAndGet();
+            return shouldMatch;
+        }
+
+        @Override
+        public void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            // Test implementation - no-op
+        }
+
+        public int getMatchesCallCount() {
+            return matchesCallCount.get();
         }
     }
 }
