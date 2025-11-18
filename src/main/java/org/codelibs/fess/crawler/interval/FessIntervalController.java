@@ -114,10 +114,19 @@ public class FessIntervalController extends DefaultIntervalController {
      * Delays the crawler while waiting for new URLs to be available.
      * This method calibrates CPU load, checks crawler status, applies
      * interval control rules, and then calls the parent implementation.
+     * All operations are wrapped in exception handling to ensure robustness
+     * in test and production environments.
      */
     @Override
     protected void delayForWaitingNewUrl() {
-        ComponentUtil.getSystemHelper().calibrateCpuLoad();
+        try {
+            ComponentUtil.getSystemHelper().calibrateCpuLoad();
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to calibrate CPU load", e);
+            }
+        }
+
         try {
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
@@ -128,6 +137,12 @@ public class FessIntervalController extends DefaultIntervalController {
             }
         }
 
-        super.delayForWaitingNewUrl();
+        try {
+            super.delayForWaitingNewUrl();
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to execute parent delay logic", e);
+            }
+        }
     }
 }
