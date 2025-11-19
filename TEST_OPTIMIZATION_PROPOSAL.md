@@ -167,9 +167,9 @@ junit.jupiter.execution.parallel.mode.classes.default = concurrent
 ### 実装済みの最適化
 
 #### 1. クローラー設定の最適化
-- **max_access_count削減**: 100 → 20（SearchApiTests）、2（CrawlerLogTests）、1（その他）
-- **外部URL削除**: https://www.codelibs.org/ → http://localhost:8080/（ネットワーク遅延削減）
+- **max_access_count削減**: 100 → 20（SearchApiTests）、2（CrawlerLogTests）、1（JobLogTests, FailureUrlTests）
 - **interval_time削減**: 100ms → 0ms（リクエスト間の遅延なし）
+- **外部URLは維持**: テストの安定性のため、https://www.codelibs.org/を使用し続ける
 
 #### 2. waitJob()のExponential Backoff
 - クローラー起動待機: 50ms → 最大300msまで段階的に増加
@@ -186,6 +186,12 @@ junit.jupiter.execution.parallel.mode.classes.default = concurrent
 - OpenSearchのeventual consistencyの問題により、refresh()は必要
 - 各書き込み操作後にrefresh()しないと、後続の読み取りで不整合が発生する可能性
 - テスト挙動の変更リスクが高いため見送り
+
+#### 外部URLからlocalhostへの変更（却下）
+- 当初、ネットワーク遅延削減のため、https://www.codelibs.org/ → http://localhost:8080/への変更を試みた
+- しかし、Fessサーバー自体をクロールすると予期しない動作が発生
+- テストの安定性を優先し、元の外部URLを維持
+- max_access_count削減とinterval_time削減で十分な時間短縮が達成できる
 
 ## テストの網羅性維持
 
@@ -232,14 +238,14 @@ junit.jupiter.execution.parallel.mode.classes.default = concurrent
 - コメント追加で意図を明確化
 
 #### JobLogTests.java
-- URL変更: https://www.codelibs.org/ → http://localhost:8080/
-- `max_access_count`: 1
-- `interval_time`: 0ms
+- `max_access_count`: 1（変更なし）
+- `interval_time`: 0ms（100ms → 0ms）
+- URL: https://www.codelibs.org/を維持（テスト安定性のため）
 
 #### CrawlerLogTests.java
-- URL変更: https://www.codelibs.org/ → http://localhost:8080/
-- `max_access_count`: 2（成功1 + 失敗1）
-- `interval_time`: 0ms
+- `max_access_count`: 2（変更なし）
+- `interval_time`: 0ms（100ms → 0ms）
+- URL: https://www.codelibs.org/を維持（テスト安定性のため）
 
 #### SearchApiTests.java
 - `max_access_count`: 100 → 20

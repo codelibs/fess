@@ -163,9 +163,9 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        // Use localhost to avoid external network access + failure URL for testing
-        final String urls = "http://localhost:8080/" + "\n" + "http://failure.url";
-        final String includedUrls = "http://localhost:8080/.*" + "\n" + "http://failure.url.*";
+        // Keep original external URL for stable test results + failure URL for testing
+        final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.url";
+        final String includedUrls = "https://www.codelibs.org/.*" + "\n" + "http://failure.url.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);

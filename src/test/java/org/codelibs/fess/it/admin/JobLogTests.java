@@ -254,9 +254,9 @@ public class JobLogTests extends CrawlTestBase {
      */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
-        // Use localhost to avoid external network access
-        final String urls = "http://localhost:8080/";
-        final String includedUrls = "http://localhost:8080/.*";
+        // Keep original external URL for stable test results
+        final String urls = "https://www.codelibs.org/";
+        final String includedUrls = "https://www.codelibs.org/.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
         requestBody.put("urls", urls);
         requestBody.put("included_urls", includedUrls);
