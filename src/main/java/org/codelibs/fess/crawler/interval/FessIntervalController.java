@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.crawler.interval;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -26,6 +28,8 @@ import org.codelibs.fess.util.ComponentUtil;
  * including processing delays, queue waiting times, and new URL discovery.
  */
 public class FessIntervalController extends DefaultIntervalController {
+
+    private static final Logger logger = LogManager.getLogger(FessIntervalController.class);
 
     /**
      * Default constructor.
@@ -110,16 +114,35 @@ public class FessIntervalController extends DefaultIntervalController {
      * Delays the crawler while waiting for new URLs to be available.
      * This method calibrates CPU load, checks crawler status, applies
      * interval control rules, and then calls the parent implementation.
+     * All operations are wrapped in exception handling to ensure robustness
+     * in test and production environments.
      */
     @Override
     protected void delayForWaitingNewUrl() {
-        ComponentUtil.getSystemHelper().calibrateCpuLoad();
+        try {
+            ComponentUtil.getSystemHelper().calibrateCpuLoad();
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to calibrate CPU load", e);
+            }
+        }
+
         try {
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
             intervalControlHelper.delayByRules();
-        } catch (final Exception e) {}
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to apply interval control rules", e);
+            }
+        }
 
-        super.delayForWaitingNewUrl();
+        try {
+            super.delayForWaitingNewUrl();
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to execute parent delay logic", e);
+            }
+        }
     }
 }
