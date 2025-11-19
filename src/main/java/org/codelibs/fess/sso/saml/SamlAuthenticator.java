@@ -97,6 +97,13 @@ public class SamlAuthenticator implements SsoAuthenticator {
         }
         ComponentUtil.getSsoManager().register(this);
 
+        // Default SAML settings
+        // NOTE: Many security settings are set to false by default for compatibility.
+        // For production use, it is STRONGLY RECOMMENDED to enable security features:
+        // - onelogin.saml2.security.authnrequest_signed
+        // - onelogin.saml2.security.want_messages_signed
+        // - onelogin.saml2.security.want_assertions_signed
+        // Override these settings in your system properties with the 'saml.' prefix.
         defaultSettings = new HashMap<>();
         defaultSettings.put("onelogin.saml2.strict", "true");
         defaultSettings.put("onelogin.saml2.debug", "false");
@@ -131,7 +138,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings.put("onelogin.saml2.contacts.technical.given_name", "Technical Guy");
         defaultSettings.put("onelogin.saml2.contacts.technical.email_address", "technical@example.com");
         defaultSettings.put("onelogin.saml2.contacts.support.given_name", "Support Guy");
-        defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@@example.com");
+        defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@example.com");
     }
 
     /**
@@ -223,7 +230,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                 throw new SsoLoginException("Invalid SAML redirect URL.", e);
             }
 
-        }).orElseGet(() -> null);
+        }).orElse(null);
     }
 
     /**

@@ -193,15 +193,18 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final String[] jwt = ((String) tr.get("id_token")).split("\\.");
             final String jwtHeader = new String(decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
             final String jwtClaim = new String(decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
-            final String jwtSigniture = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
+            final String jwtSignature = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("jwtHeader: {}", jwtHeader);
                 logger.debug("jwtClaim: {}", jwtClaim);
-                logger.debug("jwtSigniture: {}", jwtSigniture);
+                logger.debug("jwtSignature: {}", jwtSignature);
             }
 
-            // TODO validate signiture
+            // SECURITY WARNING: JWT signature validation is not implemented.
+            // This is a critical security vulnerability. The ID token should be validated
+            // to ensure it was issued by the expected OpenID Connect provider and has not been tampered with.
+            // TODO: Implement JWT signature validation using the provider's public key
 
             final Map<String, Object> attributes = new HashMap<>();
             attributes.put("accesstoken", tr.getAccessToken());
@@ -210,7 +213,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("expire", tr.getExpiresInSeconds());
             attributes.put("jwtheader", jwtHeader);
             attributes.put("jwtclaim", jwtClaim);
-            attributes.put("jwtsign", jwtSigniture);
+            attributes.put("jwtsignature", jwtSignature);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("attribute: {}", attributes);
