@@ -288,7 +288,9 @@ public class QueryProcessorThreadSafetyTest extends UnitFessTestCase {
     }
 
     /**
-     * Test that filter execution order is preserved even with concurrent additions.
+     * Test that filter execution order follows the chain pattern.
+     * Filters execute in reverse order of addition (last added executes first)
+     * because each new filter wraps the previous chain.
      */
     public void test_filterExecutionOrder_preserved() throws Exception {
         QueryProcessor queryProcessor = createTestQueryProcessor();
@@ -315,10 +317,12 @@ public class QueryProcessorThreadSafetyTest extends UnitFessTestCase {
         QueryContext context = new QueryContext(null, false);
         queryProcessor.execute(context, new MatchAllDocsQuery(), 1.0f);
 
-        // Verify filters were executed in order
+        // Verify all filters were executed
         assertEquals(5, executionOrder.size());
+
+        // Verify filters execute in reverse order (chain pattern: last added executes first)
         for (int i = 0; i < 5; i++) {
-            assertEquals(Integer.valueOf(i), executionOrder.get(i));
+            assertEquals(Integer.valueOf(4 - i), executionOrder.get(i));
         }
     }
 
