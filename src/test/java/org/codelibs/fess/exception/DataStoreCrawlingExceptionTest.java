@@ -238,4 +238,152 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
         assertFalse(exception.aborted());
     }
+
+    public void test_constructorWithThrowableCause_OutOfMemoryError() {
+        // Test that constructor accepts Error as cause (verifies Throwable parameter change)
+        String url = "http://example.com/large-dataset";
+        String message = "Crawling failed due to memory exhaustion";
+        OutOfMemoryError error = new OutOfMemoryError("Heap space exhausted");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error);
+
+        assertEquals(url, exception.getUrl());
+        assertEquals(message, exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof Error);
+        assertTrue(exception.getCause() instanceof OutOfMemoryError);
+        assertEquals("Heap space exhausted", exception.getCause().getMessage());
+        assertFalse(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_OutOfMemoryErrorWithAbort() {
+        // Test Error with abort flag
+        String url = "http://example.com/critical-resource";
+        String message = "Critical memory error during crawling";
+        OutOfMemoryError error = new OutOfMemoryError("Cannot allocate memory");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error, true);
+
+        assertEquals(url, exception.getUrl());
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof OutOfMemoryError);
+        assertTrue(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_StackOverflowError() {
+        // Test with StackOverflowError
+        String url = "http://example.com/recursive-content";
+        String message = "Stack overflow during content parsing";
+        StackOverflowError error = new StackOverflowError("Recursive parsing detected");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error);
+
+        assertEquals(url, exception.getUrl());
+        assertTrue(exception.getCause() instanceof StackOverflowError);
+        assertEquals(error, exception.getCause());
+        assertFalse(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_AssertionError() {
+        // Test with AssertionError
+        String url = "http://example.com/invalid-state";
+        String message = "Assertion failed during data store access";
+        AssertionError error = new AssertionError("Data integrity check failed");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error, false);
+
+        assertEquals(url, exception.getUrl());
+        assertTrue(exception.getCause() instanceof AssertionError);
+        assertEquals(error, exception.getCause());
+        assertFalse(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_LinkageError() {
+        // Test with LinkageError subclass
+        String url = "http://example.com/data";
+        String message = "Class loading error during crawling";
+        NoClassDefFoundError error = new NoClassDefFoundError("Parser class not found");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error);
+
+        assertEquals(url, exception.getUrl());
+        assertTrue(exception.getCause() instanceof NoClassDefFoundError);
+        assertTrue(exception.getCause() instanceof LinkageError);
+        assertFalse(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_BackwardCompatibilityWithException() {
+        // Verify backward compatibility - Exception types still work
+        String url = "http://example.com/test";
+        String message = "Crawling error";
+
+        // Test with IOException
+        java.io.IOException ioException = new java.io.IOException("Network error");
+        DataStoreCrawlingException exception1 = new DataStoreCrawlingException(url, message, ioException);
+        assertTrue(exception1.getCause() instanceof java.io.IOException);
+
+        // Test with IllegalArgumentException
+        IllegalArgumentException argException = new IllegalArgumentException("Invalid URL format");
+        DataStoreCrawlingException exception2 = new DataStoreCrawlingException(url, message, argException);
+        assertTrue(exception2.getCause() instanceof IllegalArgumentException);
+
+        // Test with RuntimeException
+        RuntimeException runtimeException = new RuntimeException("Unexpected error");
+        DataStoreCrawlingException exception3 = new DataStoreCrawlingException(url, message, runtimeException);
+        assertTrue(exception3.getCause() instanceof RuntimeException);
+    }
+
+    public void test_constructorWithThrowableCause_NullError() {
+        // Test with null Error
+        String url = "http://example.com/test";
+        String message = "Error with null cause";
+        Error nullError = null;
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, nullError);
+
+        assertEquals(url, exception.getUrl());
+        assertEquals(message, exception.getMessage());
+        assertNull(exception.getCause());
+        assertFalse(exception.aborted());
+    }
+
+    public void test_constructorWithThrowableCause_ChainedErrorsAndExceptions() {
+        // Test with mixed Errors and Exceptions in cause chain
+        String url = "http://example.com/complex-error";
+        String message = "Complex error during crawling";
+
+        NullPointerException innerException = new NullPointerException("Null reference");
+        AssertionError middleError = new AssertionError("Assertion failed", innerException);
+        RuntimeException outerException = new RuntimeException("Wrapper", middleError);
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, outerException, true);
+
+        assertEquals(url, exception.getUrl());
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.aborted());
+
+        // Verify the cause chain
+        Throwable cause1 = exception.getCause();
+        assertTrue(cause1 instanceof RuntimeException);
+
+        Throwable cause2 = cause1.getCause();
+        assertTrue(cause2 instanceof AssertionError);
+
+        Throwable cause3 = cause2.getCause();
+        assertTrue(cause3 instanceof NullPointerException);
+    }
+
+    public void test_constructorWithThrowableCause_VirtualMachineError() {
+        // Test with VirtualMachineError
+        String url = "http://example.com/vm-error";
+        String message = "VM error during crawling";
+        InternalError error = new InternalError("JVM internal error");
+
+        DataStoreCrawlingException exception = new DataStoreCrawlingException(url, message, error);
+
+        assertEquals(url, exception.getUrl());
+        assertTrue(exception.getCause() instanceof InternalError);
+        assertTrue(exception.getCause() instanceof VirtualMachineError);
+        assertFalse(exception.aborted());
+    }
 }

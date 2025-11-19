@@ -140,4 +140,77 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(ThumbnailGenerationException.class.getName()));
         assertTrue(toStringResult.contains(message));
     }
+
+    public void test_constructorWithThrowableCause_Error() {
+        // Test that the constructor can accept Error as cause (not just Exception)
+        // This verifies the change from Exception to Throwable parameter
+        String message = "Thumbnail generation failed due to OutOfMemoryError";
+        Error error = new OutOfMemoryError("Not enough memory");
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof Error);
+        assertTrue(exception.getCause() instanceof OutOfMemoryError);
+        assertEquals("Not enough memory", exception.getCause().getMessage());
+    }
+
+    public void test_constructorWithThrowableCause_StackOverflowError() {
+        // Test with StackOverflowError as cause
+        String message = "Thumbnail generation failed";
+        StackOverflowError error = new StackOverflowError("Stack overflow during processing");
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof StackOverflowError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_AssertionError() {
+        // Test with AssertionError as cause
+        String message = "Assertion failed during thumbnail generation";
+        AssertionError error = new AssertionError("Unexpected state");
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof AssertionError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_RuntimeException() {
+        // Test that RuntimeException still works (backward compatibility)
+        String message = "Runtime error during thumbnail generation";
+        RuntimeException runtimeException = new RuntimeException("Runtime issue");
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, runtimeException);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertEquals(runtimeException, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_CheckedException() {
+        // Test with checked exception (IOException)
+        String message = "IO error during thumbnail generation";
+        Exception checkedException = new java.io.IOException("File not found");
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, checkedException);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof java.io.IOException);
+        assertEquals(checkedException, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_NestedErrorAndException() {
+        // Test with nested Error and Exception
+        String message = "Complex error during thumbnail generation";
+        Exception innerException = new IllegalArgumentException("Invalid argument");
+        Error middleError = new AssertionError("Assertion failed", innerException);
+        RuntimeException outerException = new RuntimeException("Outer error", middleError);
+        ThumbnailGenerationException exception = new ThumbnailGenerationException(message, outerException);
+
+        assertEquals(message, exception.getMessage());
+        assertEquals(outerException, exception.getCause());
+        assertEquals(middleError, exception.getCause().getCause());
+        assertEquals(innerException, exception.getCause().getCause().getCause());
+    }
 }

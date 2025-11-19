@@ -42,10 +42,10 @@ public class DataStoreCrawlingException extends CrawlingAccessException {
      *
      * @param url the URL where the crawling error occurred
      * @param message the error message
-     * @param e the underlying exception that caused this error
+     * @param cause the underlying exception that caused this error
      */
-    public DataStoreCrawlingException(final String url, final String message, final Exception e) {
-        this(url, message, e, false);
+    public DataStoreCrawlingException(final String url, final String message, final Throwable cause) {
+        this(url, message, cause, false);
     }
 
     /**
@@ -53,11 +53,11 @@ public class DataStoreCrawlingException extends CrawlingAccessException {
      *
      * @param url the URL where the crawling error occurred
      * @param message the error message
-     * @param e the underlying exception that caused this error
+     * @param cause the underlying exception that caused this error
      * @param abort whether the crawling process should be aborted due to this error
      */
-    public DataStoreCrawlingException(final String url, final String message, final Exception e, final boolean abort) {
-        super(message, e);
+    public DataStoreCrawlingException(final String url, final String message, final Throwable cause, final boolean abort) {
+        super(message, cause);
         this.url = url;
         this.abort = abort;
     }

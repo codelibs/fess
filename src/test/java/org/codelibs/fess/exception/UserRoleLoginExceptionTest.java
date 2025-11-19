@@ -20,6 +20,16 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class UserRoleLoginExceptionTest extends UnitFessTestCase {
 
+    // Mock subclass of RootAction for testing generic type safety
+    private static class TestAction extends RootAction {
+        // Test subclass
+    }
+
+    // Another mock subclass for testing
+    private static class AdminAction extends RootAction {
+        // Test admin subclass
+    }
+
     public void test_constructor() {
         // Test constructor with RootAction class
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -120,5 +130,117 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         } catch (InterruptedException e) {
             fail("Thread interrupted");
         }
+    }
+
+    public void test_genericTypeSafety_withSubclass() {
+        // Test that the exception accepts RootAction subclasses
+        // This verifies the change from Class<RootAction> to Class<? extends RootAction>
+        UserRoleLoginException exception = new UserRoleLoginException(TestAction.class);
+        assertNotNull(exception);
+        assertEquals(TestAction.class, exception.getActionClass());
+    }
+
+    public void test_genericTypeSafety_withAnotherSubclass() {
+        // Test with another RootAction subclass
+        UserRoleLoginException exception = new UserRoleLoginException(AdminAction.class);
+        assertNotNull(exception);
+        assertEquals(AdminAction.class, exception.getActionClass());
+    }
+
+    public void test_genericTypeSafety_getActionClassReturnType() {
+        // Test that getActionClass() returns the correct generic type
+        UserRoleLoginException exceptionWithRootAction = new UserRoleLoginException(RootAction.class);
+        Class<? extends RootAction> actionClass1 = exceptionWithRootAction.getActionClass();
+        assertNotNull(actionClass1);
+        assertEquals(RootAction.class, actionClass1);
+
+        UserRoleLoginException exceptionWithSubclass = new UserRoleLoginException(TestAction.class);
+        Class<? extends RootAction> actionClass2 = exceptionWithSubclass.getActionClass();
+        assertNotNull(actionClass2);
+        assertEquals(TestAction.class, actionClass2);
+        assertTrue(RootAction.class.isAssignableFrom(actionClass2));
+    }
+
+    public void test_genericTypeSafety_multipleDifferentSubclasses() {
+        // Test that different instances can hold different subclass types
+        UserRoleLoginException exception1 = new UserRoleLoginException(RootAction.class);
+        UserRoleLoginException exception2 = new UserRoleLoginException(TestAction.class);
+        UserRoleLoginException exception3 = new UserRoleLoginException(AdminAction.class);
+
+        assertEquals(RootAction.class, exception1.getActionClass());
+        assertEquals(TestAction.class, exception2.getActionClass());
+        assertEquals(AdminAction.class, exception3.getActionClass());
+
+        // Verify they are all RootAction or subclasses
+        assertTrue(RootAction.class.isAssignableFrom(exception1.getActionClass()));
+        assertTrue(RootAction.class.isAssignableFrom(exception2.getActionClass()));
+        assertTrue(RootAction.class.isAssignableFrom(exception3.getActionClass()));
+    }
+
+    public void test_genericTypeSafety_throwAndCatchWithSubclass() {
+        // Test throwing and catching with a subclass
+        try {
+            throw new UserRoleLoginException(TestAction.class);
+        } catch (UserRoleLoginException e) {
+            Class<? extends RootAction> actionClass = e.getActionClass();
+            assertEquals(TestAction.class, actionClass);
+            assertTrue(RootAction.class.isAssignableFrom(actionClass));
+        }
+    }
+
+    public void test_genericTypeSafety_consistencyBetweenConstructorAndGetter() {
+        // Verify consistency between constructor parameter type and getter return type
+        // This test ensures the generic type change is consistent throughout the class
+
+        // Test with RootAction.class
+        Class<? extends RootAction> inputClass1 = RootAction.class;
+        UserRoleLoginException exception1 = new UserRoleLoginException(inputClass1);
+        Class<? extends RootAction> outputClass1 = exception1.getActionClass();
+        assertSame(inputClass1, outputClass1);
+
+        // Test with TestAction.class
+        Class<? extends RootAction> inputClass2 = TestAction.class;
+        UserRoleLoginException exception2 = new UserRoleLoginException(inputClass2);
+        Class<? extends RootAction> outputClass2 = exception2.getActionClass();
+        assertSame(inputClass2, outputClass2);
+
+        // Test with AdminAction.class
+        Class<? extends RootAction> inputClass3 = AdminAction.class;
+        UserRoleLoginException exception3 = new UserRoleLoginException(inputClass3);
+        Class<? extends RootAction> outputClass3 = exception3.getActionClass();
+        assertSame(inputClass3, outputClass3);
+    }
+
+    public void test_genericTypeSafety_noClassCastException() {
+        // Verify that no ClassCastException occurs when using subclasses
+        try {
+            UserRoleLoginException exception1 = new UserRoleLoginException(TestAction.class);
+            Class<? extends RootAction> actionClass1 = exception1.getActionClass();
+            assertNotNull(actionClass1);
+
+            UserRoleLoginException exception2 = new UserRoleLoginException(AdminAction.class);
+            Class<? extends RootAction> actionClass2 = exception2.getActionClass();
+            assertNotNull(actionClass2);
+
+            // No ClassCastException should occur
+        } catch (ClassCastException e) {
+            fail("ClassCastException should not occur: " + e.getMessage());
+        }
+    }
+
+    public void test_genericTypeSafety_verifyInheritance() {
+        // Verify that TestAction and AdminAction are indeed subclasses of RootAction
+        assertTrue(RootAction.class.isAssignableFrom(TestAction.class));
+        assertTrue(RootAction.class.isAssignableFrom(AdminAction.class));
+
+        // Create exceptions with subclasses
+        UserRoleLoginException exception1 = new UserRoleLoginException(TestAction.class);
+        UserRoleLoginException exception2 = new UserRoleLoginException(AdminAction.class);
+
+        // Verify the action classes are properly stored
+        assertTrue(RootAction.class.isAssignableFrom(exception1.getActionClass()));
+        assertTrue(RootAction.class.isAssignableFrom(exception2.getActionClass()));
+        assertTrue(TestAction.class.isAssignableFrom(exception1.getActionClass()));
+        assertTrue(AdminAction.class.isAssignableFrom(exception2.getActionClass()));
     }
 }

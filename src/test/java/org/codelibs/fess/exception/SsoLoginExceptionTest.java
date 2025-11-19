@@ -239,4 +239,98 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals("Error 2", exception2.getMessage());
         assertEquals("Error 3", exception3.getMessage());
     }
+
+    public void test_constructorWithThrowableCause_OutOfMemoryError() {
+        // Test that constructor accepts Error as cause (verifies Throwable parameter change)
+        String message = "SSO login failed due to memory error";
+        OutOfMemoryError error = new OutOfMemoryError("Not enough memory for SSO login");
+        SsoLoginException exception = new SsoLoginException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof Error);
+        assertTrue(exception.getCause() instanceof OutOfMemoryError);
+        assertEquals("Not enough memory for SSO login", exception.getCause().getMessage());
+    }
+
+    public void test_constructorWithThrowableCause_StackOverflowError() {
+        // Test with StackOverflowError as cause
+        String message = "SSO login recursive overflow";
+        StackOverflowError error = new StackOverflowError("Stack overflow in authentication chain");
+        SsoLoginException exception = new SsoLoginException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof StackOverflowError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_AssertionError() {
+        // Test with AssertionError as cause
+        String message = "SSO login assertion violation";
+        AssertionError error = new AssertionError("Security assertion failed");
+        SsoLoginException exception = new SsoLoginException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof AssertionError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_LinkageError() {
+        // Test with LinkageError subclass
+        String message = "SSO login class loading error";
+        NoClassDefFoundError error = new NoClassDefFoundError("SSO provider class not found");
+        SsoLoginException exception = new SsoLoginException(message, error);
+
+        assertEquals(message, exception.getMessage());
+        assertTrue(exception.getCause() instanceof NoClassDefFoundError);
+        assertTrue(exception.getCause() instanceof LinkageError);
+        assertEquals(error, exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_BackwardCompatibility() {
+        // Verify backward compatibility with Exception parameter
+        String message = "SSO login failed";
+
+        // Test with various Exception types
+        IOException ioException = new IOException("Connection failed");
+        SsoLoginException exception1 = new SsoLoginException(message, ioException);
+        assertTrue(exception1.getCause() instanceof IOException);
+
+        IllegalArgumentException argException = new IllegalArgumentException("Invalid token");
+        SsoLoginException exception2 = new SsoLoginException(message, argException);
+        assertTrue(exception2.getCause() instanceof IllegalArgumentException);
+
+        RuntimeException runtimeException = new RuntimeException("Runtime error");
+        SsoLoginException exception3 = new SsoLoginException(message, runtimeException);
+        assertTrue(exception3.getCause() instanceof RuntimeException);
+    }
+
+    public void test_constructorWithThrowableCause_NullError() {
+        // Test with null Error (should work same as null Exception)
+        String message = "SSO login error with null cause";
+        Error nullError = null;
+        SsoLoginException exception = new SsoLoginException(message, nullError);
+
+        assertEquals(message, exception.getMessage());
+        assertNull(exception.getCause());
+    }
+
+    public void test_constructorWithThrowableCause_ChainedErrorsAndExceptions() {
+        // Test with chain containing both Errors and Exceptions
+        String message = "SSO login complex error chain";
+        IllegalStateException innerException = new IllegalStateException("Bad state");
+        AssertionError middleError = new AssertionError("Assertion failed", innerException);
+        RuntimeException outerException = new RuntimeException("Wrapper exception", middleError);
+        SsoLoginException exception = new SsoLoginException(message, outerException);
+
+        assertEquals(message, exception.getMessage());
+        Throwable cause1 = exception.getCause();
+        assertTrue(cause1 instanceof RuntimeException);
+
+        Throwable cause2 = cause1.getCause();
+        assertTrue(cause2 instanceof AssertionError);
+
+        Throwable cause3 = cause2.getCause();
+        assertTrue(cause3 instanceof IllegalStateException);
+    }
 }

@@ -40,10 +40,10 @@ public class SsoLoginException extends FessSystemException {
      * Constructs a new SsoLoginException with the specified detail message and cause.
      *
      * @param message The detail message explaining the SSO login failure
-     * @param e The underlying exception that caused this SSO login failure
+     * @param cause The underlying exception that caused this SSO login failure
      */
-    public SsoLoginException(final String message, final Exception e) {
-        super(message, e);
+    public SsoLoginException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
 }
