@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -65,9 +64,8 @@ public class DataStoreFactory {
     /**
      * Map containing registered data store instances indexed by their names and class simple names.
      * All keys are stored in lowercase for case-insensitive lookup.
-     * Thread-safe implementation using ConcurrentHashMap for concurrent access.
      */
-    protected Map<String, DataStore> dataStoreMap = new ConcurrentHashMap<>();
+    protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
 
     /**
      * Cached array of available data store names discovered from plugin JAR files.
