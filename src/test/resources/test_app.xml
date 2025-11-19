@@ -4,7 +4,10 @@
 <components>
 	<include path="convention.xml" />
 	<include path="lastaflute.xml" />
-	
+
 	<!-- Register systemProperties for test environment -->
 	<component name="systemProperties" class="org.codelibs.fess.unit.TestSystemProperties" />
+
+	<!-- Register test stub for CrawlingConfigHelper -->
+	<component name="crawlingConfigHelper" class="org.codelibs.fess.helper.TestCrawlingConfigHelper" instance="singleton" />
 </components>
