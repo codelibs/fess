@@ -300,7 +300,7 @@ public class RankFusionProcessor implements AutoCloseable {
                 Thread.currentThread().interrupt(); // Restore interrupt status
                 return SearchResult.create().build();
             } catch (final ExecutionException e) {
-                logger.error("Search operation failed with exception", e.getCause());
+                logger.warn("Search operation failed with exception", e.getCause());
                 return SearchResult.create().build();
             }
         }).toArray(SearchResult[]::new);
@@ -418,7 +418,7 @@ public class RankFusionProcessor implements AutoCloseable {
                     searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
                     searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
         } catch (final Exception e) {
-            logger.error("Main searcher failed to execute search for query: {}", query, e);
+            logger.warn("Main searcher failed to execute search for query: {}", query, e);
             return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(),
                     0, false, null, params.getStartPosition(), pageSize, 0);
         }
