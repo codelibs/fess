@@ -866,6 +866,11 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
+        public String getStorageMaxItemsInPage() {
+            return "100";
+        }
+
+        @Override
         public Integer getStorageMaxItemsInPageAsInteger() {
             return 100;
         }
