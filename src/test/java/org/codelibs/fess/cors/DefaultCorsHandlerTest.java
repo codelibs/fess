@@ -876,6 +876,11 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
+        public String getPluginVersionFilter() {
+            return null;
+        }
+
+        @Override
         public Integer getPluginVersionFilterAsInteger() {
             return null;
         }
