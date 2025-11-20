@@ -166,10 +166,10 @@ ${fe:html(true)}
 		<jsp:include page="footer.jsp" />
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>
+	<script src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script src="${fe:url('/js/popper.min.js')}"></script>
+	<script src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script src="${fe:url('/js/suggestor.js')}"></script>
+	<script src="${fe:url('/js/index.js')}"></script>
 </body>
 ${fe:html(false)}
