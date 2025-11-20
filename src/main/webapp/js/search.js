@@ -133,17 +133,17 @@ $(function() {
     })
       .done(function(data) {
         if (data.record_count > 0) {
-          var docIds = {};
+          var docIdsLookup = {};
           var i;
           for (i = 0; i < data.data.length; i++) {
-            docIds["#" + data.data[i].doc_id] = true;
+            docIdsLookup["#" + data.data[i].doc_id] = true;
           }
 
           $favorites.each(function() {
             var $favorite = $(this);
             var url = $favorite.attr("href");
 
-            if (docIds[url]) {
+            if (docIdsLookup[url]) {
               var $favorited = $favorite.siblings(".favorited");
               $favorite.fadeOut(FADE_DURATION, function() {
                 $favorited.fadeIn(FADE_DURATION);
