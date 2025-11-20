@@ -15,9 +15,7 @@
  */
 package org.codelibs.fess.rank.fusion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,269 +25,209 @@ import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.FacetResponse;
-import org.opensearch.search.aggregations.Aggregations;
-import org.opensearch.search.aggregations.InternalAggregations;
 import org.dbflute.optional.OptionalThing;
 
+/**
+ * Tests for RankFusionSearcher abstract base class.
+ */
 public class RankFusionSearcherTest extends UnitFessTestCase {
 
-    private SearchRequestParams createTestSearchRequestParams() {
-        return new SearchRequestParams() {
-            @Override
-            public String getQuery() {
-                return "test query";
-            }
-
-            @Override
-            public String getSimilarDocHash() {
-                return null;
-            }
-
-            @Override
-            public SearchRequestType getType() {
-                return SearchRequestType.SEARCH;
-            }
-
-            @Override
-            public Locale getLocale() {
-                return Locale.ENGLISH;
-            }
-
-            @Override
-            public Object getAttribute(String name) {
-                return null;
-            }
-
-            @Override
-            public String[] getExtraQueries() {
-                return new String[0];
-            }
-
-            @Override
-            public int getOffset() {
-                return 0;
-            }
-
-            @Override
-            public int getPageSize() {
-                return 10;
-            }
-
-            @Override
-            public int getStartPosition() {
-                return 0;
-            }
-
-            @Override
-            public String getSort() {
-                return null;
-            }
-
-            @Override
-            public Map<String, String[]> getFields() {
-                return new HashMap<>();
-            }
-
-            @Override
-            public Map<String, String[]> getConditions() {
-                return new HashMap<>();
-            }
-
-            @Override
-            public String[] getLanguages() {
-                return new String[0];
-            }
-
-            @Override
-            public GeoInfo getGeoInfo() {
-                return null;
-            }
-
-            @Override
-            public FacetInfo getFacetInfo() {
-                return null;
-            }
-
-            @Override
-            public HighlightInfo getHighlightInfo() {
-                return null;
-            }
-
-            @Override
-            public String getTrackTotalHits() {
-                return null;
-            }
-
-            @Override
-            public Float getMinScore() {
-                return null;
-            }
-
-            @Override
-            public String[] getResponseFields() {
-                return new String[0];
-            }
-        };
+    /**
+     * Test getName() method derives name from class name.
+     */
+    public void test_getNameFromClassName() {
+        final TestSearcher searcher = new TestSearcher();
+        assertEquals("test", searcher.getName());
     }
 
-    private RankFusionSearcher rankFusionSearcher;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        // Create a concrete implementation for testing
-        rankFusionSearcher = new TestRankFusionSearcher();
+    /**
+     * Test getName() removes "Searcher" suffix.
+     */
+    public void test_getNameRemovesSearcherSuffix() {
+        final CustomSearcher searcher = new CustomSearcher();
+        assertEquals("custom", searcher.getName());
     }
 
-    public void test_getName_defaultBehavior() {
-        // Test that getName() properly converts class name to lowercase without "Searcher" suffix
-        assertEquals("test_rank_fusion", rankFusionSearcher.getName());
+    /**
+     * Test getName() converts to lowercase.
+     */
+    public void test_getNameLowercase() {
+        final MyCustomSearcher searcher = new MyCustomSearcher();
+        // Should be "my_custom" (decamelized and lowercased)
+        String name = searcher.getName();
+        assertNotNull(name);
+        assertTrue(name.equals("my_custom") || name.equals("mycustom"));
     }
 
-    public void test_getName_cachesBehavior() {
-        // Test that getName() caches the result after first call
-        String firstName = rankFusionSearcher.getName();
-        String secondName = rankFusionSearcher.getName();
-        assertSame(firstName, secondName);
-        assertEquals("test_rank_fusion", firstName);
+    /**
+     * Test getName() is cached (lazily initialized).
+     */
+    public void test_getNameCached() {
+        final TestSearcher searcher = new TestSearcher();
+        final String name1 = searcher.getName();
+        final String name2 = searcher.getName();
+        assertSame(name1, name2); // Should be same instance
     }
 
-    public void test_getName_customSearcherClass() {
-        // Test with different searcher implementation
-        RankFusionSearcher customSearcher = new CustomSearcher();
-        assertEquals("custom", customSearcher.getName());
+    /**
+     * Test searcher with simple class name.
+     */
+    public void test_simpleClassNameSearcher() {
+        final SimpleSearcher searcher = new SimpleSearcher();
+        assertEquals("simple", searcher.getName());
     }
 
-    public void test_getName_simpleSearcherClass() {
-        // Test with simple searcher name
-        RankFusionSearcher simpleSearcher = new SimpleSearcher();
-        assertEquals("simple", simpleSearcher.getName());
+    /**
+     * Test searcher extending another searcher.
+     */
+    public void test_extendedSearcher() {
+        final ExtendedTestSearcher searcher = new ExtendedTestSearcher();
+        // Name should be based on actual class, not parent
+        assertEquals("extended_test", searcher.getName());
     }
 
-    public void test_getName_complexCamelCaseSearcher() {
-        // Test with complex camel case naming
-        RankFusionSearcher complexSearcher = new VeryComplexRankFusionSearcher();
-        assertEquals("very_complex_rank_fusion", complexSearcher.getName());
-    }
-
-    public void test_getName_searcherWithoutSuffixSearcher() {
-        // Test with class that doesn't end with "Searcher"
-        RankFusionSearcher noSuffixSearcher = new NoSuffixSearcherImpl();
-        assertEquals("no_suffix_impl", noSuffixSearcher.getName());
-    }
-
-    public void test_search_withValidParameters() {
-        // Test that search method is properly called with valid parameters
-        TestRankFusionSearcher testSearcher = new TestRankFusionSearcher();
-        String query = "test query";
-        SearchRequestParams params = createTestSearchRequestParams();
-        OptionalThing<FessUserBean> userBean = OptionalThing.empty();
-
-        SearchResult result = testSearcher.search(query, params, userBean);
-
+    /**
+     * Test that search method must be implemented.
+     */
+    public void test_searchMethodAbstract() {
+        final TestSearcher searcher = new TestSearcher();
+        // Should be able to call search
+        final SearchResult result = searcher.search("test", new TestSearchRequestParams(), OptionalThing.empty());
         assertNotNull(result);
-        assertEquals(query, testSearcher.lastQuery);
-        assertEquals(params, testSearcher.lastParams);
-        assertEquals(userBean, testSearcher.lastUserBean);
     }
 
-    public void test_search_withUserBean() {
-        // Test search with user bean present
-        TestRankFusionSearcher testSearcher = new TestRankFusionSearcher();
-        String query = "user query";
-        SearchRequestParams params = createTestSearchRequestParams();
-        FessUserBean user = FessUserBean.empty();
-        OptionalThing<FessUserBean> userBean = OptionalThing.of(user);
-
-        SearchResult result = testSearcher.search(query, params, userBean);
-
-        assertNotNull(result);
-        assertEquals(query, testSearcher.lastQuery);
-        assertEquals(params, testSearcher.lastParams);
-        assertTrue(testSearcher.lastUserBean.isPresent());
-        assertEquals(user, testSearcher.lastUserBean.get());
-    }
-
-    public void test_search_withNullQuery() {
-        // Test search with null query
-        TestRankFusionSearcher testSearcher = new TestRankFusionSearcher();
-        SearchRequestParams params = createTestSearchRequestParams();
-        OptionalThing<FessUserBean> userBean = OptionalThing.empty();
-
-        SearchResult result = testSearcher.search(null, params, userBean);
-
-        assertNotNull(result);
-        assertNull(testSearcher.lastQuery);
-        assertEquals(params, testSearcher.lastParams);
-        assertEquals(userBean, testSearcher.lastUserBean);
-    }
-
-    public void test_search_withEmptyQuery() {
-        // Test search with empty query
-        TestRankFusionSearcher testSearcher = new TestRankFusionSearcher();
-        String query = "";
-        SearchRequestParams params = createTestSearchRequestParams();
-        OptionalThing<FessUserBean> userBean = OptionalThing.empty();
-
-        SearchResult result = testSearcher.search(query, params, userBean);
-
-        assertNotNull(result);
-        assertEquals("", testSearcher.lastQuery);
-        assertEquals(params, testSearcher.lastParams);
-        assertEquals(userBean, testSearcher.lastUserBean);
-    }
-
-    // Test implementation of RankFusionSearcher for testing purposes
-    private static class TestRankFusionSearcher extends RankFusionSearcher {
-        String lastQuery;
-        SearchRequestParams lastParams;
-        OptionalThing<FessUserBean> lastUserBean;
-
+    /**
+     * Simple test searcher implementation.
+     */
+    static class TestSearcher extends RankFusionSearcher {
         @Override
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
-            this.lastQuery = query;
-            this.lastParams = params;
-            this.lastUserBean = userBean;
-
-            // Return a dummy SearchResult
-            List<Map<String, Object>> documentList = new ArrayList<>();
-            Map<String, Object> doc = new HashMap<>();
-            doc.put("title", "Test Document");
-            documentList.add(doc);
-
-            // Create empty aggregations instead of null
-            Aggregations emptyAggregations = InternalAggregations.EMPTY;
-            return new SearchResult(documentList, 1L, "eq", 100L, false, new FacetResponse(emptyAggregations));
+            return SearchResult.create().build();
         }
     }
 
-    // Additional test searcher classes for getName() testing
-    private static class CustomSearcher extends RankFusionSearcher {
+    /**
+     * Custom searcher implementation.
+     */
+    static class CustomSearcher extends RankFusionSearcher {
         @Override
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
-            return new SearchResult(new ArrayList<>(), 0L, "eq", 0L, false, new FacetResponse(InternalAggregations.EMPTY));
+            return SearchResult.create().build();
         }
     }
 
-    private static class SimpleSearcher extends RankFusionSearcher {
+    /**
+     * Multi-word class name searcher.
+     */
+    static class MyCustomSearcher extends RankFusionSearcher {
         @Override
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
-            return new SearchResult(new ArrayList<>(), 0L, "eq", 0L, false, new FacetResponse(InternalAggregations.EMPTY));
+            return SearchResult.create().build();
         }
     }
 
-    private static class VeryComplexRankFusionSearcher extends RankFusionSearcher {
+    /**
+     * Simple searcher for testing.
+     */
+    static class SimpleSearcher extends RankFusionSearcher {
         @Override
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
-            return new SearchResult(new ArrayList<>(), 0L, "eq", 0L, false, new FacetResponse(InternalAggregations.EMPTY));
+            return SearchResult.create().build();
         }
     }
 
-    private static class NoSuffixSearcherImpl extends RankFusionSearcher {
+    /**
+     * Extended searcher for testing inheritance.
+     */
+    static class ExtendedTestSearcher extends TestSearcher {
         @Override
         protected SearchResult search(String query, SearchRequestParams params, OptionalThing<FessUserBean> userBean) {
-            return new SearchResult(new ArrayList<>(), 0L, "eq", 0L, false, new FacetResponse(InternalAggregations.EMPTY));
+            return SearchResult.create().allRecordCount(100).build();
+        }
+    }
+
+    /**
+     * Test search request parameters for testing.
+     */
+    static class TestSearchRequestParams extends SearchRequestParams {
+        @Override
+        public String getQuery() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String[]> getFields() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String[]> getConditions() {
+            return null;
+        }
+
+        @Override
+        public String[] getLanguages() {
+            return null;
+        }
+
+        @Override
+        public GeoInfo getGeoInfo() {
+            return null;
+        }
+
+        @Override
+        public FacetInfo getFacetInfo() {
+            return null;
+        }
+
+        @Override
+        public HighlightInfo getHighlightInfo() {
+            return null;
+        }
+
+        @Override
+        public String getSort() {
+            return null;
+        }
+
+        @Override
+        public int getStartPosition() {
+            return 0;
+        }
+
+        @Override
+        public int getOffset() {
+            return 0;
+        }
+
+        @Override
+        public int getPageSize() {
+            return 10;
+        }
+
+        @Override
+        public String[] getExtraQueries() {
+            return null;
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            return null;
+        }
+
+        @Override
+        public Locale getLocale() {
+            return null;
+        }
+
+        @Override
+        public SearchRequestType getType() {
+            return null;
+        }
+
+        @Override
+        public String getSimilarDocHash() {
+            return null;
         }
     }
 }

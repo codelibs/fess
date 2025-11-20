@@ -39,7 +39,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int allRecordCount = 1000;
         int pageSize = 10;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.init();
 
             if (rankFusionProcessor.search(query, new TestSearchRequestParams(0, pageSize, 0),
@@ -101,7 +101,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 45;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(10, 45, 45));
             rankFusionProcessor.init();
 
@@ -214,7 +214,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 0;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
             rankFusionProcessor.init();
 
@@ -241,7 +241,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 0;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
             rankFusionProcessor.init();
 
@@ -268,7 +268,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 0;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 0));
             rankFusionProcessor.init();
 
@@ -295,7 +295,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 10;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
             rankFusionProcessor.init();
 
@@ -322,7 +322,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 0;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
             rankFusionProcessor.init();
 
@@ -349,7 +349,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 0;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(10, 0, 0));
             rankFusionProcessor.init();
 
@@ -376,7 +376,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 100;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
             rankFusionProcessor.init();
 
@@ -403,7 +403,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 90;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
             rankFusionProcessor.init();
 
@@ -430,7 +430,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         int pageSize = 100;
         int offset = 50;
         try (RankFusionProcessor rankFusionProcessor = new RankFusionProcessor()) {
-            rankFusionProcessor.setSeacher(new TestMainSearcher(allRecordCount));
+            rankFusionProcessor.setSearcher(new TestMainSearcher(allRecordCount));
             rankFusionProcessor.register(new TestSubSearcher(0, 0, 1000));
             rankFusionProcessor.init();
 

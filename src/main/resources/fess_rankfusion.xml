@@ -4,7 +4,7 @@
 <components>
 	<component name="rankFusionProcessor"
 		class="org.codelibs.fess.rank.fusion.RankFusionProcessor">
-		<postConstruct name="setSeacher">
+		<postConstruct name="setSearcher">
 			<arg>
 				<component
 					class="org.codelibs.fess.rank.fusion.DefaultSearcher">
