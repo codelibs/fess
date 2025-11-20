@@ -109,11 +109,10 @@ public class QueryProcessor {
     /**
      * Adds a filter to the processing pipeline.
      * After adding a filter, the filter chain is recreated to include the new filter.
-     * This method is synchronized to ensure thread-safe filter chain creation.
      *
      * @param filter the filter to add to the processing pipeline
      */
-    public synchronized void addFilter(final Filter filter) {
+    public void addFilter(final Filter filter) {
         filterList.add(filter);
         createFilterChain();
     }
@@ -121,9 +120,8 @@ public class QueryProcessor {
     /**
      * Creates the filter chain from the registered filters.
      * The chain starts with the default filter chain and appends each registered filter.
-     * This method is synchronized to ensure thread-safe filter chain creation.
      */
-    protected synchronized void createFilterChain() {
+    protected void createFilterChain() {
         FilterChain chain = createDefaultFilterChain();
         for (final Filter element : filterList) {
             chain = appendFilterChain(element, chain);
