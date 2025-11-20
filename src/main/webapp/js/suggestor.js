@@ -30,6 +30,9 @@
     SINGLE_QUOTE: 222
   };
 
+  // UI constants
+  var VERTICAL_SPACING = 6; // Pixels between input field and suggestion box
+
   $.fn.suggestor = function (setting) {
     var $boxElement,
       $textArea,
@@ -56,7 +59,8 @@
        */
       isInputKey = function (keyCode) {
         return (
-          (keyCode >= KEY_CODES.NUM_0 && keyCode <= KEY_CODES.Z) ||
+          (keyCode >= KEY_CODES.NUM_0 && keyCode <= KEY_CODES.NUM_9) ||
+          (keyCode >= KEY_CODES.A && keyCode <= KEY_CODES.Z) ||
           (keyCode >= KEY_CODES.NUMPAD_0 && keyCode <= KEY_CODES.NUMPAD_9) ||
           (keyCode >= KEY_CODES.SEMICOLON && keyCode <= KEY_CODES.SINGLE_QUOTE) ||
           keyCode === KEY_CODES.BACKSPACE ||
@@ -244,10 +248,9 @@
             reslist,
             $olEle,
             str,
-            isDuplicate,
-            $tmpli,
             $liEle,
-            i, j, k;
+            seenTexts,
+            i, j;
 
           listNum = 0;
           if (typeof hits !== "undefined" && hits.length > 0) {
@@ -263,24 +266,19 @@
               margin: "2px"
             });
 
+            // Use a Set to track seen texts for O(n) duplicate checking
+            seenTexts = {};
+
             for (
               j = 0;
               j < reslist.length && listNum < settingAjaxInfo.num;
               j++
             ) {
               str = reslist[j];
-              isDuplicate = false;
 
-              // Check for duplicates
-              $tmpli = $($olEle.children("li"));
-              for (k = 0; k < $tmpli.length; k++) {
-                if (str === $($tmpli.get(k)).text()) {
-                  isDuplicate = true;
-                  break;
-                }
-              }
-
-              if (!isDuplicate) {
+              // Check for duplicates using Set lookup
+              if (!seenTexts[str]) {
+                seenTexts[str] = true;
                 $liEle = $("<li/>");
                 $liEle.text(str); // Use text() instead of html() to prevent XSS
                 $liEle.attr({
@@ -405,7 +403,7 @@
         resize: function () {
           var offset = $textArea.offset();
           $boxElement.css({
-            top: offset.top + $textArea.outerHeight() + 6,
+            top: offset.top + $textArea.outerHeight() + VERTICAL_SPACING,
             left: offset.left,
             height: "auto",
             width: "auto"
