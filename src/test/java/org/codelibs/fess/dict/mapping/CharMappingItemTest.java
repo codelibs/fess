@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.dict.mapping;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -39,8 +41,8 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals(0L, item.getId());
         assertNotNull(item.getNewInputs());
         assertEquals("result", item.getNewOutput());
-        // NewInputs should be same as inputs for id=0
-        assertSame(inputs, item.getNewInputs());
+        // NewInputs should have same content as inputs for id=0 (defensive copy is returned)
+        assertArrayEquals(inputs, item.getNewInputs());
         assertEquals("result", item.getNewOutput());
     }
 
@@ -246,6 +248,24 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertNotSame(item1.hashCode(), item4.hashCode());
     }
 
+    public void test_hashCode_withNullOutput() {
+        // Test hashCode with null output - should not throw, returns consistent hash for null
+        String[] inputs1 = { "a", "b" };
+        String[] inputs2 = { "a", "b" };
+        CharMappingItem item1 = new CharMappingItem(1L, inputs1, null);
+        CharMappingItem item2 = new CharMappingItem(2L, inputs2, null);
+
+        // Should not throw
+        int hash1 = item1.hashCode();
+        int hash2 = item2.hashCode();
+
+        // Same inputs and null output should produce same hashCode
+        assertEquals(hash1, hash2);
+
+        // Consistent hashCode
+        assertEquals(item1.hashCode(), item1.hashCode());
+    }
+
     public void test_equals() {
         String[] inputs1 = { "a", "b" };
         String[] inputs2 = { "b", "a" }; // Different order
@@ -286,6 +306,32 @@ public class CharMappingItemTest extends UnitFessTestCase {
         CharMappingItem item2 = new CharMappingItem(2L, inputs2, "output");
 
         assertTrue(item1.equals(item2));
+    }
+
+    public void test_equals_withNullOutput() {
+        // Test equals with null output - should not throw, uses null-safe comparison
+        String[] inputs1 = { "a", "b" };
+        String[] inputs2 = { "a", "b" };
+        String[] inputs3 = { "c", "d" };
+
+        CharMappingItem item1 = new CharMappingItem(1L, inputs1, null);
+        CharMappingItem item2 = new CharMappingItem(2L, inputs2, null);
+        CharMappingItem item3 = new CharMappingItem(3L, inputs1, "output");
+
+        // Two items with same inputs and null output should be equal
+        assertTrue(item1.equals(item2));
+
+        // Item with null output should not equal item with non-null output
+        assertFalse(item3.equals(item1));
+        assertFalse(item1.equals(item3));
+
+        // Item with null output should not equal item with different inputs
+        CharMappingItem item4 = new CharMappingItem(4L, inputs3, null);
+        assertFalse(item1.equals(item4));
+
+        // Symmetry
+        assertTrue(item1.equals(item2));
+        assertTrue(item2.equals(item1));
     }
 
     public void test_toString() {
@@ -349,5 +395,50 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals(1, item.getInputs().length);
         assertEquals("input", item.getInputs()[0]);
         assertEquals("output", item.getOutput());
+    }
+
+    public void test_defensiveCopy_inputs() {
+        // Test that getInputs() returns defensive copy
+        String[] originalInputs = { "a", "b", "c" };
+        CharMappingItem item = new CharMappingItem(1L, originalInputs, "output");
+
+        String[] returnedInputs = item.getInputs();
+
+        // Modifying returned array should not affect original
+        returnedInputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] inputs2 = item.getInputs();
+        assertEquals("a", inputs2[0]);
+        assertEquals("b", inputs2[1]);
+        assertEquals("c", inputs2[2]);
+    }
+
+    public void test_defensiveCopy_newInputs() {
+        // Test that getNewInputs() returns defensive copy
+        CharMappingItem item = new CharMappingItem(1L, new String[] { "a" }, "output");
+        item.setNewInputs(new String[] { "p", "q", "r" });
+
+        String[] returnedInputs = item.getNewInputs();
+
+        // Modifying returned array should not affect original
+        returnedInputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] inputs2 = item.getNewInputs();
+        assertEquals("p", inputs2[0]);
+        assertEquals("q", inputs2[1]);
+        assertEquals("r", inputs2[2]);
+    }
+
+    public void test_defensiveCopy_nullArrays() {
+        // Test that defensive copy handles null arrays correctly
+        CharMappingItem item1 = new CharMappingItem(1L, new String[] { "a" }, "output");
+
+        // Set to null
+        item1.setNewInputs(null);
+
+        // Should return null, not crash
+        assertNull(item1.getNewInputs());
     }
 }

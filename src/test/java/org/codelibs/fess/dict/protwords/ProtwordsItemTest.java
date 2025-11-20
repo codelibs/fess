@@ -133,14 +133,19 @@ public class ProtwordsItemTest extends UnitFessTestCase {
     }
 
     public void test_hashCode_withNullInput() {
-        // Test hashCode with null input should throw NullPointerException
-        ProtwordsItem item = new ProtwordsItem(1, null);
-        try {
-            item.hashCode();
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-            // Expected
-        }
+        // Test hashCode with null input - should not throw, returns consistent hash for null
+        ProtwordsItem item1 = new ProtwordsItem(1, null);
+        ProtwordsItem item2 = new ProtwordsItem(2, null);
+
+        // Should not throw
+        int hash1 = item1.hashCode();
+        int hash2 = item2.hashCode();
+
+        // Same null input should produce same hashCode
+        assertEquals(hash1, hash2);
+
+        // Consistent hashCode
+        assertEquals(item1.hashCode(), item1.hashCode());
     }
 
     public void test_equals() {
@@ -174,20 +179,21 @@ public class ProtwordsItemTest extends UnitFessTestCase {
     }
 
     public void test_equals_withNullInput() {
-        // Test equals with null input
+        // Test equals with null input - should not throw, uses null-safe comparison
         ProtwordsItem item1 = new ProtwordsItem(1, null);
         ProtwordsItem item2 = new ProtwordsItem(2, null);
         ProtwordsItem item3 = new ProtwordsItem(1, "word");
 
-        try {
-            item1.equals(item2);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-            // Expected
-        }
+        // Two items with null input should be equal
+        assertTrue(item1.equals(item2));
 
-        // equals with null input may return false instead of throwing NPE
+        // Item with null input should not equal item with non-null input
         assertFalse(item3.equals(item1));
+        assertFalse(item1.equals(item3));
+
+        // Symmetry
+        assertTrue(item1.equals(item2));
+        assertTrue(item2.equals(item1));
     }
 
     public void test_toString() {

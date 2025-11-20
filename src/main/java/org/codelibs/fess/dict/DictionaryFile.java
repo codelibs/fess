@@ -256,7 +256,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
 
         @Override
         public boolean removeAll(final Collection<?> c) {
-            return parent.retainAll(c);
+            return parent.removeAll(c);
         }
 
         @Override

@@ -98,4 +98,85 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("A,a", new SynonymItem(1, new String[] { "A", "a" }, new String[] { "A", "a" }).toLineString());
         assertEquals("a", new SynonymItem(1, new String[] { "a" }, new String[] { "a" }).toLineString());
     }
+
+    public void test_defensiveCopy_inputs() {
+        // Test that getInputs() returns defensive copy
+        String[] originalInputs = { "a", "b", "c" };
+        SynonymItem item = new SynonymItem(1, originalInputs, new String[] { "x" });
+
+        String[] returnedInputs = item.getInputs();
+
+        // Modifying returned array should not affect original
+        returnedInputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] inputs2 = item.getInputs();
+        assertEquals("a", inputs2[0]);
+        assertEquals("b", inputs2[1]);
+        assertEquals("c", inputs2[2]);
+    }
+
+    public void test_defensiveCopy_outputs() {
+        // Test that getOutputs() returns defensive copy
+        String[] originalOutputs = { "x", "y", "z" };
+        SynonymItem item = new SynonymItem(1, new String[] { "a" }, originalOutputs);
+
+        String[] returnedOutputs = item.getOutputs();
+
+        // Modifying returned array should not affect original
+        returnedOutputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] outputs2 = item.getOutputs();
+        assertEquals("x", outputs2[0]);
+        assertEquals("y", outputs2[1]);
+        assertEquals("z", outputs2[2]);
+    }
+
+    public void test_defensiveCopy_newInputs() {
+        // Test that getNewInputs() returns defensive copy
+        SynonymItem item = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });
+        item.setNewInputs(new String[] { "p", "q", "r" });
+
+        String[] returnedInputs = item.getNewInputs();
+
+        // Modifying returned array should not affect original
+        returnedInputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] inputs2 = item.getNewInputs();
+        assertEquals("p", inputs2[0]);
+        assertEquals("q", inputs2[1]);
+        assertEquals("r", inputs2[2]);
+    }
+
+    public void test_defensiveCopy_newOutputs() {
+        // Test that getNewOutputs() returns defensive copy
+        SynonymItem item = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });
+        item.setNewOutputs(new String[] { "p", "q", "r" });
+
+        String[] returnedOutputs = item.getNewOutputs();
+
+        // Modifying returned array should not affect original
+        returnedOutputs[0] = "modified";
+
+        // Get again and verify not modified
+        String[] outputs2 = item.getNewOutputs();
+        assertEquals("p", outputs2[0]);
+        assertEquals("q", outputs2[1]);
+        assertEquals("r", outputs2[2]);
+    }
+
+    public void test_defensiveCopy_nullArrays() {
+        // Test that defensive copy handles null arrays correctly
+        SynonymItem item1 = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });
+
+        // Set to null
+        item1.setNewInputs(null);
+        item1.setNewOutputs(null);
+
+        // Should return null, not crash
+        assertNull(item1.getNewInputs());
+        assertNull(item1.getNewOutputs());
+    }
 }

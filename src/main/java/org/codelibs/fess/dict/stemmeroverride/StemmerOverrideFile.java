@@ -276,10 +276,20 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
          * @throws DictionaryException if the temporary file cannot be created.
          */
         protected StemmerOverrideUpdater(final StemmerOverrideItem newItem) {
+            FileOutputStream fos = null;
             try {
                 newFile = ComponentUtil.getSystemHelper().createTempFile(STEMMER_OVERRIDE, ".txt");
-                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
+                fos = new FileOutputStream(newFile);
+                writer = new BufferedWriter(new OutputStreamWriter(fos, Constants.UTF_8));
+                fos = null; // Successfully wrapped, no need to close explicitly
             } catch (final Exception e) {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (final IOException ioe) {
+                        // Ignore close exception
+                    }
+                }
                 if (newFile != null) {
                     newFile.delete();
                 }

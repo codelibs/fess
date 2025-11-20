@@ -121,6 +121,22 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertNotSame(item1.hashCode(), item4.hashCode());
     }
 
+    public void test_hashCode_withNullInput() {
+        // Test hashCode with null input - should not throw, returns consistent hash for null
+        StopwordsItem item1 = new StopwordsItem(1, null);
+        StopwordsItem item2 = new StopwordsItem(2, null);
+
+        // Should not throw
+        int hash1 = item1.hashCode();
+        int hash2 = item2.hashCode();
+
+        // Same null input should produce same hashCode
+        assertEquals(hash1, hash2);
+
+        // Consistent hashCode
+        assertEquals(item1.hashCode(), item1.hashCode());
+    }
+
     public void test_equals() {
         // Test equals method
         StopwordsItem item1 = new StopwordsItem(1, "test");
@@ -154,6 +170,24 @@ public class StopwordsItemTest extends UnitFessTestCase {
 
         // Should still be equal based on original input
         assertTrue(item1.equals(item2));
+    }
+
+    public void test_equals_withNullInput() {
+        // Test equals with null input - should not throw, uses null-safe comparison
+        StopwordsItem item1 = new StopwordsItem(1, null);
+        StopwordsItem item2 = new StopwordsItem(2, null);
+        StopwordsItem item3 = new StopwordsItem(1, "word");
+
+        // Two items with null input should be equal
+        assertTrue(item1.equals(item2));
+
+        // Item with null input should not equal item with non-null input
+        assertFalse(item3.equals(item1));
+        assertFalse(item1.equals(item3));
+
+        // Symmetry
+        assertTrue(item1.equals(item2));
+        assertTrue(item2.equals(item1));
     }
 
     public void test_toString() {
