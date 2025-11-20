@@ -130,8 +130,11 @@ public class LoginAction extends FessLoginAction {
                     .orElseGet(() -> redirect(LoginAction.class));
         };
         validatePasswordForm(form, toIndexPage);
-        final String username = getUserBean().map(FessUserBean::getUserId)
-                .orElseThrow(() -> new IllegalStateException("User session not found"));
+        if (!getUserBean().isPresent()) {
+            logger.warn("User session not found during password change");
+            return redirect(LoginAction.class);
+        }
+        final String username = getUserBean().get().getUserId();
         try {
             userService.changePassword(username, form.password);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
@@ -154,13 +157,18 @@ public class LoginAction extends FessLoginAction {
 
         final String oldPassword =
                 getSession().map(session -> (String) session.getAttribute(INVALID_OLD_PASSWORD)).orElse(StringUtil.EMPTY);
-        final String userId = getUserBean().map(FessUserBean::getUserId)
-                .orElseThrow(() -> new IllegalStateException("User session not found"));
-        fessLoginAssist.findLoginUser(new LocalUserCredential(userId, oldPassword)).orElseGet(() -> {
+        getUserBean().ifPresent(user -> {
+            final String userId = user.getUserId();
+            fessLoginAssist.findLoginUser(new LocalUserCredential(userId, oldPassword)).orElseGet(() -> {
+                throwValidationError(messages -> {
+                    messages.addErrorsNoUserForChangingPassword(GLOBAL);
+                }, validationErrorLambda);
+                return null;
+            });
+        }).orElse(() -> {
             throwValidationError(messages -> {
-                messages.addErrorsNoUserForChangingPassword(GLOBAL);
+                messages.addErrorsLoginError(GLOBAL);
             }, validationErrorLambda);
-            return null;
         });
     }
 
