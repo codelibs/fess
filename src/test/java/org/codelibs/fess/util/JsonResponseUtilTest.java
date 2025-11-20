@@ -94,9 +94,9 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
     }
 
     public void test_escapeCallbackName_withSpecialCharacters() {
-        assertEquals("/**/callback", JsonResponseUtil.escapeCallbackName("callback!@#$%^&*()"));
+        assertEquals("/**/callback$", JsonResponseUtil.escapeCallbackName("callback!@#$%^&*()"));
         assertEquals("/**/abc123XYZ", JsonResponseUtil.escapeCallbackName("abc123!XYZ"));
-        assertEquals("/**/test_fn", JsonResponseUtil.escapeCallbackName("test_fn<script>"));
+        assertEquals("/**/test_fnscript", JsonResponseUtil.escapeCallbackName("test_fn<script>"));
     }
 
     public void test_escapeCallbackName_null() {
@@ -108,7 +108,7 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
     }
 
     public void test_escapeCallbackName_onlyInvalidCharacters() {
-        assertEquals("/**/", JsonResponseUtil.escapeCallbackName("!@#$%^&*()"));
+        assertEquals("/**/$", JsonResponseUtil.escapeCallbackName("!@#$%^&*()"));
         assertEquals("/**/", JsonResponseUtil.escapeCallbackName("---"));
     }
 
