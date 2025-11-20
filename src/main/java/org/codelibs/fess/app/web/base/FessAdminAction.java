@@ -15,15 +15,26 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.lastaflute.web.validation.VaErrorHook;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletContext;
@@ -98,7 +109,37 @@ public abstract class FessAdminAction extends FessBaseAction {
      * @param data the data to write
      */
     protected void write(final String path, final byte[] data) {
+        validateFilePath(path);
         LdiFileUtil.write(path, data);
+    }
+
+    /**
+     * Validates the file path.
+     *
+     * @param path the file path to validate
+     */
+    protected void validateFilePath(final String path) {
+        if (StringUtil.isBlank(path)) {
+            throw new IllegalArgumentException("File path cannot be empty");
+        }
+        try {
+            final Path filePath = Paths.get(path).normalize();
+            final String normalizedPath = filePath.toString();
+            if (normalizedPath.contains("..")) {
+                throw new IllegalArgumentException("Invalid file path");
+            }
+            final File file = filePath.toFile();
+            final String canonicalPath = file.getCanonicalPath();
+            final String varPath = System.getProperty("fess.var.path");
+            if (varPath != null) {
+                final String baseCanonicalPath = new File(varPath).getCanonicalPath();
+                if (!canonicalPath.startsWith(baseCanonicalPath)) {
+                    throw new IllegalArgumentException("File path is outside allowed directory");
+                }
+            }
+        } catch (final IOException e) {
+            throw new IllegalArgumentException("Invalid file path", e);
+        }
     }
 
     /**
@@ -108,6 +149,35 @@ public abstract class FessAdminAction extends FessBaseAction {
      */
     protected ServletContext getServletContext() {
         return LaServletContextUtil.getServletContext();
+    }
+
+    /**
+     * Verifies that the CRUD mode matches the expected mode.
+     *
+     * @param crudMode the actual CRUD mode
+     * @param expectedMode the expected CRUD mode
+     * @param errorHook the error hook to call if verification fails
+     */
+    protected void verifyCrudMode(final int crudMode, final int expectedMode, final VaErrorHook errorHook) {
+        if (crudMode != expectedMode) {
+            throwValidationError(messages -> {
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
+            }, errorHook);
+        }
+    }
+
+    /**
+     * Encodes permission strings into an array.
+     *
+     * @param permissionsText the permissions text (newline-separated)
+     * @return encoded permission array
+     */
+    protected static String[] encodePermissions(final String permissionsText) {
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        return split(permissionsText, "\n").get(stream -> stream.map(permissionHelper::encode)
+                .filter(StringUtil::isNotBlank)
+                .distinct()
+                .toArray(String[]::new));
     }
 
     // ===================================================================================

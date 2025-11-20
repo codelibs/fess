@@ -158,7 +158,13 @@ public class GoAction extends FessSearchAction {
         }
 
         if (!isFileSystemPath(targetUrl)) {
-            return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
+            if (isValidRedirectUrl(targetUrl)) {
+                return HtmlResponse.fromRedirectPathAsIs(DocumentUtil.encodeUrl(targetUrl + hash));
+            } else {
+                logger.warn("Invalid redirect URL detected: {}", targetUrl);
+                saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
+                return redirect(ErrorAction.class);
+            }
         }
         if (!fessConfig.isSearchFileProxyEnabled()) {
             return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
@@ -190,5 +196,25 @@ public class GoAction extends FessSearchAction {
     protected boolean isFileSystemPath(final String url) {
         return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
                 || url.startsWith("storage:");
+    }
+
+    /**
+     * Validates if the URL is safe for redirection.
+     *
+     * @param url the URL to validate
+     * @return true if the URL is valid for redirection, false otherwise
+     */
+    protected boolean isValidRedirectUrl(final String url) {
+        if (StringUtil.isBlank(url)) {
+            return false;
+        }
+        final String lowerUrl = url.toLowerCase();
+        if (lowerUrl.startsWith("http://") || lowerUrl.startsWith("https://")) {
+            return true;
+        }
+        if (lowerUrl.startsWith("javascript:") || lowerUrl.startsWith("data:") || lowerUrl.startsWith("vbscript:")) {
+            return false;
+        }
+        return true;
     }
 }

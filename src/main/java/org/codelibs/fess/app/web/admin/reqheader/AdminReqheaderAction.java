@@ -229,7 +229,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
@@ -257,7 +257,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getRequestHeader(form).ifPresent(entity -> {
@@ -284,7 +284,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getRequestHeader(form).ifPresent(entity -> {
@@ -311,7 +311,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -409,21 +409,6 @@ public class AdminReqheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the CRUD mode matches the expected mode.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

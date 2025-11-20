@@ -85,7 +85,11 @@ public class ProfileAction extends FessSearchAction {
             return asIndexHtml();
         };
         validatePasswordForm(form, toIndexPage);
-        final String username = getUserBean().map(FessUserBean::getUserId).get();
+        if (!getUserBean().isPresent()) {
+            logger.warn("User session not found during password change");
+            return redirect(LoginAction.class);
+        }
+        final String username = getUserBean().get().getUserId();
         try {
             userService.changePassword(username, form.newPassword);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
@@ -107,11 +111,18 @@ public class ProfileAction extends FessSearchAction {
             }, validationErrorLambda);
         }
 
-        fessLoginAssist.findLoginUser(new LocalUserCredential(getUserBean().get().getUserId(), form.oldPassword)).orElseGet(() -> {
+        getUserBean().ifPresent(user -> {
+            final String userId = user.getUserId();
+            fessLoginAssist.findLoginUser(new LocalUserCredential(userId, form.oldPassword)).orElseGet(() -> {
+                throwValidationError(messages -> {
+                    messages.addErrorsNoUserForChangingPassword(GLOBAL);
+                }, validationErrorLambda);
+                return null;
+            });
+        }).orElse(() -> {
             throwValidationError(messages -> {
-                messages.addErrorsNoUserForChangingPassword(GLOBAL);
+                messages.addErrorsLoginError(GLOBAL);
             }, validationErrorLambda);
-            return null;
         });
     }
 

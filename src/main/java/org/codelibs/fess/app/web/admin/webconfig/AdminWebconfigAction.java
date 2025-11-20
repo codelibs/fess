@@ -260,7 +260,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
@@ -296,15 +296,16 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getWebConfig(form).ifPresent(entity -> {
             try {
                 webConfigService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                logger.info("Created web config: {}", entity.getName());
             } catch (final Exception e) {
-                logger.warn("Failed to process a request.", e);
+                logger.warn("Failed to create web config: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -323,15 +324,16 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         verifyToken(this::asEditHtml);
         getWebConfig(form).ifPresent(entity -> {
             try {
                 webConfigService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                logger.info("Updated web config: {}", entity.getName());
             } catch (final Exception e) {
-                logger.warn("Failed to process a request.", e);
+                logger.warn("Failed to update web config: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -350,7 +352,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -358,8 +360,9 @@ public class AdminWebconfigAction extends FessAdminAction {
             try {
                 webConfigService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                logger.info("Deleted web config: {}", entity.getName());
             } catch (final Exception e) {
-                logger.warn("Failed to process a request.", e);
+                logger.warn("Failed to delete web config: {}", form.name, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                         this::asEditHtml);
             }
@@ -417,11 +420,7 @@ public class AdminWebconfigAction extends FessAdminAction {
                     op -> op.exclude(Stream
                             .concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS))
                             .toArray(n -> new String[n])));
-            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-            entity.setPermissions(split(form.permissions, "\n").get(stream -> stream.map(s -> permissionHelper.encode(s))
-                    .filter(StringUtil::isNotBlank)
-                    .distinct()
-                    .toArray(n -> new String[n])));
+            entity.setPermissions(encodePermissions(form.permissions));
             entity.setVirtualHosts(split(form.virtualHosts, "\n")
                     .get(stream -> stream.filter(StringUtil::isNotBlank).distinct().map(String::trim).toArray(n -> new String[n])));
             return entity;
@@ -443,22 +442,6 @@ public class AdminWebconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verifies that the provided CRUD mode matches the expected mode.
-     * Throws a validation error if the modes do not match.
-     *
-     * @param crudMode the actual CRUD mode
-     * @param expectedMode the expected CRUD mode
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
-    // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
 

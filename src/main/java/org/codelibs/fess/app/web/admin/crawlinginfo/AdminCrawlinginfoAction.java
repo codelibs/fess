@@ -177,7 +177,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public HtmlResponse details(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        verifyCrudMode(crudMode, CrudMode.DETAILS, this::asListHtml);
         saveToken();
         return crawlingInfoService.getCrawlingInfo(id)
                 .map(entity -> asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
@@ -205,7 +205,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse threaddump(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -234,7 +234,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS, this::asListHtml);
         validate(form, messages -> {}, this::asDetailsHtml);
         verifyToken(this::asDetailsHtml);
         final String id = form.id;
@@ -266,19 +266,6 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    /**
-     * Verify the CRUD mode.
-     * @param crudMode The CRUD mode.
-     * @param expectedMode The expected mode.
-     */
-    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
-        if (crudMode != expectedMode) {
-            throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, this::asListHtml);
-        }
-    }
-
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
