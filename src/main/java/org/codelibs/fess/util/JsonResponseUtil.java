@@ -170,7 +170,7 @@ public class JsonResponseUtil {
 
     /**
      * Escapes a callback name for JSONP responses.
-     * Only allows alphanumeric characters and underscore to prevent
+     * Only allows alphanumeric characters, underscore, and dollar sign to prevent
      * prototype pollution attacks in JavaScript environments.
      *
      * @param callbackName The callback name
@@ -180,8 +180,8 @@ public class JsonResponseUtil {
         if (callbackName == null) {
             return null;
         }
-        // Only allow alphanumeric and underscore characters (no dots for security)
-        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_]", StringUtil.EMPTY);
+        // Only allow alphanumeric, underscore, and dollar characters (no dots for security)
+        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$]", StringUtil.EMPTY);
     }
 
     /**
