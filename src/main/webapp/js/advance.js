@@ -1,9 +1,9 @@
 $(function() {
-  const $searchButton = $("#searchButton");
-  const contextPath = $("#contextPath").val();
-  const BUTTON_DISABLE_DURATION = 3000;
+  var $searchButton = $("#searchButton");
+  var contextPath = $("#contextPath").val();
+  var BUTTON_DISABLE_DURATION = 3000;
 
-  const SUGGESTOR_CONFIG = {
+  var SUGGESTOR_CONFIG = {
     ajaxinfo: {
       url: contextPath + "/api/v1/suggest-words",
       fn: ["_default", "content", "title"],

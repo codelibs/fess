@@ -1,16 +1,16 @@
 $(function() {
-  const $result = $("#result");
-  const $queryId = $("#queryId");
-  const $favorites = $(".favorite", $result);
-  const $searchButton = $("#searchButton");
-  const contextPath = $("#contextPath").val();
-  const IMG_LOADING_DELAY = 200;
-  const IMG_LOADING_MAX = 0;
-  const BUTTON_DISABLE_DURATION = 3000;
-  const AJAX_TIMEOUT = 10000;
-  const FADE_DURATION = 1000;
+  var $result = $("#result");
+  var $queryId = $("#queryId");
+  var $favorites = $(".favorite", $result);
+  var $searchButton = $("#searchButton");
+  var contextPath = $("#contextPath").val();
+  var IMG_LOADING_DELAY = 200;
+  var IMG_LOADING_MAX = 0;
+  var BUTTON_DISABLE_DURATION = 3000;
+  var AJAX_TIMEOUT = 10000;
+  var FADE_DURATION = 1000;
 
-  const SUGGESTOR_CONFIG = {
+  var SUGGESTOR_CONFIG = {
     ajaxinfo: {
       url: contextPath + "/api/v1/suggest-words",
       fn: ["_default", "content", "title"],
@@ -50,7 +50,7 @@ $(function() {
 
   $("[data-toggle='control-options']").on("click", function(e) {
     e.preventDefault();
-    const target = $(this).attr("data-target") || $(this).attr("href");
+    var target = $(this).attr("data-target") || $(this).attr("href");
     if (target) {
       $(target).toggleClass("active");
     }
@@ -65,17 +65,17 @@ $(function() {
   });
 
   $result.on("mousedown", "a.link", function(e) {
-    const $link = $(this);
-    const docId = $link.attr("data-id");
-    const url = $link.attr("href");
-    const queryId = $("#queryId").val();
-    const order = $link.attr("data-order");
-    const rt = $("#rt").val();
-    let goUrl = contextPath + "/go/?rt=" + rt + "&docId=" + docId + "&queryId=" + queryId + "&order=" + order;
+    var $link = $(this);
+    var docId = $link.attr("data-id");
+    var url = $link.attr("href");
+    var queryId = $("#queryId").val();
+    var order = $link.attr("data-order");
+    var rt = $("#rt").val();
+    var goUrl = contextPath + "/go/?rt=" + rt + "&docId=" + docId + "&queryId=" + queryId + "&order=" + order;
 
-    const hashIndex = url.indexOf("#");
+    var hashIndex = url.indexOf("#");
     if (hashIndex >= 0) {
-      const hashStr = url.substring(hashIndex);
+      var hashStr = url.substring(hashIndex);
       goUrl += "&hash=" + encodeURIComponent(hashStr);
     }
 
@@ -84,12 +84,12 @@ $(function() {
 
   $result.on("click", "a.favorite", function(e) {
     e.preventDefault();
-    const $favorite = $(this);
-    const values = $favorite.attr("href").split("#");
+    var $favorite = $(this);
+    var values = $favorite.attr("href").split("#");
 
     if (values.length === 2 && $queryId.length > 0) {
-      const docId = values[1];
-      const actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
+      var docId = values[1];
+      var actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
 
       $.ajax({
         dataType: "json",
@@ -103,8 +103,8 @@ $(function() {
       })
         .done(function(data) {
           if (data.result === "created") {
-            const $favorited = $favorite.siblings(".favorited");
-            const $favoritedCount = $(".favorited-count", $favorited);
+            var $favorited = $favorite.siblings(".favorited");
+            var $favoritedCount = $(".favorited-count", $favorited);
             $favoritedCount.hide();
             $favorite.fadeOut(FADE_DURATION, function() {
               $favorited.fadeIn(FADE_DURATION);
@@ -133,18 +133,18 @@ $(function() {
     })
       .done(function(data) {
         if (data.record_count > 0) {
-          const docIds = {};
-          let i;
+          var docIds = {};
+          var i;
           for (i = 0; i < data.data.length; i++) {
             docIds["#" + data.data[i].doc_id] = true;
           }
 
           $favorites.each(function() {
-            const $favorite = $(this);
-            const url = $favorite.attr("href");
+            var $favorite = $(this);
+            var url = $favorite.attr("href");
 
             if (docIds[url]) {
-              const $favorited = $favorite.siblings(".favorited");
+              var $favorited = $favorite.siblings(".favorited");
               $favorite.fadeOut(FADE_DURATION, function() {
                 $favorited.fadeIn(FADE_DURATION);
               });
@@ -159,11 +159,11 @@ $(function() {
 
   $result.on("click", ".more a", function(e) {
     e.preventDefault();
-    const $moreLink = $(this);
-    const value = $moreLink.attr("href");
+    var $moreLink = $(this);
+    var value = $moreLink.attr("href");
 
     if (value) {
-      const $info = $(value + " .info");
+      var $info = $(value + " .info");
       if ($info.length > 0) {
         $moreLink.fadeOut(500, function() {
           $info.slideDown("slow");
@@ -177,8 +177,8 @@ $(function() {
     $("#query").suggestor(SUGGESTOR_CONFIG);
   }
 
-  const loadImage = function(img, url, limit) {
-    const imgData = new Image();
+  var loadImage = function(img, url, limit) {
+    var imgData = new Image();
 
     $(imgData).on("load", function() {
       $(img).css("background-image", "");
@@ -199,14 +199,14 @@ $(function() {
   };
 
   $("img.thumbnail").each(function() {
-    const $img = $(this);
+    var $img = $(this);
     $img.css("background-image", 'url("' + contextPath + '/images/loading.gif")');
     loadImage(this, $img.attr("data-src"), IMG_LOADING_MAX);
   });
 
-  const clipboard = new ClipboardJS(".url-copy");
+  var clipboard = new ClipboardJS(".url-copy");
   clipboard.on("success", function(e) {
-    const trigger = e.trigger;
+    var trigger = e.trigger;
     trigger.classList.remove("url-copy", "far", "fa-copy");
     trigger.classList.add("url-copied", "fas", "fa-check");
 

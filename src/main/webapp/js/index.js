@@ -1,9 +1,9 @@
 $(function() {
-  const $searchButton = $("#searchButton");
-  const contextPath = $("#contextPath").val();
-  const BUTTON_DISABLE_DURATION = 3000;
+  var $searchButton = $("#searchButton");
+  var contextPath = $("#contextPath").val();
+  var BUTTON_DISABLE_DURATION = 3000;
 
-  const SUGGESTOR_CONFIG = {
+  var SUGGESTOR_CONFIG = {
     ajaxinfo: {
       url: contextPath + "/api/v1/suggest-words",
       fn: ["_default", "content", "title"],
@@ -45,7 +45,7 @@ $(function() {
 
   $("[data-toggle='control-options']").on("click", function(e) {
     e.preventDefault();
-    const target = $(this).attr("data-target") || $(this).attr("href");
+    var target = $(this).attr("data-target") || $(this).attr("href");
     if (target) {
       $(target).toggleClass("active");
     }
