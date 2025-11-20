@@ -1,54 +1,46 @@
 $(function() {
-  $('input[type="text"],select,textarea', ".login-box,section.content")
-    .first()
-    .focus();
-  $(".form-group .has-error")
-    .first()
-    .next("input,select,textarea")
-    .focus();
+  const $firstInput = $('input[type="text"],select,textarea', ".login-box,section.content").first();
+  const $errorInput = $(".form-group .has-error").first().next("input,select,textarea");
 
-  $("section.content input").keypress(function(e) {
-    var $submitButton;
+  if ($errorInput.length) {
+    $errorInput.focus();
+  } else {
+    $firstInput.focus();
+  }
+
+  $("section.content input").on("keypress", function(e) {
     if (e.which === 13) {
-      $submitButton = $("input#submit, button#submit");
+      const $submitButton = $("input#submit, button#submit");
       if ($submitButton.length > 0) {
-        $submitButton[0].submit();
+        $submitButton.closest("form").trigger("submit");
       }
-      // ignore enter key down
       return false;
     }
   });
 
   $(".table tr[data-href]").each(function() {
-    $(this)
-      .css("cursor", "pointer")
-      .hover(
-        function() {
-          $(this).addClass("active");
-        },
-        function() {
-          $(this).removeClass("active");
-        }
-      )
-      .click(function() {
-        document.location = $(this).attr("data-href");
+    const $row = $(this);
+    $row.css("cursor", "pointer")
+      .on("mouseenter", function() {
+        $(this).addClass("active");
+      })
+      .on("mouseleave", function() {
+        $(this).removeClass("active");
+      })
+      .on("click", function() {
+        window.location.href = $(this).attr("data-href");
       });
   });
 
   $("#confirmToDelete").on("show.bs.modal", function(event) {
-    var button = $(event.relatedTarget),
-        docId = button.data("docid"),
-        title = button.data("title"),
-        url = button.data("url");
+    const button = $(event.relatedTarget);
+    const docId = button.data("docid");
+    const title = button.data("title");
+    const url = button.data("url");
 
-    $(this)
-      .find(".modal-body #delete-doc-title")
-      .text(title);
-    $(this)
-      .find(".modal-body #delete-doc-url")
-      .text(url);
-    $(this)
-      .find(".modal-footer input#docId")
-      .val(docId);
+    const $modal = $(this);
+    $modal.find(".modal-body #delete-doc-title").text(title);
+    $modal.find(".modal-body #delete-doc-url").text(url);
+    $modal.find(".modal-footer input#docId").val(docId);
   });
 });

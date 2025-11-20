@@ -1,131 +1,142 @@
 $(function() {
-  var $result = $("#result"),
-      $queryId = $("#queryId"),
-      $favorites = $(".favorite", $result),
-      $searchButton = $("#searchButton"),
-      contextPath = $("#contextPath").val(),
-      loadImage,
-      IMG_LOADING_DELAY = 200,
-      IMG_LOADING_MAX = 0,
-      clipboard;
+  const $result = $("#result");
+  const $queryId = $("#queryId");
+  const $favorites = $(".favorite", $result);
+  const $searchButton = $("#searchButton");
+  const contextPath = $("#contextPath").val();
+  const IMG_LOADING_DELAY = 200;
+  const IMG_LOADING_MAX = 0;
+  const BUTTON_DISABLE_DURATION = 3000;
+  const AJAX_TIMEOUT = 10000;
+  const FADE_DURATION = 1000;
 
-  $("#searchForm").on("submit", function(e) {
-    $searchButton.attr("disabled", true);
-    setTimeout(function() {
-      $searchButton.attr("disabled", false);
-    }, 3000);
+  const SUGGESTOR_CONFIG = {
+    ajaxinfo: {
+      url: contextPath + "/api/v1/suggest-words",
+      fn: ["_default", "content", "title"],
+      num: 10,
+      lang: $("#langSearchOption").val()
+    },
+    boxCssInfo: {
+      border: "1px solid rgba(82, 168, 236, 0.5)",
+      "box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
+      "background-color": "#fff",
+      "z-index": "10000"
+    },
+    listSelectedCssInfo: {
+      "background-color": "rgba(82, 168, 236, 0.1)"
+    },
+    listDeselectedCssInfo: {
+      "background-color": "#ffffff"
+    },
+    minterm: 1,
+    adjustWidthVal: 11,
+    searchForm: $("#searchForm")
+  };
+
+  $("#searchForm").on("submit", () => {
+    $searchButton.prop("disabled", true);
+    setTimeout(() => {
+      $searchButton.prop("disabled", false);
+    }, BUTTON_DISABLE_DURATION);
     return true;
   });
 
-  $(document).on("click touchend", function(e) {
+  $(document).on("click touchend", (e) => {
     if (!$(e.target).closest("#searchOptions, [data-toggle='control-options']").length) {
       $("#searchOptions").removeClass("active");
     }
   });
 
-  $("[data-toggle='control-options']").click(function(e) {
+  $("[data-toggle='control-options']").on("click", function(e) {
     e.preventDefault();
-    var target = $(this).attr("data-target") || $(this).attr("href");
+    const target = $(this).attr("data-target") || $(this).attr("href");
     if (target) {
       $(target).toggleClass("active");
     }
   });
 
-  $("#searchOptionsClearButton").on("click", function(e) {
+  $("#searchOptionsClearButton").on("click", (e) => {
+    e.preventDefault();
     $("#labelTypeSearchOption").prop("selectedIndex", -1);
     $("#langSearchOption").prop("selectedIndex", 0);
     $("#sortSearchOption").prop("selectedIndex", 0);
     $("#numSearchOption").prop("selectedIndex", 0);
-    return false;
   });
+
+  const buildGoUrl = (docId, url, includeQueryIdAndOrder = true) => {
+    const rt = $("#rt").val();
+    const params = new URLSearchParams({
+      rt: rt,
+      docId: docId
+    });
+
+    if (includeQueryIdAndOrder) {
+      const queryId = $("#queryId").val();
+      const order = $(this).attr("data-order");
+      params.append("queryId", queryId);
+      params.append("order", order);
+    }
+
+    const hashIndex = url.indexOf("#");
+    if (hashIndex >= 0) {
+      const hashStr = url.substring(hashIndex);
+      params.append("hash", hashStr);
+      return `${contextPath}/go/?${params.toString()}${includeQueryIdAndOrder ? "" : hashStr}`;
+    }
+
+    return `${contextPath}/go/?${params.toString()}`;
+  };
 
   $result.on("mousedown", "a.link", function(e) {
-    var docId = $(this).attr("data-id"),
-        rt = $("#rt").val(),
-        queryId = $("#queryId").val(),
-        order = $(this).attr("data-order"),
-        url = $(this).attr("href"),
-        buf = [],
-        hashIndex,
-        hashStr;
-    buf.push(contextPath);
-    buf.push("/go/?rt=");
-    buf.push(rt);
-    buf.push("&docId=");
-    buf.push(docId);
-    buf.push("&queryId=");
-    buf.push(queryId);
-    buf.push("&order=");
-    buf.push(order);
+    const $link = $(this);
+    const docId = $link.attr("data-id");
+    const url = $link.attr("href");
+    const queryId = $("#queryId").val();
+    const order = $link.attr("data-order");
 
-    hashIndex = url.indexOf("#");
-    if (hashIndex >= 0) {
-      hashStr = url.substring(hashIndex);
-      buf.push("&hash=");
-      buf.push(encodeURIComponent(hashStr));
-    }
+    const goUrl = `${contextPath}/go/?rt=${$("#rt").val()}&docId=${docId}&queryId=${queryId}&order=${order}${
+      url.includes("#") ? `&hash=${encodeURIComponent(url.substring(url.indexOf("#")))}` : ""
+    }`;
 
-    $(this).attr("href", buf.join(""));
-  });
-
-  $result.on("mouseover", "a.link", function(e) {
-    var docId = $(this).attr("data-id"),
-        rt = $("#rt").val(),
-        url = $(this).attr("href"),
-        buf = [],
-        hashIndex,
-        hashStr;
-    buf.push(contextPath);
-    buf.push("/go/?rt=");
-    buf.push(rt);
-    buf.push("&docId=");
-    buf.push(docId);
-
-    hashIndex = url.indexOf("#");
-    if (hashIndex >= 0) {
-      hashStr = url.substring(hashIndex);
-      buf.push("&hash=");
-      buf.push(encodeURIComponent(hashStr));
-      buf.push(hashStr);
-    }
+    $link.attr("href", goUrl);
   });
 
   $result.on("click", "a.favorite", function(e) {
-    var $favorite = $(this),
-        values = $favorite.attr("href").split("#"),
-        actionUrl,
-        docId;
+    e.preventDefault();
+    const $favorite = $(this);
+    const values = $favorite.attr("href").split("#");
+
     if (values.length === 2 && $queryId.length > 0) {
-      docId = values[1];
-      actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
+      const docId = values[1];
+      const actionUrl = `${contextPath}/api/v1/documents/${docId}/favorite`;
+
       $.ajax({
         dataType: "json",
         cache: false,
         type: "post",
-        timeoutNumber: 10000,
+        timeout: AJAX_TIMEOUT,
         url: actionUrl,
         data: {
           queryId: $queryId.val()
         }
       })
-        .done(function(data) {
-          var $favorited,
-              $favoritedCount;
+        .done((data) => {
           if (data.result === "created") {
-            $favorited = $favorite.siblings(".favorited");
-            $favoritedCount = $(".favorited-count", $favorited);
-            $favoritedCount.css("display", "none");
-            $favorite.fadeOut(1000, function() {
-              $favorited.fadeIn(1000);
+            const $favorited = $favorite.siblings(".favorited");
+            const $favoritedCount = $(".favorited-count", $favorited);
+            $favoritedCount.hide();
+            $favorite.fadeOut(FADE_DURATION, () => {
+              $favorited.fadeIn(FADE_DURATION);
             });
           }
         })
-        .fail(function(data) {
-          $favorite.attr("href", "#" + docId);
-          // alert(JSON.stringify(data));
+        .fail((jqXHR, textStatus, errorThrown) => {
+          $favorite.attr("href", `#${docId}`);
+          console.error("Failed to add favorite:", textStatus, errorThrown);
         });
     }
-    $(this).attr("href", "#");
+    $favorite.attr("href", "#");
     return false;
   });
 
@@ -134,54 +145,43 @@ $(function() {
       dataType: "json",
       cache: false,
       type: "get",
-      timeoutNumber: 10000,
-      url: contextPath + "/api/v1/favorites",
+      timeout: AJAX_TIMEOUT,
+      url: `${contextPath}/api/v1/favorites`,
       data: {
         queryId: $queryId.val()
       }
     })
-      .done(function(data) {
-        var docIds,
-            i;
+      .done((data) => {
         if (data.record_count > 0) {
-          docIds = data.data;
-          for (i = 0; i < docIds.length; i++) {
-            docIds[i] = "#" + docIds[i].doc_id;
-          }
-          $favorites.each(function(index) {
-            var $favorite = $(this),
-                url = $favorite.attr("href"),
-                found = false,
-                $favorited,
-                i;
-            for (i = 0; i < docIds.length; i++) {
-              if (url === docIds[i]) {
-                found = true;
-                break;
-              }
-            }
-            if (found) {
-              $favorited = $favorite.siblings(".favorited");
-              $favorite.fadeOut(1000, function() {
-                $favorited.fadeIn(1000);
+          const docIds = new Set(data.data.map(item => `#${item.doc_id}`));
+
+          $favorites.each(function() {
+            const $favorite = $(this);
+            const url = $favorite.attr("href");
+
+            if (docIds.has(url)) {
+              const $favorited = $favorite.siblings(".favorited");
+              $favorite.fadeOut(FADE_DURATION, () => {
+                $favorited.fadeIn(FADE_DURATION);
               });
             }
           });
         }
       })
-      .fail(function(data) {
-        // alert(JSON.stringify(data));
+      .fail((jqXHR, textStatus, errorThrown) => {
+        console.error("Failed to load favorites:", textStatus, errorThrown);
       });
   }
 
   $result.on("click", ".more a", function(e) {
-    var $moreLink = $(this),
-        value = $moreLink.attr("href"),
-        $info;
-    if (value !== "") {
-      $info = $(value + " .info");
+    e.preventDefault();
+    const $moreLink = $(this);
+    const value = $moreLink.attr("href");
+
+    if (value) {
+      const $info = $(`${value} .info`);
       if ($info.length > 0) {
-        $moreLink.fadeOut(500, function() {
+        $moreLink.fadeOut(500, () => {
           $info.slideDown("slow");
         });
       }
@@ -190,83 +190,47 @@ $(function() {
   });
 
   if (typeof $.fn.suggestor === "function") {
-    $("#query").suggestor({
-      ajaxinfo: {
-        url: contextPath + "/api/v1/suggest-words",
-        fn: ["_default", "content", "title"],
-        num: 10,
-        lang: $("#langSearchOption").val()
-      },
-      boxCssInfo: {
-        border: "1px solid rgba(82, 168, 236, 0.5)",
-        "-webkit-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "-moz-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "background-color": "#fff",
-        "z-index": "10000"
-      },
-      listSelectedCssInfo: {
-        "background-color": "rgba(82, 168, 236, 0.1)"
-      },
-      listDeselectedCssInfo: {
-        "background-color": "#ffffff"
-      },
-      minterm: 1,
-      adjustWidthVal: 11,
-      searchForm: $("#searchForm")
-    });
+    $("#query").suggestor(SUGGESTOR_CONFIG);
   }
 
-  loadImage = function(img, url, limit) {
-    var imgData = new Image();
-    $(imgData).on("load", function() {
+  const loadImage = (img, url, limit) => {
+    const imgData = new Image();
+
+    $(imgData).on("load", () => {
       $(img).css("background-image", "");
       $(img).attr("src", url);
     });
-    $(imgData).on("error", function() {
+
+    $(imgData).on("error", () => {
       if (limit > 0) {
-        setTimeout(function() {
-          loadImage(img, url, --limit);
+        setTimeout(() => {
+          loadImage(img, url, limit - 1);
         }, IMG_LOADING_DELAY);
       } else {
-        // $(img).attr('src', contextPath + "/images/noimage.png");
-        $(img)
-          .parent()
-          .parent()
-          .css("display", "none");
+        $(img).parent().parent().hide();
       }
-      imgData = null;
     });
+
     imgData.src = url;
   };
 
   $("img.thumbnail").each(function() {
-    $(this).css(
-      "background-image",
-      'url("' + contextPath + '/images/loading.gif")'
-    );
-    loadImage(this, $(this).attr("data-src"), IMG_LOADING_MAX);
+    const $img = $(this);
+    $img.css("background-image", `url("${contextPath}/images/loading.gif")`);
+    loadImage(this, $img.attr("data-src"), IMG_LOADING_MAX);
   });
-  
-  clipboard = new ClipboardJS(".url-copy");
-  clipboard.on("success", function(e) {
-    e.trigger.classList.remove("url-copy");
-    e.trigger.classList.remove("far");
-    e.trigger.classList.remove("fa-copy");
-    e.trigger.classList.add("url-copied");
-    e.trigger.classList.add("fas");
-    e.trigger.classList.add("fa-check");
-    setTimeout(function(){
-      e.trigger.classList.remove("url-copied");
-      e.trigger.classList.remove("fas");
-      e.trigger.classList.remove("fa-check");
-      e.trigger.classList.add("url-copy");
-      e.trigger.classList.add("far");
-      e.trigger.classList.add("fa-copy");
-    },2000);
+
+  const clipboard = new ClipboardJS(".url-copy");
+  clipboard.on("success", (e) => {
+    const trigger = e.trigger;
+    trigger.classList.remove("url-copy", "far", "fa-copy");
+    trigger.classList.add("url-copied", "fas", "fa-check");
+
+    setTimeout(() => {
+      trigger.classList.remove("url-copied", "fas", "fa-check");
+      trigger.classList.add("url-copy", "far", "fa-copy");
+    }, 2000);
+
     e.clearSelection();
   });
 });
