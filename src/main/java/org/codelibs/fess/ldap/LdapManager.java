@@ -205,7 +205,7 @@ public class LdapManager {
                     isBind = true;
                 }
             } catch (final LdapConfigurationException e) {
-                logger.error("LDAP configuration error: {}", e.getMessage());
+                logger.warn("LDAP configuration error: {}", e.getMessage());
             } catch (final LdapOperationException e) {
                 logger.warn("LDAP connection failed: {}", e.getMessage(), e);
             } catch (final Exception e) {
@@ -1553,10 +1553,10 @@ public class LdapManager {
             });
             return true;
         } catch (final LdapOperationException e) {
-            logger.error("Failed to change password for user: {}", username, e);
+            logger.warn("Failed to change password for user: {}", username, e);
             throw e;
         } catch (final Exception e) {
-            logger.error("Unexpected error while changing password for user: {}", username, e);
+            logger.warn("Unexpected error while changing password for user: {}", username, e);
             return false;
         }
     }
