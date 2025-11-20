@@ -75,7 +75,7 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
         assertEquals("/**/myCallback", JsonResponseUtil.escapeCallbackName("myCallback"));
         assertEquals("/**/jQuery123", JsonResponseUtil.escapeCallbackName("jQuery123"));
         assertEquals("/**/_callback", JsonResponseUtil.escapeCallbackName("_callback"));
-        assertEquals("/**/$callback", JsonResponseUtil.escapeCallbackName("$callback"));
+        assertEquals("/**/callback", JsonResponseUtil.escapeCallbackName("$callback"));
     }
 
     public void test_escapeCallbackName_withInvalidCharacters() {
@@ -94,9 +94,9 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
     }
 
     public void test_escapeCallbackName_withSpecialCharacters() {
-        assertEquals("/**/callback$", JsonResponseUtil.escapeCallbackName("callback!@#$%^&*()"));
+        assertEquals("/**/callback", JsonResponseUtil.escapeCallbackName("callback!@#$%^&*()"));
         assertEquals("/**/abc123XYZ", JsonResponseUtil.escapeCallbackName("abc123!XYZ"));
-        assertEquals("/**/test_fnscript", JsonResponseUtil.escapeCallbackName("test_fn<script>"));
+        assertEquals("/**/test_fn", JsonResponseUtil.escapeCallbackName("test_fn<script>"));
     }
 
     public void test_escapeCallbackName_null() {
@@ -108,7 +108,7 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
     }
 
     public void test_escapeCallbackName_onlyInvalidCharacters() {
-        assertEquals("/**/$", JsonResponseUtil.escapeCallbackName("!@#$%^&*()"));
+        assertEquals("/**/", JsonResponseUtil.escapeCallbackName("!@#$%^&*()"));
         assertEquals("/**/", JsonResponseUtil.escapeCallbackName("---"));
     }
 
@@ -162,9 +162,9 @@ public class JsonResponseUtilTest extends UnitFessTestCase {
     }
 
     public void test_escapeCallbackName_alphanumericOnly() {
-        // Test that only alphanumeric, underscore, and dollar are allowed
+        // Test that only alphanumeric and underscore are allowed
         String result = JsonResponseUtil.escapeCallbackName("abcABC123_$");
-        assertEquals("/**/abcABC123_$", result);
+        assertEquals("/**/abcABC123_", result);
 
         // Verify dots are removed
         result = JsonResponseUtil.escapeCallbackName("abc.def");
