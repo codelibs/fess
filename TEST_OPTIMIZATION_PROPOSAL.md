@@ -30,34 +30,33 @@
 
 ## 最適化案
 
-### 【高効果】1. クローラー設定の最適化
+### 【中効果】1. クローラー設定の最適化
 
-**効果**: 30-50%の時間短縮が期待できる
+**効果**: 10-20%の時間短縮が期待できる
 
 #### 変更内容:
-- `max_access_count`: 100 → **2** （SearchApiTests）
-- `max_access_count`: 2 → **1** （その他のテスト）
-- クロール対象URLを最小限にする
-- 不要な外部URLアクセスを避ける
+- `interval_time`: 100ms → **0ms** （リクエスト間の遅延を削除）
+- WebクロールのJobLogTests、CrawlerLogTestsはmax_access_countが既に最小限（1-2）
+- SearchApiTestsのmax_access_countは維持（検索テストには多様なドキュメントが必要）
 
 #### 実装例（SearchApiTests）:
 ```java
-// 現状: max_access_count = 100, depth = 0
+// 現状
 requestBody.put("max_access_count", 100);
+requestBody.put("interval_time", 100);
 
-// 最適化後: 検索テストに必要な最小限のドキュメント数のみ
-requestBody.put("max_access_count", 5);  // 検索テストに十分な件数
-requestBody.put("depth", 0);              // 既存のまま
+// 最適化後
+requestBody.put("max_access_count", 100);  // 維持 - 検索テストに必要
+requestBody.put("interval_time", 0);       // 遅延を削除
 ```
 
-#### 実装例（FailureUrlTests, JobLogTests）:
+#### 実装例（JobLogTests）:
 ```java
-// 現状: 外部URL + 失敗URL
-final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.url";
+// 現状
+requestBody.put("interval_time", 100);
 
-// 最適化後: ローカルまたはモックURLのみ
-final String urls = "http://localhost:8080/dummy" + "\n" + "http://failure.url";
-requestBody.put("max_access_count", 1);  // 最小限
+// 最適化後
+requestBody.put("interval_time", 0);  // 遅延なし
 ```
 
 ### 【中効果】2. waitJob()のポーリング最適化
@@ -156,18 +155,21 @@ junit.jupiter.execution.parallel.mode.classes.default = concurrent
 ## 期待される効果
 
 ### 控えめな見積もり:
-- Phase 1: **35-45%短縮** → 約135-160秒（2.2-2.7分）
-- Phase 2: **追加5-10%短縮** → 約120-140秒（2-2.3分）
+- Phase 1: **15-25%短縮** → 約185-210秒（3-3.5分）
+- Phase 2: **追加5-10%短縮** → 約165-195秒（2.8-3.2分）
 
 ### 最適化後の目標:
-**合計実行時間**: 247秒 → **120-140秒**（約40-50%短縮）
+**合計実行時間**: 247秒 → **165-195秒**（約20-30%短縮）
+
+注: SearchApiTestsのmax_access_countは維持（100）。検索テストには多様なドキュメントが必要なため、削減すると複数のテストが失敗します。
 
 ## 実装内容
 
 ### 実装済みの最適化
 
 #### 1. クローラー設定の最適化
-- **max_access_count削減**: 100 → 20（SearchApiTests）、2（CrawlerLogTests）、1（JobLogTests, FailureUrlTests）
+- **max_access_count削減**: WebクロールのみでCrawlerLogTests（2）、JobLogTests（1）、FailureUrlTests（1）
+- **SearchApiTestsは維持**: 100（検索テストには多様なドキュメントが必要）
 - **interval_time削減**: 100ms → 0ms（リクエスト間の遅延なし）
 - **外部URLは維持**: テストの安定性のため、https://www.codelibs.org/を使用し続ける
 
@@ -248,7 +250,7 @@ junit.jupiter.execution.parallel.mode.classes.default = concurrent
 - URL: https://www.codelibs.org/を維持（テスト安定性のため）
 
 #### SearchApiTests.java
-- `max_access_count`: 100 → 20
+- `max_access_count`: 100（維持 - 検索テストには多様なドキュメントが必要）
 - `interval_time`: 100ms → 0ms
 
 #### CrudTestBase.java
