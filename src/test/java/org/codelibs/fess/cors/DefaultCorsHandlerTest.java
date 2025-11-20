@@ -874,5 +874,10 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         public Integer getStorageMaxItemsInPageAsInteger() {
             return 100;
         }
+
+        @Override
+        public Integer getPluginVersionFilterAsInteger() {
+            return null;
+        }
     }
 }
