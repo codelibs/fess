@@ -34,15 +34,15 @@ $(function() {
     searchForm: $("#searchForm")
   };
 
-  $("#searchForm").on("submit", () => {
+  $("#searchForm").on("submit", function() {
     $searchButton.prop("disabled", true);
-    setTimeout(() => {
+    setTimeout(function() {
       $searchButton.prop("disabled", false);
     }, BUTTON_DISABLE_DURATION);
     return true;
   });
 
-  $(document).on("click touchend", (e) => {
+  $(document).on("click touchend", function(e) {
     if (!$(e.target).closest("#searchOptions, [data-toggle='control-options']").length) {
       $("#searchOptions").removeClass("active");
     }
@@ -56,7 +56,7 @@ $(function() {
     }
   });
 
-  $("#searchOptionsClearButton").on("click", (e) => {
+  $("#searchOptionsClearButton").on("click", function(e) {
     e.preventDefault();
     $("#labelTypeSearchOption").prop("selectedIndex", -1);
     $("#langSearchOption").prop("selectedIndex", 0);
@@ -64,40 +64,20 @@ $(function() {
     $("#numSearchOption").prop("selectedIndex", 0);
   });
 
-  const buildGoUrl = (docId, url, includeQueryIdAndOrder = true) => {
-    const rt = $("#rt").val();
-    const params = new URLSearchParams({
-      rt: rt,
-      docId: docId
-    });
-
-    if (includeQueryIdAndOrder) {
-      const queryId = $("#queryId").val();
-      const order = $(this).attr("data-order");
-      params.append("queryId", queryId);
-      params.append("order", order);
-    }
-
-    const hashIndex = url.indexOf("#");
-    if (hashIndex >= 0) {
-      const hashStr = url.substring(hashIndex);
-      params.append("hash", hashStr);
-      return `${contextPath}/go/?${params.toString()}${includeQueryIdAndOrder ? "" : hashStr}`;
-    }
-
-    return `${contextPath}/go/?${params.toString()}`;
-  };
-
   $result.on("mousedown", "a.link", function(e) {
     const $link = $(this);
     const docId = $link.attr("data-id");
     const url = $link.attr("href");
     const queryId = $("#queryId").val();
     const order = $link.attr("data-order");
+    const rt = $("#rt").val();
+    let goUrl = contextPath + "/go/?rt=" + rt + "&docId=" + docId + "&queryId=" + queryId + "&order=" + order;
 
-    const goUrl = `${contextPath}/go/?rt=${$("#rt").val()}&docId=${docId}&queryId=${queryId}&order=${order}${
-      url.includes("#") ? `&hash=${encodeURIComponent(url.substring(url.indexOf("#")))}` : ""
-    }`;
+    const hashIndex = url.indexOf("#");
+    if (hashIndex >= 0) {
+      const hashStr = url.substring(hashIndex);
+      goUrl += "&hash=" + encodeURIComponent(hashStr);
+    }
 
     $link.attr("href", goUrl);
   });
@@ -109,7 +89,7 @@ $(function() {
 
     if (values.length === 2 && $queryId.length > 0) {
       const docId = values[1];
-      const actionUrl = `${contextPath}/api/v1/documents/${docId}/favorite`;
+      const actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
 
       $.ajax({
         dataType: "json",
@@ -121,18 +101,18 @@ $(function() {
           queryId: $queryId.val()
         }
       })
-        .done((data) => {
+        .done(function(data) {
           if (data.result === "created") {
             const $favorited = $favorite.siblings(".favorited");
             const $favoritedCount = $(".favorited-count", $favorited);
             $favoritedCount.hide();
-            $favorite.fadeOut(FADE_DURATION, () => {
+            $favorite.fadeOut(FADE_DURATION, function() {
               $favorited.fadeIn(FADE_DURATION);
             });
           }
         })
-        .fail((jqXHR, textStatus, errorThrown) => {
-          $favorite.attr("href", `#${docId}`);
+        .fail(function(jqXHR, textStatus, errorThrown) {
+          $favorite.attr("href", "#" + docId);
           console.error("Failed to add favorite:", textStatus, errorThrown);
         });
     }
@@ -146,29 +126,33 @@ $(function() {
       cache: false,
       type: "get",
       timeout: AJAX_TIMEOUT,
-      url: `${contextPath}/api/v1/favorites`,
+      url: contextPath + "/api/v1/favorites",
       data: {
         queryId: $queryId.val()
       }
     })
-      .done((data) => {
+      .done(function(data) {
         if (data.record_count > 0) {
-          const docIds = new Set(data.data.map(item => `#${item.doc_id}`));
+          const docIds = {};
+          let i;
+          for (i = 0; i < data.data.length; i++) {
+            docIds["#" + data.data[i].doc_id] = true;
+          }
 
           $favorites.each(function() {
             const $favorite = $(this);
             const url = $favorite.attr("href");
 
-            if (docIds.has(url)) {
+            if (docIds[url]) {
               const $favorited = $favorite.siblings(".favorited");
-              $favorite.fadeOut(FADE_DURATION, () => {
+              $favorite.fadeOut(FADE_DURATION, function() {
                 $favorited.fadeIn(FADE_DURATION);
               });
             }
           });
         }
       })
-      .fail((jqXHR, textStatus, errorThrown) => {
+      .fail(function(jqXHR, textStatus, errorThrown) {
         console.error("Failed to load favorites:", textStatus, errorThrown);
       });
   }
@@ -179,9 +163,9 @@ $(function() {
     const value = $moreLink.attr("href");
 
     if (value) {
-      const $info = $(`${value} .info`);
+      const $info = $(value + " .info");
       if ($info.length > 0) {
-        $moreLink.fadeOut(500, () => {
+        $moreLink.fadeOut(500, function() {
           $info.slideDown("slow");
         });
       }
@@ -193,17 +177,17 @@ $(function() {
     $("#query").suggestor(SUGGESTOR_CONFIG);
   }
 
-  const loadImage = (img, url, limit) => {
+  const loadImage = function(img, url, limit) {
     const imgData = new Image();
 
-    $(imgData).on("load", () => {
+    $(imgData).on("load", function() {
       $(img).css("background-image", "");
       $(img).attr("src", url);
     });
 
-    $(imgData).on("error", () => {
+    $(imgData).on("error", function() {
       if (limit > 0) {
-        setTimeout(() => {
+        setTimeout(function() {
           loadImage(img, url, limit - 1);
         }, IMG_LOADING_DELAY);
       } else {
@@ -216,17 +200,17 @@ $(function() {
 
   $("img.thumbnail").each(function() {
     const $img = $(this);
-    $img.css("background-image", `url("${contextPath}/images/loading.gif")`);
+    $img.css("background-image", 'url("' + contextPath + '/images/loading.gif")');
     loadImage(this, $img.attr("data-src"), IMG_LOADING_MAX);
   });
 
   const clipboard = new ClipboardJS(".url-copy");
-  clipboard.on("success", (e) => {
+  clipboard.on("success", function(e) {
     const trigger = e.trigger;
     trigger.classList.remove("url-copy", "far", "fa-copy");
     trigger.classList.add("url-copied", "fas", "fa-check");
 
-    setTimeout(() => {
+    setTimeout(function() {
       trigger.classList.remove("url-copied", "fas", "fa-check");
       trigger.classList.add("url-copy", "far", "fa-copy");
     }, 2000);

@@ -27,9 +27,9 @@ $(function() {
     searchForm: $("#searchForm")
   };
 
-  $("#searchForm").on("submit", () => {
+  $("#searchForm").on("submit", function() {
     $searchButton.prop("disabled", true);
-    setTimeout(() => {
+    setTimeout(function() {
       $searchButton.prop("disabled", false);
     }, BUTTON_DISABLE_DURATION);
     return true;

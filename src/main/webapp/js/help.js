@@ -27,15 +27,15 @@ $(function() {
     searchForm: $("#searchForm")
   };
 
-  $("#searchForm").on("submit", () => {
+  $("#searchForm").on("submit", function() {
     $searchButton.prop("disabled", true);
-    setTimeout(() => {
+    setTimeout(function() {
       $searchButton.prop("disabled", false);
     }, BUTTON_DISABLE_DURATION);
     return true;
   });
 
-  $(document).on("click touchend", (e) => {
+  $(document).on("click touchend", function(e) {
     if (!$(e.target).closest("#searchOptions, [data-toggle='control-options']").length) {
       $("#searchOptions").removeClass("active");
     }
@@ -49,7 +49,7 @@ $(function() {
     }
   });
 
-  $("#searchOptionsClearButton").on("click", (e) => {
+  $("#searchOptionsClearButton").on("click", function(e) {
     e.preventDefault();
     $("#labelTypeSearchOption").prop("selectedIndex", -1);
     $("#langSearchOption").prop("selectedIndex", 0);
