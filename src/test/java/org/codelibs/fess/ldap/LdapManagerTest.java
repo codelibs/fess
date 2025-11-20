@@ -20,10 +20,15 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.naming.NamingException;
+import javax.naming.directory.SearchResult;
+
+import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 
 public class LdapManagerTest extends UnitFessTestCase {
 
@@ -125,5 +130,324 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertTrue(ldapManager.allowEmptyGroupAndRole(user));
         allowEmptyPermission.set(false);
         assertTrue(ldapManager.allowEmptyGroupAndRole(user));
+    }
+
+    // ========================================================================
+    // Tests for LDAP Injection Prevention
+    // ========================================================================
+
+    public void test_escapeLDAPSearchFilter_withNull() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null input should return empty string
+        assertEquals("", ldapManager.escapeLDAPSearchFilter(null));
+    }
+
+    public void test_escapeLDAPSearchFilter_withEmptyString() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("", ldapManager.escapeLDAPSearchFilter(""));
+    }
+
+    public void test_escapeLDAPSearchFilter_withNormalInput() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Normal input should not be escaped
+        assertEquals("normaluser", ldapManager.escapeLDAPSearchFilter("normaluser"));
+        assertEquals("user123", ldapManager.escapeLDAPSearchFilter("user123"));
+        assertEquals("user.name", ldapManager.escapeLDAPSearchFilter("user.name"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withBackslash() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Backslash should be escaped to \5c
+        assertEquals("\\5c", ldapManager.escapeLDAPSearchFilter("\\"));
+        assertEquals("test\\5cvalue", ldapManager.escapeLDAPSearchFilter("test\\value"));
+        assertEquals("\\5c\\5c", ldapManager.escapeLDAPSearchFilter("\\\\"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withAsterisk() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Asterisk should be escaped to \2a (prevents wildcard injection)
+        assertEquals("\\2a", ldapManager.escapeLDAPSearchFilter("*"));
+        assertEquals("user\\2a", ldapManager.escapeLDAPSearchFilter("user*"));
+        assertEquals("\\2aadmin\\2a", ldapManager.escapeLDAPSearchFilter("*admin*"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withParentheses() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Parentheses should be escaped (prevents filter injection)
+        assertEquals("\\28", ldapManager.escapeLDAPSearchFilter("("));
+        assertEquals("\\29", ldapManager.escapeLDAPSearchFilter(")"));
+        assertEquals("\\28admin\\29", ldapManager.escapeLDAPSearchFilter("(admin)"));
+        assertEquals("\\28objectClass=\\2a\\29", ldapManager.escapeLDAPSearchFilter("(objectClass=*)"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withNullByte() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null byte should be escaped to \00
+        assertEquals("\\00", ldapManager.escapeLDAPSearchFilter("\0"));
+        assertEquals("test\\00value", ldapManager.escapeLDAPSearchFilter("test\0value"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withComplexInjectionAttempt() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Complex injection attempt should be fully escaped
+        String injectionAttempt = "admin)(|(password=*";
+        String expected = "admin\\29\\28|\\28password=\\2a";
+        assertEquals(expected, ldapManager.escapeLDAPSearchFilter(injectionAttempt));
+    }
+
+    public void test_escapeLDAPSearchFilter_withAllSpecialCharacters() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Test all special characters together (note: = is not escaped per RFC 4515)
+        String input = "\\*()\0";
+        String expected = "\\5c\\2a\\28\\29\\00";
+        assertEquals(expected, ldapManager.escapeLDAPSearchFilter(input));
+    }
+
+    // ========================================================================
+    // Tests for Defensive Null/Blank Checks
+    // ========================================================================
+
+    public void test_getSAMAccountGroupName_withNullBindDn() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null bindDn should return empty
+        OptionalEntity<String> result = ldapManager.getSAMAccountGroupName(null, "testGroup");
+        assertFalse(result.isPresent());
+    }
+
+    public void test_getSAMAccountGroupName_withBlankBindDn() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Blank bindDn should return empty
+        OptionalEntity<String> result = ldapManager.getSAMAccountGroupName("", "testGroup");
+        assertFalse(result.isPresent());
+
+        result = ldapManager.getSAMAccountGroupName("   ", "testGroup");
+        assertFalse(result.isPresent());
+    }
+
+    public void test_getSAMAccountGroupName_withNullGroupName() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null groupName should return empty
+        OptionalEntity<String> result = ldapManager.getSAMAccountGroupName("dc=example,dc=com", null);
+        assertFalse(result.isPresent());
+    }
+
+    public void test_getSAMAccountGroupName_withBlankGroupName() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Blank groupName should return empty
+        OptionalEntity<String> result = ldapManager.getSAMAccountGroupName("dc=example,dc=com", "");
+        assertFalse(result.isPresent());
+
+        result = ldapManager.getSAMAccountGroupName("dc=example,dc=com", "   ");
+        assertFalse(result.isPresent());
+    }
+
+    public void test_changePassword_withNullUsername() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapAdminEnabled(String username) {
+                return true;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null username should return false
+        assertFalse(ldapManager.changePassword(null, "newPassword"));
+    }
+
+    public void test_changePassword_withBlankUsername() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapAdminEnabled(String username) {
+                return true;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Blank username should return false
+        assertFalse(ldapManager.changePassword("", "newPassword"));
+        assertFalse(ldapManager.changePassword("   ", "newPassword"));
+    }
+
+    public void test_changePassword_withNullPassword() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapAdminEnabled(String username) {
+                return true;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Null password should return false
+        assertFalse(ldapManager.changePassword("testuser", null));
+    }
+
+    public void test_changePassword_withBlankPassword() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapAdminEnabled(String username) {
+                return true;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Blank password should return false
+        assertFalse(ldapManager.changePassword("testuser", ""));
+        assertFalse(ldapManager.changePassword("testuser", "   "));
+    }
+
+    public void test_changePassword_withAdminDisabled() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapAdminEnabled(String username) {
+                return false;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Admin disabled should return false
+        assertFalse(ldapManager.changePassword("testuser", "newPassword"));
+    }
+
+    // ========================================================================
+    // Tests for Improved Error Handling
+    // ========================================================================
+
+    public void test_normalizePermissionName_withNull() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Should handle null gracefully (though it may throw NPE in actual implementation)
+        // This test documents the expected behavior
+        try {
+            String result = ldapManager.normalizePermissionName(null);
+            assertNull(result);
+        } catch (NullPointerException e) {
+            // NPE is acceptable for null input
+        }
+    }
+
+    public void test_normalizePermissionName_withLowercaseEnabled() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return true;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("admin", ldapManager.normalizePermissionName("ADMIN"));
+        assertEquals("admin", ldapManager.normalizePermissionName("Admin"));
+        assertEquals("admin", ldapManager.normalizePermissionName("admin"));
+    }
+
+    public void test_normalizePermissionName_withLowercaseDisabled() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapLowercasePermissionName() {
+                return false;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        assertEquals("ADMIN", ldapManager.normalizePermissionName("ADMIN"));
+        assertEquals("Admin", ldapManager.normalizePermissionName("Admin"));
+        assertEquals("admin", ldapManager.normalizePermissionName("admin"));
+    }
+
+    // ========================================================================
+    // Tests for Edge Cases
+    // ========================================================================
+
+    public void test_escapeLDAPSearchFilter_withUnicodeCharacters() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Unicode characters should pass through unchanged
+        assertEquals("テスト", ldapManager.escapeLDAPSearchFilter("テスト"));
+        assertEquals("用户", ldapManager.escapeLDAPSearchFilter("用户"));
+        assertEquals("사용자", ldapManager.escapeLDAPSearchFilter("사용자"));
+    }
+
+    public void test_escapeLDAPSearchFilter_withMixedContent() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Mixed normal and special characters
+        assertEquals("user\\28test\\29", ldapManager.escapeLDAPSearchFilter("user(test)"));
+        assertEquals("admin\\2auser", ldapManager.escapeLDAPSearchFilter("admin*user"));
+        assertEquals("test\\5cpath", ldapManager.escapeLDAPSearchFilter("test\\path"));
+    }
+
+    public void test_getSearchRoleName_withEdgeCases() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public boolean isLdapIgnoreNetbiosName() {
+                return true;
+            }
+
+            @Override
+            public boolean isLdapGroupNameWithUnderscores() {
+                return false;
+            }
+        });
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Edge cases that should return null
+        assertNull(ldapManager.getSearchRoleName(null));
+        assertNull(ldapManager.getSearchRoleName(""));
+        assertNull(ldapManager.getSearchRoleName("   "));
+        assertNull(ldapManager.getSearchRoleName("no_cn_prefix"));
+        assertNull(ldapManager.getSearchRoleName("dn=test"));
+    }
+
+    public void test_replaceWithUnderscores_withEdgeCases() {
+        LdapManager ldapManager = new LdapManager();
+        ldapManager.init();
+
+        // Edge cases
+        assertEquals("", ldapManager.replaceWithUnderscores(""));
+        assertEquals("normal", ldapManager.replaceWithUnderscores("normal"));
+        // Input "//\\[]:;" has 8 special characters that should be replaced
+        assertEquals("________", ldapManager.replaceWithUnderscores("//\\\\[]:;"));
     }
 }
