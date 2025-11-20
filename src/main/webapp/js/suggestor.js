@@ -1,4 +1,38 @@
+/**
+ * Suggestor - jQuery plugin for search autocomplete functionality
+ * Provides real-time search suggestions with keyboard and mouse navigation
+ */
 (function ($) {
+  "use strict";
+
+  // Key code constants for better readability
+  var KEY_CODES = {
+    BACKSPACE: 8,
+    ENTER: 13,
+    SPACE: 32,
+    UP: 38,
+    DOWN: 40,
+    DELETE: 46,
+    NUM_0: 48,
+    NUM_9: 57,
+    A: 65,
+    Z: 90,
+    NUMPAD_0: 96,
+    NUMPAD_9: 105,
+    SEMICOLON: 186,
+    EQUALS: 187,
+    DASH: 189,
+    FORWARD_SLASH: 191,
+    GRAVE: 192,
+    OPEN_BRACKET: 219,
+    BACK_SLASH: 220,
+    CLOSE_BRACKET: 221,
+    SINGLE_QUOTE: 222
+  };
+
+  // UI constants
+  var VERTICAL_SPACING = 6; // Pixels between input field and suggestion box
+
   $.fn.suggestor = function (setting) {
     var $boxElement,
       $textArea,
@@ -8,7 +42,7 @@
       listSelNum = 0,
       isMouseHover = false,
       started = false,
-      interval = 5,
+      debounceTimer = null,
 
       settingMinTerm = 1,
       settingAjaxInfo,
@@ -20,33 +54,95 @@
 
       suggestingSts = false,
 
+      /**
+       * Helper function to check if a keycode is a valid input key
+       */
+      isInputKey = function (keyCode) {
+        return (
+          (keyCode >= KEY_CODES.NUM_0 && keyCode <= KEY_CODES.NUM_9) ||
+          (keyCode >= KEY_CODES.A && keyCode <= KEY_CODES.Z) ||
+          (keyCode >= KEY_CODES.NUMPAD_0 && keyCode <= KEY_CODES.NUMPAD_9) ||
+          (keyCode >= KEY_CODES.SEMICOLON && keyCode <= KEY_CODES.SINGLE_QUOTE) ||
+          keyCode === KEY_CODES.BACKSPACE ||
+          keyCode === KEY_CODES.SPACE ||
+          keyCode === KEY_CODES.DELETE
+        );
+      },
+
+      /**
+       * Helper function to apply CSS styles to list items
+       */
+      applyListItemStyle = function ($item, isSelected) {
+        if (isSelected) {
+          if (typeof listSelectedCssInfo === "undefined") {
+            $item.css("background-color", "#e5e5e5");
+          } else {
+            $item.css(listSelectedCssInfo);
+          }
+        } else {
+          if (typeof listDeselectedCssInfo !== "undefined") {
+            $item.css(listDeselectedCssInfo);
+          } else {
+            var bgColor = "#ffffff";
+            if (
+              typeof boxCssInfo !== "undefined" &&
+              typeof boxCssInfo["background-color"] !== "undefined"
+            ) {
+              bgColor = boxCssInfo["background-color"];
+            }
+            $item.css("background-color", bgColor);
+          }
+        }
+      },
+
+      /**
+       * Helper function to safely escape HTML to prevent XSS
+       */
+      escapeHtml = function (text) {
+        return $("<div>").text(text).html();
+      },
+
       suggestor = {
+        /**
+         * Initialize the suggestor plugin
+         */
         init: function ($element, setting) {
           var suggestor;
 
           suggestingSts = false;
           $boxElement = $("<div/>");
           $boxElement.addClass("suggestorBox");
+          $boxElement.attr({
+            role: "listbox",
+            "aria-label": "Search suggestions"
+          });
 
-          //style sheet
-          $boxElement.css("display", "none");
-          $boxElement.css("position", "absolute");
-          $boxElement.css("text-align", "left");
-          $boxElement.css("font-size", $element.css("font-size"));
+          // Apply default or custom CSS styles
+          $boxElement.css({
+            display: "none",
+            position: "absolute",
+            "text-align": "left",
+            "font-size": $element.css("font-size")
+          });
+
           if (typeof setting.boxCssInfo === "undefined") {
-            $boxElement.css("border", "1px solid #cccccc");
-            $boxElement.css(
-              "box-shadow",
-              "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)"
-            );
-            $boxElement.css("background-color", "#fff");
-          }
-          if (typeof setting.boxCssInfo !== "undefined") {
+            $boxElement.css({
+              border: "1px solid #cccccc",
+              "box-shadow":
+                "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
+              "background-color": "#fff"
+            });
+          } else {
             $boxElement.css(setting.boxCssInfo);
           }
 
           $textArea = $element;
-          $textArea.attr("autocomplete", "off");
+          $textArea.attr({
+            autocomplete: "off",
+            "aria-autocomplete": "list",
+            "aria-haspopup": "listbox",
+            "aria-expanded": "false"
+          });
 
           isFocusList = false;
           inputText = $textArea.val();
@@ -77,6 +173,9 @@
           $("body").append($boxElement);
         },
 
+        /**
+         * Fetch and display suggestions based on current input
+         */
         suggest: function () {
           suggestingSts = true;
 
@@ -89,7 +188,7 @@
           listSelNum = 0;
 
           if (inputText.length < settingMinTerm) {
-            $boxElement.css("display", "none");
+            this.hideSuggestionBox();
             suggestingSts = false;
             return;
           }
@@ -110,15 +209,37 @@
             .done(function (obj) {
               suggestor.createAutoCompleteList(obj);
             })
-            .fail(function (a, obj, b) {
+            .fail(function (xhr, status, error) {
+              if (console && console.error) {
+                console.error("Suggestion request failed:", status, error);
+              }
+              suggestor.hideSuggestionBox();
               suggestingSts = false;
-              return;
             });
         },
 
+        /**
+         * Hide suggestion box and update ARIA attributes
+         */
+        hideSuggestionBox: function () {
+          $boxElement.css("display", "none");
+          $textArea.attr("aria-expanded", "false");
+        },
+
+        /**
+         * Show suggestion box and update ARIA attributes
+         */
+        showSuggestionBox: function () {
+          $boxElement.css("display", "block");
+          $textArea.attr("aria-expanded", "true");
+        },
+
+        /**
+         * Create and display the autocomplete suggestion list
+         */
         createAutoCompleteList: function (obj) {
           if (typeof obj.record_count === "undefined") {
-            $boxElement.css("display", "none");
+            this.hideSuggestionBox();
             return;
           }
 
@@ -127,21 +248,26 @@
             reslist,
             $olEle,
             str,
-            chkCorrectWord,
-            $tmpli,
             $liEle,
-            i, j, k;
+            seenTexts,
+            i, j;
 
           listNum = 0;
-          if (typeof hits !== "undefined") {
+          if (typeof hits !== "undefined" && hits.length > 0) {
             reslist = [];
             for (i = 0; i < hits.length; i++) {
               reslist.push(hits[i].text);
             }
+
             $olEle = $("<ol/>");
-            $olEle.css("list-style", "none");
-            $olEle.css("padding", "0");
-            $olEle.css("margin", "2px");
+            $olEle.css({
+              "list-style": "none",
+              padding: "0",
+              margin: "2px"
+            });
+
+            // Use a Set to track seen texts for O(n) duplicate checking
+            seenTexts = {};
 
             for (
               j = 0;
@@ -149,92 +275,49 @@
               j++
             ) {
               str = reslist[j];
-              chkCorrectWord = true;
 
-              $tmpli = $($olEle.children("li"));
-              for (k = 0; k < $tmpli.length; k++) {
-                if (str === $($tmpli.get(k)).html()) {
-                  chkCorrectWord = false;
-                }
-              }
-
-              if (chkCorrectWord) {
+              // Check for duplicates using Set lookup
+              if (!seenTexts[str]) {
+                seenTexts[str] = true;
                 $liEle = $("<li/>");
-                $liEle.html(str);
+                $liEle.text(str); // Use text() instead of html() to prevent XSS
+                $liEle.attr({
+                  role: "option",
+                  "aria-selected": "false"
+                });
+                $liEle.css("padding", "2px");
+
+                // Click handler
                 $liEle.on("click", function () {
-                  var str = $(this).html();
+                  var text = $(this).text();
                   suggestor.fixList();
-                  $textArea.val(str);
+                  $textArea.val(text);
                   if (typeof $settingSearchForm !== "undefined") {
                     $settingSearchForm.submit();
-                    //$settingSearchForm.trigger("submit");
                   }
                 });
+
+                // Mouse enter handler
                 $liEle.on("mouseenter", function () {
-                  listSelNum =
-                    $(this)
-                      .closest("ol")
-                      .children("li")
-                      .index(this) + 1;
-                  $(this)
-                    .closest("ol")
-                    .children("li")
-                    .each(function (i) {
-                      if (i === listSelNum - 1) {
-                        if (typeof listSelectedCssInfo === "undefined") {
-                          $(this).css("background-color", "#e5e5e5");
-                        } else {
-                          $(this).css(listSelectedCssInfo);
-                        }
-                      } else {
-                        if (typeof listDeselectedCssInfo !== "undefined") {
-                          $(this).css(listDeselectedCssInfo);
-                        } else {
-                          if (
-                            typeof boxCssInfo === "undefined" ||
-                            typeof boxCssInfo["background-color"] ===
-                            "undefined"
-                          ) {
-                            $(this).css("background-color", "#ffffff");
-                          } else {
-                            $(this).css(
-                              "background-color",
-                              boxCssInfo["background-color"]
-                            );
-                          }
-                        }
-                      }
-                    });
+                  var $items = $(this).closest("ol").children("li");
+                  listSelNum = $items.index(this) + 1;
+                  $items.each(function (i) {
+                    var isSelected = i === listSelNum - 1;
+                    applyListItemStyle($(this), isSelected);
+                    $(this).attr("aria-selected", isSelected ? "true" : "false");
+                  });
                 });
+
+                // Mouse leave handler
                 $liEle.on("mouseleave", function () {
-                  if (
-                    listSelNum ===
-                    $(this)
-                      .closest("ol")
-                      .children("li")
-                      .index(this) +
-                    1
-                  ) {
-                    if (typeof listDeselectedCssInfo !== "undefined") {
-                      $(this).css(listDeselectedCssInfo);
-                    } else {
-                      if (
-                        typeof boxCssInfo === "undefined" ||
-                        typeof boxCssInfo["background-color"] === "undefined"
-                      ) {
-                        $(this).css("background-color", "#ffffff");
-                      } else {
-                        $(this).css(
-                          "background-color",
-                          boxCssInfo["background-color"]
-                        );
-                      }
-                    }
+                  var $this = $(this);
+                  var currentIndex = $this.closest("ol").children("li").index(this) + 1;
+                  if (listSelNum === currentIndex) {
+                    applyListItemStyle($this, false);
+                    $this.attr("aria-selected", "false");
                     listSelNum = 0;
                   }
                 });
-
-                $liEle.css("padding", "2px");
 
                 $olEle.append($liEle);
                 listNum++;
@@ -244,18 +327,21 @@
             if (listNum > 0 && $textArea.val().length >= settingMinTerm) {
               $boxElement.html("");
               $boxElement.append($olEle);
-              $boxElement.css("display", "block");
+              this.showSuggestionBox();
             } else {
-              $boxElement.css("display", "none");
+              this.hideSuggestionBox();
             }
           } else {
-            $boxElement.css("display", "none");
+            this.hideSuggestionBox();
           }
           this.resize();
 
           suggestingSts = false;
         },
 
+        /**
+         * Navigate through suggestion list using keyboard
+         */
         selectlist: function (direction) {
           if ($boxElement.css("display") === "none") {
             return;
@@ -271,144 +357,118 @@
 
           isFocusList = true;
 
+          // Wrap around at boundaries
           if (listSelNum < 0) {
             listSelNum = listNum;
           } else if (listSelNum > listNum) {
             listSelNum = 0;
           }
 
-          $boxElement
-            .children("ol")
-            .children("li")
-            .each(function (i) {
-              if (i === listSelNum - 1) {
-                if (typeof listSelectedCssInfo === "undefined") {
-                  $(this).css("background-color", "#e5e5e5");
-                } else {
-                  $(this).css(listSelectedCssInfo);
-                }
-                $textArea.val($(this).html());
-              } else {
-                if (typeof listDeselectedCssInfo !== "undefined") {
-                  $(this).css(listDeselectedCssInfo);
-                } else {
-                  if (
-                    typeof boxCssInfo === "undefined" ||
-                    typeof boxCssInfo["background-color"] === "undefined"
-                  ) {
-                    $(this).css("background-color", "#ffffff");
-                  } else {
-                    $(this).css(
-                      "background-color",
-                      boxCssInfo["background-color"]
-                    );
-                  }
-                }
-              }
-            });
+          var $items = $boxElement.children("ol").children("li");
+          $items.each(function (i) {
+            var $item = $(this);
+            var isSelected = i === listSelNum - 1;
+            applyListItemStyle($item, isSelected);
+            $item.attr("aria-selected", isSelected ? "true" : "false");
+            if (isSelected) {
+              $textArea.val($item.text());
+            }
+          });
+
           if (listSelNum === 0) {
             $textArea.val(inputText);
           }
         },
 
+        /**
+         * Confirm the selected suggestion
+         */
         fixList: function () {
           if (listSelNum > 0) {
-            $textArea.val(
-              $(
-                $boxElement
-                  .children("ol")
-                  .children("li")
-                  .get(listSelNum - 1)
-              ).html()
+            var $selectedItem = $(
+              $boxElement.children("ol").children("li").get(listSelNum - 1)
             );
+            $textArea.val($selectedItem.text());
           }
           inputText = $textArea.val();
 
           isFocusList = false;
-          $boxElement.css("display", "none");
+          this.hideSuggestionBox();
           listNum = 0;
         },
 
+        /**
+         * Resize and position the suggestion box
+         */
         resize: function () {
-          $boxElement.css("top", $textArea.offset().top + $textArea.height() + 6);
-          $boxElement.css("left", $textArea.offset().left);
-          $boxElement.css("height", "auto");
-          $boxElement.css("width", "auto");
-          if ($boxElement.width() < $textArea.width() + settingAdjustWidthVal) {
-            $boxElement.width($textArea.width() + settingAdjustWidthVal);
+          var offset = $textArea.offset();
+          $boxElement.css({
+            top: offset.top + $textArea.outerHeight() + VERTICAL_SPACING,
+            left: offset.left,
+            height: "auto",
+            width: "auto"
+          });
+
+          var minWidth = $textArea.outerWidth() + settingAdjustWidthVal;
+          if ($boxElement.width() < minWidth) {
+            $boxElement.width(minWidth);
           }
         }
       };
 
     suggestor.init($(this), setting);
 
+    // Keydown event handler
     $(this).on("keydown", function (e) {
-      if (
-        (e.keyCode >= 48 && e.keyCode <= 90) ||
-        (e.keyCode >= 96 && e.keyCode <= 105) ||
-        (e.keyCode >= 186 && e.keyCode <= 226) ||
-        e.keyCode === 8 ||
-        e.keyCode === 32 ||
-        e.keyCode === 46
-      ) {
+      if (isInputKey(e.keyCode)) {
         started = true;
         isFocusList = false;
-      } else if (e.keyCode === 38) {
+      } else if (e.keyCode === KEY_CODES.UP) {
         if ($boxElement.css("display") !== "none") {
           e.preventDefault();
         }
         suggestor.selectlist("up");
-      } else if (e.keyCode === 40) {
+      } else if (e.keyCode === KEY_CODES.DOWN) {
         if ($boxElement.css("display") === "none") {
           suggestor.suggest();
         } else {
           suggestor.selectlist("down");
         }
-      } else if (e.keyCode === 13) {
+      } else if (e.keyCode === KEY_CODES.ENTER) {
         if (isFocusList) {
           suggestor.fixList();
         }
       }
     });
+
+    // Keyup event handler
     $(this).on("keyup", function (e) {
-      if (
-        (e.keyCode >= 48 && e.keyCode <= 90) ||
-        (e.keyCode >= 96 && e.keyCode <= 105) ||
-        (e.keyCode >= 186 && e.keyCode <= 226) ||
-        e.keyCode === 8 ||
-        e.keyCode === 32 ||
-        e.keyCode === 46
-      ) {
+      if (isInputKey(e.keyCode)) {
         started = true;
         isFocusList = false;
-      } else if (e.keyCode === 38) {
-        /*			if($boxElement.css("display") !== "none") {
-        var strTmp = $textArea.val();
-        $textArea.val("");
-        $textArea.focus();
-        $textArea.val(strTmp);
-      } */
       }
     });
+
+    // Blur event handler
     $(this).on("blur", function () {
       if (!isMouseHover) {
         suggestor.fixList();
       }
     });
 
-    //monitoring input field
-    var debounceTimer;
+    // Input event handler with debouncing
     $(this).on("input", function () {
       if ($textArea.val() !== inputText) {
         if (!isFocusList && started && !suggestingSts) {
           // Clear existing timer and set new one to debounce rapid inputs
           clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(function() {
-            //update if not selecting item in list
+          debounceTimer = setTimeout(function () {
             suggestor.suggest();
-          }, 300); // 300ms delay
+          }, 300); // 300ms delay for debouncing
         }
       }
     });
+
+    return this;
   };
 })(jQuery);
