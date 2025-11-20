@@ -205,7 +205,7 @@ public class LdapManager {
                     isBind = true;
                 }
             } catch (final LdapConfigurationException e) {
-                logger.warn("LDAP configuration error: {}", e.getMessage());
+                logger.warn("LDAP configuration error: {}", e.getMessage(), e);
             } catch (final LdapOperationException e) {
                 logger.warn("LDAP connection failed: {}", e.getMessage(), e);
             } catch (final Exception e) {
