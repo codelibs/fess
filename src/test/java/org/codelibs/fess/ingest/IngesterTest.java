@@ -107,6 +107,12 @@ public class IngesterTest extends UnitFessTestCase {
             public void setContentLength(Long contentLength) {
                 // Stub implementation for testing
             }
+
+            @Override
+            public Long getContentLength() {
+                // Stub implementation for testing
+                return null;
+            }
         };
 
         Map<String, Object> processed = ingester.process(target, accessResult);
