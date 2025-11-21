@@ -1,19 +1,44 @@
 $(function() {
-  var $result = $("#result"),
-      $queryId = $("#queryId"),
-      $favorites = $(".favorite", $result),
-      $searchButton = $("#searchButton"),
-      contextPath = $("#contextPath").val(),
-      loadImage,
-      IMG_LOADING_DELAY = 200,
-      IMG_LOADING_MAX = 0,
-      clipboard;
+  var $result = $("#result");
+  var $queryId = $("#queryId");
+  var $favorites = $(".favorite", $result);
+  var $searchButton = $("#searchButton");
+  var contextPath = $("#contextPath").val();
+  var IMG_LOADING_DELAY = 200;
+  var IMG_LOADING_MAX = 0;
+  var BUTTON_DISABLE_DURATION = 3000;
+  var AJAX_TIMEOUT = 10000;
+  var FADE_DURATION = 1000;
 
-  $("#searchForm").on("submit", function(e) {
-    $searchButton.attr("disabled", true);
+  var SUGGESTOR_CONFIG = {
+    ajaxinfo: {
+      url: contextPath + "/api/v1/suggest-words",
+      fn: ["_default", "content", "title"],
+      num: 10,
+      lang: $("#langSearchOption").val()
+    },
+    boxCssInfo: {
+      border: "1px solid rgba(82, 168, 236, 0.5)",
+      "box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
+      "background-color": "#fff",
+      "z-index": "10000"
+    },
+    listSelectedCssInfo: {
+      "background-color": "rgba(82, 168, 236, 0.1)"
+    },
+    listDeselectedCssInfo: {
+      "background-color": "#ffffff"
+    },
+    minterm: 1,
+    adjustWidthVal: 11,
+    searchForm: $("#searchForm")
+  };
+
+  $("#searchForm").on("submit", function() {
+    $searchButton.prop("disabled", true);
     setTimeout(function() {
-      $searchButton.attr("disabled", false);
-    }, 3000);
+      $searchButton.prop("disabled", false);
+    }, BUTTON_DISABLE_DURATION);
     return true;
   });
 
@@ -23,7 +48,7 @@ $(function() {
     }
   });
 
-  $("[data-toggle='control-options']").click(function(e) {
+  $("[data-toggle='control-options']").on("click", function(e) {
     e.preventDefault();
     var target = $(this).attr("data-target") || $(this).attr("href");
     if (target) {
@@ -32,100 +57,66 @@ $(function() {
   });
 
   $("#searchOptionsClearButton").on("click", function(e) {
+    e.preventDefault();
     $("#labelTypeSearchOption").prop("selectedIndex", -1);
     $("#langSearchOption").prop("selectedIndex", 0);
     $("#sortSearchOption").prop("selectedIndex", 0);
     $("#numSearchOption").prop("selectedIndex", 0);
-    return false;
   });
 
   $result.on("mousedown", "a.link", function(e) {
-    var docId = $(this).attr("data-id"),
-        rt = $("#rt").val(),
-        queryId = $("#queryId").val(),
-        order = $(this).attr("data-order"),
-        url = $(this).attr("href"),
-        buf = [],
-        hashIndex,
-        hashStr;
-    buf.push(contextPath);
-    buf.push("/go/?rt=");
-    buf.push(rt);
-    buf.push("&docId=");
-    buf.push(docId);
-    buf.push("&queryId=");
-    buf.push(queryId);
-    buf.push("&order=");
-    buf.push(order);
+    var $link = $(this);
+    var docId = $link.attr("data-id");
+    var url = $link.attr("href");
+    var queryId = $("#queryId").val();
+    var order = $link.attr("data-order");
+    var rt = $("#rt").val();
+    var goUrl = contextPath + "/go/?rt=" + rt + "&docId=" + docId + "&queryId=" + queryId + "&order=" + order;
 
-    hashIndex = url.indexOf("#");
+    var hashIndex = url.indexOf("#");
     if (hashIndex >= 0) {
-      hashStr = url.substring(hashIndex);
-      buf.push("&hash=");
-      buf.push(encodeURIComponent(hashStr));
+      var hashStr = url.substring(hashIndex);
+      goUrl += "&hash=" + encodeURIComponent(hashStr);
     }
 
-    $(this).attr("href", buf.join(""));
-  });
-
-  $result.on("mouseover", "a.link", function(e) {
-    var docId = $(this).attr("data-id"),
-        rt = $("#rt").val(),
-        url = $(this).attr("href"),
-        buf = [],
-        hashIndex,
-        hashStr;
-    buf.push(contextPath);
-    buf.push("/go/?rt=");
-    buf.push(rt);
-    buf.push("&docId=");
-    buf.push(docId);
-
-    hashIndex = url.indexOf("#");
-    if (hashIndex >= 0) {
-      hashStr = url.substring(hashIndex);
-      buf.push("&hash=");
-      buf.push(encodeURIComponent(hashStr));
-      buf.push(hashStr);
-    }
+    $link.attr("href", goUrl);
   });
 
   $result.on("click", "a.favorite", function(e) {
-    var $favorite = $(this),
-        values = $favorite.attr("href").split("#"),
-        actionUrl,
-        docId;
+    e.preventDefault();
+    var $favorite = $(this);
+    var values = $favorite.attr("href").split("#");
+
     if (values.length === 2 && $queryId.length > 0) {
-      docId = values[1];
-      actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
+      var docId = values[1];
+      var actionUrl = contextPath + "/api/v1/documents/" + docId + "/favorite";
+
       $.ajax({
         dataType: "json",
         cache: false,
         type: "post",
-        timeoutNumber: 10000,
+        timeout: AJAX_TIMEOUT,
         url: actionUrl,
         data: {
           queryId: $queryId.val()
         }
       })
         .done(function(data) {
-          var $favorited,
-              $favoritedCount;
           if (data.result === "created") {
-            $favorited = $favorite.siblings(".favorited");
-            $favoritedCount = $(".favorited-count", $favorited);
-            $favoritedCount.css("display", "none");
-            $favorite.fadeOut(1000, function() {
-              $favorited.fadeIn(1000);
+            var $favorited = $favorite.siblings(".favorited");
+            var $favoritedCount = $(".favorited-count", $favorited);
+            $favoritedCount.hide();
+            $favorite.fadeOut(FADE_DURATION, function() {
+              $favorited.fadeIn(FADE_DURATION);
             });
           }
         })
-        .fail(function(data) {
+        .fail(function(jqXHR, textStatus, errorThrown) {
           $favorite.attr("href", "#" + docId);
-          // alert(JSON.stringify(data));
+          console.error("Failed to add favorite:", textStatus, errorThrown);
         });
     }
-    $(this).attr("href", "#");
+    $favorite.attr("href", "#");
     return false;
   });
 
@@ -134,52 +125,45 @@ $(function() {
       dataType: "json",
       cache: false,
       type: "get",
-      timeoutNumber: 10000,
+      timeout: AJAX_TIMEOUT,
       url: contextPath + "/api/v1/favorites",
       data: {
         queryId: $queryId.val()
       }
     })
       .done(function(data) {
-        var docIds,
-            i;
         if (data.record_count > 0) {
-          docIds = data.data;
-          for (i = 0; i < docIds.length; i++) {
-            docIds[i] = "#" + docIds[i].doc_id;
+          var docIdsLookup = {};
+          var i;
+          for (i = 0; i < data.data.length; i++) {
+            docIdsLookup["#" + data.data[i].doc_id] = true;
           }
-          $favorites.each(function(index) {
-            var $favorite = $(this),
-                url = $favorite.attr("href"),
-                found = false,
-                $favorited,
-                i;
-            for (i = 0; i < docIds.length; i++) {
-              if (url === docIds[i]) {
-                found = true;
-                break;
-              }
-            }
-            if (found) {
-              $favorited = $favorite.siblings(".favorited");
-              $favorite.fadeOut(1000, function() {
-                $favorited.fadeIn(1000);
+
+          $favorites.each(function() {
+            var $favorite = $(this);
+            var url = $favorite.attr("href");
+
+            if (docIdsLookup[url]) {
+              var $favorited = $favorite.siblings(".favorited");
+              $favorite.fadeOut(FADE_DURATION, function() {
+                $favorited.fadeIn(FADE_DURATION);
               });
             }
           });
         }
       })
-      .fail(function(data) {
-        // alert(JSON.stringify(data));
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        console.error("Failed to load favorites:", textStatus, errorThrown);
       });
   }
 
   $result.on("click", ".more a", function(e) {
-    var $moreLink = $(this),
-        value = $moreLink.attr("href"),
-        $info;
-    if (value !== "") {
-      $info = $(value + " .info");
+    e.preventDefault();
+    var $moreLink = $(this);
+    var value = $moreLink.attr("href");
+
+    if (value) {
+      var $info = $(value + " .info");
       if ($info.length > 0) {
         $moreLink.fadeOut(500, function() {
           $info.slideDown("slow");
@@ -190,83 +174,47 @@ $(function() {
   });
 
   if (typeof $.fn.suggestor === "function") {
-    $("#query").suggestor({
-      ajaxinfo: {
-        url: contextPath + "/api/v1/suggest-words",
-        fn: ["_default", "content", "title"],
-        num: 10,
-        lang: $("#langSearchOption").val()
-      },
-      boxCssInfo: {
-        border: "1px solid rgba(82, 168, 236, 0.5)",
-        "-webkit-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "-moz-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "background-color": "#fff",
-        "z-index": "10000"
-      },
-      listSelectedCssInfo: {
-        "background-color": "rgba(82, 168, 236, 0.1)"
-      },
-      listDeselectedCssInfo: {
-        "background-color": "#ffffff"
-      },
-      minterm: 1,
-      adjustWidthVal: 11,
-      searchForm: $("#searchForm")
-    });
+    $("#query").suggestor(SUGGESTOR_CONFIG);
   }
 
-  loadImage = function(img, url, limit) {
+  var loadImage = function(img, url, limit) {
     var imgData = new Image();
+
     $(imgData).on("load", function() {
       $(img).css("background-image", "");
       $(img).attr("src", url);
     });
+
     $(imgData).on("error", function() {
       if (limit > 0) {
         setTimeout(function() {
-          loadImage(img, url, --limit);
+          loadImage(img, url, limit - 1);
         }, IMG_LOADING_DELAY);
       } else {
-        // $(img).attr('src', contextPath + "/images/noimage.png");
-        $(img)
-          .parent()
-          .parent()
-          .css("display", "none");
+        $(img).parent().parent().hide();
       }
-      imgData = null;
     });
+
     imgData.src = url;
   };
 
   $("img.thumbnail").each(function() {
-    $(this).css(
-      "background-image",
-      'url("' + contextPath + '/images/loading.gif")'
-    );
-    loadImage(this, $(this).attr("data-src"), IMG_LOADING_MAX);
+    var $img = $(this);
+    $img.css("background-image", 'url("' + contextPath + '/images/loading.gif")');
+    loadImage(this, $img.attr("data-src"), IMG_LOADING_MAX);
   });
-  
-  clipboard = new ClipboardJS(".url-copy");
+
+  var clipboard = new ClipboardJS(".url-copy");
   clipboard.on("success", function(e) {
-    e.trigger.classList.remove("url-copy");
-    e.trigger.classList.remove("far");
-    e.trigger.classList.remove("fa-copy");
-    e.trigger.classList.add("url-copied");
-    e.trigger.classList.add("fas");
-    e.trigger.classList.add("fa-check");
-    setTimeout(function(){
-      e.trigger.classList.remove("url-copied");
-      e.trigger.classList.remove("fas");
-      e.trigger.classList.remove("fa-check");
-      e.trigger.classList.add("url-copy");
-      e.trigger.classList.add("far");
-      e.trigger.classList.add("fa-copy");
-    },2000);
+    var trigger = e.trigger;
+    trigger.classList.remove("url-copy", "far", "fa-copy");
+    trigger.classList.add("url-copied", "fas", "fa-check");
+
+    setTimeout(function() {
+      trigger.classList.remove("url-copied", "fas", "fa-check");
+      trigger.classList.add("url-copy", "far", "fa-copy");
+    }, 2000);
+
     e.clearSelection();
   });
 });

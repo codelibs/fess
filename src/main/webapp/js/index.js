@@ -1,14 +1,39 @@
 $(function() {
+  var $searchButton = $("#searchButton");
+  var contextPath = $("#contextPath").val();
+  var BUTTON_DISABLE_DURATION = 3000;
+
+  var SUGGESTOR_CONFIG = {
+    ajaxinfo: {
+      url: contextPath + "/api/v1/suggest-words",
+      fn: ["_default", "content", "title"],
+      num: 10,
+      lang: $("#langSearchOption").val()
+    },
+    boxCssInfo: {
+      border: "1px solid rgba(82, 168, 236, 0.5)",
+      "box-shadow": "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
+      "background-color": "#fff",
+      "z-index": "10000"
+    },
+    listSelectedCssInfo: {
+      "background-color": "rgba(82, 168, 236, 0.1)"
+    },
+    listDeselectedCssInfo: {
+      "background-color": "#ffffff"
+    },
+    minterm: 1,
+    adjustWidthVal: 11,
+    searchForm: $("#searchForm")
+  };
+
   $("#contentQuery").focus();
 
-  var $searchButton = $("#searchButton"),
-      contextPath = $("#contextPath").val();
-
-  $("#searchForm").on("submit", function(e) {
-    $searchButton.attr("disabled", true);
+  $("#searchForm").on("submit", function() {
+    $searchButton.prop("disabled", true);
     setTimeout(function() {
-      $searchButton.attr("disabled", false);
-    }, 3000);
+      $searchButton.prop("disabled", false);
+    }, BUTTON_DISABLE_DURATION);
     return true;
   });
 
@@ -18,7 +43,7 @@ $(function() {
     }
   });
 
-  $("[data-toggle='control-options']").click(function(e) {
+  $("[data-toggle='control-options']").on("click", function(e) {
     e.preventDefault();
     var target = $(this).attr("data-target") || $(this).attr("href");
     if (target) {
@@ -27,41 +52,14 @@ $(function() {
   });
 
   $("#searchOptionsClearButton").on("click", function(e) {
+    e.preventDefault();
     $("#labelTypeSearchOption").prop("selectedIndex", -1);
     $("#langSearchOption").prop("selectedIndex", 0);
     $("#sortSearchOption").prop("selectedIndex", 0);
     $("#numSearchOption").prop("selectedIndex", 0);
-    return false;
   });
 
   if (typeof $.fn.suggestor === "function") {
-    $("#contentQuery").suggestor({
-      ajaxinfo: {
-        url: contextPath + "/api/v1/suggest-words",
-        fn: ["_default", "content", "title"],
-        num: 10,
-        lang: $("#langSearchOption").val()
-      },
-      boxCssInfo: {
-        border: "1px solid rgba(82, 168, 236, 0.5)",
-        "-webkit-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "-moz-box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "box-shadow":
-          "0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)",
-        "background-color": "#fff",
-        "z-index": "10000"
-      },
-      listSelectedCssInfo: {
-        "background-color": "rgba(82, 168, 236, 0.1)"
-      },
-      listDeselectedCssInfo: {
-        "background-color": "#ffffff"
-      },
-      minterm: 1,
-      adjustWidthVal: 11,
-      searchForm: $("#searchForm")
-    });
+    $("#contentQuery").suggestor(SUGGESTOR_CONFIG);
   }
 });
