@@ -62,13 +62,20 @@ public class CrawlTestBase extends ITBase {
     protected static void waitJob(final String namePrefix) {
         Boolean isRunning = false;
         int count = 0;
+        long sleepTime = 50; // Start with 50ms
 
-        while (count < 1500 && !isRunning) { // Wait until the crawler starts
-            ThreadUtil.sleep(100);
+        // Wait until the crawler starts (with exponential backoff)
+        while (count < 1500 && !isRunning) {
+            ThreadUtil.sleep(sleepTime);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
             isRunning = (Boolean) scheduler.get("running");
+
+            // Exponential backoff: gradually increase sleep time up to 300ms
+            if (count % 5 == 0 && sleepTime < 300) {
+                sleepTime = Math.min((long) (sleepTime * 1.5), 300);
+            }
         }
         if (1500 <= count) {
             logger.info("Time out: Failed to start crawler)");
@@ -78,13 +85,20 @@ public class CrawlTestBase extends ITBase {
         logger.info("Crawler is running");
         count = 0;
         isRunning = true;
-        while (count < 3000 && isRunning) { // Wait until the crawler terminates
-            ThreadUtil.sleep(100);
+        sleepTime = 100; // Reset to 100ms for termination wait
+
+        // Wait until the crawler terminates (with exponential backoff)
+        while (count < 3000 && isRunning) {
+            ThreadUtil.sleep(sleepTime);
             count++;
             final Map<String, Object> scheduler = getSchedulerItem(namePrefix);
             assertTrue(scheduler.containsKey("running"));
             isRunning = (Boolean) scheduler.get("running");
 
+            // Exponential backoff: gradually increase sleep time up to 500ms
+            if (count % 10 == 0 && sleepTime < 500) {
+                sleepTime = Math.min((long) (sleepTime * 1.3), 500);
+            }
         }
         if (3000 <= count) {
             logger.info("Time out: Crawler takes too much time");

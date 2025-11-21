@@ -399,9 +399,9 @@ public class SearchApiTests extends CrawlTestBase {
         requestBody.put("name", NAME_PREFIX + "FileConfig");
         requestBody.put("paths", paths);
         requestBody.put("excluded_paths", ".*\\.git.*");
-        requestBody.put("max_access_count", 100);
+        requestBody.put("max_access_count", 100); // Keep original - search tests need diverse documents
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 100);
+        requestBody.put("interval_time", 0); // No delay between file access
         requestBody.put("boost", 100);
         requestBody.put("permissions", "{role}guest");
         requestBody.put("available", true);

@@ -163,6 +163,7 @@ public class CrawlerLogTests extends CrawlTestBase {
      * */
     private static void createWebConfig() {
         final Map<String, Object> requestBody = new HashMap<>();
+        // Keep original external URL for stable test results + failure URL for testing
         final String urls = "https://www.codelibs.org/" + "\n" + "http://failure.url";
         final String includedUrls = "https://www.codelibs.org/.*" + "\n" + "http://failure.url.*";
         requestBody.put("name", NAME_PREFIX + "WebConfig");
@@ -170,9 +171,9 @@ public class CrawlerLogTests extends CrawlTestBase {
         requestBody.put("included_urls", includedUrls);
         requestBody.put("user_agent", "Mozilla/5.0");
         requestBody.put("depth", 0);
-        requestBody.put("max_access_count", 2L);
+        requestBody.put("max_access_count", 2L); // Minimal: 1 success + 1 failure
         requestBody.put("num_of_thread", 1);
-        requestBody.put("interval_time", 0);
+        requestBody.put("interval_time", 0); // No delay
         requestBody.put("boost", 100);
         requestBody.put("available", true);
         requestBody.put("sort_order", 0);
