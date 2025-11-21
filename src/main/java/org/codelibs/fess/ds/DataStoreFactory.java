@@ -71,13 +71,14 @@ public class DataStoreFactory {
      * Cached array of available data store names discovered from plugin JAR files.
      * This cache is refreshed periodically based on the lastLoadedTime.
      */
-    protected String[] dataStoreNames = StringUtil.EMPTY_STRINGS;
+    protected volatile String[] dataStoreNames = StringUtil.EMPTY_STRINGS;
 
     /**
      * Timestamp of the last time data store names were loaded from plugin files.
      * Used to implement a time-based cache refresh mechanism.
+     * Volatile to ensure visibility across threads.
      */
-    protected long lastLoadedTime = 0;
+    protected volatile long lastLoadedTime = 0;
 
     /**
      * Creates a new instance of DataStoreFactory.
@@ -130,7 +131,7 @@ public class DataStoreFactory {
      *
      * @return array of data store names sorted alphabetically, never null
      */
-    public String[] getDataStoreNames() {
+    public synchronized String[] getDataStoreNames() {
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         if (now - lastLoadedTime > 60000L) {
             final List<String> nameList = loadDataStoreNameList();
@@ -154,9 +155,18 @@ public class DataStoreFactory {
     protected List<String> loadDataStoreNameList() {
         final Set<String> nameSet = new HashSet<>();
         final File[] jarFiles = ResourceUtil.getPluginJarFiles(PluginHelper.ArtifactType.DATA_STORE.getId());
+        if (jarFiles == null) {
+            return nameSet.stream().sorted().collect(Collectors.toList());
+        }
         for (final File jarFile : jarFiles) {
             try (FileSystem fs = FileSystems.newFileSystem(jarFile.toPath(), ClassLoader.getSystemClassLoader())) {
                 final Path xmlPath = fs.getPath("fess_ds++.xml");
+                if (!Files.exists(xmlPath)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Configuration file not found in {}", jarFile.getAbsolutePath());
+                    }
+                    continue;
+                }
                 try (InputStream is = Files.newInputStream(xmlPath)) {
                     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     factory.setFeature(org.codelibs.fess.crawler.Constants.FEATURE_SECURE_PROCESSING, true);

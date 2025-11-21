@@ -43,13 +43,6 @@ import org.codelibs.fess.util.ComponentUtil;
  */
 public abstract class AbstractDataStore implements DataStore {
 
-    /**
-     * Default constructor.
-     */
-    public AbstractDataStore() {
-        // nothing
-    }
-
     private static final Logger logger = LogManager.getLogger(AbstractDataStore.class);
 
     /**
@@ -64,8 +57,16 @@ public abstract class AbstractDataStore implements DataStore {
 
     /**
      * The flag to check if the data store is alive.
+     * Volatile to ensure visibility across threads.
      */
-    protected boolean alive = true;
+    protected volatile boolean alive = true;
+
+    /**
+     * Default constructor.
+     */
+    public AbstractDataStore() {
+        // nothing
+    }
 
     /**
      * Register this data store.

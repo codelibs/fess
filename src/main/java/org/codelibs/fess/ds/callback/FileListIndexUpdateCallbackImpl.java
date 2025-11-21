@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
@@ -89,8 +89,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     /** Factory for creating crawler clients to handle different URL schemes. */
     protected CrawlerClientFactory crawlerClientFactory;
 
-    /** List of URLs to be deleted, cached for batch processing. */
-    protected List<String> deleteUrlList = new ArrayList<>(100);
+    /**
+     * List of URLs to be deleted, cached for batch processing.
+     * All access is synchronized via indexUpdateCallback lock.
+     */
+    protected List<String> deleteUrlList = new ArrayList<>();
 
     /** Maximum size of the delete URL cache before batch deletion is triggered. */
     protected int maxDeleteDocumentCacheSize;
@@ -585,8 +588,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             executor.shutdownNow();
         }
 
-        if (!deleteUrlList.isEmpty()) {
-            deleteDocuments();
+        synchronized (indexUpdateCallback) {
+            if (!deleteUrlList.isEmpty()) {
+                deleteDocuments();
+            }
         }
         indexUpdateCallback.commit();
     }

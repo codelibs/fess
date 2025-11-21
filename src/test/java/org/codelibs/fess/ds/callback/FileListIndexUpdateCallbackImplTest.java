@@ -186,4 +186,374 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         assertTrue(result);
     }
+
+    // ========== Thread Safety Tests ==========
+
+    /**
+     * Test that deleteUrlList access is thread-safe with synchronized blocks.
+     * This test verifies the ArrayList implementation works correctly when
+     * all access is properly synchronized via indexUpdateCallback lock.
+     */
+    public void test_deleteUrlList_synchronizedAccess() throws Exception {
+        // Create a mock IndexUpdateCallback for synchronization
+        IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
+            @Override
+            public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
+            }
+
+            @Override
+            public long getDocumentSize() {
+                return 0;
+            }
+
+            @Override
+            public long getExecuteTime() {
+                return 0;
+            }
+
+            @Override
+            public void commit() {
+            }
+        };
+
+        FileListIndexUpdateCallbackImpl callback = new FileListIndexUpdateCallbackImpl(mockCallback, null, 1);
+        callback.setMaxDeleteDocumentCacheSize(1000);
+
+        final int threadCount = 10;
+        final int urlsPerThread = 100;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+
+        // Multiple threads add URLs to deleteUrlList
+        for (int i = 0; i < threadCount; i++) {
+            final int threadIndex = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    for (int j = 0; j < urlsPerThread; j++) {
+                        // Access is synchronized internally in the actual implementation
+                        // Here we just verify no concurrent modification exceptions occur
+                        String url = "http://example.com/thread" + threadIndex + "/doc" + j;
+                        // Simulate the synchronized access that happens in deleteDocument()
+                        synchronized (mockCallback) {
+                            callback.deleteUrlList.add(url);
+                        }
+                    }
+                } catch (Exception e) {
+                    exceptions[threadIndex] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+        }
+
+        // Verify all URLs were added
+        synchronized (mockCallback) {
+            assertEquals("All URLs should be added", threadCount * urlsPerThread, callback.deleteUrlList.size());
+        }
+    }
+
+    /**
+     * Test concurrent reads from deleteUrlList while synchronized.
+     * Verifies that ArrayList can be safely read when properly synchronized.
+     */
+    public void test_deleteUrlList_concurrentReads() throws Exception {
+        IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
+            @Override
+            public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
+            }
+
+            @Override
+            public long getDocumentSize() {
+                return 0;
+            }
+
+            @Override
+            public long getExecuteTime() {
+                return 0;
+            }
+
+            @Override
+            public void commit() {
+            }
+        };
+
+        FileListIndexUpdateCallbackImpl callback = new FileListIndexUpdateCallbackImpl(mockCallback, null, 1);
+
+        // Pre-populate with some URLs
+        synchronized (mockCallback) {
+            for (int i = 0; i < 100; i++) {
+                callback.deleteUrlList.add("http://example.com/doc" + i);
+            }
+        }
+
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+        final int[] sizes = new int[threadCount];
+        final boolean[][] containsResults = new boolean[threadCount][10];
+
+        // Multiple threads read from deleteUrlList
+        for (int i = 0; i < threadCount; i++) {
+            final int threadIndex = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    synchronized (mockCallback) {
+                        sizes[threadIndex] = callback.deleteUrlList.size();
+                        for (int j = 0; j < 10; j++) {
+                            containsResults[threadIndex][j] = callback.deleteUrlList.contains("http://example.com/doc" + j);
+                        }
+                    }
+                } catch (Exception e) {
+                    exceptions[threadIndex] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for all threads to complete
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertEquals("Thread " + i + " should see correct size", 100, sizes[i]);
+            for (int j = 0; j < 10; j++) {
+                assertTrue("Thread " + i + " should find doc" + j, containsResults[i][j]);
+            }
+        }
+    }
+
+    /**
+     * Test that clear operation on deleteUrlList is thread-safe.
+     */
+    public void test_deleteUrlList_clearOperation() throws Exception {
+        IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
+            @Override
+            public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
+            }
+
+            @Override
+            public long getDocumentSize() {
+                return 0;
+            }
+
+            @Override
+            public long getExecuteTime() {
+                return 0;
+            }
+
+            @Override
+            public void commit() {
+            }
+        };
+
+        FileListIndexUpdateCallbackImpl callback = new FileListIndexUpdateCallbackImpl(mockCallback, null, 1);
+
+        final int iterations = 10;
+        final Thread[] threads = new Thread[2];
+        final Exception[] exceptions = new Exception[2];
+
+        // One thread adds, another clears
+        threads[0] = new Thread(() -> {
+            try {
+                for (int i = 0; i < iterations; i++) {
+                    synchronized (mockCallback) {
+                        callback.deleteUrlList.add("http://example.com/doc" + i);
+                    }
+                    Thread.yield();
+                }
+            } catch (Exception e) {
+                exceptions[0] = e;
+            }
+        });
+
+        threads[1] = new Thread(() -> {
+            try {
+                for (int i = 0; i < iterations; i++) {
+                    synchronized (mockCallback) {
+                        callback.deleteUrlList.clear();
+                    }
+                    Thread.yield();
+                }
+            } catch (Exception e) {
+                exceptions[1] = e;
+            }
+        });
+
+        // Start both threads
+        threads[0].start();
+        threads[1].start();
+
+        // Wait for completion
+        threads[0].join();
+        threads[1].join();
+
+        // Verify no exceptions occurred (the main goal is no ConcurrentModificationException)
+        assertNull("Add thread threw exception", exceptions[0]);
+        assertNull("Clear thread threw exception", exceptions[1]);
+    }
+
+    /**
+     * Test iteration over deleteUrlList while synchronized.
+     * This simulates what happens in deleteDocuments() method.
+     */
+    public void test_deleteUrlList_iteration() throws Exception {
+        IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
+            @Override
+            public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
+            }
+
+            @Override
+            public long getDocumentSize() {
+                return 0;
+            }
+
+            @Override
+            public long getExecuteTime() {
+                return 0;
+            }
+
+            @Override
+            public void commit() {
+            }
+        };
+
+        FileListIndexUpdateCallbackImpl callback = new FileListIndexUpdateCallbackImpl(mockCallback, null, 1);
+
+        // Pre-populate
+        synchronized (mockCallback) {
+            for (int i = 0; i < 50; i++) {
+                callback.deleteUrlList.add("http://example.com/doc" + i);
+            }
+        }
+
+        final int threadCount = 5;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+        final int[][] counts = new int[threadCount][1];
+
+        // Multiple threads iterate over the list
+        for (int i = 0; i < threadCount; i++) {
+            final int threadIndex = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    synchronized (mockCallback) {
+                        for (String url : callback.deleteUrlList) {
+                            counts[threadIndex][0]++;
+                            // Simulate some processing
+                            assertNotNull(url);
+                        }
+                    }
+                } catch (Exception e) {
+                    exceptions[threadIndex] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for completion
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertEquals("Thread " + i + " should iterate over all URLs", 50, counts[i][0]);
+        }
+    }
+
+    /**
+     * Test isEmpty() check on deleteUrlList with concurrent access.
+     * This simulates the check in commit() method.
+     */
+    public void test_deleteUrlList_isEmptyCheck() throws Exception {
+        IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
+            @Override
+            public void store(DataStoreParams paramMap, Map<String, Object> dataMap) {
+            }
+
+            @Override
+            public long getDocumentSize() {
+                return 0;
+            }
+
+            @Override
+            public long getExecuteTime() {
+                return 0;
+            }
+
+            @Override
+            public void commit() {
+            }
+        };
+
+        FileListIndexUpdateCallbackImpl callback = new FileListIndexUpdateCallbackImpl(mockCallback, null, 1);
+
+        final int threadCount = 10;
+        final Thread[] threads = new Thread[threadCount];
+        final Exception[] exceptions = new Exception[threadCount];
+
+        // Threads alternate between adding and checking isEmpty
+        for (int i = 0; i < threadCount; i++) {
+            final int threadIndex = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    for (int j = 0; j < 100; j++) {
+                        synchronized (mockCallback) {
+                            if (threadIndex % 2 == 0) {
+                                callback.deleteUrlList.add("http://example.com/doc" + threadIndex + "_" + j);
+                            } else {
+                                boolean empty = callback.deleteUrlList.isEmpty();
+                                // Just verify the check doesn't throw exception
+                                if (!empty) {
+                                    assertTrue(callback.deleteUrlList.size() > 0);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    exceptions[threadIndex] = e;
+                }
+            });
+        }
+
+        // Start all threads
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        // Wait for completion
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        // Verify no exceptions occurred
+        for (int i = 0; i < threadCount; i++) {
+            assertNull("Thread " + i + " threw exception", exceptions[i]);
+        }
+    }
 }
