@@ -180,8 +180,10 @@ public class JsonResponseUtil {
         if (callbackName == null) {
             return null;
         }
-        // Only allow alphanumeric and underscore characters (no dots or dollar signs for security)
-        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_]", StringUtil.EMPTY);
+        // First, remove HTML/XML tags to prevent script injection
+        String sanitized = callbackName.replaceAll("<[^>]*>", StringUtil.EMPTY);
+        // Then, only allow alphanumeric and underscore characters (no dots or dollar signs for security)
+        return "/**/" + sanitized.replaceAll("[^0-9a-zA-Z_]", StringUtil.EMPTY);
     }
 
     /**
