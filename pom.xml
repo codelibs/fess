@@ -140,9 +140,6 @@
 					</includes>
 					<argLine>@{argLine} ${test.command.args}</argLine>
 					<useSystemClassLoader>false</useSystemClassLoader>
-					<systemPropertyVariables>
-						<os.name>${os.name}</os.name>
-					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 			<plugin>
