@@ -889,5 +889,10 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         public Integer getPluginVersionFilterAsInteger() {
             return null;
         }
+
+        @Override
+        public String getLdapAttrHomeDirectory() {
+            return null;
+        }
     }
 }
