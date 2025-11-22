@@ -113,6 +113,11 @@ public class IngesterTest extends UnitFessTestCase {
                 // Stub implementation for testing
                 return null;
             }
+
+            @Override
+            public void setAccessResultData(org.codelibs.fess.crawler.entity.AccessResultData<String> data) {
+                // Stub implementation for testing
+            }
         };
 
         Map<String, Object> processed = ingester.process(target, accessResult);
