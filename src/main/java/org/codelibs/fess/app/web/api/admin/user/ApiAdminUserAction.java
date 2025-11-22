@@ -116,7 +116,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         } catch (final Exception e) {
-            logger.error("Failed to create user: username={}, error={}", body.name, e.getMessage(), e);
+            logger.warn("Failed to create user: username={}, error={}", body.name, e.getMessage(), e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(true).status(ApiResult.Status.OK).result());
@@ -143,7 +143,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
         try {
             userService.store(entity);
         } catch (final Exception e) {
-            logger.error("Failed to update user: id={}, username={}, error={}", body.id, body.name, e.getMessage(), e);
+            logger.warn("Failed to update user: id={}, username={}, error={}", body.id, body.name, e.getMessage(), e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(entity.getId()).created(false).status(ApiResult.Status.OK).result());
@@ -171,7 +171,7 @@ public class ApiAdminUserAction extends FessApiAdminAction {
             userService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         } catch (final Exception e) {
-            logger.error("Failed to delete user: id={}, username={}, error={}", id, entity.getName(), e.getMessage(), e);
+            logger.warn("Failed to delete user: id={}, username={}, error={}", id, entity.getName(), e.getMessage(), e);
             throwValidationErrorApi(messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)));
         }
         return asJson(new ApiResult.ApiUpdateResponse().id(id).created(false).status(ApiResult.Status.OK).result());

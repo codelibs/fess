@@ -17,6 +17,8 @@ package org.codelibs.fess.app.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -30,8 +32,6 @@ import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Resource;
 
@@ -43,7 +43,7 @@ import jakarta.annotation.Resource;
  */
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LogManager.getLogger(UserService.class);
 
     /**
      * Default constructor for UserService.
@@ -141,7 +141,7 @@ public class UserService {
                 logger.info("User {} completed successfully: username={}, id={}", isUpdate ? "update" : "create", username, user.getId());
             }
         } catch (final Exception e) {
-            logger.error("Failed to {} user: username={}, id={}, error={}", isUpdate ? "update" : "create", username, user.getId(),
+            logger.warn("Failed to {} user: username={}, id={}, error={}", isUpdate ? "update" : "create", username, user.getId(),
                     e.getMessage(), e);
             throw e;
         }
@@ -181,7 +181,7 @@ public class UserService {
         } catch (final FessUserNotFoundException e) {
             throw e;
         } catch (final Exception e) {
-            logger.error("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
+            logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throw e;
         }
     }
@@ -211,7 +211,7 @@ public class UserService {
                 logger.info("User deleted successfully: username={}, id={}", username, userId);
             }
         } catch (final Exception e) {
-            logger.error("Failed to delete user: username={}, id={}, error={}", username, userId, e.getMessage(), e);
+            logger.warn("Failed to delete user: username={}, id={}, error={}", username, userId, e.getMessage(), e);
             throw e;
         }
     }

@@ -173,7 +173,7 @@ public class AdminBackupAction extends FessAdminAction {
                         tempFile.getAbsolutePath());
             }
         } catch (final IOException e) {
-            logger.error("Failed to upload backup file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to upload backup file: fileName={}, error={}", fileName, e.getMessage(), e);
             if (tempFile.exists() && !tempFile.delete()) {
                 logger.warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
             }
@@ -287,7 +287,7 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.info("Bulk data import completed successfully: fileName={}, resetJobs={}", fileName, resetJobs.get());
             }
         } catch (final Exception e) {
-            logger.error("Failed to import bulk file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import bulk file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -310,7 +310,7 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.info("GSA XML import completed successfully: fileName={}", fileName);
             }
         } catch (final IOException e) {
-            logger.error("Failed to import GSA XML file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import GSA XML file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -328,7 +328,7 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.info("System properties import completed successfully: fileName={}", fileName);
             }
         } catch (final IOException e) {
-            logger.error("Failed to import system.properties file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import system.properties file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -346,7 +346,7 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.info("Fess JSON import completed successfully: fileName={}", fileName);
             }
         } catch (final IOException e) {
-            logger.error("Failed to import fess.json file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import fess.json file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -364,7 +364,7 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.info("Doc JSON import completed successfully: fileName={}", fileName);
             }
         } catch (final IOException e) {
-            logger.error("Failed to import doc.json file: fileName={}, error={}", fileName, e.getMessage(), e);
+            logger.warn("Failed to import doc.json file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
