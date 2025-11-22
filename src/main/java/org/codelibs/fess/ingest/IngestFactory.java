@@ -15,24 +15,34 @@
  */
 package org.codelibs.fess.ingest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * Factory class for managing and organizing document ingesters.
- * The factory maintains a sorted collection of ingesters based on their priority
- * and provides methods to add new ingesters and retrieve the current collection.
+ * The factory maintains a sorted array of ingesters based on their priority.
  *
- * Ingesters are automatically sorted by priority, with lower numbers having higher priority.
+ * <p>Ingesters are automatically sorted by priority, with lower numbers having higher priority.
+ * This class is designed for initialization-time registration only and is not thread-safe.</p>
+ *
+ * <p><strong>IMPORTANT:</strong> The {@code add()} method should only be called during
+ * the initialization phase (typically via DI container) before the factory is accessed
+ * by multiple threads. Runtime modification is not supported.</p>
  */
 public class IngestFactory {
     /** Logger instance for this class */
     private static final Logger logger = LogManager.getLogger(IngestFactory.class);
 
+    /** Comparator for sorting ingesters by priority */
+    private static final Comparator<Ingester> PRIORITY_COMPARATOR = Comparator.comparingInt(Ingester::getPriority);
+
     /** Array of registered ingesters, sorted by priority */
-    private Ingester[] ingesters = {};
+    private Ingester[] ingesters = new Ingester[0];
 
     /**
      * Default constructor.
@@ -43,19 +53,39 @@ public class IngestFactory {
 
     /**
      * Adds an ingester to the factory.
-     * The ingester is inserted into the collection and the array is re-sorted by priority.
-     * This method is thread-safe.
+     * If an ingester with the same class already exists, it will be replaced.
      *
-     * @param ingester the ingester to add
+     * <p><strong>IMPORTANT:</strong> This method is NOT thread-safe. It should only
+     * be called during the initialization phase before the factory is used.</p>
+     *
+     * @param ingester the ingester to add (must not be null)
+     * @throws IllegalArgumentException if ingester is null
      */
-    public synchronized void add(final Ingester ingester) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", ingester.getClass().getSimpleName());
+    public void add(final Ingester ingester) {
+        if (ingester == null) {
+            throw new IllegalArgumentException("Ingester cannot be null");
         }
-        final Ingester[] newIngesters = Arrays.copyOf(ingesters, ingesters.length + 1);
-        newIngesters[ingesters.length] = ingester;
-        Arrays.sort(newIngesters, (o1, o2) -> o1.priority - o2.priority);
-        ingesters = newIngesters;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Loading {}", ingester.getClass().getSimpleName());
+        }
+
+        // Convert to list for manipulation
+        final List<Ingester> list = new ArrayList<>(Arrays.asList(ingesters));
+
+        // Remove existing ingester of the same class if present
+        list.removeIf(existing -> existing.getClass().equals(ingester.getClass()));
+
+        // Add new ingester and sort by priority
+        list.add(ingester);
+        list.sort(PRIORITY_COMPARATOR);
+
+        // Update array
+        ingesters = list.toArray(new Ingester[0]);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Loaded {} with priority {}", ingester.getClass().getSimpleName(), ingester.getPriority());
+        }
     }
 
     /**
@@ -63,7 +93,11 @@ public class IngestFactory {
      * The returned array contains all ingesters in priority order
      * (lower priority numbers first).
      *
-     * @return the sorted array of ingesters
+     * <p>The array is returned directly for read-only access. Modifications
+     * to the array will not affect future calls to this method, but callers
+     * should treat the array as immutable.</p>
+     *
+     * @return the array of ingesters
      */
     public Ingester[] getIngesters() {
         return ingesters;
