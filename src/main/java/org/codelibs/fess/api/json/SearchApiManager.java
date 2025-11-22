@@ -1279,7 +1279,12 @@ public class SearchApiManager extends BaseApiManager {
                 t.printStackTrace(pw);
                 pw.flush();
                 buf.append(" [ ").append(sw.toString()).append(" ]");
-            } catch (final IOException ignore) {}
+            } catch (final IOException e) {
+                // StringWriter close() should not throw IOException, but log just in case
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Unexpected IOException while closing StringWriter", e);
+                }
+            }
             return buf.toString();
         };
         final String message;
