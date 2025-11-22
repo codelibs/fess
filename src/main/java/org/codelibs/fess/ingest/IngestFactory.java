@@ -16,7 +16,7 @@
 package org.codelibs.fess.ingest;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,11 +25,14 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Factory class for managing and organizing document ingesters.
- * The factory maintains a sorted collection of ingesters based on their priority
- * and provides methods to add new ingesters and retrieve the current collection.
+ * The factory maintains a sorted array of ingesters based on their priority.
  *
  * <p>Ingesters are automatically sorted by priority, with lower numbers having higher priority.
- * This class is thread-safe for concurrent access.</p>
+ * This class is designed for initialization-time registration only and is not thread-safe.</p>
+ *
+ * <p><strong>IMPORTANT:</strong> The {@code add()} method should only be called during
+ * the initialization phase (typically via DI container) before the factory is accessed
+ * by multiple threads. Runtime modification is not supported.</p>
  */
 public class IngestFactory {
     /** Logger instance for this class */
@@ -38,11 +41,8 @@ public class IngestFactory {
     /** Comparator for sorting ingesters by priority */
     private static final Comparator<Ingester> PRIORITY_COMPARATOR = Comparator.comparingInt(Ingester::getPriority);
 
-    /** List of registered ingesters, sorted by priority */
-    private final List<Ingester> ingesterList = new ArrayList<>();
-
-    /** Cached array of ingesters for efficient retrieval */
-    private volatile Ingester[] cachedIngesters = new Ingester[0];
+    /** Array of registered ingesters, sorted by priority */
+    private Ingester[] ingesters = new Ingester[0];
 
     /**
      * Default constructor.
@@ -53,14 +53,15 @@ public class IngestFactory {
 
     /**
      * Adds an ingester to the factory.
-     * The ingester is inserted into the collection and sorted by priority.
      * If an ingester with the same class already exists, it will be replaced.
-     * This method is thread-safe.
+     *
+     * <p><strong>IMPORTANT:</strong> This method is NOT thread-safe. It should only
+     * be called during the initialization phase before the factory is used.</p>
      *
      * @param ingester the ingester to add (must not be null)
      * @throws IllegalArgumentException if ingester is null
      */
-    public synchronized void add(final Ingester ingester) {
+    public void add(final Ingester ingester) {
         if (ingester == null) {
             throw new IllegalArgumentException("Ingester cannot be null");
         }
@@ -69,15 +70,18 @@ public class IngestFactory {
             logger.debug("Loading {}", ingester.getClass().getSimpleName());
         }
 
+        // Convert to list for manipulation
+        final List<Ingester> list = new ArrayList<>(Arrays.asList(ingesters));
+
         // Remove existing ingester of the same class if present
-        ingesterList.removeIf(existing -> existing.getClass().equals(ingester.getClass()));
+        list.removeIf(existing -> existing.getClass().equals(ingester.getClass()));
 
         // Add new ingester and sort by priority
-        ingesterList.add(ingester);
-        Collections.sort(ingesterList, PRIORITY_COMPARATOR);
+        list.add(ingester);
+        list.sort(PRIORITY_COMPARATOR);
 
-        // Update cached array
-        cachedIngesters = ingesterList.toArray(new Ingester[0]);
+        // Update array
+        ingesters = list.toArray(new Ingester[0]);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {} with priority {}", ingester.getClass().getSimpleName(), ingester.getPriority());
@@ -85,87 +89,17 @@ public class IngestFactory {
     }
 
     /**
-     * Removes an ingester from the factory.
-     * This method is thread-safe.
-     *
-     * @param ingester the ingester to remove
-     * @return true if the ingester was removed, false otherwise
-     */
-    public synchronized boolean remove(final Ingester ingester) {
-        if (ingester == null) {
-            return false;
-        }
-
-        final boolean removed = ingesterList.remove(ingester);
-        if (removed) {
-            // Update cached array
-            cachedIngesters = ingesterList.toArray(new Ingester[0]);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removed {}", ingester.getClass().getSimpleName());
-            }
-        }
-        return removed;
-    }
-
-    /**
-     * Removes an ingester by class type.
-     * This method is thread-safe.
-     *
-     * @param ingesterClass the class of the ingester to remove
-     * @return true if an ingester was removed, false otherwise
-     */
-    public synchronized boolean removeByClass(final Class<? extends Ingester> ingesterClass) {
-        if (ingesterClass == null) {
-            return false;
-        }
-
-        final boolean removed = ingesterList.removeIf(ingester -> ingester.getClass().equals(ingesterClass));
-        if (removed) {
-            // Update cached array
-            cachedIngesters = ingesterList.toArray(new Ingester[0]);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Removed ingester of type {}", ingesterClass.getSimpleName());
-            }
-        }
-        return removed;
-    }
-
-    /**
-     * Clears all registered ingesters.
-     * This method is thread-safe.
-     */
-    public synchronized void clear() {
-        ingesterList.clear();
-        cachedIngesters = new Ingester[0];
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Cleared all ingesters");
-        }
-    }
-
-    /**
-     * Returns the number of registered ingesters.
-     *
-     * @return the number of ingesters
-     */
-    public int size() {
-        return cachedIngesters.length;
-    }
-
-    /**
-     * Returns a defensive copy of the array of registered ingesters sorted by priority.
+     * Returns the array of registered ingesters sorted by priority.
      * The returned array contains all ingesters in priority order
      * (lower priority numbers first).
      *
-     * <p>The returned array is a copy and modifications to it will not affect
-     * the internal state of the factory.</p>
+     * <p>The array is returned directly for read-only access. Modifications
+     * to the array will not affect future calls to this method, but callers
+     * should treat the array as immutable.</p>
      *
-     * @return a copy of the sorted array of ingesters
+     * @return the array of ingesters
      */
     public Ingester[] getIngesters() {
-        // Return a defensive copy of the cached array
-        return cachedIngesters.clone();
+        return ingesters;
     }
 }
