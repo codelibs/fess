@@ -131,7 +131,7 @@ public class LoginAction extends FessLoginAction {
         };
         validatePasswordForm(form, toIndexPage);
         if (!getUserBean().isPresent()) {
-            logger.error("User session not found during password change - potential session timeout or security issue");
+            logger.warn("User session not found during password change - potential session timeout or security issue");
             return redirect(LoginAction.class);
         }
         final String username = getUserBean().get().getUserId();
@@ -139,7 +139,7 @@ public class LoginAction extends FessLoginAction {
             userService.changePassword(username, form.password);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
-            logger.error("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
+            logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
         }
         getSession().ifPresent(session -> session.removeAttribute(INVALID_OLD_PASSWORD));

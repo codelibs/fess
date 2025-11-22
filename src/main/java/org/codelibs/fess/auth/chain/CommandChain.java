@@ -170,7 +170,7 @@ public class CommandChain implements AuthenticationChain {
             it.join(5000);
 
             if (mt.isTeminated()) {
-                logger.error("Command execution timeout for user: username={}", username);
+                logger.warn("Command execution timeout for user: username={}", username);
                 throw new CommandExecutionException("The command execution is timeout for user: " + username);
             }
 
@@ -183,7 +183,7 @@ public class CommandChain implements AuthenticationChain {
                 logger.debug("Process output:\n{}", it.getOutput());
             }
             if (exitValue == 143 && mt.isTeminated()) {
-                logger.error("Command execution timeout (exit 143) for user: username={}", username);
+                logger.warn("Command execution timeout (exit 143) for user: username={}", username);
                 throw new CommandExecutionException("The command execution is timeout for user: " + username);
             }
             return exitValue;
@@ -191,12 +191,12 @@ public class CommandChain implements AuthenticationChain {
             throw e;
         } catch (final InterruptedException e) {
             if (mt != null && mt.isTeminated()) {
-                logger.error("Command execution interrupted due to timeout for user: username={}", username, e);
+                logger.warn("Command execution interrupted due to timeout for user: username={}", username, e);
                 throw new CommandExecutionException("The command execution is timeout for user: " + username, e);
             }
             throw new InterruptedRuntimeException(e);
         } catch (final Exception e) {
-            logger.error("Command execution failed for user: username={}, error={}", username, e.getMessage(), e);
+            logger.warn("Command execution failed for user: username={}, error={}", username, e.getMessage(), e);
             throw new CommandExecutionException("Process terminated for user: " + username, e);
         } finally {
             if (mt != null) {
