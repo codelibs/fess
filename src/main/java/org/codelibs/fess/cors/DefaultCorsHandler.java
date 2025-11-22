@@ -31,6 +31,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DefaultCorsHandler extends CorsHandler {
 
     /**
+     * Cached FessConfig instance for performance optimization.
+     */
+    protected FessConfig fessConfig;
+
+    /**
      * Creates a new instance of DefaultCorsHandler.
      * This constructor initializes the default CORS handler for applying
      * standard CORS headers based on application configuration.
@@ -41,18 +46,20 @@ public class DefaultCorsHandler extends CorsHandler {
 
     /**
      * Registers this CORS handler with the factory for configured allowed origins.
-     * This method is automatically called after bean initialization.
+     * This method is automatically called after bean initialization and caches
+     * the FessConfig instance for better performance.
      */
     @PostConstruct
     public void register() {
         final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessConfig = ComponentUtil.getFessConfig();
         fessConfig.getApiCorsAllowOriginList().forEach(s -> factory.add(s, this));
     }
 
     /**
      * Processes the CORS request by adding standard CORS headers to the response.
-     * Headers include allowed origin, methods, headers, max age, and credentials setting.
+     * Headers include allowed origin, methods, headers, max age, credentials setting,
+     * expose headers, and vary header for proper caching.
      *
      * @param origin the origin of the request
      * @param request the servlet request
@@ -60,13 +67,37 @@ public class DefaultCorsHandler extends CorsHandler {
      */
     @Override
     public void process(final String origin, final ServletRequest request, final ServletResponse response) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        // Add standard CORS headers
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_METHODS, fessConfig.getApiCorsAllowMethods());
         httpResponse.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, fessConfig.getApiCorsAllowHeaders());
         httpResponse.addHeader(ACCESS_CONTROL_MAX_AGE, fessConfig.getApiCorsMaxAge());
-        httpResponse.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, fessConfig.getApiCorsAllowCredentials());
+
+        // Add credentials header only if explicitly set to true (CORS spec compliance)
+        final String allowCredentials = fessConfig.getApiCorsAllowCredentials();
+        if ("true".equalsIgnoreCase(allowCredentials)) {
+            httpResponse.addHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+        }
+
+        // Add expose headers if configured
+        final String exposeHeaders = fessConfig.getApiCorsExposeHeaders();
+        if (exposeHeaders != null && !exposeHeaders.isEmpty()) {
+            httpResponse.addHeader(ACCESS_CONTROL_EXPOSE_HEADERS, exposeHeaders);
+        }
+
+        // Add Vary header for proper caching
+        httpResponse.addHeader(VARY, ORIGIN);
+
+        // Handle private network access request if present
+        if (request instanceof jakarta.servlet.http.HttpServletRequest) {
+            final jakarta.servlet.http.HttpServletRequest httpRequest = (jakarta.servlet.http.HttpServletRequest) request;
+            final String privateNetworkRequest = httpRequest.getHeader(ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK);
+            if ("true".equalsIgnoreCase(privateNetworkRequest)) {
+                httpResponse.addHeader(ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK, "true");
+            }
+        }
     }
 
 }
