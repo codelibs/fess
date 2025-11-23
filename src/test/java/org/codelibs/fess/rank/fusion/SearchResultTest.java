@@ -61,11 +61,7 @@ public class SearchResultTest extends UnitFessTestCase {
         doc2.put("_id", "doc2");
         doc2.put("title", "Document 2");
 
-        final SearchResult result = SearchResult.create()
-                .addDocument(doc1)
-                .addDocument(doc2)
-                .allRecordCount(2)
-                .build();
+        final SearchResult result = SearchResult.create().addDocument(doc1).addDocument(doc2).allRecordCount(2).build();
 
         assertNotNull(result);
         assertEquals(2, result.getDocumentList().size());
@@ -77,10 +73,7 @@ public class SearchResultTest extends UnitFessTestCase {
      * Test SearchResult with partial results flag.
      */
     public void test_searchResultWithPartialResults() {
-        final SearchResult result = SearchResult.create()
-                .allRecordCount(1000)
-                .partialResults(true)
-                .build();
+        final SearchResult result = SearchResult.create().allRecordCount(1000).partialResults(true).build();
 
         assertTrue(result.isPartialResults());
     }
@@ -90,10 +83,7 @@ public class SearchResultTest extends UnitFessTestCase {
      */
     public void test_searchResultWithFacetResponse() {
         final FacetResponse facetResponse = new FacetResponse(null);
-        final SearchResult result = SearchResult.create()
-                .allRecordCount(100)
-                .facetResponse(facetResponse)
-                .build();
+        final SearchResult result = SearchResult.create().allRecordCount(100).facetResponse(facetResponse).build();
 
         assertNotNull(result.getFacetResponse());
         assertEquals(facetResponse, result.getFacetResponse());
@@ -103,9 +93,7 @@ public class SearchResultTest extends UnitFessTestCase {
      * Test SearchResult default relation is GREATER_THAN_OR_EQUAL_TO.
      */
     public void test_defaultRelation() {
-        final SearchResult result = SearchResult.create()
-                .allRecordCount(100)
-                .build();
+        final SearchResult result = SearchResult.create().allRecordCount(100).build();
 
         assertEquals(Relation.GREATER_THAN_OR_EQUAL_TO.toString(), result.getAllRecordCountRelation());
     }
@@ -114,9 +102,7 @@ public class SearchResultTest extends UnitFessTestCase {
      * Test SearchResult with zero record count.
      */
     public void test_zeroRecordCount() {
-        final SearchResult result = SearchResult.create()
-                .allRecordCount(0)
-                .build();
+        final SearchResult result = SearchResult.create().allRecordCount(0).build();
 
         assertEquals(0, result.getAllRecordCount());
         assertTrue(result.getDocumentList().isEmpty());
@@ -126,10 +112,7 @@ public class SearchResultTest extends UnitFessTestCase {
      * Test SearchResult toString method.
      */
     public void test_toString() {
-        final SearchResult result = SearchResult.create()
-                .allRecordCount(100)
-                .queryTime(50)
-                .build();
+        final SearchResult result = SearchResult.create().allRecordCount(100).queryTime(50).build();
 
         final String str = result.toString();
         assertNotNull(str);

@@ -47,8 +47,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.init();
 
             // Should handle empty searcher list gracefully
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -62,8 +61,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(100));
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             assertEquals(10, results.size());
         }
@@ -80,8 +78,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             // Replace with new searcher
             processor.setSearcher(new TestSearcher(100));
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             assertEquals(10, results.size());
         }
@@ -95,8 +92,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(100));
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 0, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 0, 0), OptionalThing.empty());
             assertNotNull(results);
             assertEquals(0, results.size());
         }
@@ -110,8 +106,8 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(100));
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10000, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results =
+                    processor.search("*", new TestSearchRequestParams(0, 10000, 0), OptionalThing.empty());
             assertNotNull(results);
             // Should return only available documents
             assertEquals(100, results.size());
@@ -126,8 +122,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(50));
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(100, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(100, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             // Should return empty or minimal results
             assertTrue(results.size() <= 10);
@@ -143,8 +138,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.init();
 
             // Implementation should handle this gracefully
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(-10, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(-10, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -157,8 +151,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(0)); // No documents
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             assertEquals(0, results.size());
         }
@@ -172,8 +165,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(1));
             processor.init();
 
-            if (processor.search("*", new TestSearchRequestParams(0, 10, 0),
-                    OptionalThing.empty()) instanceof QueryResponseList list) {
+            if (processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty()) instanceof QueryResponseList list) {
                 assertEquals(1, list.size());
                 assertEquals(1, list.getAllRecordCount());
                 assertEquals("0", list.get(0).get(ID_FIELD));
@@ -193,8 +185,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.register(new TestSearcher(50)); // Half-full searcher
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             assertTrue(results.size() <= 10);
         }
@@ -209,8 +200,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.init();
 
             // Should handle null query gracefully
-            final List<Map<String, Object>> results = processor.search(null,
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search(null, new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -223,8 +213,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.setSearcher(new TestSearcher(100));
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -241,8 +230,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.init();
 
             // Should still work without errors
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -256,8 +244,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
             processor.register(new TestSearcherWithFixedIds("doc2", "doc3", "doc4")); // Some duplicates
             processor.init();
 
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
             // RRF should merge duplicates and boost their scores
         }

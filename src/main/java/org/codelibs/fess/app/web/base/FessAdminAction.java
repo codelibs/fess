@@ -174,10 +174,8 @@ public abstract class FessAdminAction extends FessBaseAction {
      */
     protected static String[] encodePermissions(final String permissionsText) {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-        return split(permissionsText, "\n").get(stream -> stream.map(permissionHelper::encode)
-                .filter(StringUtil::isNotBlank)
-                .distinct()
-                .toArray(String[]::new));
+        return split(permissionsText, "\n")
+                .get(stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct().toArray(String[]::new));
     }
 
     // ===================================================================================

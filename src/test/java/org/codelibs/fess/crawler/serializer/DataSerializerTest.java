@@ -229,8 +229,7 @@ public class DataSerializerTest extends UnitFessTestCase {
         Object deserialized1 = serializer.fromBinaryToObject(serialized1);
         Object deserialized2 = serializer.fromBinaryToObject(serialized2);
 
-        assertEquals("Multiple deserializations should produce identical results",
-                deserialized1, deserialized2);
+        assertEquals("Multiple deserializations should produce identical results", deserialized1, deserialized2);
     }
 
     /**

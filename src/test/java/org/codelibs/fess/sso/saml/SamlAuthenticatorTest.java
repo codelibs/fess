@@ -43,7 +43,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         Map<String, Object> defaultSettings = new HashMap<>();
         defaultSettings.put("onelogin.saml2.strict", "true");
         defaultSettings.put("onelogin.saml2.debug", "false");
-        
+
         // Build default URLs without requiring DI
         String baseUrl = "http://localhost:8080";
         try {
@@ -52,7 +52,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         } catch (Exception e) {
             // Use fallback
         }
-        
+
         defaultSettings.put("onelogin.saml2.sp.entityid", baseUrl + "/sso/metadata");
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", baseUrl + "/sso/");
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
@@ -85,7 +85,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         defaultSettings.put("onelogin.saml2.contacts.technical.email_address", "technical@example.com");
         defaultSettings.put("onelogin.saml2.contacts.support.given_name", "Support Guy");
         defaultSettings.put("onelogin.saml2.contacts.support.email_address", "support@example.com");
-        
+
         return defaultSettings;
     }
 
@@ -175,16 +175,14 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
                 defaultSettings.get("onelogin.saml2.sp.single_logout_service.binding"));
 
         // Verify NameID format
-        assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-                defaultSettings.get("onelogin.saml2.sp.nameidformat"));
+        assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", defaultSettings.get("onelogin.saml2.sp.nameidformat"));
     }
 
     public void test_buildDefaultUrl() throws Exception {
         SamlAuthenticator authenticator = new SamlAuthenticator();
 
         // Use reflection to access protected method
-        java.lang.reflect.Method buildDefaultUrlMethod =
-                SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+        java.lang.reflect.Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
         buildDefaultUrlMethod.setAccessible(true);
 
         String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
@@ -217,15 +215,15 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("support@example.com", supportEmail);
         assertEquals("technical@example.com", techEmail);
     }
-    
+
     public void test_emailTypoFix_supportEmail() throws Exception {
         // This test specifically verifies the typo fix: support@@example.com -> support@example.com
         Map<String, Object> defaultSettings = createDefaultSettings();
         String supportEmail = (String) defaultSettings.get("onelogin.saml2.contacts.support.email_address");
-        
+
         // The critical assertion: must NOT contain double @
         assertFalse("Support email must not contain @@", supportEmail.contains("@@"));
-        
+
         // And must be the correct value
         assertEquals("support@example.com", supportEmail);
     }

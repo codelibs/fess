@@ -9,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 package org.codelibs.fess.query;
 
@@ -106,8 +106,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
 
         // Should complete quickly (relaxed threshold for CI environments)
         // Note: Set-based O(1) lookup should be much faster than O(n) array iteration
-        assertTrue("Set-based lookup should complete quickly (duration: " + duration / 1_000_000 + "ms)",
-                   duration < 1_000_000_000); // 1 second (relaxed from 100ms for CI)
+        assertTrue("Set-based lookup should complete quickly (duration: " + duration / 1_000_000 + "ms)", duration < 1_000_000_000); // 1 second (relaxed from 100ms for CI)
     }
 
     /**
@@ -117,12 +116,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
 
-        QueryBuilder result = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                Constants.DEFAULT_FIELD,
-                "test text",
-                1.0f,
+        QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, Constants.DEFAULT_FIELD, "test text", 1.0f,
                 (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
@@ -138,13 +132,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
 
-        QueryBuilder result = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                "title",  // Valid search field
-                "test text",
-                2.0f,
-                (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
+        QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, "title", // Valid search field
+                "test text", 2.0f, (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
         // Should use field builder
@@ -158,13 +147,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
 
-        QueryBuilder result = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                "unsupported_field",  // Not a search field
-                "test text",
-                1.0f,
-                (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
+        QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, "unsupported_field", // Not a search field
+                "test text", 1.0f, (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
         // Should fall back to default query builder
@@ -180,12 +164,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         QueryContext context = new QueryContext("test", true);
 
         String queryText = "search term";
-        queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                "title",
-                queryText,
-                1.0f,
+        queryCommand.convertWithFieldCheck(fessConfig, context, "title", queryText, 1.0f,
                 (field, boost) -> QueryBuilders.matchQuery(field, queryText).boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
@@ -206,12 +185,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         for (float boost : boostValues) {
             QueryContext context = new QueryContext("test", true);
 
-            QueryBuilder result = queryCommand.convertWithFieldCheck(
-                    fessConfig,
-                    context,
-                    "title",
-                    "test",
-                    boost,
+            QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, "title", "test", boost,
                     (field, b) -> QueryBuilders.matchQuery(field, "test").boost(b),
                     (field, text, b) -> QueryBuilders.matchQuery(field, text).boost(b));
 
@@ -226,13 +200,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
 
-        QueryBuilder result = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                "title",
-                "",  // Empty text
-                1.0f,
-                (field, boost) -> QueryBuilders.matchQuery(field, "").boost(boost),
+        QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, "title", "", // Empty text
+                1.0f, (field, boost) -> QueryBuilders.matchQuery(field, "").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
         assertNotNull(result);
@@ -245,12 +214,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
 
-        QueryBuilder result = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context,
-                null,
-                "test text",
-                1.0f,
+        QueryBuilder result = queryCommand.convertWithFieldCheck(fessConfig, context, null, "test text", 1.0f,
                 (field, boost) -> QueryBuilders.matchQuery(field, "test text").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
@@ -262,8 +226,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
      * Test FieldQueryBuilder functional interface.
      */
     public void test_fieldQueryBuilder_interface() {
-        QueryCommand.FieldQueryBuilder builder = (field, text, boost) ->
-            QueryBuilders.termQuery(field, text).boost(boost);
+        QueryCommand.FieldQueryBuilder builder = (field, text, boost) -> QueryBuilders.termQuery(field, text).boost(boost);
 
         QueryBuilder result = builder.buildQuery("title", "test", 2.0f);
         assertNotNull(result);
@@ -273,8 +236,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
      * Test DefaultQueryBuilderFunction functional interface.
      */
     public void test_defaultQueryBuilderFunction_interface() {
-        QueryCommand.DefaultQueryBuilderFunction builder = (field, boost) ->
-            QueryBuilders.matchQuery(field, "test").boost(boost);
+        QueryCommand.DefaultQueryBuilderFunction builder = (field, boost) -> QueryBuilders.matchQuery(field, "test").boost(boost);
 
         QueryBuilder result = builder.apply("title", 3.0f);
         assertNotNull(result);
@@ -291,12 +253,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         QueryContext context2 = new QueryContext("test", true);
 
         // Using template method
-        QueryBuilder result1 = queryCommand.convertWithFieldCheck(
-                fessConfig,
-                context1,
-                "title",
-                "test",
-                1.0f,
+        QueryBuilder result1 = queryCommand.convertWithFieldCheck(fessConfig, context1, "title", "test", 1.0f,
                 (field, boost) -> QueryBuilders.matchQuery(field, "test").boost(boost),
                 (field, text, boost) -> QueryBuilders.matchQuery(field, text).boost(boost));
 
@@ -342,10 +299,8 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
         }
 
         @Override
-        public QueryBuilder convertWithFieldCheck(FessConfig fessConfig, QueryContext context,
-                String field, String text, float boost,
-                DefaultQueryBuilderFunction defaultBuilder,
-                FieldQueryBuilder fieldBuilder) {
+        public QueryBuilder convertWithFieldCheck(FessConfig fessConfig, QueryContext context, String field, String text, float boost,
+                DefaultQueryBuilderFunction defaultBuilder, FieldQueryBuilder fieldBuilder) {
             return super.convertWithFieldCheck(fessConfig, context, field, text, boost, defaultBuilder, fieldBuilder);
         }
     }

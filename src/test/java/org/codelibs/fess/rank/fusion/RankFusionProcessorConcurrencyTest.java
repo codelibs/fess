@@ -196,8 +196,8 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
                 assertTrue("Concurrent set/register timed out", endLatch.await(10, TimeUnit.SECONDS));
 
                 // Processor should still be functional
-                final List<Map<String, Object>> results = processor.search("*",
-                        new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+                final List<Map<String, Object>> results =
+                        processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
                 assertNotNull(results);
 
             } finally {
@@ -227,8 +227,8 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
                     executor.submit(() -> {
                         try {
                             startLatch.await();
-                            List<Map<String, Object>> results = processor.search("*",
-                                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+                            List<Map<String, Object>> results =
+                                    processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
                             synchronized (allResults) {
                                 allResults.add(results);
                             }

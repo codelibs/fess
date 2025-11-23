@@ -9,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 package org.codelibs.fess.query;
 
@@ -229,7 +229,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
         // Blank fields are handled before Set lookup
         assertFalse(queryFieldConfig.isFacetField(""));
         assertFalse(queryFieldConfig.isFacetField(null));
-        assertFalse(queryFieldConfig.isFacetField("   "));  // Whitespace only
+        assertFalse(queryFieldConfig.isFacetField("   ")); // Whitespace only
     }
 
     /**
@@ -324,7 +324,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
         // Note: This is a rough check - exact performance depends on JVM, hardware, etc.
         // We expect Set lookup to be at least as fast as array lookup for large datasets
         assertTrue("Set-based lookup should be faster or comparable to array-based lookup for large datasets",
-                setDuration <= arrayDuration * 2);  // Allow 2x margin for test stability
+                setDuration <= arrayDuration * 2); // Allow 2x margin for test stability
     }
 
     /**

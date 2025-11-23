@@ -60,7 +60,8 @@ public class FacetResponse {
                 } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
                     final Filter queryFacet = (Filter) aggregation;
                     final String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
-                    queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), StandardCharsets.UTF_8), queryFacet.getDocCount());
+                    queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), StandardCharsets.UTF_8),
+                            queryFacet.getDocCount());
                 }
 
             });

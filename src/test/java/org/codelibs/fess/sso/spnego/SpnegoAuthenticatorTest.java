@@ -91,8 +91,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
 
         // SPNEGO typically doesn't provide special response handling
-        org.lastaflute.web.response.ActionResponse response =
-                authenticator.getResponse(org.codelibs.fess.sso.SsoResponseType.METADATA);
+        org.lastaflute.web.response.ActionResponse response = authenticator.getResponse(org.codelibs.fess.sso.SsoResponseType.METADATA);
         assertNull(response);
 
         response = authenticator.getResponse(org.codelibs.fess.sso.SsoResponseType.LOGOUT);
