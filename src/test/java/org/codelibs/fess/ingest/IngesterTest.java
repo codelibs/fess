@@ -129,6 +129,12 @@ public class IngesterTest extends UnitFessTestCase {
             public void setExecutionTime(Integer executionTime) {
                 // Stub implementation for testing
             }
+
+            @Override
+            public Integer getExecutionTime() {
+                // Stub implementation for testing
+                return null;
+            }
         };
 
         Map<String, Object> processed = ingester.process(target, accessResult);
