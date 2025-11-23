@@ -264,7 +264,7 @@ public class DocumentHelper {
      */
     public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String crawlingInfoId, final String url) {
         if (StringUtil.isBlank(crawlingInfoId)) {
-            throw new CrawlingAccessException("sessionId is null.");
+            throw new CrawlingAccessException("Cannot process crawl request: crawlingInfoId is required (URL: " + url + ")");
         }
 
         final CrawlerClientFactory crawlerClientFactory = crawlingConfig.initializeClientFactory(ComponentUtil::getCrawlerClientFactory);

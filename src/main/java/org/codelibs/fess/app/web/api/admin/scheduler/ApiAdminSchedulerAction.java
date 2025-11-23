@@ -70,7 +70,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
      */
     @Execute
     public HtmlResponse index() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("HTML index page is not supported for scheduler API - use JSON endpoints instead");
     }
 
     /**

@@ -48,7 +48,8 @@ public class ScriptEngineFactory {
      */
     public void add(final String name, final ScriptEngine scriptEngine) {
         if (name == null || scriptEngine == null) {
-            throw new IllegalArgumentException("name or scriptEngine is null.");
+            throw new IllegalArgumentException("Cannot register script engine: name=" + name + ", scriptEngine=" + scriptEngine
+                    + " (both parameters are required)");
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", name);
@@ -64,12 +65,12 @@ public class ScriptEngineFactory {
      */
     public ScriptEngine getScriptEngine(final String name) {
         if (name == null) {
-            throw new ScriptEngineException("script name is null.");
+            throw new ScriptEngineException("Cannot retrieve script engine: script name parameter is null");
         }
         final ScriptEngine scriptEngine = scriptEngineMap.get(name.toLowerCase(Locale.ROOT));
         if (scriptEngine != null) {
             return scriptEngine;
         }
-        throw new ScriptEngineException(name + " is not found.");
+        throw new ScriptEngineException("Script engine '" + name + "' not found. Available engines: " + scriptEngineMap.keySet());
     }
 }

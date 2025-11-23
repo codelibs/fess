@@ -90,13 +90,15 @@ public class FessStandardTransformer extends AbstractFessFileTransformer {
     protected Extractor getExtractor(final ResponseData responseData) {
         final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();
         if (extractorFactory == null) {
-            throw new FessSystemException("Could not find extractorFactory.");
+            throw new FessSystemException("Could not find extractorFactory for document processing: URL=" + responseData.getUrl()
+                    + ", MIME type=" + responseData.getMimeType());
         }
         Extractor extractor = extractorFactory.getExtractor(responseData.getMimeType());
         if (extractor == null) {
             extractor = ComponentUtil.getComponent("tikaExtractor");
             if (extractor == null) {
-                throw new FessSystemException("Could not find tikaExtractor.");
+                throw new FessSystemException("Could not find tikaExtractor as fallback for URL=" + responseData.getUrl()
+                        + ", MIME type=" + responseData.getMimeType());
             }
         }
 

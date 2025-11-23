@@ -1895,7 +1895,8 @@ public class SearchEngineClient implements Client {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
             if (offset > fessConfig.getQueryMaxSearchResultOffsetAsInteger()) {
-                throw new ResultOffsetExceededException("The number of result size is exceeded.");
+                throw new ResultOffsetExceededException("Search result offset (" + offset + ") exceeds maximum allowed value ("
+                        + fessConfig.getQueryMaxSearchResultOffsetAsInteger() + ")");
             }
 
             final QueryContext queryContext = buildQueryContext(queryHelper, queryFieldConfig, fessConfig);
@@ -2285,7 +2286,8 @@ public class SearchEngineClient implements Client {
         if (client instanceof final HttpClient httpClient) {
             return httpClient.getEngineInfo();
         }
-        throw new SearchEngineClientException("client is not HttpClient.");
+        throw new SearchEngineClientException(
+                "Unable to retrieve engine info: client is not HttpClient (actual type: " + client.getClass().getName() + ")");
     }
 
     //
@@ -3014,7 +3016,7 @@ public class SearchEngineClient implements Client {
     @Override
     public void searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request,
             ActionListener<SearchResponse> listener) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("OpenSearch view search operations are not implemented yet");
     }
 
     /**
@@ -3026,7 +3028,7 @@ public class SearchEngineClient implements Client {
      */
     @Override
     public ActionFuture<SearchResponse> searchView(org.opensearch.action.admin.indices.view.SearchViewAction.Request request) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("OpenSearch view search operations are not implemented yet");
     }
 
     /**
@@ -3039,7 +3041,7 @@ public class SearchEngineClient implements Client {
     @Override
     public void listViewNames(org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request,
             ActionListener<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listener) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("OpenSearch view listing operations are not implemented yet");
     }
 
     /**
@@ -3052,6 +3054,6 @@ public class SearchEngineClient implements Client {
     @Override
     public ActionFuture<org.opensearch.action.admin.indices.view.ListViewNamesAction.Response> listViewNames(
             org.opensearch.action.admin.indices.view.ListViewNamesAction.Request request) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("OpenSearch view listing operations are not implemented yet");
     }
 }

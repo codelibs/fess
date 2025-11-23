@@ -304,7 +304,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
             if (claimsSet == null) {
-                throw new SsoLoginException("could not validate nonce");
+                throw new SsoLoginException("OIDC nonce validation failed: JWT claims set is null");
             }
 
             final String nonce = (String) claimsSet.getClaim("nonce");
@@ -312,12 +312,13 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 logger.debug("nonce: {}", nonce);
             }
             if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
-                throw new SsoLoginException("could not validate nonce");
+                throw new SsoLoginException("OIDC nonce validation failed: expected '" + stateData.getNonce() + "', received '"
+                        + (nonce != null ? nonce : "null") + "'");
             }
         } catch (final SsoLoginException e) {
             throw e;
         } catch (final Exception e) {
-            throw new SsoLoginException("could not validate nonce", e);
+            throw new SsoLoginException("OIDC nonce validation failed due to token parsing error", e);
         }
     }
 
@@ -342,7 +343,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
             final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
-                throw new SsoLoginException("authentication result was null");
+                throw new SsoLoginException("Failed to acquire access token using refresh token: authentication result was null");
             }
             return result;
         } catch (final Exception e) {
@@ -374,7 +375,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
             final IAuthenticationResult result = app.acquireToken(parameters).get(acquisitionTimeout, TimeUnit.MILLISECONDS);
             if (result == null) {
-                throw new SsoLoginException("authentication result was null");
+                throw new SsoLoginException(
+                        "Failed to acquire access token using authorization code: authentication result was null");
             }
             return result;
         } catch (final Exception e) {
@@ -418,7 +420,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
      */
     protected void validateAuthRespMatchesCodeFlow(final AuthenticationSuccessResponse oidcResponse) {
         if (oidcResponse.getIDToken() != null || oidcResponse.getAccessToken() != null || oidcResponse.getAuthorizationCode() == null) {
-            throw new SsoLoginException("unexpected set of artifacts received");
+            throw new SsoLoginException("Unexpected OAuth2 artifacts received: expected authorization code only, but got idToken="
+                    + (oidcResponse.getIDToken() != null) + ", accessToken=" + (oidcResponse.getAccessToken() != null)
+                    + ", authCode=" + (oidcResponse.getAuthorizationCode() != null));
         }
     }
 
@@ -435,7 +439,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 return stateDataInSession;
             }
         }
-        throw new SsoLoginException("could not validate state");
+        throw new SsoLoginException("OAuth2 state validation failed: "
+                + (StringUtils.isEmpty(state) ? "state parameter is empty" : "state not found in session (possible CSRF attack or expired session)"));
     }
 
     /**

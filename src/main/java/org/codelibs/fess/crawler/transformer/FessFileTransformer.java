@@ -90,7 +90,8 @@ public class FessFileTransformer extends AbstractFessFileTransformer {
     protected Extractor getExtractor(final ResponseData responseData) {
         final ExtractorFactory extractorFactory = ComponentUtil.getExtractorFactory();
         if (extractorFactory == null) {
-            throw new FessSystemException("Could not find extractorFactory.");
+            throw new FessSystemException("Could not find extractorFactory for file processing: URL=" + responseData.getUrl()
+                    + ", MIME type=" + responseData.getMimeType());
         }
         final Extractor extractor = extractorFactory.getExtractor(responseData.getMimeType());
         if (logger.isDebugEnabled()) {

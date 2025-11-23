@@ -237,7 +237,7 @@ public class IndexUpdater extends Thread {
     @Override
     public void run() {
         if (dataService == null) {
-            throw new FessSystemException("DataService is null.");
+            throw new FessSystemException("Cannot start index updater: DataService has not been initialized");
         }
 
         if (logger.isDebugEnabled()) {

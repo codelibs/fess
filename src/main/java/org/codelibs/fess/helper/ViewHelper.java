@@ -855,7 +855,8 @@ public class ViewHelper {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final String configId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldConfigId(), String.class);
         if (configId == null) {
-            throw new FessSystemException("configId is null.");
+            final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+            throw new FessSystemException("Unable to retrieve content: configId is missing from document" + (url != null ? " (URL: " + url + ")" : ""));
         }
         if (configId.length() < 2) {
             throw new FessSystemException("Invalid configId: " + configId);

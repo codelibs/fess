@@ -180,7 +180,7 @@ public class CrawlingInfoService {
      */
     protected void setupStoreCondition(final CrawlingInfo crawlingInfo) {
         if (crawlingInfo == null) {
-            throw new FessSystemException("Crawling Session is null.");
+            throw new FessSystemException("Cannot store crawling session: crawlingInfo parameter is null");
         }
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         if (crawlingInfo.getCreatedTime() == null) {
@@ -243,7 +243,7 @@ public class CrawlingInfoService {
      */
     public void storeInfo(final List<CrawlingInfoParam> crawlingInfoParamList) {
         if (crawlingInfoParamList == null) {
-            throw new FessSystemException("Crawling Session Info is null.");
+            throw new FessSystemException("Cannot store crawling session info: crawlingInfoParamList parameter is null");
         }
 
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

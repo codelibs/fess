@@ -146,7 +146,8 @@ public class PythonJob extends ExecJob {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         if (StringUtil.isBlank(filename)) {
-            throw new JobProcessingException("Python script is not specified.");
+            throw new JobProcessingException(
+                    "Python script filename is not specified: set the 'filename' property in job configuration");
         }
 
         cmdList.add(fessConfig.getPythonCommandPath());

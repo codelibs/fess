@@ -79,7 +79,7 @@ public class JobHelper {
      */
     public void register(final LaCron cron, final ScheduledJob scheduledJob) {
         if (scheduledJob == null) {
-            throw new ScheduledJobException("No job.");
+            throw new ScheduledJobException("Cannot register scheduled job: scheduledJob parameter is null");
         }
 
         final String id = scheduledJob.getId();

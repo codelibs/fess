@@ -122,7 +122,7 @@ public class CommandChain implements AuthenticationChain {
      */
     protected int executeCommand(final String[] commands, final String username, final String password) {
         if (commands == null || commands.length == 0) {
-            throw new CommandExecutionException("command is empty.");
+            throw new CommandExecutionException("Authentication command chain is empty: no commands configured to execute");
         }
 
         if (logger.isInfoEnabled()) {
