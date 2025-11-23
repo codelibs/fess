@@ -99,7 +99,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
             dataStoreFactory.add(null, dataStore);
             fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or dataStore is null.", e.getMessage());
+            assertTrue(e.getMessage().contains("Both name and dataStore parameters are required"));
+            assertTrue(e.getMessage().contains("name: null"));
         }
     }
 
@@ -109,7 +110,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
             dataStoreFactory.add("testName", null);
             fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or dataStore is null.", e.getMessage());
+            assertTrue(e.getMessage().contains("Both name and dataStore parameters are required"));
+            assertTrue(e.getMessage().contains("dataStore: null"));
         }
     }
 
@@ -119,7 +121,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
             dataStoreFactory.add(null, null);
             fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or dataStore is null.", e.getMessage());
+            assertEquals("Both name and dataStore parameters are required. name: null, dataStore: null", e.getMessage());
         }
     }
 
