@@ -891,6 +891,181 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         }
 
         @Override
+        public String getLdapAttrSurname() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrGivenName() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrEmployeeNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrMail() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrTelephoneNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrHomePhone() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrHomePostalAddress() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrLabeledURI() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrRoomNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrDescription() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrTitle() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPager() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrStreet() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPostalCode() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPhysicalDeliveryOfficeName() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrDestinationIndicator() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrInternationaliSDNNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrState() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrEmployeeType() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrFacsimileTelephoneNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPostOfficeBox() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrInitials() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrCarLicense() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrMobile() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPostalAddress() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrCity() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrTeletexTerminalIdentifier() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrX121Address() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrBusinessCategory() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrRegisteredAddress() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrDisplayName() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrPreferredLanguage() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrDepartmentNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrUidNumber() {
+            return null;
+        }
+
+        @Override
+        public String getLdapAttrGidNumber() {
+            return null;
+        }
+
+        @Override
         public String getLdapAttrHomeDirectory() {
             return null;
         }
