@@ -301,7 +301,13 @@ public class AdminBackupAction extends FessAdminAction {
         final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
         try (final InputStream in = new FileInputStream(tempFile)) {
             configParser.parse(new InputSource(in));
+        } catch (final IOException e) {
+            logger.warn("Failed to read GSA XML file: fileName={}, error={}", fileName, e.getMessage(), e);
+            deleteTempFile(tempFile);
+            return;
+        }
 
+        try {
             configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
             configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
             labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
@@ -309,8 +315,8 @@ public class AdminBackupAction extends FessAdminAction {
             if (logger.isInfoEnabled()) {
                 logger.info("GSA XML import completed successfully: fileName={}", fileName);
             }
-        } catch (final IOException e) {
-            logger.warn("Failed to import GSA XML file: fileName={}, error={}", fileName, e.getMessage(), e);
+        } catch (final Exception e) {
+            logger.warn("Failed to insert GSA XML data into database: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
