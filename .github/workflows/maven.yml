@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: ubuntu-24.04
     env:
       PARENT_BRANCH: main
     timeout-minutes: 15
@@ -30,7 +30,7 @@ jobs:
     - uses: actions/cache@v4
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Checkout fess-parent
