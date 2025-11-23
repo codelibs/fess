@@ -27,18 +27,18 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
+    - uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Checkout fess-parent
       uses: actions/checkout@v4
       with:
         repository: codelibs/fess-parent
         ref: ${{ env.PARENT_BRANCH }}
         path: fess-parent
-    - uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') || 'fallback' }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
     - name: Install fess-parent
       run: |
         cd fess-parent
