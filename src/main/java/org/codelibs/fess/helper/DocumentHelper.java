@@ -264,13 +264,13 @@ public class DocumentHelper {
      */
     public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String crawlingInfoId, final String url) {
         if (StringUtil.isBlank(crawlingInfoId)) {
-            throw new CrawlingAccessException("sessionId is null.");
+            throw new CrawlingAccessException("sessionId is null. Cannot access document without a valid session ID.");
         }
 
         final CrawlerClientFactory crawlerClientFactory = crawlingConfig.initializeClientFactory(ComponentUtil::getCrawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new CrawlingAccessException("CrawlerClient is null for " + url);
+            throw new CrawlingAccessException("CrawlerClient is null for URL: " + url + ". Unable to access the document without a crawler client.");
         }
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();

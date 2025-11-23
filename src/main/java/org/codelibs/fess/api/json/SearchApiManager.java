@@ -1198,47 +1198,47 @@ public class SearchApiManager extends BaseApiManager {
 
         @Override
         public GeoInfo getGeoInfo() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getGeoInfo() is not supported in this implementation");
         }
 
         @Override
         public FacetInfo getFacetInfo() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getFacetInfo() is not supported in this implementation");
         }
 
         @Override
         public String getSort() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getSort() is not supported in this implementation");
         }
 
         @Override
         public int getStartPosition() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getStartPosition() is not supported in this implementation");
         }
 
         @Override
         public int getOffset() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getOffset() is not supported in this implementation");
         }
 
         @Override
         public int getPageSize() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getPageSize() is not supported in this implementation");
         }
 
         @Override
         public String[] getExtraQueries() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getExtraQueries() is not supported in this implementation");
         }
 
         @Override
         public Object getAttribute(final String name) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getAttribute() is not supported in this implementation");
         }
 
         @Override
         public Locale getLocale() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getLocale() is not supported in this implementation");
         }
 
         @Override
@@ -1248,7 +1248,7 @@ public class SearchApiManager extends BaseApiManager {
 
         @Override
         public String getSimilarDocHash() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getSimilarDocHash() is not supported in this implementation");
         }
 
         @Override

@@ -264,7 +264,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public ServletContext getServletContext() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getServletContext() is not supported in SpnegoFilterConfig");
         }
 
         /**
@@ -376,7 +376,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public Enumeration<String> getInitParameterNames() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getInitParameterNames() is not supported in SpnegoFilterConfig");
         }
 
     }

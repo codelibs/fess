@@ -855,10 +855,10 @@ public class ViewHelper {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final String configId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldConfigId(), String.class);
         if (configId == null) {
-            throw new FessSystemException("configId is null.");
+            throw new FessSystemException("configId is null in document: " + doc);
         }
         if (configId.length() < 2) {
-            throw new FessSystemException("Invalid configId: " + configId);
+            throw new FessSystemException("Invalid configId length: " + configId + ". ConfigId must be at least 2 characters long.");
         }
         final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
         if (config == null) {

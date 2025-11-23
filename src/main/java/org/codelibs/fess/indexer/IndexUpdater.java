@@ -237,7 +237,7 @@ public class IndexUpdater extends Thread {
     @Override
     public void run() {
         if (dataService == null) {
-            throw new FessSystemException("DataService is null.");
+            throw new FessSystemException("DataService is null. IndexUpdater cannot proceed without a DataService instance.");
         }
 
         if (logger.isDebugEnabled()) {

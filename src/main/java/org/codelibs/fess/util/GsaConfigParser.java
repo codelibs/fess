@@ -196,7 +196,7 @@ public class GsaConfigParser extends DefaultHandler {
             logger.debug("Start Element: {}", qName);
         }
         if (tagQueue.isEmpty() && !"eef".equalsIgnoreCase(qName)) {
-            throw new GsaConfigException("Invalid format.");
+            throw new GsaConfigException("Invalid GSA configuration format. Root element must be 'eef', but found: " + qName);
         }
         if (COLLECTION.equalsIgnoreCase(qName) && COLLECTIONS.equalsIgnoreCase(tagQueue.peekLast())) {
             final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
