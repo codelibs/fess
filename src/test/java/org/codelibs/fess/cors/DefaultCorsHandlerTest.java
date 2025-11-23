@@ -1069,5 +1069,10 @@ public class DefaultCorsHandlerTest extends UnitFessTestCase {
         public String getLdapAttrHomeDirectory() {
             return null;
         }
+
+        @Override
+        public boolean isLdapRoleSearchRoleEnabled() {
+            return false;
+        }
     }
 }
