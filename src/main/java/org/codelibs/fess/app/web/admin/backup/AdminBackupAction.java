@@ -159,8 +159,8 @@ public class AdminBackupAction extends FessAdminAction {
         verifyToken(this::asListHtml);
         final String fileName = form.bulkFile.getFileName();
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Backup file upload initiated: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Backup file upload initiated: fileName={}", fileName);
         }
 
         final File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
@@ -229,8 +229,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importBulk(final String fileName, final File tempFile) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Bulk data import started: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Bulk data import started: fileName={}", fileName);
         }
 
         final ObjectMapper mapper = new ObjectMapper();
@@ -294,8 +294,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importGsaXml(final String fileName, final File tempFile) {
-        if (logger.isInfoEnabled()) {
-            logger.info("GSA XML import started: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("GSA XML import started: fileName={}", fileName);
         }
 
         final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
@@ -323,8 +323,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importSystemProperties(final String fileName, final File tempFile) {
-        if (logger.isInfoEnabled()) {
-            logger.info("System properties import started: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("System properties import started: fileName={}", fileName);
         }
 
         try (final InputStream in = new FileInputStream(tempFile)) {
@@ -341,8 +341,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importFessJson(final String fileName, final File tempFile) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Fess JSON import started: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Fess JSON import started: fileName={}", fileName);
         }
 
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getFessJsonPath())) {
@@ -359,8 +359,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importDocJson(final String fileName, final File tempFile) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Doc JSON import started: fileName={}", fileName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Doc JSON import started: fileName={}", fileName);
         }
 
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getDocJsonPath())) {
@@ -396,8 +396,8 @@ public class AdminBackupAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Backup download requested: id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Backup download requested: id={}", id);
         }
 
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {

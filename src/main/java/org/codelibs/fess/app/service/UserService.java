@@ -121,8 +121,8 @@ public class UserService {
         final String username = user.getName();
         final boolean isUpdate = StringUtil.isNotBlank(user.getId());
 
-        if (logger.isInfoEnabled()) {
-            logger.info("User {} operation initiated: username={}, id={}", isUpdate ? "update" : "create", username,
+        if (logger.isDebugEnabled()) {
+            logger.debug("User {} operation initiated: username={}, id={}", isUpdate ? "update" : "create", username,
                     user.getId() != null ? user.getId() : "new");
         }
 
@@ -156,8 +156,8 @@ public class UserService {
      * @throws FessUserNotFoundException if the user is not found
      */
     public void changePassword(final String username, final String password) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Password change initiated for user: username={}", username);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Password change initiated for user: username={}", username);
         }
 
         try {
@@ -172,7 +172,9 @@ public class UserService {
                         logger.info("Password changed successfully for user: username={}, id={}", username, entity.getId());
                     }
                 }).orElse(() -> {
-                    logger.error("Failed to change password - user not found: username={}", username);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to change password - user not found: username={}", username);
+                    }
                     throw new FessUserNotFoundException(username);
                 });
             } else {
@@ -196,8 +198,8 @@ public class UserService {
         final String username = user.getName();
         final String userId = user.getId();
 
-        if (logger.isInfoEnabled()) {
-            logger.info("User deletion initiated: username={}, id={}", username, userId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("User deletion initiated: username={}, id={}", username, userId);
         }
 
         try {

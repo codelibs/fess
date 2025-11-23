@@ -126,7 +126,7 @@ public class CommandChain implements AuthenticationChain {
         }
 
         // Log command template with masked password for security
-        if (logger.isInfoEnabled()) {
+        if (logger.isDebugEnabled()) {
             final String commandStr = stream(commands).get(stream -> stream.map(s -> {
                 if ("$PASSWORD".equals(s)) {
                     return "***MASKED***";
@@ -136,7 +136,7 @@ public class CommandChain implements AuthenticationChain {
                 }
                 return s;
             }).collect(java.util.stream.Collectors.joining(" ")));
-            logger.info("Executing command for user: username={}, command={}", username, commandStr);
+            logger.debug("Executing command for user: username={}, command={}", username, commandStr);
         }
 
         final String[] cmds = stream(commands).get(stream -> stream.map(s -> {
