@@ -17,6 +17,8 @@ package org.codelibs.fess.ds;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.callback.IndexUpdateCallback;
@@ -119,33 +121,59 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
         // Ensure alive starts as true
         assertTrue(dataStore.alive);
 
-        final int readerThreadCount = 10;
+        final int readerThreadCount = 5;
+        final long testDurationMs = 200; // Run for 200ms
         final Thread[] readerThreads = new Thread[readerThreadCount];
-        final boolean[][] observations = new boolean[readerThreadCount][100];
+        final java.util.List<Boolean>[] observations = new java.util.List[readerThreadCount];
+        final CountDownLatch startLatch = new CountDownLatch(1);
 
-        // Start reader threads that continuously check alive field
+        // Initialize observation lists
+        for (int i = 0; i < readerThreadCount; i++) {
+            observations[i] = new java.util.ArrayList<>();
+        }
+
+        // Start reader threads that continuously check alive field for a fixed duration
         for (int i = 0; i < readerThreadCount; i++) {
             final int threadIndex = i;
             readerThreads[i] = new Thread(() -> {
-                for (int j = 0; j < 100; j++) {
-                    observations[threadIndex][j] = dataStore.alive;
-                    // Small yield to allow context switching
-                    Thread.yield();
+                try {
+                    startLatch.await(); // Wait for start signal
+                    long endTime = System.currentTimeMillis() + testDurationMs;
+                    while (System.currentTimeMillis() < endTime) {
+                        observations[threadIndex].add(dataStore.alive);
+                        Thread.yield(); // Allow other threads to run
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             });
             readerThreads[i].start();
         }
 
-        // Writer thread sets alive to false
+        // Writer thread sets alive to false early
         Thread writerThread = new Thread(() -> {
-            dataStore.alive = false;
+            try {
+                startLatch.await(); // Wait for start signal
+                // Set alive to false very early - no delay
+                dataStore.alive = false;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         });
         writerThread.start();
-        writerThread.join();
+
+        // Give threads a moment to reach the latch
+        Thread.sleep(50);
+
+        // Release all threads to start simultaneously
+        startLatch.countDown();
+
+        // Wait for writer thread to complete
+        writerThread.join(1000);
 
         // Wait for all reader threads to complete
         for (Thread thread : readerThreads) {
-            thread.join();
+            thread.join(testDurationMs + 1000);
         }
 
         // Verify that alive was changed to false
@@ -155,8 +183,8 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
         // due to volatile ensuring visibility
         int falseCount = 0;
         for (int i = 0; i < readerThreadCount; i++) {
-            for (int j = 0; j < 100; j++) {
-                if (!observations[i][j]) {
+            for (Boolean observed : observations[i]) {
+                if (!observed) {
                     falseCount++;
                 }
             }

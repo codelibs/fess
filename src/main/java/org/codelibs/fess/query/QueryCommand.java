@@ -258,10 +258,8 @@ public abstract class QueryCommand {
      * @param fieldBuilder function to build field-specific queries
      * @return the constructed query builder
      */
-    protected QueryBuilder convertWithFieldCheck(final FessConfig fessConfig, final QueryContext context,
-            final String field, final String text, final float boost,
-            final DefaultQueryBuilderFunction defaultBuilder,
-            final FieldQueryBuilder fieldBuilder) {
+    protected QueryBuilder convertWithFieldCheck(final FessConfig fessConfig, final QueryContext context, final String field,
+            final String text, final float boost, final DefaultQueryBuilderFunction defaultBuilder, final FieldQueryBuilder fieldBuilder) {
 
         context.addFieldLog(field, text);
         context.addHighlightedQuery(text);

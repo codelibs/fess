@@ -325,8 +325,8 @@ public class GroovyEngineTest extends UnitFessTestCase {
         final Map<String, Object> params = new HashMap<>();
         params.put("items", new int[] { 1, 2, 3, 4, 5 });
 
-        final String script = "def sum = 0\n" + "items.each { item ->\n" + "  if (item % 2 == 0) {\n" + "    sum += item\n"
-                + "  }\n" + "}\n" + "return sum";
+        final String script = "def sum = 0\n" + "items.each { item ->\n" + "  if (item % 2 == 0) {\n" + "    sum += item\n" + "  }\n"
+                + "}\n" + "return sum";
 
         assertEquals(6, groovyEngine.evaluate(script, params)); // 2 + 4 = 6
     }

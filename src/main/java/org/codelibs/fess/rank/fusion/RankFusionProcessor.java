@@ -108,8 +108,8 @@ public class RankFusionProcessor implements AutoCloseable {
         final int minimumWindowSize = maxPageSize * 2;
 
         if (configuredWindowSize < minimumWindowSize) {
-            logger.warn("Configured rank.fusion.window_size ({}) is less than required minimum size ({}). " +
-                    "Using minimum size instead.", configuredWindowSize, minimumWindowSize);
+            logger.warn("Configured rank.fusion.window_size ({}) is less than required minimum size ({}). " + "Using minimum size instead.",
+                    configuredWindowSize, minimumWindowSize);
             this.windowSize = minimumWindowSize;
         } else {
             this.windowSize = configuredWindowSize;
@@ -179,8 +179,8 @@ public class RankFusionProcessor implements AutoCloseable {
         final RankFusionSearcher[] availableSearchers = getAvailableSearchers();
         if (availableSearchers.length == 0) {
             logger.warn("No searchers available for query: {}", query);
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(),
-                    0, false, null, params.getStartPosition(), params.getPageSize(), 0);
+            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
+                    params.getPageSize(), 0);
         }
         if (availableSearchers.length == 1) {
             return searchWithMainSearcher(availableSearchers[0], query, params, userBean);
@@ -266,8 +266,8 @@ public class RankFusionProcessor implements AutoCloseable {
         // Guard against division by zero (should not happen due to caller checks, but defensive)
         if (searchers.length == 0) {
             logger.warn("searchWithMultipleSearchers called with empty searcher array");
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(),
-                    0, false, null, params.getStartPosition(), params.getPageSize(), 0);
+            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
+                    params.getPageSize(), 0);
         }
         final int size = windowSize / searchers.length;
         if (logger.isDebugEnabled()) {
@@ -312,8 +312,8 @@ public class RankFusionProcessor implements AutoCloseable {
         for (int searcherIndex = 0; searcherIndex < results.length; searcherIndex++) {
             final List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
             if (logger.isDebugEnabled()) {
-                logger.debug("Searcher[{}]: retrieved {} docs / {} total docs",
-                        searcherIndex, docList.size(), results[searcherIndex].getAllRecordCount());
+                logger.debug("Searcher[{}]: retrieved {} docs / {} total docs", searcherIndex, docList.size(),
+                        results[searcherIndex].getAllRecordCount());
             }
             for (int docRank = 0; docRank < docList.size(); docRank++) {
                 final Map<String, Object> doc = docList.get(docRank);
@@ -419,8 +419,8 @@ public class RankFusionProcessor implements AutoCloseable {
                     searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
         } catch (final Exception e) {
             logger.warn("Main searcher failed to execute search for query: {}", query, e);
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(),
-                    0, false, null, params.getStartPosition(), pageSize, 0);
+            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
+                    pageSize, 0);
         }
     }
 

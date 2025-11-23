@@ -49,8 +49,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should handle exception gracefully and return results from working searcher
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -65,8 +64,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should handle exception gracefully
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -81,8 +79,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should handle null documents gracefully
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -97,8 +94,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should skip documents without ID field
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -113,8 +109,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should skip documents with null ID
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -129,8 +124,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should skip documents with non-string ID (pattern matching fails)
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -144,8 +138,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
             processor.init();
 
             // Should return empty results without crashing
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             assertNotNull(results);
         }
     }
@@ -161,8 +154,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
 
             // Should complete even with slow searcher
             final long startTime = System.currentTimeMillis();
-            final List<Map<String, Object>> results = processor.search("*",
-                    new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
+            final List<Map<String, Object>> results = processor.search("*", new TestSearchRequestParams(0, 10, 0), OptionalThing.empty());
             final long elapsed = System.currentTimeMillis() - startTime;
 
             assertNotNull(results);
