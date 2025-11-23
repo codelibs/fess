@@ -70,7 +70,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
      */
     @Execute
     public HtmlResponse index() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("index() is not supported in API. Use the admin UI instead.");
     }
 
     /**

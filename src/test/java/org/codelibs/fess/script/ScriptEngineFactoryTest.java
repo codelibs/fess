@@ -89,7 +89,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.add(null, engine);
             fail("Should throw IllegalArgumentException for null name");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or scriptEngine is null.", e.getMessage());
+            assertTrue(e.getMessage().contains("Both name and scriptEngine parameters are required"));
+            assertTrue(e.getMessage().contains("name: null"));
         }
     }
 
@@ -99,7 +100,8 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.add("test", null);
             fail("Should throw IllegalArgumentException for null engine");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or scriptEngine is null.", e.getMessage());
+            assertTrue(e.getMessage().contains("Both name and scriptEngine parameters are required"));
+            assertTrue(e.getMessage().contains("scriptEngine: null"));
         }
     }
 
@@ -109,7 +111,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.add(null, null);
             fail("Should throw IllegalArgumentException for null parameters");
         } catch (IllegalArgumentException e) {
-            assertEquals("name or scriptEngine is null.", e.getMessage());
+            assertEquals("Both name and scriptEngine parameters are required. name: null, scriptEngine: null", e.getMessage());
         }
     }
 
@@ -182,7 +184,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
             scriptEngineFactory.getScriptEngine(null);
             fail("Should throw ScriptEngineException for null name");
         } catch (ScriptEngineException e) {
-            assertEquals("script name is null.", e.getMessage());
+            assertEquals("Script engine name parameter is null. A valid script engine name must be provided.", e.getMessage());
         }
     }
 

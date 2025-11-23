@@ -110,7 +110,7 @@ public class WebAuthentication extends BsWebAuthentication {
 
     private Credentials getCredentials() {
         if (StringUtil.isEmpty(getUsername())) {
-            throw new CrawlerSystemException("username is empty.");
+            throw new CrawlerSystemException("Username is empty in WebAuthentication configuration. A valid username must be provided for authentication.");
         }
 
         if (Constants.NTLM.equals(getProtocolScheme())) {

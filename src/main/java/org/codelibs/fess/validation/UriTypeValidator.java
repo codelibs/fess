@@ -42,7 +42,7 @@ public class UriTypeValidator implements ConstraintValidator<UriType, String> {
         protocols = switch (uriType.protocolType()) {
         case WEB -> ComponentUtil.getProtocolHelper().getWebProtocols();
         case FILE -> ComponentUtil.getProtocolHelper().getFileProtocols();
-        default -> throw new ConstraintDefinitionException("protocolType is emtpy.");
+        default -> throw new ConstraintDefinitionException("protocolType is empty or invalid: " + uriType.protocolType());
         };
     }
 

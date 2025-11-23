@@ -503,7 +503,9 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         } catch (final ChildUrlsException | DataStoreCrawlingException e) {
             throw e;
         } catch (final Exception e) {
-            throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final Object configId = dataMap.get(fessConfig.getIndexFieldConfigId());
+            throw new DataStoreCrawlingException(url, "Failed to add document. url: " + url + ", configId: " + configId, e);
         }
     }
 

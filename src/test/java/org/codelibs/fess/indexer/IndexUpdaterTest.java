@@ -189,7 +189,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
             indexUpdater.run();
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("DataService is null.", e.getMessage());
+            assertEquals("DataService is null. IndexUpdater cannot proceed without a DataService instance.", e.getMessage());
         }
     }
 
