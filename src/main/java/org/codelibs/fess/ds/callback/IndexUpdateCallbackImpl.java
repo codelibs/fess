@@ -114,7 +114,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         //   required check
         final Object urlObj = dataMap.get(fessConfig.getIndexFieldUrl());
         if (urlObj == null) {
-            throw new DataStoreException("URL field is null in dataMap. Cannot index document without a URL. dataMap=" + dataMap);
+            final Object configId = dataMap.get(fessConfig.getIndexFieldConfigId());
+            throw new DataStoreException("URL field is null in dataMap. Cannot index document without a URL. configId: " + configId);
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
