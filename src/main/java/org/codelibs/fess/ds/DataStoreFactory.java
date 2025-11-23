@@ -100,7 +100,7 @@ public class DataStoreFactory {
      */
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
-            throw new IllegalArgumentException("name or dataStore is null.");
+            throw new IllegalArgumentException("Both name and dataStore parameters are required. name: " + name + ", dataStore: " + dataStore);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", name);

@@ -99,7 +99,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || !responseData.hasResponseBody()) {
-            throw new CrawlingAccessException("No response body.");
+            final String url = responseData != null ? responseData.getUrl() : "unknown";
+            throw new CrawlingAccessException("No response body for URL: " + url + ". Cannot transform empty response.");
         }
 
         final ResultData resultData = new ResultData();
