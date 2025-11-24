@@ -98,7 +98,8 @@ public class QueryProcessor {
      */
     public void add(final String name, final QueryCommand queryCommand) {
         if (name == null || queryCommand == null) {
-            throw new IllegalArgumentException("Both name and queryCommand parameters are required. name: " + name + ", queryCommand: " + queryCommand);
+            throw new IllegalArgumentException(
+                    "Both name and queryCommand parameters are required. name: " + name + ", queryCommand: " + queryCommand);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", name);
