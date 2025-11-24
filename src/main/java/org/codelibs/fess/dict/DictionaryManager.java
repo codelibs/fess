@@ -102,8 +102,8 @@ public class DictionaryManager {
                 } catch (final Exception e) {
                     final String filePath = fileMap.get("path") != null ? fileMap.get("path").toString() : "unknown";
                     final String fileTimestamp = fileMap.get("@timestamp") != null ? fileMap.get("@timestamp").toString() : "unknown";
-                    logger.warn("Failed to load dictionary file: path={}, timestamp={}, error={}", filePath, fileTimestamp,
-                            e.getMessage(), e);
+                    logger.warn("Failed to load dictionary file: path={}, timestamp={}, error={}", filePath, fileTimestamp, e.getMessage(),
+                            e);
                 }
                 return null;
             }).filter(file -> file != null).toArray(n -> new DictionaryFile<?>[n]);

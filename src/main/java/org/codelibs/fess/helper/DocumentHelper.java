@@ -270,7 +270,8 @@ public class DocumentHelper {
         final CrawlerClientFactory crawlerClientFactory = crawlingConfig.initializeClientFactory(ComponentUtil::getCrawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new CrawlingAccessException("CrawlerClient is null for URL: " + url + ". Unable to access the document without a crawler client.");
+            throw new CrawlingAccessException(
+                    "CrawlerClient is null for URL: " + url + ". Unable to access the document without a crawler client.");
         }
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();

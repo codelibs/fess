@@ -48,7 +48,8 @@ public class ScriptEngineFactory {
      */
     public void add(final String name, final ScriptEngine scriptEngine) {
         if (name == null || scriptEngine == null) {
-            throw new IllegalArgumentException("Both name and scriptEngine parameters are required. name: " + name + ", scriptEngine: " + scriptEngine);
+            throw new IllegalArgumentException(
+                    "Both name and scriptEngine parameters are required. name: " + name + ", scriptEngine: " + scriptEngine);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded {}", name);
