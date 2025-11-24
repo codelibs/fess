@@ -17,6 +17,8 @@ package org.codelibs.fess.app.service;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -40,6 +42,8 @@ import jakarta.annotation.Resource;
  *
  */
 public class UserService {
+
+    private static final Logger logger = LogManager.getLogger(UserService.class);
 
     /**
      * Default constructor for UserService.
@@ -114,16 +118,33 @@ public class UserService {
      * @param user the user entity to store
      */
     public void store(final User user) {
-        if (StringUtil.isBlank(user.getSurname())) {
-            user.setSurname(user.getName());
+        final String username = user.getName();
+        final boolean isUpdate = StringUtil.isNotBlank(user.getId());
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("User {} operation initiated: username={}, id={}", isUpdate ? "update" : "create", username,
+                    user.getId() != null ? user.getId() : "new");
         }
 
-        ComponentUtil.getAuthenticationManager().insert(user);
+        try {
+            if (StringUtil.isBlank(user.getSurname())) {
+                user.setSurname(user.getName());
+            }
 
-        userBhv.insertOrUpdate(user, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+            ComponentUtil.getAuthenticationManager().insert(user);
 
+            userBhv.insertOrUpdate(user, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+
+            if (logger.isInfoEnabled()) {
+                logger.info("User {} completed successfully: username={}, id={}", isUpdate ? "update" : "create", username, user.getId());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to {} user: username={}, id={}, error={}", isUpdate ? "update" : "create", username, user.getId(),
+                    e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -135,17 +156,36 @@ public class UserService {
      * @throws FessUserNotFoundException if the user is not found
      */
     public void changePassword(final String username, final String password) {
-        final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
-        if (changed) {
-            userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
-                final String encodedPassword = fessLoginAssist.encryptPassword(password);
-                entity.setPassword(encodedPassword);
-                userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
-            }).orElse(() -> {
-                throw new FessUserNotFoundException(username);
-            });
+        if (logger.isDebugEnabled()) {
+            logger.debug("Password change initiated for user: username={}", username);
         }
 
+        try {
+            final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
+            if (changed) {
+                userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
+                    final String encodedPassword = fessLoginAssist.encryptPassword(password);
+                    entity.setPassword(encodedPassword);
+                    userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
+
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Password changed successfully for user: username={}, id={}", username, entity.getId());
+                    }
+                }).orElse(() -> {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to change password - user not found: username={}", username);
+                    }
+                    throw new FessUserNotFoundException(username);
+                });
+            } else {
+                logger.warn("Password change not applied by authentication manager: username={}", username);
+            }
+        } catch (final FessUserNotFoundException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -155,12 +195,27 @@ public class UserService {
      * @param user the user entity to delete
      */
     public void delete(final User user) {
-        ComponentUtil.getAuthenticationManager().delete(user);
+        final String username = user.getName();
+        final String userId = user.getId();
 
-        userBhv.delete(user, op -> {
-            op.setRefreshPolicy(Constants.TRUE);
-        });
+        if (logger.isDebugEnabled()) {
+            logger.debug("User deletion initiated: username={}, id={}", username, userId);
+        }
 
+        try {
+            ComponentUtil.getAuthenticationManager().delete(user);
+
+            userBhv.delete(user, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+            });
+
+            if (logger.isInfoEnabled()) {
+                logger.info("User deleted successfully: username={}, id={}", username, userId);
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to delete user: username={}, id={}, error={}", username, userId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

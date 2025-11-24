@@ -471,7 +471,11 @@ public class Crawler {
                 dayForCleanupStr = options.expires;
                 try {
                     dayForCleanup = Integer.parseInt(dayForCleanupStr);
-                } catch (final NumberFormatException e) {}
+                } catch (final NumberFormatException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Invalid expires value, using default: value={}, error={}", dayForCleanupStr, e.getMessage());
+                    }
+                }
             } else {
                 dayForCleanup = ComponentUtil.getFessConfig().getDayForCleanup();
             }

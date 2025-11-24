@@ -125,8 +125,18 @@ public class CommandChain implements AuthenticationChain {
             throw new CommandExecutionException("Command array is null or empty. At least one command must be provided.");
         }
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Command: {}", String.join(" ", commands));
+        // Log command template with masked password for security
+        if (logger.isDebugEnabled()) {
+            final String commandStr = stream(commands).get(stream -> stream.map(s -> {
+                if ("$PASSWORD".equals(s)) {
+                    return "***MASKED***";
+                }
+                if ("$USERNAME".equals(s)) {
+                    return username;
+                }
+                return s;
+            }).collect(java.util.stream.Collectors.joining(" ")));
+            logger.debug("Executing command for user: username={}, command={}", username, commandStr);
         }
 
         final String[] cmds = stream(commands).get(stream -> stream.map(s -> {
@@ -160,27 +170,42 @@ public class CommandChain implements AuthenticationChain {
             it.join(5000);
 
             if (mt.isTeminated()) {
-                throw new CommandExecutionException("The command execution is timeout: " + String.join(" ", commands));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Command execution timeout for user: username={}", username);
+                }
+                throw new CommandExecutionException("The command execution is timeout for user: " + username);
             }
 
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("Exit Code: {} - Process Output:\n{}", exitValue, it.getOutput());
+                logger.info("Command execution completed for user: username={}, exitCode={}", username, exitValue);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Process output:\n{}", it.getOutput());
             }
             if (exitValue == 143 && mt.isTeminated()) {
-                throw new CommandExecutionException("The command execution is timeout: " + String.join(" ", commands));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Command execution timeout (exit 143) for user: username={}", username);
+                }
+                throw new CommandExecutionException("The command execution is timeout for user: " + username);
             }
             return exitValue;
         } catch (final CrawlerSystemException e) {
             throw e;
         } catch (final InterruptedException e) {
             if (mt != null && mt.isTeminated()) {
-                throw new CommandExecutionException("The command execution is timeout: " + String.join(" ", commands), e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Command execution interrupted due to timeout for user: username={}", username, e);
+                }
+                throw new CommandExecutionException("The command execution is timeout for user: " + username, e);
             }
             throw new InterruptedRuntimeException(e);
         } catch (final Exception e) {
-            throw new CommandExecutionException("Process terminated.", e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Command execution failed for user: username={}, error={}", username, e.getMessage(), e);
+            }
+            throw new CommandExecutionException("Process terminated for user: " + username, e);
         } finally {
             if (mt != null) {
                 mt.setFinished(true);

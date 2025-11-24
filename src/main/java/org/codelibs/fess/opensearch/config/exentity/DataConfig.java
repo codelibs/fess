@@ -106,7 +106,11 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         if (value != null) {
             try {
                 boost = Float.parseFloat(value);
-            } catch (final Exception e) {}
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid boost value, keeping current: value={}, error={}", value, e.getMessage());
+                }
+            }
         }
     }
 
