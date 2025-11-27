@@ -30,8 +30,6 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
- * The DBM of BadWord.
- *
  * @author ESFlute (using FreeGen)
  */
 public class BadWordDbm extends AbstractDBMeta {

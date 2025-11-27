@@ -30,8 +30,6 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
- * The DBM of LabelType.
- *
  * @author ESFlute (using FreeGen)
  */
 public class LabelTypeDbm extends AbstractDBMeta {
