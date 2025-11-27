@@ -532,22 +532,55 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param user The Entra ID user to update.
      */
     public void updateMemberOf(final EntraIdUser user) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[updateMemberOf] Starting for user: {}", user.getName());
+        }
+
         final List<String> groupList = new ArrayList<>();
         final List<String> roleList = new ArrayList<>();
         final List<String> groupIdsForParentLookup = new ArrayList<>();
-        groupList.addAll(getDefaultGroupList());
-        roleList.addAll(getDefaultRoleList());
+
+        final List<String> defaultGroups = getDefaultGroupList();
+        final List<String> defaultRoles = getDefaultRoleList();
+        groupList.addAll(defaultGroups);
+        roleList.addAll(defaultRoles);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[updateMemberOf] Default groups: {}, Default roles: {}", defaultGroups, defaultRoles);
+        }
 
         // Retrieve direct groups synchronously (parent group lookup is deferred)
         processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[updateMemberOf] Direct groups retrieved. Total groups: {}, Total roles: {}, Group IDs for parent lookup: {}",
+                    groupList.size(), roleList.size(), groupIdsForParentLookup.size());
+        }
 
         // Set initial groups
         user.setGroups(groupList.stream().distinct().toArray(n -> new String[n]));
         user.setRoles(roleList.stream().distinct().toArray(n -> new String[n]));
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("[updateMemberOf] Initial groups/roles set for user: {}. Groups: {}, Roles: {}", user.getName(),
+                    Arrays.toString(user.getGroupNames()), Arrays.toString(user.getRoleNames()));
+        }
+
         // Schedule lazy loading of parent groups
         if (!groupIdsForParentLookup.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[updateMemberOf] Scheduling parent group lookup for {} group IDs: {}", groupIdsForParentLookup.size(),
+                        groupIdsForParentLookup);
+            }
             scheduleParentGroupLookup(user, new ArrayList<>(groupList), new ArrayList<>(roleList), groupIdsForParentLookup);
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[updateMemberOf] No parent group lookup needed (no group IDs to process)");
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[updateMemberOf] Completed for user: {}", user.getName());
         }
     }
 
@@ -664,7 +697,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected void processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
             final List<String> groupIdsForParentLookup, final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("url: {}", url);
+            logger.debug("[processDirectMemberOf] Fetching direct memberships from URL: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
@@ -694,11 +727,17 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                             groupList.add(id);
                             // Collect group ID for parent lookup (deferred)
                             groupIdsForParentLookup.add(id);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("[processDirectMemberOf] Added group ID: {} (will lookup parent groups later)", id);
+                            }
                         } else if (memberType.contains("role")) {
                             roleList.add(id);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("[processDirectMemberOf] Added role ID: {}", id);
+                            }
                         } else {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("unknown @odata.type: {}", memberOf);
+                                logger.debug("[processDirectMemberOf] Unknown @odata.type: {}, treating as group", memberOf);
                             }
                             groupList.add(id);
                             groupIdsForParentLookup.add(id);
@@ -748,30 +787,58 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected void scheduleParentGroupLookup(final EntraIdUser user, final List<String> initialGroups, final List<String> initialRoles,
             final List<String> groupIds) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[scheduleParentGroupLookup] Scheduling async parent group lookup for user: {}, groupIds count: {}",
+                    user.getName(), groupIds.size());
+        }
         TimeoutManager.getInstance().addTimeoutTarget(() -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[scheduleParentGroupLookup] Async task started for user: {}", user.getName());
+            }
+            final long startTime = System.currentTimeMillis();
             try {
                 final List<String> updatedGroups = new ArrayList<>(initialGroups);
                 final List<String> updatedRoles = new ArrayList<>(initialRoles);
 
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[scheduleParentGroupLookup] Processing {} group IDs for parent lookup", groupIds.size());
+                }
+
+                int processedCount = 0;
                 for (final String groupId : groupIds) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[scheduleParentGroupLookup] Processing parent groups for groupId: {} ({}/{})", groupId,
+                                ++processedCount, groupIds.size());
+                    }
                     processParentGroup(user, updatedGroups, updatedRoles, groupId);
                 }
 
                 // Update groups/roles
-                user.setGroups(updatedGroups.stream().distinct().toArray(n -> new String[n]));
-                user.setRoles(updatedRoles.stream().distinct().toArray(n -> new String[n]));
+                final String[] finalGroups = updatedGroups.stream().distinct().toArray(n -> new String[n]);
+                final String[] finalRoles = updatedRoles.stream().distinct().toArray(n -> new String[n]);
+                user.setGroups(finalGroups);
+                user.setRoles(finalRoles);
 
                 // Reset permissions to force recalculation
                 user.resetPermissions();
 
+                final long elapsedTime = System.currentTimeMillis() - startTime;
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Parent group lookup completed. Groups: {}, Roles: {}", updatedGroups.size(), updatedRoles.size());
+                    logger.debug(
+                            "[scheduleParentGroupLookup] Async task completed for user: {}. Final groups: {}, Final roles: {}, Elapsed time: {}ms",
+                            user.getName(), finalGroups.length, finalRoles.length, elapsedTime);
+                    logger.debug("[scheduleParentGroupLookup] Final groups for user {}: {}", user.getName(), Arrays.toString(finalGroups));
+                    logger.debug("[scheduleParentGroupLookup] Final roles for user {}: {}", user.getName(), Arrays.toString(finalRoles));
                 }
 
                 // Update session information
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[scheduleParentGroupLookup] Notifying permission change for user: {}", user.getName());
+                }
                 ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(user)));
             } catch (final Exception e) {
-                logger.warn("Failed to process parent groups asynchronously.", e);
+                final long elapsedTime = System.currentTimeMillis() - startTime;
+                logger.warn("Failed to process parent groups asynchronously for user: {} after {}ms", user.getName(), elapsedTime, e);
             }
         }, 0, false);
     }
@@ -797,15 +864,22 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
             final int depth) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[processParentGroup] Processing parent groups for id: {}, depth: {}/{}", id, depth, maxGroupDepth);
+        }
         if (depth >= maxGroupDepth) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Maximum group depth {} reached for group {}", maxGroupDepth, id);
+                logger.debug("[processParentGroup] Maximum group depth {} reached for group {}", maxGroupDepth, id);
             }
             return;
         }
         final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, id, depth);
         StreamUtil.stream(groupsAndRoles.getFirst()).of(stream -> stream.forEach(groupList::add));
         StreamUtil.stream(groupsAndRoles.getSecond()).of(stream -> stream.forEach(roleList::add));
+        if (logger.isDebugEnabled()) {
+            logger.debug("[processParentGroup] Completed for id: {}, depth: {}, added groups: {}, added roles: {}", id, depth,
+                    groupsAndRoles.getFirst().length, groupsAndRoles.getSecond().length);
+        }
     }
 
     /**
@@ -826,19 +900,37 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @return A pair containing group names and role names.
      */
     protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id, final int depth) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[getParentGroup] Getting parent groups for id: {}, depth: {}", id, depth);
+        }
         if (depth >= maxGroupDepth) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Maximum group depth {} reached for group {}", maxGroupDepth, id);
+                logger.debug("[getParentGroup] Maximum group depth {} reached for group {}", maxGroupDepth, id);
             }
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
+        // Check if cached
+        final Pair<String[], String[]> cachedResult = groupCache.getIfPresent(id);
+        if (cachedResult != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[getParentGroup] Cache HIT for id: {}, groups: {}, roles: {}", id, cachedResult.getFirst().length,
+                        cachedResult.getSecond().length);
+            }
+            return cachedResult;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[getParentGroup] Cache MISS for id: {}, fetching from API", id);
+        }
         try {
             return groupCache.get(id, () -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[getParentGroup] Loading parent groups for id: {} into cache", id);
+                }
                 final List<String> groupList = new ArrayList<>();
                 final List<String> roleList = new ArrayList<>();
                 final String url = "https://graph.microsoft.com/v1.0/groups/" + id + "/getMemberGroups";
                 if (logger.isDebugEnabled()) {
-                    logger.debug("url: {}", url);
+                    logger.debug("[getParentGroup] Calling API: {}", url);
                 }
                 try (CurlResponse response = Curl.post(url)
                         .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
@@ -848,14 +940,23 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                         .execute()) {
                     final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
                     if (logger.isDebugEnabled()) {
-                        logger.debug("response: {}", contentMap);
+                        logger.debug("[getParentGroup] Response for id {}: {}", id, contentMap);
                     }
                     if (contentMap.containsKey("value")) {
                         final String[] values = DocumentUtil.getValue(contentMap, "value", String[].class);
                         if (values != null) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("[getParentGroup] Found {} parent group IDs for id: {}", values.length, id);
+                            }
                             for (final String value : values) {
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("[getParentGroup] Processing parent group id: {} for group: {}", value, id);
+                                }
                                 processGroup(user, groupList, roleList, value);
                                 if (!groupList.contains(value) && !roleList.contains(value)) {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("[getParentGroup] Recursively getting parent groups for: {}", value);
+                                    }
                                     final Pair<String[], String[]> groupsAndRoles = getParentGroup(user, value, depth + 1);
                                     StreamUtil.stream(groupsAndRoles.getFirst()).of(stream1 -> stream1.forEach(groupList::add));
                                     StreamUtil.stream(groupsAndRoles.getSecond()).of(stream2 -> stream2.forEach(roleList::add));
@@ -866,19 +967,26 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                         @SuppressWarnings("unchecked")
                         final Map<String, Object> errorMap = (Map<String, Object>) contentMap.get("error");
                         if ("Request_ResourceNotFound".equals(errorMap.get("code"))) {
-                            logger.debug("Failed to access parent groups: {}", contentMap);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("[getParentGroup] Resource not found for id {}: {}", id, contentMap);
+                            }
                         } else {
-                            logger.warn("Failed to access parent groups: {}", contentMap);
+                            logger.warn("Failed to access parent groups for id {}: {}", id, contentMap);
                         }
                     }
                 } catch (final IOException e) {
-                    logger.warn("Failed to access groups/roles in Entra ID.", e);
+                    logger.warn("Failed to access groups/roles in Entra ID for id: {}", id, e);
                 }
-                return new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
+                final Pair<String[], String[]> result = new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
                         roleList.stream().distinct().toArray(n2 -> new String[n2]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[getParentGroup] Cached result for id {}: {} groups, {} roles", id, result.getFirst().length,
+                            result.getSecond().length);
+                }
+                return result;
             });
         } catch (final ExecutionException e) {
-            logger.warn("Failed to process a group cache.", e);
+            logger.warn("Failed to process group cache for id: {}", id, e);
             return new Pair<>(StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
         }
     }
@@ -891,9 +999,12 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      * @param id The group ID to process.
      */
     protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[processGroup] Processing group info for id: {}", id);
+        }
         final String url = "https://graph.microsoft.com/v1.0/groups/" + id;
         if (logger.isDebugEnabled()) {
-            logger.debug("url: {}", url);
+            logger.debug("[processGroup] Fetching from url: {}", url);
         }
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
@@ -901,25 +1012,32 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
-                logger.debug("response: {}", contentMap);
+                logger.debug("[processGroup] Response for id {}: {}", id, contentMap);
             }
             groupList.add(id);
             if (contentMap.containsKey("error")) {
-                logger.warn("Failed to access parent groups: {}", contentMap);
+                logger.warn("Failed to access group info: {}", contentMap);
             } else {
                 final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 final String[] names = fessConfig.getEntraIdPermissionFields();
+                final int initialSize = groupList.size();
                 for (final String name : names) {
                     final String value = (String) contentMap.get(name);
                     if (StringUtil.isNotBlank(value)) {
                         groupList.add(value);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("[processGroup] Added {} value: {} for group id: {}", name, value, id);
+                        }
                     } else if (logger.isDebugEnabled()) {
-                        logger.debug("{} is empty: {}", name, id);
+                        logger.debug("[processGroup] {} is empty for group id: {}", name, id);
                     }
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[processGroup] Completed for id: {}, added {} entries", id, groupList.size() - initialSize);
                 }
             }
         } catch (final IOException e) {
-            logger.warn("Failed to access groups/roles in Entra ID.", e);
+            logger.warn("Failed to access groups/roles in Entra ID for id: {}", id, e);
         }
     }
 
