@@ -63,6 +63,8 @@ if NOT "%FESS_PROXY_PORT%" == "" (
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dhttp.proxyPort=%FESS_PROXY_PORT%
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dhttps.proxyPort=%FESS_PROXY_PORT%
 )
+REM http.nonProxyHosts applies to both HTTP and HTTPS connections.
+REM There is no https.nonProxyHosts property in Java.
 if NOT "%FESS_NON_PROXY_HOSTS%" == "" (
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dhttp.nonProxyHosts=%FESS_NON_PROXY_HOSTS%
 )

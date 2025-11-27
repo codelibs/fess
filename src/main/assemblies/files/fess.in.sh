@@ -61,6 +61,8 @@ if [ "x$FESS_PROXY_PORT" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.proxyPort=$FESS_PROXY_PORT"
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttps.proxyPort=$FESS_PROXY_PORT"
 fi
+# http.nonProxyHosts applies to both HTTP and HTTPS connections.
+# There is no https.nonProxyHosts property in Java.
 if [ "x$FESS_NON_PROXY_HOSTS" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.nonProxyHosts=$FESS_NON_PROXY_HOSTS"
 fi
