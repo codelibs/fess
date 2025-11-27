@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.sso.aad;
+package org.codelibs.fess.sso.entraid;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 
@@ -41,8 +41,8 @@ import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.curl.Curl;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
-import org.codelibs.fess.app.web.base.login.AzureAdCredential;
-import org.codelibs.fess.app.web.base.login.AzureAdCredential.AzureAdUser;
+import org.codelibs.fess.app.web.base.login.EntraIdCredential;
+import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.SsoLoginException;
@@ -79,40 +79,72 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Azure Active Directory (Azure AD) SSO authenticator implementation.
- * Handles OAuth2/OpenID Connect authentication flow with Azure AD.
+ * Microsoft Entra ID SSO authenticator implementation.
+ * Handles OAuth2/OpenID Connect authentication flow with Entra ID.
  */
-public class AzureAdAuthenticator implements SsoAuthenticator {
+public class EntraIdAuthenticator implements SsoAuthenticator {
 
-    private static final Logger logger = LogManager.getLogger(AzureAdAuthenticator.class);
+    private static final Logger logger = LogManager.getLogger(EntraIdAuthenticator.class);
 
     /**
-     * Default constructor for AzureAdAuthenticator.
+     * Default constructor for EntraIdAuthenticator.
      */
-    public AzureAdAuthenticator() {
+    public EntraIdAuthenticator() {
         // Default constructor
     }
 
-    /** Configuration key for Azure AD state time-to-live. */
-    protected static final String AZUREAD_STATE_TTL = "aad.state.ttl";
+    // New configuration keys for Entra ID
+    /** Configuration key for Entra ID state time-to-live. */
+    protected static final String ENTRAID_STATE_TTL = "entraid.state.ttl";
 
-    /** Configuration key for Azure AD authority URL. */
-    protected static final String AZUREAD_AUTHORITY = "aad.authority";
+    /** Configuration key for Entra ID authority URL. */
+    protected static final String ENTRAID_AUTHORITY = "entraid.authority";
 
-    /** Configuration key for Azure AD tenant ID. */
-    protected static final String AZUREAD_TENANT = "aad.tenant";
+    /** Configuration key for Entra ID tenant ID. */
+    protected static final String ENTRAID_TENANT = "entraid.tenant";
 
-    /** Configuration key for Azure AD client secret. */
-    protected static final String AZUREAD_CLIENT_SECRET = "aad.client.secret";
+    /** Configuration key for Entra ID client secret. */
+    protected static final String ENTRAID_CLIENT_SECRET = "entraid.client.secret";
 
-    /** Configuration key for Azure AD client ID. */
-    protected static final String AZUREAD_CLIENT_ID = "aad.client.id";
+    /** Configuration key for Entra ID client ID. */
+    protected static final String ENTRAID_CLIENT_ID = "entraid.client.id";
 
-    /** Configuration key for Azure AD reply URL. */
-    protected static final String AZUREAD_REPLY_URL = "aad.reply.url";
+    /** Configuration key for Entra ID reply URL. */
+    protected static final String ENTRAID_REPLY_URL = "entraid.reply.url";
 
-    /** Session attribute key for storing Azure AD states. */
-    protected static final String STATES = "aadStates";
+    /** Configuration key for Entra ID default groups. */
+    protected static final String ENTRAID_DEFAULT_GROUPS = "entraid.default.groups";
+
+    /** Configuration key for Entra ID default roles. */
+    protected static final String ENTRAID_DEFAULT_ROLES = "entraid.default.roles";
+
+    // Legacy configuration keys for backward compatibility (Azure AD)
+    /** Legacy configuration key for Azure AD state time-to-live. */
+    protected static final String AAD_STATE_TTL = "aad.state.ttl";
+
+    /** Legacy configuration key for Azure AD authority URL. */
+    protected static final String AAD_AUTHORITY = "aad.authority";
+
+    /** Legacy configuration key for Azure AD tenant ID. */
+    protected static final String AAD_TENANT = "aad.tenant";
+
+    /** Legacy configuration key for Azure AD client secret. */
+    protected static final String AAD_CLIENT_SECRET = "aad.client.secret";
+
+    /** Legacy configuration key for Azure AD client ID. */
+    protected static final String AAD_CLIENT_ID = "aad.client.id";
+
+    /** Legacy configuration key for Azure AD reply URL. */
+    protected static final String AAD_REPLY_URL = "aad.reply.url";
+
+    /** Legacy configuration key for Azure AD default groups. */
+    protected static final String AAD_DEFAULT_GROUPS = "aad.default.groups";
+
+    /** Legacy configuration key for Azure AD default roles. */
+    protected static final String AAD_DEFAULT_ROLES = "aad.default.roles";
+
+    /** Session attribute key for storing Entra ID states. */
+    protected static final String STATES = "entraidStates";
 
     /** OAuth2 state parameter name. */
     protected static final String STATE = "state";
@@ -148,7 +180,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     protected boolean useV2Endpoint = true;
 
     /**
-     * Initializes the Azure AD authenticator.
+     * Initializes the Entra ID authenticator.
      * Registers this authenticator with the SSO manager and sets up group cache.
      */
     @PostConstruct
@@ -164,7 +196,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     public LoginCredential getLoginCredential() {
         return LaRequestUtil.getOptionalRequest().map(request -> {
             if (logger.isDebugEnabled()) {
-                logger.debug("Logging in with Azure AD Authenticator");
+                logger.debug("Logging in with Entra ID Authenticator");
             }
             final HttpSession session = request.getSession(false);
             if (session != null && containsAuthenticationData(request)) {
@@ -172,7 +204,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     return processAuthenticationData(request);
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Failed to process a login request on AzureAD.", e);
+                        logger.debug("Failed to process a login request on Entra ID.", e);
                     }
                 }
                 return null;
@@ -183,7 +215,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Generates the Azure AD authorization URL for the authentication request.
+     * Generates the Entra ID authorization URL for the authentication request.
      * @param request The HTTP servlet request.
      * @return The authorization URL to redirect the user to.
      */
@@ -267,7 +299,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
             final IAuthenticationResult authData = getAccessToken(oidcResponse.getAuthorizationCode(), getReplyUrl(request));
             validateNonce(stateData, authData);
 
-            return new AzureAdCredential(authData);
+            return new EntraIdCredential(authData);
         }
         final AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse) authResponse;
         throw new SsoLoginException(String.format("Request for auth code failed: %s - %s", oidcResponse.getErrorObject().getCode(),
@@ -275,7 +307,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Parses the authentication response from Azure AD.
+     * Parses the authentication response from Entra ID.
      * @param url The response URL.
      * @param params The response parameters.
      * @return The parsed authentication response.
@@ -352,7 +384,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Obtains an access token using an authorization code.
-     * @param authorizationCode The authorization code received from Azure AD.
+     * @param authorizationCode The authorization code received from Entra ID.
      * @param currentUri The current URI for the redirect.
      * @return The authentication result containing the access token.
      */
@@ -384,10 +416,10 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Attempts to refresh tokens silently using the MSAL4J silent authentication flow.
-     * @param user The Azure AD user whose tokens need to be refreshed.
+     * @param user The Entra ID user whose tokens need to be refreshed.
      * @return The new authentication result, or null if silent refresh failed.
      */
-    public IAuthenticationResult refreshTokenSilently(final AzureAdCredential.AzureAdUser user) {
+    public IAuthenticationResult refreshTokenSilently(final EntraIdCredential.EntraIdUser user) {
         final String authority = getAuthority() + getTenant() + "/";
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -473,7 +505,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Checks if the request contains authentication data from Azure AD.
+     * Checks if the request contains authentication data from Entra ID.
      * @param request The HTTP servlet request to check.
      * @return True if authentication data is present, false otherwise.
      */
@@ -493,9 +525,9 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Updates the user's group and role membership information.
-     * @param user The Azure AD user to update.
+     * @param user The Entra ID user to update.
      */
-    public void updateMemberOf(final AzureAdUser user) {
+    public void updateMemberOf(final EntraIdUser user) {
         final List<String> groupList = new ArrayList<>();
         final List<String> roleList = new ArrayList<>();
         groupList.addAll(getDefaultGroupList());
@@ -507,12 +539,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Processes member-of information from Microsoft Graph API.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param url The Microsoft Graph API URL.
      */
-    protected void processMemberOf(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String url) {
+    protected void processMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String url) {
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
         }
@@ -554,8 +586,8 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                     } else {
                         logger.warn("id is empty: {}", memberOf);
                     }
-                    final String[] names = fessConfig.getAzureAdPermissionFields();
-                    final boolean useDomainServices = fessConfig.isAzureAdUseDomainServices();
+                    final String[] names = fessConfig.getEntraIdPermissionFields();
+                    final boolean useDomainServices = fessConfig.isEntraIdUseDomainServices();
                     for (final String name : names) {
                         final String value = (String) memberOf.get(name);
                         if (StringUtil.isNotBlank(value)) {
@@ -585,7 +617,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 logger.warn("Failed to access groups/roles: {}", contentMap);
             }
         } catch (final IOException e) {
-            logger.warn("Failed to access groups/roles in AzureAD.", e);
+            logger.warn("Failed to access groups/roles in Entra ID.", e);
         }
     }
 
@@ -607,24 +639,24 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Processes parent group information for nested groups.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
      */
-    protected void processParentGroup(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+    protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
         processParentGroup(user, groupList, roleList, id, 0);
     }
 
     /**
      * Processes parent group information for nested groups with depth tracking.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
      * @param depth The current recursion depth.
      */
-    protected void processParentGroup(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String id,
+    protected void processParentGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id,
             final int depth) {
         if (depth >= maxGroupDepth) {
             if (logger.isDebugEnabled()) {
@@ -639,22 +671,22 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Retrieves parent group information for the specified group ID.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
      * @return A pair containing group names and role names.
      */
-    protected Pair<String[], String[]> getParentGroup(final AzureAdUser user, final String id) {
+    protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id) {
         return getParentGroup(user, id, 0);
     }
 
     /**
      * Retrieves parent group information for the specified group ID with depth tracking.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param id The group ID to get parent information for.
      * @param depth The current recursion depth.
      * @return A pair containing group names and role names.
      */
-    protected Pair<String[], String[]> getParentGroup(final AzureAdUser user, final String id, final int depth) {
+    protected Pair<String[], String[]> getParentGroup(final EntraIdUser user, final String id, final int depth) {
         if (depth >= maxGroupDepth) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Maximum group depth {} reached for group {}", maxGroupDepth, id);
@@ -701,7 +733,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                         }
                     }
                 } catch (final IOException e) {
-                    logger.warn("Failed to access groups/roles in AzureAD.", e);
+                    logger.warn("Failed to access groups/roles in Entra ID.", e);
                 }
                 return new Pair<>(groupList.stream().distinct().toArray(n1 -> new String[n1]),
                         roleList.stream().distinct().toArray(n2 -> new String[n2]));
@@ -714,12 +746,12 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Processes individual group information.
-     * @param user The Azure AD user.
+     * @param user The Entra ID user.
      * @param groupList The list to add group names to.
      * @param roleList The list to add role names to.
      * @param id The group ID to process.
      */
-    protected void processGroup(final AzureAdUser user, final List<String> groupList, final List<String> roleList, final String id) {
+    protected void processGroup(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String id) {
         final String url = "https://graph.microsoft.com/v1.0/groups/" + id;
         if (logger.isDebugEnabled()) {
             logger.debug("url: {}", url);
@@ -737,7 +769,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 logger.warn("Failed to access parent groups: {}", contentMap);
             } else {
                 final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                final String[] names = fessConfig.getAzureAdPermissionFields();
+                final String[] names = fessConfig.getEntraIdPermissionFields();
                 for (final String name : names) {
                     final String value = (String) contentMap.get(name);
                     if (StringUtil.isNotBlank(value)) {
@@ -748,16 +780,20 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
                 }
             }
         } catch (final IOException e) {
-            logger.warn("Failed to access groups/roles in AzureAD.", e);
+            logger.warn("Failed to access groups/roles in Entra ID.", e);
         }
     }
 
     /**
      * Gets the default group list for users.
+     * Uses new entraid.default.groups key with fallback to legacy aad.default.groups.
      * @return The default group list.
      */
     protected List<String> getDefaultGroupList() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.groups");
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_DEFAULT_GROUPS);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_DEFAULT_GROUPS);
+        }
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
         }
@@ -766,10 +802,14 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     /**
      * Gets the default role list for users.
+     * Uses new entraid.default.roles key with fallback to legacy aad.default.roles.
      * @return The default role list.
      */
     protected List<String> getDefaultRoleList() {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty("aad.default.roles");
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_DEFAULT_ROLES);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_DEFAULT_ROLES);
+        }
         if (StringUtil.isBlank(value)) {
             return Collections.emptyList();
         }
@@ -816,52 +856,81 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Gets the Azure AD client ID from configuration.
+     * Gets the Entra ID client ID from configuration.
+     * Uses new entraid.client.id key with fallback to legacy aad.client.id.
      * @return The client ID.
      */
     protected String getClientId() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_CLIENT_ID, StringUtil.EMPTY);
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_CLIENT_ID);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_CLIENT_ID, StringUtil.EMPTY);
+        }
+        return value;
     }
 
     /**
-     * Gets the Azure AD client secret from configuration.
+     * Gets the Entra ID client secret from configuration.
+     * Uses new entraid.client.secret key with fallback to legacy aad.client.secret.
      * @return The client secret.
      */
     protected String getClientSecret() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_CLIENT_SECRET, StringUtil.EMPTY);
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_CLIENT_SECRET);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_CLIENT_SECRET, StringUtil.EMPTY);
+        }
+        return value;
     }
 
     /**
-     * Gets the Azure AD tenant ID from configuration.
+     * Gets the Entra ID tenant ID from configuration.
+     * Uses new entraid.tenant key with fallback to legacy aad.tenant.
      * @return The tenant ID.
      */
     protected String getTenant() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_TENANT, StringUtil.EMPTY);
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_TENANT);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_TENANT, StringUtil.EMPTY);
+        }
+        return value;
     }
 
     /**
-     * Gets the Azure AD authority URL from configuration.
+     * Gets the Entra ID authority URL from configuration.
+     * Uses new entraid.authority key with fallback to legacy aad.authority.
      * @return The authority URL.
      */
     protected String getAuthority() {
-        return ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_AUTHORITY, "https://login.microsoftonline.com/");
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_AUTHORITY);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_AUTHORITY, "https://login.microsoftonline.com/");
+        }
+        return value;
     }
 
     /**
      * Gets the state time-to-live from configuration.
+     * Uses new entraid.state.ttl key with fallback to legacy aad.state.ttl.
      * @return The state TTL in milliseconds.
      */
     protected long getStateTtl() {
-        return Long.parseLong(ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_STATE_TTL, "3600"));
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_STATE_TTL);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_STATE_TTL, "3600");
+        }
+        return Long.parseLong(value);
     }
 
     /**
-     * Gets the reply URL for Azure AD authentication.
+     * Gets the reply URL for Entra ID authentication.
+     * Uses new entraid.reply.url key with fallback to legacy aad.reply.url.
      * @param request The HTTP servlet request.
      * @return The reply URL.
      */
     protected String getReplyUrl(final HttpServletRequest request) {
-        final String value = ComponentUtil.getFessConfig().getSystemProperty(AZUREAD_REPLY_URL, StringUtil.EMPTY);
+        String value = ComponentUtil.getFessConfig().getSystemProperty(ENTRAID_REPLY_URL);
+        if (StringUtil.isBlank(value)) {
+            value = ComponentUtil.getFessConfig().getSystemProperty(AAD_REPLY_URL, StringUtil.EMPTY);
+        }
         if (StringUtil.isNotBlank(value)) {
             return value;
         }
@@ -870,7 +939,7 @@ public class AzureAdAuthenticator implements SsoAuthenticator {
 
     @Override
     public void resolveCredential(final LoginCredentialResolver resolver) {
-        resolver.resolve(AzureAdCredential.class, credential -> OptionalEntity.of(credential.getUser()));
+        resolver.resolve(EntraIdCredential.class, credential -> OptionalEntity.of(credential.getUser()));
     }
 
     /**
