@@ -351,7 +351,7 @@ public class RoleQueryHelper {
                         return;
                     }
                 } catch (final NumberFormatException e) {
-                    logger.warn("Invalid role info: {}", rolesStr, e);
+                    logger.warn("Invalid role info: failed to parse timestamp from '{}'", rolesStr, e);
                     return;
                 }
             }

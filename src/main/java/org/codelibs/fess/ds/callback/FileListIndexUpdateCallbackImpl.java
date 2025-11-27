@@ -132,7 +132,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
      */
     protected ExecutorService newFixedThreadPool(final int nThreads) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Executor Thread Pool: {}", nThreads);
+            logger.debug("Initialized executor thread pool: size={}", nThreads);
         }
         return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(nThreads),
                 new ThreadPoolExecutor.CallerRunsPolicy());
@@ -157,7 +157,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     // deleted file
                     deleteDocument(localParams, dataMap);
                 } else {
-                    logger.warn("unknown event: {}, data: {}", eventType, dataMap);
+                    logger.warn("Unknown event type: '{}'. Supported: [create, modify, delete]. url={}", eventType,
+                            dataMap.get(ComponentUtil.getFessConfig().getIndexFieldUrl()));
                 }
             } finally {
                 if (keyObj != null) {
@@ -193,14 +194,14 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (indexUpdateCallback) {
             // required check
             if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
-                logger.warn("Could not add a doc. Invalid data: {}", dataMap);
+                logger.warn("Could not add document: url field is missing or null");
                 return;
             }
 
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
             final CrawlerClient client = crawlerClientFactory.getClient(url);
             if (client == null) {
-                logger.warn("CrawlerClient is null. Data: {}", dataMap);
+                logger.warn("CrawlerClient not available for url='{}'. Protocol may not be supported.", url);
                 return;
             }
 
@@ -266,7 +267,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                                     .forEach(requestQueue::offer);
                         }
                     } else {
-                        logger.warn("Failed to access {}.", crawlRequest, e);
+                        logger.warn("Failed to access url='{}', depth={}", crawlRequest.getUrl(), crawlRequest.getDepth(), e);
                     }
                 }
             }
@@ -382,9 +383,9 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 return Long.parseLong(maxAccessCount);
             } catch (final NumberFormatException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.warn("Failed to parse {}", maxAccessCount, e);
+                    logger.warn("Failed to parse max_access_count: '{}'. Expected: integer value", maxAccessCount, e);
                 } else {
-                    logger.warn("Failed to parse {}", maxAccessCount);
+                    logger.warn("Failed to parse max_access_count: '{}'. Expected: integer value", maxAccessCount);
                 }
             }
         }
@@ -414,9 +415,9 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 return Integer.parseInt(maxDepth);
             } catch (final NumberFormatException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.warn("Failed to parse {}", maxDepth, e);
+                    logger.warn("Failed to parse max_depth: '{}'. Expected: integer value", maxDepth, e);
                 } else {
-                    logger.warn("Failed to parse {}", maxDepth);
+                    logger.warn("Failed to parse max_depth: '{}'. Expected: integer value", maxDepth);
                 }
             }
         }
@@ -456,7 +457,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
             final Rule rule = ruleManager.getRule(responseData);
             if (rule == null) {
-                logger.warn("No url rule. Data: {}", dataMap);
+                logger.warn("No matching url rule for url='{}'", url);
             } else {
                 responseData.setRuleId(rule.getRuleId());
                 final ResponseProcessor responseProcessor = rule.getResponseProcessor();
@@ -495,8 +496,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                     indexUpdateCallback.store(paramMap, dataMap);
                     crawlerStatsHelper.record(keyObj, StatsAction.PROCESSED);
                 } else {
-                    logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: {}, Data: {}",
-                            responseProcessor, dataMap);
+                    logger.warn("Unexpected response processor: expected=DefaultResponseProcessor, actual={}, url={}",
+                            responseProcessor.getClass().getSimpleName(), url);
                 }
             }
             return null;
@@ -540,15 +541,15 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
      */
     protected boolean deleteDocument(final DataStoreParams paramMap, final Map<String, Object> dataMap) {
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Deleting {}", dataMap);
-        }
-
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deleting document: url={}", dataMap.get(fessConfig.getIndexFieldUrl()));
+        }
 
         // required check
         if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
-            logger.warn("Could not delete a doc. Invalid data: {}", dataMap);
+            logger.warn("Could not delete document: url field is missing or null");
             return false;
         }
 
@@ -561,7 +562,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 final long count = indexingHelper.deleteDocumentByQuery(searchEngineClient,
                         QueryBuilders.prefixQuery(fessConfig.getIndexFieldUrl(), url));
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Deleted {} docs for {}*", count, url);
+                    logger.debug("Deleted {} documents for url prefix: {}", count, url);
                 }
             } else {
                 deleteUrlList.add(url);
@@ -584,7 +585,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             executor.awaitTermination(executorTerminationTimeout, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to interrupt executor.", e);
+                logger.debug("Executor shutdown interrupted", e);
             }
         } finally {
             executor.shutdownNow();
@@ -609,7 +610,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             indexingHelper.deleteDocumentByUrl(searchEngineClient, url);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleted {}", deleteUrlList);
+            logger.debug("Deleted {} documents from URL list", deleteUrlList.size());
         }
         deleteUrlList.clear();
     }

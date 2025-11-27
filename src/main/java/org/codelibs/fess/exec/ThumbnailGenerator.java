@@ -184,7 +184,7 @@ public class ThumbnailGenerator {
             if (totalCount != 0) {
                 logger.info("Processed {} thumbnail task(s).", totalCount);
             } else {
-                logger.info("No new thumbnails found.");
+                logger.info("No thumbnail tasks to process.");
             }
             exitCode = 0;
         } catch (final ContainerNotAvailableException e) {
@@ -195,7 +195,7 @@ public class ThumbnailGenerator {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("ThumbnailGenerator does not work correctly.", t);
+            logger.error("ThumbnailGenerator terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (systemMonitorTask != null) {

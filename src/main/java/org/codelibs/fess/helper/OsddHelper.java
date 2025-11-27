@@ -83,12 +83,12 @@ public class OsddHelper {
         }
         final String path = LaServletContextUtil.getServletContext().getRealPath(osddPath);
         if (path == null) {
-            logger.warn("{} was not found.", path);
+            logger.warn("OSDD file path could not be resolved: {}", osddPath);
             return null;
         }
         final File osddFile = new File(path);
         if (!osddFile.isFile()) {
-            logger.warn("{} was not a file.", path);
+            logger.warn("OSDD path is not a file: {}", path);
             return null;
         }
         return osddFile;

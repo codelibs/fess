@@ -135,7 +135,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
                 }
                 return;
             }
-            logger.warn("Failed to store a failure url.", e);
+            logger.warn("Failed to store failure url: {}", urlQueue.getUrl(), e);
         }
 
         if (cae.isDebugEnabled()) {
@@ -153,9 +153,9 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
     @Override
     protected void processCrawlingException(final Object... objs) {
+        final UrlQueue<?> urlQueue = objs.length > 1 && objs[1] instanceof UrlQueue<?> ? (UrlQueue<?>) objs[1] : null;
         try {
             final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
-            final UrlQueue<?> urlQueue = (UrlQueue<?>) objs[1];
             final Throwable e = (Throwable) objs[2];
 
             storeFailureUrl(crawlerContext, urlQueue, e.getClass().getCanonicalName(), e);
@@ -171,11 +171,11 @@ public class CrawlerLogHelper extends LogHelperImpl {
                 }
                 return;
             }
-            logger.warn("Failed to store a failure url.", e);
+            logger.warn("Failed to store failure url: {}", urlQueue != null ? urlQueue.getUrl() : "unknown", e);
         }
 
         super.processCrawlingException(objs);
-        if (objs.length > 1 && objs[1] instanceof final UrlQueue<?> urlQueue) {
+        if (urlQueue != null) {
             ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
         }
     }

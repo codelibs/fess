@@ -359,7 +359,7 @@ public class DocumentHelper {
                 }
                 return SIMILAR_DOC_HASH_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
             } catch (final IOException e) {
-                logger.warn("Failed to encode {}", hash, e);
+                logger.warn("Failed to encode similar document hash: {}", hash, e);
             }
         }
         return hash;

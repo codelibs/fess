@@ -368,7 +368,7 @@ public class Crawler {
                         }
                     }
                 } catch (final IOException e) {
-                    logger.debug("I/O exception.", e);
+                    logger.debug("I/O exception while reading process command.", e);
                 }
             }, "ProcessCommand");
             commandThread.start();
@@ -390,7 +390,7 @@ public class Crawler {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("Crawler does not work correctly.", t);
+            logger.error("Crawler terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (commandThread != null && commandThread.isAlive()) {
@@ -481,7 +481,7 @@ public class Crawler {
             }
             crawlingInfoHelper.updateParams(options.sessionId, options.name, dayForCleanup);
         } catch (final Exception e) {
-            logger.warn("Failed to store crawling information.", e);
+            logger.warn("Failed to store crawling information: sessionId={}", options.sessionId, e);
         }
 
         try {
@@ -490,7 +490,7 @@ public class Crawler {
             try {
                 crawlingInfoHelper.store(options.sessionId, false);
             } catch (final Exception e) {
-                logger.warn("Failed to store crawling information.", e);
+                logger.warn("Failed to store crawling information: sessionId={}", options.sessionId, e);
             }
 
             final Map<String, String> infoMap = crawlingInfoHelper.getInfoMap(options.sessionId);
@@ -510,7 +510,7 @@ public class Crawler {
             try {
                 crawler.sendMail(infoMap);
             } catch (final Exception e) {
-                logger.warn("Failed to send a mail.", e);
+                logger.warn("Failed to send notification mail.", e);
             }
 
         }
@@ -615,7 +615,7 @@ public class Crawler {
      */
     public int doCrawl(final Options options) {
         if (logger.isInfoEnabled()) {
-            logger.info("Starting Crawler..");
+            logger.info("Starting Crawler...");
         }
 
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
@@ -681,7 +681,7 @@ public class Crawler {
 
             return Constants.EXIT_OK;
         } catch (final Throwable t) {
-            logger.warn("An exception occurs on the crawl task.", t);
+            logger.warn("Crawl task failed with an exception.", t);
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);

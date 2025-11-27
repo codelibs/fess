@@ -106,7 +106,7 @@ public class IndexingHelper {
             synchronized (searchEngineClient) {
                 final long deletedDocCount = deleteOldDocuments(searchEngineClient, docList);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Deleted {} old docs", deletedDocCount);
+                    logger.debug("Deleted {} stale documents", deletedDocCount);
                 }
                 final BulkResponse response =
                         searchEngineClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), docList, (doc, builder) -> {
@@ -132,11 +132,11 @@ public class IndexingHelper {
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
-                    logger.info("Sent {} docs (Doc:{process {}ms, send {}ms, size {}}, {})", docList.size(), docList.getProcessingTime(),
+                    logger.info("Sent {} documents (process={}ms, send={}ms, size={}, {})", docList.size(), docList.getProcessingTime(),
                             systemHelper.getCurrentTimeAsLong() - execTime, MemoryUtil.byteCountToDisplaySize(docList.getContentSize()),
                             MemoryUtil.getMemoryUsageLog());
                 } else {
-                    logger.info("Sent {}  docs (Doc:{send {}ms}, {})", docList.size(), systemHelper.getCurrentTimeAsLong() - execTime,
+                    logger.info("Sent {} documents (send={}ms, {})", docList.size(), systemHelper.getCurrentTimeAsLong() - execTime,
                             MemoryUtil.getMemoryUsageLog());
                 }
             }
@@ -349,7 +349,8 @@ public class IndexingHelper {
         final long maxSearchDocSize = fessConfig.getIndexerMaxSearchDocSizeAsInteger().longValue();
         final boolean exceeded = numFound > maxSearchDocSize;
         if (exceeded) {
-            logger.warn("Max document size is exceeded({}>{}): {}", numFound, fessConfig.getIndexerMaxSearchDocSize(), queryBuilder);
+            logger.warn("Max search document size exceeded: found={}, limit={}. query={}", numFound,
+                    fessConfig.getIndexerMaxSearchDocSize(), queryBuilder);
         }
 
         if (numFound > fessConfig.getIndexerMaxResultWindowSizeAsInteger().longValue()) {
@@ -492,7 +493,7 @@ public class IndexingHelper {
         refreshIndex(searchEngineClient, index);
         final long numOfDeleted = searchEngineClient.deleteByQuery(index, queryBuilder);
         if (logger.isDebugEnabled()) {
-            logger.debug("Deleted {} old docs.", numOfDeleted);
+            logger.debug("Deleted {} stale documents.", numOfDeleted);
         }
         return numOfDeleted;
     }

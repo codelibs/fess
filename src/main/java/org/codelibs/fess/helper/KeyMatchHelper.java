@@ -140,7 +140,7 @@ public class KeyMatchHelper extends AbstractConfigHelper {
 
                 waitForNext();
             } catch (final Exception e) {
-                logger.warn("Cannot load {}", keyMatch, e);
+                logger.warn("Failed to load KeyMatch: id={}, term={}", keyMatch.getId(), keyMatch.getTerm(), e);
             }
         });
         this.keyMatchQueryMap = keyMatchQueryMap;

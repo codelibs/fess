@@ -171,7 +171,7 @@ public class SuggestCreator {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("Suggest creator does not work correctly.", t);
+            logger.error("SuggestCreator terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (systemMonitorTask != null) {
@@ -220,7 +220,7 @@ public class SuggestCreator {
 
     private int create() {
         if (!ComponentUtil.getFessConfig().isSuggestDocuments() && !ComponentUtil.getFessConfig().isSuggestSearchLog()) {
-            logger.info("Skipped to create new suggest index.");
+            logger.info("Skipped creating suggest index: both document and search log suggestions are disabled.");
             return 0;
         }
 
@@ -292,7 +292,7 @@ public class SuggestCreator {
             }
             return 0;
         } catch (final Exception e) {
-            logger.info("Purge error.", e);
+            logger.warn("Failed to purge suggest data.", e);
             return 1;
         }
     }

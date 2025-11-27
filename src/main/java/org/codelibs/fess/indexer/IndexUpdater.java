@@ -203,17 +203,17 @@ public class IndexUpdater extends Thread {
         try {
             urlFilterService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete url filters: {}", sessionId, e);
+            logger.warn("Failed to delete UrlFilter: sessionId={}", sessionId, e);
         }
         try {
             urlQueueService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete url queues: {}", sessionId, e);
+            logger.warn("Failed to delete UrlQueue: sessionId={}", sessionId, e);
         }
         try {
             dataService.delete(sessionId);
         } catch (final Exception e) {
-            logger.warn("Failed to delete data: {}", sessionId, e);
+            logger.warn("Failed to delete AccessResult: sessionId={}", sessionId, e);
         }
     }
 
@@ -337,7 +337,7 @@ public class IndexUpdater extends Thread {
                         throw e;
                     }
                     errorCount++;
-                    logger.warn("Failed to access data. Retry to access it {} times.", errorCount, e);
+                    logger.warn("Failed to access AccessResult data. Retrying... (attempt={}/{})", errorCount, maxErrorCount, e);
                 } finally {
                     if (systemHelper.isForceStop()) {
                         finishCrawling = true;
@@ -433,7 +433,7 @@ public class IndexUpdater extends Thread {
                     final Transformer transformer = ComponentUtil.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
-                        logger.warn("No transformer: {}", accessResultData.getTransformerName());
+                        logger.warn("Transformer not found: name={}, url={}", accessResultData.getTransformerName(), accessResult.getUrl());
                         continue;
                     }
                     @SuppressWarnings("unchecked")
@@ -446,7 +446,7 @@ public class IndexUpdater extends Thread {
 
                     if (Constants.FALSE.equals(map.get(Constants.INDEXING_TARGET))) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Skipped. This document is not a index target. ");
+                            logger.debug("Skipped indexing (not a target): url={}", accessResult.getUrl());
                         }
                         continue;
                     }
@@ -472,10 +472,10 @@ public class IndexUpdater extends Thread {
                         logger.debug("The number of an added document is {}.", documentSize);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Could not add a doc: {}", accessResult.getUrl(), e);
+                    logger.warn("Failed to add document: url={}", accessResult.getUrl(), e);
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Skipped. No content. ");
+                logger.debug("Skipped indexing (no content): url={}", accessResult.getUrl());
             }
 
         }
@@ -547,7 +547,7 @@ public class IndexUpdater extends Thread {
         }
 
         if (documentBoost > 0) {
-            addBoostValue(map, documentBoost);
+            addBoostValue(map, documentBoost, fessConfig);
         }
 
         if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
@@ -564,11 +564,10 @@ public class IndexUpdater extends Thread {
      * @param map the document data map to add the boost value to
      * @param documentBoost the boost value to apply to the document
      */
-    protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+    protected void addBoostValue(final Map<String, Object> map, final float documentBoost, final FessConfig fessConfig) {
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
-            logger.debug("Set a document boost ({}).", documentBoost);
+            logger.debug("Document boost applied: boost={}, url={}", documentBoost, map.get(fessConfig.getIndexFieldUrl()));
         }
     }
 
@@ -677,7 +676,7 @@ public class IndexUpdater extends Thread {
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         if (totalHits > unprocessedDocumentSize && intervalControlHelper.isCrawlerRunning()) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopped all crawler threads. You have {} (>{}) unprocessed docs.", totalHits, unprocessedDocumentSize);
+                logger.info("Stopped all crawler threads. Unprocessed documents: count={}, limit={}", totalHits, unprocessedDocumentSize);
             }
             intervalControlHelper.setCrawlerRunning(false);
         }
@@ -698,8 +697,7 @@ public class IndexUpdater extends Thread {
             }
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted {} documents. The execution time is {}ms.", sessionId,
-                        systemHelper.getCurrentTimeAsLong() - execTime2);
+                logger.debug("Deleted session data: sessionId={}, time={}ms", sessionId, systemHelper.getCurrentTimeAsLong() - execTime2);
             }
         }
         finishedSessionIdList.clear();
