@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.sso.aad;
+package org.codelibs.fess.sso.entraid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +21,9 @@ import java.util.List;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
-public class AzureAdAuthenticatorTest extends UnitFessTestCase {
+public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     public void test_addGroupOrRoleName() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         List<String> list = new ArrayList<>();
 
         list.clear();
@@ -56,7 +56,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_setMaxGroupDepth() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
         // Test setting different max group depths
         authenticator.setMaxGroupDepth(5);
@@ -68,7 +68,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_setGroupCacheExpiry() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
         // Test setting different cache expiry values
         authenticator.setGroupCacheExpiry(300L);
@@ -80,7 +80,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_getParentGroup_withDepthLimit() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(2);
 
         // Test that depth limit returns empty arrays when depth is exceeded
@@ -92,7 +92,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_getParentGroup_exactlyAtDepthLimit() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(5);
 
         // Test with depth exactly at the limit - should return empty arrays
@@ -103,7 +103,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_getParentGroup_oneBeforeDepthLimit() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(5);
 
         // Test with depth one before the limit - should attempt to process
@@ -121,7 +121,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_processParentGroup_callsOverloadWithDepth() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(3);
 
         List<String> groupList = new ArrayList<>();
@@ -141,7 +141,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_processParentGroup_respectsDepthLimit() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(2);
 
         List<String> groupList = new ArrayList<>();
@@ -156,7 +156,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_setUseV2Endpoint() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
         // Test parameter accepts final boolean (compile-time verification)
         authenticator.setUseV2Endpoint(true);
@@ -167,7 +167,7 @@ public class AzureAdAuthenticatorTest extends UnitFessTestCase {
     }
 
     public void test_defaultMaxGroupDepth() {
-        AzureAdAuthenticator authenticator = new AzureAdAuthenticator();
+        EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
         // Test that default max depth (10) prevents deep recursion
         // Depth 100 should exceed default and return empty

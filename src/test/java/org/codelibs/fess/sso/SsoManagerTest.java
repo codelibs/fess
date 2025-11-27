@@ -377,6 +377,67 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertNull(ssoManager.logout(FessUserBean.empty()));
     }
 
+    // Test backward compatibility: aad -> entraid mapping
+    public void test_getAuthenticator_aadMapsToEntraid() {
+        // Register an authenticator with the new "entraid" name
+        ComponentUtil.register(testAuthenticator, "entraidAuthenticator");
+
+        // Use legacy "aad" SSO type
+        currentSsoType = "aad";
+        ssoManager = new SsoManager() {
+            @Override
+            protected String getSsoType() {
+                return currentSsoType;
+            }
+        };
+
+        // Verify that "aad" SSO type resolves to "entraidAuthenticator"
+        SsoAuthenticator authenticator = ssoManager.getAuthenticator();
+        assertNotNull(authenticator);
+        assertEquals(testAuthenticator, authenticator);
+    }
+
+    public void test_getAuthenticator_entraidDirectAccess() {
+        // Register an authenticator with "entraid" name
+        ComponentUtil.register(testAuthenticator, "entraidAuthenticator");
+
+        // Use new "entraid" SSO type
+        currentSsoType = "entraid";
+        ssoManager = new SsoManager() {
+            @Override
+            protected String getSsoType() {
+                return currentSsoType;
+            }
+        };
+
+        // Verify that "entraid" SSO type resolves to "entraidAuthenticator"
+        SsoAuthenticator authenticator = ssoManager.getAuthenticator();
+        assertNotNull(authenticator);
+        assertEquals(testAuthenticator, authenticator);
+    }
+
+    public void test_getLoginCredential_withAadSsoType() {
+        final LoginCredential expectedCredential = new TestLoginCredential("entraiduser");
+        testAuthenticator.setLoginCredential(expectedCredential);
+
+        // Register authenticator with entraid name
+        ComponentUtil.register(testAuthenticator, "entraidAuthenticator");
+
+        // Use legacy "aad" SSO type
+        currentSsoType = "aad";
+        ssoManager = new SsoManager() {
+            @Override
+            protected String getSsoType() {
+                return currentSsoType;
+            }
+        };
+
+        // Verify login credential is retrieved correctly via backward compatibility
+        LoginCredential credential = ssoManager.getLoginCredential();
+        assertNotNull(credential);
+        assertEquals("entraiduser", ((TestLoginCredential) credential).username);
+    }
+
     // Helper classes for testing
     private static class TestLoginCredential implements LoginCredential {
         private final String username;
