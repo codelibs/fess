@@ -31,7 +31,6 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
-import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaErrorHook;

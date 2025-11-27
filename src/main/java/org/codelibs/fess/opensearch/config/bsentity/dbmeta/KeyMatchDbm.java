@@ -30,8 +30,6 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
- * The DBM of KeyMatch.
- *
  * @author ESFlute (using FreeGen)
  */
 public class KeyMatchDbm extends AbstractDBMeta {

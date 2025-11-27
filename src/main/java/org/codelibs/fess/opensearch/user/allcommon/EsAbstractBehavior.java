@@ -89,7 +89,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
 
     // ===================================================================================
-    //                                                                       Fesen
+    //                                                                       OpenSearch
     //                                                                              ======
     public RefreshResponse refresh() {
         return client.admin().indices().prepareRefresh(asEsIndex()).execute().actionGet(refreshTimeout);

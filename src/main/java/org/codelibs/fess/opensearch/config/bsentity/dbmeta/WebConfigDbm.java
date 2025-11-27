@@ -30,8 +30,6 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
- * The DBM of WebConfig.
- *
  * @author ESFlute (using FreeGen)
  */
 public class WebConfigDbm extends AbstractDBMeta {

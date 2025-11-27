@@ -28,8 +28,6 @@ import org.opensearch.action.delete.DeleteRequestBuilder;
 import org.opensearch.action.index.IndexRequestBuilder;
 
 /**
- * The abstract entity for Elasticsearch.
- *
  * @author ESFlute (using FreeGen)
  */
 public abstract class EsAbstractEntity implements Entity, Serializable, Cloneable {

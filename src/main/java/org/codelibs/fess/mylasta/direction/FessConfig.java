@@ -18,8 +18,6 @@ package org.codelibs.fess.mylasta.direction;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
- * The config for Fess.
- *
  * @author FreeGen
  */
 public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction.FessProp {
@@ -1637,7 +1635,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. storage */
     String ONLINE_HELP_NAME_STORAGE = "online.help.name.storage";
 
-    /** The key of the configuration. e.g. ja */
+    /** The key of the configuration. e.g. de,es,fr,ja,ko,zh-cn */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
     /** The key of the configuration. e.g. https://discuss.codelibs.org/c/Fess{lang}/ */
@@ -1930,7 +1928,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'search_engine.http.url'. <br>
      * The value is, e.g. http://localhost:9201 <br>
-     * comment: The URL of the search engine HTTP endpoint.
+     * comment: <br>
+     * The URL of the search engine HTTP endpoint.<br>
+     * For IPv6 environments, use brackets around the IPv6 address (e.g., http://[::1]:9201)
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSearchEngineHttpUrl();
@@ -7870,7 +7870,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'online.help.supported.langs'. <br>
-     * The value is, e.g. ja <br>
+     * The value is, e.g. de,es,fr,ja,ko,zh-cn <br>
      * comment: Supported languages for online help.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -12542,7 +12542,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_MAINTENANCE, "maintenance");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_PLUGIN, "plugin");
             defaultMap.put(FessConfig.ONLINE_HELP_NAME_STORAGE, "storage");
-            defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "ja");
+            defaultMap.put(FessConfig.ONLINE_HELP_SUPPORTED_LANGS, "de,es,fr,ja,ko,zh-cn");
             defaultMap.put(FessConfig.FORUM_LINK, "https://discuss.codelibs.org/c/Fess{lang}/");
             defaultMap.put(FessConfig.FORUM_SUPPORTED_LANGS, "en,ja");
             defaultMap.put(FessConfig.SUGGEST_POPULAR_WORD_SEED, "0");

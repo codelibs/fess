@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;

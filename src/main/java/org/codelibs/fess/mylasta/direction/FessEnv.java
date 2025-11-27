@@ -19,8 +19,6 @@ import org.lastaflute.core.direction.ObjectiveConfig;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
- * The environment for Fess.
- *
  * @author FreeGen
  */
 public interface FessEnv {
