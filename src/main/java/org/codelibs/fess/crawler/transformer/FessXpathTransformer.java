@@ -18,8 +18,8 @@ package org.codelibs.fess.crawler.transformer;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.BufferedInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -410,12 +410,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             value = urlStr;
         }
         try {
-            final URL url = new java.net.URL(value);
-            final String host = url.getHost();
+            final URI uri = URI.create(value);
+            final String host = uri.getHost();
             if (StringUtil.isBlank(host) || "http".equalsIgnoreCase(host) || "https".equalsIgnoreCase(host)) {
                 return false;
             }
-        } catch (final MalformedURLException e) {
+        } catch (final IllegalArgumentException e) {
             return false;
         }
         return true;
@@ -725,9 +725,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      */
     protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
         try {
-            final URL u = new URL(baseUrl);
-            return new URL(u, canonicalUrl.startsWith(":") ? u.getProtocol() + canonicalUrl : canonicalUrl).toString();
-        } catch (final MalformedURLException e) {
+            final URI baseUri = URI.create(baseUrl);
+            final String resolveTarget = canonicalUrl.startsWith(":") ? baseUri.getScheme() + canonicalUrl : canonicalUrl;
+            return baseUri.resolve(resolveTarget).toString();
+        } catch (final IllegalArgumentException e) {
             logger.warn("Invalid canonical url: {} : {}", baseUrl, canonicalUrl, e);
         }
         return null;
@@ -982,7 +983,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
         try {
-            final URL url = getBaseUrl(responseData.getUrl(), baseHref);
+            final java.net.URL url = getBaseUrl(responseData.getUrl(), baseHref);
             for (final Map.Entry<String, String> entry : childUrlRuleMap.entrySet()) {
                 for (final String u : getUrlFromTagAttribute(url, document, entry.getKey(), entry.getValue(), responseData.getCharSet())) {
                     anchorList.add(RequestDataBuilder.newRequestData().get().url(u).build());
@@ -1006,13 +1007,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @param currentUrl the current URL
      * @param baseHref the base href value from HTML
      * @return the base URL
-     * @throws MalformedURLException if the URL is malformed
+     * @throws Exception if the URL is malformed
      */
-    protected URL getBaseUrl(final String currentUrl, final String baseHref) throws MalformedURLException {
+    protected java.net.URL getBaseUrl(final String currentUrl, final String baseHref) throws Exception {
         if (baseHref != null) {
-            return getURL(currentUrl, baseHref);
+            final URI uri = getURI(currentUrl, baseHref);
+            return uri.toURL();
         }
-        return new URL(currentUrl);
+        return URI.create(currentUrl).toURL();
     }
 
     /**
@@ -1094,14 +1096,17 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @param encoding the character encoding
      */
     @Override
-    protected void addChildUrlFromTagAttribute(final List<String> urlList, final URL url, final String attrValue, final String encoding) {
+    protected void addChildUrlFromTagAttribute(final List<String> urlList, final java.net.URL url, final String attrValue,
+            final String encoding) {
         final String urlValue = attrValue.trim();
-        URL childUrl;
         String u = null;
         try {
-            childUrl = new URL(url, urlValue.startsWith(":") ? url.getProtocol() + urlValue : urlValue);
-            u = encodeUrl(normalizeUrl(childUrl.toExternalForm()), encoding);
-        } catch (final MalformedURLException e) {
+            // Convert URL to URI for modern URL handling
+            final URI uri = url.toURI();
+            final String resolveTarget = urlValue.startsWith(":") ? uri.getScheme() + urlValue : urlValue;
+            final URI childUri = uri.resolve(resolveTarget);
+            u = encodeUrl(normalizeUrl(childUri.toString()), encoding);
+        } catch (final IllegalArgumentException | URISyntaxException e) {
             final int pos = urlValue.indexOf(':');
             if (pos > 0 && pos < 10) {
                 u = encodeUrl(normalizeUrl(urlValue), encoding);
@@ -1161,9 +1166,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if (thumbnailNode != null) {
                 final String content = thumbnailNode.getTextContent();
                 if (StringUtil.isNotBlank(content)) {
-                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
-                    if (thumbnailUrl != null) {
-                        return thumbnailUrl.toExternalForm();
+                    final URI thumbnailUri = getURI(responseData.getUrl(), content);
+                    if (thumbnailUri != null) {
+                        return thumbnailUri.toString();
                     }
                 }
             }
@@ -1173,9 +1178,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if (ogImageNode != null) {
                 final String content = ogImageNode.getTextContent();
                 if (StringUtil.isNotBlank(content)) {
-                    final URL thumbnailUrl = getURL(responseData.getUrl(), content);
-                    if (thumbnailUrl != null) {
-                        return thumbnailUrl.toExternalForm();
+                    final URI thumbnailUri = getURI(responseData.getUrl(), content);
+                    if (thumbnailUri != null) {
+                        return thumbnailUri.toString();
                     }
                 }
             }
@@ -1227,9 +1232,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final Node srcNode = attributes.getNamedItem("src");
         if (srcNode != null) {
             try {
-                final URL thumbnailUrl = getURL(url, srcNode.getTextContent());
-                if (thumbnailUrl != null) {
-                    return thumbnailUrl.toExternalForm();
+                final URI thumbnailUri = getURI(url, srcNode.getTextContent());
+                if (thumbnailUri != null) {
+                    return thumbnailUri.toString();
                 }
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
@@ -1267,27 +1272,27 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     /**
-     * Creates a URL object from the current URL and a relative or absolute URL string.
+     * Creates a URI object from the current URL and a relative or absolute URL string.
      *
      * @param currentUrl the current URL as base
      * @param url the URL string to process
-     * @return the URL object
-     * @throws MalformedURLException if the URL is malformed
+     * @return the URI object
+     * @throws URISyntaxException if the URI is malformed
      */
-    protected URL getURL(final String currentUrl, final String url) throws MalformedURLException {
+    protected URI getURI(final String currentUrl, final String url) throws URISyntaxException {
         if (url != null) {
             if (url.startsWith("://")) {
                 final String protocol = currentUrl.split(":")[0];
-                return new URL(protocol + url);
+                return URI.create(protocol + url);
             }
             if (url.startsWith("//")) {
                 final String protocol = currentUrl.split(":")[0];
-                return new URL(protocol + ":" + url);
+                return URI.create(protocol + ":" + url);
             }
             if (url.startsWith("/") || url.indexOf(':') == -1) {
-                return new URL(new URL(currentUrl), url);
+                return URI.create(currentUrl).resolve(url);
             }
-            return new URL(url);
+            return URI.create(url);
         }
         return null;
     }
