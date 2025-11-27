@@ -52,6 +52,19 @@ if [ "x$FESS_USE_IPV4" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djava.net.preferIPv4Stack=true"
 fi
 
+# proxy
+if [ "x$FESS_PROXY_HOST" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.proxyHost=$FESS_PROXY_HOST"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttps.proxyHost=$FESS_PROXY_HOST"
+fi
+if [ "x$FESS_PROXY_PORT" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.proxyPort=$FESS_PROXY_PORT"
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttps.proxyPort=$FESS_PROXY_PORT"
+fi
+if [ "x$FESS_NON_PROXY_HOSTS" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dhttp.nonProxyHosts=$FESS_NON_PROXY_HOSTS"
+fi
+
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djna.nosys=true"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Djdk.io.permissionsUseCanonicalPath=true"
 
