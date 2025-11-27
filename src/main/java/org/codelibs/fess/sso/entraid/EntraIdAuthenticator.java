@@ -36,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.net.UuidUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.curl.Curl;
@@ -54,6 +55,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -524,17 +526,29 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Updates the user's group and role membership information.
+     * Updates the user's group and role membership information with lazy loading for parent groups.
+     * Direct groups are retrieved synchronously, while parent groups are fetched asynchronously
+     * to avoid login delays when users have many nested group memberships.
      * @param user The Entra ID user to update.
      */
     public void updateMemberOf(final EntraIdUser user) {
         final List<String> groupList = new ArrayList<>();
         final List<String> roleList = new ArrayList<>();
+        final List<String> groupIdsForParentLookup = new ArrayList<>();
         groupList.addAll(getDefaultGroupList());
         roleList.addAll(getDefaultRoleList());
-        processMemberOf(user, groupList, roleList, "https://graph.microsoft.com/v1.0/me/memberOf");
+
+        // Retrieve direct groups synchronously (parent group lookup is deferred)
+        processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, "https://graph.microsoft.com/v1.0/me/memberOf");
+
+        // Set initial groups
         user.setGroups(groupList.stream().distinct().toArray(n -> new String[n]));
         user.setRoles(roleList.stream().distinct().toArray(n -> new String[n]));
+
+        // Schedule lazy loading of parent groups
+        if (!groupIdsForParentLookup.isEmpty()) {
+            scheduleParentGroupLookup(user, new ArrayList<>(groupList), new ArrayList<>(roleList), groupIdsForParentLookup);
+        }
     }
 
     /**
@@ -635,6 +649,131 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 list.add(values[0]);
             }
         }
+    }
+
+    /**
+     * Processes direct member-of information from Microsoft Graph API without parent group lookup.
+     * This method retrieves only direct group memberships and collects group IDs for later
+     * asynchronous parent group lookup.
+     * @param user The Entra ID user.
+     * @param groupList The list to add group names to.
+     * @param roleList The list to add role names to.
+     * @param groupIdsForParentLookup The list to collect group IDs for later parent lookup.
+     * @param url The Microsoft Graph API URL.
+     */
+    protected void processDirectMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList,
+            final List<String> groupIdsForParentLookup, final String url) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("url: {}", url);
+        }
+        try (CurlResponse response = Curl.get(url)
+                .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
+                .header("Accept", "application/json")
+                .execute()) {
+            final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+            if (logger.isDebugEnabled()) {
+                logger.debug("response: {}", contentMap);
+            }
+            if (contentMap.containsKey("value")) {
+                @SuppressWarnings("unchecked")
+                final List<Map<String, Object>> memberOfList = (List<Map<String, Object>>) contentMap.get("value");
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                for (final Map<String, Object> memberOf : memberOfList) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("member: {}", memberOf);
+                    }
+                    String memberType = (String) memberOf.get("@odata.type");
+                    if (memberType == null) {
+                        logger.warn("@odata.type is null: {}", memberOf);
+                        continue;
+                    }
+                    memberType = memberType.toLowerCase(Locale.ENGLISH);
+                    final String id = (String) memberOf.get("id");
+                    if (StringUtil.isNotBlank(id)) {
+                        if (memberType.contains("group")) {
+                            groupList.add(id);
+                            // Collect group ID for parent lookup (deferred)
+                            groupIdsForParentLookup.add(id);
+                        } else if (memberType.contains("role")) {
+                            roleList.add(id);
+                        } else {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("unknown @odata.type: {}", memberOf);
+                            }
+                            groupList.add(id);
+                            groupIdsForParentLookup.add(id);
+                        }
+                    } else {
+                        logger.warn("id is empty: {}", memberOf);
+                    }
+                    final String[] names = fessConfig.getEntraIdPermissionFields();
+                    final boolean useDomainServices = fessConfig.isEntraIdUseDomainServices();
+                    for (final String name : names) {
+                        final String value = (String) memberOf.get(name);
+                        if (StringUtil.isNotBlank(value)) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("{} is a member of {}", name, value);
+                            }
+                            if (memberType.contains("group")) {
+                                addGroupOrRoleName(groupList, value, useDomainServices);
+                            } else if (memberType.contains("role")) {
+                                addGroupOrRoleName(roleList, value, useDomainServices);
+                            } else {
+                                addGroupOrRoleName(groupList, value, useDomainServices);
+                            }
+                        } else if (logger.isDebugEnabled()) {
+                            logger.debug("{} is empty: {}", name, memberOf);
+                        }
+                    }
+                }
+                final String nextLink = (String) contentMap.get("@odata.nextLink");
+                if (StringUtil.isNotBlank(nextLink)) {
+                    processDirectMemberOf(user, groupList, roleList, groupIdsForParentLookup, nextLink);
+                }
+            } else if (contentMap.containsKey("error")) {
+                logger.warn("Failed to access groups/roles: {}", contentMap);
+            }
+        } catch (final IOException e) {
+            logger.warn("Failed to access groups/roles in Entra ID.", e);
+        }
+    }
+
+    /**
+     * Schedules asynchronous parent group lookup using TimeoutManager.
+     * This method defers the retrieval of nested group information to avoid login delays.
+     * @param user The Entra ID user.
+     * @param initialGroups The initial group list to be updated.
+     * @param initialRoles The initial role list to be updated.
+     * @param groupIds The list of group IDs to lookup parent groups for.
+     */
+    protected void scheduleParentGroupLookup(final EntraIdUser user, final List<String> initialGroups, final List<String> initialRoles,
+            final List<String> groupIds) {
+        TimeoutManager.getInstance().addTimeoutTarget(() -> {
+            try {
+                final List<String> updatedGroups = new ArrayList<>(initialGroups);
+                final List<String> updatedRoles = new ArrayList<>(initialRoles);
+
+                for (final String groupId : groupIds) {
+                    processParentGroup(user, updatedGroups, updatedRoles, groupId);
+                }
+
+                // Update groups/roles
+                user.setGroups(updatedGroups.stream().distinct().toArray(n -> new String[n]));
+                user.setRoles(updatedRoles.stream().distinct().toArray(n -> new String[n]));
+
+                // Reset permissions to force recalculation
+                user.resetPermissions();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Parent group lookup completed. Groups: {}, Roles: {}", updatedGroups.size(), updatedRoles.size());
+                }
+
+                // Update session information
+                ComponentUtil.getActivityHelper().permissionChanged(OptionalThing.of(new FessUserBean(user)));
+            } catch (final Exception e) {
+                logger.warn("Failed to process parent groups asynchronously.", e);
+            }
+        }, 0, false);
     }
 
     /**

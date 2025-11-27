@@ -75,13 +75,13 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
         private static final long serialVersionUID = 1L;
 
         /** User's group memberships. */
-        protected String[] groups;
+        protected volatile String[] groups;
 
         /** User's role assignments. */
-        protected String[] roles;
+        protected volatile String[] roles;
 
         /** User's computed permissions. */
-        protected String[] permissions;
+        protected volatile String[] permissions;
 
         /** Entra ID authentication result. */
         protected IAuthenticationResult authResult;
@@ -184,7 +184,7 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
          * Sets the user's group memberships.
          * @param groups Array of group names.
          */
-        public void setGroups(final String[] groups) {
+        public synchronized void setGroups(final String[] groups) {
             this.groups = groups;
         }
 
@@ -192,8 +192,16 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
          * Sets the user's role assignments.
          * @param roles Array of role names.
          */
-        public void setRoles(final String[] roles) {
+        public synchronized void setRoles(final String[] roles) {
             this.roles = roles;
+        }
+
+        /**
+         * Resets permissions to force recalculation on next getPermissions() call.
+         * This is called after asynchronous parent group lookup completes.
+         */
+        public void resetPermissions() {
+            this.permissions = null;
         }
     }
 }
