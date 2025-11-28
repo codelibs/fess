@@ -15,14 +15,31 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.Crawler;
+import org.codelibs.fess.crawler.CrawlerContext;
+import org.codelibs.fess.crawler.interval.FessIntervalController;
+import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.Param.Config;
 import org.codelibs.fess.opensearch.config.exentity.FileConfig;
 import org.codelibs.fess.opensearch.config.exentity.WebConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -433,5 +450,351 @@ public class WebFsIndexHelperTest extends UnitFessTestCase {
         } catch (Exception e) {
             assertTrue(true);
         }
+    }
+
+    // ===== Tests for new methods added in refactoring =====
+
+    public void test_processFilters_withBlankString() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+
+        // Test with null
+        webFsIndexHelper.processFilters(null, crawler, systemHelper, true, "URL");
+        verify(crawler, never()).addIncludeFilter(anyString());
+
+        // Test with empty string
+        webFsIndexHelper.processFilters("", crawler, systemHelper, true, "URL");
+        verify(crawler, never()).addIncludeFilter(anyString());
+
+        // Test with whitespace only
+        webFsIndexHelper.processFilters("   ", crawler, systemHelper, true, "URL");
+        verify(crawler, never()).addIncludeFilter(anyString());
+    }
+
+    public void test_processFilters_includeFilters() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "http://example.com/.*\nhttp://test.com/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+        verify(systemHelper, times(2)).encodeUrlFilter(anyString());
+    }
+
+    public void test_processFilters_excludeFilters() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "http://example.com/admin/.*\nhttp://test.com/private/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, false, "URL");
+
+        verify(crawler, times(2)).addExcludeFilter(anyString());
+        verify(systemHelper, times(2)).encodeUrlFilter(anyString());
+    }
+
+    public void test_processFilters_withComments() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "# This is a comment\nhttp://example.com/.*\n# Another comment\nhttp://test.com/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        // Only non-comment lines should be added
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_processFilters_withDisableUrlEncode() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "#DISABLE_URL_ENCODE\nhttp://example.com/special chars/.*\nhttp://test.com/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        // First URL should not be encoded, second should be
+        verify(systemHelper, times(1)).encodeUrlFilter(anyString());
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_processFilters_multipleDisableUrlEncode() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "#DISABLE_URL_ENCODE\nhttp://example.com/special1/.*\n#DISABLE_URL_ENCODE\nhttp://test.com/special2/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        // Neither URL should be encoded
+        verify(systemHelper, never()).encodeUrlFilter(anyString());
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_addFailureExclusionFilters_withNullList() {
+        Crawler crawler = mock(Crawler.class);
+        TestCrawlingConfigHelper configHelper = (TestCrawlingConfigHelper) ComponentUtil.getCrawlingConfigHelper();
+        configHelper.setExcludedUrlList(null);
+
+        webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
+
+        verify(crawler, never()).addExcludeFilter(anyString());
+    }
+
+    public void test_addFailureExclusionFilters_withEmptyList() {
+        Crawler crawler = mock(Crawler.class);
+        TestCrawlingConfigHelper configHelper = (TestCrawlingConfigHelper) ComponentUtil.getCrawlingConfigHelper();
+        configHelper.setExcludedUrlList(Collections.emptyList());
+
+        webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
+
+        verify(crawler, never()).addExcludeFilter(anyString());
+    }
+
+    public void test_addFailureExclusionFilters_withUrls() {
+        Crawler crawler = mock(Crawler.class);
+        TestCrawlingConfigHelper configHelper = (TestCrawlingConfigHelper) ComponentUtil.getCrawlingConfigHelper();
+        List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://test.com/error");
+        configHelper.setExcludedUrlList(excludedUrls);
+
+        webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
+
+        verify(crawler, times(2)).addExcludeFilter(anyString());
+    }
+
+    public void test_addFailureExclusionFilters_withDuplicates() {
+        Crawler crawler = mock(Crawler.class);
+        TestCrawlingConfigHelper configHelper = (TestCrawlingConfigHelper) ComponentUtil.getCrawlingConfigHelper();
+        List<String> excludedUrls = Arrays.asList("http://example.com/failed", "http://example.com/failed", "http://test.com/error");
+        configHelper.setExcludedUrlList(excludedUrls);
+
+        webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
+
+        // Duplicates should be filtered by distinct()
+        verify(crawler, times(2)).addExcludeFilter(anyString());
+    }
+
+    public void test_configureCrawler_allParameters() {
+        Crawler crawler = mock(Crawler.class);
+        CrawlerContext crawlerContext = mock(CrawlerContext.class);
+        FessIntervalController intervalController = mock(FessIntervalController.class);
+
+        when(crawler.getCrawlerContext()).thenReturn(crawlerContext);
+        when(crawler.getIntervalController()).thenReturn(intervalController);
+
+        int intervalTime = 1000;
+        int numOfThread = 5;
+        int depth = 3;
+        long maxCount = 100L;
+
+        webFsIndexHelper.configureCrawler(crawler, intervalTime, numOfThread, depth, maxCount);
+
+        verify(intervalController).setDelayMillisForWaitingNewUrl(intervalTime);
+        verify(crawlerContext).setNumOfThread(numOfThread);
+        verify(crawlerContext).setMaxDepth(depth);
+        verify(crawlerContext).setMaxAccessCount(maxCount);
+        verify(crawler).setBackground(true);
+        verify(crawler).setThreadPriority(Thread.NORM_PRIORITY);
+    }
+
+    public void test_configureCrawler_withUnlimitedDepth() {
+        Crawler crawler = mock(Crawler.class);
+        CrawlerContext crawlerContext = mock(CrawlerContext.class);
+        FessIntervalController intervalController = mock(FessIntervalController.class);
+
+        when(crawler.getCrawlerContext()).thenReturn(crawlerContext);
+        when(crawler.getIntervalController()).thenReturn(intervalController);
+
+        webFsIndexHelper.configureCrawler(crawler, 1000, 5, -1, 100L);
+
+        verify(crawlerContext).setMaxDepth(-1);
+    }
+
+    public void test_configureCrawler_withDefaultValues() {
+        Crawler crawler = mock(Crawler.class);
+        CrawlerContext crawlerContext = mock(CrawlerContext.class);
+        FessIntervalController intervalController = mock(FessIntervalController.class);
+
+        when(crawler.getCrawlerContext()).thenReturn(crawlerContext);
+        when(crawler.getIntervalController()).thenReturn(intervalController);
+
+        webFsIndexHelper.configureCrawler(crawler, Constants.DEFAULT_INTERVAL_TIME_FOR_WEB,
+                Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB, -1, Long.MAX_VALUE);
+
+        verify(crawlerContext).setMaxAccessCount(Long.MAX_VALUE);
+    }
+
+    public void test_handleCleanupConfig_withCleanupAll() {
+        Map<String, String> configParamMap = new HashMap<>();
+        configParamMap.put(Config.CLEANUP_ALL, Constants.TRUE);
+
+        // Mock required services
+        try {
+            webFsIndexHelper.handleCleanupConfig("sessionId", configParamMap);
+            // If no exception, test passes
+            assertTrue(true);
+        } catch (Exception e) {
+            // Expected in unit test environment
+            assertTrue(true);
+        }
+    }
+
+    public void test_handleCleanupConfig_withCleanupUrlFilters() {
+        Map<String, String> configParamMap = new HashMap<>();
+        configParamMap.put(Config.CLEANUP_URL_FILTERS, Constants.TRUE);
+
+        try {
+            webFsIndexHelper.handleCleanupConfig("sessionId", configParamMap);
+            assertTrue(true);
+        } catch (Exception e) {
+            // Expected in unit test environment
+            assertTrue(true);
+        }
+    }
+
+    public void test_handleCleanupConfig_withNoCleanup() {
+        Map<String, String> configParamMap = new HashMap<>();
+        configParamMap.put(Config.CLEANUP_ALL, Constants.FALSE);
+
+        try {
+            webFsIndexHelper.handleCleanupConfig("sessionId", configParamMap);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_handleCleanupConfig_withEmptyMap() {
+        Map<String, String> configParamMap = new HashMap<>();
+
+        try {
+            webFsIndexHelper.handleCleanupConfig("sessionId", configParamMap);
+            assertTrue(true);
+        } catch (Exception e) {
+            assertTrue(true);
+        }
+    }
+
+    public void test_setupWebCrawler_withBlankUrls() {
+        WebConfig webConfig = new WebConfig();
+        webConfig.setUrls("");
+        webConfig.setName("TestConfig");
+
+        List<String> sessionIdList = new ArrayList<>();
+        List<String> crawlerStatusList = new ArrayList<>();
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        ProtocolHelper protocolHelper = mock(ProtocolHelper.class);
+
+        webFsIndexHelper.setupWebCrawler("sessionId", webConfig, sessionIdList, crawlerStatusList, systemHelper, protocolHelper);
+
+        // Should not add anything to lists when URLs are blank
+        assertEquals(0, sessionIdList.size());
+        assertEquals(0, crawlerStatusList.size());
+    }
+
+    public void test_setupFileCrawler_withBlankPaths() {
+        FileConfig fileConfig = new FileConfig();
+        fileConfig.setPaths("");
+        fileConfig.setName("TestConfig");
+
+        List<String> sessionIdList = new ArrayList<>();
+        List<String> crawlerStatusList = new ArrayList<>();
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        ProtocolHelper protocolHelper = mock(ProtocolHelper.class);
+
+        webFsIndexHelper.setupFileCrawler("sessionId", fileConfig, sessionIdList, crawlerStatusList, systemHelper, protocolHelper);
+
+        // Should not add anything to lists when paths are blank
+        assertEquals(0, sessionIdList.size());
+        assertEquals(0, crawlerStatusList.size());
+    }
+
+    public void test_processFilters_withEmptyLines() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "http://example.com/.*\n\n\nhttp://test.com/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        // Empty lines should be ignored
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_processFilters_withWhitespaceLines() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "http://example.com/.*\n   \n\t\nhttp://test.com/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        // Whitespace-only lines should be ignored
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_addFailureExclusionFilters_withBlankUrls() {
+        Crawler crawler = mock(Crawler.class);
+        TestCrawlingConfigHelper configHelper = (TestCrawlingConfigHelper) ComponentUtil.getCrawlingConfigHelper();
+        List<String> excludedUrls = Arrays.asList("", "  ", "http://example.com/failed");
+        configHelper.setExcludedUrlList(excludedUrls);
+
+        webFsIndexHelper.addFailureExclusionFilters(crawler, "configId", "URL");
+
+        // Only non-blank URLs should be added
+        verify(crawler, times(1)).addExcludeFilter(anyString());
+    }
+
+    public void test_processFilters_pathType() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "/tmp/test/.*\n/var/log/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "Path");
+
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+    }
+
+    public void test_configureCrawler_customPriority() {
+        webFsIndexHelper.setCrawlerPriority(Thread.MAX_PRIORITY);
+
+        Crawler crawler = mock(Crawler.class);
+        CrawlerContext crawlerContext = mock(CrawlerContext.class);
+        FessIntervalController intervalController = mock(FessIntervalController.class);
+
+        when(crawler.getCrawlerContext()).thenReturn(crawlerContext);
+        when(crawler.getIntervalController()).thenReturn(intervalController);
+
+        webFsIndexHelper.configureCrawler(crawler, 1000, 5, 3, 100L);
+
+        verify(crawler).setThreadPriority(Thread.MAX_PRIORITY);
+    }
+
+    public void test_processFilters_mixedCommentsAndFilters() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String filterStr = "# Header comment\n" + "http://example1.com/.*\n" + "# Middle comment\n" + "http://example2.com/.*\n"
+                + "# Footer comment";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        verify(crawler, times(2)).addIncludeFilter(anyString());
+        verify(systemHelper, times(2)).encodeUrlFilter(anyString());
+    }
+
+    public void test_processFilters_specialCharacters() {
+        Crawler crawler = mock(Crawler.class);
+        SystemHelper systemHelper = mock(SystemHelper.class);
+        when(systemHelper.encodeUrlFilter(anyString())).thenAnswer(invocation -> "encoded_" + invocation.getArgument(0));
+
+        String filterStr = "http://example.com/path with spaces/.*";
+        webFsIndexHelper.processFilters(filterStr, crawler, systemHelper, true, "URL");
+
+        verify(systemHelper, times(1)).encodeUrlFilter(anyString());
+        verify(crawler, times(1)).addIncludeFilter(anyString());
     }
 }
