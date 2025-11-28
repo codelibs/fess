@@ -149,7 +149,7 @@ public class ThumbnailManager {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         final String thumbnailPath = System.getProperty(Constants.FESS_THUMBNAIL_PATH);
         if (thumbnailPath != null) {
@@ -163,7 +163,7 @@ public class ThumbnailManager {
             }
         }
         if (baseDir.mkdirs()) {
-            logger.info("Created: {}", baseDir.getAbsolutePath());
+            logger.info("Created thumbnail directory: {}", baseDir.getAbsolutePath());
         }
         if (!baseDir.isDirectory()) {
             throw new FessSystemException("Not found: " + baseDir.getAbsolutePath());
@@ -192,7 +192,7 @@ public class ThumbnailManager {
                     }
                 } catch (final InterruptedException e) {
                     if (generating && logger.isDebugEnabled()) {
-                        logger.debug("Interupted task.", e);
+                        logger.debug("Interrupted task.", e);
                     }
                 } catch (final Exception e) {
                     if (generating) {
@@ -218,7 +218,7 @@ public class ThumbnailManager {
         try {
             thumbnailQueueThread.join(10000);
         } catch (final InterruptedException e) {
-            logger.warn("Thumbnail thread is timeouted.", e);
+            logger.warn("Thumbnail thread timed out.", e);
         }
         generatorList.forEach(g -> {
             try {
@@ -332,7 +332,7 @@ public class ThumbnailManager {
             final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
             if (!noImageFile.isFile() || systemHelper.getCurrentTimeAsLong() - noImageFile.lastModified() > noImageExpired) {
                 if (noImageFile.isFile() && !noImageFile.delete()) {
-                    logger.warn("Failed to delete {}", noImageFile.getAbsolutePath());
+                    logger.warn("Failed to delete no-image file: {}", noImageFile.getAbsolutePath());
                 }
                 final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
                 if (generator.isAvailable()) {
@@ -345,7 +345,7 @@ public class ThumbnailManager {
                         }
                     }
                 } else {
-                    logger.warn("{} is not available.", generatorName);
+                    logger.warn("Thumbnail generator is not available: name={}", generatorName);
                 }
             } else if (logger.isDebugEnabled()) {
                 logger.debug("No image file exists: {}", noImageFile.getAbsolutePath());
@@ -567,7 +567,7 @@ public class ThumbnailManager {
             try {
                 Files.delete(path);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Delete {}", path);
+                    logger.debug("Deleted thumbnail file: {}", path);
                 }
 
                 Path parent = path.getParent();
@@ -575,7 +575,7 @@ public class ThumbnailManager {
                     parent = parent.getParent();
                 }
             } catch (final IOException e) {
-                logger.warn("Failed to delete {}", path, e);
+                logger.warn("Failed to delete thumbnail file: {}", path, e);
             }
         }
 
@@ -648,7 +648,7 @@ public class ThumbnailManager {
             if (directory.list() != null && directory.list().length == 0 && !THUMBNAILS_DIR_NAME.equals(directory.getName())) {
                 Files.delete(dir);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Delete {}", dir);
+                    logger.debug("Deleted empty directory: {}", dir);
                 }
                 return true;
             }
@@ -679,9 +679,9 @@ public class ThumbnailManager {
                                     // ignore
                                 }
                                 Files.move(path, newPath);
-                                logger.info("Move {} to {}", path, newPath);
+                                logger.info("Moving thumbnail: from={}, to={}", path, newPath);
                             } catch (final IOException e) {
-                                logger.warn("Failed to move {}", path, e);
+                                logger.warn("Failed to move thumbnail: path={}", path, e);
                             }
                         }
                     }

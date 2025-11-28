@@ -114,7 +114,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             parentFile.mkdirs();
         }
         if (!parentFile.isDirectory()) {
-            logger.warn("Not found: {}", parentFile.getAbsolutePath());
+            logger.warn("Parent directory not found: {}", parentFile.getAbsolutePath());
             return false;
         }
 
@@ -157,7 +157,7 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
                 if (!created) {
                     updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                     if (outputFile.exists() && !outputFile.delete()) {
-                        logger.warn("Failed to delete {}", outputFile.getAbsolutePath());
+                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath());
                     }
                 }
             }

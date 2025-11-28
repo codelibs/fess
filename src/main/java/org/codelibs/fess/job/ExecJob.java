@@ -328,7 +328,7 @@ public abstract class ExecJob {
             return;
         }
         if (!FileUtils.deleteQuietly(ownTmpDir)) {
-            logger.warn("Could not delete a temp dir: {}", ownTmpDir.getAbsolutePath());
+            logger.warn("Could not delete temp directory: path={}", ownTmpDir.getAbsolutePath());
         }
     }
 
@@ -362,7 +362,7 @@ public abstract class ExecJob {
             return null;
         }
         return TimeoutManager.getInstance().addTimeoutTarget(() -> {
-            logger.warn("Process is terminated due to {} second exceeded.", timeout);
+            logger.warn("Process terminated: timeout={}s exceeded", timeout);
             ComponentUtil.getProcessHelper().destroyProcess(sessionId);
             processTimeout = true;
         }, timeout, false);

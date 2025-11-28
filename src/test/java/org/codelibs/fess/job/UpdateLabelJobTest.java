@@ -111,7 +111,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     public void test_execute_success() {
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("3 docs")); // 3 documents processed
+        assertTrue(result.contains("3 documents")); // 3 documents processed
         assertFalse(result.contains("exception"));
     }
 
@@ -122,7 +122,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
 
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("3 docs"));
+        assertTrue(result.contains("3 documents"));
         // queryBuilder field is protected, so we can't directly assert it
     }
 
@@ -142,7 +142,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         String result = updateLabelJob.execute();
         assertNotNull(result);
         assertTrue(result.contains("Test exception"));
-        assertFalse(result.contains("docs"));
+        assertFalse(result.contains("documents"));
     }
 
     // Test query() method
@@ -162,7 +162,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         // But we can verify the job still executes properly
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("docs"));
+        assertTrue(result.contains("documents"));
     }
 
     // Test constructor
@@ -177,7 +177,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
         String result = updateLabelJob.execute();
         assertNotNull(result);
         // The mock returns a fixed count of 3
-        assertTrue(result.contains("docs"));
+        assertTrue(result.contains("documents"));
     }
 
     // Test with empty label set
@@ -204,7 +204,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
 
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("0 docs"));
+        assertTrue(result.contains("0 documents"));
     }
 
     // Test script generation with multiple labels
@@ -214,7 +214,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
 
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("3 docs")); // Verify the job executes
+        assertTrue(result.contains("3 documents")); // Verify the job executes
     }
 
     // Test handling of processing exception
@@ -233,7 +233,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
 
         String result = updateLabelJob.execute();
         assertNotNull(result);
-        assertTrue(result.contains("0 docs"));
+        assertTrue(result.contains("0 documents"));
     }
 
 }

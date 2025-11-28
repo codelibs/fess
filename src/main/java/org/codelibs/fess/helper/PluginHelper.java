@@ -193,18 +193,18 @@ public class PluginHelper {
                                     list.add(new Artifact(name, actualVersion,
                                             pluginUrl + version + "/" + name + "-" + actualVersion + ".jar"));
                                 } else if (logger.isDebugEnabled()) {
-                                    logger.debug("Snapshot name is not found: {}/{}", name, version);
+                                    logger.debug("Snapshot name not found: name={}, version={}", name, version);
                                 }
                             } else {
                                 list.add(new Artifact(name, version, pluginUrl + version + "/" + name + "-" + version + ".jar"));
                             }
                         } else if (logger.isDebugEnabled()) {
-                            logger.debug("{}:{} is ignored.", name, version);
+                            logger.debug("Artifact ignored: name={}, version={}", name, version);
                         }
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to parse {}maven-metadata.xml.", pluginUrl, e);
+                logger.warn("Failed to parse maven-metadata.xml: url={}", pluginUrl, e);
             }
         }
         return list;
@@ -293,7 +293,7 @@ public class PluginHelper {
      */
     protected String getRepositoryContent(final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Loading {}", url);
+            logger.debug("Loading: url={}", url);
         }
         try (final CurlResponse response = createCurlRequest(url).execute()) {
             return response.getContentAsString();

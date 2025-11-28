@@ -215,7 +215,7 @@ public class ViewHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
@@ -477,7 +477,7 @@ public class ViewHelper {
                     url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.warn("Failed to decode {}", url, e);
+                        logger.warn("Failed to decode url: url={}", url, e);
                     }
                 }
             }

@@ -221,7 +221,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
                 final Matcher m = parsePattern.matcher(replacedLine);
 
                 if (!m.find()) {
-                    logger.warn("Failed to parse {} in {}", line, path);
+                    logger.warn("Failed to parse mapping: line={}, path={}", line, path);
                     if (updater != null) {
                         updater.write("# " + line);
                     }
@@ -232,7 +232,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
                 output = m.group(2).trim();
 
                 if (inputs == null || output == null || inputs.length == 0) {
-                    logger.warn("Failed to parse {} in {}", line, path);
+                    logger.warn("Failed to parse mapping: line={}, path={}", line, path);
                     if (updater != null) {
                         updater.write("# " + line);
                     }

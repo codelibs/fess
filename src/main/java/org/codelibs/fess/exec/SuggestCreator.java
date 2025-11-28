@@ -128,7 +128,7 @@ public class SuggestCreator {
                 ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
                 System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: {}={}", e.getKey(), e.getValue()));
                 System.getenv().entrySet().forEach(e -> logger.debug("Env: {}={}", e.getKey(), e.getValue()));
-                logger.debug("Option: {}", options);
+                logger.debug("Options: options={}", options);
             } catch (final Exception e) {
                 // ignore
             }
@@ -151,7 +151,7 @@ public class SuggestCreator {
                 @Override
                 public void run() {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Destroying LaContainer..");
+                        logger.debug("Destroying LaContainer...");
                     }
                     destroyContainer();
                 }
@@ -171,7 +171,7 @@ public class SuggestCreator {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("Suggest creator does not work correctly.", t);
+            logger.error("SuggestCreator terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (systemMonitorTask != null) {
@@ -200,7 +200,7 @@ public class SuggestCreator {
             try {
                 final File propFile = ComponentUtil.getSystemHelper().createTempFile("suggest_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: {}", propFile.getAbsolutePath());
+                    logger.debug("Deleted temp file: path={}", propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();
@@ -220,7 +220,7 @@ public class SuggestCreator {
 
     private int create() {
         if (!ComponentUtil.getFessConfig().isSuggestDocuments() && !ComponentUtil.getFessConfig().isSuggestSearchLog()) {
-            logger.info("Skipped to create new suggest index.");
+            logger.info("Skipped creating suggest index: both document and search log suggestions are disabled.");
             return 0;
         }
 
@@ -292,7 +292,7 @@ public class SuggestCreator {
             }
             return 0;
         } catch (final Exception e) {
-            logger.info("Purge error.", e);
+            logger.warn("Failed to purge suggest data.", e);
             return 1;
         }
     }

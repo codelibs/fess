@@ -68,7 +68,7 @@ public class CurlHelper {
         final String authorities = fessConfig.getFesenHttpSslCertificateAuthorities();
         if (StringUtil.isNotBlank(authorities)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Loading certificate_authorities: {}", authorities);
+                logger.debug("Loading certificate_authorities: path={}", authorities);
             }
             try (final InputStream in = new FileInputStream(authorities)) {
                 final Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(in);
@@ -84,7 +84,7 @@ public class CurlHelper {
                 sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
                 sslSocketFactory = sslContext.getSocketFactory();
             } catch (final Exception e) {
-                logger.warn("Failed to load {}", authorities, e);
+                logger.warn("Failed to load certificate_authorities: path={}", authorities, e);
             }
         }
 

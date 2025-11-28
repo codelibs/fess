@@ -45,7 +45,7 @@ public class MatchAllQueryCommand extends QueryCommand {
     @Override
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (logger.isDebugEnabled()) {
-            logger.debug("{}:{}", query, boost);
+            logger.debug("MatchAllQuery: query={}, boost={}", query, boost);
         }
         return QueryBuilders.matchAllQuery().boost(boost);
     }

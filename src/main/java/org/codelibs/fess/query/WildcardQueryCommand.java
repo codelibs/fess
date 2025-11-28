@@ -62,7 +62,7 @@ public class WildcardQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final WildcardQuery wildcardQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("WildcardQuery: query={}, boost={}", query, boost);
             }
             return convertWildcardQuery(context, wildcardQuery, boost);
         }

@@ -52,7 +52,7 @@ public class ScriptEngineFactory {
                     "Both name and scriptEngine parameters are required. name: " + name + ", scriptEngine: " + scriptEngine);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", name);
+            logger.debug("Loaded ScriptEngine: {}", name);
         }
         scriptEngineMap.put(name.toLowerCase(Locale.ROOT), scriptEngine);
         scriptEngineMap.put(scriptEngine.getClass().getSimpleName().toLowerCase(Locale.ROOT), scriptEngine);

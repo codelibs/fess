@@ -316,12 +316,12 @@ public class ElevateWordService {
                         }
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to read a sugget elevate word: {}", list, e);
+                    logger.warn("Failed to read a suggest elevate word: {}", list, e);
                 }
             }
             elevateWordBhv.refresh();
         } catch (final IOException e) {
-            logger.warn("Failed to read a sugget elevate word.", e);
+            logger.warn("Failed to read a suggest elevate word.", e);
         }
     }
 
@@ -372,7 +372,7 @@ public class ElevateWordService {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        logger.warn("Failed to write a sugget elevate word: {}", entity, e);
+                        logger.warn("Failed to write a suggest elevate word: {}", entity, e);
                     }
                 }
 
@@ -387,7 +387,7 @@ public class ElevateWordService {
 
             csvWriter.flush();
         } catch (final IOException e) {
-            logger.warn("Failed to write a sugget elevate word.", e);
+            logger.warn("Failed to write a suggest elevate word.", e);
         }
     }
 

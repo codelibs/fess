@@ -150,3 +150,10 @@ Generated code:
 - **Default Port**: 8080 (configurable via `fess.port` system property)
 - **Log Location**: `target/fess-logs/` (dev), `/var/log/fess/` (prod)
 - **Admin Login**: `admin/admin`
+
+## Log Message Guidelines
+
+- Format parameters as `key=value` (e.g., `sessionId={}`, `url={}`)
+- Prefix with `[name]` when context identification is needed
+- Use full words, not abbreviations (e.g., "documents" not "docs")
+- Log only identifying fields, not entire objects

@@ -94,7 +94,7 @@ public class GroovyEngine extends AbstractScriptEngine {
             final GroovyShell groovyShell = new GroovyShell(classLoader, new Binding(bindingMap));
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Evaluating Groovy script: {}", template);
+                logger.debug("Evaluating Groovy script: template={}", template);
             }
 
             return groovyShell.evaluate(template);
@@ -107,7 +107,7 @@ public class GroovyEngine extends AbstractScriptEngine {
             throw e;
         } catch (final Exception e) {
             // Log and return null for other exceptions to maintain backward compatibility
-            logger.warn("Failed to evaluate Groovy script. Template: {}, Parameters: {}", template, safeParamMap, e);
+            logger.warn("Failed to evaluate Groovy script: template={}, parameters={}", template, safeParamMap, e);
             return null;
         } finally {
             // Properly clean up GroovyClassLoader resources

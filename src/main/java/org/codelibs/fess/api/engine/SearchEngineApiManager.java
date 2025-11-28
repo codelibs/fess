@@ -77,7 +77,7 @@ public class SearchEngineApiManager extends BaseApiManager {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load {}", this.getClass().getSimpleName());
+            logger.info("Loaded {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getWebApiManagerFactory().add(this);
     }
@@ -118,7 +118,7 @@ public class SearchEngineApiManager extends BaseApiManager {
         } catch (final WebApiException e) {
             String message;
             if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiJsonResponseExceptionIncluded())) {
-                logger.warn("Failed to access to Web API.", e);
+                logger.warn("Failed to access Web API.", e);
                 message = e.getMessage();
             } else {
                 final String errorCode = UUID.randomUUID().toString();
@@ -242,7 +242,7 @@ public class SearchEngineApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read {} from {}", path, filePath);
+                logger.error("Failed to read file: path={}, filePath={}", path, filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         } else {
@@ -252,7 +252,7 @@ public class SearchEngineApiManager extends BaseApiManager {
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
-                logger.error("Failed to read {} from {}", path, filePath);
+                logger.error("Failed to read file: path={}, filePath={}", path, filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         }

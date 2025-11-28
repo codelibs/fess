@@ -50,7 +50,7 @@ public class BooleanQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final BooleanQuery booleanQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("BooleanQuery: query={}, boost={}", query, boost);
             }
             return convertBooleanQuery(context, booleanQuery, boost);
         }

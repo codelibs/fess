@@ -156,13 +156,13 @@ public class AdminMaintenanceAction extends FessAdminAction {
         searchEngineClient.flushConfigFiles(() -> {
             final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
             searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
-                logger.info("Close {}", docIndex);
+                logger.info("Closing index: {}", docIndex);
                 searchEngineClient.admin()
                         .indices()
                         .prepareOpen(docIndex)
-                        .execute(ActionListener.wrap(res2 -> logger.info("Open {}", docIndex),
-                                e -> logger.warn("Failed to open {}", docIndex, e)));
-            }, e -> logger.warn("Failed to close {}", docIndex, e)));
+                        .execute(ActionListener.wrap(res2 -> logger.info("Opened index: {}", docIndex),
+                                e -> logger.warn("Failed to open index: {}", docIndex, e)));
+            }, e -> logger.warn("Failed to close index: {}", docIndex, e)));
         });
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
@@ -355,7 +355,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
                         zos.putNextEntry(entry);
                         final long len = Files.copy(filePath, zos);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("{}: {}", filePath.getFileName(), len);
+                            logger.debug("Log file: name={}, size={}", filePath.getFileName(), len);
                         }
                     } catch (final IOException e) {
                         logger.warn("Failed to access {}", filePath, e);

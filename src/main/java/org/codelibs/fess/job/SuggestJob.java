@@ -252,7 +252,7 @@ public class SuggestJob extends ExecJob {
                 processHelper.destroyProcess(sessionId);
             } finally {
                 if (propFile != null && !propFile.delete()) {
-                    logger.warn("Failed to delete {}.", propFile.getAbsolutePath());
+                    logger.warn("Failed to delete properties file: {}", propFile.getAbsolutePath());
                 }
                 deleteTempDir(ownTmpDir);
             }

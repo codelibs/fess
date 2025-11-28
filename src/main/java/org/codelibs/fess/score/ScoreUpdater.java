@@ -47,7 +47,7 @@ public class ScoreUpdater {
                 final long count = b.process();
                 resultBuf.append(b.getClass().getSimpleName()).append(" : ").append(count).append('\n');
             } catch (final Exception e) {
-                logger.warn("Failed to update scores.", e);
+                logger.warn("Failed to update scores: booster={}", b.getClass().getSimpleName(), e);
                 resultBuf.append(e.getMessage()).append('\n');
             }
         });

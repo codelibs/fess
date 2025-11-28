@@ -84,12 +84,12 @@ public class JobHelper {
 
         final String id = scheduledJob.getId();
         if (!Constants.T.equals(scheduledJob.getAvailable())) {
-            logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
+            logger.info("Inactive Job: id={}, name={}", id, scheduledJob.getName());
             try {
                 unregister(scheduledJob);
             } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to delete Job {}", scheduledJob, e);
+                    logger.debug("Failed to delete Job: job={}", scheduledJob, e);
                 }
             }
             return;
@@ -113,7 +113,7 @@ public class JobHelper {
                     final String cronExpression = scheduledJob.getCronExpression();
                     job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
                 } else {
-                    logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
+                    logger.info("Inactive Job: id={}, name={}", id, scheduledJob.getName());
                     job.becomeNonCron();
                 }
             } else if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
@@ -128,7 +128,7 @@ public class JobHelper {
                 cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(), fessConfig.getSchedulerConcurrentExecModeAsEnum(),
                         op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
             } else {
-                logger.info("Inactive Job {}:{}", id, scheduledJob.getName());
+                logger.info("Inactive Job: id={}, name={}", id, scheduledJob.getName());
                 cron.registerNonCron(fessConfig.getSchedulerJobClassAsClass(), fessConfig.getSchedulerConcurrentExecModeAsEnum(),
                         op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
             }

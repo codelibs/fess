@@ -104,7 +104,7 @@ public class DataStoreFactory {
                     "Both name and dataStore parameters are required. name: " + name + ", dataStore: " + dataStore);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", name);
+            logger.debug("Loaded DataStore: name={}", name);
         }
         dataStoreMap.put(name.toLowerCase(Locale.ROOT), dataStore);
         dataStoreMap.put(dataStore.getClass().getSimpleName().toLowerCase(Locale.ROOT), dataStore);
@@ -164,7 +164,7 @@ public class DataStoreFactory {
                 final Path xmlPath = fs.getPath("fess_ds++.xml");
                 if (!Files.exists(xmlPath)) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Configuration file not found in {}", jarFile.getAbsolutePath());
+                        logger.debug("Configuration file (fess_ds++.xml) not found: path={}", jarFile.getAbsolutePath());
                     }
                     continue;
                 }
@@ -194,7 +194,7 @@ public class DataStoreFactory {
                     }
                 }
             } catch (final Exception e) {
-                logger.warn("Failed to load {}", jarFile.getAbsolutePath(), e);
+                logger.warn("Failed to load DataStore plugin: path={}", jarFile.getAbsolutePath(), e);
             }
         }
         return nameSet.stream().sorted().collect(Collectors.toList());
