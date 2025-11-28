@@ -81,7 +81,7 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
             } else if (keyValue.length == 1) {
                 list.add(new Pair<>(keyValue[0].trim(), StringUtil.EMPTY));
             } else {
-                logger.warn("Unexpected value: {}", s);
+                logger.warn("Unexpected value: value={}", s);
             }
         }));
 
@@ -132,12 +132,12 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
         } else if (response instanceof StreamResponse) {
             mimeType = "application/octet-stream";
         } else {
-            logger.debug("Unknown response: {}", response);
+            logger.debug("Unknown response: response={}", response);
             return;
         }
         adjustActionResponseHeaders(mimeType, (k, v) -> {
             if (logger.isDebugEnabled()) {
-                logger.debug("Apply header {}:{} to response of {}", k, v, mimeType);
+                logger.debug("Apply header: key={}, value={}, mimeType={}", k, v, mimeType);
             }
             response.header(k, v);
         });

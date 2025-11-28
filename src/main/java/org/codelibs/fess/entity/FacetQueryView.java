@@ -75,7 +75,7 @@ public class FacetQueryView {
             queryMap.remove("labels.facet_filetype_others");
             queryMap.put("labels.facet_filetype_others", "filetype:others");
             if (logger.isDebugEnabled()) {
-                logger.debug("updated query map: {}", queryMap);
+                logger.debug("Updated query map: queryMap={}", queryMap);
             }
         }
 

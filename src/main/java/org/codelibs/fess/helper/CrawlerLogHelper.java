@@ -135,17 +135,17 @@ public class CrawlerLogHelper extends LogHelperImpl {
                 }
                 return;
             }
-            logger.warn("Failed to store failure url: {}", urlQueue.getUrl(), e);
+            logger.warn("Failed to store failure url: url={}", urlQueue.getUrl(), e);
         }
 
         if (cae.isDebugEnabled()) {
-            logger.debug("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
+            logger.debug("[{}] Crawling Access Exception: url={}", failureUrlId, urlQueue.getUrl(), cae);
         } else if (cae.isInfoEnabled()) {
             logger.info("[{}] {}", failureUrlId, cae.getMessage());
         } else if (cae.isWarnEnabled()) {
-            logger.warn("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
+            logger.warn("[{}] Crawling Access Exception: url={}", failureUrlId, urlQueue.getUrl(), cae);
         } else if (cae.isErrorEnabled()) {
-            logger.error("[{}] Crawling Access Exception at {}", failureUrlId, urlQueue.getUrl(), cae);
+            logger.error("[{}] Crawling Access Exception: url={}", failureUrlId, urlQueue.getUrl(), cae);
         }
 
         ComponentUtil.getCrawlerStatsHelper().record(urlQueue, StatsAction.ACCESS_EXCEPTION);
@@ -171,7 +171,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
                 }
                 return;
             }
-            logger.warn("Failed to store failure url: {}", urlQueue != null ? urlQueue.getUrl() : "unknown", e);
+            logger.warn("Failed to store failure url: url={}", urlQueue != null ? urlQueue.getUrl() : "unknown", e);
         }
 
         super.processCrawlingException(objs);

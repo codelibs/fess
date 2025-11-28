@@ -160,7 +160,7 @@ public class IndexUpdater extends Thread {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         if (ComponentUtil.hasIngestFactory()) {
             ingestFactory = ComponentUtil.getIngestFactory();
@@ -175,7 +175,7 @@ public class IndexUpdater extends Thread {
     public void destroy() {
         if (!finishCrawling) {
             if (logger.isInfoEnabled()) {
-                logger.info("Stopping all crawler.");
+                logger.info("Stopping all crawlers.");
             }
             forceStop();
         }
@@ -412,7 +412,7 @@ public class IndexUpdater extends Thread {
         final long maxDocumentRequestSize = Long.parseLong(fessConfig.getIndexerWebfsMaxDocumentRequestSize());
         for (final OpenSearchAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Indexing {}", accessResult.getUrl());
+                logger.debug("Indexing: url={}", accessResult.getUrl());
             }
             accessResult.setStatus(Constants.DONE_STATUS);
             accessResultList.add(accessResult);
@@ -420,7 +420,7 @@ public class IndexUpdater extends Thread {
             if (accessResult.getHttpStatusCode() != 200) {
                 // invalid page
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Skipped. The response code is {}.", accessResult.getHttpStatusCode());
+                    logger.debug("Skipped: httpStatusCode={}", accessResult.getHttpStatusCode());
                 }
                 continue;
             }
@@ -440,7 +440,7 @@ public class IndexUpdater extends Thread {
                     final Map<String, Object> map = (Map<String, Object>) transformer.getData(accessResultData);
                     if (map.isEmpty()) {
                         // no transformer
-                        logger.warn("No data: {}", accessResult.getUrl());
+                        logger.warn("No data: url={}", accessResult.getUrl());
                         continue;
                     }
 
@@ -469,7 +469,7 @@ public class IndexUpdater extends Thread {
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {
-                        logger.debug("The number of an added document is {}.", documentSize);
+                        logger.debug("Added documents: count={}", documentSize);
                     }
                 } catch (final Exception e) {
                     logger.warn("Failed to add document: url={}", accessResult.getUrl(), e);
@@ -492,7 +492,7 @@ public class IndexUpdater extends Thread {
         try {
             return accessResult.getAccessResultData();
         } catch (final Exception e) {
-            logger.warn("Failed to get data from {}", accessResult.getUrl(), e);
+            logger.warn("Failed to get data: url={}", accessResult.getUrl(), e);
         }
         return null;
     }
@@ -547,7 +547,7 @@ public class IndexUpdater extends Thread {
         }
 
         if (documentBoost > 0) {
-            addBoostValue(map, documentBoost, fessConfig);
+            addBoostValue(map, documentBoost);
         }
 
         if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
@@ -564,7 +564,8 @@ public class IndexUpdater extends Thread {
      * @param map the document data map to add the boost value to
      * @param documentBoost the boost value to apply to the document
      */
-    protected void addBoostValue(final Map<String, Object> map, final float documentBoost, final FessConfig fessConfig) {
+    protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
             logger.debug("Document boost applied: boost={}, url={}", documentBoost, map.get(fessConfig.getIndexFieldUrl()));
@@ -585,7 +586,7 @@ public class IndexUpdater extends Thread {
             final int count = searchLogHelper.getClickCount(url);
             doc.put(fessConfig.getIndexFieldClickCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Click Count: {}, url: {}", count, url);
+                logger.debug("Click count: count={}, url={}", count, url);
             }
         }
     }
@@ -604,7 +605,7 @@ public class IndexUpdater extends Thread {
             final long count = searchLogHelper.getFavoriteCount(url);
             map.put(fessConfig.getIndexFieldFavoriteCount(), count);
             if (logger.isDebugEnabled()) {
-                logger.debug("Favorite Count: {}, url: {}", count, url);
+                logger.debug("Favorite count: count={}, url={}", count, url);
             }
         }
     }
@@ -624,7 +625,7 @@ public class IndexUpdater extends Thread {
             accessResultList.clear();
             final long time = systemHelper.getCurrentTimeAsLong() - execTime;
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated {} access results. The execution time is {}ms.", size, time);
+                logger.debug("Updated access results: count={}, time={}ms", size, time);
             }
             return time;
         }
@@ -693,7 +694,7 @@ public class IndexUpdater extends Thread {
         for (final String sessionId : finishedSessionIdList) {
             final long execTime2 = systemHelper.getCurrentTimeAsLong();
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleting document data: {}", sessionId);
+                logger.debug("Deleting document data: sessionId={}", sessionId);
             }
             deleteBySessionId(sessionId);
             if (logger.isDebugEnabled()) {
@@ -703,7 +704,7 @@ public class IndexUpdater extends Thread {
         finishedSessionIdList.clear();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Deleted completed document data. The execution time is {}ms.", systemHelper.getCurrentTimeAsLong() - execTime);
+            logger.info("Deleted completed document data: time={}ms", systemHelper.getCurrentTimeAsLong() - execTime);
         }
     }
 

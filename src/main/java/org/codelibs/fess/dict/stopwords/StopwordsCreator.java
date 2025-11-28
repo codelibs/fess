@@ -50,7 +50,7 @@ public class StopwordsCreator extends DictionaryCreator {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load {}", this.getClass().getSimpleName());
+            logger.info("Loaded {}", this.getClass().getSimpleName());
         }
         dictionaryManager.addCreator(this);
     }

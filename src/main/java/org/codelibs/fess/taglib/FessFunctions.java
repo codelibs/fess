@@ -107,7 +107,7 @@ public class FessFunctions {
                             return Files.getLastModifiedTime(path).toMillis();
                         }
                     } catch (final Exception e) {
-                        logger.debug("Failed to access {}", key, e);
+                        logger.debug("Failed to access resource file: path={}", key, e);
                     }
                     return 0L;
                 }
@@ -527,7 +527,7 @@ public class FessFunctions {
                     sb.append("?t=").append(value.toString());
                 }
             } catch (final ExecutionException e) {
-                logger.debug("Failed to access {}", input, e);
+                logger.debug("Failed to access resource hash cache: path={}", input, e);
             }
         }
         return LaResponseUtil.getResponse().encodeURL(sb.toString());

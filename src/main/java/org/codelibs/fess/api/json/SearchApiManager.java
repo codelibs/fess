@@ -130,7 +130,7 @@ public class SearchApiManager extends BaseApiManager {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load {}", this.getClass().getSimpleName());
+            logger.info("Loaded {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getWebApiManagerFactory().add(this);
     }
@@ -292,7 +292,7 @@ public class SearchApiManager extends BaseApiManager {
             }, OptionalThing.empty());
             response.flushBuffer();
             if (logger.isDebugEnabled()) {
-                logger.debug("Loaded {} docs", count);
+                logger.debug("Loaded {} documents", count);
             }
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {

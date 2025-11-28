@@ -79,8 +79,8 @@ public class ProtocolHelper {
         loadProtocols("org.codelibs.fess.net.protocol");
 
         if (logger.isDebugEnabled()) {
-            logger.debug("web protocols: {}", Arrays.toString(webProtocols));
-            logger.debug("file protocols: {}", Arrays.toString(fileProtocols));
+            logger.debug("Web protocols: protocols={}", Arrays.toString(webProtocols));
+            logger.debug("File protocols: protocols={}", Arrays.toString(fileProtocols));
         }
     }
 
@@ -100,7 +100,7 @@ public class ProtocolHelper {
 
             while (resources.hasMoreElements()) {
                 final URL resource = resources.nextElement();
-                logger.debug("loading {}", resource);
+                logger.debug("Loading resource: url={}", resource);
                 if ("file".equals(resource.getProtocol())) {
                     final File directory = new File(resource.getFile());
                     if (directory.exists() && directory.isDirectory()) {
@@ -109,7 +109,7 @@ public class ProtocolHelper {
                             for (final File file : files) {
                                 final String name = file.getName();
                                 subPackages.add(name);
-                                logger.debug("found {} in {}", name, resource);
+                                logger.debug("Found subpackage: name={}, resource={}", name, resource);
                             }
                         }
                     }
@@ -124,7 +124,7 @@ public class ProtocolHelper {
                                 final String name = entryName.substring(path.length() + 1, entryName.length() - 1);
                                 if (name.indexOf('/') == -1) {
                                     subPackages.add(name);
-                                    logger.debug("found {} in {}", name, resource);
+                                    logger.debug("Found subpackage: name={}, resource={}", name, resource);
                                 }
                             }
                         }
@@ -132,7 +132,7 @@ public class ProtocolHelper {
                 }
             }
         } catch (final IOException e) {
-            logger.warn("Cannot load subpackages from {}", basePackage, e);
+            logger.warn("Cannot load subpackages: basePackage={}", basePackage, e);
         }
 
         subPackages.stream().forEach(protocol -> {
@@ -145,7 +145,7 @@ public class ProtocolHelper {
                     } else if ("file".equalsIgnoreCase(protocolType)) {
                         addFileProtocol(protocol);
                     } else {
-                        logger.warn("Unknown protocol: {}", protocol);
+                        logger.warn("Unknown protocol: protocol={}", protocol);
                     }
                 }
             } catch (final ClassNotFoundRuntimeException e) {
@@ -205,7 +205,7 @@ public class ProtocolHelper {
     public void addWebProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(webProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {
-            logger.debug("web protocols contains {}.", protocol);
+            logger.debug("Web protocols already contains: protocol={}", protocol);
             return;
         }
         webProtocols = Arrays.copyOf(webProtocols, webProtocols.length + 1);
@@ -221,7 +221,7 @@ public class ProtocolHelper {
     public void addFileProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(fileProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {
-            logger.debug("file protocols contains {}.", protocol);
+            logger.debug("File protocols already contains: protocol={}", protocol);
             return;
         }
         fileProtocols = Arrays.copyOf(fileProtocols, fileProtocols.length + 1);

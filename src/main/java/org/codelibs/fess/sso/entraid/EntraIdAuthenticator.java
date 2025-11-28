@@ -188,7 +188,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
         groupCache = CacheBuilder.newBuilder().expireAfterWrite(groupCacheExpiry, TimeUnit.SECONDS).build();
@@ -262,7 +262,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
         final StateData stateData = new StateData(nonce, ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         if (logger.isDebugEnabled()) {
-            logger.debug("store {} in session", stateData);
+            logger.debug("Storing state in session: {}", stateData);
         }
         stateMap.put(state, stateData);
     }
@@ -292,7 +292,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         // validate that state in response equals to state in request
         final StateData stateData = validateState(request.getSession(), params.containsKey(STATE) ? params.get(STATE).get(0) : null);
         if (logger.isDebugEnabled()) {
-            logger.debug("load {}", stateData);
+            logger.debug("Loading state: {}", stateData);
         }
 
         final AuthenticationResponse authResponse = parseAuthenticationResponse(urlBuf.toString(), params);
@@ -333,7 +333,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected void validateNonce(final StateData stateData, final IAuthenticationResult authData) {
         final String idToken = authData.idToken();
         if (logger.isDebugEnabled()) {
-            logger.debug("idToken: {}", idToken);
+            logger.debug("idToken={}", idToken);
         }
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
@@ -343,7 +343,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
 
             final String nonce = (String) claimsSet.getClaim("nonce");
             if (logger.isDebugEnabled()) {
-                logger.debug("nonce: {}", nonce);
+                logger.debug("nonce={}", nonce);
             }
             if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
                 throw new SsoLoginException("could not validate nonce");
@@ -363,7 +363,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     public IAuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
-            logger.debug("refreshToken: {}, authority: {}", refreshToken, authority);
+            logger.debug("refreshToken={}, authority={}", refreshToken, authority);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -394,7 +394,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
-            logger.debug("authCode: {}, authority: {}, uri: {}", authCode, authority, currentUri);
+            logger.debug("authCode={}, authority={}, uri={}", authCode, authority, currentUri);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -490,14 +490,14 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                     .collect(Collectors.toList())
                     .forEach(s -> {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("remove old state: {}", s);
+                            logger.debug("Removing old state: {}", s);
                         }
                         states.remove(s);
                     });
             final StateData stateData = states.get(state);
             if (stateData != null) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("restore {} from session", stateData);
+                    logger.debug("Restoring state from session: {}", stateData);
                 }
                 states.remove(state);
                 return stateData;
@@ -520,7 +520,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         }
         final Map<String, String[]> params = request.getParameterMap();
         if (logger.isDebugEnabled()) {
-            logger.debug("params: {}", params);
+            logger.debug("params={}", params);
         }
         return params.containsKey(ERROR) || params.containsKey(ID_TOKEN) || params.containsKey(CODE);
     }
@@ -593,7 +593,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     protected void processMemberOf(final EntraIdUser user, final List<String> groupList, final List<String> roleList, final String url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("url: {}", url);
+            logger.debug("url={}", url);
         }
         try (CurlResponse response = Curl.get(url)
                 .header("Authorization", "Bearer " + user.getAuthenticationResult().accessToken())
@@ -601,7 +601,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
-                logger.debug("response: {}", contentMap);
+                logger.debug("response={}", contentMap);
             }
             if (contentMap.containsKey("value")) {
                 @SuppressWarnings("unchecked")
@@ -609,7 +609,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 for (final Map<String, Object> memberOf : memberOfList) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("member: {}", memberOf);
+                        logger.debug("member={}", memberOf);
                     }
                     String memberType = (String) memberOf.get("@odata.type");
                     if (memberType == null) {
@@ -625,7 +625,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                             roleList.add(id);
                         } else {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("unknown @odata.type: {}", memberOf);
+                                logger.debug("Unknown @odata.type: {}", memberOf);
                             }
                             groupList.add(id);
                         }
@@ -647,7 +647,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                                 addGroupOrRoleName(roleList, value, useDomainServices);
                             } else {
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("unknown @odata.type: {}", memberOf);
+                                    logger.debug("Unknown @odata.type: {}", memberOf);
                                 }
                                 addGroupOrRoleName(groupList, value, useDomainServices);
                             }
@@ -705,7 +705,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 .execute()) {
             final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
             if (logger.isDebugEnabled()) {
-                logger.debug("response: {}", contentMap);
+                logger.debug("response={}", contentMap);
             }
             if (contentMap.containsKey("value")) {
                 @SuppressWarnings("unchecked")
@@ -713,7 +713,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
                 final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 for (final Map<String, Object> memberOf : memberOfList) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("member: {}", memberOf);
+                        logger.debug("member={}", memberOf);
                     }
                     String memberType = (String) memberOf.get("@odata.type");
                     if (memberType == null) {

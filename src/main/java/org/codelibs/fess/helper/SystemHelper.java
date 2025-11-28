@@ -163,7 +163,7 @@ public class SystemHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.set(2027, 4 - 1, 1); // EOL Date

@@ -64,7 +64,7 @@ public class FuzzyQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final FuzzyQuery fuzzyQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("FuzzyQuery: query={}, boost={}", query, boost);
             }
             return convertFuzzyQuery(context, fuzzyQuery, boost);
         }

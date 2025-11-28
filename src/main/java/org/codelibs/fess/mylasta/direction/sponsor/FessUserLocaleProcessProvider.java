@@ -51,7 +51,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
             try {
                 return requestManager.getParameter(name).filter(StringUtil::isNotBlank).map(LocaleUtils::toLocale);
             } catch (final Exception e) {
-                logger.debug("Failed to parse a value of {}.", name, e);
+                logger.debug("Failed to parse locale: name={}", name, e);
             }
         }
         return OptionalObject.empty();

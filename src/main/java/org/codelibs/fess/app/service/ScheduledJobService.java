@@ -180,7 +180,7 @@ public class ScheduledJobService {
             try {
                 ComponentUtil.getJobHelper().register(cron, scheduledJob);
             } catch (final Exception e) {
-                logger.error("Failed to start Job {}", scheduledJob.getId(), e);
+                logger.error("Failed to start job: id={}", scheduledJob.getId(), e);
             }
         });
     }

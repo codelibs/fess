@@ -144,7 +144,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         fessLoginAssist.getSavedUserBean().ifPresent(u -> {
             final boolean result = u.getFessUser().refresh();
             if (logger.isDebugEnabled()) {
-                logger.debug("refresh user info: {}", result);
+                logger.debug("Refreshed user info: result={}", result);
             }
         });
         return viewHelper.getActionHook().godHandPrologue(runtime, super::godHandPrologue);

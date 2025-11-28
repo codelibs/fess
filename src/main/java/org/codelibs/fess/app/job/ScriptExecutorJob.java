@@ -61,7 +61,7 @@ public class ScriptExecutorJob implements LaJob {
      */
     protected void process(final LaJobRuntime runtime) {
         if (!runtime.getParameterMap().containsKey(Constants.SCHEDULED_JOB)) {
-            logger.warn("{} is empty.", Constants.SCHEDULED_JOB);
+            logger.warn("Scheduled job is empty: key={}", Constants.SCHEDULED_JOB);
             return;
         }
         runtime.stopIfNeeds();
@@ -72,13 +72,13 @@ public class ScriptExecutorJob implements LaJob {
         final String id = scheduledJob.getId();
         final String target = scheduledJob.getTarget();
         if (!ComponentUtil.getFessConfig().isSchedulerTarget(target)) {
-            logger.info("Ignore Job {}:{} because of not target: {}", scheduledJob.getName(), id, scheduledJob.getTarget());
+            logger.info("Ignoring job: name={}, id={}, target={}", scheduledJob.getName(), id, scheduledJob.getTarget());
             return;
         }
 
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         if (!jobHelper.isAvailable(id)) {
-            logger.info("Job {} is unavailable. Unregistering this job.", id);
+            logger.info("Job is unavailable, unregistering: id={}", id);
             jobHelper.unregister(scheduledJob);
             return;
         }
@@ -94,7 +94,7 @@ public class ScriptExecutorJob implements LaJob {
 
         if (!jobManager.findJobByUniqueOf(LaJobUnique.of(id)).isPresent()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Job {} is running.", id);
+                logger.debug("Job is running: id={}", id);
             }
             return;
         }
@@ -107,25 +107,25 @@ public class ScriptExecutorJob implements LaJob {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Starting Job {}. scriptType: {}, script: {}", id, scriptType, script);
+                logger.debug("Starting job: id={}, scriptType={}, script={}", id, scriptType, script);
             } else if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                logger.info("Starting Job {}.", id);
+                logger.info("Starting job: id={}", id);
             }
 
             final Object ret = jobExecutor.execute(Constants.DEFAULT_SCRIPT, script);
             if (ret == null) {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job {}.", id);
+                    logger.info("Finished job: id={}", id);
                 }
             } else {
                 if (scheduledJob.isLoggingEnabled() && logger.isInfoEnabled()) {
-                    logger.info("Finished Job {}. The return value is:\n{}", id, ret);
+                    logger.info("Finished job: id={}, returnValue:\n{}", id, ret);
                 }
                 jobLog.setScriptResult(ret.toString());
             }
             jobLog.setJobStatus(Constants.OK);
         } catch (final Throwable t) {
-            logger.warn("Failed to execute {}: {}", id, script, t);
+            logger.warn("Failed to execute job: id={}, script={}", id, script, t);
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
@@ -133,12 +133,12 @@ public class ScriptExecutorJob implements LaJob {
                 try {
                     task.stop();
                 } catch (final Exception e) {
-                    logger.warn("Failed to stop {}", jobLog, e);
+                    logger.warn("Failed to stop job: {}", jobLog, e);
                 }
             }
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
             if (logger.isDebugEnabled()) {
-                logger.debug("jobLog: {}", jobLog);
+                logger.debug("jobLog={}", jobLog);
             }
             if (scheduledJob.isLoggingEnabled()) {
                 jobHelper.store(jobLog);

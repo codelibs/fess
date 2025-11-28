@@ -53,7 +53,7 @@ public class PhraseQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final PhraseQuery phraseQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("PhraseQuery: query={}, boost={}", query, boost);
             }
             return convertPhraseQuery(context, phraseQuery, boost);
         }

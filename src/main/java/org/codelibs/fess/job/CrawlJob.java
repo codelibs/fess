@@ -285,11 +285,11 @@ public class CrawlJob extends ExecJob {
             if (fessConfig.isSchedulerTarget(scheduledJob.getTarget())) {
                 if (scheduledJob.isRunning()) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("{} is running.", scheduledJob.getId());
+                        logger.debug("Scheduled job is running: id={}", scheduledJob.getId());
                     }
                     counter.incrementAndGet();
                 } else if (logger.isDebugEnabled()) {
-                    logger.debug("{} is not running.", scheduledJob.getId());
+                    logger.debug("Scheduled job is not running: id={}", scheduledJob.getId());
                 }
             }
         });
@@ -492,7 +492,7 @@ public class CrawlJob extends ExecJob {
                 processHelper.destroyProcess(sessionId);
             } finally {
                 if (propFile != null && !propFile.delete()) {
-                    logger.warn("Failed to delete {}.", propFile.getAbsolutePath());
+                    logger.warn("Failed to delete properties file: {}", propFile.getAbsolutePath());
                 }
                 deleteTempDir(ownTmpDir);
             }

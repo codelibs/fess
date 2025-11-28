@@ -120,7 +120,7 @@ public class EntraIdCredential implements LoginCredential, FessCredential {
                 final String homeAccountId = account.homeAccountId();
                 final String username = account.username();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("homeAccountId:{} username:{}", homeAccountId, username);
+                    logger.debug("homeAccountId={}, username={}", homeAccountId, username);
                 }
                 permissionSet.add(systemHelper.getSearchRoleByUser(homeAccountId));
                 permissionSet.add(systemHelper.getSearchRoleByUser(username));

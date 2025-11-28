@@ -267,7 +267,7 @@ public class CommandChain implements AuthenticationChain {
                     teminated = true;
                 } catch (final Exception e) {
                     if (logger.isInfoEnabled()) {
-                        logger.info("Could not kill the subprocess.", e);
+                        logger.info("Could not kill subprocess: process={}", process, e);
                     }
                 }
             }

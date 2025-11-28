@@ -102,7 +102,7 @@ public class QueryProcessor {
                     "Both name and queryCommand parameters are required. name: " + name + ", queryCommand: " + queryCommand);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", name);
+            logger.debug("Loaded QueryCommand: {}", name);
         }
         queryCommandMap.put(name, queryCommand);
     }

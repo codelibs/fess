@@ -50,7 +50,7 @@ public class IngestFactory {
      */
     public synchronized void add(final Ingester ingester) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", ingester.getClass().getSimpleName());
+            logger.debug("Loaded Ingester: {}", ingester.getClass().getSimpleName());
         }
         final Ingester[] newIngesters = Arrays.copyOf(ingesters, ingesters.length + 1);
         newIngesters[ingesters.length] = ingester;

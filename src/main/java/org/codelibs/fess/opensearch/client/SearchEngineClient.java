@@ -344,7 +344,7 @@ public class SearchEngineClient implements Client {
     @PostConstruct
     public void open() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -469,7 +469,7 @@ public class SearchEngineClient implements Client {
 
                 addMapping(configIndex, configType, indexName);
             } else {
-                logger.warn("Invalid index config name: {}", configName);
+                logger.warn("Invalid index config name: configName={}", configName);
             }
         });
     }
@@ -515,7 +515,7 @@ public class SearchEngineClient implements Client {
                     client.admin().indices().prepareExists(indexName).execute().actionGet(fessConfig.getIndexSearchTimeout());
             exists = response.isExists();
         } catch (final Exception e) {
-            logger.debug("Failed to check {} index status.", indexName, e);
+            logger.debug("Failed to check index status: indexName={}", indexName, e);
         }
         return exists;
     }
@@ -585,7 +585,7 @@ public class SearchEngineClient implements Client {
             if (response.getHttpStatusCode() == 200) {
                 return true;
             }
-            logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex);
+            logger.warn("Failed to reindex: fromIndex={}, toIndex={}", fromIndex, toIndex);
         } catch (final IOException e) {
             logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
         }
@@ -608,7 +608,7 @@ public class SearchEngineClient implements Client {
                 return null;
             }
             final String requestsPerSecond = String.valueOf(fessConfig.getIndexReindexSizeAsInteger() * fessConfig.availableProcessors());
-            logger.info("Set requests_per_second to {}", requestsPerSecond);
+            logger.info("Set requests_per_second: value={}", requestsPerSecond);
             return requestsPerSecond;
         }
         return value;
@@ -664,14 +664,14 @@ public class SearchEngineClient implements Client {
                     .execute()
                     .actionGet(fessConfig.getIndexIndicesTimeout());
             if (indexResponse.isAcknowledged()) {
-                logger.info("Created {} index.", indexName);
+                logger.info("Created index: indexName={}", indexName);
                 return true;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to create {} index.", indexName);
+                logger.debug("Failed to create index: indexName={}", indexName);
             }
         } catch (final Exception e) {
-            logger.warn("{} is not found.", indexConfigFile, e);
+            logger.warn("Index config file not found: path={}", indexConfigFile, e);
         }
 
         return false;
@@ -690,7 +690,7 @@ public class SearchEngineClient implements Client {
                     client.admin().indices().prepareDelete(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             return response.isAcknowledged();
         } catch (final Exception e) {
-            logger.debug("Failed to delete {}.", indexName, e);
+            logger.debug("Failed to delete index: indexName={}", indexName, e);
         }
         return false;
     }

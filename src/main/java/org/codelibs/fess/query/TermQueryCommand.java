@@ -63,7 +63,7 @@ public class TermQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final TermQuery termQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("TermQuery: query={}, boost={}", query, boost);
             }
             return convertTermQuery(context, termQuery, boost);
         }

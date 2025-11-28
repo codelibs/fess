@@ -131,7 +131,7 @@ public class RoleQueryHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         stream(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray()).of(stream -> stream.forEach(name -> {
             defaultRoleList.add(name);
