@@ -110,13 +110,31 @@
 		</postConstruct>
 		<postConstruct name="register"></postConstruct>
 	</component>
+	<component name="svgThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"svgThumbnailGenerator"</property>
+		<property name="commandList">
+			["${path}/generate-thumbnail",
+			"svg",
+			"${url}",
+			"${outputFile}"]
+		</property>
+		<property name="generatorList">
+			["${path}/generate-thumbnail"]
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"image/svg+xml"</arg>
+		</postConstruct>
+		<postConstruct name="register"></postConstruct>
+	</component>
 	<component name="imageThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="name">"imageThumbnailGenerator"</property>
 		<property name="commandList">
 			["${path}/generate-thumbnail",
 			"image",
 			"${url}",
-			"${outputFile}"]
+			"${outputFile}",
+			"${mimetype}"]
 		</property>
 		<property name="generatorList">
 			["${path}/generate-thumbnail"]

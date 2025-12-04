@@ -3,6 +3,7 @@
 cmd_type=$1
 url=$2
 output_file=$3
+mimetype=${4:-}
 image_size=100x100
 target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
 
@@ -15,12 +16,27 @@ check_command() {
   fi
 }
 
-if [[ x"$HOME" = "x/root" ]] ; then
+# Get ImageMagick command (magick for v7, convert for v6)
+get_imagemagick_cmd() {
+  if command -v magick >/dev/null 2>&1; then
+    echo "magick"
+  elif command -v convert >/dev/null 2>&1; then
+    echo "convert"
+  else
+    echo ""
+  fi
+}
+
+if [[ x"$HOME" = "x/root" ]] || [[ x"$HOME" = "x/var/root" ]] ; then
   HOME=/var/lib/fess
 fi
 
 if [[ x"${cmd_type}" = "xmsoffice" ]] ; then
-  check_command convert
+  im_cmd=$(get_imagemagick_cmd)
+  if [[ -z "${im_cmd}" ]] ; then
+    echo "ImageMagick (convert or magick) does not exist."
+    exit 1
+  fi
   check_command pdftoppm
   check_command unoconv
   tmp_pdf_file=/tmp/thumbnail.$$.pdf
@@ -37,10 +53,14 @@ if [[ x"${cmd_type}" = "xmsoffice" ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
-  convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
+  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
   rm -f ${tmp_png_prefix}*png
 elif [[ x"${cmd_type}" = "xpdf" ]] ; then
-  check_command convert
+  im_cmd=$(get_imagemagick_cmd)
+  if [[ -z "${im_cmd}" ]] ; then
+    echo "ImageMagick (convert or magick) does not exist."
+    exit 1
+  fi
   check_command pdftoppm
   target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
   tmp_png_prefix=/tmp/thumbnail.png.$$
@@ -50,10 +70,14 @@ elif [[ x"${cmd_type}" = "xpdf" ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
-  convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
+  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
   rm -f ${tmp_png_prefix}*png
 elif [[ x"${cmd_type}" = "xps" ]] ; then
-  check_command convert
+  im_cmd=$(get_imagemagick_cmd)
+  if [[ -z "${im_cmd}" ]] ; then
+    echo "ImageMagick (convert or magick) does not exist."
+    exit 1
+  fi
   check_command pdftoppm
   check_command ps2pdf
   target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
@@ -71,12 +95,30 @@ elif [[ x"${cmd_type}" = "xps" ]] ; then
     echo "pdftoppm does not work."
     exit 1
   fi
-  convert -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
+  ${im_cmd} -thumbnail ${image_size} ${tmp_png_file} "${output_file}"
   rm -f ${tmp_png_prefix}*png
-elif [[ x"${cmd_type}" = "ximage" ]] ; then
-  check_command convert
+elif [[ x"${cmd_type}" = "xsvg" ]] ; then
+  check_command rsvg-convert
   target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
-  convert -thumbnail ${image_size} "${target_file}" "${output_file}"
+  rsvg-convert -w 100 -h 100 --keep-aspect-ratio "${target_file}" -o "${output_file}"
+elif [[ x"${cmd_type}" = "ximage" ]] ; then
+  im_cmd=$(get_imagemagick_cmd)
+  if [[ -z "${im_cmd}" ]] ; then
+    echo "ImageMagick (convert or magick) does not exist."
+    exit 1
+  fi
+  target_file=$(echo "$url" | sed -e "s#^file:/*#/#g")
+  # Build format hint from MIME type for better ImageMagick compatibility
+  format_hint=""
+  case "${mimetype}" in
+    "image/gif")  format_hint="gif:" ;;
+    "image/tiff") format_hint="tiff:" ;;
+    "image/png")  format_hint="png:" ;;
+    "image/jpeg") format_hint="jpeg:" ;;
+    "image/bmp"|"image/x-windows-bmp"|"image/x-ms-bmp") format_hint="bmp:" ;;
+    "image/vnd.adobe.photoshop"|"image/photoshop"|"application/x-photoshop"|"application/photoshop") format_hint="psd:" ;;
+  esac
+  ${im_cmd} -thumbnail ${image_size} "${format_hint}${target_file}" "${output_file}"
 elif [[ x"${cmd_type}" = "x" ]] ; then
   echo "No filetype."
   exit 1
