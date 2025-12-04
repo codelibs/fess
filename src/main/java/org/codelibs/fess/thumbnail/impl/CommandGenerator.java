@@ -133,7 +133,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
 
         return process(thumbnailId, responseData -> {
-            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", "");
+            final String mimeType = responseData.getMimeType();
+            final String extension = getExtensionFromMimeType(mimeType);
+            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", extension);
             try {
                 CopyUtil.copy(responseData.getResponseBody(), tempFile);
 
@@ -141,7 +143,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 final String outputPath = outputFile.getAbsolutePath();
                 final List<String> cmdList = new ArrayList<>();
                 for (final String value : commandList) {
-                    cmdList.add(expandPath(value.replace("${url}", tempPath).replace("${outputFile}", outputPath)));
+                    cmdList.add(expandPath(value.replace("${url}", tempPath)
+                            .replace("${outputFile}", outputPath)
+                            .replace("${mimetype}", mimeType != null ? mimeType : "")));
                 }
 
                 if (executeCommand(thumbnailId, cmdList) != 0) {
@@ -394,6 +398,28 @@ public class CommandGenerator extends BaseThumbnailGenerator {
      */
     public void setCommandDestroyTimeout(final long commandDestroyTimeout) {
         this.commandDestroyTimeout = commandDestroyTimeout;
+    }
+
+    /**
+     * Gets file extension from MIME type for creating temp files with proper extensions.
+     * This helps ImageMagick correctly identify file formats.
+     * @param mimeType The MIME type of the content.
+     * @return The file extension including the dot (e.g., ".gif"), or empty string if unknown.
+     */
+    protected String getExtensionFromMimeType(final String mimeType) {
+        if (mimeType == null) {
+            return "";
+        }
+        return switch (mimeType) {
+        case "image/gif" -> ".gif";
+        case "image/tiff" -> ".tiff";
+        case "image/svg+xml" -> ".svg";
+        case "image/jpeg" -> ".jpg";
+        case "image/png" -> ".png";
+        case "image/bmp", "image/x-windows-bmp", "image/x-ms-bmp" -> ".bmp";
+        case "image/vnd.adobe.photoshop", "image/photoshop", "application/x-photoshop", "application/photoshop" -> ".psd";
+        default -> "";
+        };
     }
 
 }
