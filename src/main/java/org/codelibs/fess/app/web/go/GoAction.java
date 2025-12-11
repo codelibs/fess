@@ -194,8 +194,7 @@ public class GoAction extends FessSearchAction {
      * @return true if the URL is a file system path, false otherwise
      */
     protected boolean isFileSystemPath(final String url) {
-        return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
-                || url.startsWith("storage:");
+        return ComponentUtil.getProtocolHelper().isFileSystemPath(url);
     }
 
     /**
