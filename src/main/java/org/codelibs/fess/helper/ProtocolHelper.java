@@ -227,4 +227,52 @@ public class ProtocolHelper {
         fileProtocols = Arrays.copyOf(fileProtocols, fileProtocols.length + 1);
         fileProtocols[fileProtocols.length - 1] = prefix;
     }
+
+    /**
+     * Checks if the given URL is a file path protocol that requires directory and permission handling.
+     * Used for incremental crawling directory detection and file permission processing.
+     *
+     * @param url the URL to check
+     * @return true if the URL uses a file path protocol (smb, smb1, file, ftp, s3, gcs)
+     */
+    public boolean isFilePathProtocol(final String url) {
+        return url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")
+                || url.startsWith("s3:") || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given URL represents a file system path for content serving.
+     * Used to determine if special handling is needed for file system URLs.
+     *
+     * @param url the URL to check
+     * @return true if the URL is a file system path (file, smb, smb1, ftp, storage, s3, gcs)
+     */
+    public boolean isFileSystemPath(final String url) {
+        return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
+                || url.startsWith("storage:") || url.startsWith("s3:") || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given URL should skip URL decoding when extracting file names.
+     * Some protocols (like SMB, FTP, S3, GCS) should preserve the original URL encoding.
+     *
+     * @param url the URL to check
+     * @return true if URL decoding should be skipped for this protocol
+     */
+    public boolean shouldSkipUrlDecode(final String url) {
+        return url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:") || url.startsWith("s3:")
+                || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given path has a known protocol prefix that should not be converted.
+     * Used to determine if path conversion is needed in the wizard.
+     *
+     * @param path the path to check
+     * @return true if the path has a known protocol prefix
+     */
+    public boolean hasKnownProtocol(final String path) {
+        return path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
+                || path.startsWith("ftp:") || path.startsWith("storage:") || path.startsWith("s3:") || path.startsWith("gcs:");
+    }
 }

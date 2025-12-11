@@ -53,6 +53,7 @@ import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper.LabelTypePattern;
 import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
@@ -75,6 +76,8 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     public void setUp() throws Exception {
         super.setUp();
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
+        // Register protocolHelper - it doesn't need FessConfig for the methods used in tests
+        ComponentUtil.register(new ProtocolHelper(), "protocolHelper");
     }
 
     public void test_transform() throws Exception {

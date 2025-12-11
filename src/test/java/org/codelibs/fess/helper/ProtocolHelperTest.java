@@ -761,4 +761,113 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("file_v2://path"));
         assertTrue(protocolHelper.isValidFileProtocol("smb.v3://server"));
     }
+
+    // ==================================================================================
+    //                                                              isFilePathProtocol Tests
+    //                                                              =========================
+
+    public void test_isFilePathProtocol_validProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertTrue(protocolHelper.isFilePathProtocol("smb://server/share"));
+        assertTrue(protocolHelper.isFilePathProtocol("smb1://server/share"));
+        assertTrue(protocolHelper.isFilePathProtocol("file:///path/to/file"));
+        assertTrue(protocolHelper.isFilePathProtocol("file:/path/to/file"));
+        assertTrue(protocolHelper.isFilePathProtocol("ftp://ftp.example.com/file"));
+        assertTrue(protocolHelper.isFilePathProtocol("s3://bucket/path"));
+        assertTrue(protocolHelper.isFilePathProtocol("gcs://bucket/path"));
+    }
+
+    public void test_isFilePathProtocol_invalidProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertFalse(protocolHelper.isFilePathProtocol("http://example.com"));
+        assertFalse(protocolHelper.isFilePathProtocol("https://example.com"));
+        assertFalse(protocolHelper.isFilePathProtocol("storage://container/blob"));
+        assertFalse(protocolHelper.isFilePathProtocol("ldap://server"));
+        assertFalse(protocolHelper.isFilePathProtocol(""));
+        assertFalse(protocolHelper.isFilePathProtocol("not-a-url"));
+    }
+
+    // ==================================================================================
+    //                                                              isFileSystemPath Tests
+    //                                                              =======================
+
+    public void test_isFileSystemPath_validProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertTrue(protocolHelper.isFileSystemPath("file:///path/to/file"));
+        assertTrue(protocolHelper.isFileSystemPath("file:/path/to/file"));
+        assertTrue(protocolHelper.isFileSystemPath("smb://server/share"));
+        assertTrue(protocolHelper.isFileSystemPath("smb1://server/share"));
+        assertTrue(protocolHelper.isFileSystemPath("ftp://ftp.example.com/file"));
+        assertTrue(protocolHelper.isFileSystemPath("storage://container/blob"));
+        assertTrue(protocolHelper.isFileSystemPath("s3://bucket/path"));
+        assertTrue(protocolHelper.isFileSystemPath("gcs://bucket/path"));
+    }
+
+    public void test_isFileSystemPath_invalidProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertFalse(protocolHelper.isFileSystemPath("http://example.com"));
+        assertFalse(protocolHelper.isFileSystemPath("https://example.com"));
+        assertFalse(protocolHelper.isFileSystemPath("ldap://server"));
+        assertFalse(protocolHelper.isFileSystemPath("mailto:test@example.com"));
+        assertFalse(protocolHelper.isFileSystemPath(""));
+        assertFalse(protocolHelper.isFileSystemPath("not-a-url"));
+    }
+
+    // ==================================================================================
+    //                                                              shouldSkipUrlDecode Tests
+    //                                                              ==========================
+
+    public void test_shouldSkipUrlDecode_skipProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertTrue(protocolHelper.shouldSkipUrlDecode("smb://server/share"));
+        assertTrue(protocolHelper.shouldSkipUrlDecode("smb1://server/share"));
+        assertTrue(protocolHelper.shouldSkipUrlDecode("ftp://ftp.example.com/file"));
+        assertTrue(protocolHelper.shouldSkipUrlDecode("s3://bucket/path"));
+        assertTrue(protocolHelper.shouldSkipUrlDecode("gcs://bucket/path"));
+    }
+
+    public void test_shouldSkipUrlDecode_decodeProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertFalse(protocolHelper.shouldSkipUrlDecode("file:///path/to/file"));
+        assertFalse(protocolHelper.shouldSkipUrlDecode("http://example.com"));
+        assertFalse(protocolHelper.shouldSkipUrlDecode("https://example.com"));
+        assertFalse(protocolHelper.shouldSkipUrlDecode("storage://container/blob"));
+        assertFalse(protocolHelper.shouldSkipUrlDecode(""));
+        assertFalse(protocolHelper.shouldSkipUrlDecode("not-a-url"));
+    }
+
+    // ==================================================================================
+    //                                                              hasKnownProtocol Tests
+    //                                                              =======================
+
+    public void test_hasKnownProtocol_knownProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertTrue(protocolHelper.hasKnownProtocol("http://example.com"));
+        assertTrue(protocolHelper.hasKnownProtocol("https://example.com"));
+        assertTrue(protocolHelper.hasKnownProtocol("smb://server/share"));
+        assertTrue(protocolHelper.hasKnownProtocol("smb1://server/share"));
+        assertTrue(protocolHelper.hasKnownProtocol("ftp://ftp.example.com/file"));
+        assertTrue(protocolHelper.hasKnownProtocol("storage://container/blob"));
+        assertTrue(protocolHelper.hasKnownProtocol("s3://bucket/path"));
+        assertTrue(protocolHelper.hasKnownProtocol("gcs://bucket/path"));
+    }
+
+    public void test_hasKnownProtocol_unknownProtocols() {
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+
+        assertFalse(protocolHelper.hasKnownProtocol("file:///path/to/file"));
+        assertFalse(protocolHelper.hasKnownProtocol("ldap://server"));
+        assertFalse(protocolHelper.hasKnownProtocol("mailto:test@example.com"));
+        assertFalse(protocolHelper.hasKnownProtocol("/local/path"));
+        assertFalse(protocolHelper.hasKnownProtocol("www.example.com"));
+        assertFalse(protocolHelper.hasKnownProtocol(""));
+        assertFalse(protocolHelper.hasKnownProtocol("not-a-url"));
+    }
 }

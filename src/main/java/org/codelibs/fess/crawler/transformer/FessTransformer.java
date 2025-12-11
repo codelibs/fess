@@ -273,7 +273,7 @@ public interface FessTransformer {
                 u = u.substring(0, idx);
             }
         }
-        if (!u.startsWith("smb:") && !u.startsWith("smb1:") && !u.startsWith("ftp:") && !u.startsWith("s3:") && !u.startsWith("gcs:")) {
+        if (!ComponentUtil.getProtocolHelper().shouldSkipUrlDecode(u)) {
             u = decodeUrlAsName(u, u.startsWith("file:"));
         }
         idx = u.lastIndexOf('/');

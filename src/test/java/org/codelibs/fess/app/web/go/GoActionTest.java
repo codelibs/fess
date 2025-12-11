@@ -15,7 +15,10 @@
  */
 package org.codelibs.fess.app.web.go;
 
+import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Test class for GoAction.
@@ -28,11 +31,28 @@ public class GoActionTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        // Setup protocolHelper with test configuration
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,smb1,ftp,storage,s3,gcs";
+            }
+        });
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+        ComponentUtil.register(protocolHelper, "protocolHelper");
+
         goAction = new TestableGoAction();
     }
 
     @Override
     public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 

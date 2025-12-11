@@ -24,6 +24,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.serializer.DataSerializer;
 import org.codelibs.fess.crawler.util.FieldConfigs;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.ProtocolHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -33,6 +35,52 @@ public class FessFileTransformerTest extends UnitFessTestCase {
     public void setUp() throws Exception {
         super.setUp();
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
+        // Setup protocolHelper with test configuration
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,smb1,ftp,storage,s3,gcs";
+            }
+
+            @Override
+            public String getCrawlerDocumentFileNameEncoding() {
+                return "";
+            }
+
+            @Override
+            public String getCrawlerDocumentSiteEncoding() {
+                return "";
+            }
+
+            @Override
+            public boolean isCrawlerDocumentUseSiteEncodingOnEnglish() {
+                return false;
+            }
+
+            @Override
+            public String getCrawlerDocumentUnknownHostname() {
+                return "unknown";
+            }
+
+            @Override
+            public Integer getCrawlerDocumentMaxSiteLengthAsInteger() {
+                return -1;
+            }
+        });
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+        ComponentUtil.register(protocolHelper, "protocolHelper");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 
     private String encodeUrl(final String url) {

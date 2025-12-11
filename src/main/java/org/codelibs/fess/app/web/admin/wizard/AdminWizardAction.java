@@ -351,8 +351,7 @@ public class AdminWizardAction extends FessAdminAction {
      * @return the converted path with appropriate protocol prefix
      */
     protected String convertCrawlingPath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
-                || path.startsWith("ftp:") || path.startsWith("storage:") || path.startsWith("s3:") || path.startsWith("gcs:")) {
+        if (ComponentUtil.getProtocolHelper().hasKnownProtocol(path)) {
             return path;
         }
 
