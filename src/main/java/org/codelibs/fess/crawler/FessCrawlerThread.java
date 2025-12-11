@@ -133,7 +133,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<>();
                 stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
-                if (url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")) {
+                if (url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")
+                        || url.startsWith("s3:") || url.startsWith("gcs:")) {
                     if (url.endsWith("/")) {
                         // directory
                         return true;

@@ -127,6 +127,22 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         url = "ftp://example.com/test%E3%81%82.txt";
         exp = "test%E3%81%82.txt";
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "s3://bucket/path/test%E3%81%82.txt";
+        exp = "test%E3%81%82.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "gcs://bucket/path/test%E3%81%82.txt";
+        exp = "test%E3%81%82.txt";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "s3://my-bucket/folder/document.pdf";
+        exp = "document.pdf";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
+
+        url = "gcs://my-bucket/folder/document.pdf";
+        exp = "document.pdf";
+        assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 
     public void test_decodeUrl_null() throws Exception {
@@ -168,6 +184,22 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
         url = "file:////" + encodeUrl("サーバー") + "/home/user";
         exp = "サーバー";
+        assertEquals(exp, transformer.getHostOnFile(url));
+
+        url = "s3://my-bucket/path/to/file";
+        exp = "my-bucket";
+        assertEquals(exp, transformer.getHostOnFile(url));
+
+        url = "gcs://my-bucket/path/to/file";
+        exp = "my-bucket";
+        assertEquals(exp, transformer.getHostOnFile(url));
+
+        url = "s3://bucket-with-dashes/file";
+        exp = "bucket-with-dashes";
+        assertEquals(exp, transformer.getHostOnFile(url));
+
+        url = "gcs://bucket_with_underscores/file";
+        exp = "bucket_with_underscores";
         assertEquals(exp, transformer.getHostOnFile(url));
 
     }
@@ -252,6 +284,22 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
         url = "ftp://example.com/file";
         exp = "example.com/file";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "s3://my-bucket/path/to/file";
+        exp = "my-bucket/path/to/file";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "gcs://my-bucket/path/to/file";
+        exp = "my-bucket/path/to/file";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "s3://bucket/";
+        exp = "bucket/";
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+
+        url = "gcs://bucket/";
+        exp = "bucket/";
         assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
     }
 

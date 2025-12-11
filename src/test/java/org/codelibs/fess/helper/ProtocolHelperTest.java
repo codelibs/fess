@@ -572,6 +572,166 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("nfs://server/path"));
     }
 
+    public void test_s3_gcs_protocols() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,s3,gcs";
+            }
+        });
+
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+
+        assertEquals(4, protocolHelper.getFileProtocols().length);
+        assertEquals("file:", protocolHelper.getFileProtocols()[0]);
+        assertEquals("smb:", protocolHelper.getFileProtocols()[1]);
+        assertEquals("s3:", protocolHelper.getFileProtocols()[2]);
+        assertEquals("gcs:", protocolHelper.getFileProtocols()[3]);
+
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path/to/file"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path/to/file"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://my-bucket/"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://my-bucket/folder/document.pdf"));
+
+        assertFalse(protocolHelper.isValidWebProtocol("s3://bucket/path"));
+        assertFalse(protocolHelper.isValidWebProtocol("gcs://bucket/path"));
+    }
+
+    public void test_s3_gcs_protocols_add_dynamically() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb";
+            }
+        });
+
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+
+        // Initially s3 and gcs should not be valid
+        assertFalse(protocolHelper.isValidFileProtocol("s3://bucket/path"));
+        assertFalse(protocolHelper.isValidFileProtocol("gcs://bucket/path"));
+
+        // Add s3 protocol dynamically
+        protocolHelper.addFileProtocol("s3");
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path"));
+        assertFalse(protocolHelper.isValidFileProtocol("gcs://bucket/path"));
+
+        // Add gcs protocol dynamically
+        protocolHelper.addFileProtocol("gcs");
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path"));
+
+        assertEquals(4, protocolHelper.getFileProtocols().length);
+    }
+
+    public void test_s3_gcs_protocols_various_urls() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,ftp,storage,s3,gcs";
+            }
+        });
+
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+
+        // S3 URLs
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://my-bucket/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket.with.dots/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket-with-dashes/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://123bucket/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path/to/deep/nested/file.txt"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path/ファイル.txt"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/path/file%20with%20spaces.txt"));
+
+        // GCS URLs
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://my-bucket/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket.with.dots/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket-with-dashes/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket_with_underscores/path"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path/to/deep/nested/file.txt"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path/ファイル.txt"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path/file%20with%20spaces.txt"));
+    }
+
+    public void test_s3_gcs_protocols_invalid_urls() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,ftp,storage,s3,gcs";
+            }
+        });
+
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+
+        // These should NOT be valid file protocols
+        assertFalse(protocolHelper.isValidFileProtocol("S3://bucket/path")); // uppercase
+        assertFalse(protocolHelper.isValidFileProtocol("GCS://bucket/path")); // uppercase
+        assertFalse(protocolHelper.isValidFileProtocol("http://example.com")); // web protocol
+        assertFalse(protocolHelper.isValidFileProtocol("https://example.com")); // web protocol
+        assertFalse(protocolHelper.isValidFileProtocol("bucket/path")); // no protocol
+        assertFalse(protocolHelper.isValidFileProtocol("")); // empty
+        assertFalse(protocolHelper.isValidFileProtocol("s4://bucket/path")); // similar but not s3
+        assertFalse(protocolHelper.isValidFileProtocol("gcss://bucket/path")); // similar but not gcs
+    }
+
+    public void test_all_file_protocols_together() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerWebProtocols() {
+                return "http,https";
+            }
+
+            @Override
+            public String getCrawlerFileProtocols() {
+                return "file,smb,smb1,ftp,storage,s3,gcs";
+            }
+        });
+
+        final ProtocolHelper protocolHelper = new ProtocolHelper();
+        protocolHelper.init();
+
+        assertEquals(7, protocolHelper.getFileProtocols().length);
+
+        // All file protocols should be valid
+        assertTrue(protocolHelper.isValidFileProtocol("file:///path/to/file"));
+        assertTrue(protocolHelper.isValidFileProtocol("smb://server/share"));
+        assertTrue(protocolHelper.isValidFileProtocol("smb1://server/share"));
+        assertTrue(protocolHelper.isValidFileProtocol("ftp://ftp.example.com/file"));
+        assertTrue(protocolHelper.isValidFileProtocol("storage://container/blob"));
+        assertTrue(protocolHelper.isValidFileProtocol("s3://bucket/key"));
+        assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/object"));
+
+        // Web protocols should NOT be valid as file protocols
+        assertFalse(protocolHelper.isValidFileProtocol("http://example.com"));
+        assertFalse(protocolHelper.isValidFileProtocol("https://example.com"));
+    }
+
     public void test_specialCharactersInProtocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
