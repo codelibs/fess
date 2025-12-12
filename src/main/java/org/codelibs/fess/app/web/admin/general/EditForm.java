@@ -355,4 +355,32 @@ public class EditForm {
      */
     @Size(max = 1000)
     public String storageBucket;
+
+    /**
+     * Storage type for cloud storage (s3, gcs, auto).
+     * Determines which storage client to use.
+     */
+    @Size(max = 20)
+    public String storageType;
+
+    /**
+     * Storage region for S3.
+     * AWS region where the S3 bucket is located.
+     */
+    @Size(max = 100)
+    public String storageRegion;
+
+    /**
+     * GCS project ID.
+     * Google Cloud project ID for GCS storage.
+     */
+    @Size(max = 200)
+    public String storageProjectId;
+
+    /**
+     * Storage credentials file path for GCS.
+     * Path to the service account credentials JSON file.
+     */
+    @Size(max = 1000)
+    public String storageCredentialsPath;
 }

@@ -708,6 +708,18 @@ public class Constants extends CoreLibConstants {
     /** Storage bucket configuration key. */
     public static final String STORAGE_BUCKET = "storage.bucket";
 
+    /** Storage type configuration key (s3, gcs, auto). */
+    public static final String STORAGE_TYPE = "storage.type";
+
+    /** Storage region configuration key (for S3). */
+    public static final String STORAGE_REGION = "storage.region";
+
+    /** Storage project ID configuration key (for GCS). */
+    public static final String STORAGE_PROJECT_ID = "storage.project.id";
+
+    /** Storage credentials path configuration key (for GCS). */
+    public static final String STORAGE_CREDENTIALS_PATH = "storage.credentials.path";
+
     // ============================================================
     // Mapping Type Constants
     // ============================================================
