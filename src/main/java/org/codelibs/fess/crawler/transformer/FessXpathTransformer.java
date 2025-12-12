@@ -983,9 +983,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         List<RequestData> anchorList = new ArrayList<>();
         final String baseHref = getBaseHref(document);
         try {
-            final java.net.URL url = getBaseUrl(responseData.getUrl(), baseHref);
+            final URI uri = getBaseUri(responseData.getUrl(), baseHref);
             for (final Map.Entry<String, String> entry : childUrlRuleMap.entrySet()) {
-                for (final String u : getUrlFromTagAttribute(url, document, entry.getKey(), entry.getValue(), responseData.getCharSet())) {
+                for (final String u : getUrlFromTagAttribute(uri, document, entry.getKey(), entry.getValue(), responseData.getCharSet())) {
                     anchorList.add(RequestDataBuilder.newRequestData().get().url(u).build());
                 }
             }
@@ -1002,19 +1002,18 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     /**
-     * Gets the base URL for resolving relative URLs.
+     * Gets the base URI for resolving relative URLs.
      *
      * @param currentUrl the current URL
      * @param baseHref the base href value from HTML
-     * @return the base URL
-     * @throws Exception if the URL is malformed
+     * @return the base URI
+     * @throws URISyntaxException if the URI is malformed
      */
-    protected java.net.URL getBaseUrl(final String currentUrl, final String baseHref) throws Exception {
+    protected URI getBaseUri(final String currentUrl, final String baseHref) throws URISyntaxException {
         if (baseHref != null) {
-            final URI uri = getURI(currentUrl, baseHref);
-            return uri.toURL();
+            return getURI(currentUrl, baseHref);
         }
-        return URI.create(currentUrl).toURL();
+        return URI.create(currentUrl);
     }
 
     /**
@@ -1091,22 +1090,19 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * Adds child URL from tag attribute value.
      *
      * @param urlList the list to add URLs to
-     * @param url the base URL for resolving relative URLs
+     * @param uri the base URI for resolving relative URLs
      * @param attrValue the attribute value containing the URL
      * @param encoding the character encoding
      */
     @Override
-    protected void addChildUrlFromTagAttribute(final List<String> urlList, final java.net.URL url, final String attrValue,
-            final String encoding) {
+    protected void addChildUrlFromTagAttribute(final List<String> urlList, final URI uri, final String attrValue, final String encoding) {
         final String urlValue = attrValue.trim();
         String u = null;
         try {
-            // Convert URL to URI for modern URL handling
-            final URI uri = url.toURI();
             final String resolveTarget = urlValue.startsWith(":") ? uri.getScheme() + urlValue : urlValue;
             final URI childUri = uri.resolve(resolveTarget);
             u = encodeUrl(normalizeUrl(childUri.toString()), encoding);
-        } catch (final IllegalArgumentException | URISyntaxException e) {
+        } catch (final IllegalArgumentException e) {
             final int pos = urlValue.indexOf(':');
             if (pos > 0 && pos < 10) {
                 u = encodeUrl(normalizeUrl(urlValue), encoding);
@@ -1114,7 +1110,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         if (u == null) {
-            logger.warn("Ignored child URL: childUrl={}, parentUrl={}", attrValue, url);
+            logger.warn("Ignored child URL: childUrl={}, parentUri={}", attrValue, uri);
             return;
         }
 
