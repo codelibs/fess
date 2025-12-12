@@ -88,7 +88,7 @@ public final class StorageClientFactory {
 
         switch (type) {
         case GCS:
-            return new GcsStorageClient(fessConfig.getStorageProjectId(), bucket, fessConfig.getStorageCredentialsPath());
+            return new GcsStorageClient(fessConfig.getStorageProjectId(), bucket, endpoint, fessConfig.getStorageCredentialsPath());
         case S3:
         case S3_COMPAT:
         default:

@@ -35,6 +35,7 @@ import org.codelibs.fess.exception.StorageException;
 
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.NoCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -59,9 +60,10 @@ public class GcsStorageClient implements StorageClient {
      *
      * @param projectId the GCS project ID
      * @param bucket the bucket name
+     * @param endpoint the custom endpoint URL (optional, for fake-gcs-server etc.)
      * @param credentialsPath the path to the credentials JSON file (optional)
      */
-    public GcsStorageClient(final String projectId, final String bucket, final String credentialsPath) {
+    public GcsStorageClient(final String projectId, final String bucket, final String endpoint, final String credentialsPath) {
         this.bucket = bucket;
 
         final StorageOptions.Builder builder = StorageOptions.newBuilder();
@@ -70,15 +72,25 @@ public class GcsStorageClient implements StorageClient {
             builder.setProjectId(projectId);
         }
 
-        if (StringUtil.isNotBlank(credentialsPath)) {
-            try (FileInputStream fis = new FileInputStream(credentialsPath)) {
-                final GoogleCredentials credentials = GoogleCredentials.fromStream(fis);
-                builder.setCredentials(credentials);
-            } catch (final IOException e) {
-                throw new StorageException("Failed to load GCS credentials from " + credentialsPath, e);
+        if (StringUtil.isNotBlank(endpoint)) {
+            // For fake-gcs-server or custom endpoint
+            builder.setHost(endpoint);
+            builder.setCredentials(NoCredentials.getInstance());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using custom GCS endpoint: {}", endpoint);
             }
+        } else {
+            // Production: use credentials file or default credentials
+            if (StringUtil.isNotBlank(credentialsPath)) {
+                try (FileInputStream fis = new FileInputStream(credentialsPath)) {
+                    final GoogleCredentials credentials = GoogleCredentials.fromStream(fis);
+                    builder.setCredentials(credentials);
+                } catch (final IOException e) {
+                    throw new StorageException("Failed to load GCS credentials from " + credentialsPath, e);
+                }
+            }
+            // If no credentials path, uses default credentials (GOOGLE_APPLICATION_CREDENTIALS env var)
         }
-        // If no credentials path, uses default credentials (GOOGLE_APPLICATION_CREDENTIALS env var)
 
         this.storage = builder.build().getService();
     }

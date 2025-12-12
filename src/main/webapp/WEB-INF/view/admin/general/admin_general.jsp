@@ -503,6 +503,30 @@ ${fe:html(true)}
                                     <%-- Storage --%>
                                 <h4><la:message key="labels.general_storage"/></h4>
                                 <div class="form-group row">
+                                    <label for="storageType"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.storage_type"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="storageType"/>
+                                        <la:select styleId="storageType" property="storageType"
+                                                   styleClass="form-control">
+                                            <la:option value="auto"><la:message key="labels.storage_type_auto"/></la:option>
+                                            <la:option value="s3"><la:message key="labels.storage_type_s3"/></la:option>
+                                            <la:option value="gcs"><la:message key="labels.storage_type_gcs"/></la:option>
+                                        </la:select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="storageBucket"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.storage_bucket"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="storageBucket"/>
+                                        <la:text styleId="storageBucket" property="storageBucket"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="storageEndpoint"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.storage_endpoint"/></label>
@@ -533,12 +557,32 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="storageBucket"
+                                    <label for="storageRegion"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.storage_bucket"/></label>
+                                            key="labels.storage_region"/></label>
                                     <div class="col-sm-9">
-                                        <la:errors property="storageBucket"/>
-                                        <la:text styleId="storageBucket" property="storageBucket"
+                                        <la:errors property="storageRegion"/>
+                                        <la:text styleId="storageRegion" property="storageRegion"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="storageProjectId"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.storage_project_id"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="storageProjectId"/>
+                                        <la:text styleId="storageProjectId" property="storageProjectId"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="storageCredentialsPath"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.storage_credentials_path"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="storageCredentialsPath"/>
+                                        <la:text styleId="storageCredentialsPath" property="storageCredentialsPath"
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
