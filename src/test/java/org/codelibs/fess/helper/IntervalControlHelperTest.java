@@ -217,35 +217,35 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
             IntervalControlHelper.parseTime("12");
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("Invalid format: 12", e.getMessage());
+            assertEquals("Invalid time format: 12. Expected format: HH:MM", e.getMessage());
         }
 
         try {
             IntervalControlHelper.parseTime("12:30:45");
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("Invalid format: 12:30:45", e.getMessage());
+            assertEquals("Invalid time format: 12:30:45. Expected format: HH:MM", e.getMessage());
         }
 
         try {
             IntervalControlHelper.parseTime("24:00");
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("Invalid format: 24:00", e.getMessage());
+            assertEquals("Invalid hour value: 24 in time: 24:00. Hour must be between 0 and 23", e.getMessage());
         }
 
         try {
             IntervalControlHelper.parseTime("12:60");
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("Invalid format: 12:60", e.getMessage());
+            assertEquals("Invalid minute value: 60 in time: 12:60. Minute must be between 0 and 59", e.getMessage());
         }
 
         try {
             IntervalControlHelper.parseTime("-1:30");
             fail("Should throw FessSystemException");
         } catch (FessSystemException e) {
-            assertEquals("Invalid format: -1:30", e.getMessage());
+            assertEquals("Invalid hour value: -1 in time: -1:30. Hour must be between 0 and 23", e.getMessage());
         }
     }
 

@@ -59,7 +59,7 @@ public class CorsFilter implements Filter {
         final String origin = httpRequest.getHeader("Origin");
         if (StringUtil.isNotBlank(origin)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("HTTP Request: {}", httpRequest.getMethod());
+                logger.debug("HTTP Request: method={}", httpRequest.getMethod());
             }
             final CorsHandlerFactory factory = ComponentUtil.getCorsHandlerFactory();
             final CorsHandler handler = factory.get(origin);
@@ -72,7 +72,7 @@ public class CorsFilter implements Filter {
                     return;
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("No CorsHandler for {}", origin);
+                logger.debug("No CorsHandler: origin={}", origin);
             }
         }
 

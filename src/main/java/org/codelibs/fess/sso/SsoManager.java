@@ -115,7 +115,12 @@ public class SsoManager {
      * @return The SSO authenticator instance, or null if not found
      */
     protected SsoAuthenticator getAuthenticator() {
-        final String name = getSsoType() + "Authenticator";
+        String ssoType = getSsoType();
+        // Backward compatibility: map legacy "aad" (Azure AD) to "entraid" (Entra ID)
+        if ("aad".equals(ssoType)) {
+            ssoType = "entraid";
+        }
+        final String name = ssoType + "Authenticator";
         if (ComponentUtil.hasComponent(name)) {
             return ComponentUtil.getComponent(name);
         }
@@ -147,7 +152,7 @@ public class SsoManager {
      */
     public void register(final SsoAuthenticator authenticator) {
         if (logger.isInfoEnabled()) {
-            logger.info("Load {}", authenticator.getClass().getSimpleName());
+            logger.info("Loaded SsoAuthenticator: {}", authenticator.getClass().getSimpleName());
         }
         authenticatorList.add(authenticator);
     }

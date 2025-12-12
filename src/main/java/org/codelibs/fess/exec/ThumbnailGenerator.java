@@ -146,7 +146,7 @@ public class ThumbnailGenerator {
                 ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
                 System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: {}={}", e.getKey(), e.getValue()));
                 System.getenv().entrySet().forEach(e -> logger.debug("Env: {}={}", e.getKey(), e.getValue()));
-                logger.debug("Option: {}", options);
+                logger.debug("Options: options={}", options);
             } catch (final Exception e) {
                 // ignore
             }
@@ -169,7 +169,7 @@ public class ThumbnailGenerator {
                 @Override
                 public void run() {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Destroying LaContainer..");
+                        logger.debug("Destroying LaContainer...");
                     }
                     destroyContainer();
                 }
@@ -184,7 +184,7 @@ public class ThumbnailGenerator {
             if (totalCount != 0) {
                 logger.info("Processed {} thumbnail task(s).", totalCount);
             } else {
-                logger.info("No new thumbnails found.");
+                logger.info("No thumbnail tasks to process.");
             }
             exitCode = 0;
         } catch (final ContainerNotAvailableException e) {
@@ -195,7 +195,7 @@ public class ThumbnailGenerator {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("ThumbnailGenerator does not work correctly.", t);
+            logger.error("ThumbnailGenerator terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (systemMonitorTask != null) {
@@ -223,7 +223,7 @@ public class ThumbnailGenerator {
             try {
                 final File propFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: {}", propFile.getAbsolutePath());
+                    logger.debug("Deleted temp file: path={}", propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();

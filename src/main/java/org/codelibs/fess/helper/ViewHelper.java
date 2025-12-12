@@ -215,7 +215,7 @@ public class ViewHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
@@ -477,7 +477,7 @@ public class ViewHelper {
                     url = URLDecoder.decode(url.replace("+", "%2B"), urlLinkEncoding);
                 } catch (final Exception e) {
                     if (logger.isDebugEnabled()) {
-                        logger.warn("Failed to decode {}", url, e);
+                        logger.warn("Failed to decode url: url={}", url, e);
                     }
                 }
             }
@@ -855,10 +855,11 @@ public class ViewHelper {
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final String configId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldConfigId(), String.class);
         if (configId == null) {
-            throw new FessSystemException("configId is null.");
+            final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
+            throw new FessSystemException("configId is null in document. docId: " + docId);
         }
         if (configId.length() < 2) {
-            throw new FessSystemException("Invalid configId: " + configId);
+            throw new FessSystemException("Invalid configId length: " + configId + ". ConfigId must be at least 2 characters long.");
         }
         final CrawlingConfig config = crawlingConfigHelper.getCrawlingConfig(configId);
         if (config == null) {

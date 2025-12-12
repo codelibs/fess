@@ -151,7 +151,7 @@ public class WebFsIndexHelper {
 
             final String urlsStr = webConfig.getUrls();
             if (StringUtil.isBlank(urlsStr)) {
-                logger.warn("No target urls. Skipped");
+                logger.warn("[{}] No target urls. Skipped.", webConfig.getName());
                 break;
             }
 
@@ -187,7 +187,7 @@ public class WebFsIndexHelper {
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for {}", sid);
+                    logger.warn("Failed to delete UrlFilter: sessionId={}", sid);
                 }
             }
 
@@ -278,7 +278,7 @@ public class WebFsIndexHelper {
 
             final String pathsStr = fileConfig.getPaths();
             if (StringUtil.isBlank(pathsStr)) {
-                logger.warn("No target uris. Skipped");
+                logger.warn("[{}] No target uris. Skipped.", fileConfig.getName());
                 break;
             }
 
@@ -313,7 +313,7 @@ public class WebFsIndexHelper {
                 try {
                     urlFilterService.delete(sid);
                 } catch (final Exception e) {
-                    logger.warn("Failed to delete url filters for {}", sid);
+                    logger.warn("Failed to delete UrlFilter: sessionId={}", sid);
                 }
             }
 
@@ -538,7 +538,7 @@ public class WebFsIndexHelper {
             // clear url filter
             urlFilterService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete UrlFilter for {}", sid, e);
+            logger.warn("Failed to delete UrlFilter: sessionId={}", sid, e);
         }
 
         try {
@@ -546,14 +546,14 @@ public class WebFsIndexHelper {
             urlQueueService.clearCache();
             urlQueueService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete UrlQueue for {}", sid, e);
+            logger.warn("Failed to delete UrlQueue: sessionId={}", sid, e);
         }
 
         try {
             // clear
             dataService.delete(sid);
         } catch (final Exception e) {
-            logger.warn("Failed to delete AccessResult for {}", sid, e);
+            logger.warn("Failed to delete AccessResult: sessionId={}", sid, e);
         }
     }
 

@@ -179,7 +179,8 @@ public class PrunedTag {
                 }
                 return tag;
             }
-            throw new FessSystemException("Invalid pruned tag: " + v);
+            throw new FessSystemException("Invalid pruned tag format: '" + v
+                    + "'. Expected format: tagname[attr=value].classname#id (e.g., div.content, span#header, p[data-type=ad])");
         }).toArray(n -> new PrunedTag[n]));
     }
 }

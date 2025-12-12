@@ -111,7 +111,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
     }
@@ -196,9 +196,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final String jwtSignature = new String(decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("jwtHeader: {}", jwtHeader);
-                logger.debug("jwtClaim: {}", jwtClaim);
-                logger.debug("jwtSignature: {}", jwtSignature);
+                logger.debug("jwtHeader={}", jwtHeader);
+                logger.debug("jwtClaim={}", jwtClaim);
+                logger.debug("jwtSignature={}", jwtSignature);
             }
 
             // SECURITY WARNING: JWT signature validation is not implemented.
@@ -216,14 +216,14 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("jwtsignature", jwtSignature);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("attribute: {}", attributes);
+                logger.debug("attributes={}", attributes);
             }
             parseJwtClaim(jwtClaim, attributes);
 
             return new OpenIdConnectCredential(attributes);
         } catch (final IOException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process callbacked request.", e);
+                logger.debug("Failed to process callback request.", e);
             }
         }
         return null;

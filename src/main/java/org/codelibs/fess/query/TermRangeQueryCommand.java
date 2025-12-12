@@ -54,7 +54,7 @@ public class TermRangeQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final TermRangeQuery termRangeQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("TermRangeQuery: query={}, boost={}", query, boost);
             }
             return convertTermRangeQuery(context, termRangeQuery, boost);
         }

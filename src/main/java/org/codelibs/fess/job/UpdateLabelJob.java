@@ -82,11 +82,11 @@ public class UpdateLabelJob {
                         return builder.setScript(script);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to process {}", hit, e);
+                    logger.warn("Failed to process search hit: {}", hit, e);
                 }
                 return null;
             });
-            resultBuf.append(count).append(" docs").append("\n");
+            resultBuf.append(count).append(" documents").append("\n");
         } catch (final Exception e) {
             logger.error("Could not update labels.", e);
             resultBuf.append(e.getMessage()).append("\n");

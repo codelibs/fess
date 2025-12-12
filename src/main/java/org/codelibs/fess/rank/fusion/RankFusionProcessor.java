@@ -16,7 +16,6 @@
 package org.codelibs.fess.rank.fusion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,7 +142,7 @@ public class RankFusionProcessor implements AutoCloseable {
                     .get(stream -> stream.map(String::trim).filter(StringUtil::isNotBlank).collect(Collectors.toUnmodifiableSet()));
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("availableSearcherNameSet={}", availableSearcherNameSet);
+            logger.debug("Available searchers: names={}", availableSearcherNameSet);
         }
     }
 
@@ -156,7 +155,7 @@ public class RankFusionProcessor implements AutoCloseable {
                 executorService.awaitTermination(60, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Interrupted.", e);
+                    logger.debug("Executor shutdown interrupted", e);
                 }
             } finally {
                 executorService.shutdownNow();
@@ -229,7 +228,7 @@ public class RankFusionProcessor implements AutoCloseable {
     protected List<Map<String, Object>> searchWithMultipleSearchers(final RankFusionSearcher[] searchers, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Send {} to the searchers.", query);
+            logger.debug("Sending query to searchers: query={}", query);
         }
         final int pageSize = params.getPageSize();
         final int startPosition = params.getStartPosition();
@@ -245,7 +244,7 @@ public class RankFusionProcessor implements AutoCloseable {
                 start = 0;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("start:{} -> start:{} with offset:{}.", startPosition, start, offset);
+                logger.debug("Adjusted start position: original={}, adjusted={}, offset={}", startPosition, start, offset);
             }
             final SearchRequestParams reqParams = new SearchRequestParamsWrapper(params, start, pageSize);
             final SearchResult searchResult = searchers[0].search(query, reqParams, userBean);
@@ -271,7 +270,7 @@ public class RankFusionProcessor implements AutoCloseable {
         }
         final int size = windowSize / searchers.length;
         if (logger.isDebugEnabled()) {
-            logger.debug("The searcher window size is {} and a rank constant is {}.", size, rankConstant);
+            logger.debug("Search parameters: windowSize={}, rankConstant={}", size, rankConstant);
         }
         final List<Future<SearchResult>> resultList = new ArrayList<>();
         for (int i = 0; i < searchers.length; i++) {
@@ -312,7 +311,7 @@ public class RankFusionProcessor implements AutoCloseable {
         for (int searcherIndex = 0; searcherIndex < results.length; searcherIndex++) {
             final List<Map<String, Object>> docList = results[searcherIndex].getDocumentList();
             if (logger.isDebugEnabled()) {
-                logger.debug("Searcher[{}]: retrieved {} docs / {} total docs", searcherIndex, docList.size(),
+                logger.debug("Searcher[{}]: retrieved {} documents / {} total documents", searcherIndex, docList.size(),
                         results[searcherIndex].getAllRecordCount());
             }
             for (int docRank = 0; docRank < docList.size(); docRank++) {
@@ -409,7 +408,7 @@ public class RankFusionProcessor implements AutoCloseable {
     protected List<Map<String, Object>> searchWithMainSearcher(final RankFusionSearcher searcher, final String query,
             final SearchRequestParams params, final OptionalThing<FessUserBean> userBean) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Send {} to the main searcher.", query);
+            logger.debug("Sending query to main searcher: query={}", query);
         }
         final int pageSize = params.getPageSize();
         try {

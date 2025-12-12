@@ -310,7 +310,7 @@ public class Crawler {
                 ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
                 System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: {}={}", e.getKey(), e.getValue()));
                 System.getenv().entrySet().forEach(e -> logger.debug("Env: {}={}", e.getKey(), e.getValue()));
-                logger.debug("Option: {}", options);
+                logger.debug("Options: options={}", options);
             } catch (final Exception e) {
                 // ignore
             }
@@ -353,12 +353,12 @@ public class Crawler {
                             }
                             command = reader.readLine().trim();
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Process command: {}", command);
+                                logger.debug("Process command: command={}", command);
                             }
                             if (Constants.CRAWLER_PROCESS_COMMAND_THREAD_DUMP.equals(command)) {
                                 ThreadDumpUtil.printThreadDump();
                             } else {
-                                logger.warn("Unknown process command: {}", command);
+                                logger.warn("Unknown process command: command={}", command);
                             }
                             if (Thread.interrupted()) {
                                 return;
@@ -368,7 +368,7 @@ public class Crawler {
                         }
                     }
                 } catch (final IOException e) {
-                    logger.debug("I/O exception.", e);
+                    logger.debug("I/O exception while reading process command.", e);
                 }
             }, "ProcessCommand");
             commandThread.start();
@@ -390,7 +390,7 @@ public class Crawler {
             }
             exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
-            logger.error("Crawler does not work correctly.", t);
+            logger.error("Crawler terminated unexpectedly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             if (commandThread != null && commandThread.isAlive()) {
@@ -454,7 +454,7 @@ public class Crawler {
             try {
                 final File propFile = ComponentUtil.getSystemHelper().createTempFile("crawler_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
-                    logger.debug("Deleted a temp file: {}", propFile.getAbsolutePath());
+                    logger.debug("Deleted temp file: path={}", propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit();
@@ -471,13 +471,17 @@ public class Crawler {
                 dayForCleanupStr = options.expires;
                 try {
                     dayForCleanup = Integer.parseInt(dayForCleanupStr);
-                } catch (final NumberFormatException e) {}
+                } catch (final NumberFormatException e) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Invalid expires value, using default: value={}, error={}", dayForCleanupStr, e.getMessage());
+                    }
+                }
             } else {
                 dayForCleanup = ComponentUtil.getFessConfig().getDayForCleanup();
             }
             crawlingInfoHelper.updateParams(options.sessionId, options.name, dayForCleanup);
         } catch (final Exception e) {
-            logger.warn("Failed to store crawling information.", e);
+            logger.warn("Failed to store crawling information: sessionId={}", options.sessionId, e);
         }
 
         try {
@@ -486,7 +490,7 @@ public class Crawler {
             try {
                 crawlingInfoHelper.store(options.sessionId, false);
             } catch (final Exception e) {
-                logger.warn("Failed to store crawling information.", e);
+                logger.warn("Failed to store crawling information: sessionId={}", options.sessionId, e);
             }
 
             final Map<String, String> infoMap = crawlingInfoHelper.getInfoMap(options.sessionId);
@@ -506,7 +510,7 @@ public class Crawler {
             try {
                 crawler.sendMail(infoMap);
             } catch (final Exception e) {
-                logger.warn("Failed to send a mail.", e);
+                logger.warn("Failed to send notification mail.", e);
             }
 
         }
@@ -611,7 +615,7 @@ public class Crawler {
      */
     public int doCrawl(final Options options) {
         if (logger.isInfoEnabled()) {
-            logger.info("Starting Crawler..");
+            logger.info("Starting Crawler...");
         }
 
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
@@ -672,12 +676,12 @@ public class Crawler {
             joinCrawlerThread(dataCrawlerThread);
 
             if (logger.isInfoEnabled()) {
-                logger.info("Finished Crawler");
+                logger.info("Finished Crawler.");
             }
 
             return Constants.EXIT_OK;
         } catch (final Throwable t) {
-            logger.warn("An exception occurs on the crawl task.", t);
+            logger.warn("Crawl task failed with an exception.", t);
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
@@ -717,7 +721,7 @@ public class Crawler {
             try {
                 crawlerThread.join();
             } catch (final Exception e) {
-                logger.info("Interrupted a crawling process: {}", crawlerThread.getName());
+                logger.info("Interrupted crawling process: name={}", crawlerThread.getName());
             }
         }
     }

@@ -182,8 +182,9 @@
 				<artifactId>formatter-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>com.github.hazendaz.maven</groupId>
+				<groupId>org.codelibs.maven</groupId>
 				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<version>2.0.0</version>
 				<executions>
 					<execution>
 						<phase>compile</phase>

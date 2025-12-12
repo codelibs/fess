@@ -56,7 +56,7 @@ public class PrefixQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final PrefixQuery prefixQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("PrefixQuery: query={}, boost={}", query, boost);
             }
             return convertPrefixQuery(context, prefixQuery, boost);
         }

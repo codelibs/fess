@@ -48,10 +48,11 @@ public class ScriptEngineFactory {
      */
     public void add(final String name, final ScriptEngine scriptEngine) {
         if (name == null || scriptEngine == null) {
-            throw new IllegalArgumentException("name or scriptEngine is null.");
+            throw new IllegalArgumentException(
+                    "Both name and scriptEngine parameters are required. name: " + name + ", scriptEngine: " + scriptEngine);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", name);
+            logger.debug("Loaded ScriptEngine: {}", name);
         }
         scriptEngineMap.put(name.toLowerCase(Locale.ROOT), scriptEngine);
         scriptEngineMap.put(scriptEngine.getClass().getSimpleName().toLowerCase(Locale.ROOT), scriptEngine);
@@ -64,7 +65,7 @@ public class ScriptEngineFactory {
      */
     public ScriptEngine getScriptEngine(final String name) {
         if (name == null) {
-            throw new ScriptEngineException("script name is null.");
+            throw new ScriptEngineException("Script engine name parameter is null. A valid script engine name must be provided.");
         }
         final ScriptEngine scriptEngine = scriptEngineMap.get(name.toLowerCase(Locale.ROOT));
         if (scriptEngine != null) {

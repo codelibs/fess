@@ -162,7 +162,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }).allMatch(s -> {
                 final boolean found = new File(s).isFile();
                 if (found && logger.isDebugEnabled()) {
-                    logger.debug("{} is found.", s);
+                    logger.debug("Generator command found: {}", s);
                 }
                 return found;
             });
@@ -248,10 +248,10 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             if (e.getCause() == null) {
                 logger.debug(e.getMessage());
             } else {
-                logger.warn("Failed to process {}", id, e);
+                logger.warn("Failed to process thumbnail: id={}", id, e);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to process {}", id, e);
+            logger.warn("Failed to process thumbnail: id={}", id, e);
         }
         return false;
     }

@@ -178,12 +178,12 @@ public class BadWordService {
                         badWordBhv.update(badWord);
                     }
                 } catch (final Exception e) {
-                    logger.warn("Failed to read a sugget elevate word: {}", list, e);
+                    logger.warn("Failed to read a suggest bad word: {}", list, e);
                 }
             }
             searchEngineClient.refresh("_all"); // TODO replace _all
         } catch (final IOException e) {
-            logger.warn("Failed to read a sugget elevate word.", e);
+            logger.warn("Failed to read a suggest bad word.", e);
         }
     }
 
@@ -210,7 +210,7 @@ public class BadWordService {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        logger.warn("Failed to write a sugget bad word: {}", entity, e);
+                        logger.warn("Failed to write a suggest bad word: {}", entity, e);
                     }
                 }
 
@@ -225,7 +225,7 @@ public class BadWordService {
 
             csvWriter.flush();
         } catch (final IOException e) {
-            logger.warn("Failed to write a sugget bad word.", e);
+            logger.warn("Failed to write a suggest bad word.", e);
         }
     }
 

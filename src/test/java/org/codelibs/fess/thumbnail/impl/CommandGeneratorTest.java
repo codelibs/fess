@@ -426,4 +426,172 @@ public class CommandGeneratorTest extends UnitFessTestCase {
 
         assertTrue("Minimal configuration should be valid", true);
     }
+
+    // ==================== Tests for getExtensionFromMimeType method ====================
+
+    // Tests for GIF MIME type
+    public void test_getExtensionFromMimeType_gif() {
+        assertEquals(".gif", generator.getExtensionFromMimeType("image/gif"));
+    }
+
+    // Tests for TIFF MIME type
+    public void test_getExtensionFromMimeType_tiff() {
+        assertEquals(".tiff", generator.getExtensionFromMimeType("image/tiff"));
+    }
+
+    // Tests for SVG MIME type
+    public void test_getExtensionFromMimeType_svg() {
+        assertEquals(".svg", generator.getExtensionFromMimeType("image/svg+xml"));
+    }
+
+    // Tests for JPEG MIME type
+    public void test_getExtensionFromMimeType_jpeg() {
+        assertEquals(".jpg", generator.getExtensionFromMimeType("image/jpeg"));
+    }
+
+    // Tests for PNG MIME type
+    public void test_getExtensionFromMimeType_png() {
+        assertEquals(".png", generator.getExtensionFromMimeType("image/png"));
+    }
+
+    // Tests for BMP MIME types (multiple variants)
+    public void test_getExtensionFromMimeType_bmp() {
+        assertEquals(".bmp", generator.getExtensionFromMimeType("image/bmp"));
+    }
+
+    public void test_getExtensionFromMimeType_xWindowsBmp() {
+        assertEquals(".bmp", generator.getExtensionFromMimeType("image/x-windows-bmp"));
+    }
+
+    public void test_getExtensionFromMimeType_xMsBmp() {
+        assertEquals(".bmp", generator.getExtensionFromMimeType("image/x-ms-bmp"));
+    }
+
+    // Tests for Photoshop MIME types (multiple variants)
+    public void test_getExtensionFromMimeType_photoshopVnd() {
+        assertEquals(".psd", generator.getExtensionFromMimeType("image/vnd.adobe.photoshop"));
+    }
+
+    public void test_getExtensionFromMimeType_photoshopImage() {
+        assertEquals(".psd", generator.getExtensionFromMimeType("image/photoshop"));
+    }
+
+    public void test_getExtensionFromMimeType_photoshopAppX() {
+        assertEquals(".psd", generator.getExtensionFromMimeType("application/x-photoshop"));
+    }
+
+    public void test_getExtensionFromMimeType_photoshopApp() {
+        assertEquals(".psd", generator.getExtensionFromMimeType("application/photoshop"));
+    }
+
+    // Tests for null and empty input
+    public void test_getExtensionFromMimeType_null() {
+        assertEquals("", generator.getExtensionFromMimeType(null));
+    }
+
+    public void test_getExtensionFromMimeType_empty() {
+        assertEquals("", generator.getExtensionFromMimeType(""));
+    }
+
+    // Tests for unknown/unsupported MIME types
+    public void test_getExtensionFromMimeType_unknownType() {
+        assertEquals("", generator.getExtensionFromMimeType("application/octet-stream"));
+    }
+
+    public void test_getExtensionFromMimeType_pdf() {
+        assertEquals("", generator.getExtensionFromMimeType("application/pdf"));
+    }
+
+    public void test_getExtensionFromMimeType_html() {
+        assertEquals("", generator.getExtensionFromMimeType("text/html"));
+    }
+
+    public void test_getExtensionFromMimeType_textPlain() {
+        assertEquals("", generator.getExtensionFromMimeType("text/plain"));
+    }
+
+    public void test_getExtensionFromMimeType_msword() {
+        assertEquals("", generator.getExtensionFromMimeType("application/msword"));
+    }
+
+    // Test all supported image MIME types in one comprehensive test
+    public void test_getExtensionFromMimeType_allImageTypes() {
+        final String[][] testCases = { { "image/gif", ".gif" }, { "image/tiff", ".tiff" }, { "image/svg+xml", ".svg" },
+                { "image/jpeg", ".jpg" }, { "image/png", ".png" }, { "image/bmp", ".bmp" }, { "image/x-windows-bmp", ".bmp" },
+                { "image/x-ms-bmp", ".bmp" }, { "image/vnd.adobe.photoshop", ".psd" }, { "image/photoshop", ".psd" },
+                { "application/x-photoshop", ".psd" }, { "application/photoshop", ".psd" } };
+
+        for (final String[] testCase : testCases) {
+            final String mimeType = testCase[0];
+            final String expectedExtension = testCase[1];
+            assertEquals("Extension for " + mimeType, expectedExtension, generator.getExtensionFromMimeType(mimeType));
+        }
+    }
+
+    // Test non-image MIME types return empty string
+    public void test_getExtensionFromMimeType_nonImageTypes() {
+        final String[] mimeTypes = { "application/pdf", "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/html", "text/plain", "application/json",
+                "application/xml", "audio/mp3", "video/mp4", "application/postscript" };
+
+        for (final String mimeType : mimeTypes) {
+            assertEquals("Extension for " + mimeType + " should be empty", "", generator.getExtensionFromMimeType(mimeType));
+        }
+    }
+
+    // Test case sensitivity (current implementation is case-sensitive)
+    public void test_getExtensionFromMimeType_caseSensitive() {
+        assertEquals("", generator.getExtensionFromMimeType("IMAGE/GIF"));
+        assertEquals("", generator.getExtensionFromMimeType("Image/Gif"));
+        assertEquals("", generator.getExtensionFromMimeType("IMAGE/SVG+XML"));
+    }
+
+    // ==================== Tests for ${mimetype} placeholder replacement ====================
+
+    public void test_mimetype_variable_replacement() {
+        final String testCommand = "generate-thumbnail image ${url} ${outputFile} ${mimetype}";
+        final String tempPath = "/tmp/test.gif";
+        final String outputPath = "/tmp/thumbnail.png";
+        final String mimeType = "image/gif";
+
+        final String expandedCommand =
+                testCommand.replace("${url}", tempPath).replace("${outputFile}", outputPath).replace("${mimetype}", mimeType);
+
+        assertEquals("generate-thumbnail image /tmp/test.gif /tmp/thumbnail.png image/gif", expandedCommand);
+        assertFalse("Expanded command should not contain ${mimetype}", expandedCommand.contains("${mimetype}"));
+    }
+
+    public void test_mimetype_variable_replacement_nullMimeType() {
+        final String testCommand = "generate-thumbnail image ${url} ${outputFile} ${mimetype}";
+        final String tempPath = "/tmp/test.gif";
+        final String outputPath = "/tmp/thumbnail.png";
+        final String mimeType = null;
+
+        final String expandedCommand = testCommand.replace("${url}", tempPath)
+                .replace("${outputFile}", outputPath)
+                .replace("${mimetype}", mimeType != null ? mimeType : "");
+
+        assertEquals("generate-thumbnail image /tmp/test.gif /tmp/thumbnail.png ", expandedCommand);
+    }
+
+    public void test_mimetype_variable_replacement_allImageFormats() {
+        final String[] mimeTypes = { "image/gif", "image/tiff", "image/svg+xml", "image/jpeg", "image/png", "image/bmp" };
+
+        for (final String mimeType : mimeTypes) {
+            final String testCommand = "generate-thumbnail image ${url} ${outputFile} ${mimetype}";
+            final String expandedCommand =
+                    testCommand.replace("${url}", "/tmp/test").replace("${outputFile}", "/tmp/out.png").replace("${mimetype}", mimeType);
+
+            assertTrue("Command should contain mimetype: " + mimeType, expandedCommand.contains(mimeType));
+            assertFalse("Command should not contain placeholder", expandedCommand.contains("${mimetype}"));
+        }
+    }
+
+    // Test command list with mimetype placeholder
+    public void test_commandList_withMimetypePlaceholder() {
+        final List<String> commands = Arrays.asList("/bin/generate-thumbnail", "image", "${url}", "${outputFile}", "${mimetype}");
+        generator.setCommandList(commands);
+        // Verify command list can contain mimetype placeholder
+        assertNotNull(generator);
+    }
 }

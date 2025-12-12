@@ -99,7 +99,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || !responseData.hasResponseBody()) {
-            throw new CrawlingAccessException("No response body.");
+            final String url = responseData != null ? responseData.getUrl() : "unknown";
+            throw new CrawlingAccessException("No response body for URL: " + url + ". Cannot transform empty response.");
         }
 
         final ResultData resultData = new ResultData();
@@ -181,13 +182,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 if (dt != null) {
                                     dataMap.put(mapping.getValue1(), FessFunctions.formatDate(dt));
                                 } else {
-                                    logger.warn("Failed to parse {}", mapping);
+                                    logger.warn("Failed to parse date mapping: {}", mapping);
                                 }
                             } else {
                                 logger.warn("Unknown mapping type: {}={}", key, mapping);
                             }
                         } catch (final Exception e) {
-                            logger.warn("Failed to parse {}", values[0], e);
+                            logger.warn("Failed to parse value: {}", values[0], e);
                         }
                     }
                 }

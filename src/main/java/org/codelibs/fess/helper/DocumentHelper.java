@@ -91,7 +91,7 @@ public class DocumentHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         try {
             final TikaExtractor tikaExtractor = ComponentUtil.getComponent("tikaExtractor");
@@ -106,7 +106,7 @@ public class DocumentHelper {
                 logger.debug("tikaExtractor is not found: {}", e.getMessage().replace('\n', ' '));
             }
         } catch (final Exception e) {
-            logger.warn("Failed to initiaize TikaExtractor.", e);
+            logger.warn("Failed to initialize TikaExtractor.", e);
         }
     }
 
@@ -264,13 +264,14 @@ public class DocumentHelper {
      */
     public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String crawlingInfoId, final String url) {
         if (StringUtil.isBlank(crawlingInfoId)) {
-            throw new CrawlingAccessException("sessionId is null.");
+            throw new CrawlingAccessException("sessionId is null. Cannot access document without a valid session ID.");
         }
 
         final CrawlerClientFactory crawlerClientFactory = crawlingConfig.initializeClientFactory(ComponentUtil::getCrawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new CrawlingAccessException("CrawlerClient is null for " + url);
+            throw new CrawlingAccessException(
+                    "CrawlerClient is null for URL: " + url + ". Unable to access the document without a crawler client.");
         }
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -336,7 +337,7 @@ public class DocumentHelper {
                 return ReaderUtil.readText(reader);
             } catch (final IOException e) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to decode {}", hash, e);
+                    logger.debug("Failed to decode similar document hash: hash={}", hash, e);
                 }
             }
         }
@@ -358,7 +359,7 @@ public class DocumentHelper {
                 }
                 return SIMILAR_DOC_HASH_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(baos.toByteArray());
             } catch (final IOException e) {
-                logger.warn("Failed to encode {}", hash, e);
+                logger.warn("Failed to encode similar document hash: hash={}", hash, e);
             }
         }
         return hash;

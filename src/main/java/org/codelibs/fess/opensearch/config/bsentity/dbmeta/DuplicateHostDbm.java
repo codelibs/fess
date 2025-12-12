@@ -30,8 +30,6 @@ import org.dbflute.dbway.DBDef;
 import org.dbflute.util.DfTypeUtil;
 
 /**
- * The DBM of DuplicateHost.
- *
  * @author ESFlute (using FreeGen)
  */
 public class DuplicateHostDbm extends AbstractDBMeta {

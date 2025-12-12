@@ -716,13 +716,30 @@ public interface FessProp {
         return getSystemPropertyAsInt(Constants.LTR_WINDOW_SIZE_PROPERTY, 100);
     }
 
-    default String[] getAzureAdPermissionFields() {
-        return split(getSystemProperty("aad.permission.fields", "mail"), ",")
-                .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
+    /**
+     * Gets the permission fields for Entra ID authentication.
+     * Uses new entraid.permission.fields key with fallback to legacy aad.permission.fields.
+     * @return Array of permission field names.
+     */
+    default String[] getEntraIdPermissionFields() {
+        String value = getSystemProperty("entraid.permission.fields", null);
+        if (StringUtil.isBlank(value)) {
+            value = getSystemProperty("aad.permission.fields", "mail");
+        }
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).toArray(n -> new String[n]));
     }
 
-    default boolean isAzureAdUseDomainServices() {
-        return Constants.TRUE.equalsIgnoreCase(getSystemProperty("aad.use.ds", "true"));
+    /**
+     * Checks if domain services are enabled for Entra ID authentication.
+     * Uses new entraid.use.ds key with fallback to legacy aad.use.ds.
+     * @return true if domain services are enabled, false otherwise.
+     */
+    default boolean isEntraIdUseDomainServices() {
+        String value = getSystemProperty("entraid.use.ds", null);
+        if (StringUtil.isBlank(value)) {
+            value = getSystemProperty("aad.use.ds", "true");
+        }
+        return Constants.TRUE.equalsIgnoreCase(value);
     }
 
     default String getSsoType() {

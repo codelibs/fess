@@ -158,14 +158,24 @@ public class AdminBackupAction extends FessAdminAction {
         validate(form, messages -> {}, this::asListHtml);
         verifyToken(this::asListHtml);
         final String fileName = form.bulkFile.getFileName();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Backup file upload initiated: fileName={}", fileName);
+        }
+
         final File tempFile = ComponentUtil.getSystemHelper().createTempFile("fess_restore_", ".tmp");
         try (final InputStream in = form.bulkFile.getInputStream(); final OutputStream out = new FileOutputStream(tempFile)) {
             CopyUtil.copy(in, out);
             asyncImport(fileName, tempFile);
+
+            if (logger.isInfoEnabled()) {
+                logger.info("Backup file uploaded successfully and queued for import: fileName={}, tempFile={}", fileName,
+                        tempFile.getAbsolutePath());
+            }
         } catch (final IOException e) {
-            logger.warn("Failed to create a temp file.", e);
+            logger.warn("Failed to upload backup file: fileName={}, error={}", fileName, e.getMessage(), e);
             if (tempFile.exists() && !tempFile.delete()) {
-                logger.warn("Failed to delete {}.", tempFile.getAbsolutePath());
+                logger.warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
             }
             throwValidationError(messages -> messages.addErrorsFileIsNotSupported(GLOBAL, fileName), this::asListHtml);
         }
@@ -219,6 +229,10 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private void importBulk(final String fileName, final File tempFile) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Bulk data import started: fileName={}", fileName);
+        }
+
         final ObjectMapper mapper = new ObjectMapper();
         final AtomicBoolean resetJobs = new AtomicBoolean(false);
         try (CurlResponse response = ComponentUtil.getCurlHelper().post("/_bulk").onConnect((req, con) -> {
@@ -268,52 +282,95 @@ public class AdminBackupAction extends FessAdminAction {
                 logger.debug("Bulk Response:\n{}", response.getContentAsString());
             }
             systemHelper.reloadConfiguration(resetJobs.get());
+
+            if (logger.isInfoEnabled()) {
+                logger.info("Bulk data import completed successfully: fileName={}, resetJobs={}", fileName, resetJobs.get());
+            }
         } catch (final Exception e) {
-            logger.warn("Failed to process bulk file: {}", fileName, e);
+            logger.warn("Failed to import bulk file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
     }
 
     private void importGsaXml(final String fileName, final File tempFile) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("GSA XML import started: fileName={}", fileName);
+        }
+
         final GsaConfigParser configParser = ComponentUtil.getComponent(GsaConfigParser.class);
         try (final InputStream in = new FileInputStream(tempFile)) {
             configParser.parse(new InputSource(in));
         } catch (final IOException e) {
-            logger.warn("Failed to process gsa.xml file: {}", fileName, e);
+            logger.warn("Failed to read GSA XML file: fileName={}, error={}", fileName, e.getMessage(), e);
+            deleteTempFile(tempFile);
+            return;
+        }
+
+        try {
+            configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
+            configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
+            labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
+
+            if (logger.isInfoEnabled()) {
+                logger.info("GSA XML import completed successfully: fileName={}", fileName);
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to insert GSA XML data into database: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
-        configParser.getWebConfig().ifPresent(c -> webConfigBhv.insert(c));
-        configParser.getFileConfig().ifPresent(c -> fileConfigBhv.insert(c));
-        labelTypeBhv.batchInsert(Arrays.stream(configParser.getLabelTypes()).collect(Collectors.toList()));
     }
 
     private void importSystemProperties(final String fileName, final File tempFile) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("System properties import started: fileName={}", fileName);
+        }
+
         try (final InputStream in = new FileInputStream(tempFile)) {
             ComponentUtil.getSystemProperties().load(in);
+
+            if (logger.isInfoEnabled()) {
+                logger.info("System properties import completed successfully: fileName={}", fileName);
+            }
         } catch (final IOException e) {
-            logger.warn("Failed to process system.properties file: {}", fileName, e);
+            logger.warn("Failed to import system.properties file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
     }
 
     private void importFessJson(final String fileName, final File tempFile) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Fess JSON import started: fileName={}", fileName);
+        }
+
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getFessJsonPath())) {
             CopyUtil.copy(in, out);
+
+            if (logger.isInfoEnabled()) {
+                logger.info("Fess JSON import completed successfully: fileName={}", fileName);
+            }
         } catch (final IOException e) {
-            logger.warn("Failed to process fess.json file: {}", fileName, e);
+            logger.warn("Failed to import fess.json file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
     }
 
     private void importDocJson(final String fileName, final File tempFile) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Doc JSON import started: fileName={}", fileName);
+        }
+
         try (final InputStream in = new FileInputStream(tempFile); final OutputStream out = Files.newOutputStream(getDocJsonPath())) {
             CopyUtil.copy(in, out);
+
+            if (logger.isInfoEnabled()) {
+                logger.info("Doc JSON import completed successfully: fileName={}", fileName);
+            }
         } catch (final IOException e) {
-            logger.warn("Failed to process doc.json file: {}", fileName, e);
+            logger.warn("Failed to import doc.json file: fileName={}, error={}", fileName, e.getMessage(), e);
         } finally {
             deleteTempFile(tempFile);
         }
@@ -339,6 +396,10 @@ public class AdminBackupAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Backup download requested: id={}", id);
+        }
+
         if (stream(fessConfig.getIndexBackupAllTargets()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
             if ("system.properties".equals(id)) {
                 return asStream(id).contentTypeOctetStream().stream(out -> {

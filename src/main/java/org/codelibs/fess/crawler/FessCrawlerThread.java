@@ -133,7 +133,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<>();
                 stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
-                if (url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")) {
+                if (ComponentUtil.getProtocolHelper().isFilePathProtocol(url)) {
                     if (url.endsWith("/")) {
                         // directory
                         return true;
@@ -193,12 +193,12 @@ public class FessCrawlerThread extends CrawlerThread {
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Accessing document: {}, status: {}", url, httpStatusCode);
+                    logger.debug("Accessing document: url={}, status={}", url, httpStatusCode);
                 }
                 if (httpStatusCode == HTTP_STATUS_NOT_FOUND) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(searchEngineClient, id)) {
-                        logger.debug("Failed to delete {} document: {}", HTTP_STATUS_NOT_FOUND, url);
+                        logger.debug("Failed to delete document: status={}, url={}", HTTP_STATUS_NOT_FOUND, url);
                     }
                     return false;
                 }
@@ -220,7 +220,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
                     if (documentExpires != null
                             && !indexingHelper.updateDocument(searchEngineClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
-                        logger.debug("Failed to update {} at {}", fessConfig.getIndexFieldExpires(), url);
+                        logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), url);
                     }
 
                     return false;
@@ -387,7 +387,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 .map(s -> clientFactory.getClient(s + ":" + url))//
                 .orElseGet(() -> clientFactory.getClient(url));
         if (logger.isDebugEnabled()) {
-            logger.debug("CrawlerClient: {}", client.getClass().getCanonicalName());
+            logger.debug("CrawlerClient: class={}", client.getClass().getCanonicalName());
         }
         return client;
     }

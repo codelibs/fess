@@ -173,7 +173,7 @@ public class GoAction extends FessSearchAction {
         try {
             final StreamResponse response = viewHelper.asContentResponse(doc);
             if (response.getHttpStatus().orElse(200) == 404) {
-                logger.debug("Not found: {}", targetUrl);
+                logger.debug("Document not found: url={}", targetUrl);
                 saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
                 return redirect(ErrorAction.class);
             }
@@ -194,8 +194,7 @@ public class GoAction extends FessSearchAction {
      * @return true if the URL is a file system path, false otherwise
      */
     protected boolean isFileSystemPath(final String url) {
-        return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
-                || url.startsWith("storage:");
+        return ComponentUtil.getProtocolHelper().isFileSystemPath(url);
     }
 
     /**

@@ -25,6 +25,8 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RequestHeaderService;
@@ -43,6 +45,8 @@ import org.codelibs.fess.util.ParameterUtil;
  * @author FreeGen
  */
 public class WebConfig extends BsWebConfig implements CrawlingConfig {
+
+    private static final Logger logger = LogManager.getLogger(WebConfig.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -137,7 +141,11 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         if (value != null) {
             try {
                 boost = Float.parseFloat(value);
-            } catch (final Exception e) {}
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid boost value, keeping current: value={}, error={}", value, e.getMessage());
+                }
+            }
         }
     }
 

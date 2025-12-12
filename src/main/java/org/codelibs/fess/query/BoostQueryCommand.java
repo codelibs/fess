@@ -47,7 +47,7 @@ public class BoostQueryCommand extends QueryCommand {
     public QueryBuilder execute(final QueryContext context, final Query query, final float boost) {
         if (query instanceof final BoostQuery boostQuery) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{}:{}", query, boost);
+                logger.debug("BoostQuery: query={}, boost={}", query, boost);
             }
             return getQueryProcessor().execute(context, boostQuery.getQuery(), boostQuery.getBoost());
         }

@@ -262,7 +262,7 @@ public class AdminStorageAction extends FessAdminAction {
             }
         });
         if (logger.isDebugEnabled()) {
-            logger.debug("tags: {} -> {}", tagItems, tags);
+            logger.debug("Tags updated: from={}, to={}", tagItems, tags);
         }
         try {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -412,16 +412,16 @@ public class AdminStorageAction extends FessAdminAction {
                 try {
                     final MakeBucketArgs args = MakeBucketArgs.builder().bucket(fessConfig.getStorageBucket()).build();
                     minioClient.makeBucket(args);
-                    logger.info("Created bucket: {}", fessConfig.getStorageBucket());
+                    logger.info("Created storage bucket: {}", fessConfig.getStorageBucket());
                 } catch (final Exception e1) {
-                    logger.warn("Failed to create bucket: {}", fessConfig.getStorageBucket(), e1);
+                    logger.warn("Failed to create storage bucket: {}", fessConfig.getStorageBucket(), e1);
                 }
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access {}", fessConfig.getStorageEndpoint(), e);
+                logger.debug("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access {}", fessConfig.getStorageEndpoint(), e);
+                logger.debug("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
             }
         }
         list.addAll(fileList);

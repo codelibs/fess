@@ -110,7 +110,7 @@ public class SearchLogHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         userInfoCache = CacheBuilder.newBuilder()//
                 .maximumSize(userInfoCacheSize)//
@@ -248,7 +248,8 @@ public class SearchLogHelper {
     public void addClickLog(final ClickLog clickLog) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (clickLogQueue.size() > fessConfig.getLoggingClickMaxQueueSizeAsInteger()) {
-            logger.warn("[{}] The click log queue size is too large. Skipped the click log: {} {}", clickLog);
+            logger.warn("Click log queue size exceeded: queueSize={}, limit={}. Skipped.", clickLogQueue.size(),
+                    fessConfig.getLoggingClickMaxQueueSizeAsInteger());
             return;
         }
         clickLogQueue.add(clickLog);

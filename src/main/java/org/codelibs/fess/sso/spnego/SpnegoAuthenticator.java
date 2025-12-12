@@ -124,7 +124,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
     }
@@ -185,7 +185,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             try {
                 principal = getAuthenticator().authenticate(request, spnegoResponse);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("principal: {}", principal);
+                    logger.debug("principal={}", principal);
                 }
             } catch (final Exception e) {
                 final String msg = "Failed to process Authorization Header: " + request.getHeader(Constants.AUTHZ_HEADER);
@@ -198,7 +198,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             // context/auth loop not yet complete
             final boolean status = spnegoResponse.isStatusSet();
             if (logger.isDebugEnabled()) {
-                logger.debug("isStatusSet: {}", status);
+                logger.debug("isStatusSet={}", status);
             }
             if (status) {
                 return new ActionResponseCredential(() -> {
@@ -222,7 +222,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
             final String[] username = principal.getName().split("@", 2);
             if (logger.isDebugEnabled()) {
-                logger.debug("username: {}", Arrays.toString(username));
+                logger.debug("username={}", Arrays.toString(username));
             }
             return new SpnegoCredential(username[0]);
         }).orElse(null);
@@ -264,7 +264,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public ServletContext getServletContext() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getServletContext() is not supported in SpnegoFilterConfig");
         }
 
         /**
@@ -376,7 +376,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
          */
         @Override
         public Enumeration<String> getInitParameterNames() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getInitParameterNames() is not supported in SpnegoFilterConfig");
         }
 
     }

@@ -81,7 +81,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         maxDocumentRequestSize = Long.parseLong(ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSize());
         maxDocumentCacheSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentCacheSizeAsInteger();
@@ -108,13 +108,14 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final SearchEngineClient searchEngineClient = ComponentUtil.getSearchEngineClient();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Adding {}", dataMap);
+            logger.debug("Adding document: url={}", dataMap.get(fessConfig.getIndexFieldUrl()));
         }
 
         //   required check
         final Object urlObj = dataMap.get(fessConfig.getIndexFieldUrl());
         if (urlObj == null) {
-            throw new DataStoreException("url is null. dataMap=" + dataMap);
+            final Object configId = dataMap.get(fessConfig.getIndexFieldConfigId());
+            throw new DataStoreException("URL field is null in dataMap. Cannot index document without a URL. configId: " + configId);
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
@@ -153,7 +154,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             final long processingTime = systemHelper.getCurrentTimeAsLong() - startTime;
             docList.addProcessingTime(processingTime);
             if (logger.isDebugEnabled()) {
-                logger.debug("Added the document({}, {}ms). The number of a document cache is {}.",
+                logger.debug("Added document (size={}, time={}ms). Document cache count: {}",
                         MemoryUtil.byteCountToDisplaySize(contentSize), processingTime, docList.size());
             }
 
@@ -166,7 +167,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         documentSize.getAndIncrement();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("The number of an added document is {}.", documentSize.get());
+            logger.debug("Total documents added: {}", documentSize.get());
         }
 
     }
@@ -188,7 +189,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             try {
                 target = ingester.process(target, paramMap);
             } catch (final Exception e) {
-                logger.warn("Failed to process Ingest[{}]", ingester.getClass().getSimpleName(), e);
+                logger.warn("[{}] Failed to process ingester", ingester.getClass().getSimpleName(), e);
             }
         }
         return target;
@@ -221,7 +222,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final int count = searchLogHelper.getClickCount(url);
         doc.put(clickCountField, count);
         if (logger.isDebugEnabled()) {
-            logger.debug("Click Count: {}, url: {}", count, url);
+            logger.debug("Updated click count: count={}, url={}", count, url);
         }
     }
 
@@ -237,7 +238,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         final long count = searchLogHelper.getFavoriteCount(url);
         doc.put(favoriteCountField, count);
         if (logger.isDebugEnabled()) {
-            logger.debug("Favorite Count: {}, url: {}", count, url);
+            logger.debug("Updated favorite count: count={}, url={}", count, url);
         }
     }
 

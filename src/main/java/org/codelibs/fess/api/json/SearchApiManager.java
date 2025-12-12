@@ -130,7 +130,7 @@ public class SearchApiManager extends BaseApiManager {
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
-            logger.info("Load {}", this.getClass().getSimpleName());
+            logger.info("Loaded {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getWebApiManagerFactory().add(this);
     }
@@ -292,7 +292,7 @@ public class SearchApiManager extends BaseApiManager {
             }, OptionalThing.empty());
             response.flushBuffer();
             if (logger.isDebugEnabled()) {
-                logger.debug("Loaded {} docs", count);
+                logger.debug("Loaded {} documents", count);
             }
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
@@ -1198,47 +1198,47 @@ public class SearchApiManager extends BaseApiManager {
 
         @Override
         public GeoInfo getGeoInfo() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getGeoInfo() is not supported in this implementation");
         }
 
         @Override
         public FacetInfo getFacetInfo() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getFacetInfo() is not supported in this implementation");
         }
 
         @Override
         public String getSort() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getSort() is not supported in this implementation");
         }
 
         @Override
         public int getStartPosition() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getStartPosition() is not supported in this implementation");
         }
 
         @Override
         public int getOffset() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getOffset() is not supported in this implementation");
         }
 
         @Override
         public int getPageSize() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getPageSize() is not supported in this implementation");
         }
 
         @Override
         public String[] getExtraQueries() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getExtraQueries() is not supported in this implementation");
         }
 
         @Override
         public Object getAttribute(final String name) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getAttribute() is not supported in this implementation");
         }
 
         @Override
         public Locale getLocale() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getLocale() is not supported in this implementation");
         }
 
         @Override
@@ -1248,7 +1248,7 @@ public class SearchApiManager extends BaseApiManager {
 
         @Override
         public String getSimilarDocHash() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("getSimilarDocHash() is not supported in this implementation");
         }
 
         @Override
@@ -1279,7 +1279,12 @@ public class SearchApiManager extends BaseApiManager {
                 t.printStackTrace(pw);
                 pw.flush();
                 buf.append(" [ ").append(sw.toString()).append(" ]");
-            } catch (final IOException ignore) {}
+            } catch (final IOException e) {
+                // StringWriter close() should not throw IOException, but log just in case
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Unexpected IOException while closing StringWriter", e);
+                }
+            }
             return buf.toString();
         };
         final String message;

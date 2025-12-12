@@ -114,7 +114,7 @@ public class SuggestHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
         split(fessConfig.getSuggestFieldContents(), ",")
@@ -149,7 +149,7 @@ public class SuggestHelper {
                 try {
                     suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
                 } catch (final SuggestSettingsException e) {
-                    logger.warn("Failed to add {}", field, e);
+                    logger.warn("Failed to add suggest field: field={}", field, e);
                 }
             }));
             suggester.createIndexIfNothing();

@@ -59,7 +59,7 @@ public class ThemeHelper {
         final Path jarPath = getJarFile(artifact);
         final String themeName = getThemeName(artifact);
         if (logger.isDebugEnabled()) {
-            logger.debug("Theme: {}", themeName);
+            logger.debug("Theme: name={}", themeName);
         }
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(jarPath))) {
             ZipEntry entry;
@@ -71,7 +71,7 @@ public class ThemeHelper {
                         continue;
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Loading {}", entry.getName());
+                        logger.debug("Loading entry: name={}", entry.getName());
                     }
                     if ("view".equals(names[0])) {
                         names[0] = themeName;
@@ -143,24 +143,24 @@ public class ThemeHelper {
     protected void closeQuietly(final Path dir) {
         if (Files.notExists(dir)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("{} does not exists.", dir);
+                logger.debug("Path does not exist: path={}", dir);
             }
             return;
         }
         try (Stream<Path> walk = Files.walk(dir, FileVisitOption.FOLLOW_LINKS)) {
             walk.sorted(Comparator.reverseOrder()).forEach(f -> {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Deleting {}", f);
+                    logger.debug("Deleting: path={}", f);
                 }
                 try {
                     Files.delete(f);
                 } catch (final IOException e) {
-                    logger.warn("Failed to delete {}", f, e);
+                    logger.warn("Failed to delete: path={}", f, e);
                 }
             });
             Files.deleteIfExists(dir);
         } catch (final IOException e) {
-            logger.warn("Failed to delete {}", dir, e);
+            logger.warn("Failed to delete: path={}", dir, e);
         }
     }
 

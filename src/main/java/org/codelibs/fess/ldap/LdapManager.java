@@ -93,7 +93,7 @@ public class LdapManager {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
     }
@@ -352,7 +352,7 @@ public class LdapManager {
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, escapeLDAPSearchFilter(ldapUser.getName()));
         if (logger.isDebugEnabled()) {
-            logger.debug("Account Filter: {}", filter);
+            logger.debug("Account filter: {}", filter);
         }
         final Set<String> subRoleSet = new HashSet<>();
         final Set<String> sAMAccountGroupNameSet = new HashSet<>();
@@ -370,7 +370,7 @@ public class LdapManager {
         });
 
         if (logger.isDebugEnabled()) {
-            logger.debug("role: {}", roleSet);
+            logger.debug("Roles: {}", roleSet);
         }
         final String[] roles = roleSet.toArray(new String[roleSet.size()]);
 
@@ -383,7 +383,7 @@ public class LdapManager {
                 });
                 processSubRoles(ldapUser, bindDn, subRoleSet, groupFilter, roleSet);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("role(lazy loading): {}", roleSet);
+                    logger.debug("Roles (lazy loading): {}", roleSet);
                 }
                 lazyLoading.accept(roleSet.toArray(new String[roleSet.size()]));
             }, 0, false);
@@ -457,14 +457,14 @@ public class LdapManager {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Group Filter: {}", filter);
+            logger.debug("Group filter: {}", filter);
         }
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         search(bindDn, filter, null, () -> ldapUser.getEnvironment(), result -> {
             for (final SearchResult srcrslt : result) {
                 final String groupDn = srcrslt.getNameInNamespace();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("groupDn: {}", groupDn);
+                    logger.debug("Group DN: {}", groupDn);
                 }
                 final String groupName = getSearchRoleName(groupDn);
                 final String roleType = updateSearchRoles(roleSet, groupDn, groupName);
@@ -1323,7 +1323,7 @@ public class LdapManager {
             if (!result.isEmpty()) {
                 delete(userDN, adminEnv);
             } else {
-                logger.info("{} does not exist in LDAP server.", user.getName());
+                logger.info("User does not exist in LDAP server: name={}", user.getName());
             }
         });
 
@@ -1342,7 +1342,7 @@ public class LdapManager {
         final Supplier<Hashtable<String, String>> adminEnv = this::createAdminEnv;
         search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
-                logger.info("{} exists in LDAP server.", role.getName());
+                logger.info("Role already exists in LDAP server: name={}", role.getName());
             } else {
                 final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
                 final BasicAttributes entry = new BasicAttributes();
@@ -1381,7 +1381,7 @@ public class LdapManager {
                 final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
                 delete(entryDN, adminEnv);
             } else {
-                logger.info("{} does not exist in LDAP server.", role.getName());
+                logger.info("Role does not exist in LDAP server: name={}", role.getName());
             }
         });
 
@@ -1419,7 +1419,7 @@ public class LdapManager {
         final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
-                logger.info("{} exists in LDAP server.", group.getName());
+                logger.info("Group already exists in LDAP server: name={}", group.getName());
                 modifyGroupAttributes(group, adminEnv, entryDN, result);
             } else {
                 final BasicAttributes entry = new BasicAttributes();
@@ -1506,7 +1506,7 @@ public class LdapManager {
                 final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
                 delete(entryDN, adminEnv);
             } else {
-                logger.info("{} does not exist in LDAP server.", group.getName());
+                logger.info("Group does not exist in LDAP server: name={}", group.getName());
             }
         });
     }
@@ -1570,7 +1570,7 @@ public class LdapManager {
      */
     protected void insert(final String entryDN, final Attributes entry, final Supplier<Hashtable<String, String>> envSupplier) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
-            logger.debug("Inserting {}", entryDN);
+            logger.debug("Inserting LDAP entry: dn={}", entryDN);
             holder.get().createSubcontext(entryDN, entry);
         } catch (final NamingException e) {
             throw new LdapOperationException("Failed to add " + entryDN, e);
@@ -1585,7 +1585,7 @@ public class LdapManager {
      */
     protected void delete(final String entryDN, final Supplier<Hashtable<String, String>> envSupplier) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
-            logger.debug("Deleting {}", entryDN);
+            logger.debug("Deleting LDAP entry: dn={}", entryDN);
             holder.get().destroySubcontext(entryDN);
         } catch (final NamingException e) {
             throw new LdapOperationException("Failed to delete " + entryDN, e);
@@ -1614,7 +1614,8 @@ public class LdapManager {
             final long startTime = systemHelper.getCurrentTimeAsLong();
             final List<SearchResult> list = Collections.list(holder.get().search(baseDn, filter, controls));
             if (logger.isDebugEnabled()) {
-                logger.debug("LDAP search[{}ms]: {} - {}", systemHelper.getCurrentTimeAsLong() - startTime, baseDn, filter);
+                logger.debug("LDAP search completed: time={}ms, baseDn={}, filter={}", systemHelper.getCurrentTimeAsLong() - startTime,
+                        baseDn, filter);
             }
             consumer.accept(list);
         } catch (final NamingException e) {

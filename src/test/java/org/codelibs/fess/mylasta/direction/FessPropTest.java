@@ -301,4 +301,178 @@ public class FessPropTest extends UnitFessTestCase {
         Arrays.sort(actual);
         assertEquals(String.join(",", expected), String.join(",", actual));
     }
+
+    public void test_getEntraIdPermissionFields_withNewKey() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test with new entraid.permission.fields key
+        systemPropMap.put("entraid.permission.fields", "displayName,userPrincipalName");
+        String[] fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(2, fields.length);
+        assertEquals("displayName", fields[0]);
+        assertEquals("userPrincipalName", fields[1]);
+    }
+
+    public void test_getEntraIdPermissionFields_withLegacyFallback() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test fallback to legacy aad.permission.fields key
+        systemPropMap.put("aad.permission.fields", "mail,displayName");
+        String[] fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(2, fields.length);
+        assertEquals("mail", fields[0]);
+        assertEquals("displayName", fields[1]);
+    }
+
+    public void test_getEntraIdPermissionFields_withDefault() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test default value when no key is set
+        String[] fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(1, fields.length);
+        assertEquals("mail", fields[0]);
+    }
+
+    public void test_getEntraIdPermissionFields_newKeyTakesPrecedence() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test that new key takes precedence over legacy key
+        systemPropMap.put("entraid.permission.fields", "newField");
+        systemPropMap.put("aad.permission.fields", "legacyField");
+        String[] fields = fessConfig.getEntraIdPermissionFields();
+        assertEquals(1, fields.length);
+        assertEquals("newField", fields[0]);
+    }
+
+    public void test_isEntraIdUseDomainServices_withNewKey() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test with new entraid.use.ds key set to false
+        systemPropMap.put("entraid.use.ds", "false");
+        assertFalse(fessConfig.isEntraIdUseDomainServices());
+
+        // Test with new entraid.use.ds key set to true
+        systemPropMap.put("entraid.use.ds", "true");
+        assertTrue(fessConfig.isEntraIdUseDomainServices());
+    }
+
+    public void test_isEntraIdUseDomainServices_withLegacyFallback() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test fallback to legacy aad.use.ds key
+        systemPropMap.put("aad.use.ds", "false");
+        assertFalse(fessConfig.isEntraIdUseDomainServices());
+    }
+
+    public void test_isEntraIdUseDomainServices_withDefault() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test default value (true) when no key is set
+        assertTrue(fessConfig.isEntraIdUseDomainServices());
+    }
+
+    public void test_isEntraIdUseDomainServices_newKeyTakesPrecedence() {
+        final Map<String, String> systemPropMap = new HashMap<>();
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getSystemProperty(final String key, final String defaultValue) {
+                return systemPropMap.getOrDefault(key, defaultValue);
+            }
+
+            @Override
+            public String getSystemProperty(final String key) {
+                return systemPropMap.get(key);
+            }
+        };
+
+        // Test that new key takes precedence over legacy key
+        systemPropMap.put("entraid.use.ds", "false");
+        systemPropMap.put("aad.use.ds", "true");
+        assertFalse(fessConfig.isEntraIdUseDomainServices());
+    }
 }

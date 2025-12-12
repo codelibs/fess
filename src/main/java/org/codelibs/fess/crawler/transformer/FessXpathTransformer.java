@@ -152,7 +152,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         fessConfig = ComponentUtil.getFessConfig();
         dataSerializer = ComponentUtil.getComponent("dataSerializer");
@@ -455,7 +455,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 && isValidCanonicalUrl(responseData.getUrl(), canonicalUrl)) {
             final Set<RequestData> childUrlSet = new HashSet<>();
             childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-            logger.info("CANONICAL: {} -> {}", responseData.getUrl(), canonicalUrl);
+            logger.info("Canonical URL redirect: from={}, to={}", responseData.getUrl(), canonicalUrl);
             throw new ChildUrlsException(childUrlSet, this.getClass().getName() + "#putAdditionalData");
         }
 
@@ -520,7 +520,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), new String(InputStreamUtil.getBytes(is), charSet));
                     putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
                 } catch (final Exception e) {
-                    logger.warn("Failed to write a cache: {}:{}", sessionId, responseData, e);
+                    logger.warn("Failed to write cache: sessionId={}, responseData={}", sessionId, responseData, e);
                 }
             } else {
                 logger.debug("Content size is too large({} > {}): {}", responseData.getContentLength(),
@@ -729,7 +729,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final String resolveTarget = canonicalUrl.startsWith(":") ? baseUri.getScheme() + canonicalUrl : canonicalUrl;
             return baseUri.resolve(resolveTarget).toString();
         } catch (final IllegalArgumentException e) {
-            logger.warn("Invalid canonical url: {} : {}", baseUrl, canonicalUrl, e);
+            logger.warn("Invalid canonical URL: baseUrl={}, canonicalUrl={}", baseUrl, canonicalUrl, e);
         }
         return null;
     }
@@ -1114,20 +1114,20 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         if (u == null) {
-            logger.warn("Ignored child URL: {} in {}", attrValue, url);
+            logger.warn("Ignored child URL: childUrl={}, parentUrl={}", attrValue, url);
             return;
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("{} -> {}", attrValue, u);
+            logger.debug("URL conversion: original={}, converted={}", attrValue, u);
         }
         if (StringUtil.isNotBlank(u)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Add Child: {}", u);
+                logger.debug("Adding child URL: url={}", u);
             }
             urlList.add(u);
         } else if (logger.isDebugEnabled()) {
-            logger.debug("Skip Child: {}", u);
+            logger.debug("Skipping child URL: url={}", u);
         }
     }
 

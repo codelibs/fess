@@ -193,10 +193,10 @@ public class GsaConfigParser extends DefaultHandler {
     public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
             throws SAXException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Start Element: {}", qName);
+            logger.debug("Start element: name={}", qName);
         }
         if (tagQueue.isEmpty() && !"eef".equalsIgnoreCase(qName)) {
-            throw new GsaConfigException("Invalid format.");
+            throw new GsaConfigException("Invalid GSA configuration format. Root element must be 'eef', but found: " + qName);
         }
         if (COLLECTION.equalsIgnoreCase(qName) && COLLECTIONS.equalsIgnoreCase(tagQueue.peekLast())) {
             final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
@@ -226,7 +226,7 @@ public class GsaConfigParser extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         if (logger.isDebugEnabled()) {
-            logger.debug("End Element: {}", qName);
+            logger.debug("End element: name={}", qName);
         }
         if (GOOD_URLS.equalsIgnoreCase(qName)) {
             if (labelType != null) {
@@ -321,7 +321,7 @@ public class GsaConfigParser extends DefaultHandler {
     public void characters(final char[] ch, final int start, final int length) throws SAXException {
         final String text = new String(ch, start, length);
         if (logger.isDebugEnabled()) {
-            logger.debug("Text: {}", text);
+            logger.debug("Text: content={}", text);
         }
         textBuf.append(text);
     }

@@ -71,7 +71,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         if (baseDir == null) {
             baseDir = new File(System.getProperty("java.io.tmpdir"));
@@ -128,12 +128,14 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             parentFile.mkdirs();
         }
         if (!parentFile.isDirectory()) {
-            logger.warn("Not found: {}", parentFile.getAbsolutePath());
+            logger.warn("Parent directory not found: {}", parentFile.getAbsolutePath());
             return false;
         }
 
         return process(thumbnailId, responseData -> {
-            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", "");
+            final String mimeType = responseData.getMimeType();
+            final String extension = getExtensionFromMimeType(mimeType);
+            final File tempFile = ComponentUtil.getSystemHelper().createTempFile("thumbnail_", extension);
             try {
                 CopyUtil.copy(responseData.getResponseBody(), tempFile);
 
@@ -141,7 +143,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 final String outputPath = outputFile.getAbsolutePath();
                 final List<String> cmdList = new ArrayList<>();
                 for (final String value : commandList) {
-                    cmdList.add(expandPath(value.replace("${url}", tempPath).replace("${outputFile}", outputPath)));
+                    cmdList.add(expandPath(value.replace("${url}", tempPath)
+                            .replace("${outputFile}", outputPath)
+                            .replace("${mimetype}", mimeType != null ? mimeType : "")));
                 }
 
                 if (executeCommand(thumbnailId, cmdList) != 0) {
@@ -153,9 +157,9 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 }
 
                 if (outputFile.isFile() && outputFile.length() == 0) {
-                    logger.warn("Thumbnail File is empty. ID is {}", thumbnailId);
+                    logger.warn("Thumbnail file is empty: id={}", thumbnailId);
                     if (outputFile.delete()) {
-                        logger.info("Deleted: {}", outputFile.getAbsolutePath());
+                        logger.info("Deleted empty thumbnail file: {}", outputFile.getAbsolutePath());
                     }
                     updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                     return false;
@@ -166,12 +170,12 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 }
                 return true;
             } catch (final Exception e) {
-                logger.warn("Failed to process ", e);
+                logger.warn("Failed to process thumbnail: id={}", thumbnailId, e);
                 updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                 return false;
             } finally {
                 if (tempFile != null && !tempFile.delete()) {
-                    logger.debug("Failed to delete {}", tempFile.getAbsolutePath());
+                    logger.debug("Failed to delete temp file: {}", tempFile.getAbsolutePath());
                 }
             }
         });
@@ -226,11 +230,11 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                     // Process finished normally.
                     final int exitValue = p.exitValue();
                     if (exitValue != 0) {
-                        logger.warn("{} failed (exit code:{}): {}", getName(), exitValue, commandList);
+                        logger.warn("{} failed: exitCode={}, command={}", getName(), exitValue, commandList);
                     }
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("{} is finished with exit code {}.", getName(), exitValue);
+                        logger.debug("{} finished: exitCode={}", getName(), exitValue);
                     }
                     return exitValue;
                 }
@@ -242,10 +246,10 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 }
             }
         } catch (final InterruptedException e) {
-            logger.warn("Interrupted to generate a thumbnail of {}: {}", thumbnailId, cmdList, e);
+            logger.warn("Interrupted generating thumbnail: id={}, command={}", thumbnailId, cmdList, e);
             Thread.currentThread().interrupt();
         } catch (final Exception e) {
-            logger.warn("Failed to generate a thumbnail of {}: {}", thumbnailId, cmdList, e);
+            logger.warn("Failed to generate thumbnail: id={}, command={}", thumbnailId, cmdList, e);
         } finally {
             if (task != null) {
                 task.cancel();
@@ -394,6 +398,28 @@ public class CommandGenerator extends BaseThumbnailGenerator {
      */
     public void setCommandDestroyTimeout(final long commandDestroyTimeout) {
         this.commandDestroyTimeout = commandDestroyTimeout;
+    }
+
+    /**
+     * Gets file extension from MIME type for creating temp files with proper extensions.
+     * This helps ImageMagick correctly identify file formats.
+     * @param mimeType The MIME type of the content.
+     * @return The file extension including the dot (e.g., ".gif"), or empty string if unknown.
+     */
+    protected String getExtensionFromMimeType(final String mimeType) {
+        if (mimeType == null) {
+            return "";
+        }
+        return switch (mimeType) {
+        case "image/gif" -> ".gif";
+        case "image/tiff" -> ".tiff";
+        case "image/svg+xml" -> ".svg";
+        case "image/jpeg" -> ".jpg";
+        case "image/png" -> ".png";
+        case "image/bmp", "image/x-windows-bmp", "image/x-ms-bmp" -> ".bmp";
+        case "image/vnd.adobe.photoshop", "image/photoshop", "application/x-photoshop", "application/photoshop" -> ".psd";
+        default -> "";
+        };
     }
 
 }

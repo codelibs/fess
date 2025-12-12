@@ -128,7 +128,7 @@ public class FacetInfo {
             query = newQuery;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("loaded facet query: {}", s);
+            logger.debug("Loaded facet query: query={}", s);
         }
     }
 

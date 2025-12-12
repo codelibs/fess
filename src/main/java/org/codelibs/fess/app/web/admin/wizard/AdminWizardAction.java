@@ -193,7 +193,10 @@ public class AdminWizardAction extends FessAdminAction {
             } else {
                 try {
                     buf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
-                } catch (final UnsupportedEncodingException e) {}
+                } catch (final UnsupportedEncodingException e) {
+                    // UTF-8 should always be supported, but log if it somehow isn't
+                    logger.warn("UTF-8 encoding not supported - this should not happen: char={}", c, e);
+                }
             }
         }
         configPath = convertCrawlingPath(buf.toString());
@@ -280,7 +283,11 @@ public class AdminWizardAction extends FessAdminAction {
         if (value != null) {
             try {
                 return Integer.parseInt(value);
-            } catch (final NumberFormatException e) {}
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid integer property value, using default: key={}, value={}, default={}", key, value, defaultValue);
+                }
+            }
         }
         return defaultValue;
     }
@@ -297,7 +304,11 @@ public class AdminWizardAction extends FessAdminAction {
         if (value != null) {
             try {
                 return Long.parseLong(value);
-            } catch (final NumberFormatException e) {}
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Invalid long property value, using default: key={}, value={}, default={}", key, value, defaultValue);
+                }
+            }
         }
         return defaultValue;
     }
@@ -340,8 +351,7 @@ public class AdminWizardAction extends FessAdminAction {
      * @return the converted path with appropriate protocol prefix
      */
     protected String convertCrawlingPath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
-                || path.startsWith("ftp:") || path.startsWith("storage:")) {
+        if (ComponentUtil.getProtocolHelper().hasKnownProtocol(path)) {
             return path;
         }
 

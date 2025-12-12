@@ -42,7 +42,7 @@ public class JobHelperTest extends UnitFessTestCase {
             jobHelper.register((ScheduledJob) null);
             fail("Should throw ScheduledJobException");
         } catch (ScheduledJobException e) {
-            assertEquals("No job.", e.getMessage());
+            assertEquals("scheduledJob parameter is null. Cannot register a null job.", e.getMessage());
         } catch (Exception e) {
             // Expected due to missing dependencies in test environment
             assertTrue(true);
@@ -55,7 +55,7 @@ public class JobHelperTest extends UnitFessTestCase {
             jobHelper.register(mockCron, null);
             fail("Should throw ScheduledJobException");
         } catch (ScheduledJobException e) {
-            assertEquals("No job.", e.getMessage());
+            assertEquals("scheduledJob parameter is null. Cannot register a null job.", e.getMessage());
         } catch (Exception e) {
             // Expected due to missing dependencies in test environment
             assertTrue(true);

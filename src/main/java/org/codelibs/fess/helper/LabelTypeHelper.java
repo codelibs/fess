@@ -64,7 +64,7 @@ public class LabelTypeHelper extends AbstractConfigHelper {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         load();
     }
@@ -228,8 +228,8 @@ public class LabelTypeHelper extends AbstractConfigHelper {
                 try {
                     list.add(new LabelTypePattern(labelType.getValue(), includedPaths, excludedPaths));
                 } catch (final Exception e) {
-                    logger.warn("Failed to create a matching pattern of a label: {}, includedPaths:{}, excludedPaths:{}",
-                            labelType.getValue(), includedPaths, excludedPaths, e);
+                    logger.warn("Failed to create label pattern: label={}, includedPaths={}, excludedPaths={}", labelType.getValue(),
+                            includedPaths, excludedPaths, e);
                 }
             }
         }

@@ -80,8 +80,8 @@ public class ProtocolHelper {
         loadProtocols("org.codelibs.fess.net.protocol");
 
         if (logger.isDebugEnabled()) {
-            logger.debug("web protocols: {}", Arrays.toString(webProtocols));
-            logger.debug("file protocols: {}", Arrays.toString(fileProtocols));
+            logger.debug("Web protocols: protocols={}", Arrays.toString(webProtocols));
+            logger.debug("File protocols: protocols={}", Arrays.toString(fileProtocols));
         }
     }
 
@@ -101,12 +101,12 @@ public class ProtocolHelper {
 
             while (resources.hasMoreElements()) {
                 final java.net.URL resource = resources.nextElement();
-                logger.debug("loading {}", resource);
+                logger.debug("Loading resource: url={}", resource);
                 final URI resourceUri;
                 try {
                     resourceUri = resource.toURI();
                 } catch (final URISyntaxException e) {
-                    logger.warn("Invalid URI for resource: {}", resource, e);
+                    logger.warn("Invalid URI for resource: url={}", resource, e);
                     continue;
                 }
 
@@ -118,7 +118,7 @@ public class ProtocolHelper {
                             for (final File file : files) {
                                 final String name = file.getName();
                                 subPackages.add(name);
-                                logger.debug("found {} in {}", name, resourceUri);
+                                logger.debug("Found subpackage: name={}, resource={}", name, resourceUri);
                             }
                         }
                     }
@@ -133,7 +133,7 @@ public class ProtocolHelper {
                                 final String name = entryName.substring(path.length() + 1, entryName.length() - 1);
                                 if (name.indexOf('/') == -1) {
                                     subPackages.add(name);
-                                    logger.debug("found {} in {}", name, resourceUri);
+                                    logger.debug("Found subpackage: name={}, resource={}", name, resourceUri);
                                 }
                             }
                         }
@@ -141,7 +141,7 @@ public class ProtocolHelper {
                 }
             }
         } catch (final IOException e) {
-            logger.warn("Cannot load subpackages from {}", basePackage, e);
+            logger.warn("Cannot load subpackages: basePackage={}", basePackage, e);
         }
 
         subPackages.stream().forEach(protocol -> {
@@ -154,7 +154,7 @@ public class ProtocolHelper {
                     } else if ("file".equalsIgnoreCase(protocolType)) {
                         addFileProtocol(protocol);
                     } else {
-                        logger.warn("Unknown protocol: {}", protocol);
+                        logger.warn("Unknown protocol: protocol={}", protocol);
                     }
                 }
             } catch (final ClassNotFoundRuntimeException e) {
@@ -214,7 +214,7 @@ public class ProtocolHelper {
     public void addWebProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(webProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {
-            logger.debug("web protocols contains {}.", protocol);
+            logger.debug("Web protocols already contains: protocol={}", protocol);
             return;
         }
         webProtocols = Arrays.copyOf(webProtocols, webProtocols.length + 1);
@@ -230,10 +230,58 @@ public class ProtocolHelper {
     public void addFileProtocol(final String protocol) {
         final String prefix = protocol + ":";
         if (stream(fileProtocols).get(stream -> stream.anyMatch(s -> s.equals(prefix)))) {
-            logger.debug("file protocols contains {}.", protocol);
+            logger.debug("File protocols already contains: protocol={}", protocol);
             return;
         }
         fileProtocols = Arrays.copyOf(fileProtocols, fileProtocols.length + 1);
         fileProtocols[fileProtocols.length - 1] = prefix;
+    }
+
+    /**
+     * Checks if the given URL is a file path protocol that requires directory and permission handling.
+     * Used for incremental crawling directory detection and file permission processing.
+     *
+     * @param url the URL to check
+     * @return true if the URL uses a file path protocol (smb, smb1, file, ftp, s3, gcs)
+     */
+    public boolean isFilePathProtocol(final String url) {
+        return url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("file:") || url.startsWith("ftp:")
+                || url.startsWith("s3:") || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given URL represents a file system path for content serving.
+     * Used to determine if special handling is needed for file system URLs.
+     *
+     * @param url the URL to check
+     * @return true if the URL is a file system path (file, smb, smb1, ftp, storage, s3, gcs)
+     */
+    public boolean isFileSystemPath(final String url) {
+        return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:")
+                || url.startsWith("storage:") || url.startsWith("s3:") || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given URL should skip URL decoding when extracting file names.
+     * Some protocols (like SMB, FTP, S3, GCS) should preserve the original URL encoding.
+     *
+     * @param url the URL to check
+     * @return true if URL decoding should be skipped for this protocol
+     */
+    public boolean shouldSkipUrlDecode(final String url) {
+        return url.startsWith("smb:") || url.startsWith("smb1:") || url.startsWith("ftp:") || url.startsWith("s3:")
+                || url.startsWith("gcs:");
+    }
+
+    /**
+     * Checks if the given path has a known protocol prefix that should not be converted.
+     * Used to determine if path conversion is needed in the wizard.
+     *
+     * @param path the path to check
+     * @return true if the path has a known protocol prefix
+     */
+    public boolean hasKnownProtocol(final String path) {
+        return path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("smb1:")
+                || path.startsWith("ftp:") || path.startsWith("storage:") || path.startsWith("s3:") || path.startsWith("gcs:");
     }
 }

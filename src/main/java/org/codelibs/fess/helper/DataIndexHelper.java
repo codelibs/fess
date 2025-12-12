@@ -126,7 +126,7 @@ public class DataIndexHelper {
         if (configList.isEmpty()) {
             // nothing
             if (logger.isInfoEnabled()) {
-                logger.info("No crawling target urls.");
+                logger.info("No crawling target data configs.");
             }
             return;
         }
@@ -355,7 +355,7 @@ public class DataIndexHelper {
             }
             final String sessionId = initParamMap.getAsString(Constants.SESSION_ID);
             if (StringUtil.isBlank(sessionId)) {
-                logger.warn("Invalid sessionId at {}", dataConfig);
+                logger.warn("[{}] Cannot delete stale documents: sessionId is not set.", dataConfig.getName());
                 return;
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -374,9 +374,9 @@ public class DataIndexHelper {
                 final String index = fessConfig.getIndexDocumentUpdateIndex();
                 searchEngineClient.admin().indices().prepareRefresh(index).execute().actionGet();
                 final long numOfDeleted = searchEngineClient.deleteByQuery(index, queryBuilder);
-                logger.info("Deleted {} old docs.", numOfDeleted);
+                logger.info("[{}] Deleted {} stale documents.", dataConfig.getName(), numOfDeleted);
             } catch (final Exception e) {
-                logger.error("Could not delete old docs at {}", dataConfig, e);
+                logger.error("[{}] Failed to delete stale documents.", dataConfig.getName(), e);
             }
         }
 

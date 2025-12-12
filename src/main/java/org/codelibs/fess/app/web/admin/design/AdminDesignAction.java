@@ -192,7 +192,7 @@ public class AdminDesignAction extends FessAdminAction {
 
         final File parentFile = uploadFile.getParentFile();
         if (!parentFile.exists() && !parentFile.mkdirs()) {
-            logger.warn("Could not create {}", parentFile.getAbsolutePath());
+            logger.warn("Could not create directory: {}", parentFile.getAbsolutePath());
         }
 
         try {
@@ -251,7 +251,7 @@ public class AdminDesignAction extends FessAdminAction {
     public HtmlResponse delete(final FileAccessForm form) {
         getTargetFile(form.fileName).ifPresent(file -> {
             if (!file.delete()) {
-                logger.error("Failed to delete {}", file.getAbsolutePath());
+                logger.error("Failed to delete design file: {}", file.getAbsolutePath());
                 throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), this::asListHtml);
             }
         }).orElse(() -> {

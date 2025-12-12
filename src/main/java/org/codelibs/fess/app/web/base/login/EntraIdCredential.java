@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.sso.aad.AzureAdAuthenticator;
+import org.codelibs.fess.sso.entraid.EntraIdAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 
@@ -33,20 +33,20 @@ import com.microsoft.aad.msal4j.IAccount;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 
 /**
- * Azure Active Directory credential implementation for Fess authentication.
- * Provides login credential functionality using Azure AD authentication results.
+ * Microsoft Entra ID credential implementation for Fess authentication.
+ * Provides login credential functionality using Entra ID authentication results.
  */
-public class AzureAdCredential implements LoginCredential, FessCredential {
+public class EntraIdCredential implements LoginCredential, FessCredential {
 
-    private static final Logger logger = LogManager.getLogger(AzureAdCredential.class);
+    private static final Logger logger = LogManager.getLogger(EntraIdCredential.class);
 
     private final IAuthenticationResult authResult;
 
     /**
-     * Constructs an Azure AD credential with the authentication result.
-     * @param authResult The authentication result from Azure AD.
+     * Constructs an Entra ID credential with the authentication result.
+     * @param authResult The authentication result from Entra ID.
      */
-    public AzureAdCredential(final IAuthenticationResult authResult) {
+    public EntraIdCredential(final IAuthenticationResult authResult) {
         this.authResult = authResult;
     }
 
@@ -61,38 +61,38 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
     }
 
     /**
-     * Gets the Azure AD user associated with this credential.
-     * @return The Azure AD user instance.
+     * Gets the Entra ID user associated with this credential.
+     * @return The Entra ID user instance.
      */
-    public AzureAdUser getUser() {
-        return new AzureAdUser(authResult);
+    public EntraIdUser getUser() {
+        return new EntraIdUser(authResult);
     }
 
     /**
-     * Azure AD user implementation providing user information and permissions.
+     * Entra ID user implementation providing user information and permissions.
      */
-    public static class AzureAdUser implements FessUser {
+    public static class EntraIdUser implements FessUser {
         private static final long serialVersionUID = 1L;
 
         /** User's group memberships. */
-        protected String[] groups;
+        protected volatile String[] groups;
 
         /** User's role assignments. */
-        protected String[] roles;
+        protected volatile String[] roles;
 
         /** User's computed permissions. */
-        protected String[] permissions;
+        protected volatile String[] permissions;
 
-        /** Azure AD authentication result. */
+        /** Entra ID authentication result. */
         protected IAuthenticationResult authResult;
 
         /**
-         * Constructs an Azure AD user with the authentication result.
-         * @param authResult The authentication result from Azure AD.
+         * Constructs an Entra ID user with the authentication result.
+         * @param authResult The authentication result from Entra ID.
          */
-        public AzureAdUser(final IAuthenticationResult authResult) {
+        public EntraIdUser(final IAuthenticationResult authResult) {
             this.authResult = authResult;
-            final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+            final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
             authenticator.updateMemberOf(this);
         }
 
@@ -120,11 +120,11 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
                 final String homeAccountId = account.homeAccountId();
                 final String username = account.username();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("homeAccountId:{} username:{}", homeAccountId, username);
+                    logger.debug("homeAccountId={}, username={}", homeAccountId, username);
                 }
                 permissionSet.add(systemHelper.getSearchRoleByUser(homeAccountId));
                 permissionSet.add(systemHelper.getSearchRoleByUser(username));
-                if (ComponentUtil.getFessConfig().isAzureAdUseDomainServices() && username.indexOf('@') >= 0) {
+                if (ComponentUtil.getFessConfig().isEntraIdUseDomainServices() && username.indexOf('@') >= 0) {
                     final String[] values = username.split("@");
                     if (values.length > 1) {
                         permissionSet.add(systemHelper.getSearchRoleByUser(values[0]));
@@ -151,7 +151,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
             }
             // Attempt to refresh token using MSAL4J silent authentication
             try {
-                final AzureAdAuthenticator authenticator = ComponentUtil.getComponent(AzureAdAuthenticator.class);
+                final EntraIdAuthenticator authenticator = ComponentUtil.getComponent(EntraIdAuthenticator.class);
                 final IAuthenticationResult newResult = authenticator.refreshTokenSilently(this);
                 if (newResult != null) {
                     authResult = newResult;
@@ -173,7 +173,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
         }
 
         /**
-         * Gets the Azure AD authentication result.
+         * Gets the Entra ID authentication result.
          * @return The authentication result.
          */
         public IAuthenticationResult getAuthenticationResult() {
@@ -184,7 +184,7 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
          * Sets the user's group memberships.
          * @param groups Array of group names.
          */
-        public void setGroups(final String[] groups) {
+        public synchronized void setGroups(final String[] groups) {
             this.groups = groups;
         }
 
@@ -192,8 +192,16 @@ public class AzureAdCredential implements LoginCredential, FessCredential {
          * Sets the user's role assignments.
          * @param roles Array of role names.
          */
-        public void setRoles(final String[] roles) {
+        public synchronized void setRoles(final String[] roles) {
             this.roles = roles;
+        }
+
+        /**
+         * Resets permissions to force recalculation on next getPermissions() call.
+         * This is called after asynchronous parent group lookup completes.
+         */
+        public void resetPermissions() {
+            this.permissions = null;
         }
     }
 }

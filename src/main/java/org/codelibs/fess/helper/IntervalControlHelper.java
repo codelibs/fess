@@ -275,16 +275,16 @@ public class IntervalControlHelper {
     protected static int[] parseTime(final String time) {
         final String[] froms = time.split(":");
         if (froms.length != 2) {
-            throw new FessSystemException("Invalid format: " + time);
+            throw new FessSystemException("Invalid time format: " + time + ". Expected format: HH:MM");
         }
         final int[] values = new int[2];
         values[0] = Integer.parseInt(froms[0]);
         if (values[0] < 0 || values[0] > 23) {
-            throw new FessSystemException("Invalid format: " + time);
+            throw new FessSystemException("Invalid hour value: " + values[0] + " in time: " + time + ". Hour must be between 0 and 23");
         }
         values[1] = Integer.parseInt(froms[1]);
         if (values[1] < 0 || values[1] > 59) {
-            throw new FessSystemException("Invalid format: " + time);
+            throw new FessSystemException("Invalid minute value: " + values[1] + " in time: " + time + ". Minute must be between 0 and 59");
         }
         return values;
     }

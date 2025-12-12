@@ -93,7 +93,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
     @PostConstruct
     public void init() {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialize {}", this.getClass().getSimpleName());
+            logger.debug("Initializing {}", this.getClass().getSimpleName());
         }
         ComponentUtil.getSsoManager().register(this);
 
@@ -195,7 +195,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
                         if (!auth.isAuthenticated()) {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Authentication is failed.");
+                                logger.debug("Authentication failed.");
                             }
                             return null;
                         }
@@ -214,7 +214,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
 
                         return createLoginCredential(request, response, auth);
                     } catch (final Exception e) {
-                        logger.warn("Authentication is failed.", e);
+                        logger.warn("Authentication failed.", e);
                         return null;
                     }
                 }

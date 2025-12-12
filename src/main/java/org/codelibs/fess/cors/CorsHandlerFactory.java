@@ -49,7 +49,7 @@ public class CorsHandlerFactory {
      */
     public void add(final String origin, final CorsHandler handler) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Loaded {}", origin);
+            logger.debug("Loaded CorsHandler: origin={}", origin);
         }
         handerMap.put(origin, handler);
     }

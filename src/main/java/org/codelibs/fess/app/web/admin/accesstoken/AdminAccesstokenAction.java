@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.accesstoken;
 
-import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.stream.Collectors;
