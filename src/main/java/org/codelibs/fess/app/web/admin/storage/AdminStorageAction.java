@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.storage;
 
 import static org.codelibs.core.stream.StreamUtil.split;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.exception.StorageException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.storage.StorageClient;
+import org.codelibs.fess.storage.StorageClientFactory;
+import org.codelibs.fess.storage.StorageItem;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalThing;
@@ -42,19 +46,6 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
-
-import io.minio.GetObjectArgs;
-import io.minio.GetObjectTagsArgs;
-import io.minio.ListObjectsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.Result;
-import io.minio.SetObjectTagsArgs;
-import io.minio.errors.ErrorResponseException;
-import io.minio.messages.Item;
 
 /**
  * Admin action for Storage management.
@@ -246,7 +237,7 @@ public class AdminStorageAction extends FessAdminAction {
     }
 
     /**
-     * Updates the tags for a storage object in the MinIO system.
+     * Updates the tags for a storage object in the storage system.
      *
      * @param objectName the name of the object to update tags for
      * @param tagItems the map of tag items from the form
@@ -264,105 +255,71 @@ public class AdminStorageAction extends FessAdminAction {
         if (logger.isDebugEnabled()) {
             logger.debug("Tags updated: from={}, to={}", tagItems, tags);
         }
-        try {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final SetObjectTagsArgs args =
-                    SetObjectTagsArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).tags(tags).build();
-            createClient(fessConfig).setObjectTags(args);
+        try (StorageClient client = StorageClientFactory.createClient()) {
+            client.setObjectTags(objectName, tags);
         } catch (final Exception e) {
             throw new StorageException("Failed to update tags for " + objectName, e);
         }
     }
 
     /**
-     * Retrieves the tags for a storage object from the MinIO system.
+     * Retrieves the tags for a storage object from the storage system.
      *
      * @param objectName the name of the object to get tags for
      * @return map of tag key-value pairs
      * @throws StorageException if retrieving tags fails
      */
     public static Map<String, String> getObjectTags(final String objectName) {
-        try {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final GetObjectTagsArgs args = GetObjectTagsArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
-            return createClient(fessConfig).getObjectTags(args).get();
+        try (StorageClient client = StorageClientFactory.createClient()) {
+            return client.getObjectTags(objectName);
         } catch (final Exception e) {
             throw new StorageException("Failed to get tags from " + objectName, e);
         }
     }
 
     /**
-     * Uploads a file to the MinIO storage system.
+     * Uploads a file to the storage system.
      *
      * @param objectName the name for the object in storage
      * @param uploadFile the multipart file to upload
      * @throws StorageException if the upload fails
      */
     public static void uploadObject(final String objectName, final MultipartFormFile uploadFile) {
-        try (final InputStream in = uploadFile.getInputStream()) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final MinioClient minioClient = createClient(fessConfig);
-            final PutObjectArgs args = PutObjectArgs.builder()
-                    .bucket(fessConfig.getStorageBucket())
-                    .object(objectName)
-                    .stream(in, uploadFile.getFileSize(), -1)
-                    .contentType("application/octet-stream")
-                    .build();
-            minioClient.putObject(args);
+        try (final InputStream in = uploadFile.getInputStream(); final StorageClient client = StorageClientFactory.createClient()) {
+            client.uploadObject(objectName, in, uploadFile.getFileSize(), "application/octet-stream");
         } catch (final Exception e) {
             throw new StorageException("Failed to upload " + objectName, e);
         }
     }
 
     /**
-     * Downloads an object from the MinIO storage system.
+     * Downloads an object from the storage system.
      *
      * @param objectName the name of the object to download
      * @param out the output stream to write the object data to
      * @throws StorageException if the download fails
      */
-    public static void downloadObject(final String objectName, final WrittenStreamOut out) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final GetObjectArgs args = GetObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
-        try (InputStream in = createClient(fessConfig).getObject(args)) {
-            out.write(in);
+    public static void downloadObject(final String objectName, final org.lastaflute.web.servlet.request.stream.WrittenStreamOut out) {
+        try (final StorageClient client = StorageClientFactory.createClient()) {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            client.downloadObject(objectName, baos);
+            out.write(new java.io.ByteArrayInputStream(baos.toByteArray()));
         } catch (final Exception e) {
             throw new StorageException("Failed to download " + objectName, e);
         }
     }
 
     /**
-     * Deletes an object from the MinIO storage system.
+     * Deletes an object from the storage system.
      *
      * @param objectName the name of the object to delete
      * @throws StorageException if the deletion fails
      */
     public static void deleteObject(final String objectName) {
-        try {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final MinioClient minioClient = createClient(fessConfig);
-            final RemoveObjectArgs args = RemoveObjectArgs.builder().bucket(fessConfig.getStorageBucket()).object(objectName).build();
-            minioClient.removeObject(args);
+        try (final StorageClient client = StorageClientFactory.createClient()) {
+            client.deleteObject(objectName);
         } catch (final Exception e) {
             throw new StorageException("Failed to delete " + objectName, e);
-        }
-    }
-
-    /**
-     * Creates a MinIO client instance with the configured endpoint and credentials.
-     *
-     * @param fessConfig the Fess configuration containing storage settings
-     * @return configured MinIO client
-     * @throws StorageException if client creation fails
-     */
-    protected static MinioClient createClient(final FessConfig fessConfig) {
-        try {
-            return MinioClient.builder()
-                    .endpoint(fessConfig.getStorageEndpoint())
-                    .credentials(fessConfig.getStorageAccessKey(), fessConfig.getStorageSecretKey())
-                    .build();
-        } catch (final Exception e) {
-            throw new StorageException("Failed to create MinioClient: " + fessConfig.getStorageEndpoint(), e);
         }
     }
 
@@ -376,54 +333,34 @@ public class AdminStorageAction extends FessAdminAction {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> list = new ArrayList<>();
         final List<Map<String, Object>> fileList = new ArrayList<>();
-        try {
-            final MinioClient minioClient = createClient(fessConfig);
-            final ListObjectsArgs args = ListObjectsArgs.builder()
-                    .bucket(fessConfig.getStorageBucket())
-                    .prefix(prefix != null && prefix.length() > 0 ? prefix + "/" : prefix)
-                    .recursive(false)
-                    .includeUserMetadata(false)
-                    .useApiVersion1(false)
-                    .build();
-            for (final Result<Item> result : minioClient.listObjects(args)) {
+
+        try (final StorageClient client = StorageClientFactory.createClient(fessConfig)) {
+            // Ensure bucket exists on first access
+            client.ensureBucketExists();
+
+            final List<StorageItem> items = client.listObjects(prefix, fessConfig.getStorageMaxItemsInPageAsInteger());
+
+            for (final StorageItem item : items) {
                 final Map<String, Object> map = new HashMap<>();
-                final Item item = result.get();
-                final String objectName = item.objectName();
-                map.put("id", encodeId(objectName));
-                map.put("path", prefix);
-                map.put("name", getName(objectName));
+                map.put("id", item.getEncodedId());
+                map.put("path", item.getPath());
+                map.put("name", item.getName());
                 map.put("hashCode", item.hashCode());
-                map.put("size", item.size());
-                map.put("directory", item.isDir());
-                if (!item.isDir()) {
-                    map.put("lastModified", item.lastModified());
+                map.put("size", item.getSize());
+                map.put("directory", item.isDirectory());
+                if (!item.isDirectory()) {
+                    map.put("lastModified", item.getLastModified());
                     fileList.add(map);
                 } else {
                     list.add(map);
                 }
-                if (list.size() + fileList.size() > fessConfig.getStorageMaxItemsInPageAsInteger()) {
-                    break;
-                }
-            }
-        } catch (final ErrorResponseException e) {
-            final String code = e.errorResponse().code();
-            if ("NoSuchBucket".equals(code)) {
-                final MinioClient minioClient = createClient(fessConfig);
-                try {
-                    final MakeBucketArgs args = MakeBucketArgs.builder().bucket(fessConfig.getStorageBucket()).build();
-                    minioClient.makeBucket(args);
-                    logger.info("Created storage bucket: {}", fessConfig.getStorageBucket());
-                } catch (final Exception e1) {
-                    logger.warn("Failed to create storage bucket: {}", fessConfig.getStorageBucket(), e1);
-                }
-            } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to access storage endpoint: {}", fessConfig.getStorageEndpoint(), e);
             }
         }
+
         list.addAll(fileList);
         return list;
     }

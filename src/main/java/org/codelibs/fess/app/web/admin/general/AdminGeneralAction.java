@@ -211,6 +211,10 @@ public class AdminGeneralAction extends FessAdminAction {
             fessConfig.setStorageSecretKey(form.storageSecretKey);
         }
         fessConfig.setStorageBucket(form.storageBucket);
+        fessConfig.setStorageType(form.storageType);
+        fessConfig.setStorageRegion(form.storageRegion);
+        fessConfig.setStorageProjectId(form.storageProjectId);
+        fessConfig.setStorageCredentialsPath(form.storageCredentialsPath);
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
@@ -273,6 +277,10 @@ public class AdminGeneralAction extends FessAdminAction {
         form.storageAccessKey = StringUtil.isNotBlank(fessConfig.getStorageAccessKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.storageSecretKey = StringUtil.isNotBlank(fessConfig.getStorageSecretKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.storageBucket = fessConfig.getStorageBucket();
+        form.storageType = fessConfig.getStorageType();
+        form.storageRegion = fessConfig.getStorageRegion();
+        form.storageProjectId = fessConfig.getStorageProjectId();
+        form.storageCredentialsPath = fessConfig.getStorageCredentialsPath();
         form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 

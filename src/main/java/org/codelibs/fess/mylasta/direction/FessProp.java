@@ -611,6 +611,38 @@ public interface FessProp {
         return getSystemProperty(Constants.STORAGE_BUCKET, StringUtil.EMPTY);
     }
 
+    default void setStorageType(final String value) {
+        setSystemProperty(Constants.STORAGE_TYPE, value);
+    }
+
+    default String getStorageType() {
+        return getSystemProperty(Constants.STORAGE_TYPE, "auto");
+    }
+
+    default void setStorageRegion(final String value) {
+        setSystemProperty(Constants.STORAGE_REGION, value);
+    }
+
+    default String getStorageRegion() {
+        return getSystemProperty(Constants.STORAGE_REGION, "us-east-1");
+    }
+
+    default void setStorageProjectId(final String value) {
+        setSystemProperty(Constants.STORAGE_PROJECT_ID, value);
+    }
+
+    default String getStorageProjectId() {
+        return getSystemProperty(Constants.STORAGE_PROJECT_ID, StringUtil.EMPTY);
+    }
+
+    default void setStorageCredentialsPath(final String value) {
+        setSystemProperty(Constants.STORAGE_CREDENTIALS_PATH, value);
+    }
+
+    default String getStorageCredentialsPath() {
+        return getSystemProperty(Constants.STORAGE_CREDENTIALS_PATH, StringUtil.EMPTY);
+    }
+
     Integer getLdapMaxUsernameLengthAsInteger();
 
     default String getLdapSecurityPrincipal(final String username) {
