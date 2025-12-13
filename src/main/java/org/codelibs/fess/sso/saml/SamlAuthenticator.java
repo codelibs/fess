@@ -17,8 +17,6 @@ package org.codelibs.fess.sso.saml;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +39,6 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.IpAddressUtil;
 import org.codelibs.saml2.Auth;
 import org.codelibs.saml2.core.authn.AuthnRequestParams;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
@@ -62,7 +59,79 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Authenticator for SAML.
+ * Authenticator for SAML 2.0.
+ *
+ * <p>This authenticator enables Single Sign-On (SSO) using SAML 2.0 protocol
+ * with Identity Providers such as Okta, Azure AD, OneLogin, etc.</p>
+ *
+ * <h2>Required Configuration</h2>
+ * <p>Add the following properties to {@code system.properties}:</p>
+ * <pre>
+ * # Enable SAML SSO
+ * sso.type=saml
+ *
+ * # Identity Provider settings (obtain from your IdP)
+ * saml.idp.entityid=http://www.okta.com/xxxxx
+ * saml.idp.single_sign_on_service.url=https://your-domain.okta.com/app/xxxxx/sso/saml
+ * saml.idp.x509cert=MIIDqjCCApKgAwIBAgIGAYMwfYAwMA0G...
+ * </pre>
+ *
+ * <h2>Service Provider URL Configuration</h2>
+ * <p>By default, the SP URLs use {@code http://localhost:8080} as the base URL.
+ * For production or when the IdP is configured with a different URL, you should
+ * set one of the following:</p>
+ *
+ * <h3>Option 1: Set base URL (recommended for simplicity)</h3>
+ * <pre>
+ * # All SP URLs will be derived from this base URL
+ * saml.sp.base.url=https://your-fess-server.example.com
+ * </pre>
+ *
+ * <h3>Option 2: Set individual SP URLs</h3>
+ * <pre>
+ * # SP Entity ID (Audience URI in IdP)
+ * saml.sp.entityid=https://your-fess-server.example.com/sso/metadata
+ *
+ * # Assertion Consumer Service URL
+ * saml.sp.assertion_consumer_service.url=https://your-fess-server.example.com/sso/
+ *
+ * # Single Logout Service URL
+ * saml.sp.single_logout_service.url=https://your-fess-server.example.com/sso/logout
+ * </pre>
+ *
+ * <h2>Complete Configuration Example (Okta)</h2>
+ * <pre>
+ * sso.type=saml
+ *
+ * # IdP settings from Okta SAML setup instructions
+ * saml.idp.entityid=http://www.okta.com/your-app-id
+ * saml.idp.single_sign_on_service.url=https://your-domain.okta.com/app/your-app/your-app-id/sso/saml
+ * saml.idp.x509cert=MIIDqjCCApKg... (your IdP certificate)
+ *
+ * # SP base URL (must match Audience URI configured in Okta)
+ * saml.sp.base.url=http://localhost:8080
+ * </pre>
+ *
+ * <h2>Optional Configuration</h2>
+ * <pre>
+ * # User attribute mapping
+ * saml.attribute.group.name=groups
+ * saml.attribute.role.name=roles
+ *
+ * # Default groups/roles for authenticated users
+ * saml.default.groups=user
+ * saml.default.roles=user
+ * </pre>
+ *
+ * <h2>Security Settings (Production)</h2>
+ * <p>For production environments, consider enabling these security features:</p>
+ * <pre>
+ * saml.security.authnrequest_signed=true
+ * saml.security.want_messages_signed=true
+ * saml.security.want_assertions_signed=true
+ * </pre>
+ *
+ * @see <a href="https://fess.codelibs.org/">Fess Documentation</a>
  */
 public class SamlAuthenticator implements SsoAuthenticator {
 
@@ -84,6 +153,11 @@ public class SamlAuthenticator implements SsoAuthenticator {
      * The key for the SAML state in the session.
      */
     protected static final String SAML_STATE = "SAML_STATE";
+
+    /**
+     * The property key for the SAML SP base URL.
+     */
+    protected static final String SAML_SP_BASE_URL = "saml.sp.base.url";
 
     private Map<String, Object> defaultSettings;
 
@@ -142,20 +216,23 @@ public class SamlAuthenticator implements SsoAuthenticator {
     }
 
     /**
-     * Builds a default URL for SAML endpoints based on the environment.
-     * Automatically handles IPv6 addresses by wrapping them in brackets.
+     * Builds a default URL for SAML endpoints.
+     * Uses the configured base URL or defaults to http://localhost:8080 for compatibility
+     * with common SAML IdP configurations.
      *
      * @param path the path to append to the base URL
-     * @return the complete URL with proper IPv6 handling
+     * @return the complete URL
      */
     protected String buildDefaultUrl(final String path) {
-        try {
-            final InetAddress localhost = InetAddress.getByName("localhost");
-            return IpAddressUtil.buildUrl("http", localhost, 8080, path);
-        } catch (final UnknownHostException e) {
-            // Fallback to hardcoded localhost if resolution fails
-            return "http://localhost:8080" + path;
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        String baseUrl = systemProperties.getProperty(SAML_SP_BASE_URL);
+        if (StringUtil.isBlank(baseUrl)) {
+            baseUrl = "http://localhost:8080";
         }
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl + path;
     }
 
     /**
