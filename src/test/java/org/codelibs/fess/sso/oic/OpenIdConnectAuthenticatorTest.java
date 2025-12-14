@@ -18,11 +18,14 @@ package org.codelibs.fess.sso.oic;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 
 public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
@@ -144,5 +147,139 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
 
         // Verify the authenticator has proper defaults
         assertNotNull(authenticator);
+    }
+
+    public void test_buildDefaultRedirectUrl_withDefaultBaseUrl() throws Exception {
+        // Test that buildDefaultRedirectUrl returns http://localhost:8080/sso/ when no property is set
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        // Ensure the property is not set
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        systemProperties.remove("oic.base.url");
+
+        // Use reflection to access protected method
+        Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+        buildDefaultRedirectUrlMethod.setAccessible(true);
+
+        String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+        // Verify URL uses default localhost:8080
+        assertNotNull(url);
+        assertEquals("http://localhost:8080/sso/", url);
+    }
+
+    public void test_buildDefaultRedirectUrl_withCustomBaseUrl() throws Exception {
+        // Test that buildDefaultRedirectUrl uses custom base URL from property
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL
+            systemProperties.setProperty("oic.base.url", "https://fess.example.com");
+
+            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+            buildDefaultRedirectUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+            // Verify URL uses custom base URL
+            assertNotNull(url);
+            assertEquals("https://fess.example.com/sso/", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("oic.base.url");
+        }
+    }
+
+    public void test_buildDefaultRedirectUrl_withTrailingSlash() throws Exception {
+        // Test that trailing slash is handled correctly
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL with trailing slash
+            systemProperties.setProperty("oic.base.url", "https://fess.example.com/");
+
+            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+            buildDefaultRedirectUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+            // Verify trailing slash is handled and URL is correct
+            assertNotNull(url);
+            assertEquals("https://fess.example.com/sso/", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("oic.base.url");
+        }
+    }
+
+    public void test_buildDefaultRedirectUrl_withPortInCustomUrl() throws Exception {
+        // Test that custom URL with port is handled correctly
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL with port
+            systemProperties.setProperty("oic.base.url", "http://127.0.0.1:9080");
+
+            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+            buildDefaultRedirectUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+            // Verify URL uses custom base URL with port
+            assertNotNull(url);
+            assertEquals("http://127.0.0.1:9080/sso/", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("oic.base.url");
+        }
+    }
+
+    public void test_buildDefaultRedirectUrl_emptyProperty() throws Exception {
+        // Test that empty property falls back to default
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set empty base URL
+            systemProperties.setProperty("oic.base.url", "");
+
+            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+            buildDefaultRedirectUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+            // Verify URL uses default localhost:8080 when property is empty
+            assertNotNull(url);
+            assertEquals("http://localhost:8080/sso/", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("oic.base.url");
+        }
+    }
+
+    public void test_buildDefaultRedirectUrl_whitespaceProperty() throws Exception {
+        // Test that whitespace-only property falls back to default
+        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set whitespace-only base URL
+            systemProperties.setProperty("oic.base.url", "   ");
+
+            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
+            buildDefaultRedirectUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+
+            // Verify URL uses default localhost:8080 when property is whitespace
+            assertNotNull(url);
+            assertEquals("http://localhost:8080/sso/", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("oic.base.url");
+        }
     }
 }

@@ -16,12 +16,13 @@
 package org.codelibs.fess.sso.saml;
 
 import java.lang.reflect.Field;
-import java.net.InetAddress;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.IpAddressUtil;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
 
@@ -44,14 +45,8 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         defaultSettings.put("onelogin.saml2.strict", "true");
         defaultSettings.put("onelogin.saml2.debug", "false");
 
-        // Build default URLs without requiring DI
+        // Build default URLs using localhost (matching the new implementation)
         String baseUrl = "http://localhost:8080";
-        try {
-            final InetAddress localhost = InetAddress.getByName("localhost");
-            baseUrl = IpAddressUtil.buildUrl("http", localhost, 8080, "");
-        } catch (Exception e) {
-            // Use fallback
-        }
 
         defaultSettings.put("onelogin.saml2.sp.entityid", baseUrl + "/sso/metadata");
         defaultSettings.put("onelogin.saml2.sp.assertion_consumer_service.url", baseUrl + "/sso/");
@@ -178,22 +173,166 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", defaultSettings.get("onelogin.saml2.sp.nameidformat"));
     }
 
-    public void test_buildDefaultUrl() throws Exception {
+    public void test_buildDefaultUrl_withDefaultBaseUrl() throws Exception {
+        // Test that buildDefaultUrl returns http://localhost:8080 when no property is set
         SamlAuthenticator authenticator = new SamlAuthenticator();
 
+        // Ensure the property is not set
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        systemProperties.remove("saml.sp.base.url");
+
         // Use reflection to access protected method
-        java.lang.reflect.Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+        Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
         buildDefaultUrlMethod.setAccessible(true);
 
         String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
 
-        // Verify URL is generated
+        // Verify URL uses default localhost:8080
         assertNotNull(url);
-        assertTrue(url.contains("8080"));
-        assertTrue(url.contains("/sso/metadata"));
+        assertEquals("http://localhost:8080/sso/metadata", url);
+    }
 
-        // Verify URL starts with http://
-        assertTrue(url.startsWith("http://"));
+    public void test_buildDefaultUrl_withCustomBaseUrl() throws Exception {
+        // Test that buildDefaultUrl uses custom base URL from property
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL
+            systemProperties.setProperty("saml.sp.base.url", "https://fess.example.com");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+
+            // Verify URL uses custom base URL
+            assertNotNull(url);
+            assertEquals("https://fess.example.com/sso/metadata", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
+    }
+
+    public void test_buildDefaultUrl_withTrailingSlash() throws Exception {
+        // Test that trailing slash is handled correctly
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL with trailing slash
+            systemProperties.setProperty("saml.sp.base.url", "https://fess.example.com/");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+
+            // Verify trailing slash is removed and URL is correct
+            assertNotNull(url);
+            assertEquals("https://fess.example.com/sso/metadata", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
+    }
+
+    public void test_buildDefaultUrl_withPortInCustomUrl() throws Exception {
+        // Test that custom URL with port is handled correctly
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set custom base URL with port
+            systemProperties.setProperty("saml.sp.base.url", "http://127.0.0.1:9080");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+
+            // Verify URL uses custom base URL with port
+            assertNotNull(url);
+            assertEquals("http://127.0.0.1:9080/sso/metadata", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
+    }
+
+    public void test_buildDefaultUrl_allEndpoints() throws Exception {
+        // Test all SAML endpoints are built correctly
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            systemProperties.setProperty("saml.sp.base.url", "https://fess.example.com");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            // Test metadata endpoint
+            String metadataUrl = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+            assertEquals("https://fess.example.com/sso/metadata", metadataUrl);
+
+            // Test ACS endpoint
+            String acsUrl = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/");
+            assertEquals("https://fess.example.com/sso/", acsUrl);
+
+            // Test SLO endpoint
+            String sloUrl = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/logout");
+            assertEquals("https://fess.example.com/sso/logout", sloUrl);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
+    }
+
+    public void test_buildDefaultUrl_emptyProperty() throws Exception {
+        // Test that empty property falls back to default
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set empty base URL
+            systemProperties.setProperty("saml.sp.base.url", "");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+
+            // Verify URL uses default localhost:8080 when property is empty
+            assertNotNull(url);
+            assertEquals("http://localhost:8080/sso/metadata", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
+    }
+
+    public void test_buildDefaultUrl_whitespaceProperty() throws Exception {
+        // Test that whitespace-only property falls back to default
+        SamlAuthenticator authenticator = new SamlAuthenticator();
+
+        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        try {
+            // Set whitespace-only base URL
+            systemProperties.setProperty("saml.sp.base.url", "   ");
+
+            Method buildDefaultUrlMethod = SamlAuthenticator.class.getDeclaredMethod("buildDefaultUrl", String.class);
+            buildDefaultUrlMethod.setAccessible(true);
+
+            String url = (String) buildDefaultUrlMethod.invoke(authenticator, "/sso/metadata");
+
+            // Verify URL uses default localhost:8080 when property is whitespace
+            assertNotNull(url);
+            assertEquals("http://localhost:8080/sso/metadata", url);
+        } finally {
+            // Clean up
+            systemProperties.remove("saml.sp.base.url");
+        }
     }
 
     public void test_contactInformation() throws Exception {

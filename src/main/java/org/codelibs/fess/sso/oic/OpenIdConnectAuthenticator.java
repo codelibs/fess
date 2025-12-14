@@ -16,8 +16,6 @@
 package org.codelibs.fess.sso.oic;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +25,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.UuidUtil;
 import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist.LoginCredentialResolver;
@@ -36,7 +35,6 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.sso.SsoResponseType;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.IpAddressUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
@@ -98,6 +96,9 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     /** Session key for OpenID Connect state parameter. */
     protected static final String OIC_STATE = "OIC_STATE";
+
+    /** Configuration key for OpenID Connect base URL. */
+    protected static final String OIC_BASE_URL = "oic.base.url";
 
     /** HTTP transport for OpenID Connect requests. */
     protected final HttpTransport httpTransport = new NetHttpTransport();
@@ -371,18 +372,21 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
     /**
      * Builds a default redirect URL for OpenID Connect based on the environment.
-     * Automatically handles IPv6 addresses by wrapping them in brackets.
+     * Uses the configured base URL or defaults to http://localhost:8080 for compatibility
+     * with common OIDC provider configurations.
      *
-     * @return the default redirect URL with proper IPv6 handling
+     * @return the default redirect URL
      */
     protected String buildDefaultRedirectUrl() {
-        try {
-            final InetAddress localhost = InetAddress.getByName("localhost");
-            return IpAddressUtil.buildUrl("http", localhost, 8080, "/sso/");
-        } catch (final UnknownHostException e) {
-            // Fallback to hardcoded localhost if resolution fails
-            return "http://localhost:8080/sso/";
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        String baseUrl = systemProperties.getProperty(OIC_BASE_URL);
+        if (StringUtil.isBlank(baseUrl)) {
+            baseUrl = "http://localhost:8080";
         }
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl + "/sso/";
     }
 
     /**
