@@ -109,7 +109,7 @@ import jakarta.servlet.http.HttpSession;
  * saml.idp.x509cert=MIIDqjCCApKg... (your IdP certificate)
  *
  * # SP base URL (must match Audience URI configured in Okta)
- * saml.sp.base.url=http://localhost:8080
+ * saml.sp.base.url=https://your-fess-server.example.com
  * </pre>
  *
  * <h2>Optional Configuration</h2>
