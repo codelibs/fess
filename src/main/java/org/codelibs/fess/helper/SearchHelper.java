@@ -583,17 +583,7 @@ public class SearchHelper {
                     LaResponseUtil.getOptionalResponse().ifPresent(res -> {
                         final Cookie cookie = new Cookie(fessConfig.getCookieSearchParameterName(), encoded);
                         cookie.setHttpOnly(Constants.TRUE.equalsIgnoreCase(fessConfig.getCookieSearchParameterHttpOnly()));
-                        final String secure = fessConfig.getCookieSearchParameterSecure();
-                        if (StringUtil.isBlank(secure)) {
-                            final String forwardedProto = req.getHeader("X-Forwarded-Proto");
-                            if ("https".equalsIgnoreCase(forwardedProto)) {
-                                cookie.setSecure(true);
-                            } else {
-                                cookie.setSecure(req.isSecure());
-                            }
-                        } else {
-                            cookie.setSecure(Constants.TRUE.equalsIgnoreCase(secure));
-                        }
+                        cookie.setSecure(isSearchParameterCookieSecure(req));
                         final String domain = fessConfig.getCookieSearchParameterDomain();
                         if (StringUtil.isNotBlank(domain)) {
                             cookie.setDomain(domain);
@@ -690,6 +680,8 @@ public class SearchHelper {
                             }
                             LaResponseUtil.getOptionalResponse().ifPresent(res -> {
                                 final Cookie invalidCookie = new Cookie(fessConfig.getCookieSearchParameterName(), StringUtil.EMPTY);
+                                invalidCookie.setHttpOnly(Constants.TRUE.equalsIgnoreCase(fessConfig.getCookieSearchParameterHttpOnly()));
+                                invalidCookie.setSecure(isSearchParameterCookieSecure(req));
                                 invalidCookie.setPath(fessConfig.getCookieSearchParameterPath());
                                 invalidCookie.setMaxAge(0);
                                 res.addCookie(invalidCookie);
@@ -726,6 +718,25 @@ public class SearchHelper {
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    /**
+     * Determines if the search parameter cookie should be secure based on configuration and request.
+     *
+     * @param request The HTTP request
+     * @return true if the cookie should have the secure flag set
+     */
+    protected boolean isSearchParameterCookieSecure(final HttpServletRequest request) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String secure = fessConfig.getCookieSearchParameterSecure();
+        if (StringUtil.isBlank(secure)) {
+            final String forwardedProto = request.getHeader("X-Forwarded-Proto");
+            if ("https".equalsIgnoreCase(forwardedProto)) {
+                return true;
+            }
+            return request.isSecure();
+        }
+        return Constants.TRUE.equalsIgnoreCase(secure);
     }
 
     /**

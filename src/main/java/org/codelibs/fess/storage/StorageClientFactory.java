@@ -54,7 +54,7 @@ public final class StorageClientFactory {
         }
 
         // S3 patterns
-        if (lowerEndpoint.contains(".amazonaws.com") || lowerEndpoint.matches(".*s3[.-].*")) {
+        if (lowerEndpoint.contains(".amazonaws.com") || lowerEndpoint.contains("s3.") || lowerEndpoint.contains("s3-")) {
             return StorageType.S3;
         }
 

@@ -198,7 +198,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
      * @param in the input stream to read the mapping data from
      */
     protected void reload(final MappingUpdater updater, final InputStream in) {
-        final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
+        final Pattern parsePattern = Pattern.compile("(.*?)\\s*+=>\\s*+(.*?)\\s*+$");
         final List<CharMappingItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
