@@ -95,4 +95,25 @@ public class SuggestTests extends CrudTestBase {
     void crudTest() {
         testRead();
     }
+
+    @Test
+    void testDeleteAllWords_ok() {
+        // Test deleting all suggest words
+        String response = checkDeleteMethod("all").asString();
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
+    }
+
+    @Test
+    void testDeleteDocumentWords_ok() {
+        // Test deleting document-based suggest words
+        String response = checkDeleteMethod("document").asString();
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
+    }
+
+    @Test
+    void testDeleteQueryWords_ok() {
+        // Test deleting query-based suggest words
+        String response = checkDeleteMethod("query").asString();
+        assertEquals(Integer.valueOf(0), JsonPath.from(response).get("response.status"));
+    }
 }
