@@ -130,11 +130,35 @@ Run the `package` goal and then the release file will be created in target/relea
 
 ### Integration Tests
 
-Launch Fess Server and run the following command:
+Integration tests require a running Fess server with OpenSearch. Follow these steps:
+
+#### 1. Build Fess
+
+    $ mvn antrun:run  # Download OpenSearch plugins (if not done)
+    $ mvn package     # Build the package
+
+#### 2. Start Fess Server
+
+    $ unzip target/releases/fess-*.zip
+    $ ./fess-*/bin/fess &
+
+Wait for Fess to be ready (this may take up to 60 seconds):
+
+    $ curl -s "http://localhost:8080/api/v1/health"
+
+You should see a JSON response when Fess is ready.
+
+#### 3. Clone Test Data
+
+Required for SearchApiTests:
+
+    $ git clone https://github.com/codelibs/fess-testdata.git /tmp/fess-testdata
+
+#### 4. Run Integration Tests
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 
-To run a single test case, you can use:
+To run a single test case:
 
     $ mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201" -Dtest=SearchApiTests
 
