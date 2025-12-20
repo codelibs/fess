@@ -160,7 +160,7 @@ public class StemmerOverrideFile extends DictionaryFile<StemmerOverrideItem> {
      * @throws DictionaryException if the input stream cannot be parsed.
      */
     protected void reload(final StemmerOverrideUpdater updater, final InputStream in) {
-        final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
+        final Pattern parsePattern = Pattern.compile("(.*?)\\s*+=>\\s*+(.*?)\\s*+$");
         final List<StemmerOverrideItem> itemList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Constants.UTF_8))) {
             long id = 0;
