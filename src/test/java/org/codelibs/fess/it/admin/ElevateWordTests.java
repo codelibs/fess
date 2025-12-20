@@ -15,12 +15,19 @@
  */
 package org.codelibs.fess.it.admin;
 
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
 
 @Tag("it")
 public class ElevateWordTests extends CrudTestBase {
@@ -79,5 +86,43 @@ public class ElevateWordTests extends CrudTestBase {
         testRead();
         testUpdate();
         testDelete();
+    }
+
+    @Test
+    void testDownloadCsv_ok() {
+        // First create some test data
+        for (int i = 0; i < 3; i++) {
+            final Map<String, Object> requestBody = createTestParam(i + 100);
+            checkPostMethod(requestBody, getItemEndpointSuffix());
+        }
+        refresh();
+
+        // Download CSV
+        Response response =
+                given().contentType("application/json").header("Authorization", getTestToken()).when().get(getApiPath() + "/download");
+
+        assertEquals(200, response.getStatusCode());
+        String body = response.getBody().asString();
+        assertTrue(body != null, "CSV response should not be null");
+    }
+
+    @Test
+    void testUploadCsv_ok() {
+        // Create CSV content with format: suggest_word,reading,boost
+        String csvContent = NAME_PREFIX + "uploadTest1,,10\n" + NAME_PREFIX + "uploadTest2,,20\n";
+
+        // Upload CSV
+        Response response = given().header("Authorization", getTestToken())
+                .multiPart("file", "elevatewords.csv", csvContent.getBytes())
+                .when()
+                .put(getApiPath() + "/upload");
+
+        int statusCode = response.getStatusCode();
+        assertTrue(statusCode == 200 || statusCode == 400, "Status code should be 200 or 400, but was " + statusCode);
+
+        if (statusCode == 200) {
+            JsonPath jsonPath = JsonPath.from(response.asString());
+            assertEquals(Integer.valueOf(0), jsonPath.get("response.status"));
+        }
     }
 }

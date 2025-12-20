@@ -15,12 +15,18 @@
  */
 package org.codelibs.fess.it.admin;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.path.json.JsonPath;
 
 @Tag("it")
 public class SchedulerTests extends CrudTestBase {
@@ -81,5 +87,17 @@ public class SchedulerTests extends CrudTestBase {
         testRead();
         testUpdate();
         testDelete();
+    }
+
+    @Test
+    void testStartJob_notFound() {
+        // Try to start a non-existent job
+        checkPutMethod(new HashMap<>(), "invalid_scheduler_id_12345/start").then().body("response.status", equalTo(1));
+    }
+
+    @Test
+    void testStopJob_notFound() {
+        // Try to stop a non-existent job
+        checkPutMethod(new HashMap<>(), "invalid_scheduler_id_12345/stop").then().body("response.status", equalTo(1));
     }
 }
