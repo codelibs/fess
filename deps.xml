@@ -6,7 +6,8 @@
 	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
 	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
-	<property name="kopf.branch" value="main" />
+	<property name="kopf.version" value="15.4.0" />
+	<property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/tags/v${kopf.version}.zip" />
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://central.sonatype.com/repository/maven-snapshots" />
@@ -32,12 +33,12 @@
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
-			<url url="https://github.com/codelibs/fess-kopf/archive/${kopf.branch}.zip" />
+			<url url="${kopf.url}" />
 		</get>
 		<delete dir="${site.dir}/kopf" />
 		<unzip dest="${site.dir}/kopf" src="${target.dir}/kopf.zip">
 			<patternset>
-				<include name="fess-kopf-${kopf.branch}/_site/**" />
+				<include name="fess-kopf-${kopf.version}/_site/**" />
 			</patternset>
 			<cutdirsmapper dirs="2" />
 		</unzip>
@@ -52,11 +53,8 @@
 		<get dest="${target.dir}">
 			<url url="${repo.url}/${jar.groupId}/${jar.artifactId}/${jar.version}/${jar.artifactId}-${file.version}.jar" />
 		</get>
-		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
-			todir="${crawler.dir}/lib"/>
-		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
-			todir="${suggest.dir}/lib"/>
-		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar"
-			todir="${thumbnail.dir}/lib"/>
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${crawler.dir}/lib" />
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${suggest.dir}/lib" />
+		<copy file="${target.dir}/${jar.artifactId}-${file.version}.jar" todir="${thumbnail.dir}/lib" />
 	</target>
 </project>
