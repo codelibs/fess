@@ -2295,4 +2295,52 @@ public interface FessProp {
         }
         return 10000L;
     }
+
+    // ===================================================================================
+    //                                                                         Rate Limit
+    //                                                                         ==========
+    String RATE_LIMIT_WHITELIST_IPS_SET = "rateLimitWhitelistIpsSet";
+
+    String RATE_LIMIT_BLOCKED_IPS_SET = "rateLimitBlockedIpsSet";
+
+    String getRateLimitWhitelistIps();
+
+    default Set<String> getRateLimitWhitelistIpsAsSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_WHITELIST_IPS_SET);
+        if (set == null) {
+            set = split(getRateLimitWhitelistIps(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            propMap.put(RATE_LIMIT_WHITELIST_IPS_SET, set);
+        }
+        return set;
+    }
+
+    String getRateLimitBlockedIps();
+
+    default Set<String> getRateLimitBlockedIpsAsSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_BLOCKED_IPS_SET);
+        if (set == null) {
+            set = split(getRateLimitBlockedIps(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            propMap.put(RATE_LIMIT_BLOCKED_IPS_SET, set);
+        }
+        return set;
+    }
+
+    String RATE_LIMIT_TRUSTED_PROXIES_SET = "rateLimitTrustedProxiesSet";
+
+    String getRateLimitTrustedProxies();
+
+    default Set<String> getRateLimitTrustedProxiesAsSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> set = (Set<String>) propMap.get(RATE_LIMIT_TRUSTED_PROXIES_SET);
+        if (set == null) {
+            set = split(getRateLimitTrustedProxies(), ",")
+                    .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).collect(Collectors.toSet()));
+            propMap.put(RATE_LIMIT_TRUSTED_PROXIES_SET, set);
+        }
+        return set;
+    }
 }
