@@ -2814,6 +2814,27 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Bucket */
     public static final String LABELS_storage_bucket = "{labels.storage_bucket}";
 
+    /** The key of the message: Type */
+    public static final String LABELS_storage_type = "{labels.storage_type}";
+
+    /** The key of the message: Auto */
+    public static final String LABELS_storage_type_auto = "{labels.storage_type_auto}";
+
+    /** The key of the message: S3 */
+    public static final String LABELS_storage_type_s3 = "{labels.storage_type_s3}";
+
+    /** The key of the message: GCS */
+    public static final String LABELS_storage_type_gcs = "{labels.storage_type_gcs}";
+
+    /** The key of the message: Region */
+    public static final String LABELS_storage_region = "{labels.storage_region}";
+
+    /** The key of the message: Project ID */
+    public static final String LABELS_storage_project_id = "{labels.storage_project_id}";
+
+    /** The key of the message: Credentials Path */
+    public static final String LABELS_storage_credentials_path = "{labels.storage_credentials_path}";
+
     /** The key of the message: Send Test Mail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
 

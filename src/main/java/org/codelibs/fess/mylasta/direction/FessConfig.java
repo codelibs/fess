@@ -289,6 +289,33 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. status,timed_out */
     String API_PING_search_engine_FIELDS = "api.ping.search_engine.fields";
 
+    /** The key of the configuration. e.g. false */
+    String RATE_LIMIT_ENABLED = "rate.limit.enabled";
+
+    /** The key of the configuration. e.g. 100 */
+    String RATE_LIMIT_REQUESTS_PER_WINDOW = "rate.limit.requests.per.window";
+
+    /** The key of the configuration. e.g. 60000 */
+    String RATE_LIMIT_WINDOW_MS = "rate.limit.window.ms";
+
+    /** The key of the configuration. e.g. 300000 */
+    String RATE_LIMIT_BLOCK_DURATION_MS = "rate.limit.block.duration.ms";
+
+    /** The key of the configuration. e.g. 60 */
+    String RATE_LIMIT_RETRY_AFTER_SECONDS = "rate.limit.retry.after.seconds";
+
+    /** The key of the configuration. e.g. 127.0.0.1,::1 */
+    String RATE_LIMIT_WHITELIST_IPS = "rate.limit.whitelist.ips";
+
+    /** The key of the configuration. e.g.  */
+    String RATE_LIMIT_BLOCKED_IPS = "rate.limit.blocked.ips";
+
+    /** The key of the configuration. e.g. 127.0.0.1,::1 */
+    String RATE_LIMIT_TRUSTED_PROXIES = "rate.limit.trusted.proxies";
+
+    /** The key of the configuration. e.g. 1000 */
+    String RATE_LIMIT_CLEANUP_INTERVAL = "rate.limit.cleanup.interval";
+
     /** The key of the configuration. e.g.  */
     String VIRTUAL_HOST_HEADERS = "virtual.host.headers";
 
@@ -2637,6 +2664,140 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getApiPingSearchEngineFields();
+
+    /**
+     * Get the value for the key 'rate.limit.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: Whether rate limiting is enabled.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitEnabled();
+
+    /**
+     * Is the property for the key 'rate.limit.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Whether rate limiting is enabled.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isRateLimitEnabled();
+
+    /**
+     * Get the value for the key 'rate.limit.requests.per.window'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of requests allowed per window.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitRequestsPerWindow();
+
+    /**
+     * Get the value for the key 'rate.limit.requests.per.window' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: Maximum number of requests allowed per window.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitRequestsPerWindowAsInteger();
+
+    /**
+     * Get the value for the key 'rate.limit.window.ms'. <br>
+     * The value is, e.g. 60000 <br>
+     * comment: Window size in milliseconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitWindowMs();
+
+    /**
+     * Get the value for the key 'rate.limit.window.ms' as {@link Integer}. <br>
+     * The value is, e.g. 60000 <br>
+     * comment: Window size in milliseconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitWindowMsAsInteger();
+
+    /**
+     * Get the value for the key 'rate.limit.block.duration.ms'. <br>
+     * The value is, e.g. 300000 <br>
+     * comment: Duration in milliseconds to block IP when limit exceeded.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitBlockDurationMs();
+
+    /**
+     * Get the value for the key 'rate.limit.block.duration.ms' as {@link Integer}. <br>
+     * The value is, e.g. 300000 <br>
+     * comment: Duration in milliseconds to block IP when limit exceeded.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitBlockDurationMsAsInteger();
+
+    /**
+     * Get the value for the key 'rate.limit.retry.after.seconds'. <br>
+     * The value is, e.g. 60 <br>
+     * comment: Retry-After header value in seconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitRetryAfterSeconds();
+
+    /**
+     * Get the value for the key 'rate.limit.retry.after.seconds' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * comment: Retry-After header value in seconds.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitRetryAfterSecondsAsInteger();
+
+    /**
+     * Get the value for the key 'rate.limit.whitelist.ips'. <br>
+     * The value is, e.g. 127.0.0.1,::1 <br>
+     * comment: Comma-separated list of whitelisted IPs (e.g., 127.0.0.1,::1).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitWhitelistIps();
+
+    /**
+     * Get the value for the key 'rate.limit.blocked.ips'. <br>
+     * The value is, e.g.  <br>
+     * comment: Comma-separated list of blocked IPs.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitBlockedIps();
+
+    /**
+     * Get the value for the key 'rate.limit.blocked.ips' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: Comma-separated list of blocked IPs.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitBlockedIpsAsInteger();
+
+    /**
+     * Get the value for the key 'rate.limit.trusted.proxies'. <br>
+     * The value is, e.g. 127.0.0.1,::1 <br>
+     * comment: Comma-separated list of trusted proxy IPs. Only trust X-Forwarded-For/X-Real-IP from these IPs.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitTrustedProxies();
+
+    /**
+     * Get the value for the key 'rate.limit.cleanup.interval'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Number of requests between cleanup operations to prevent memory leaks.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRateLimitCleanupInterval();
+
+    /**
+     * Get the value for the key 'rate.limit.cleanup.interval' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Number of requests between cleanup operations to prevent memory leaks.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRateLimitCleanupIntervalAsInteger();
 
     /**
      * Get the value for the key 'virtual.host.headers'. <br>
@@ -9128,6 +9289,70 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.API_PING_search_engine_FIELDS);
         }
 
+        public String getRateLimitEnabled() {
+            return get(FessConfig.RATE_LIMIT_ENABLED);
+        }
+
+        public boolean isRateLimitEnabled() {
+            return is(FessConfig.RATE_LIMIT_ENABLED);
+        }
+
+        public String getRateLimitRequestsPerWindow() {
+            return get(FessConfig.RATE_LIMIT_REQUESTS_PER_WINDOW);
+        }
+
+        public Integer getRateLimitRequestsPerWindowAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_REQUESTS_PER_WINDOW);
+        }
+
+        public String getRateLimitWindowMs() {
+            return get(FessConfig.RATE_LIMIT_WINDOW_MS);
+        }
+
+        public Integer getRateLimitWindowMsAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_WINDOW_MS);
+        }
+
+        public String getRateLimitBlockDurationMs() {
+            return get(FessConfig.RATE_LIMIT_BLOCK_DURATION_MS);
+        }
+
+        public Integer getRateLimitBlockDurationMsAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_BLOCK_DURATION_MS);
+        }
+
+        public String getRateLimitRetryAfterSeconds() {
+            return get(FessConfig.RATE_LIMIT_RETRY_AFTER_SECONDS);
+        }
+
+        public Integer getRateLimitRetryAfterSecondsAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_RETRY_AFTER_SECONDS);
+        }
+
+        public String getRateLimitWhitelistIps() {
+            return get(FessConfig.RATE_LIMIT_WHITELIST_IPS);
+        }
+
+        public String getRateLimitBlockedIps() {
+            return get(FessConfig.RATE_LIMIT_BLOCKED_IPS);
+        }
+
+        public Integer getRateLimitBlockedIpsAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_BLOCKED_IPS);
+        }
+
+        public String getRateLimitTrustedProxies() {
+            return get(FessConfig.RATE_LIMIT_TRUSTED_PROXIES);
+        }
+
+        public String getRateLimitCleanupInterval() {
+            return get(FessConfig.RATE_LIMIT_CLEANUP_INTERVAL);
+        }
+
+        public Integer getRateLimitCleanupIntervalAsInteger() {
+            return getAsInteger(FessConfig.RATE_LIMIT_CLEANUP_INTERVAL);
+        }
+
         public String getVirtualHostHeaders() {
             return get(FessConfig.VIRTUAL_HOST_HEADERS);
         }
@@ -12122,6 +12347,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.API_CORS_ALLOW_CREDENTIALS, "true");
             defaultMap.put(FessConfig.API_JSONP_ENABLED, "false");
             defaultMap.put(FessConfig.API_PING_search_engine_FIELDS, "status,timed_out");
+            defaultMap.put(FessConfig.RATE_LIMIT_ENABLED, "false");
+            defaultMap.put(FessConfig.RATE_LIMIT_REQUESTS_PER_WINDOW, "100");
+            defaultMap.put(FessConfig.RATE_LIMIT_WINDOW_MS, "60000");
+            defaultMap.put(FessConfig.RATE_LIMIT_BLOCK_DURATION_MS, "300000");
+            defaultMap.put(FessConfig.RATE_LIMIT_RETRY_AFTER_SECONDS, "60");
+            defaultMap.put(FessConfig.RATE_LIMIT_WHITELIST_IPS, "127.0.0.1,::1");
+            defaultMap.put(FessConfig.RATE_LIMIT_BLOCKED_IPS, "");
+            defaultMap.put(FessConfig.RATE_LIMIT_TRUSTED_PROXIES, "127.0.0.1,::1");
+            defaultMap.put(FessConfig.RATE_LIMIT_CLEANUP_INTERVAL, "1000");
             defaultMap.put(FessConfig.VIRTUAL_HOST_HEADERS, "");
             defaultMap.put(FessConfig.HTTP_PROXY_HOST, "");
             defaultMap.put(FessConfig.HTTP_PROXY_PORT, "8080");

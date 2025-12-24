@@ -59,6 +59,7 @@ import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RateLimitHelper;
 import org.codelibs.fess.helper.RelatedContentHelper;
 import org.codelibs.fess.helper.RelatedQueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
@@ -127,6 +128,8 @@ public final class ComponentUtil {
     private static final String QUERY_STRING_BUILDER = "queryStringBuilder";
 
     private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
+
+    private static final String RATE_LIMIT_HELPER = "rateLimitHelper";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -705,6 +708,14 @@ public final class ComponentUtil {
      */
     public static AccessTokenHelper getAccessTokenHelper() {
         return getComponent(ACCESS_TOKEN_HELPER);
+    }
+
+    /**
+     * Gets the rate limit helper component.
+     * @return The rate limit helper.
+     */
+    public static RateLimitHelper getRateLimitHelper() {
+        return getComponent(RATE_LIMIT_HELPER);
     }
 
     /**
