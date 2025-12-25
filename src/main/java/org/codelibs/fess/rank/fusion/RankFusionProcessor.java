@@ -43,6 +43,8 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -299,6 +301,12 @@ public class RankFusionProcessor implements AutoCloseable {
                 Thread.currentThread().interrupt(); // Restore interrupt status
                 return SearchResult.create().build();
             } catch (final ExecutionException e) {
+                if (e.getCause() instanceof final InvalidQueryException iqe) {
+                    throw iqe;
+                }
+                if (e.getCause() instanceof final ResultOffsetExceededException roee) {
+                    throw roee;
+                }
                 logger.warn("Search operation failed with exception", e.getCause());
                 return SearchResult.create().build();
             }
@@ -416,6 +424,8 @@ public class RankFusionProcessor implements AutoCloseable {
             return createResponseList(searchResult.getDocumentList(), searchResult.getAllRecordCount(),
                     searchResult.getAllRecordCountRelation(), searchResult.getQueryTime(), searchResult.isPartialResults(),
                     searchResult.getFacetResponse(), params.getStartPosition(), pageSize, 0);
+        } catch (final InvalidQueryException | ResultOffsetExceededException e) {
+            throw e;
         } catch (final Exception e) {
             logger.warn("Main searcher failed to execute search for query: {}", query, e);
             return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
