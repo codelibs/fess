@@ -62,6 +62,26 @@ public abstract class CorsHandler {
     protected static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
     /**
+     * CORS header for specifying which headers can be exposed to the client.
+     */
+    protected static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
+    /**
+     * Request header for preflight requests asking for private network access.
+     */
+    protected static final String ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK = "Access-Control-Request-Private-Network";
+
+    /**
+     * Vary header to indicate that response varies based on Origin header.
+     */
+    protected static final String VARY = "Vary";
+
+    /**
+     * Origin header name.
+     */
+    protected static final String ORIGIN = "Origin";
+
+    /**
      * Processes the CORS request by setting appropriate headers.
      *
      * @param origin the origin of the request
