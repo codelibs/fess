@@ -37,4 +37,25 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
     public static String getSearchEngineHttpAddress() {
         return System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
     }
+
+    /**
+     * Masks sensitive values for logging purposes.
+     * Keys matching sensitive patterns (PASSWORD, SECRET, KEY, TOKEN, CREDENTIAL, AUTH, PRIVATE)
+     * will have their values replaced with "********".
+     *
+     * @param key The key name to check
+     * @param value The value to potentially mask
+     * @return The masked value if the key matches a sensitive pattern, otherwise the original value
+     */
+    public static String maskSensitiveValue(final String key, final String value) {
+        if (key == null || value == null) {
+            return value;
+        }
+        final String upperKey = key.toUpperCase();
+        if (upperKey.contains("PASSWORD") || upperKey.contains("SECRET") || upperKey.contains("KEY") || upperKey.contains("TOKEN")
+                || upperKey.contains("CREDENTIAL") || upperKey.contains("AUTH") || upperKey.contains("PRIVATE")) {
+            return "********";
+        }
+        return value;
+    }
 }

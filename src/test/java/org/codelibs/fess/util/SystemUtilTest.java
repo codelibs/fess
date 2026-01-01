@@ -314,4 +314,74 @@ public class SystemUtilTest extends UnitFessTestCase {
             }
         }
     }
+
+    public void test_maskSensitiveValue_withPassword() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("DB_PASSWORD", "secret123"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("password", "secret123"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("mysql_password", "secret123"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("SMTP_PASSWORD", "secret123"));
+    }
+
+    public void test_maskSensitiveValue_withSecret() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("AWS_SECRET_ACCESS_KEY", "AKIAIOSFODNN7EXAMPLE"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("secret", "mySecret"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("CLIENT_SECRET", "abc123"));
+    }
+
+    public void test_maskSensitiveValue_withKey() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("API_KEY", "abc123"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("apikey", "abc123"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("PRIVATE_KEY", "-----BEGIN RSA PRIVATE KEY-----"));
+    }
+
+    public void test_maskSensitiveValue_withToken() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("AUTH_TOKEN", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("access_token", "ya29.a0ARrdaM8"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("REFRESH_TOKEN", "1//0eXyz"));
+    }
+
+    public void test_maskSensitiveValue_withCredential() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("GOOGLE_CREDENTIALS", "{}"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("credential", "user:pass"));
+    }
+
+    public void test_maskSensitiveValue_withAuth() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("BASIC_AUTH", "dXNlcjpwYXNz"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("auth_header", "Bearer xyz"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("OAUTH_CLIENT_ID", "123456"));
+    }
+
+    public void test_maskSensitiveValue_withPrivate() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("PRIVATE_DATA", "sensitive"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("private_config", "internal"));
+    }
+
+    public void test_maskSensitiveValue_safeValues() {
+        // These should NOT be masked
+        assertEquals("localhost:9200", SystemUtil.maskSensitiveValue("HOST", "localhost:9200"));
+        assertEquals("8080", SystemUtil.maskSensitiveValue("PORT", "8080"));
+        assertEquals("/var/log/fess", SystemUtil.maskSensitiveValue("LOG_DIR", "/var/log/fess"));
+        assertEquals("production", SystemUtil.maskSensitiveValue("ENVIRONMENT", "production"));
+        assertEquals("admin", SystemUtil.maskSensitiveValue("USER_NAME", "admin"));
+        assertEquals("true", SystemUtil.maskSensitiveValue("DEBUG_MODE", "true"));
+    }
+
+    public void test_maskSensitiveValue_nullHandling() {
+        assertNull(SystemUtil.maskSensitiveValue(null, "value"));
+        assertNull(SystemUtil.maskSensitiveValue("key", null));
+        assertNull(SystemUtil.maskSensitiveValue(null, null));
+    }
+
+    public void test_maskSensitiveValue_caseInsensitive() {
+        // Should work regardless of case
+        assertEquals("********", SystemUtil.maskSensitiveValue("password", "secret"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("PASSWORD", "secret"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("Password", "secret"));
+        assertEquals("********", SystemUtil.maskSensitiveValue("PaSsWoRd", "secret"));
+    }
+
+    public void test_maskSensitiveValue_emptyValue() {
+        assertEquals("********", SystemUtil.maskSensitiveValue("PASSWORD", ""));
+        assertEquals("", SystemUtil.maskSensitiveValue("HOST", ""));
+    }
 }
