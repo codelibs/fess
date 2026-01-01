@@ -88,7 +88,7 @@ public class AdminLogAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE, ROLE + VIEW })
     public ActionResponse download(final String id) {
-        final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
+        final String filename = sanitizeFilename(new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8));
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath) && isLogFilename(filename)) {
             final Path path = Paths.get(logFilePath, filename);
@@ -100,6 +100,16 @@ public class AdminLogAction extends FessAdminAction {
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), this::asIndexHtml);
         return redirect(getClass()); // no-op
+    }
+
+    /**
+     * Sanitizes a filename by removing path traversal sequences and whitespace.
+     *
+     * @param filename the filename to sanitize
+     * @return the sanitized filename
+     */
+    public static String sanitizeFilename(final String filename) {
+        return filename.replace("..", "").replaceAll("\\s", "");
     }
 
     /**
