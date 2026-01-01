@@ -78,11 +78,18 @@ public class User extends BsUser implements FessUser {
 
     public void setOriginalPassword(final String originalPassword) {
         this.originalPassword = originalPassword;
-
     }
 
     public String getOriginalPassword() {
         return originalPassword;
+    }
+
+    /**
+     * Clears the original password from memory.
+     * Should be called after the password has been used for authentication or provisioning.
+     */
+    public void clearOriginalPassword() {
+        this.originalPassword = null;
     }
 
     @Override

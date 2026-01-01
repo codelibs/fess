@@ -144,6 +144,8 @@ public class UserService {
             logger.warn("Failed to {} user: username={}, id={}, error={}", isUpdate ? "update" : "create", username, user.getId(),
                     e.getMessage(), e);
             throw e;
+        } finally {
+            user.clearOriginalPassword();
         }
     }
 
