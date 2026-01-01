@@ -505,50 +505,14 @@ public class LdapManager {
     /**
      * Escapes special characters in an LDAP search filter to prevent LDAP injection attacks.
      *
-     * <p>This method escapes the following characters as per RFC 4515:
-     * <ul>
-     * <li>\ (backslash) → \5c</li>
-     * <li>* (asterisk) → \2a</li>
-     * <li>( (left parenthesis) → \28</li>
-     * <li>) (right parenthesis) → \29</li>
-     * <li>\0 (null character) → \00</li>
-     * </ul>
-     *
-     * <p><strong>Security Note:</strong> This method MUST be called on all user-supplied
-     * input before using it in LDAP search filters to prevent LDAP injection vulnerabilities.
-     *
      * @param filter the LDAP search filter to escape (null is treated as empty string)
      * @return the escaped filter string safe for use in LDAP queries (empty string if filter is null)
      * @see <a href="https://tools.ietf.org/html/rfc4515">RFC 4515 - LDAP String Representation of Search Filters</a>
+     * @deprecated Use {@link LdapUtil#escapeValue(String)} instead
      */
+    @Deprecated
     protected String escapeLDAPSearchFilter(final String filter) {
-        if (filter == null) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder(filter.length() * 2);
-        for (int i = 0; i < filter.length(); i++) {
-            final char curChar = filter.charAt(i);
-            switch (curChar) {
-            case '\\':
-                sb.append("\\5c");
-                break;
-            case '*':
-                sb.append("\\2a");
-                break;
-            case '(':
-                sb.append("\\28");
-                break;
-            case ')':
-                sb.append("\\29");
-                break;
-            case '\0':
-                sb.append("\\00");
-                break;
-            default:
-                sb.append(curChar);
-            }
-        }
-        return sb.toString();
+        return LdapUtil.escapeValue(filter);
     }
 
     /**
