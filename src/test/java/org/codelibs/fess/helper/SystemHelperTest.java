@@ -781,4 +781,369 @@ public class SystemHelperTest extends UnitFessTestCase {
             return null;
         }
     }
+
+    public void test_validatePassword_blank() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 8;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "admin";
+            }
+        });
+
+        assertEquals("errors.blank_password", systemHelper.validatePassword(null));
+        assertEquals("errors.blank_password", systemHelper.validatePassword(""));
+        assertEquals("errors.blank_password", systemHelper.validatePassword("   "));
+    }
+
+    public void test_validatePassword_minLength() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 8;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "admin";
+            }
+        });
+
+        assertEquals("errors.password_length", systemHelper.validatePassword("1234567"));
+        assertEquals("", systemHelper.validatePassword("12345678"));
+        assertEquals("", systemHelper.validatePassword("123456789"));
+    }
+
+    public void test_validatePassword_requireUppercase() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+
+        assertEquals("errors.password_no_uppercase", systemHelper.validatePassword("password"));
+        assertEquals("", systemHelper.validatePassword("Password"));
+        assertEquals("", systemHelper.validatePassword("PASSWORD"));
+    }
+
+    public void test_validatePassword_requireLowercase() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+
+        assertEquals("errors.password_no_lowercase", systemHelper.validatePassword("PASSWORD"));
+        assertEquals("", systemHelper.validatePassword("Password"));
+        assertEquals("", systemHelper.validatePassword("password"));
+    }
+
+    public void test_validatePassword_requireDigit() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+
+        assertEquals("errors.password_no_digit", systemHelper.validatePassword("password"));
+        assertEquals("", systemHelper.validatePassword("password1"));
+        assertEquals("", systemHelper.validatePassword("123456"));
+    }
+
+    public void test_validatePassword_requireSpecialChar() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return true;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "";
+            }
+        });
+
+        assertEquals("errors.password_no_special_char", systemHelper.validatePassword("password"));
+        assertEquals("", systemHelper.validatePassword("password!"));
+        assertEquals("", systemHelper.validatePassword("pass@word"));
+        assertEquals("", systemHelper.validatePassword("pass#word"));
+    }
+
+    public void test_validatePassword_blacklisted() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 0;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return false;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return false;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "admin\npassword\n123456";
+            }
+        });
+
+        assertEquals("errors.password_is_blacklisted", systemHelper.validatePassword("admin"));
+        assertEquals("errors.password_is_blacklisted", systemHelper.validatePassword("password"));
+        assertEquals("errors.password_is_blacklisted", systemHelper.validatePassword("123456"));
+        assertEquals("", systemHelper.validatePassword("securepassword"));
+    }
+
+    public void test_validatePassword_allRequirements() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getPasswordMinLengthAsInteger() {
+                return 8;
+            }
+
+            @Override
+            public boolean isPasswordRequireUppercase() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireLowercase() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireDigit() {
+                return true;
+            }
+
+            @Override
+            public boolean isPasswordRequireSpecialChar() {
+                return true;
+            }
+
+            @Override
+            public String getPasswordInvalidAdminPasswords() {
+                return "admin";
+            }
+        });
+
+        assertEquals("errors.password_length", systemHelper.validatePassword("Aa1!"));
+        assertEquals("errors.password_no_uppercase", systemHelper.validatePassword("password1!"));
+        assertEquals("errors.password_no_lowercase", systemHelper.validatePassword("PASSWORD1!"));
+        assertEquals("errors.password_no_digit", systemHelper.validatePassword("Password!"));
+        assertEquals("errors.password_no_special_char", systemHelper.validatePassword("Password1"));
+        assertEquals("", systemHelper.validatePassword("Password1!"));
+        assertEquals("", systemHelper.validatePassword("MyP@ssw0rd"));
+    }
+
+    public void test_containsUppercase() {
+        assertTrue(systemHelper.containsUppercase("A"));
+        assertTrue(systemHelper.containsUppercase("aA"));
+        assertTrue(systemHelper.containsUppercase("ABC"));
+        assertFalse(systemHelper.containsUppercase("abc"));
+        assertFalse(systemHelper.containsUppercase("123"));
+        assertFalse(systemHelper.containsUppercase(""));
+    }
+
+    public void test_containsLowercase() {
+        assertTrue(systemHelper.containsLowercase("a"));
+        assertTrue(systemHelper.containsLowercase("Aa"));
+        assertTrue(systemHelper.containsLowercase("abc"));
+        assertFalse(systemHelper.containsLowercase("ABC"));
+        assertFalse(systemHelper.containsLowercase("123"));
+        assertFalse(systemHelper.containsLowercase(""));
+    }
+
+    public void test_containsDigit() {
+        assertTrue(systemHelper.containsDigit("1"));
+        assertTrue(systemHelper.containsDigit("a1"));
+        assertTrue(systemHelper.containsDigit("123"));
+        assertFalse(systemHelper.containsDigit("abc"));
+        assertFalse(systemHelper.containsDigit("ABC"));
+        assertFalse(systemHelper.containsDigit(""));
+    }
+
+    public void test_containsSpecialChar() {
+        assertTrue(systemHelper.containsSpecialChar("!"));
+        assertTrue(systemHelper.containsSpecialChar("a!"));
+        assertTrue(systemHelper.containsSpecialChar("@#$%"));
+        assertTrue(systemHelper.containsSpecialChar("pass-word"));
+        assertTrue(systemHelper.containsSpecialChar("pass_word"));
+        assertFalse(systemHelper.containsSpecialChar("abc"));
+        assertFalse(systemHelper.containsSpecialChar("123"));
+        assertFalse(systemHelper.containsSpecialChar("abc123"));
+        assertFalse(systemHelper.containsSpecialChar(""));
+    }
 }

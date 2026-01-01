@@ -22,6 +22,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.app.web.profile.ProfileAction;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -154,6 +155,13 @@ public class LoginAction extends FessLoginAction {
             }, validationErrorLambda);
         }
 
+        final String validationError = ComponentUtil.getSystemHelper().validatePassword(form.password);
+        if (StringUtil.isNotBlank(validationError)) {
+            throwValidationError(messages -> {
+                addPasswordValidationError(messages, validationError);
+            }, validationErrorLambda);
+        }
+
         final String oldPassword =
                 getSession().map(session -> (String) session.getAttribute(INVALID_OLD_PASSWORD)).orElse(StringUtil.EMPTY);
         getUserBean().ifPresent(user -> {
@@ -169,6 +177,33 @@ public class LoginAction extends FessLoginAction {
                 messages.addErrorsLoginError(GLOBAL);
             }, validationErrorLambda);
         });
+    }
+
+    protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
+        switch (errorKey) {
+        case "errors.password_length":
+            messages.addErrorsPasswordLength(GLOBAL,
+                    String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+            break;
+        case "errors.password_no_uppercase":
+            messages.addErrorsPasswordNoUppercase(GLOBAL);
+            break;
+        case "errors.password_no_lowercase":
+            messages.addErrorsPasswordNoLowercase(GLOBAL);
+            break;
+        case "errors.password_no_digit":
+            messages.addErrorsPasswordNoDigit(GLOBAL);
+            break;
+        case "errors.password_no_special_char":
+            messages.addErrorsPasswordNoSpecialChar(GLOBAL);
+            break;
+        case "errors.password_is_blacklisted":
+            messages.addErrorsPasswordIsBlacklisted(GLOBAL);
+            break;
+        default:
+            messages.addErrorsBlankPassword(GLOBAL);
+            break;
+        }
     }
 
     private OptionalThing<HttpSession> getSession() {

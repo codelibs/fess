@@ -305,6 +305,24 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Password is required. */
     public static final String ERRORS_blank_password = "{errors.blank_password}";
 
+    /** The key of the message: Password must be at least {0} characters long. */
+    public static final String ERRORS_password_length = "{errors.password_length}";
+
+    /** The key of the message: Password must contain at least one uppercase letter. */
+    public static final String ERRORS_password_no_uppercase = "{errors.password_no_uppercase}";
+
+    /** The key of the message: Password must contain at least one lowercase letter. */
+    public static final String ERRORS_password_no_lowercase = "{errors.password_no_lowercase}";
+
+    /** The key of the message: Password must contain at least one digit. */
+    public static final String ERRORS_password_no_digit = "{errors.password_no_digit}";
+
+    /** The key of the message: Password must contain at least one special character. */
+    public static final String ERRORS_password_no_special_char = "{errors.password_no_special_char}";
+
+    /** The key of the message: Password is not allowed. Please choose a different password. */
+    public static final String ERRORS_password_is_blacklisted = "{errors.password_is_blacklisted}";
+
     /** The key of the message: Does not match a confirmation password. */
     public static final String ERRORS_invalid_confirm_password = "{errors.invalid_confirm_password}";
 
@@ -1880,6 +1898,91 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsBlankPassword(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_blank_password));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_length' with parameters.
+     * <pre>
+     * message: Password must be at least {0} characters long.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordLength(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_length, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_no_uppercase' with parameters.
+     * <pre>
+     * message: Password must contain at least one uppercase letter.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordNoUppercase(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_no_uppercase));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_no_lowercase' with parameters.
+     * <pre>
+     * message: Password must contain at least one lowercase letter.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordNoLowercase(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_no_lowercase));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_no_digit' with parameters.
+     * <pre>
+     * message: Password must contain at least one digit.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordNoDigit(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_no_digit));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_no_special_char' with parameters.
+     * <pre>
+     * message: Password must contain at least one special character.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordNoSpecialChar(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_no_special_char));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.password_is_blacklisted' with parameters.
+     * <pre>
+     * message: Password is not allowed. Please choose a different password.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPasswordIsBlacklisted(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_password_is_blacklisted));
         return this;
     }
 

@@ -19,10 +19,13 @@ package org.codelibs.fess.app.web.profile;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -110,6 +113,15 @@ public class ProfileAction extends FessSearchAction {
             }, validationErrorLambda);
         }
 
+        final String validationError = ComponentUtil.getSystemHelper().validatePassword(form.newPassword);
+        if (StringUtil.isNotBlank(validationError)) {
+            form.newPassword = null;
+            form.confirmNewPassword = null;
+            throwValidationError(messages -> {
+                addPasswordValidationError(messages, validationError);
+            }, validationErrorLambda);
+        }
+
         getUserBean().ifPresent(user -> {
             final String userId = user.getUserId();
             fessLoginAssist.findLoginUser(new LocalUserCredential(userId, form.oldPassword)).orElseGet(() -> {
@@ -123,6 +135,33 @@ public class ProfileAction extends FessSearchAction {
                 messages.addErrorsLoginError(GLOBAL);
             }, validationErrorLambda);
         });
+    }
+
+    protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
+        switch (errorKey) {
+        case "errors.password_length":
+            messages.addErrorsPasswordLength(GLOBAL,
+                    String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+            break;
+        case "errors.password_no_uppercase":
+            messages.addErrorsPasswordNoUppercase(GLOBAL);
+            break;
+        case "errors.password_no_lowercase":
+            messages.addErrorsPasswordNoLowercase(GLOBAL);
+            break;
+        case "errors.password_no_digit":
+            messages.addErrorsPasswordNoDigit(GLOBAL);
+            break;
+        case "errors.password_no_special_char":
+            messages.addErrorsPasswordNoSpecialChar(GLOBAL);
+            break;
+        case "errors.password_is_blacklisted":
+            messages.addErrorsPasswordIsBlacklisted(GLOBAL);
+            break;
+        default:
+            messages.addErrorsBlankPassword(GLOBAL);
+            break;
+        }
     }
 
     /**

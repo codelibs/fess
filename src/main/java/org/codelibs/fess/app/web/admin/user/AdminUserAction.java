@@ -432,6 +432,42 @@ public class AdminUserAction extends FessAdminAction {
                 messages.addErrorsInvalidConfirmPassword("confirmPassword");
             }, validationErrorLambda);
         }
+        if (StringUtil.isNotBlank(form.password)) {
+            final String validationError = ComponentUtil.getSystemHelper().validatePassword(form.password);
+            if (StringUtil.isNotBlank(validationError)) {
+                resetPassword(form);
+                throwValidationError(messages -> {
+                    addPasswordValidationError(messages, validationError);
+                }, validationErrorLambda);
+            }
+        }
+    }
+
+    protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
+        switch (errorKey) {
+        case "errors.password_length":
+            messages.addErrorsPasswordLength("password",
+                    String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+            break;
+        case "errors.password_no_uppercase":
+            messages.addErrorsPasswordNoUppercase("password");
+            break;
+        case "errors.password_no_lowercase":
+            messages.addErrorsPasswordNoLowercase("password");
+            break;
+        case "errors.password_no_digit":
+            messages.addErrorsPasswordNoDigit("password");
+            break;
+        case "errors.password_no_special_char":
+            messages.addErrorsPasswordNoSpecialChar("password");
+            break;
+        case "errors.password_is_blacklisted":
+            messages.addErrorsPasswordIsBlacklisted("password");
+            break;
+        default:
+            messages.addErrorsBlankPassword("password");
+            break;
+        }
     }
 
     /**

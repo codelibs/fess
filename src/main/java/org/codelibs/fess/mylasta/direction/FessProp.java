@@ -2209,6 +2209,16 @@ public interface FessProp {
                 .get(stream -> stream.map(String::trim).filter(StringUtil::isNotEmpty).anyMatch(s -> s.equals(password)));
     }
 
+    Integer getPasswordMinLengthAsInteger();
+
+    boolean isPasswordRequireUppercase();
+
+    boolean isPasswordRequireLowercase();
+
+    boolean isPasswordRequireDigit();
+
+    boolean isPasswordRequireSpecialChar();
+
     String getSearchlogRequestHeaders();
 
     default String[] getSearchlogRequestHeadersAsArray() {
