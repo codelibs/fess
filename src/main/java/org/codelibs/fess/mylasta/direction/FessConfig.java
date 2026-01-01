@@ -61,6 +61,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String APP_AUDIT_LOG_FORMAT = "app.audit.log.format";
 
+    /** The key of the configuration. e.g. true */
+    String SCRIPT_AUDIT_LOG_ENABLED = "script.audit.log.enabled";
+
     /** The key of the configuration. e.g. -Djava.awt.headless=true<br>
      * -Dfile.encoding=UTF-8<br>
      * -Djna.nosys=true<br>
@@ -2095,6 +2098,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getAppAuditLogFormatAsInteger();
+
+    /**
+     * Get the value for the key 'script.audit.log.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: Script audit log settings.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getScriptAuditLogEnabled();
+
+    /**
+     * Is the property for the key 'script.audit.log.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Script audit log settings.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isScriptAuditLogEnabled();
 
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
@@ -9061,6 +9080,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.APP_AUDIT_LOG_FORMAT);
         }
 
+        public String getScriptAuditLogEnabled() {
+            return get(FessConfig.SCRIPT_AUDIT_LOG_ENABLED);
+        }
+
+        public boolean isScriptAuditLogEnabled() {
+            return is(FessConfig.SCRIPT_AUDIT_LOG_ENABLED);
+        }
+
         public String getJvmCrawlerOptions() {
             return get(FessConfig.JVM_CRAWLER_OPTIONS);
         }
@@ -12301,6 +12328,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key|.*token|.*secret");
             defaultMap.put(FessConfig.APP_EXTENSION_NAMES, "");
             defaultMap.put(FessConfig.APP_AUDIT_LOG_FORMAT, "");
+            defaultMap.put(FessConfig.SCRIPT_AUDIT_LOG_ENABLED, "true");
             defaultMap.put(FessConfig.JVM_CRAWLER_OPTIONS,
                     "-Djava.awt.headless=true\n-Dfile.encoding=UTF-8\n-Djna.nosys=true\n-Djdk.io.permissionsUseCanonicalPath=true\n-Dhttp.maxConnections=20\n-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\n-server\n-Xms128m\n-Xmx512m\n-XX:MaxMetaspaceSize=128m\n-XX:CompressedClassSpaceSize=32m\n-XX:-UseGCOverheadLimit\n-XX:+UseTLAB\n-XX:+DisableExplicitGC\n-XX:-HeapDumpOnOutOfMemoryError\n-XX:-OmitStackTraceInFastThrow\n-XX:+UnlockExperimentalVMOptions\n-XX:+UseG1GC\n-XX:InitiatingHeapOccupancyPercent=45\n-XX:G1HeapRegionSize=1m\n-XX:MaxGCPauseMillis=60000\n-XX:G1NewSizePercent=5\n-XX:G1MaxNewSizePercent=5\n-Djcifs.smb.client.responseTimeout=30000\n-Djcifs.smb.client.soTimeout=35000\n-Djcifs.smb.client.connTimeout=60000\n-Djcifs.smb.client.sessionTimeout=60000\n-Djcifs.smb1.smb.client.connTimeout=60000\n-Djcifs.smb1.smb.client.soTimeout=35000\n-Djcifs.smb1.smb.client.responseTimeout=30000\n-Dio.netty.noUnsafe=true\n-Dio.netty.noKeySetOptimization=true\n-Dio.netty.recycler.maxCapacityPerThread=0\n-Dlog4j.shutdownHookEnabled=false\n-Dlog4j2.formatMsgNoLookups=true\n-Dlog4j2.disable.jmx=true\n-Dlog4j.skipJansi=true\n-Dsun.java2d.cmm=sun.java2d.cmm.kcms.KcmsServiceProvider\n-Dorg.apache.pdfbox.rendering.UsePureJavaCMYKConversion=true\n");
             defaultMap.put(FessConfig.JVM_SUGGEST_OPTIONS,

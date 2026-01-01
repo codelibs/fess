@@ -22,9 +22,13 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.script.AbstractScriptEngine;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.job.LaJobRuntime;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
@@ -97,17 +101,21 @@ public class GroovyEngine extends AbstractScriptEngine {
                 logger.debug("Evaluating Groovy script: template={}", template);
             }
 
-            return groovyShell.evaluate(template);
+            final Object result = groovyShell.evaluate(template);
+            logScriptExecution(template, "success");
+            return result;
         } catch (final JobProcessingException e) {
             // Rethrow JobProcessingException to allow scripts to signal job-specific errors
             // that should be handled by the job framework
             if (logger.isDebugEnabled()) {
                 logger.debug("Script raised JobProcessingException", e);
             }
+            logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
             throw e;
         } catch (final Exception e) {
             // Log and return null for other exceptions to maintain backward compatibility
             logger.warn("Failed to evaluate Groovy script: template={}, parameters={}", template, safeParamMap, e);
+            logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
             return null;
         } finally {
             // Properly clean up GroovyClassLoader resources
@@ -130,6 +138,61 @@ public class GroovyEngine extends AbstractScriptEngine {
     @Override
     protected String getName() {
         return "groovy";
+    }
+
+    /**
+     * Gets the current scheduled job from the thread-local job runtime.
+     *
+     * @return the scheduled job if available, null otherwise
+     */
+    protected ScheduledJob getCurrentScheduledJob() {
+        try {
+            final LaJobRuntime runtime = ComponentUtil.getJobHelper().getJobRuntime();
+            if (runtime != null) {
+                final Object job = runtime.getParameterMap().get(Constants.SCHEDULED_JOB);
+                if (job instanceof ScheduledJob) {
+                    return (ScheduledJob) job;
+                }
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to get scheduled job from thread local", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Logs script execution to the audit log.
+     *
+     * @param script the script content that was executed
+     * @param result the execution result (e.g., "success" or "failure:ExceptionType")
+     */
+    protected void logScriptExecution(final String script, final String result) {
+        try {
+            final ScheduledJob job = getCurrentScheduledJob();
+            String source = "unknown";
+            String user = "system";
+
+            if (job != null) {
+                source = "scheduler:" + job.getName();
+                if (job.getCreatedBy() != null) {
+                    user = job.getCreatedBy();
+                }
+            } else {
+                try {
+                    user = ComponentUtil.getSystemHelper().getUsername();
+                } catch (final Exception e) {
+                    // Ignore - background job context
+                }
+            }
+
+            ComponentUtil.getActivityHelper().scriptExecution(getName(), script, source, user, result);
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to log script execution", e);
+            }
+        }
     }
 
 }
