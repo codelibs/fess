@@ -106,6 +106,12 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     /** JSON factory for OpenID Connect response parsing. */
     protected final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
+    /** Number of characters to show at start and end when masking sensitive values. */
+    private static final int MASK_VISIBLE_CHARS = 4;
+
+    /** Mask string used to replace hidden characters. */
+    private static final String MASK_STRING = "...";
+
     /**
      * Initializes the OpenID Connect authenticator.
      */
@@ -131,7 +137,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                     final String code = request.getParameter("code");
                     final String reqState = request.getParameter("state");
                     if (logger.isDebugEnabled()) {
-                        logger.debug("code: {}, state(request): {}, state(session): {}", code, reqState, sesState);
+                        logger.debug("code={}, stateMatch={}", maskSensitiveValue(code), sesState.equals(reqState));
                     }
                     if (sesState.equals(reqState) && StringUtil.isNotBlank(code)) {
                         return processCallback(request, code);
@@ -429,5 +435,23 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
     @Override
     public String logout(final FessUserBean user) {
         return null;
+    }
+
+    /**
+     * Masks a sensitive value for safe logging.
+     * Shows only the first and last few characters with masking in between.
+     *
+     * @param value the sensitive value to mask
+     * @return the masked value, or "null" if value is null
+     */
+    protected String maskSensitiveValue(final String value) {
+        if (value == null) {
+            return "null";
+        }
+        final int length = value.length();
+        if (length <= MASK_VISIBLE_CHARS * 2) {
+            return MASK_STRING;
+        }
+        return value.substring(0, MASK_VISIBLE_CHARS) + MASK_STRING + value.substring(length - MASK_VISIBLE_CHARS);
     }
 }
