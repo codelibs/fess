@@ -239,6 +239,24 @@ public class ThumbnailManager {
     }
 
     /**
+     * Validates that the given file path is within the base thumbnail directory.
+     * This prevents path traversal attacks when processing paths from the database.
+     *
+     * @param file the file to validate
+     * @return true if the file path is valid and within baseDir, false otherwise
+     */
+    protected boolean isValidThumbnailPath(final File file) {
+        try {
+            final String canonicalBasePath = baseDir.getCanonicalPath();
+            final String canonicalFilePath = file.getCanonicalPath();
+            return canonicalFilePath.startsWith(canonicalBasePath + File.separator) || canonicalFilePath.equals(canonicalBasePath);
+        } catch (final IOException e) {
+            logger.warn("Failed to validate thumbnail path: file={}", file.getAbsolutePath(), e);
+            return false;
+        }
+    }
+
+    /**
      * Stores thumbnail generation tasks to the queue for processing.
      *
      * @param taskList list of thumbnail tasks to store
@@ -329,6 +347,10 @@ public class ThumbnailManager {
         final String generatorName = entity.getGenerator();
         try {
             final File outputFile = new File(baseDir, entity.getPath());
+            if (!isValidThumbnailPath(outputFile)) {
+                logger.warn("Invalid thumbnail path detected: path={}", entity.getPath());
+                return;
+            }
             final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
             if (!noImageFile.isFile() || systemHelper.getCurrentTimeAsLong() - noImageFile.lastModified() > noImageExpired) {
                 if (noImageFile.isFile() && !noImageFile.delete()) {

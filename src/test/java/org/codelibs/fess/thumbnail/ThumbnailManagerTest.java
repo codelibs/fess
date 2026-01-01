@@ -497,6 +497,29 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    // Test isValidThumbnailPath with valid path
+    public void test_isValidThumbnailPath_validPath() {
+        File validFile = new File(tempDir, "_1/_2/test.png");
+        assertTrue(thumbnailManager.isValidThumbnailPath(validFile));
+    }
+
+    // Test isValidThumbnailPath with path traversal
+    public void test_isValidThumbnailPath_pathTraversal() {
+        File invalidFile = new File(tempDir, "../../../etc/passwd");
+        assertFalse(thumbnailManager.isValidThumbnailPath(invalidFile));
+    }
+
+    // Test isValidThumbnailPath with absolute path outside baseDir
+    public void test_isValidThumbnailPath_outsideBaseDir() {
+        File invalidFile = new File("/tmp/other/directory/file.png");
+        assertFalse(thumbnailManager.isValidThumbnailPath(invalidFile));
+    }
+
+    // Test isValidThumbnailPath with path equal to baseDir
+    public void test_isValidThumbnailPath_equalsBaseDir() {
+        assertTrue(thumbnailManager.isValidThumbnailPath(tempDir));
+    }
+
     // Helper test thumbnail generator class
     private static class TestThumbnailGenerator implements ThumbnailGenerator {
         boolean available = false;
