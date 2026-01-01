@@ -225,6 +225,72 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    // ===== Script Execution Audit Log Tests =====
+
+    public void test_normalizeScript_null() {
+        assertEquals("-", activityHelper.normalizeScript(null));
+    }
+
+    public void test_normalizeScript_empty() {
+        assertEquals("", activityHelper.normalizeScript(""));
+    }
+
+    public void test_normalizeScript_normal() {
+        assertEquals("return 1 + 2", activityHelper.normalizeScript("return 1 + 2"));
+    }
+
+    public void test_normalizeScript_withControlCharacters() {
+        assertEquals("line1 line2 line3", activityHelper.normalizeScript("line1\nline2\rline3"));
+        assertEquals("tab1_tab2", activityHelper.normalizeScript("tab1\ttab2"));
+        // \t -> _, \n -> space, \r -> space, \n -> space
+        assertEquals("mixed_   ", activityHelper.normalizeScript("mixed\t\n\r\n"));
+    }
+
+    public void test_normalizeScript_longScript() {
+        // Create a script longer than 1000 characters
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 1100; i++) {
+            sb.append("a");
+        }
+        String longScript = sb.toString();
+
+        String result = activityHelper.normalizeScript(longScript);
+
+        // Should be truncated to 1000 characters (997 + "...")
+        assertEquals(1000, result.length());
+        assertTrue(result.endsWith("..."));
+    }
+
+    public void test_normalizeScript_exactlyMaxLength() {
+        // Create a script of exactly 1000 characters
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            sb.append("b");
+        }
+        String exactScript = sb.toString();
+
+        String result = activityHelper.normalizeScript(exactScript);
+
+        // Should not be truncated
+        assertEquals(1000, result.length());
+        assertFalse(result.endsWith("..."));
+    }
+
+    public void test_normalizeScript_lessThanMaxLength() {
+        // Create a script of 999 characters
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 999; i++) {
+            sb.append("c");
+        }
+        String shortScript = sb.toString();
+
+        String result = activityHelper.normalizeScript(shortScript);
+
+        // Should not be truncated
+        assertEquals(999, result.length());
+        assertFalse(result.endsWith("..."));
+    }
+
     OptionalThing<FessUserBean> createUser(String name, String[] permissions) {
         return OptionalThing.of(new FessUserBean(new TestUser(name, permissions)));
     }

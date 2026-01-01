@@ -433,4 +433,122 @@ public class GroovyEngineTest extends UnitFessTestCase {
         // In Groovy, the last expression is implicitly returned
         assertEquals(10, groovyEngine.evaluate("x * 2", params));
     }
+
+    // ===== Audit Log Tests =====
+
+    /**
+     * Test that getCurrentScheduledJob returns null when no job runtime is available
+     */
+    public void test_getCurrentScheduledJob_noJobRuntime() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        assertNull(testEngine.testGetCurrentScheduledJob());
+    }
+
+    /**
+     * Test that logScriptExecution handles null job gracefully
+     */
+    public void test_logScriptExecution_noJob() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        // Should not throw exception
+        testEngine.testLogScriptExecution("return 1", "success");
+        assertTrue(testEngine.logScriptExecutionCalled);
+        assertEquals("return 1", testEngine.lastLoggedScript);
+        assertEquals("success", testEngine.lastLoggedResult);
+    }
+
+    /**
+     * Test that logScriptExecution records success result
+     */
+    public void test_logScriptExecution_success() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        testEngine.testLogScriptExecution("return container.getComponent('test')", "success");
+        assertTrue(testEngine.logScriptExecutionCalled);
+        assertEquals("success", testEngine.lastLoggedResult);
+    }
+
+    /**
+     * Test that logScriptExecution records failure result
+     */
+    public void test_logScriptExecution_failure() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        testEngine.testLogScriptExecution("invalid script", "failure:GroovyRuntimeException");
+        assertTrue(testEngine.logScriptExecutionCalled);
+        assertEquals("failure:GroovyRuntimeException", testEngine.lastLoggedResult);
+    }
+
+    /**
+     * Test that evaluate calls logScriptExecution on success
+     */
+    public void test_evaluate_callsLogScriptExecutionOnSuccess() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+        testEngine.evaluate("return 'test'", params);
+        assertTrue(testEngine.logScriptExecutionCalled);
+        assertEquals("success", testEngine.lastLoggedResult);
+    }
+
+    /**
+     * Test that evaluate calls logScriptExecution on generic exception
+     */
+    public void test_evaluate_callsLogScriptExecutionOnException() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+        testEngine.evaluate("return undefinedVariable", params);
+        assertTrue(testEngine.logScriptExecutionCalled);
+        assertTrue(testEngine.lastLoggedResult.startsWith("failure:"));
+    }
+
+    /**
+     * Test that evaluate calls logScriptExecution on JobProcessingException
+     */
+    public void test_evaluate_callsLogScriptExecutionOnJobProcessingException() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+        try {
+            testEngine.evaluate("throw new org.codelibs.fess.exception.JobProcessingException('test')", params);
+            fail("Expected JobProcessingException");
+        } catch (final JobProcessingException e) {
+            assertTrue(testEngine.logScriptExecutionCalled);
+            assertEquals("failure:JobProcessingException", testEngine.lastLoggedResult);
+        }
+    }
+
+    /**
+     * Test that getName returns correct value
+     */
+    public void test_getName_returnsGroovy() {
+        final TestableGroovyEngine testEngine = new TestableGroovyEngine();
+        assertEquals("groovy", testEngine.testGetName());
+    }
+
+    /**
+     * Testable GroovyEngine subclass for testing protected methods
+     */
+    static class TestableGroovyEngine extends GroovyEngine {
+        boolean logScriptExecutionCalled = false;
+        String lastLoggedScript = null;
+        String lastLoggedResult = null;
+        String lastLoggedSource = null;
+        String lastLoggedUser = null;
+
+        public org.codelibs.fess.opensearch.config.exentity.ScheduledJob testGetCurrentScheduledJob() {
+            return getCurrentScheduledJob();
+        }
+
+        public void testLogScriptExecution(final String script, final String result) {
+            logScriptExecution(script, result);
+        }
+
+        public String testGetName() {
+            return getName();
+        }
+
+        @Override
+        protected void logScriptExecution(final String script, final String result) {
+            logScriptExecutionCalled = true;
+            lastLoggedScript = script;
+            lastLoggedResult = result;
+            // Don't call super to avoid dependency on ComponentUtil
+        }
+    }
 }

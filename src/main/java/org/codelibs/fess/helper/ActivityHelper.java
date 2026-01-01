@@ -203,6 +203,46 @@ public class ActivityHelper {
     }
 
     /**
+     * Log the script execution activity.
+     * @param scriptType The type of script (e.g., "groovy").
+     * @param script The script content.
+     * @param source The source of execution (e.g., "scheduler:JobName").
+     * @param user The user who triggered the execution.
+     * @param result The execution result (e.g., "success" or "failure:ExceptionType").
+     */
+    public void scriptExecution(final String scriptType, final String script, final String source, final String user, final String result) {
+        if (!ComponentUtil.getFessConfig().isScriptAuditLogEnabled()) {
+            return;
+        }
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.SCRIPT_EXECUTION.name());
+        valueMap.put("scriptType", scriptType != null ? scriptType : "-");
+        valueMap.put("source", source != null ? source : "-");
+        valueMap.put("user", user != null ? user : "-");
+        valueMap.put("result", result != null ? result : "-");
+        valueMap.put("script", normalizeScript(script));
+        log(valueMap);
+    }
+
+    /**
+     * Normalize script content for logging.
+     * Replaces control characters and truncates if too long.
+     * @param script The script content.
+     * @return The normalized script content.
+     */
+    protected String normalizeScript(final String script) {
+        if (script == null) {
+            return "-";
+        }
+        String normalized = script.replace('\n', ' ').replace('\r', ' ').replace('\t', '_');
+        final int maxLength = 1000;
+        if (normalized.length() > maxLength) {
+            return normalized.substring(0, maxLength - 3) + "...";
+        }
+        return normalized;
+    }
+
+    /**
      * Print the log.
      * @param action The action.
      * @param user The user.
@@ -304,7 +344,11 @@ public class ActivityHelper {
         /**
          * The update permission action.
          */
-        UPDATE_PERMISSION;
+        UPDATE_PERMISSION,
+        /**
+         * The script execution action.
+         */
+        SCRIPT_EXECUTION;
     }
 
     /**
