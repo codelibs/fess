@@ -18,6 +18,8 @@ package org.codelibs.fess.thumbnail.impl;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
@@ -105,5 +107,83 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
         logger.debug("width: {}, height: {}", img.getWidth(), img.getHeight());
         assertEquals("Image Width", width, img.getWidth());
         assertEquals("Image Height", height, img.getHeight());
+    }
+
+    // Tests for atomic file operations (TOCTOU fix)
+
+    public void test_createDirectories_nestedPath() throws Exception {
+        // Test that Files.createDirectories works correctly for nested paths
+        Path tempDir = Files.createTempDirectory("toctou_test");
+        try {
+            Path nestedPath = tempDir.resolve("level1").resolve("level2").resolve("level3");
+            assertFalse(Files.exists(nestedPath));
+
+            Files.createDirectories(nestedPath);
+
+            assertTrue(Files.exists(nestedPath));
+            assertTrue(Files.isDirectory(nestedPath));
+        } finally {
+            // Cleanup
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    public void test_createDirectories_existingPath() throws Exception {
+        // Test that Files.createDirectories is idempotent (no exception on existing dir)
+        Path tempDir = Files.createTempDirectory("toctou_test");
+        try {
+            Path existingPath = tempDir.resolve("existing");
+            Files.createDirectories(existingPath);
+            assertTrue(Files.exists(existingPath));
+
+            // Calling again should not throw exception
+            Files.createDirectories(existingPath);
+            assertTrue(Files.exists(existingPath));
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    public void test_deleteIfExists_existingFile() throws Exception {
+        // Test that Files.deleteIfExists works correctly for existing files
+        Path tempFile = Files.createTempFile("toctou_test", ".tmp");
+        try {
+            assertTrue(Files.exists(tempFile));
+
+            boolean deleted = Files.deleteIfExists(tempFile);
+
+            assertTrue(deleted);
+            assertFalse(Files.exists(tempFile));
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
+
+    public void test_deleteIfExists_nonExistingFile() throws Exception {
+        // Test that Files.deleteIfExists doesn't throw on non-existing file
+        Path tempDir = Files.createTempDirectory("toctou_test");
+        try {
+            Path nonExistingFile = tempDir.resolve("non_existing.tmp");
+            assertFalse(Files.exists(nonExistingFile));
+
+            // Should return false without throwing exception
+            boolean deleted = Files.deleteIfExists(nonExistingFile);
+
+            assertFalse(deleted);
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file);
+                }
+            }
+        }
+        dir.delete();
     }
 }
