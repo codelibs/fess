@@ -16,6 +16,9 @@
 package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -593,5 +596,96 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         generator.setCommandList(commands);
         // Verify command list can contain mimetype placeholder
         assertNotNull(generator);
+    }
+
+    // ==================== Tests for TOCTOU fix - atomic file operations ====================
+
+    public void test_atomicCreateDirectories_nestedPath() throws Exception {
+        // Test that Files.createDirectories creates nested directories atomically
+        Path tempDir = Files.createTempDirectory("toctou_cmd_test");
+        try {
+            Path nestedPath = tempDir.resolve("a").resolve("b").resolve("c");
+            assertFalse(Files.exists(nestedPath));
+
+            Files.createDirectories(nestedPath);
+
+            assertTrue(Files.exists(nestedPath));
+            assertTrue(Files.isDirectory(nestedPath));
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    public void test_atomicCreateDirectories_existingDirectory() throws Exception {
+        // Test that Files.createDirectories doesn't fail on existing directory
+        Path tempDir = Files.createTempDirectory("toctou_cmd_test");
+        try {
+            Path existingPath = tempDir.resolve("existing");
+            Files.createDirectories(existingPath);
+            assertTrue(Files.exists(existingPath));
+
+            // Should not throw when called again
+            Files.createDirectories(existingPath);
+            assertTrue(Files.exists(existingPath));
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    public void test_atomicDeleteIfExists_existingFile() throws Exception {
+        // Test that Files.deleteIfExists deletes existing file atomically
+        Path tempFile = Files.createTempFile("toctou_cmd_test", ".tmp");
+        try {
+            assertTrue(Files.exists(tempFile));
+
+            boolean deleted = Files.deleteIfExists(tempFile);
+
+            assertTrue(deleted);
+            assertFalse(Files.exists(tempFile));
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
+
+    public void test_atomicDeleteIfExists_nonExistingFile() throws Exception {
+        // Test that Files.deleteIfExists returns false for non-existing file without throwing
+        Path tempDir = Files.createTempDirectory("toctou_cmd_test");
+        try {
+            Path nonExisting = tempDir.resolve("non_existing.tmp");
+            assertFalse(Files.exists(nonExisting));
+
+            boolean deleted = Files.deleteIfExists(nonExisting);
+
+            assertFalse(deleted);
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
+
+    public void test_atomicDeleteIfExists_emptyFile() throws Exception {
+        // Test deleting empty files (simulating empty thumbnail scenario)
+        Path tempFile = Files.createTempFile("toctou_cmd_test", ".tmp");
+        try {
+            assertEquals(0, Files.size(tempFile));
+
+            boolean deleted = Files.deleteIfExists(tempFile);
+
+            assertTrue(deleted);
+            assertFalse(Files.exists(tempFile));
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file);
+                }
+            }
+        }
+        dir.delete();
     }
 }

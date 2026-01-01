@@ -330,9 +330,12 @@ public class ThumbnailManager {
         try {
             final File outputFile = new File(baseDir, entity.getPath());
             final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
+            final Path noImagePath = noImageFile.toPath();
             if (!noImageFile.isFile() || systemHelper.getCurrentTimeAsLong() - noImageFile.lastModified() > noImageExpired) {
-                if (noImageFile.isFile() && !noImageFile.delete()) {
-                    logger.warn("Failed to delete no-image file: {}", noImageFile.getAbsolutePath());
+                try {
+                    Files.deleteIfExists(noImagePath);
+                } catch (final IOException e) {
+                    logger.warn("Failed to delete no-image file: {}", noImageFile.getAbsolutePath(), e);
                 }
                 final ThumbnailGenerator generator = ComponentUtil.getComponent(generatorName);
                 if (generator.isAvailable()) {

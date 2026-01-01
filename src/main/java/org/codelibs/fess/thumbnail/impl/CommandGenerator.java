@@ -16,7 +16,10 @@
 package org.codelibs.fess.thumbnail.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -124,11 +127,11 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
 
         final File parentFile = outputFile.getParentFile();
-        if (!parentFile.exists()) {
-            parentFile.mkdirs();
-        }
-        if (!parentFile.isDirectory()) {
-            logger.warn("Parent directory not found: {}", parentFile.getAbsolutePath());
+        final Path parentPath = parentFile.toPath();
+        try {
+            Files.createDirectories(parentPath);
+        } catch (final IOException e) {
+            logger.warn("Failed to create parent directory: {}", parentFile.getAbsolutePath(), e);
             return false;
         }
 
@@ -148,18 +151,25 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                             .replace("${mimetype}", mimeType != null ? mimeType : "")));
                 }
 
+                final Path outputPath2 = outputFile.toPath();
                 if (executeCommand(thumbnailId, cmdList) != 0) {
                     logger.warn("Failed to execute command for thumbnail ID: {}", thumbnailId);
-                    if (outputFile.isFile() && !outputFile.delete()) {
-                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath());
+                    try {
+                        Files.deleteIfExists(outputPath2);
+                    } catch (final IOException e) {
+                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath(), e);
                     }
                     return false;
                 }
 
                 if (outputFile.isFile() && outputFile.length() == 0) {
                     logger.warn("Thumbnail file is empty: id={}", thumbnailId);
-                    if (outputFile.delete()) {
-                        logger.info("Deleted empty thumbnail file: {}", outputFile.getAbsolutePath());
+                    try {
+                        if (Files.deleteIfExists(outputPath2)) {
+                            logger.info("Deleted empty thumbnail file: {}", outputFile.getAbsolutePath());
+                        }
+                    } catch (final IOException e) {
+                        logger.warn("Failed to delete empty thumbnail file: {}", outputFile.getAbsolutePath(), e);
                     }
                     updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                     return false;
@@ -174,8 +184,12 @@ public class CommandGenerator extends BaseThumbnailGenerator {
                 updateThumbnailField(thumbnailId, StringUtil.EMPTY);
                 return false;
             } finally {
-                if (tempFile != null && !tempFile.delete()) {
-                    logger.debug("Failed to delete temp file: {}", tempFile.getAbsolutePath());
+                if (tempFile != null) {
+                    try {
+                        Files.deleteIfExists(tempFile.toPath());
+                    } catch (final IOException e) {
+                        logger.debug("Failed to delete temp file: {}", tempFile.getAbsolutePath(), e);
+                    }
                 }
             }
         });

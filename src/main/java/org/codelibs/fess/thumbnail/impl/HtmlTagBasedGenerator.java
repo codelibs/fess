@@ -20,6 +20,8 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -110,11 +112,11 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
         }
 
         final File parentFile = outputFile.getParentFile();
-        if (!parentFile.exists()) {
-            parentFile.mkdirs();
-        }
-        if (!parentFile.isDirectory()) {
-            logger.warn("Parent directory not found: {}", parentFile.getAbsolutePath());
+        final Path parentPath = parentFile.toPath();
+        try {
+            Files.createDirectories(parentPath);
+        } catch (final IOException e) {
+            logger.warn("Failed to create parent directory: {}", parentFile.getAbsolutePath(), e);
             return false;
         }
 
@@ -156,8 +158,10 @@ public class HtmlTagBasedGenerator extends BaseThumbnailGenerator {
             } finally {
                 if (!created) {
                     updateThumbnailField(thumbnailId, StringUtil.EMPTY);
-                    if (outputFile.exists() && !outputFile.delete()) {
-                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath());
+                    try {
+                        Files.deleteIfExists(outputFile.toPath());
+                    } catch (final IOException e) {
+                        logger.warn("Failed to delete output file: {}", outputFile.getAbsolutePath(), e);
                     }
                 }
             }

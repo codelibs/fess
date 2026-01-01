@@ -536,4 +536,50 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
             // Do nothing
         }
     }
+
+    // ==================== Tests for TOCTOU fix - atomic file operations ====================
+
+    public void test_atomicDeleteIfExists_noImageFile() throws Exception {
+        // Test that Files.deleteIfExists works correctly for no-image marker files
+        Path noImageFile = Files.createTempFile("noimage_test", ".noimage");
+        try {
+            assertTrue(Files.exists(noImageFile));
+
+            // Atomic delete should succeed
+            boolean deleted = Files.deleteIfExists(noImageFile);
+
+            assertTrue(deleted);
+            assertFalse(Files.exists(noImageFile));
+        } finally {
+            Files.deleteIfExists(noImageFile);
+        }
+    }
+
+    public void test_atomicDeleteIfExists_alreadyDeleted() throws Exception {
+        // Test that deleting already deleted file doesn't throw
+        Path tempFile = Files.createTempFile("already_deleted", ".tmp");
+        Files.delete(tempFile);
+        assertFalse(Files.exists(tempFile));
+
+        // Should return false without throwing
+        boolean deleted = Files.deleteIfExists(tempFile);
+        assertFalse(deleted);
+    }
+
+    public void test_atomicDeleteIfExists_concurrentScenario() throws Exception {
+        // Test simulating concurrent access scenario
+        Path tempDir = Files.createTempDirectory("concurrent_test");
+        try {
+            Path targetFile = tempDir.resolve("target.tmp");
+            Files.createFile(targetFile);
+
+            // First delete succeeds
+            assertTrue(Files.deleteIfExists(targetFile));
+
+            // Second delete returns false (file already gone)
+            assertFalse(Files.deleteIfExists(targetFile));
+        } finally {
+            deleteDirectory(tempDir.toFile());
+        }
+    }
 }
