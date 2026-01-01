@@ -333,7 +333,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected void validateNonce(final StateData stateData, final IAuthenticationResult authData) {
         final String idToken = authData.idToken();
         if (logger.isDebugEnabled()) {
-            logger.debug("idToken={}", idToken);
+            logger.debug("idToken={}", maskSensitiveValue(idToken));
         }
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
@@ -363,7 +363,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     public IAuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
-            logger.debug("refreshToken={}, authority={}", refreshToken, authority);
+            logger.debug("refreshToken={}, authority={}", maskSensitiveValue(refreshToken), authority);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -394,7 +394,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
         final String authority = getAuthority() + getTenant() + "/";
         final String authCode = authorizationCode.getValue();
         if (logger.isDebugEnabled()) {
-            logger.debug("authCode={}, authority={}, uri={}", authCode, authority, currentUri);
+            logger.debug("authCode={}, authority={}, uri={}", maskSensitiveValue(authCode), authority, currentUri);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
@@ -1239,5 +1239,21 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
      */
     public void setUseV2Endpoint(final boolean useV2Endpoint) {
         this.useV2Endpoint = useV2Endpoint;
+    }
+
+    /**
+     * Masks a sensitive value for safe logging.
+     * Returns a masked representation that shows only the length of the value.
+     * @param value The sensitive value to mask.
+     * @return A masked string representation.
+     */
+    protected String maskSensitiveValue(final String value) {
+        if (value == null) {
+            return "[null]";
+        }
+        if (value.isEmpty()) {
+            return "[empty]";
+        }
+        return "[MASKED, length=" + value.length() + "]";
     }
 }
