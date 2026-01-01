@@ -18,6 +18,9 @@ package org.codelibs.fess.mylasta.direction;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
@@ -51,6 +54,11 @@ import jakarta.annotation.Resource;
  * @author jflute
  */
 public class FessFwAssistantDirector extends CachedFwAssistantDirector {
+
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
+    private static final Logger logger = LogManager.getLogger(FessFwAssistantDirector.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -107,8 +115,14 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         final InvertibleCryptographer inver;
         final String cipherAlgorism = fessConfig.getAppCipherAlgorism();
         if ("blowfish".equalsIgnoreCase(cipherAlgorism)) {
+            logger.warn(
+                    "Blowfish cipher is deprecated due to its 64-bit block size vulnerability. Please consider migrating to AES. algorism={}",
+                    cipherAlgorism);
             inver = InvertibleCryptographer.createBlowfishCipher(fessConfig.getAppCipherKey());
         } else if ("des".equalsIgnoreCase(cipherAlgorism)) {
+            logger.warn(
+                    "DES cipher is deprecated due to its 56-bit key size vulnerability. Please consider migrating to AES. algorism={}",
+                    cipherAlgorism);
             inver = InvertibleCryptographer.createDesCipher(fessConfig.getAppCipherKey());
         } else if ("rsa".equalsIgnoreCase(cipherAlgorism)) {
             inver = InvertibleCryptographer.createRsaCipher(fessConfig.getAppCipherKey());
@@ -121,6 +135,9 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         if ("sha512".equalsIgnoreCase(digestAlgorism)) {
             oneWay = OneWayCryptographer.createSha512Cryptographer();
         } else if ("md5".equalsIgnoreCase(digestAlgorism)) {
+            logger.warn(
+                    "MD5 digest is deprecated due to its collision vulnerabilities. Please consider migrating to SHA-256. algorism={}",
+                    digestAlgorism);
             oneWay = new OneWayCryptographer("MD5", OneWayCryptographer.ENCODING_UTF8);
         } else {
             oneWay = OneWayCryptographer.createSha256Cryptographer();
