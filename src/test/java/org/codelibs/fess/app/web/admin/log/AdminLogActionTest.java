@@ -116,6 +116,11 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(".. /test.log"));
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(" ../test.log"));
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(".. / .. /test.log"));
+        // Whitespace between dots - must be removed before ".." removal
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename(". ./test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename(". . /test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename(".\t./test.log"));
+        assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename(". ./. ./etc/passwd.log"));
     }
 
     public void test_sanitizeFilename_pathTraversalPatterns() {
