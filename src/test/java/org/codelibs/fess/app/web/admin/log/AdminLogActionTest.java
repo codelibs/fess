@@ -161,9 +161,14 @@ public class AdminLogActionTest extends UnitFessTestCase {
     }
 
     public void test_sanitizeFilename_windowsPathSeparators() {
-        // Windows path separators are not specifically handled
-        assertEquals("test\\file.log", AdminLogAction.sanitizeFilename("test\\file.log"));
-        assertEquals("\\test.log", AdminLogAction.sanitizeFilename("..\\test.log"));
+        // Windows path separators are normalized to forward slashes
+        assertEquals("test/file.log", AdminLogAction.sanitizeFilename("test\\file.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("..\\test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("..\\..\\test.log"));
+        assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename("..\\..\\etc\\passwd.log"));
+        // Mixed slashes
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("..\\/../test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("../..\\test.log"));
     }
 
     // ==================================================================================

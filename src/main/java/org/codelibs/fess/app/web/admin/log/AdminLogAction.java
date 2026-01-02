@@ -109,7 +109,7 @@ public class AdminLogAction extends FessAdminAction {
      * @return the sanitized filename
      */
     public static String sanitizeFilename(final String filename) {
-        return filename.replaceAll("\\s", "").replace("..", "").replaceAll("/+", "/");
+        return filename.replaceAll("\\s", "").replace("\\", "/").replace("..", "").replaceAll("/+", "/");
     }
 
     /**
