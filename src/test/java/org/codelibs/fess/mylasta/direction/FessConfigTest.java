@@ -45,6 +45,8 @@ public class FessConfigTest extends UnitFessTestCase {
                     return "http://localhost:9201";
                 case FessConfig.search_engine_heartbeat_interval:
                     return "10000";
+                case FessConfig.APP_CIPHER_ALGORITHM:
+                    return "aes";
                 case FessConfig.APP_CIPHER_ALGORISM:
                     return "aes";
                 case FessConfig.APP_CIPHER_KEY:
@@ -230,6 +232,11 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals(Integer.valueOf(10000), fessConfig.getSearchEngineHeartbeatIntervalAsInteger());
     }
 
+    public void test_appCipherAlgorithm() {
+        assertEquals("aes", fessConfig.getAppCipherAlgorithm());
+    }
+
+    @SuppressWarnings("deprecation")
     public void test_appCipherAlgorism() {
         assertEquals("aes", fessConfig.getAppCipherAlgorism());
     }

@@ -105,22 +105,22 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
 
     protected FessSecurityResourceProvider createSecurityResourceProvider() {
         final InvertibleCryptographer inver;
-        final String cipherAlgorism = fessConfig.getAppCipherAlgorism();
-        if ("blowfish".equalsIgnoreCase(cipherAlgorism)) {
+        final String cipherAlgorithm = fessConfig.getAppCipherAlgorithm();
+        if ("blowfish".equalsIgnoreCase(cipherAlgorithm)) {
             inver = InvertibleCryptographer.createBlowfishCipher(fessConfig.getAppCipherKey());
-        } else if ("des".equalsIgnoreCase(cipherAlgorism)) {
+        } else if ("des".equalsIgnoreCase(cipherAlgorithm)) {
             inver = InvertibleCryptographer.createDesCipher(fessConfig.getAppCipherKey());
-        } else if ("rsa".equalsIgnoreCase(cipherAlgorism)) {
+        } else if ("rsa".equalsIgnoreCase(cipherAlgorithm)) {
             inver = InvertibleCryptographer.createRsaCipher(fessConfig.getAppCipherKey());
         } else {
             inver = InvertibleCryptographer.createAesCipher(fessConfig.getAppCipherKey());
         }
 
         final OneWayCryptographer oneWay;
-        final String digestAlgorism = fessConfig.getAppDigestAlgorism();
-        if ("sha512".equalsIgnoreCase(digestAlgorism)) {
+        final String digestAlgorithm = fessConfig.getAppDigestAlgorithm();
+        if ("sha512".equalsIgnoreCase(digestAlgorithm)) {
             oneWay = OneWayCryptographer.createSha512Cryptographer();
-        } else if ("md5".equalsIgnoreCase(digestAlgorism)) {
+        } else if ("md5".equalsIgnoreCase(digestAlgorithm)) {
             oneWay = new OneWayCryptographer("MD5", OneWayCryptographer.ENCODING_UTF8);
         } else {
             oneWay = OneWayCryptographer.createSha256Cryptographer();
