@@ -90,16 +90,16 @@ public class AdminLogActionTest extends UnitFessTestCase {
     public void test_sanitizeFilename_removesDoubleDots() {
         assertEquals("", AdminLogAction.sanitizeFilename(".."));
         assertEquals("/etc/passwd", AdminLogAction.sanitizeFilename("../etc/passwd"));
-        assertEquals("//etc/passwd", AdminLogAction.sanitizeFilename("../../etc/passwd"));
+        assertEquals("/etc/passwd", AdminLogAction.sanitizeFilename("../../etc/passwd"));
         assertEquals("test.log", AdminLogAction.sanitizeFilename("..test.log"));
-        assertEquals("test.log", AdminLogAction.sanitizeFilename("test..log"));
+        assertEquals("testlog", AdminLogAction.sanitizeFilename("test..log"));
     }
 
     public void test_sanitizeFilename_removesMultipleDoubleDots() {
         // "...." becomes "" (two ".." are removed)
         assertEquals("", AdminLogAction.sanitizeFilename("...."));
-        assertEquals("//test.log", AdminLogAction.sanitizeFilename("....//test.log"));
-        assertEquals("////test.log", AdminLogAction.sanitizeFilename("....//....//test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("....//test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("....//....//test.log"));
     }
 
     public void test_sanitizeFilename_removesWhitespace() {
@@ -115,18 +115,18 @@ public class AdminLogActionTest extends UnitFessTestCase {
     public void test_sanitizeFilename_removesDoubleDotsAndWhitespace() {
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(".. /test.log"));
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(" ../test.log"));
-        assertEquals("//test.log", AdminLogAction.sanitizeFilename(".. / .. /test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename(".. / .. /test.log"));
     }
 
     public void test_sanitizeFilename_pathTraversalPatterns() {
-        // Common path traversal attack patterns
+        // Common path traversal attack patterns - multiple slashes are normalized to single
         assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename("../etc/passwd.log"));
-        assertEquals("//etc/passwd.log", AdminLogAction.sanitizeFilename("../../etc/passwd.log"));
-        assertEquals("///etc/passwd.log", AdminLogAction.sanitizeFilename("../../../etc/passwd.log"));
+        assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename("../../etc/passwd.log"));
+        assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename("../../../etc/passwd.log"));
 
         // With multiple consecutive dots
-        assertEquals("//test.log", AdminLogAction.sanitizeFilename("....//test.log"));
-        assertEquals("////test.log", AdminLogAction.sanitizeFilename("......//....//test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("....//test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("......//....//test.log"));
 
         // Mixed patterns
         assertEquals("/var/log/other.log", AdminLogAction.sanitizeFilename("../var/log/other.log"));
@@ -148,6 +148,13 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("", AdminLogAction.sanitizeFilename(""));
     }
 
+    public void test_sanitizeFilename_normalizesMultipleSlashes() {
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("//test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("///test.log"));
+        assertEquals("/test.log", AdminLogAction.sanitizeFilename("////test.log"));
+        assertEquals("a/b/c.log", AdminLogAction.sanitizeFilename("a//b///c.log"));
+    }
+
     public void test_sanitizeFilename_windowsPathSeparators() {
         // Windows path separators are not specifically handled
         assertEquals("test\\file.log", AdminLogAction.sanitizeFilename("test\\file.log"));
@@ -163,11 +170,11 @@ public class AdminLogActionTest extends UnitFessTestCase {
         // but must end with .log to pass isLogFilename check
 
         String sanitized1 = AdminLogAction.sanitizeFilename("../../../var/log/auth.log");
-        assertEquals("///var/log/auth.log", sanitized1);
+        assertEquals("/var/log/auth.log", sanitized1);
         assertTrue(AdminLogAction.isLogFilename(sanitized1));
 
         String sanitized2 = AdminLogAction.sanitizeFilename("....//....//var/log/syslog.log");
-        assertEquals("////var/log/syslog.log", sanitized2);
+        assertEquals("/var/log/syslog.log", sanitized2);
         assertTrue(AdminLogAction.isLogFilename(sanitized2));
     }
 
