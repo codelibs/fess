@@ -1113,6 +1113,12 @@ public class SystemHelper {
         return StringUtil.EMPTY;
     }
 
+    /**
+     * Checks if the password contains at least one uppercase letter.
+     *
+     * @param password the password to check
+     * @return true if the password contains an uppercase letter, false otherwise
+     */
     protected boolean containsUppercase(final String password) {
         for (int i = 0; i < password.length(); i++) {
             if (Character.isUpperCase(password.charAt(i))) {
@@ -1122,6 +1128,12 @@ public class SystemHelper {
         return false;
     }
 
+    /**
+     * Checks if the password contains at least one lowercase letter.
+     *
+     * @param password the password to check
+     * @return true if the password contains a lowercase letter, false otherwise
+     */
     protected boolean containsLowercase(final String password) {
         for (int i = 0; i < password.length(); i++) {
             if (Character.isLowerCase(password.charAt(i))) {
@@ -1131,6 +1143,12 @@ public class SystemHelper {
         return false;
     }
 
+    /**
+     * Checks if the password contains at least one digit.
+     *
+     * @param password the password to check
+     * @return true if the password contains a digit, false otherwise
+     */
     protected boolean containsDigit(final String password) {
         for (int i = 0; i < password.length(); i++) {
             if (Character.isDigit(password.charAt(i))) {
@@ -1140,6 +1158,13 @@ public class SystemHelper {
         return false;
     }
 
+    /**
+     * Checks if the password contains at least one special character.
+     * A special character is defined as any character that is not a letter, digit, or whitespace.
+     *
+     * @param password the password to check
+     * @return true if the password contains a special character, false otherwise
+     */
     protected boolean containsSpecialChar(final String password) {
         for (int i = 0; i < password.length(); i++) {
             final char c = password.charAt(i);

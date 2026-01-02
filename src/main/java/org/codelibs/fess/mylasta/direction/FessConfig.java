@@ -9020,7 +9020,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Is the property for the key 'password.require.uppercase' true? <br>
      * The value is, e.g. false <br>
      * comment: Require uppercase letters in password.
-     * @return The determination, true or false. (if not found, exception)
+     * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPasswordRequireUppercase();
 
@@ -9036,7 +9036,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Is the property for the key 'password.require.lowercase' true? <br>
      * The value is, e.g. false <br>
      * comment: Require lowercase letters in password.
-     * @return The determination, true or false. (if not found, exception)
+     * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPasswordRequireLowercase();
 
@@ -9052,7 +9052,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Is the property for the key 'password.require.digit' true? <br>
      * The value is, e.g. false <br>
      * comment: Require digits in password.
-     * @return The determination, true or false. (if not found, exception)
+     * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPasswordRequireDigit();
 
@@ -9068,7 +9068,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Is the property for the key 'password.require.special.char' true? <br>
      * The value is, e.g. false <br>
      * comment: Require special characters in password.
-     * @return The determination, true or false. (if not found, exception)
+     * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPasswordRequireSpecialChar();
 

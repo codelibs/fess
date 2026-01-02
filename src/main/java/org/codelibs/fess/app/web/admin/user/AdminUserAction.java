@@ -443,11 +443,16 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
+    /**
+     * Adds a password validation error message to the messages object based on the error key.
+     *
+     * @param messages the FessMessages object to add the error to
+     * @param errorKey the error key identifying the type of password validation error
+     */
     protected void addPasswordValidationError(final FessMessages messages, final String errorKey) {
         switch (errorKey) {
         case "errors.password_length":
-            messages.addErrorsPasswordLength("password",
-                    String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
+            messages.addErrorsPasswordLength("password", String.valueOf(ComponentUtil.getFessConfig().getPasswordMinLengthAsInteger()));
             break;
         case "errors.password_no_uppercase":
             messages.addErrorsPasswordNoUppercase("password");
