@@ -352,7 +352,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
                             samlUser.getNameIdFormat(), samlUser.getNameidNameQualifier(), samlUser.getNameidSPNameQualifier());
                     return auth.logout(null, logoutRequestParams, true);
                 } catch (final Exception e) {
-                    logger.warn("Failed to logout from IdP: {}", samlUser, e);
+                    logger.warn("Failed to logout from IdP: name={}", samlUser.getName(), e);
                 }
                 return null;
             }).orElse(null);
