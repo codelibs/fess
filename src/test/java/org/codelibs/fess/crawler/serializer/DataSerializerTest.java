@@ -15,10 +15,17 @@
  */
 package org.codelibs.fess.crawler.serializer;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 
@@ -293,5 +300,237 @@ public class DataSerializerTest extends UnitFessTestCase {
         Object deserialized = serializer.fromBinaryToObject(serialized);
         assertNotNull("Deserialized object should not be null", deserialized);
         assertEquals("Unicode characters should be preserved", original, deserialized);
+    }
+
+    /**
+     * Test serialization of Date objects
+     */
+    public void test_serializeDeserialize_date() {
+        Date original = new Date();
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertTrue("Deserialized object should be a Date", deserialized instanceof Date);
+        assertEquals("Date should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of LinkedHashMap (preserves order)
+     */
+    public void test_serializeDeserialize_linkedHashMap() {
+        LinkedHashMap<String, Object> original = new LinkedHashMap<>();
+        original.put("first", 1);
+        original.put("second", 2);
+        original.put("third", 3);
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
+        assertEquals("Map contents should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of LinkedList
+     */
+    public void test_serializeDeserialize_linkedList() {
+        LinkedList<String> original = new LinkedList<>();
+        original.add("first");
+        original.add("second");
+        original.add("third");
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertTrue("Deserialized object should be a List", deserialized instanceof List);
+        assertEquals("List contents should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of HashSet
+     */
+    public void test_serializeDeserialize_hashSet() {
+        HashSet<String> original = new HashSet<>();
+        original.add("one");
+        original.add("two");
+        original.add("three");
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertTrue("Deserialized object should be a Set", deserialized instanceof Set);
+        assertEquals("Set contents should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of TreeMap
+     */
+    public void test_serializeDeserialize_treeMap() {
+        TreeMap<String, Integer> original = new TreeMap<>();
+        original.put("alpha", 1);
+        original.put("beta", 2);
+        original.put("gamma", 3);
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
+        assertEquals("Map contents should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of Long values
+     */
+    public void test_serializeDeserialize_long() {
+        Long original = 9876543210L;
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertEquals("Long value should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of Double values
+     */
+    public void test_serializeDeserialize_double() {
+        Double original = 3.14159265359;
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertEquals("Double value should match", original, deserialized);
+    }
+
+    /**
+     * Test serialization of Boolean values
+     */
+    public void test_serializeDeserialize_boolean() {
+        Boolean original = Boolean.TRUE;
+
+        byte[] serialized = serializer.fromObjectToBinary(original);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        Object deserialized = serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized object should not be null", deserialized);
+        assertEquals("Boolean value should match", original, deserialized);
+    }
+
+    // ========== Security Tests ==========
+
+    /**
+     * Security test: Verify that unregistered classes are rejected during serialization.
+     * This test ensures that the Kryo registration requirement is working correctly.
+     * Unregistered classes should throw an exception to prevent potential RCE attacks.
+     */
+    public void test_security_unregisteredClassRejected() {
+        // File class is intentionally not registered to test security
+        File unregisteredObject = new File("/tmp/test");
+
+        try {
+            serializer.fromObjectToBinary(unregisteredObject);
+            fail("Should have thrown an exception for unregistered class");
+        } catch (Exception e) {
+            // Find the root cause - it should be related to unregistered class
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                rootCause = rootCause.getCause();
+            }
+            String message = rootCause.getMessage();
+            assertTrue("Exception message should mention unregistered class: " + message,
+                    message != null && (message.contains("not registered") || message.contains("Class is not registered")
+                            || message.contains("unregistered")));
+        }
+    }
+
+    /**
+     * Security test: Custom class should be rejected.
+     * This test verifies that arbitrary user-defined classes cannot be serialized,
+     * which is important for preventing gadget chain attacks.
+     */
+    public void test_security_customClassRejected() {
+        // Create a simple custom object that is not registered
+        CustomTestClass customObject = new CustomTestClass("test");
+
+        try {
+            serializer.fromObjectToBinary(customObject);
+            fail("Should have thrown an exception for unregistered custom class");
+        } catch (Exception e) {
+            // Find the root cause - it should be related to unregistered class
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                rootCause = rootCause.getCause();
+            }
+            String message = rootCause.getMessage();
+            assertTrue("Exception message should mention unregistered class: " + message,
+                    message != null && (message.contains("not registered") || message.contains("Class is not registered")
+                            || message.contains("unregistered")));
+        }
+    }
+
+    /**
+     * Test that all registered types work correctly.
+     * This ensures our registration covers the common use cases.
+     */
+    public void test_allRegisteredTypesWork() {
+        // Test various registered types
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("string", "test");
+        testData.put("integer", 42);
+        testData.put("long", 123456789L);
+        testData.put("double", 3.14);
+        testData.put("boolean", true);
+        testData.put("date", new Date());
+
+        List<String> list = new ArrayList<>();
+        list.add("item1");
+        list.add("item2");
+        testData.put("list", list);
+
+        Map<String, Integer> nestedMap = new HashMap<>();
+        nestedMap.put("nested", 100);
+        testData.put("nestedMap", nestedMap);
+
+        byte[] serialized = serializer.fromObjectToBinary(testData);
+        assertNotNull("Serialized data should not be null", serialized);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> deserialized = (Map<String, Object>) serializer.fromBinaryToObject(serialized);
+        assertNotNull("Deserialized data should not be null", deserialized);
+        assertEquals("String should match", "test", deserialized.get("string"));
+        assertEquals("Integer should match", 42, deserialized.get("integer"));
+        assertEquals("Long should match", 123456789L, deserialized.get("long"));
+        assertEquals("Double should match", 3.14, deserialized.get("double"));
+        assertEquals("Boolean should match", true, deserialized.get("boolean"));
+        assertNotNull("Date should not be null", deserialized.get("date"));
+        assertNotNull("List should not be null", deserialized.get("list"));
+        assertNotNull("Nested map should not be null", deserialized.get("nestedMap"));
+    }
+
+    /**
+     * Helper class for testing that unregistered custom classes are rejected.
+     */
+    private static class CustomTestClass {
+        @SuppressWarnings("unused")
+        private final String value;
+
+        CustomTestClass(String value) {
+            this.value = value;
+        }
     }
 }

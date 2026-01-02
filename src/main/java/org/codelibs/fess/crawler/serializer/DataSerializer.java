@@ -18,6 +18,20 @@ package org.codelibs.fess.crawler.serializer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +42,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.CollectionSerializer;
+import com.esotericsoftware.kryo.serializers.MapSerializer;
 
 /**
  * A serializer class for handling object serialization and deserialization.
@@ -60,24 +76,95 @@ public class DataSerializer {
      * Constructs a new DataSerializer.
      * <p>
      * Initializes the ThreadLocal Kryo instances with appropriate configuration.
-     * The Kryo instances are configured to not require class registration for
-     * flexibility, and debug mode warnings are enabled when debug logging is active.
+     * The Kryo instances are configured to require class registration for security,
+     * preventing deserialization of arbitrary classes that could lead to RCE vulnerabilities.
+     * Only explicitly registered classes can be serialized/deserialized.
      * </p>
      */
     public DataSerializer() {
         kryoThreadLocal = ThreadLocal.withInitial(() -> {
             final Kryo kryo = new Kryo();
-            // TODO use kryo.register for security
-            // SECURITY WARNING: setRegistrationRequired(false) allows deserialization of arbitrary classes
-            // which could potentially lead to remote code execution vulnerabilities.
-            // This should be replaced with explicit class registration using kryo.register()
-            // for all classes that need to be serialized/deserialized.
-            kryo.setRegistrationRequired(false);
+            // Enable registration requirement for security - only registered classes can be deserialized
+            kryo.setRegistrationRequired(true);
             if (logger.isDebugEnabled()) {
                 kryo.setWarnUnregisteredClasses(true);
             }
+            // Register allowed classes for serialization/deserialization
+            registerClasses(kryo);
             return kryo;
         });
+    }
+
+    /**
+     * Registers all classes that are allowed for Kryo serialization/deserialization.
+     * <p>
+     * This method registers only the classes that are needed by the crawler data serialization.
+     * By explicitly registering classes, we prevent deserialization of arbitrary classes
+     * which could lead to remote code execution vulnerabilities through gadget chains.
+     * </p>
+     *
+     * @param kryo the Kryo instance to register classes with
+     */
+    protected void registerClasses(final Kryo kryo) {
+        // Primitive types and wrappers
+        kryo.register(String.class);
+        kryo.register(String[].class);
+        kryo.register(Integer.class);
+        kryo.register(int[].class);
+        kryo.register(Long.class);
+        kryo.register(long[].class);
+        kryo.register(Double.class);
+        kryo.register(double[].class);
+        kryo.register(Float.class);
+        kryo.register(float[].class);
+        kryo.register(Boolean.class);
+        kryo.register(boolean[].class);
+        kryo.register(Byte.class);
+        kryo.register(byte[].class);
+        kryo.register(Short.class);
+        kryo.register(short[].class);
+        kryo.register(Character.class);
+        kryo.register(char[].class);
+
+        // Common object types
+        kryo.register(Object.class);
+        kryo.register(Object[].class);
+        kryo.register(Class.class);
+
+        // Date and time types
+        kryo.register(Date.class);
+        kryo.register(Timestamp.class);
+
+        // Numeric types
+        kryo.register(BigDecimal.class);
+        kryo.register(BigInteger.class);
+
+        // Collections - with explicit serializers for safety
+        kryo.register(ArrayList.class, new CollectionSerializer<>());
+        kryo.register(LinkedList.class, new CollectionSerializer<>());
+        kryo.register(HashSet.class, new CollectionSerializer<>());
+        kryo.register(LinkedHashSet.class, new CollectionSerializer<>());
+        kryo.register(TreeSet.class, new CollectionSerializer<>());
+
+        // Maps - with explicit serializers for safety
+        kryo.register(HashMap.class, new MapSerializer<>());
+        kryo.register(LinkedHashMap.class, new MapSerializer<>());
+        kryo.register(TreeMap.class, new MapSerializer<>());
+
+        // Immutable collections (from Collections utility)
+        try {
+            kryo.register(Collections.emptyList().getClass());
+            kryo.register(Collections.emptySet().getClass());
+            kryo.register(Collections.emptyMap().getClass());
+            kryo.register(Collections.singletonList(null).getClass());
+            kryo.register(Collections.singleton(null).getClass());
+            kryo.register(Collections.singletonMap(null, null).getClass());
+            kryo.register(Arrays.asList().getClass());
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to register some immutable collection classes.", e);
+            }
+        }
     }
 
     /**
