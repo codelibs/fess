@@ -367,7 +367,9 @@ public class SystemUtilTest extends UnitFessTestCase {
     }
 
     public void test_maskSensitiveValue_nullHandling() {
-        assertNull(SystemUtil.maskSensitiveValue(null, "value"));
+        // When key is null, cannot determine if sensitive, so return value as-is
+        assertEquals("value", SystemUtil.maskSensitiveValue(null, "value"));
+        // When value is null, return null
         assertNull(SystemUtil.maskSensitiveValue("key", null));
         assertNull(SystemUtil.maskSensitiveValue(null, null));
     }
