@@ -475,4 +475,149 @@ public class FessPropTest extends UnitFessTestCase {
         systemPropMap.put("aad.use.ds", "true");
         assertFalse(fessConfig.isEntraIdUseDomainServices());
     }
+
+    public void test_getLdapSecurityPrincipal_escapesSpecialChars() throws IOException {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public Integer getLdapMaxUsernameLengthAsInteger() {
+                return Integer.valueOf(-1);
+            }
+        };
+
+        DynamicProperties existingProps = SingletonLaContainerFactory.getContainer().getComponent("systemProperties");
+        existingProps.setProperty("ldap.security.principal", "cn=%s,dc=example,dc=com");
+
+        // Normal username
+        assertEquals("cn=admin,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("admin"));
+
+        // Asterisk injection attempt
+        assertEquals("cn=admin\\2a,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("admin*"));
+
+        // Parentheses injection attempt
+        assertEquals("cn=admin\\29\\28cn=\\2a,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("admin)(cn=*"));
+
+        // Backslash
+        assertEquals("cn=admin\\5ctest,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("admin\\test"));
+    }
+
+    public void test_getLdapAdminUserFilter_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminUserFilter() {
+                return "(uid=%s)";
+            }
+        };
+
+        // Normal name
+        assertEquals("(uid=testuser)", fessConfig.getLdapAdminUserFilter("testuser"));
+
+        // Asterisk injection attempt
+        assertEquals("(uid=test\\2a)", fessConfig.getLdapAdminUserFilter("test*"));
+
+        // LDAP injection attempt
+        assertEquals("(uid=\\2a\\29\\28|\\28uid=\\2a)", fessConfig.getLdapAdminUserFilter("*)(|(uid=*"));
+    }
+
+    public void test_getLdapAdminUserSecurityPrincipal_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminUserFilter() {
+                return "uid=%s";
+            }
+
+            @Override
+            public String getLdapAdminUserBaseDn() {
+                return "ou=users,dc=example,dc=com";
+            }
+        };
+
+        // Normal name
+        assertEquals("uid=testuser,ou=users,dc=example,dc=com", fessConfig.getLdapAdminUserSecurityPrincipal("testuser"));
+
+        // Asterisk injection attempt
+        assertEquals("uid=test\\2a,ou=users,dc=example,dc=com", fessConfig.getLdapAdminUserSecurityPrincipal("test*"));
+    }
+
+    public void test_getLdapAdminRoleFilter_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminRoleFilter() {
+                return "(cn=%s)";
+            }
+        };
+
+        // Normal name
+        assertEquals("(cn=admin)", fessConfig.getLdapAdminRoleFilter("admin"));
+
+        // Asterisk injection attempt
+        assertEquals("(cn=admin\\2a)", fessConfig.getLdapAdminRoleFilter("admin*"));
+
+        // LDAP injection attempt
+        assertEquals("(cn=\\29\\28cn=\\2a\\29\\29\\28|\\28cn=admin)", fessConfig.getLdapAdminRoleFilter(")(cn=*))(|(cn=admin"));
+    }
+
+    public void test_getLdapAdminRoleSecurityPrincipal_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminRoleFilter() {
+                return "cn=%s";
+            }
+
+            @Override
+            public String getLdapAdminRoleBaseDn() {
+                return "ou=roles,dc=example,dc=com";
+            }
+        };
+
+        // Normal name
+        assertEquals("cn=admin,ou=roles,dc=example,dc=com", fessConfig.getLdapAdminRoleSecurityPrincipal("admin"));
+
+        // Asterisk injection attempt
+        assertEquals("cn=admin\\2a,ou=roles,dc=example,dc=com", fessConfig.getLdapAdminRoleSecurityPrincipal("admin*"));
+    }
+
+    public void test_getLdapAdminGroupFilter_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminGroupFilter() {
+                return "(cn=%s)";
+            }
+        };
+
+        // Normal name
+        assertEquals("(cn=developers)", fessConfig.getLdapAdminGroupFilter("developers"));
+
+        // Asterisk injection attempt
+        assertEquals("(cn=dev\\2a)", fessConfig.getLdapAdminGroupFilter("dev*"));
+
+        // LDAP injection attempt
+        assertEquals("(cn=\\2a\\29\\28|\\28cn=\\2a)", fessConfig.getLdapAdminGroupFilter("*)(|(cn=*"));
+    }
+
+    public void test_getLdapAdminGroupSecurityPrincipal_escapesSpecialChars() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getLdapAdminGroupFilter() {
+                return "cn=%s";
+            }
+
+            @Override
+            public String getLdapAdminGroupBaseDn() {
+                return "ou=groups,dc=example,dc=com";
+            }
+        };
+
+        // Normal name
+        assertEquals("cn=developers,ou=groups,dc=example,dc=com", fessConfig.getLdapAdminGroupSecurityPrincipal("developers"));
+
+        // Asterisk injection attempt
+        assertEquals("cn=dev\\2a,ou=groups,dc=example,dc=com", fessConfig.getLdapAdminGroupSecurityPrincipal("dev*"));
+    }
 }
