@@ -47,7 +47,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
             }
 
             @Override
-            public String getAppCipherAlgorism() {
+            public String getAppCipherAlgorithm() {
                 return "AES";
             }
 

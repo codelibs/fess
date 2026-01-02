@@ -44,13 +44,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String search_engine_heartbeat_interval = "search_engine.heartbeat_interval";
 
     /** The key of the configuration. e.g. aes */
-    String APP_CIPHER_ALGORISM = "app.cipher.algorism";
+    String APP_CIPHER_ALGORITHM = "app.cipher.algorithm";
 
     /** The key of the configuration. e.g. ___change__me___ */
     String APP_CIPHER_KEY = "app.cipher.key";
 
     /** The key of the configuration. e.g. sha256 */
-    String APP_DIGEST_ALGORISM = "app.digest.algorism";
+    String APP_DIGEST_ALGORITHM = "app.digest.algorithm";
 
     /** The key of the configuration. e.g. .*password|.*key|.*token|.*secret */
     String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
@@ -2037,12 +2037,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSearchEngineHeartbeatIntervalAsInteger();
 
     /**
-     * Get the value for the key 'app.cipher.algorism'. <br>
+     * Get the value for the key 'app.cipher.algorithm'. <br>
      * The value is, e.g. aes <br>
      * comment: Cipher algorithm used for encryption.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getAppCipherAlgorism();
+    String getAppCipherAlgorithm();
 
     /**
      * Get the value for the key 'app.cipher.key'. <br>
@@ -2053,12 +2053,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getAppCipherKey();
 
     /**
-     * Get the value for the key 'app.digest.algorism'. <br>
+     * Get the value for the key 'app.digest.algorithm'. <br>
      * The value is, e.g. sha256 <br>
      * comment: Algorithm for digest calculation.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getAppDigestAlgorism();
+    String getAppDigestAlgorithm();
 
     /**
      * Get the value for the key 'app.encrypt.property.pattern'. <br>
@@ -9059,16 +9059,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.search_engine_heartbeat_interval);
         }
 
-        public String getAppCipherAlgorism() {
-            return get(FessConfig.APP_CIPHER_ALGORISM);
+        public String getAppCipherAlgorithm() {
+            return get(FessConfig.APP_CIPHER_ALGORITHM);
         }
 
         public String getAppCipherKey() {
             return get(FessConfig.APP_CIPHER_KEY);
         }
 
-        public String getAppDigestAlgorism() {
-            return get(FessConfig.APP_DIGEST_ALGORISM);
+        public String getAppDigestAlgorithm() {
+            return get(FessConfig.APP_DIGEST_ALGORITHM);
         }
 
         public String getAppEncryptPropertyPattern() {
@@ -12337,9 +12337,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.search_engine_USERNAME, "");
             defaultMap.put(FessConfig.search_engine_PASSWORD, "");
             defaultMap.put(FessConfig.search_engine_heartbeat_interval, "10000");
-            defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
+            defaultMap.put(FessConfig.APP_CIPHER_ALGORITHM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
-            defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
+            defaultMap.put(FessConfig.APP_DIGEST_ALGORITHM, "sha256");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key|.*token|.*secret");
             defaultMap.put(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN,
                     ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*");

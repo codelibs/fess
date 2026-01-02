@@ -113,29 +113,29 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
 
     protected FessSecurityResourceProvider createSecurityResourceProvider() {
         final InvertibleCryptographer inver;
-        final String cipherAlgorism = fessConfig.getAppCipherAlgorism();
-        if ("blowfish".equalsIgnoreCase(cipherAlgorism)) {
+        final String cipherAlgorithm = fessConfig.getAppCipherAlgorithm();
+        if ("blowfish".equalsIgnoreCase(cipherAlgorithm)) {
             logger.warn(
-                    "Blowfish cipher is deprecated due to its 64-bit block size vulnerability. Please consider migrating to AES. algorism={}",
-                    cipherAlgorism);
+                    "Blowfish cipher is deprecated due to its 64-bit block size vulnerability. Please consider migrating to AES. algorithm={}",
+                    cipherAlgorithm);
             inver = InvertibleCryptographer.createBlowfishCipher(fessConfig.getAppCipherKey());
-        } else if ("des".equalsIgnoreCase(cipherAlgorism)) {
-            logger.warn("DES cipher is deprecated due to its 56-bit key size vulnerability. Please consider migrating to AES. algorism={}",
-                    cipherAlgorism);
+        } else if ("des".equalsIgnoreCase(cipherAlgorithm)) {
+            logger.warn("DES cipher is deprecated due to its 56-bit key size vulnerability. Please consider migrating to AES. algorithm={}",
+                    cipherAlgorithm);
             inver = InvertibleCryptographer.createDesCipher(fessConfig.getAppCipherKey());
-        } else if ("rsa".equalsIgnoreCase(cipherAlgorism)) {
+        } else if ("rsa".equalsIgnoreCase(cipherAlgorithm)) {
             inver = InvertibleCryptographer.createRsaCipher(fessConfig.getAppCipherKey());
         } else {
             inver = InvertibleCryptographer.createAesCipher(fessConfig.getAppCipherKey());
         }
 
         final OneWayCryptographer oneWay;
-        final String digestAlgorism = fessConfig.getAppDigestAlgorism();
-        if ("sha512".equalsIgnoreCase(digestAlgorism)) {
+        final String digestAlgorithm = fessConfig.getAppDigestAlgorithm();
+        if ("sha512".equalsIgnoreCase(digestAlgorithm)) {
             oneWay = OneWayCryptographer.createSha512Cryptographer();
-        } else if ("md5".equalsIgnoreCase(digestAlgorism)) {
-            logger.warn("MD5 digest is deprecated due to its collision vulnerabilities. Please consider migrating to SHA-256. algorism={}",
-                    digestAlgorism);
+        } else if ("md5".equalsIgnoreCase(digestAlgorithm)) {
+            logger.warn("MD5 digest is deprecated due to its collision vulnerabilities. Please consider migrating to SHA-256. algorithm={}",
+                    digestAlgorithm);
             oneWay = new OneWayCryptographer("MD5", OneWayCryptographer.ENCODING_UTF8);
         } else {
             oneWay = OneWayCryptographer.createSha256Cryptographer();
