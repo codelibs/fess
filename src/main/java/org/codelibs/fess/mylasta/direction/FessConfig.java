@@ -46,17 +46,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORITHM = "app.cipher.algorithm";
 
-    /** The key of the configuration. e.g. aes (deprecated: use app.cipher.algorithm) */
-    String APP_CIPHER_ALGORISM = "app.cipher.algorism";
-
     /** The key of the configuration. e.g. ___change__me___ */
     String APP_CIPHER_KEY = "app.cipher.key";
 
     /** The key of the configuration. e.g. sha256 */
     String APP_DIGEST_ALGORITHM = "app.digest.algorithm";
-
-    /** The key of the configuration. e.g. sha256 (deprecated: use app.digest.algorithm) */
-    String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
     /** The key of the configuration. e.g. .*password|.*key|.*token|.*secret */
     String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
@@ -2048,16 +2042,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getAppCipherAlgorithm();
 
     /**
-     * Get the value for the key 'app.cipher.algorism'. <br>
-     * The value is, e.g. aes <br>
-     * comment: Cipher algorithm used for encryption (deprecated: use getAppCipherAlgorithm()).
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @deprecated use {@link #getAppCipherAlgorithm()}
-     */
-    @Deprecated
-    String getAppCipherAlgorism();
-
-    /**
      * Get the value for the key 'app.cipher.key'. <br>
      * The value is, e.g. ___change__me___ <br>
      * comment: Secret key for encryption (change this value for production).
@@ -2072,16 +2056,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppDigestAlgorithm();
-
-    /**
-     * Get the value for the key 'app.digest.algorism'. <br>
-     * The value is, e.g. sha256 <br>
-     * comment: Algorithm for digest calculation (deprecated: use getAppDigestAlgorithm()).
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @deprecated use {@link #getAppDigestAlgorithm()}
-     */
-    @Deprecated
-    String getAppDigestAlgorism();
 
     /**
      * Get the value for the key 'app.encrypt.property.pattern'. <br>
@@ -9075,16 +9049,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         }
 
         public String getAppCipherAlgorithm() {
-            String value = get(FessConfig.APP_CIPHER_ALGORITHM);
-            if (value != null) {
-                return value;
-            }
-            return get(FessConfig.APP_CIPHER_ALGORISM);
-        }
-
-        @Deprecated
-        public String getAppCipherAlgorism() {
-            return get(FessConfig.APP_CIPHER_ALGORISM);
+            return get(FessConfig.APP_CIPHER_ALGORITHM);
         }
 
         public String getAppCipherKey() {
@@ -9092,16 +9057,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
         }
 
         public String getAppDigestAlgorithm() {
-            String value = get(FessConfig.APP_DIGEST_ALGORITHM);
-            if (value != null) {
-                return value;
-            }
-            return get(FessConfig.APP_DIGEST_ALGORISM);
-        }
-
-        @Deprecated
-        public String getAppDigestAlgorism() {
-            return get(FessConfig.APP_DIGEST_ALGORISM);
+            return get(FessConfig.APP_DIGEST_ALGORITHM);
         }
 
         public String getAppEncryptPropertyPattern() {
@@ -12367,10 +12323,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.search_engine_PASSWORD, "");
             defaultMap.put(FessConfig.search_engine_heartbeat_interval, "10000");
             defaultMap.put(FessConfig.APP_CIPHER_ALGORITHM, "aes");
-            defaultMap.put(FessConfig.APP_CIPHER_ALGORISM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORITHM, "sha256");
-            defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key|.*token|.*secret");
             defaultMap.put(FessConfig.APP_EXTENSION_NAMES, "");
             defaultMap.put(FessConfig.APP_AUDIT_LOG_FORMAT, "");

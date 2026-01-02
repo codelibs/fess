@@ -47,8 +47,6 @@ public class FessConfigTest extends UnitFessTestCase {
                     return "10000";
                 case FessConfig.APP_CIPHER_ALGORITHM:
                     return "aes";
-                case FessConfig.APP_CIPHER_ALGORISM:
-                    return "aes";
                 case FessConfig.APP_CIPHER_KEY:
                     return "___change__me___";
                 case FessConfig.APP_ENCRYPT_PROPERTY_PATTERN:
@@ -234,11 +232,6 @@ public class FessConfigTest extends UnitFessTestCase {
 
     public void test_appCipherAlgorithm() {
         assertEquals("aes", fessConfig.getAppCipherAlgorithm());
-    }
-
-    @SuppressWarnings("deprecation")
-    public void test_appCipherAlgorism() {
-        assertEquals("aes", fessConfig.getAppCipherAlgorism());
     }
 
     public void test_appCipherKey() {
