@@ -27,8 +27,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
  */
 public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
 
-    private static final String DEFAULT_SENSITIVE_PATTERN =
-            ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*";
+    private static final String DEFAULT_SENSITIVE_PATTERN = ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*";
 
     private static volatile Pattern sensitivePattern;
 
@@ -58,8 +57,7 @@ public class SystemUtil extends org.codelibs.core.lang.SystemUtil {
         if (sensitivePattern == null) {
             synchronized (SystemUtil.class) {
                 if (sensitivePattern == null) {
-                    final String patternStr =
-                            System.getProperty(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN, DEFAULT_SENSITIVE_PATTERN);
+                    final String patternStr = System.getProperty(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN, DEFAULT_SENSITIVE_PATTERN);
                     sensitivePattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
                 }
             }

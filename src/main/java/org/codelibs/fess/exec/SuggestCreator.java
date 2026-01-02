@@ -126,10 +126,13 @@ public class SuggestCreator {
         if (logger.isDebugEnabled()) {
             try {
                 ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: {}", s));
-                System.getProperties().entrySet().stream()
+                System.getProperties()
+                        .entrySet()
+                        .stream()
                         .forEach(e -> logger.debug("Property: {}={}", e.getKey(),
                                 SystemUtil.maskSensitiveValue(String.valueOf(e.getKey()), String.valueOf(e.getValue()))));
-                System.getenv().entrySet()
+                System.getenv()
+                        .entrySet()
                         .forEach(e -> logger.debug("Env: {}={}", e.getKey(), SystemUtil.maskSensitiveValue(e.getKey(), e.getValue())));
                 logger.debug("Options: options={}", options);
             } catch (final Exception e) {
