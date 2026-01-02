@@ -135,7 +135,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
             oneWay = OneWayCryptographer.createSha512Cryptographer();
         } else if ("md5".equalsIgnoreCase(digestAlgorithm)) {
             logger.warn("MD5 digest is deprecated due to its collision vulnerabilities. Please consider migrating to SHA-256. algorithm={}",
-                    cipherAlgorithm);
+                    digestAlgorithm);
             oneWay = new OneWayCryptographer("MD5", OneWayCryptographer.ENCODING_UTF8);
         } else {
             oneWay = OneWayCryptographer.createSha256Cryptographer();
