@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.design;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -168,16 +169,21 @@ public class AdminDesignAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), this::asListHtml);
         }
 
+        final File baseDir = new File(getServletContext().getRealPath("/"));
         File uploadFile;
+        File expectedBaseDir;
         // normalize filename
         if (checkFileType(fileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())) {
+            expectedBaseDir = new File(baseDir, "images");
             uploadFile = new File(getServletContext().getRealPath("/images/" + fileName));
         } else if (checkFileType(fileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())) {
+            expectedBaseDir = new File(baseDir, "css");
             uploadFile = new File(getServletContext().getRealPath("/css/" + fileName));
         } else if (checkFileType(fileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())) {
+            expectedBaseDir = new File(baseDir, "js");
             uploadFile = new File(getServletContext().getRealPath("/js/" + fileName));
         } else if (fessConfig.isSupportedUploadedFile(fileName) || fessConfig.isSupportedUploadedFile(uploadedFileName)) {
             uploadFile = ResourceUtil.getResourceAsFileNoException(fileName);
@@ -185,8 +191,16 @@ public class AdminDesignAction extends FessAdminAction {
                 throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFileName"), this::asListHtml);
                 return null;
             }
+            expectedBaseDir = null; // Skip path traversal check for resource files
         } else {
             throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), this::asListHtml);
+            return null;
+        }
+
+        // Validate path to prevent path traversal attacks
+        if (expectedBaseDir != null && !isValidUploadPath(uploadFile, expectedBaseDir)) {
+            logger.warn("Path traversal attempt detected: fileName={}", fileName);
+            throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid("designFileName"), this::asListHtml);
             return null;
         }
 
@@ -354,23 +368,50 @@ public class AdminDesignAction extends FessAdminAction {
         return fileList;
     }
 
+    private boolean isValidUploadPath(final File file, final File baseDir) {
+        try {
+            final String canonicalFilePath = file.getCanonicalPath();
+            final String canonicalBasePath = baseDir.getCanonicalPath() + File.separator;
+            return canonicalFilePath.startsWith(canonicalBasePath);
+        } catch (final IOException e) {
+            logger.warn("Failed to validate upload path: file={}", file.getAbsolutePath(), e);
+            return false;
+        }
+    }
+
     private File getJspFile(final String fileName, final String jspType) {
         try {
             final String[] values = URLDecoder.decode(fileName, Constants.UTF_8).split(":");
             if (values.length != 2) {
                 throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
             }
+
+            // Validate virtual host path to prevent path traversal
+            final String virtualHostPath = values[0];
+            if (!isValidVirtualHostPath(virtualHostPath)) {
+                logger.warn("Invalid virtual host path detected: path={}", virtualHostPath);
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
+            }
+
             final String jspFileName = systemHelper.getDesignJspFileName(values[1]);
             if (jspFileName == null) {
                 throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
             }
             String path;
             if ("view".equals(jspType)) {
-                path = "/WEB-INF/" + jspType + values[0] + "/" + jspFileName;
+                path = "/WEB-INF/" + jspType + virtualHostPath + "/" + jspFileName;
             } else {
                 path = "/WEB-INF/" + jspType + "/" + jspFileName;
             }
             final File jspFile = new File(getServletContext().getRealPath(path));
+
+            // Validate canonical path to prevent path traversal
+            final File webInfDir = new File(getServletContext().getRealPath("/WEB-INF"));
+            if (!isValidUploadPath(jspFile, webInfDir)) {
+                logger.warn("Path traversal attempt detected in JSP file path: path={}", path);
+                throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), this::asListHtml);
+            }
+
             if (!jspFile.exists()) {
                 throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), this::asListHtml);
             }
@@ -378,6 +419,21 @@ public class AdminDesignAction extends FessAdminAction {
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Failed to decode " + fileName, e);
         }
+    }
+
+    private boolean isValidVirtualHostPath(final String path) {
+        // Empty path is valid (default host)
+        if (StringUtil.isBlank(path)) {
+            return true;
+        }
+        // Path must match one of the configured virtual host paths
+        for (final String validPath : ComponentUtil.getVirtualHostHelper().getVirtualHostPaths()) {
+            if (path.equals(validPath)) {
+                return true;
+            }
+        }
+        // Also allow "/" as a valid path (used in loadJspFileNameItems for blank keys)
+        return "/".equals(path);
     }
 
     // ===================================================================================
