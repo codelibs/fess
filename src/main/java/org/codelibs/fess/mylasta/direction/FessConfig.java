@@ -1926,6 +1926,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. admin */
     String PASSWORD_INVALID_ADMIN_PASSWORDS = "password.invalid.admin.passwords";
 
+    /** The key of the configuration. e.g. 8 */
+    String PASSWORD_MIN_LENGTH = "password.min.length";
+
+    /** The key of the configuration. e.g. false */
+    String PASSWORD_REQUIRE_UPPERCASE = "password.require.uppercase";
+
+    /** The key of the configuration. e.g. false */
+    String PASSWORD_REQUIRE_LOWERCASE = "password.require.lowercase";
+
+    /** The key of the configuration. e.g. false */
+    String PASSWORD_REQUIRE_DIGIT = "password.require.digit";
+
+    /** The key of the configuration. e.g. false */
+    String PASSWORD_REQUIRE_SPECIAL_CHAR = "password.require.special.char";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9007,6 +9022,87 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getPasswordInvalidAdminPasswords();
 
     /**
+     * Get the value for the key 'password.min.length'. <br>
+     * The value is, e.g. 8 <br>
+     * comment: Minimum password length (0 to disable).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordMinLength();
+
+    /**
+     * Get the value for the key 'password.min.length' as {@link Integer}. <br>
+     * The value is, e.g. 8 <br>
+     * comment: Minimum password length (0 to disable).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPasswordMinLengthAsInteger();
+
+    /**
+     * Get the value for the key 'password.require.uppercase'. <br>
+     * The value is, e.g. false <br>
+     * comment: Require uppercase letters in password.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordRequireUppercase();
+
+    /**
+     * Is the property for the key 'password.require.uppercase' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Require uppercase letters in password.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPasswordRequireUppercase();
+
+    /**
+     * Get the value for the key 'password.require.lowercase'. <br>
+     * The value is, e.g. false <br>
+     * comment: Require lowercase letters in password.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordRequireLowercase();
+
+    /**
+     * Is the property for the key 'password.require.lowercase' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Require lowercase letters in password.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPasswordRequireLowercase();
+
+    /**
+     * Get the value for the key 'password.require.digit'. <br>
+     * The value is, e.g. false <br>
+     * comment: Require digits in password.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordRequireDigit();
+
+    /**
+     * Is the property for the key 'password.require.digit' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Require digits in password.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPasswordRequireDigit();
+
+    /**
+     * Get the value for the key 'password.require.special.char'. <br>
+     * The value is, e.g. false <br>
+     * comment: Require special characters in password.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPasswordRequireSpecialChar();
+
+    /**
+     * Is the property for the key 'password.require.special.char' true? <br>
+     * The value is, e.g. false <br>
+     * comment: Require special characters in password.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPasswordRequireSpecialChar();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -12327,6 +12423,46 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS);
         }
 
+        public String getPasswordMinLength() {
+            return get(FessConfig.PASSWORD_MIN_LENGTH);
+        }
+
+        public Integer getPasswordMinLengthAsInteger() {
+            return getAsInteger(FessConfig.PASSWORD_MIN_LENGTH);
+        }
+
+        public String getPasswordRequireUppercase() {
+            return get(FessConfig.PASSWORD_REQUIRE_UPPERCASE);
+        }
+
+        public boolean isPasswordRequireUppercase() {
+            return is(FessConfig.PASSWORD_REQUIRE_UPPERCASE);
+        }
+
+        public String getPasswordRequireLowercase() {
+            return get(FessConfig.PASSWORD_REQUIRE_LOWERCASE);
+        }
+
+        public boolean isPasswordRequireLowercase() {
+            return is(FessConfig.PASSWORD_REQUIRE_LOWERCASE);
+        }
+
+        public String getPasswordRequireDigit() {
+            return get(FessConfig.PASSWORD_REQUIRE_DIGIT);
+        }
+
+        public boolean isPasswordRequireDigit() {
+            return is(FessConfig.PASSWORD_REQUIRE_DIGIT);
+        }
+
+        public String getPasswordRequireSpecialChar() {
+            return get(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR);
+        }
+
+        public boolean isPasswordRequireSpecialChar() {
+            return is(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -12908,6 +13044,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PLUGIN_VERSION_FILTER, "");
             defaultMap.put(FessConfig.STORAGE_MAX_ITEMS_IN_PAGE, "1000");
             defaultMap.put(FessConfig.PASSWORD_INVALID_ADMIN_PASSWORDS, "admin");
+            defaultMap.put(FessConfig.PASSWORD_MIN_LENGTH, "8");
+            defaultMap.put(FessConfig.PASSWORD_REQUIRE_UPPERCASE, "false");
+            defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
+            defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
+            defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

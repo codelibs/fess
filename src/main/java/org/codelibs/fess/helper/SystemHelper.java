@@ -1071,4 +1071,107 @@ public class SystemHelper {
     public void setSystemCpuCheckInterval(final long systemCpuCheckInterval) {
         this.systemCpuCheckInterval = systemCpuCheckInterval;
     }
+
+    /**
+     * Validates a password against configured password policy requirements.
+     *
+     * @param password The password to validate.
+     * @return An empty string if the password is valid, or an error key for the validation failure.
+     */
+    public String validatePassword(final String password) {
+        if (StringUtil.isBlank(password)) {
+            return "errors.blank_password";
+        }
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        final Integer minLength = fessConfig.getPasswordMinLengthAsInteger();
+        if (minLength != null && minLength > 0 && password.length() < minLength) {
+            return "errors.password_length";
+        }
+
+        if (fessConfig.isPasswordRequireUppercase() && !containsUppercase(password)) {
+            return "errors.password_no_uppercase";
+        }
+
+        if (fessConfig.isPasswordRequireLowercase() && !containsLowercase(password)) {
+            return "errors.password_no_lowercase";
+        }
+
+        if (fessConfig.isPasswordRequireDigit() && !containsDigit(password)) {
+            return "errors.password_no_digit";
+        }
+
+        if (fessConfig.isPasswordRequireSpecialChar() && !containsSpecialChar(password)) {
+            return "errors.password_no_special_char";
+        }
+
+        if (!fessConfig.isValidAdminPassword(password)) {
+            return "errors.password_is_blacklisted";
+        }
+
+        return StringUtil.EMPTY;
+    }
+
+    /**
+     * Checks if the password contains at least one uppercase letter.
+     *
+     * @param password the password to check
+     * @return true if the password contains an uppercase letter, false otherwise
+     */
+    protected boolean containsUppercase(final String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isUpperCase(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the password contains at least one lowercase letter.
+     *
+     * @param password the password to check
+     * @return true if the password contains a lowercase letter, false otherwise
+     */
+    protected boolean containsLowercase(final String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isLowerCase(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the password contains at least one digit.
+     *
+     * @param password the password to check
+     * @return true if the password contains a digit, false otherwise
+     */
+    protected boolean containsDigit(final String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isDigit(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the password contains at least one special character.
+     * A special character is defined as any character that is not a letter, digit, or whitespace.
+     *
+     * @param password the password to check
+     * @return true if the password contains a special character, false otherwise
+     */
+    protected boolean containsSpecialChar(final String password) {
+        for (int i = 0; i < password.length(); i++) {
+            final char c = password.charAt(i);
+            if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
