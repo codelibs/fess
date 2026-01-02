@@ -204,7 +204,7 @@ public class SamlAuthenticator implements SsoAuthenticator {
         defaultSettings.put("onelogin.saml2.security.requested_authncontext", "urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
         defaultSettings.put("onelogin.saml2.security.onelogin.saml2.security.requested_authncontextcomparison", "exact");
         defaultSettings.put("onelogin.saml2.security.want_xml_validation", "true");
-        defaultSettings.put("onelogin.saml2.security.signature_algorithm", "http://www.w3.org/2000/09/xmldsig#rsa-sha1");
+        defaultSettings.put("onelogin.saml2.security.signature_algorithm", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         defaultSettings.put("onelogin.saml2.organization.name", "CodeLibs");
         defaultSettings.put("onelogin.saml2.organization.displayname", "Fess");
         defaultSettings.put("onelogin.saml2.organization.url", "https://fess.codelibs.org/");
