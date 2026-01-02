@@ -15,18 +15,26 @@
  */
 package org.codelibs.fess.api;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Factory class for managing and retrieving web API managers.
- * This factory maintains a collection of web API managers and provides
+ * This factory maintains a thread-safe collection of web API managers and provides
  * functionality to find the appropriate manager for incoming requests.
+ *
+ * Uses CopyOnWriteArrayList for thread-safe iteration during request matching
+ * while allowing concurrent additions during initialization.
  */
 public class WebApiManagerFactory {
+
+    /**
+     * Thread-safe list of registered web API managers.
+     * Uses CopyOnWriteArrayList for safe iteration during request matching.
+     */
+    protected final List<WebApiManager> webApiManagers = new CopyOnWriteArrayList<>();
 
     /**
      * Default constructor.
@@ -36,24 +44,22 @@ public class WebApiManagerFactory {
     }
 
     /**
-     * Array of registered web API managers.
-     */
-    protected WebApiManager[] webApiManagers = {};
-
-    /**
      * Adds a web API manager to the factory.
+     * This method is thread-safe and can be called during initialization.
      *
      * @param webApiManager The web API manager to add
+     * @throws IllegalArgumentException if webApiManager is null
      */
     public void add(final WebApiManager webApiManager) {
-        final List<WebApiManager> list = new ArrayList<>();
-        Collections.addAll(list, webApiManagers);
-        list.add(webApiManager);
-        webApiManagers = list.toArray(new WebApiManager[list.size()]);
+        if (webApiManager == null) {
+            throw new IllegalArgumentException("webApiManager must not be null");
+        }
+        webApiManagers.add(webApiManager);
     }
 
     /**
      * Gets the appropriate web API manager for the given request.
+     * Returns the first manager that matches the request.
      *
      * @param request The HTTP servlet request
      * @return The matching web API manager, or null if no match found
@@ -65,6 +71,15 @@ public class WebApiManagerFactory {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the number of registered API managers.
+     *
+     * @return The number of registered managers
+     */
+    public int size() {
+        return webApiManagers.size();
     }
 
 }
