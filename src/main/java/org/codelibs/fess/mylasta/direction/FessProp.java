@@ -50,6 +50,7 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.core.misc.Tuple4;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.ldap.LdapUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
@@ -651,9 +652,9 @@ public interface FessProp {
         if (username == null) {
             value = StringUtil.EMPTY;
         } else if (maxLength >= 0 && username.length() > maxLength) {
-            value = username.substring(0, maxLength);
+            value = LdapUtil.escapeValue(username.substring(0, maxLength));
         } else {
-            value = username;
+            value = LdapUtil.escapeValue(username);
         }
         return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), value);
     }
@@ -1172,14 +1173,14 @@ public interface FessProp {
     String getLdapAdminUserFilter();
 
     default String getLdapAdminUserFilter(final String name) {
-        return String.format(getLdapAdminUserFilter(), name);
+        return String.format(getLdapAdminUserFilter(), LdapUtil.escapeValue(name));
     }
 
     String getLdapAdminUserBaseDn();
 
     default String getLdapAdminUserSecurityPrincipal(final String name) {
         final StringBuilder buf = new StringBuilder(100);
-        buf.append(String.format(getLdapAdminUserFilter(), name));
+        buf.append(String.format(getLdapAdminUserFilter(), LdapUtil.escapeValue(name)));
         if (StringUtil.isNotBlank(getLdapAdminUserBaseDn())) {
             buf.append(',').append(getLdapAdminUserBaseDn());
         }
@@ -1197,14 +1198,14 @@ public interface FessProp {
     String getLdapAdminRoleFilter();
 
     default String getLdapAdminRoleFilter(final String name) {
-        return String.format(getLdapAdminRoleFilter(), name);
+        return String.format(getLdapAdminRoleFilter(), LdapUtil.escapeValue(name));
     }
 
     String getLdapAdminRoleBaseDn();
 
     default String getLdapAdminRoleSecurityPrincipal(final String name) {
         final StringBuilder buf = new StringBuilder(100);
-        buf.append(String.format(getLdapAdminRoleFilter(), name));
+        buf.append(String.format(getLdapAdminRoleFilter(), LdapUtil.escapeValue(name)));
         if (StringUtil.isNotBlank(getLdapAdminRoleBaseDn())) {
             buf.append(',').append(getLdapAdminRoleBaseDn());
         }
@@ -1222,14 +1223,14 @@ public interface FessProp {
     String getLdapAdminGroupFilter();
 
     default String getLdapAdminGroupFilter(final String name) {
-        return String.format(getLdapAdminGroupFilter(), name);
+        return String.format(getLdapAdminGroupFilter(), LdapUtil.escapeValue(name));
     }
 
     String getLdapAdminGroupBaseDn();
 
     default String getLdapAdminGroupSecurityPrincipal(final String name) {
         final StringBuilder buf = new StringBuilder(100);
-        buf.append(String.format(getLdapAdminGroupFilter(), name));
+        buf.append(String.format(getLdapAdminGroupFilter(), LdapUtil.escapeValue(name)));
         if (StringUtil.isNotBlank(getLdapAdminGroupBaseDn())) {
             buf.append(',').append(getLdapAdminGroupBaseDn());
         }
