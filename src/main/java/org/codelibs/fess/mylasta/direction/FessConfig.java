@@ -55,6 +55,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .*password|.*key|.*token|.*secret */
     String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
 
+    /** The key of the configuration. e.g. .*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.* */
+    String APP_LOG_SENSITIVE_PROPERTY_PATTERN = "app.log.sensitive.property.pattern";
+
     /** The key of the configuration. e.g.  */
     String APP_EXTENSION_NAMES = "app.extension.names";
 
@@ -2064,6 +2067,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppEncryptPropertyPattern();
+
+    /**
+     * Get the value for the key 'app.log.sensitive.property.pattern'. <br>
+     * The value is, e.g. .*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.* <br>
+     * comment: Regex pattern for sensitive values to mask in debug logs (case-insensitive match against property/env keys).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppLogSensitivePropertyPattern();
 
     /**
      * Get the value for the key 'app.extension.names'. <br>
@@ -9064,6 +9075,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN);
         }
 
+        public String getAppLogSensitivePropertyPattern() {
+            return get(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN);
+        }
+
         public String getAppExtensionNames() {
             return get(FessConfig.APP_EXTENSION_NAMES);
         }
@@ -12326,6 +12341,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORISM, "sha256");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key|.*token|.*secret");
+            defaultMap.put(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN,
+                    ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*");
             defaultMap.put(FessConfig.APP_EXTENSION_NAMES, "");
             defaultMap.put(FessConfig.APP_AUDIT_LOG_FORMAT, "");
             defaultMap.put(FessConfig.SCRIPT_AUDIT_LOG_ENABLED, "true");
