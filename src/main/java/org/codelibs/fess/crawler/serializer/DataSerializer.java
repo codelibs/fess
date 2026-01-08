@@ -152,18 +152,32 @@ public class DataSerializer {
         kryo.register(TreeMap.class, new MapSerializer<>());
 
         // Immutable collections (from Collections utility)
+        // Register each class individually to ensure partial failures don't skip all registrations
+        registerClassSafely(kryo, Collections.emptyList().getClass());
+        registerClassSafely(kryo, Collections.emptySet().getClass());
+        registerClassSafely(kryo, Collections.emptyMap().getClass());
+        registerClassSafely(kryo, Collections.singletonList(null).getClass());
+        registerClassSafely(kryo, Collections.singleton(null).getClass());
+        registerClassSafely(kryo, Collections.singletonMap(null, null).getClass());
+        registerClassSafely(kryo, Arrays.asList().getClass());
+    }
+
+    /**
+     * Safely registers a class with Kryo, logging any registration failures at WARN level.
+     * <p>
+     * This method catches exceptions for individual class registrations to ensure
+     * that a failure to register one class doesn't prevent other classes from being registered.
+     * Registration failures are logged at WARN level since they may cause serialization errors later.
+     * </p>
+     *
+     * @param kryo the Kryo instance to register the class with
+     * @param clazz the class to register
+     */
+    private void registerClassSafely(final Kryo kryo, final Class<?> clazz) {
         try {
-            kryo.register(Collections.emptyList().getClass());
-            kryo.register(Collections.emptySet().getClass());
-            kryo.register(Collections.emptyMap().getClass());
-            kryo.register(Collections.singletonList(null).getClass());
-            kryo.register(Collections.singleton(null).getClass());
-            kryo.register(Collections.singletonMap(null, null).getClass());
-            kryo.register(Arrays.asList().getClass());
+            kryo.register(clazz);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to register some immutable collection classes.", e);
-            }
+            logger.warn("Failed to register class for Kryo serialization: {}", clazz.getName(), e);
         }
     }
 
