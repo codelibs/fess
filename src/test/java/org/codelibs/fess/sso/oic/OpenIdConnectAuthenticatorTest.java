@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.sso.oic;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

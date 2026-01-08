@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.util;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
