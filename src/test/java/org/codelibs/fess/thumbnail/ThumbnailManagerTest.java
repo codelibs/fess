@@ -34,15 +34,19 @@ import org.codelibs.fess.opensearch.config.cbean.ThumbnailQueueCB;
 import org.codelibs.fess.opensearch.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.opensearch.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ThumbnailManagerTest extends UnitFessTestCase {
 
     private ThumbnailManager thumbnailManager;
     private File tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create temp directory for testing
         tempDir = Files.createTempDirectory("thumbnail_test").toFile();
@@ -86,7 +90,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (thumbnailManager != null) {
             try {
                 thumbnailManager.destroy();
@@ -115,6 +119,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test initialization
+    @Test
     public void test_init() {
         assertNotNull(thumbnailManager.baseDir);
         assertTrue(thumbnailManager.baseDir.exists());
@@ -123,6 +128,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test initialization with system property
+    @Test
     public void test_init_withSystemProperty() {
         File customDir = new File(tempDir, "custom");
         System.setProperty(Constants.FESS_THUMBNAIL_PATH, customDir.getAbsolutePath());
@@ -143,6 +149,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test initialization with var path
+    @Test
     public void test_init_withVarPath() {
         File varDir = new File(tempDir, "var");
         System.setProperty(Constants.FESS_VAR_PATH, varDir.getAbsolutePath());
@@ -162,6 +169,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test initialization with non-existent directory
+    @Test
     public void test_init_nonExistentDirectory() {
         ThumbnailManager manager = new ThumbnailManager() {
             @Override
@@ -196,6 +204,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test initialization failure
+    @Test
     public void test_init_failure() {
         ThumbnailManager manager = new ThumbnailManager() {
             @Override
@@ -215,6 +224,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getThumbnailPathOption
+    @Test
     public void test_getThumbnailPathOption() {
         String option = thumbnailManager.getThumbnailPathOption();
         assertNotNull(option);
@@ -223,6 +233,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test offer with valid generator
+    @Test
     public void test_offer_withValidGenerator() {
         TestThumbnailGenerator generator = new TestThumbnailGenerator();
         generator.available = true;
@@ -239,6 +250,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test offer with no matching generator
+    @Test
     public void test_offer_noMatchingGenerator() {
         TestThumbnailGenerator generator = new TestThumbnailGenerator();
         generator.available = true;
@@ -254,6 +266,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test offer with null task
+    @Test
     public void test_offer_nullTask() {
         TestThumbnailGenerator generator = new TestThumbnailGenerator();
         generator.available = true;
@@ -269,6 +282,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test offer with full queue
+    @Test
     public void test_offer_fullQueue() {
         thumbnailManager.setThumbnailTaskQueueSize(1);
         thumbnailManager.init();
@@ -294,6 +308,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getImageFilename with docMap
+    @Test
     public void test_getImageFilename_withDocMap() {
         Map<String, Object> docMap = new HashMap<>();
         docMap.put("_id", "1234567890abcdef");
@@ -305,6 +320,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getImageFilename with docid - use the String version directly
+    @Test
     public void test_getImageFilename_withDocId() {
         String docid = "1234567890abcdef";
         // Call the String version directly
@@ -316,6 +332,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getImageFilename with custom settings
+    @Test
     public void test_getImageFilename_customSettings() {
         thumbnailManager.setImageExtention("jpg");
         thumbnailManager.setSplitSize(5);
@@ -329,6 +346,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getThumbnailFile with existing file
+    @Test
     public void test_getThumbnailFile_exists() throws IOException {
         Map<String, Object> docMap = new HashMap<>();
         docMap.put("_id", "testdoc");
@@ -344,6 +362,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getThumbnailFile with non-existing file
+    @Test
     public void test_getThumbnailFile_notExists() {
         Map<String, Object> docMap = new HashMap<>();
         docMap.put("_id", "nonexistent");
@@ -353,6 +372,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test getThumbnailFile with blank path
+    @Test
     public void test_getThumbnailFile_blankPath() {
         Map<String, Object> docMap = new HashMap<>();
         // No _id field, so docid will be null
@@ -362,6 +382,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test add generator available
+    @Test
     public void test_add_availableGenerator() {
         TestThumbnailGenerator generator = new TestThumbnailGenerator();
         generator.available = true;
@@ -371,6 +392,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test add generator not available
+    @Test
     public void test_add_unavailableGenerator() {
         TestThumbnailGenerator generator = new TestThumbnailGenerator();
         generator.available = false;
@@ -380,6 +402,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test process with available generator
+    @Test
     public void test_process_availableGenerator() throws IOException {
         // Skip this test as it requires container components
         // The process method needs actual ThumbnailQueueBhv and other components
@@ -387,6 +410,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test process with unavailable generator
+    @Test
     public void test_process_unavailableGenerator() {
         // Skip this test as it requires container components
         // The process method needs actual ThumbnailQueueBhv and other components
@@ -394,12 +418,14 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test destroy
+    @Test
     public void test_destroy() {
         thumbnailManager.destroy();
         assertFalse(thumbnailManager.generating);
     }
 
     // Test purge with expired files
+    @Test
     public void test_purge_withExpiredFiles() throws IOException {
         // Create test files
         File dir1 = new File(tempDir, "_1");
@@ -427,6 +453,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test FilePurgeVisitor
+    @Test
     public void test_FilePurgeVisitor() throws IOException {
         // Create a test file
         File testFile = new File(tempDir, "_1/_2/test.png");
@@ -459,6 +486,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test FilePurgeVisitor getDocId
+    @Test
     public void test_FilePurgeVisitor_getDocId() throws IOException {
         // Test the getDocId logic without creating actual FilePurgeVisitor
         // The logic converts path to doc ID by removing path separators
@@ -469,6 +497,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test FilePurgeVisitor visitFileFailed
+    @Test
     public void test_FilePurgeVisitor_visitFileFailed() throws IOException {
         // Test that visitFileFailed doesn't throw exception
         // This is primarily a logging method, so we just verify no exception
@@ -476,6 +505,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test FilePurgeVisitor postVisitDirectory
+    @Test
     public void test_FilePurgeVisitor_postVisitDirectory() throws IOException {
         // Test empty directory deletion logic
         File emptyDir = new File(tempDir, "empty");
@@ -491,6 +521,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     // Test FilePurgeVisitor postVisitDirectoryWithException
+    @Test
     public void test_FilePurgeVisitor_postVisitDirectoryWithException() throws IOException {
         // Test that postVisitDirectory with exception doesn't throw
         // This is primarily a logging method, so we just verify no exception
@@ -539,6 +570,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
 
     // ==================== Tests for TOCTOU fix - atomic file operations ====================
 
+    @Test
     public void test_atomicDeleteIfExists_noImageFile() throws Exception {
         // Test that Files.deleteIfExists works correctly for no-image marker files
         Path noImageFile = Files.createTempFile("noimage_test", ".noimage");
@@ -555,6 +587,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_atomicDeleteIfExists_alreadyDeleted() throws Exception {
         // Test that deleting already deleted file doesn't throw
         Path tempFile = Files.createTempFile("already_deleted", ".tmp");
@@ -566,6 +599,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
         assertFalse(deleted);
     }
 
+    @Test
     public void test_atomicDeleteIfExists_concurrentScenario() throws Exception {
         // Test simulating concurrent access scenario
         Path tempDir = Files.createTempDirectory("concurrent_test");

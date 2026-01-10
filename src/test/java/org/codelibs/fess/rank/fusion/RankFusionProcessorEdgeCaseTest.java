@@ -30,6 +30,7 @@ import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
 
 /**
  * Edge case tests for RankFusionProcessor.
@@ -42,6 +43,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test behavior when no searchers are registered (empty list).
      */
+    @Test
     public void test_emptySearcherList() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.init();
@@ -55,6 +57,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test setSearcher when list is initially empty.
      */
+    @Test
     public void test_setSearcherOnEmptyList() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             // Set searcher before init
@@ -70,6 +73,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test setSearcher replaces existing searcher.
      */
+    @Test
     public void test_setSearcherReplacesExisting() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(50));
@@ -87,6 +91,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with zero page size.
      */
+    @Test
     public void test_searchWithZeroPageSize() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -101,6 +106,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with very large page size.
      */
+    @Test
     public void test_searchWithLargePageSize() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -117,6 +123,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with start position beyond available documents.
      */
+    @Test
     public void test_searchBeyondAvailableDocuments() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(50));
@@ -132,6 +139,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with negative start position (should be handled gracefully).
      */
+    @Test
     public void test_searchWithNegativeStartPosition() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -146,6 +154,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test with searcher that returns empty results.
      */
+    @Test
     public void test_searcherReturnsNoResults() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(0)); // No documents
@@ -160,6 +169,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test with searcher that returns single document.
      */
+    @Test
     public void test_searcherReturnsSingleDocument() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(1));
@@ -178,6 +188,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test multiple searchers with mixed result counts.
      */
+    @Test
     public void test_multipleSearchersWithMixedResults() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -194,6 +205,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with null query (should be handled by implementation).
      */
+    @Test
     public void test_searchWithNullQuery() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -208,6 +220,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test search with empty query string.
      */
+    @Test
     public void test_searchWithEmptyQuery() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -221,6 +234,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test registering same searcher multiple times.
      */
+    @Test
     public void test_registerSameSearcherMultipleTimes() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -238,6 +252,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test with documents having duplicate IDs across searchers.
      */
+    @Test
     public void test_duplicateDocumentIds() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcherWithFixedIds("doc1", "doc2", "doc3"));
@@ -253,6 +268,7 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
     /**
      * Test that close can be called multiple times safely.
      */
+    @Test
     public void test_multipleCloseCallsSafe() throws Exception {
         RankFusionProcessor processor = new RankFusionProcessor();
         processor.setSearcher(new TestSearcher(100));

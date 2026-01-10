@@ -53,6 +53,9 @@ import org.dbflute.mail.CardView;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlerTest extends UnitFessTestCase {
 
@@ -71,9 +74,10 @@ public class CrawlerTest extends UnitFessTestCase {
     private NotificationHelper notificationHelper;
     private Postbox postbox;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         crawler = new Crawler();
 
         // Initialize mock components
@@ -249,7 +253,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
         // Clear static fields
         clearStaticFields();
@@ -266,6 +270,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test addError method
+    @Test
     public void test_addError_withValidMessage() {
         String errorMsg = "Test error message";
         Crawler.addError(errorMsg);
@@ -281,6 +286,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addError_withNullMessage() {
         Crawler.addError(null);
 
@@ -295,6 +301,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addError_withEmptyMessage() {
         Crawler.addError("");
 
@@ -309,6 +316,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addError_withBlankMessage() {
         Crawler.addError("   ");
 
@@ -324,6 +332,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test Options class
+    @Test
     public void test_Options_getWebConfigIdList_withValidIds() {
         Crawler.Options options = new Crawler.Options();
         options.webConfigIds = "id1,id2,id3";
@@ -336,6 +345,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(result.contains("id3"));
     }
 
+    @Test
     public void test_Options_getWebConfigIdList_withNull() {
         Crawler.Options options = new Crawler.Options();
         options.webConfigIds = null;
@@ -344,6 +354,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_Options_getWebConfigIdList_withEmpty() {
         Crawler.Options options = new Crawler.Options();
         options.webConfigIds = "";
@@ -352,6 +363,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_Options_getFileConfigIdList_withValidIds() {
         Crawler.Options options = new Crawler.Options();
         options.fileConfigIds = "file1,file2";
@@ -363,6 +375,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(result.contains("file2"));
     }
 
+    @Test
     public void test_Options_getFileConfigIdList_withSingleId() {
         Crawler.Options options = new Crawler.Options();
         options.fileConfigIds = "single";
@@ -373,6 +386,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(result.contains("single"));
     }
 
+    @Test
     public void test_Options_getDataConfigIdList_withValidIds() {
         Crawler.Options options = new Crawler.Options();
         options.dataConfigIds = "data1,data2,data3,data4";
@@ -386,6 +400,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(result.contains("data4"));
     }
 
+    @Test
     public void test_Options_toString() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "session123";
@@ -410,6 +425,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test initializeProbes method
+    @Test
     public void test_initializeProbes() {
         // Simply test that the method doesn't throw exceptions
         try {
@@ -420,6 +436,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test main method with invalid arguments
+    @Test
     public void test_main_withInvalidArguments() {
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
         PrintStream originalErr = System.err;
@@ -437,6 +454,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test doCrawl method
+    @Test
     public void test_doCrawl_withAllNull() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "test-session";
@@ -445,6 +463,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals(Constants.EXIT_OK, result);
     }
 
+    @Test
     public void test_doCrawl_withWebConfigIds() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "test-session";
@@ -454,6 +473,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals(Constants.EXIT_OK, result);
     }
 
+    @Test
     public void test_doCrawl_withFileConfigIds() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "test-session";
@@ -463,6 +483,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals(Constants.EXIT_OK, result);
     }
 
+    @Test
     public void test_doCrawl_withDataConfigIds() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "test-session";
@@ -472,6 +493,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals(Constants.EXIT_OK, result);
     }
 
+    @Test
     public void test_doCrawl_withAllConfigIds() {
         Crawler.Options options = new Crawler.Options();
         options.sessionId = "test-session";
@@ -483,6 +505,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals(Constants.EXIT_OK, result);
     }
 
+    @Test
     public void test_doCrawl_withException() {
         // Create a crawler that throws exception
         Crawler errorCrawler = new Crawler() {
@@ -511,6 +534,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test writeTimeToSessionInfo method
+    @Test
     public void test_writeTimeToSessionInfo_withValidHelper() {
         final Map<String, String> capturedInfo = new HashMap<>();
         CrawlingInfoHelper helper = new CrawlingInfoHelper() {
@@ -525,6 +549,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertNotNull(capturedInfo.get("test-key"));
     }
 
+    @Test
     public void test_writeTimeToSessionInfo_withNullHelper() {
         // Should not throw exception
         try {
@@ -535,6 +560,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test sendMail method
+    @Test
     public void test_sendMail_withNotificationDisabled() {
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("TestKey", "TestValue");
@@ -547,6 +573,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendMail_withNotificationEnabled() {
         // Override fessConfig to enable notification
         FessConfig notificationConfig = new FessConfig.SimpleImpl() {
@@ -594,6 +621,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendMail_withEmptyInfoMap() {
         Map<String, String> infoMap = new HashMap<>();
 
@@ -605,6 +633,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test getValueFromMap private method via reflection
+    @Test
     public void test_getValueFromMap() throws Exception {
         Method method = Crawler.class.getDeclaredMethod("getValueFromMap", Map.class, String.class, String.class);
         method.setAccessible(true);
@@ -632,6 +661,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test joinCrawlerThread private method via reflection
+    @Test
     public void test_joinCrawlerThread() throws Exception {
         Method method = Crawler.class.getDeclaredMethod("joinCrawlerThread", Thread.class);
         method.setAccessible(true);
@@ -661,6 +691,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test destroyContainer private static method via reflection
+    @Test
     public void test_destroyContainer() throws Exception {
         // Test destroyContainer method - skip this test as it conflicts with container management
         // The test framework manages the container lifecycle
@@ -668,6 +699,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test process method with different options
+    @Test
     public void test_process_withDefaultSessionId() throws Exception {
         // Test that default sessionId is generated when not provided
         Crawler.Options options = new Crawler.Options();
@@ -694,6 +726,7 @@ public class CrawlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_withCustomSessionId() throws Exception {
         // Test that custom sessionId is sanitized
         Crawler.Options options = new Crawler.Options();
@@ -708,6 +741,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals("test_session_123", options.sessionId);
     }
 
+    @Test
     public void test_process_withPropertiesPath() throws Exception {
         // Test that properties path is properly handled
         // Create temporary properties file
@@ -724,6 +758,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertTrue(new File(options.propertiesPath).exists());
     }
 
+    @Test
     public void test_process_withExpires() throws Exception {
         // Test that expires value is properly set
         Crawler.Options options = new Crawler.Options();
@@ -734,6 +769,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals("14", options.expires);
     }
 
+    @Test
     public void test_process_withInvalidExpires() throws Exception {
         // Test that invalid expires value is handled
         Crawler.Options options = new Crawler.Options();
@@ -744,6 +780,7 @@ public class CrawlerTest extends UnitFessTestCase {
         assertEquals("invalid", options.expires);
     }
 
+    @Test
     public void test_process_withName() throws Exception {
         // Test that name is properly set
         Crawler.Options options = new Crawler.Options();
@@ -755,6 +792,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test error handling in doCrawl
+    @Test
     public void test_doCrawl_withErrors() {
         // Clear any previous errors
         try {
@@ -820,6 +858,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     // Test concurrent crawling
+    @Test
     public void test_doCrawl_concurrentWebAndData() {
         final List<String> executionOrder = Collections.synchronizedList(new ArrayList<>());
 

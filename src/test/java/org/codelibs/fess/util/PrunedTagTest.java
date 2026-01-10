@@ -22,9 +22,11 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.junit.jupiter.api.Test;
 
 public class PrunedTagTest extends UnitFessTestCase {
 
+    @Test
     public void test_hashCode() {
         PrunedTag prunedtag = new PrunedTag("tag");
 
@@ -32,6 +34,7 @@ public class PrunedTagTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_equals() {
 
         PrunedTag prunedtag = new PrunedTag("tag");
@@ -42,6 +45,7 @@ public class PrunedTagTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_toString() {
         String tag = "tag", id = "id", css = "css", attrName = "attrName", attrValue = "attrValue";
         PrunedTag prunedtag = new PrunedTag(tag);
@@ -52,6 +56,7 @@ public class PrunedTagTest extends UnitFessTestCase {
                 prunedtag.toString());
     }
 
+    @Test
     public void test_parse() {
         PrunedTag[] tags = PrunedTag.parse("");
         assertEquals(0, tags.length);
@@ -86,6 +91,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertEquals("PrunedTag [tag=a, id=null, css=test-a, attrName=null, attrValue=null]", tags[0].toString());
     }
 
+    @Test
     public void test_matches_basicTag() {
         PrunedTag tag = new PrunedTag("div");
 
@@ -100,6 +106,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertTrue(tag.matches(divUpperNode));
     }
 
+    @Test
     public void test_matches_withId() {
         PrunedTag tag = new PrunedTag("div");
         tag.setId("test-id");
@@ -124,6 +131,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertFalse(tag.matches(wrongTag));
     }
 
+    @Test
     public void test_matches_withCss() {
         PrunedTag tag = new PrunedTag("div");
         tag.setCss("highlight");
@@ -158,6 +166,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertFalse(tag.matches(nodeWithNullClass));
     }
 
+    @Test
     public void test_matches_withAttribute() {
         PrunedTag tag = new PrunedTag("a");
         tag.setAttr("target", "_blank");
@@ -182,6 +191,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertFalse(tag.matches(wrongTag));
     }
 
+    @Test
     public void test_matches_complexCombinations() {
         // Test tag with both id and css (id takes precedence)
         PrunedTag tagWithIdAndCss = new PrunedTag("div");
@@ -221,6 +231,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertFalse(tagWithAttrAndCss.matches(nodeWithWrongAttr));
     }
 
+    @Test
     public void test_equals_comprehensive() {
         PrunedTag tag1 = new PrunedTag("div");
         tag1.setId("test");
@@ -277,6 +288,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertTrue(tagWithNulls.equals(anotherTagWithNulls));
     }
 
+    @Test
     public void test_parse_complexCombinations() {
         // Test complex parsing combinations
         PrunedTag[] tags = PrunedTag.parse("div[data-toggle=modal].modal#main-modal");
@@ -301,6 +313,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertEquals(2, tags.length);
     }
 
+    @Test
     public void test_parse_edgeCases() {
         // Test empty string
         PrunedTag[] tags = PrunedTag.parse("");
@@ -323,6 +336,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertEquals(0, tags.length);
     }
 
+    @Test
     public void test_parse_invalidFormats() {
         // Test invalid formats that should throw FessSystemException
         try {
@@ -347,6 +361,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_parse_attributeVariations() {
         // Test different attribute formats
         PrunedTag[] tags = PrunedTag.parse("input[type=text]");
@@ -365,6 +380,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertTrue(tags[0].toString().contains("attrValue=https://example.com"));
     }
 
+    @Test
     public void test_hashCode_consistency() {
         PrunedTag tag1 = new PrunedTag("div");
         tag1.setId("test");
@@ -383,6 +399,7 @@ public class PrunedTagTest extends UnitFessTestCase {
         assertEquals(hash1, hash2);
     }
 
+    @Test
     public void test_setters() {
         PrunedTag tag = new PrunedTag("div");
 

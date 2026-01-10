@@ -16,9 +16,11 @@
 package org.codelibs.fess.util;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class BooleanFunctionTest extends UnitFessTestCase {
 
+    @Test
     public void test_apply_string() {
         BooleanFunction<String> isNotEmpty = s -> s != null && !s.isEmpty();
 
@@ -28,6 +30,7 @@ public class BooleanFunctionTest extends UnitFessTestCase {
         assertFalse(isNotEmpty.apply(null));
     }
 
+    @Test
     public void test_apply_integer() {
         BooleanFunction<Integer> isPositive = n -> n != null && n > 0;
 
@@ -38,6 +41,7 @@ public class BooleanFunctionTest extends UnitFessTestCase {
         assertFalse(isPositive.apply(null));
     }
 
+    @Test
     public void test_apply_object() {
         BooleanFunction<Object> isNotNull = obj -> obj != null;
 
@@ -47,6 +51,7 @@ public class BooleanFunctionTest extends UnitFessTestCase {
         assertFalse(isNotNull.apply(null));
     }
 
+    @Test
     public void test_apply_boolean() {
         BooleanFunction<Boolean> identity = b -> b != null && b;
 
@@ -55,6 +60,7 @@ public class BooleanFunctionTest extends UnitFessTestCase {
         assertFalse(identity.apply(null));
     }
 
+    @Test
     public void test_lambda_expression() {
         BooleanFunction<String> startsWithHello = s -> s != null && s.startsWith("hello");
 
@@ -65,6 +71,7 @@ public class BooleanFunctionTest extends UnitFessTestCase {
         assertFalse(startsWithHello.apply(null));
     }
 
+    @Test
     public void test_method_reference() {
         BooleanFunction<String> isEmpty = String::isEmpty;
 

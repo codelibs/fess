@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DuplicateHostPagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_DuplicateHostPager() {
         DuplicateHostPager duplicatehostpager = new DuplicateHostPager();
 

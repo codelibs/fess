@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ScheduledJobExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithMessage() {
         // Test constructor with message only
         String message = "Test scheduled job error";
@@ -28,6 +30,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndCause() {
         // Test constructor with message and cause
         String message = "Test scheduled job error with cause";
@@ -39,6 +42,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause exception", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithNullMessage() {
         // Test constructor with null message
         ScheduledJobException exception = new ScheduledJobException(null);
@@ -47,6 +51,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndCause() {
         // Test constructor with null message and null cause
         ScheduledJobException exception = new ScheduledJobException(null, null);
@@ -55,6 +60,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -64,6 +70,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Test message with null cause";
@@ -73,6 +80,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that ScheduledJobException is instance of FessSystemException
         ScheduledJobException exception = new ScheduledJobException("Test");
@@ -83,6 +91,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTracePresent() {
         // Test that stack trace is captured properly
         ScheduledJobException exception = new ScheduledJobException("Stack trace test");
@@ -96,6 +105,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertEquals("test_stackTracePresent", firstElement.getMethodName());
     }
 
+    @Test
     public void test_nestedExceptionChain() {
         // Test nested exception chain
         Throwable rootCause = new IllegalArgumentException("Root cause");
@@ -109,6 +119,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Job execution failed";
@@ -124,6 +135,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertTrue(exceptionCaught);
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String expectedMessage = "Job execution failed with error";
@@ -142,6 +154,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertTrue(exceptionCaught);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that the exception is serializable
         ScheduledJobException exception = new ScheduledJobException("Serialization test");
@@ -150,6 +163,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_longMessage() {
         // Test with very long message
         StringBuilder sb = new StringBuilder();
@@ -162,6 +176,7 @@ public class ScheduledJobExceptionTest extends UnitFessTestCase {
         assertEquals(longMessage, exception.getMessage());
     }
 
+    @Test
     public void test_specialCharactersInMessage() {
         // Test with special characters in message
         String specialMessage = "Error: \n\t\r Special chars: 日本語 中文 한국어 émojis 😀 🎉";

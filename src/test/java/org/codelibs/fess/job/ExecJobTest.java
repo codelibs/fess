@@ -39,6 +39,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.job.LaJobRuntime;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ExecJobTest extends UnitFessTestCase {
 
@@ -117,9 +121,10 @@ public class ExecJobTest extends UnitFessTestCase {
         }
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         execJob = new TestExecJob();
         tempDir = Files.createTempDirectory("execjob_test").toFile();
 
@@ -153,7 +158,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         FileUtils.deleteQuietly(tempDir);
 
         // Restore original helpers
@@ -171,6 +176,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test constructor and initial state
+    @Test
     public void test_constructor() {
         assertNotNull(execJob);
         assertNull(execJob.jobExecutor);
@@ -187,6 +193,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test execute method
+    @Test
     public void test_execute() {
         assertEquals("success", execJob.execute());
 
@@ -195,6 +202,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test execute with JobExecutor
+    @Test
     public void test_execute_withJobExecutor() {
         JobExecutor jobExecutor = new JobExecutor() {
             @Override
@@ -209,6 +217,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test getExecuteType
+    @Test
     public void test_getExecuteType() {
         assertEquals("test", execJob.getExecuteType());
 
@@ -217,6 +226,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test jobExecutor setter
+    @Test
     public void test_jobExecutor() {
         JobExecutor jobExecutor = new JobExecutor() {
             @Override
@@ -231,6 +241,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test sessionId setter
+    @Test
     public void test_sessionId() {
         String testSessionId = "test-session-123";
         ExecJob result = execJob.sessionId(testSessionId);
@@ -239,6 +250,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test logFilePath setter
+    @Test
     public void test_logFilePath() {
         String testPath = "/path/to/log";
         ExecJob result = execJob.logFilePath(testPath);
@@ -247,6 +259,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test logLevel setter
+    @Test
     public void test_logLevel() {
         String testLevel = "DEBUG";
         ExecJob result = execJob.logLevel(testLevel);
@@ -255,6 +268,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test logSuffix setter
+    @Test
     public void test_logSuffix() {
         String testSuffix = "test suffix";
         ExecJob result = execJob.logSuffix(testSuffix);
@@ -271,6 +285,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test timeout setter
+    @Test
     public void test_timeout() {
         ExecJob result = execJob.timeout(60);
         assertEquals(60, execJob.timeout);
@@ -283,6 +298,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test useLocalFesen setter
+    @Test
     public void test_useLocalFesen() {
         ExecJob result = execJob.useLocalFesen(false);
         assertFalse(execJob.useLocalFesen);
@@ -294,6 +310,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test remoteDebug method
+    @Test
     public void test_remoteDebug() {
         ExecJob result = execJob.remoteDebug();
         assertSame(execJob, result);
@@ -303,6 +320,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test gcLogging method
+    @Test
     public void test_gcLogging() {
         ExecJob result = execJob.gcLogging();
         assertSame(execJob, result);
@@ -318,6 +336,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test jvmOptions method
+    @Test
     public void test_jvmOptions() {
         ExecJob result = execJob.jvmOptions("-Xmx1024m", "-Xms512m");
         assertSame(execJob, result);
@@ -332,6 +351,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test lastaEnv setter
+    @Test
     public void test_lastaEnv() {
         String testEnv = "production";
         ExecJob result = execJob.lastaEnv(testEnv);
@@ -340,6 +360,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test addSystemProperty method
+    @Test
     public void test_addSystemProperty() {
         List<String> cmdList = new ArrayList<>();
 
@@ -371,6 +392,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test addFessConfigProperties method
+    @Test
     public void test_addFessConfigProperties() {
         List<String> cmdList = new ArrayList<>();
 
@@ -393,6 +415,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test addFessSystemProperties method
+    @Test
     public void test_addFessSystemProperties() {
         List<String> cmdList = new ArrayList<>();
 
@@ -415,6 +438,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test addFessCustomSystemProperties method
+    @Test
     public void test_addFessCustomSystemProperties() {
         List<String> cmdList = new ArrayList<>();
 
@@ -447,6 +471,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test deleteTempDir method
+    @Test
     public void test_deleteTempDir() throws IOException {
         // Test with null
         execJob.testDeleteTempDir(null);
@@ -465,6 +490,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test appendJarFile method
+    @Test
     public void test_appendJarFile() throws IOException {
         StringBuilder buf = new StringBuilder();
         File libDir = new File(tempDir, "lib");
@@ -493,6 +519,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test createTimeoutTask method
+    @Test
     public void test_createTimeoutTask() {
         // Test with no timeout
         execJob.timeout = -1;
@@ -512,6 +539,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test createSystemProperties method
+    @Test
     public void test_createSystemProperties() throws IOException {
         List<String> cmdList = new ArrayList<>();
         cmdList.add("test");
@@ -549,6 +577,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test createSystemProperties with IOException
+    @Test
     public void test_createSystemProperties_IOException() {
         List<String> cmdList = new ArrayList<>();
         File invalidFile = new File("/invalid/path/test.properties");
@@ -563,6 +592,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test getLogName method
+    @Test
     public void test_getLogName() {
         // Test without suffix
         execJob.logSuffix = "";
@@ -578,6 +608,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test complex scenario with multiple configurations
+    @Test
     public void test_complexConfiguration() {
         execJob.sessionId("complex-session")
                 .logFilePath("/var/log/fess")
@@ -604,6 +635,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test edge cases and boundary conditions
+    @Test
     public void test_edgeCases() {
         // Test with empty strings
         execJob.sessionId("");
@@ -628,6 +660,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test exception handling in execute
+    @Test
     public void test_execute_withException() {
         execJob.setThrowException(true);
 
@@ -640,6 +673,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test concurrent modification of jvmOptions
+    @Test
     public void test_jvmOptions_concurrent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(2);
 
@@ -666,6 +700,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test pattern matching in custom properties
+    @Test
     public void test_customProperties_complexPattern() {
         List<String> cmdList = new ArrayList<>();
 
@@ -690,6 +725,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     // Test invalid regex in custom properties
+    @Test
     public void test_customProperties_invalidRegex() {
         List<String> cmdList = new ArrayList<>();
 

@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ScriptEngineExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Script engine error occurred";
@@ -28,6 +30,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Script execution failed";
@@ -39,6 +42,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertEquals("Underlying error", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         ScriptEngineException exception = new ScriptEngineException(null);
@@ -47,6 +51,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         ScriptEngineException exception = new ScriptEngineException(null, null);
@@ -55,6 +60,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -64,6 +70,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Script error";
@@ -73,6 +80,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that ScriptEngineException is an instance of FessSystemException
         ScriptEngineException exception = new ScriptEngineException("test");
@@ -83,6 +91,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has the correct serialVersionUID field
         ScriptEngineException exception = new ScriptEngineException("Serialization test");
@@ -92,6 +101,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertEquals("Serialization test", exception.getMessage());
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly maintained
         String message = "Stack trace test";
@@ -109,6 +119,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertTrue(causeStackTrace.length > 0);
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Script engine test error";
@@ -120,6 +131,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertTrue(result.contains(message));
     }
 
+    @Test
     public void test_withComplexCauseChain() {
         // Test with a chain of exceptions
         Exception rootCause = new NullPointerException("Root cause");
@@ -133,6 +145,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_withLongMessage() {
         // Test with a very long message
         StringBuilder longMessage = new StringBuilder();
@@ -147,6 +160,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_withSpecialCharactersInMessage() {
         // Test with special characters in message
         String message = "Error with special chars: \n\t\r\"'<>&";
@@ -156,6 +170,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_withUnicodeInMessage() {
         // Test with Unicode characters in message
         String message = "エラー発生: スクリプトエンジン例外 😱";
@@ -165,6 +180,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String message = "Thrown exception test";
@@ -179,6 +195,7 @@ public class ScriptEngineExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent class
         String message = "Parent class catch test";

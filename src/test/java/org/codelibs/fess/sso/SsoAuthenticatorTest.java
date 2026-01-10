@@ -28,14 +28,18 @@ import org.lastaflute.web.response.JsonResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SsoAuthenticatorTest extends UnitFessTestCase {
 
     private TestSsoAuthenticator authenticator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         authenticator = new TestSsoAuthenticator();
     }
 
@@ -90,6 +94,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
     }
 
     // Test getLoginCredential method
+    @Test
     public void test_getLoginCredential_returnsValidCredential() {
         // Setup test credential
         TestLoginCredential expectedCredential = new TestLoginCredential("testuser", "testpass");
@@ -105,6 +110,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertEquals("testpass", ((TestLoginCredential) result).getPassword());
     }
 
+    @Test
     public void test_getLoginCredential_returnsNull() {
         // Setup
         authenticator.setLoginCredential(null);
@@ -117,6 +123,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
     }
 
     // Test resolveCredential method
+    @Test
     public void test_resolveCredential_withValidResolver() {
         // Setup
         TestLoginCredentialResolver resolver = new TestLoginCredentialResolver();
@@ -129,6 +136,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertNotNull(authenticator.getLastResolver());
     }
 
+    @Test
     public void test_resolveCredential_withNullResolver() {
         // Execute
         authenticator.resolveCredential(null);
@@ -138,6 +146,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertNull(authenticator.getLastResolver());
     }
 
+    @Test
     public void test_resolveCredential_multipleResolvers() {
         // Setup
         TestLoginCredentialResolver resolver1 = new TestLoginCredentialResolver();
@@ -153,6 +162,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
     }
 
     // Test getResponse method with different response types
+    @Test
     public void test_getResponse_withMetadataType() {
         // Setup - Test with null response initially
         ActionResponse result = authenticator.getResponse(SsoResponseType.METADATA);
@@ -172,6 +182,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertEquals(expectedResponse, result);
     }
 
+    @Test
     public void test_getResponse_withLogoutType() {
         // Setup
         JsonResponse<?> expectedResponse = new JsonResponse<>(new HashMap<>());
@@ -185,6 +196,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertEquals(expectedResponse, result);
     }
 
+    @Test
     public void test_getResponse_withNullType() {
         // Execute
         ActionResponse result = authenticator.getResponse(null);
@@ -193,6 +205,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_getResponse_withUnsetType() {
         // Execute - requesting type without setting response
         ActionResponse result = authenticator.getResponse(SsoResponseType.METADATA);
@@ -202,6 +215,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
     }
 
     // Test logout method
+    @Test
     public void test_logout_withValidUser() {
         // Setup
         FessUserBean user = FessUserBean.empty();
@@ -217,6 +231,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertEquals(user, authenticator.getLastLogoutUser());
     }
 
+    @Test
     public void test_logout_withNullUser() {
         // Setup
         authenticator.setLogoutUrl("https://example.com/logout");
@@ -230,6 +245,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertNull(authenticator.getLastLogoutUser());
     }
 
+    @Test
     public void test_logout_returnsNull() {
         // Setup
         FessUserBean user = FessUserBean.empty();
@@ -243,6 +259,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
         assertEquals(user, authenticator.getLastLogoutUser());
     }
 
+    @Test
     public void test_logout_withEmptyString() {
         // Setup
         FessUserBean user = FessUserBean.empty();
@@ -257,6 +274,7 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
     }
 
     // Test complete workflow
+    @Test
     public void test_completeAuthenticationFlow() {
         // Setup
         TestLoginCredential credential = new TestLoginCredential("user", "pass");

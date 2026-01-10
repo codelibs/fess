@@ -17,6 +17,9 @@ package org.codelibs.fess.exception;
 
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class UserRoleLoginExceptionTest extends UnitFessTestCase {
 
@@ -30,6 +33,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         // Test admin subclass
     }
 
+    @Test
     public void test_constructor() {
         // Test constructor with RootAction class
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -37,6 +41,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertEquals(RootAction.class, exception.getActionClass());
     }
 
+    @Test
     public void test_getActionClass() {
         // Test getActionClass returns correct class
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -46,6 +51,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertEquals("org.codelibs.fess.app.web.RootAction", actionClass.getName());
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test fillInStackTrace returns null for performance optimization
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -57,6 +63,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertEquals(0, stackTrace.length);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is correctly defined
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -64,6 +71,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_exceptionInheritance() {
         // Test that exception is a RuntimeException
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -72,18 +80,21 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_getMessage() {
         // Test that getMessage returns null (no message set in constructor)
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
         assertNull(exception.getMessage());
     }
 
+    @Test
     public void test_getCause() {
         // Test that getCause returns null (no cause set in constructor)
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         try {
@@ -95,6 +106,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test that multiple instances maintain their own state
         UserRoleLoginException exception1 = new UserRoleLoginException(RootAction.class);
@@ -106,6 +118,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertSame(RootAction.class, exception2.getActionClass());
     }
 
+    @Test
     public void test_synchronizedFillInStackTrace() {
         // Test thread safety of fillInStackTrace method
         UserRoleLoginException exception = new UserRoleLoginException(RootAction.class);
@@ -132,6 +145,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_genericTypeSafety_withSubclass() {
         // Test that the exception accepts RootAction subclasses
         // This verifies the change from Class<RootAction> to Class<? extends RootAction>
@@ -140,6 +154,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertEquals(TestAction.class, exception.getActionClass());
     }
 
+    @Test
     public void test_genericTypeSafety_withAnotherSubclass() {
         // Test with another RootAction subclass
         UserRoleLoginException exception = new UserRoleLoginException(AdminAction.class);
@@ -147,6 +162,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertEquals(AdminAction.class, exception.getActionClass());
     }
 
+    @Test
     public void test_genericTypeSafety_getActionClassReturnType() {
         // Test that getActionClass() returns the correct generic type
         UserRoleLoginException exceptionWithRootAction = new UserRoleLoginException(RootAction.class);
@@ -161,6 +177,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertTrue(RootAction.class.isAssignableFrom(actionClass2));
     }
 
+    @Test
     public void test_genericTypeSafety_multipleDifferentSubclasses() {
         // Test that different instances can hold different subclass types
         UserRoleLoginException exception1 = new UserRoleLoginException(RootAction.class);
@@ -177,6 +194,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertTrue(RootAction.class.isAssignableFrom(exception3.getActionClass()));
     }
 
+    @Test
     public void test_genericTypeSafety_throwAndCatchWithSubclass() {
         // Test throwing and catching with a subclass
         try {
@@ -188,6 +206,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_genericTypeSafety_consistencyBetweenConstructorAndGetter() {
         // Verify consistency between constructor parameter type and getter return type
         // This test ensures the generic type change is consistent throughout the class
@@ -211,6 +230,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         assertSame(inputClass3, outputClass3);
     }
 
+    @Test
     public void test_genericTypeSafety_noClassCastException() {
         // Verify that no ClassCastException occurs when using subclasses
         try {
@@ -228,6 +248,7 @@ public class UserRoleLoginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_genericTypeSafety_verifyInheritance() {
         // Verify that TestAction and AdminAction are indeed subclasses of RootAction
         assertTrue(RootAction.class.isAssignableFrom(TestAction.class));

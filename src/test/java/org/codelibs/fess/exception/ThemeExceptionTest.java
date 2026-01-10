@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ThemeExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithMessage() {
         // Test constructor with message only
         String message = "Theme installation failed";
@@ -29,6 +31,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndCause() {
         // Test constructor with message and cause
         String message = "Theme configuration error";
@@ -41,6 +44,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertEquals("Config file not found", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithNullMessage() {
         // Test constructor with null message
         ThemeException exception = new ThemeException(null);
@@ -50,6 +54,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndCause() {
         // Test constructor with null message and cause
         ThemeException exception = new ThemeException(null, null);
@@ -59,6 +64,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -69,6 +75,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Theme uninstallation failed";
@@ -79,6 +86,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_inheritance() {
         // Test that ThemeException properly extends FessSystemException
         ThemeException exception = new ThemeException("Test");
@@ -89,6 +97,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         ThemeException exception = new ThemeException("Stack trace test");
@@ -107,6 +116,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that the exception is serializable
         ThemeException exception = new ThemeException("Serialization test");
@@ -116,6 +126,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_nestedExceptions() {
         // Test nested exception handling
         Exception innerCause = new IllegalArgumentException("Invalid parameter");
@@ -135,6 +146,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertEquals("Invalid parameter", nestedCause.getMessage());
     }
 
+    @Test
     public void test_messageWithSpecialCharacters() {
         // Test message with special characters
         String message = "Theme error: 日本語 & special <characters> \"quoted\" 'text'";
@@ -144,6 +156,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_veryLongMessage() {
         // Test with very long message
         StringBuilder sb = new StringBuilder();
@@ -158,6 +171,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         assertEquals(longMessage, exception.getMessage());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Theme loading error";
@@ -172,6 +186,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching exception with cause
         String expectedMessage = "Theme validation failed";
@@ -187,6 +202,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_catchAsFessSystemException() {
         // Test catching as parent exception type
         String message = "Theme error";
@@ -201,6 +217,7 @@ public class ThemeExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_rethrowWithWrapping() {
         // Test rethrowing with wrapping
         String originalMessage = "Original theme error";

@@ -35,6 +35,9 @@ import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 
 import jakarta.servlet.ServletContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SuggestJobTest extends UnitFessTestCase {
 
@@ -46,9 +49,10 @@ public class SuggestJobTest extends UnitFessTestCase {
     private MockPopularWordHelper mockPopularWordHelper;
     private File tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create temp directory for testing first
         tempDir = File.createTempFile("suggestjob_test", "");
@@ -76,7 +80,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         // Clean up temp directory
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
@@ -92,6 +96,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with successful execution
+    @Test
     public void test_execute_success() {
         createRequiredDirectories();
 
@@ -110,6 +115,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with failure
+    @Test
     public void test_execute_failure() {
         createRequiredDirectories();
 
@@ -125,6 +131,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with existing session ID
+    @Test
     public void test_execute_withExistingSessionId() {
         createRequiredDirectories();
         String existingSessionId = "EXISTING123456";
@@ -140,6 +147,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with job executor shutdown listener
+    @Test
     public void test_execute_withJobExecutor() {
         createRequiredDirectories();
         MockJobExecutor mockJobExecutor = new MockJobExecutor();
@@ -155,6 +163,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with timeout
+    @Test
     public void test_execute_withTimeout() {
         createRequiredDirectories();
         suggestJob.timeout(10);
@@ -169,6 +178,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with process timeout
+    @Test
     public void test_execute_processTimeout() {
         createRequiredDirectories();
         suggestJob.timeout(1);
@@ -185,6 +195,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test executeSuggestCreator with Windows environment
+    @Test
     public void test_executeSuggestCreator_windows() {
         createRequiredDirectories();
         System.setProperty("os.name", "Windows 10");
@@ -207,6 +218,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test executeSuggestCreator with Unix environment
+    @Test
     public void test_executeSuggestCreator_unix() {
         createRequiredDirectories();
         System.setProperty("os.name", "Linux");
@@ -229,6 +241,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test executeSuggestCreator with custom config properties
+    @Test
     public void test_executeSuggestCreator_withConfPath() {
         createRequiredDirectories();
         String confPath = "/custom/conf/path";
@@ -256,6 +269,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test executeSuggestCreator with local Fesen
+    @Test
     public void test_executeSuggestCreator_withLocalFesen() {
         createRequiredDirectories();
         suggestJob.useLocalFesen(true);
@@ -279,6 +293,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test executeSuggestCreator with interrupted exception
+    @Test
     public void test_executeSuggestCreator_withInterruptedException() {
         createRequiredDirectories();
         mockProcessHelper.setThrowException(new InterruptedException("Interrupted"));
@@ -295,11 +310,13 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test getExecuteType method
+    @Test
     public void test_getExecuteType() {
         assertEquals(Constants.EXECUTE_TYPE_SUGGEST, suggestJob.getExecuteType());
     }
 
     // Test session ID generation
+    @Test
     public void test_sessionIdGeneration() {
         assertNull(suggestJob.sessionId);
 
@@ -313,6 +330,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     // Test command list construction with target classes directory
+    @Test
     public void test_executeSuggestCreator_withTargetClassesDir() {
         createRequiredDirectories();
         File targetDir = new File(System.getProperty("user.dir"), "target");
@@ -339,7 +357,7 @@ public class SuggestJobTest extends UnitFessTestCase {
         }
 
         List<String> cmdList = mockProcessHelper.getLastCommandList();
-        assertNotNull("Command list should not be null", cmdList);
+        assertNotNull(cmdList, "Command list should not be null");
         assertTrue("Command list should not be empty", !cmdList.isEmpty());
 
         int cpIndex = cmdList.indexOf("-cp");

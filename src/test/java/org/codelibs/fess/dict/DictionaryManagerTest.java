@@ -22,15 +22,19 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.mapping.CharMappingCreator;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DictionaryManagerTest extends UnitFessTestCase {
     private File testDir;
 
     private File file1;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         testDir = File.createTempFile("synonymtest", "_dir");
         testDir.delete();
         testDir.mkdirs();
@@ -39,11 +43,12 @@ public class DictionaryManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
         FileUtils.deleteDirectory(testDir);
     }
 
+    @Test
     public void test_init() {
         final DictionaryManager dictionaryManager = new DictionaryManager();
         dictionaryManager.init();
@@ -55,6 +60,7 @@ public class DictionaryManagerTest extends UnitFessTestCase {
     }
 
     /*
+    @Test
     public void test_storeSynonymFiles() throws Exception {
         final DictionaryManager dictionaryManager = new DictionaryManager();
         final SynonymCreator synonymCreator = new SynonymCreator();

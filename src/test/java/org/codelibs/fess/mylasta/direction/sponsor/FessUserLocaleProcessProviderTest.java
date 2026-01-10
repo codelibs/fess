@@ -26,30 +26,36 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.path.ActionPathResolver;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
 
     private FessUserLocaleProcessProvider provider;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         provider = new FessUserLocaleProcessProvider();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test isAcceptCookieLocale method
+    @Test
     public void test_isAcceptCookieLocale() {
         // Always returns false as per implementation
         assertFalse(provider.isAcceptCookieLocale());
     }
 
     // Test findBusinessLocale with valid locale parameter
+    @Test
     public void test_findBusinessLocale_withValidLocale() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -72,6 +78,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with Japanese locale
+    @Test
     public void test_findBusinessLocale_withJapaneseLocale() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -94,6 +101,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with language only (no country)
+    @Test
     public void test_findBusinessLocale_withLanguageOnly() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -116,6 +124,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with hyphen separator
+    @Test
     public void test_findBusinessLocale_withHyphenSeparator() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -138,6 +147,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with blank parameter name
+    @Test
     public void test_findBusinessLocale_withBlankParameterName() {
         // Setup mock config with blank parameter name
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -159,6 +169,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with null parameter name
+    @Test
     public void test_findBusinessLocale_withNullParameterName() {
         // Setup mock config with null parameter name
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -180,6 +191,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with no parameter value
+    @Test
     public void test_findBusinessLocale_withNoParameterValue() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -201,6 +213,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with invalid locale format
+    @Test
     public void test_findBusinessLocale_withInvalidLocaleFormat() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -222,6 +235,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with language and country and variant
+    @Test
     public void test_findBusinessLocale_withLanguageCountryVariant() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -247,6 +261,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessLocale with case sensitivity
+    @Test
     public void test_findBusinessLocale_withMixedCase() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -269,6 +284,7 @@ public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test multiple calls to ensure consistency
+    @Test
     public void test_findBusinessLocale_multipleCallsConsistency() {
         // Setup mock config
         FessConfig mockConfig = new FessConfig.SimpleImpl() {

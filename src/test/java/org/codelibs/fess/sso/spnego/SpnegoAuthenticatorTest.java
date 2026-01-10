@@ -16,25 +16,31 @@
 package org.codelibs.fess.sso.spnego;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SpnegoAuthenticatorTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_authenticatorInstantiation() {
         // Verify authenticator can be instantiated without errors
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
         assertNotNull(authenticator);
     }
 
+    @Test
     public void test_spnegoConfigClass() {
         // Verify the inner class is named correctly: SpnegoConfig (not SpengoConfig)
         // This test verifies the typo fix by ensuring the class compiles
@@ -46,6 +52,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_securitySettings_allowBasic() throws Exception {
         // Test that ALLOW_BASIC security setting can be accessed
         // This verifies the security warnings are properly documented in code
@@ -58,6 +65,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_securitySettings_allowUnsecureBasic() throws Exception {
         // Verify the ALLOW_UNSEC_BASIC setting is documented with security warnings
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
@@ -68,6 +76,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_constantsExist() {
         // Verify all expected configuration constants are defined
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
@@ -79,6 +88,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertEquals("SpnegoAuthenticator", SpnegoAuthenticator.class.getSimpleName());
     }
 
+    @Test
     public void test_nullSafeLogout() {
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
 
@@ -87,6 +97,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertNull(logoutUrl);
     }
 
+    @Test
     public void test_nullSafeGetResponse() {
         SpnegoAuthenticator authenticator = new SpnegoAuthenticator();
 
@@ -98,6 +109,7 @@ public class SpnegoAuthenticatorTest extends UnitFessTestCase {
         assertNull(response);
     }
 
+    @Test
     public void test_innerClassNaming() {
         // Verify the inner SpnegoConfig class exists and is properly named
         // This test ensures the typo fix (SpengoConfig -> SpnegoConfig) is correct

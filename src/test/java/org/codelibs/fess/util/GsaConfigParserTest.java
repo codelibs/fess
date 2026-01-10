@@ -28,17 +28,22 @@ import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class GsaConfigParserTest extends UnitFessTestCase {
 
     private static final Logger logger = LogManager.getLogger(GsaConfigParserTest.class);
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new SystemHelper(), "systemHelper");
     }
 
+    @Test
     public void test_parse() throws IOException {
         GsaConfigParser parser = new GsaConfigParser();
         try (InputStream is = ResourceUtil.getResourceAsStream("data/gsaconfig.xml")) {
@@ -54,6 +59,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals(3, labelTypes.length);
     }
 
+    @Test
     public void test_escape() {
         // https://www.google.com/support/enterprise/static/gsa/docs/admin/70/gsa_doc_set/admin_crawl/url_patterns.html#1076127
         assertEscapePattern("", "# Test");
@@ -77,6 +83,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals(expect, parser.getFilterPath(value));
     }
 
+    @Test
     public void test_parseFilterPaths_web() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -86,6 +93,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("", parser.parseFilterPaths("# comment\n\n  ", true, false));
     }
 
+    @Test
     public void test_parseFilterPaths_file() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -94,6 +102,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("\\Qtest\\E", parser.parseFilterPaths("test", false, true));
     }
 
+    @Test
     public void test_escape_advanced() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -104,6 +113,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("\\Qtest\\E", parser.escape("test"));
     }
 
+    @Test
     public void test_unescape() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -112,6 +122,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("\\", parser.unescape("\\\\"));
     }
 
+    @Test
     public void test_appendFilterPath() {
         GsaConfigParser parser = new GsaConfigParser();
         StringBuilder buf = new StringBuilder();
@@ -127,6 +138,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("test", parser.appendFileterPath(new StringBuilder(), "test"));
     }
 
+    @Test
     public void test_getFilterPath_regexpCase() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -134,6 +146,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("test", parser.getFilterPath("regexpCase:test"));
     }
 
+    @Test
     public void test_setProtocols() {
         GsaConfigParser parser = new GsaConfigParser();
 
@@ -147,6 +160,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals("\\Qftp://test\\E.*", parser.parseFilterPaths("ftp://test", false, true));
     }
 
+    @Test
     public void test_parseWithInvalidFormat() {
         GsaConfigParser parser = new GsaConfigParser();
         String invalidXml = "<?xml version=\"1.0\"?><invalid><test/></invalid>";
@@ -159,6 +173,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_parseWithMalformedXml() {
         GsaConfigParser parser = new GsaConfigParser();
         String malformedXml = "<?xml version=\"1.0\"?><eef><unclosed>";
@@ -171,6 +186,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_parseWithUserAgent() {
         GsaConfigParser parser = new GsaConfigParser();
         String xmlWithUserAgent = "<?xml version=\"1.0\"?>" + "<eef><config><globalparams>" + "<user_agent>custom-agent</user_agent>"
@@ -183,6 +199,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         }).orElse(() -> fail("WebConfig should be present"));
     }
 
+    @Test
     public void test_parseMinimalValid() {
         GsaConfigParser parser = new GsaConfigParser();
         String minimalXml = "<?xml version=\"1.0\"?>" + "<eef><config><globalparams>" + "<start_urls>https://example.com</start_urls>"
@@ -195,6 +212,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertEquals(0, parser.getLabelTypes().length);
     }
 
+    @Test
     public void test_parseWithFileUrls() {
         GsaConfigParser parser = new GsaConfigParser();
         String xmlWithFileUrls = "<?xml version=\"1.0\"?>" + "<eef><config><globalparams>"
@@ -211,6 +229,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         });
     }
 
+    @Test
     public void test_parseWithMixedUrls() {
         GsaConfigParser parser = new GsaConfigParser();
         String xmlWithMixedUrls = "<?xml version=\"1.0\"?>" + "<eef><config><globalparams>"
@@ -232,6 +251,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         });
     }
 
+    @Test
     public void test_parseWithCollectionFilters() {
         GsaConfigParser parser = new GsaConfigParser();
         String xmlWithCollection = "<?xml version=\"1.0\"?>" + "<eef><config>" + "<collections><collection Name=\"test\">"
@@ -249,6 +269,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertNotNull(labels[0].getExcludedPaths());
     }
 
+    @Test
     public void test_toString() {
         GsaConfigParser parser = new GsaConfigParser();
         String result = parser.toString();
@@ -258,6 +279,7 @@ public class GsaConfigParserTest extends UnitFessTestCase {
         assertTrue(result.contains("fileConfig"));
     }
 
+    @Test
     public void test_getSAXHandlerMethods() throws SAXException {
         GsaConfigParser parser = new GsaConfigParser();
 

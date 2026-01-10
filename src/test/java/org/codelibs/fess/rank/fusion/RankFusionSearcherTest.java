@@ -26,6 +26,8 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for RankFusionSearcher abstract base class.
@@ -35,6 +37,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test getName() method derives name from class name.
      */
+    @Test
     public void test_getNameFromClassName() {
         final TestSearcher searcher = new TestSearcher();
         assertEquals("test", searcher.getName());
@@ -43,6 +46,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test getName() removes "Searcher" suffix.
      */
+    @Test
     public void test_getNameRemovesSearcherSuffix() {
         final CustomSearcher searcher = new CustomSearcher();
         assertEquals("custom", searcher.getName());
@@ -51,6 +55,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test getName() converts to lowercase.
      */
+    @Test
     public void test_getNameLowercase() {
         final MyCustomSearcher searcher = new MyCustomSearcher();
         // Should be "my_custom" (decamelized and lowercased)
@@ -62,6 +67,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test getName() is cached (lazily initialized).
      */
+    @Test
     public void test_getNameCached() {
         final TestSearcher searcher = new TestSearcher();
         final String name1 = searcher.getName();
@@ -72,6 +78,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test searcher with simple class name.
      */
+    @Test
     public void test_simpleClassNameSearcher() {
         final SimpleSearcher searcher = new SimpleSearcher();
         assertEquals("simple", searcher.getName());
@@ -80,6 +87,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test searcher extending another searcher.
      */
+    @Test
     public void test_extendedSearcher() {
         final ExtendedTestSearcher searcher = new ExtendedTestSearcher();
         // Name should be based on actual class, not parent
@@ -89,6 +97,7 @@ public class RankFusionSearcherTest extends UnitFessTestCase {
     /**
      * Test that search method must be implemented.
      */
+    @Test
     public void test_searchMethodAbstract() {
         final TestSearcher searcher = new TestSearcher();
         // Should be able to call search

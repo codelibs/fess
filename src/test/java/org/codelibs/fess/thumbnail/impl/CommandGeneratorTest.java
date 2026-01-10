@@ -25,53 +25,64 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CommandGeneratorTest extends UnitFessTestCase {
 
     private CommandGenerator generator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         generator = new CommandGenerator();
     }
 
     // Basic setter tests
+    @Test
     public void test_setCommandTimeout() throws Exception {
         final long timeout = 5000L;
         generator.setCommandTimeout(timeout);
         assertTrue(true);
     }
 
+    @Test
     public void test_setCommandDestroyTimeout() throws Exception {
         final long timeout = 2000L;
         generator.setCommandDestroyTimeout(timeout);
         assertTrue(true);
     }
 
+    @Test
     public void test_setBaseDir() throws Exception {
         final File tempDir = new File(System.getProperty("java.io.tmpdir"));
         generator.setBaseDir(tempDir);
         assertTrue(true);
     }
 
+    @Test
     public void test_setCommandList() throws Exception {
         final List<String> commands = Collections.singletonList("test_command");
         generator.setCommandList(commands);
         assertTrue(true);
     }
 
+    @Test
     public void test_setCommandList_null() throws Exception {
         generator.setCommandList(null);
         assertTrue(true);
     }
 
+    @Test
     public void test_setCommandList_empty() throws Exception {
         final List<String> commands = new ArrayList<>();
         generator.setCommandList(commands);
         assertTrue(true);
     }
 
+    @Test
     public void test_setCommandList_multiple() throws Exception {
         final List<String> commands = Arrays.asList("command1", "command2", "command3");
         generator.setCommandList(commands);
@@ -79,6 +90,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Basic generate tests that work without component dependencies
+    @Test
     public void test_generate_outputFile_exists() throws Exception {
         final File outputFile = File.createTempFile("command_generator", ".out");
         try {
@@ -90,6 +102,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generate_outputFile_null() throws Exception {
         generator.setCommandList(Collections.singletonList("echo test"));
         try {
@@ -100,6 +113,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generate_thumbnailId_null() throws Exception {
         final File outputFile = File.createTempFile("command_generator", ".out");
         try {
@@ -116,6 +130,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generate_thumbnailId_empty() throws Exception {
         final File outputFile = File.createTempFile("command_generator", ".out");
         try {
@@ -133,6 +148,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test parent directory scenarios
+    @Test
     public void test_generate_parent_directory_not_exists() throws Exception {
         final File tempDir = new File(System.getProperty("java.io.tmpdir"));
         final File nonExistentParent = new File(tempDir, "non_existent_" + System.currentTimeMillis());
@@ -158,6 +174,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generate_invalid_parent_directory() throws Exception {
         // Create a path that's guaranteed to be invalid
         final File invalidParent = System.getProperty("os.name", "linux").toLowerCase().startsWith("windows")
@@ -176,6 +193,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test command list scenarios
+    @Test
     public void test_generate_no_command_list() throws Exception {
         final File outputFile = File.createTempFile("command_generator", ".out");
         try {
@@ -192,6 +210,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generate_empty_command_list() throws Exception {
         final File outputFile = File.createTempFile("command_generator", ".out");
         try {
@@ -209,6 +228,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test variable replacement logic without triggering component dependencies
+    @Test
     public void test_variable_replacement_logic() throws Exception {
         // Test the variable replacement logic directly
         final List<String> commands =
@@ -234,6 +254,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test timeout scenarios
+    @Test
     public void test_command_timeout_configuration() throws Exception {
         // Test timeout configuration without triggering component dependencies
         generator.setCommandTimeout(100L); // Very short timeout
@@ -251,13 +272,14 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test ProcessDestroyer inner class
+    @Test
     public void test_processDestroyer_creation() throws Exception {
         // We can't directly test ProcessDestroyer without creating actual processes,
         // but we can test that the class exists and basic functionality
         try {
             // Use reflection to verify ProcessDestroyer class exists
             final Class<?> destroyerClass = Class.forName("org.codelibs.fess.thumbnail.impl.CommandGenerator$ProcessDestroyer");
-            assertNotNull("ProcessDestroyer class should exist", destroyerClass);
+            assertNotNull(destroyerClass, "ProcessDestroyer class should exist");
             assertTrue("ProcessDestroyer should extend TimerTask", java.util.TimerTask.class.isAssignableFrom(destroyerClass));
         } catch (final ClassNotFoundException e) {
             fail("ProcessDestroyer inner class should exist");
@@ -265,6 +287,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test exception handling scenarios
+    @Test
     public void test_exception_handling_scenarios() throws Exception {
         // Test various exception scenarios without triggering component dependencies
 
@@ -292,6 +315,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test multiple commands configuration
+    @Test
     public void test_multiple_commands_configuration() throws Exception {
         // Test setting multiple commands without triggering execution
         final List<String> commands =
@@ -310,6 +334,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test baseDir configuration
+    @Test
     public void test_baseDir_configuration() throws Exception {
         final File customBaseDir = new File(System.getProperty("java.io.tmpdir"), "custom_base");
         customBaseDir.mkdirs();
@@ -325,6 +350,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test command timeout edge cases
+    @Test
     public void test_timeout_values() throws Exception {
         // Test zero timeout
         generator.setCommandTimeout(0L);
@@ -350,6 +376,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test special characters in paths
+    @Test
     public void test_special_characters_in_paths() throws Exception {
         final File tempDir = new File(System.getProperty("java.io.tmpdir"));
         final File outputFile = new File(tempDir, "test file with spaces.out");
@@ -368,6 +395,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test concurrent access patterns
+    @Test
     public void test_concurrent_operations() throws Exception {
         final CommandGenerator generator1 = new CommandGenerator();
         final CommandGenerator generator2 = new CommandGenerator();
@@ -382,6 +410,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test command string construction edge cases
+    @Test
     public void test_command_string_edge_cases() throws Exception {
         // Test with commands containing special characters
         final List<String> specialCommands = Arrays.asList("echo \"test with quotes\"", "echo 'test with single quotes'",
@@ -401,6 +430,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test path expansion logic
+    @Test
     public void test_path_expansion() throws Exception {
         // Test the expandPath functionality indirectly through variable replacement
         final String testCommand = "convert ${url} -resize 100x100 ${outputFile}";
@@ -414,6 +444,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test configuration validation
+    @Test
     public void test_configuration_validation() throws Exception {
         // Test configuration without actual execution
         generator.setCommandTimeout(30000L); // 30 seconds
@@ -433,91 +464,111 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     // ==================== Tests for getExtensionFromMimeType method ====================
 
     // Tests for GIF MIME type
+    @Test
     public void test_getExtensionFromMimeType_gif() {
         assertEquals(".gif", generator.getExtensionFromMimeType("image/gif"));
     }
 
     // Tests for TIFF MIME type
+    @Test
     public void test_getExtensionFromMimeType_tiff() {
         assertEquals(".tiff", generator.getExtensionFromMimeType("image/tiff"));
     }
 
     // Tests for SVG MIME type
+    @Test
     public void test_getExtensionFromMimeType_svg() {
         assertEquals(".svg", generator.getExtensionFromMimeType("image/svg+xml"));
     }
 
     // Tests for JPEG MIME type
+    @Test
     public void test_getExtensionFromMimeType_jpeg() {
         assertEquals(".jpg", generator.getExtensionFromMimeType("image/jpeg"));
     }
 
     // Tests for PNG MIME type
+    @Test
     public void test_getExtensionFromMimeType_png() {
         assertEquals(".png", generator.getExtensionFromMimeType("image/png"));
     }
 
     // Tests for BMP MIME types (multiple variants)
+    @Test
     public void test_getExtensionFromMimeType_bmp() {
         assertEquals(".bmp", generator.getExtensionFromMimeType("image/bmp"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_xWindowsBmp() {
         assertEquals(".bmp", generator.getExtensionFromMimeType("image/x-windows-bmp"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_xMsBmp() {
         assertEquals(".bmp", generator.getExtensionFromMimeType("image/x-ms-bmp"));
     }
 
     // Tests for Photoshop MIME types (multiple variants)
+    @Test
     public void test_getExtensionFromMimeType_photoshopVnd() {
         assertEquals(".psd", generator.getExtensionFromMimeType("image/vnd.adobe.photoshop"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_photoshopImage() {
         assertEquals(".psd", generator.getExtensionFromMimeType("image/photoshop"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_photoshopAppX() {
         assertEquals(".psd", generator.getExtensionFromMimeType("application/x-photoshop"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_photoshopApp() {
         assertEquals(".psd", generator.getExtensionFromMimeType("application/photoshop"));
     }
 
     // Tests for null and empty input
+    @Test
     public void test_getExtensionFromMimeType_null() {
         assertEquals("", generator.getExtensionFromMimeType(null));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_empty() {
         assertEquals("", generator.getExtensionFromMimeType(""));
     }
 
     // Tests for unknown/unsupported MIME types
+    @Test
     public void test_getExtensionFromMimeType_unknownType() {
         assertEquals("", generator.getExtensionFromMimeType("application/octet-stream"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_pdf() {
         assertEquals("", generator.getExtensionFromMimeType("application/pdf"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_html() {
         assertEquals("", generator.getExtensionFromMimeType("text/html"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_textPlain() {
         assertEquals("", generator.getExtensionFromMimeType("text/plain"));
     }
 
+    @Test
     public void test_getExtensionFromMimeType_msword() {
         assertEquals("", generator.getExtensionFromMimeType("application/msword"));
     }
 
     // Test all supported image MIME types in one comprehensive test
+    @Test
     public void test_getExtensionFromMimeType_allImageTypes() {
         final String[][] testCases = { { "image/gif", ".gif" }, { "image/tiff", ".tiff" }, { "image/svg+xml", ".svg" },
                 { "image/jpeg", ".jpg" }, { "image/png", ".png" }, { "image/bmp", ".bmp" }, { "image/x-windows-bmp", ".bmp" },
@@ -532,6 +583,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test non-image MIME types return empty string
+    @Test
     public void test_getExtensionFromMimeType_nonImageTypes() {
         final String[] mimeTypes = { "application/pdf", "application/msword",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/html", "text/plain", "application/json",
@@ -543,6 +595,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test case sensitivity (current implementation is case-sensitive)
+    @Test
     public void test_getExtensionFromMimeType_caseSensitive() {
         assertEquals("", generator.getExtensionFromMimeType("IMAGE/GIF"));
         assertEquals("", generator.getExtensionFromMimeType("Image/Gif"));
@@ -551,6 +604,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
 
     // ==================== Tests for ${mimetype} placeholder replacement ====================
 
+    @Test
     public void test_mimetype_variable_replacement() {
         final String testCommand = "generate-thumbnail image ${url} ${outputFile} ${mimetype}";
         final String tempPath = "/tmp/test.gif";
@@ -564,6 +618,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         assertFalse("Expanded command should not contain ${mimetype}", expandedCommand.contains("${mimetype}"));
     }
 
+    @Test
     public void test_mimetype_variable_replacement_nullMimeType() {
         final String testCommand = "generate-thumbnail image ${url} ${outputFile} ${mimetype}";
         final String tempPath = "/tmp/test.gif";
@@ -577,6 +632,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         assertEquals("generate-thumbnail image /tmp/test.gif /tmp/thumbnail.png ", expandedCommand);
     }
 
+    @Test
     public void test_mimetype_variable_replacement_allImageFormats() {
         final String[] mimeTypes = { "image/gif", "image/tiff", "image/svg+xml", "image/jpeg", "image/png", "image/bmp" };
 
@@ -591,6 +647,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
     }
 
     // Test command list with mimetype placeholder
+    @Test
     public void test_commandList_withMimetypePlaceholder() {
         final List<String> commands = Arrays.asList("/bin/generate-thumbnail", "image", "${url}", "${outputFile}", "${mimetype}");
         generator.setCommandList(commands);
@@ -600,6 +657,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
 
     // ==================== Tests for TOCTOU fix - atomic file operations ====================
 
+    @Test
     public void test_atomicCreateDirectories_nestedPath() throws Exception {
         // Test that Files.createDirectories creates nested directories atomically
         Path tempDir = Files.createTempDirectory("toctou_cmd_test");
@@ -616,6 +674,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_atomicCreateDirectories_existingDirectory() throws Exception {
         // Test that Files.createDirectories doesn't fail on existing directory
         Path tempDir = Files.createTempDirectory("toctou_cmd_test");
@@ -632,6 +691,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_atomicDeleteIfExists_existingFile() throws Exception {
         // Test that Files.deleteIfExists deletes existing file atomically
         Path tempFile = Files.createTempFile("toctou_cmd_test", ".tmp");
@@ -647,6 +707,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_atomicDeleteIfExists_nonExistingFile() throws Exception {
         // Test that Files.deleteIfExists returns false for non-existing file without throwing
         Path tempDir = Files.createTempDirectory("toctou_cmd_test");
@@ -662,6 +723,7 @@ public class CommandGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_atomicDeleteIfExists_emptyFile() throws Exception {
         // Test deleting empty files (simulating empty thumbnail scenario)
         Path tempFile = Files.createTempFile("toctou_cmd_test", ".tmp");

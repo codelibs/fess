@@ -20,17 +20,22 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class NotificationHelperTest extends UnitFessTestCase {
 
     private NotificationHelper notificationHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         notificationHelper = new NotificationHelper();
     }
 
+    @Test
     public void test_sendToSlack_withBlankWebhookUrls() {
         // Setup mock configuration with blank webhook URLs
         ComponentUtil.setFessConfig(new MockFessConfig() {
@@ -50,6 +55,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendToSlack_withNullWebhookUrls() {
         // Setup mock configuration with null webhook URLs
         ComponentUtil.setFessConfig(new MockFessConfig() {
@@ -69,6 +75,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendToGoogleChat_withBlankWebhookUrls() {
         // Setup mock configuration with blank webhook URLs
         ComponentUtil.setFessConfig(new MockFessConfig() {
@@ -88,6 +95,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendToGoogleChat_withNullWebhookUrls() {
         // Setup mock configuration with null webhook URLs
         ComponentUtil.setFessConfig(new MockFessConfig() {
@@ -107,6 +115,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_toSlackMessage_withBasicContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Test Subject");
@@ -123,6 +132,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toSlackMessage_withEmptyContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("");
@@ -137,6 +147,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toSlackMessage_withNullContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject(null);
@@ -151,6 +162,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toSlackMessage_withSpecialCharacters() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Test \"Subject\" with 'quotes'");
@@ -169,6 +181,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("Test"));
     }
 
+    @Test
     public void test_toSlackMessage_withWhitespaceContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("  Test Subject  ");
@@ -184,6 +197,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertFalse(result.contains("  Test Content  "));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withBasicContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Test Subject");
@@ -200,6 +214,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withEmptyContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("");
@@ -214,6 +229,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withNullContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject(null);
@@ -228,6 +244,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withSpecialCharacters() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Test \"Subject\" with 'quotes'");
@@ -246,6 +263,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("Test"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withWhitespaceContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("  Test Subject  ");
@@ -261,6 +279,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertFalse(result.contains("  Test Content  "));
     }
 
+    @Test
     public void test_slackAndGoogleChatMessage_identical() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Test Subject");
@@ -273,6 +292,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertEquals(slackResult, googleChatResult);
     }
 
+    @Test
     public void test_toSlackMessage_withLongContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
 
@@ -296,6 +316,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_toGoogleChatMessage_withLongContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
 
@@ -319,6 +340,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_toSlackMessage_withUnicodeContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("テスト件名 🚀");
@@ -331,6 +353,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("テスト") || result.contains("\\u"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withUnicodeContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("テスト件名 🚀");
@@ -343,10 +366,12 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("テスト") || result.contains("\\u"));
     }
 
+    @Test
     public void test_constantValue() {
         assertEquals('\n', NotificationHelper.LF);
     }
 
+    @Test
     public void test_send_withBothConfigurations() {
         // Setup mock configuration with both webhook URLs
         ComponentUtil.setFessConfig(new MockFessConfig());
@@ -363,6 +388,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_toSlackMessage_withOnlySubject() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Only Subject");
@@ -375,6 +401,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toSlackMessage_withOnlyContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject(null);
@@ -387,6 +414,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withOnlySubject() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Only Subject");
@@ -399,6 +427,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withOnlyContent() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject(null);
@@ -411,6 +440,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("```"));
     }
 
+    @Test
     public void test_toSlackMessage_withBackslashCharacters() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Subject with \\ backslash");
@@ -424,6 +454,7 @@ public class NotificationHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("backslash"));
     }
 
+    @Test
     public void test_toGoogleChatMessage_withBackslashCharacters() {
         MockSMailPostingDiscloser discloser = new MockSMailPostingDiscloser();
         discloser.setSubject("Subject with \\ backslash");

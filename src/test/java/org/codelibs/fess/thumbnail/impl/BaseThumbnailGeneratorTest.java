@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
 
@@ -50,12 +51,14 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isAvailable() {
         // Test default implementation
         generator = new TestThumbnailGenerator();
         assertTrue(generator.isAvailable());
     }
 
+    @Test
     public void test_isTarget() {
         // Test isTarget method
         generator = new TestThumbnailGenerator();
@@ -71,6 +74,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addCondition() {
         // Test adding conditions
         generator = new TestThumbnailGenerator();
@@ -88,6 +92,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertNotNull(generator);
     }
 
+    @Test
     public void test_getName() {
         // Test getName and setName methods
         generator = new TestThumbnailGenerator();
@@ -104,6 +109,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals("new-name", generator.getName());
     }
 
+    @Test
     public void test_generate() {
         // Test generate method is called correctly
         generator = new TestThumbnailGenerator();
@@ -114,6 +120,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertTrue(generator.isGenerateCalled());
     }
 
+    @Test
     public void test_destroy() {
         // Test destroy method is called correctly
         generator = new TestThumbnailGenerator();
@@ -123,6 +130,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertTrue(generator.isDestroyCalled());
     }
 
+    @Test
     public void test_expandPath() {
         // Test expandPath method
         generator = new TestThumbnailGenerator();
@@ -142,6 +150,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals("${temp}/file", generator.expandPath("${temp}/file")); // No partial replacement
     }
 
+    @Test
     public void test_directoryNameLength() {
         // Test directoryNameLength setter
         generator = new TestThumbnailGenerator();
@@ -158,6 +167,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals(0, generator.directoryNameLength);
     }
 
+    @Test
     public void test_maxRedirectCount() {
         // Test maxRedirectCount setter
         generator = new TestThumbnailGenerator();
@@ -174,6 +184,7 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals(0, generator.maxRedirectCount);
     }
 
+    @Test
     public void test_createTask() {
         // Test createTask method (requires FessConfig)
         generator = new TestThumbnailGenerator();

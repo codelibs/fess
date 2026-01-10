@@ -21,13 +21,17 @@ import java.util.List;
 
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class StemmerOverrideFileTest extends UnitFessTestCase {
     private StemmerOverrideFile stemmerOverrideFile;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         stemmerOverrideFile = new StemmerOverrideFile("1", "dummy", new Date());
         List<StemmerOverrideItem> itemList = new ArrayList<>();
         itemList.add(new StemmerOverrideItem(1, "aaa", "a"));
@@ -36,6 +40,7 @@ public class StemmerOverrideFileTest extends UnitFessTestCase {
         stemmerOverrideFile.stemmerOverrideItemList = itemList;
     }
 
+    @Test
     public void test_selectList() {
         final PagingList<StemmerOverrideItem> itemList1 = stemmerOverrideFile.selectList(0, 20); // error occurs
         assertEquals(3, itemList1.size());

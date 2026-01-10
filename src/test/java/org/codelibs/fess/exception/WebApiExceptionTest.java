@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class WebApiExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withStatusCodeAndMessage() {
         // Test constructor with status code and message
         int statusCode = 404;
@@ -31,6 +33,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withStatusCodeMessageAndCause() {
         // Test constructor with status code, message, and cause
         int statusCode = 500;
@@ -44,6 +47,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withStatusCodeAndException() {
         // Test constructor with status code and exception
         int statusCode = 503;
@@ -57,6 +61,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withStatusCodeAndNullException() {
         // Test constructor with status code and null exception
         int statusCode = 400;
@@ -69,6 +74,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_statusCode_variousHttpCodes() {
         // Test with various HTTP status codes
         int[] statusCodes = { 200, 201, 400, 401, 403, 404, 500, 502, 503 };
@@ -79,6 +85,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_statusCode_negativeValue() {
         // Test with negative status code
         int statusCode = -1;
@@ -90,6 +97,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_statusCode_zero() {
         // Test with zero status code
         int statusCode = 0;
@@ -101,6 +109,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_message_emptyString() {
         // Test with empty message string
         int statusCode = 404;
@@ -112,6 +121,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_message_nullString() {
         // Test with null message string
         int statusCode = 500;
@@ -123,6 +133,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessage());
     }
 
+    @Test
     public void test_inheritance_fromFessSystemException() {
         // Test that WebApiException is a subclass of FessSystemException
         WebApiException exception = new WebApiException(500, "Test");
@@ -133,6 +144,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serializable() {
         // Test that the exception has serialVersionUID
         WebApiException exception = new WebApiException(404, "Not Found");
@@ -142,6 +154,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is preserved
         int statusCode = 500;
@@ -153,6 +166,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_nestedExceptions() {
         // Test nested exceptions
         Exception innerCause = new IllegalArgumentException("Invalid argument");
@@ -165,6 +179,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(innerCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         int expectedStatusCode = 403;
@@ -178,6 +193,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwWithCauseAndCatch() {
         // Test throwing with cause and catching
         int expectedStatusCode = 500;
@@ -193,6 +209,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleExceptions_differentStatusCodes() {
         // Test creating multiple exceptions with different status codes
         WebApiException exception1 = new WebApiException(400, "Bad Request");
@@ -207,6 +224,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertTrue(exception2.getStatusCode() != exception3.getStatusCode());
     }
 
+    @Test
     public void test_exceptionWithLongMessage() {
         // Test with very long message
         int statusCode = 413;
@@ -222,6 +240,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_exceptionWithSpecialCharactersInMessage() {
         // Test with special characters in message
         int statusCode = 400;
@@ -233,6 +252,7 @@ public class WebApiExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_exceptionWithUnicodeMessage() {
         // Test with unicode characters in message
         int statusCode = 422;

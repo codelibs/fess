@@ -21,14 +21,18 @@ import java.util.Map;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SearchLogHelperTest extends UnitFessTestCase {
 
     private SearchLogHelper searchLogHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         searchLogHelper = new SearchLogHelper();
         setupMockComponents();
         searchLogHelper.init();
@@ -39,6 +43,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
     }
 
+    @Test
     public void test_init() {
         SearchLogHelper helper = new SearchLogHelper();
         helper.init();
@@ -47,24 +52,28 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertNotNull(helper.searchLogLogger);
     }
 
+    @Test
     public void test_setUserCheckInterval() {
         long interval = 5 * 60 * 1000L; // 5 minutes
         searchLogHelper.setUserCheckInterval(interval);
         assertEquals(interval, searchLogHelper.userCheckInterval);
     }
 
+    @Test
     public void test_setUserInfoCacheSize() {
         int cacheSize = 5000;
         searchLogHelper.setUserInfoCacheSize(cacheSize);
         assertEquals(cacheSize, searchLogHelper.userInfoCacheSize);
     }
 
+    @Test
     public void test_setLoggerName() {
         String loggerName = "test.logger";
         searchLogHelper.setLoggerName(loggerName);
         assertEquals(loggerName, searchLogHelper.loggerName);
     }
 
+    @Test
     public void test_getUserInfo_emptyUserCode() {
         try {
             var result = searchLogHelper.getUserInfo("");
@@ -75,6 +84,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getUserInfo_nullUserCode() {
         try {
             var result = searchLogHelper.getUserInfo(null);
@@ -85,6 +95,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_toLowerHyphen() {
         Map<String, Object> source = new HashMap<>();
         source.put("TestKey", "value1");
@@ -104,6 +115,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertEquals("nestedValue", nestedResult.get("nested_key"));
     }
 
+    @Test
     public void test_toLowerHyphen_emptyMap() {
         Map<String, Object> source = new HashMap<>();
         Map<String, Object> result = searchLogHelper.toLowerHyphen(source);
@@ -112,6 +124,7 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertTrue(result.isEmpty());
     }
 
+    @Test
     public void test_toLowerHyphen_nullValues() {
         Map<String, Object> source = new HashMap<>();
         source.put("AnotherKey", "anotherValue");
@@ -123,11 +136,13 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertEquals("validValue", result.get("valid_key"));
     }
 
+    @Test
     public void test_searchLogQueue_initialization() {
         assertNotNull(searchLogHelper.searchLogQueue);
         assertTrue(searchLogHelper.searchLogQueue.isEmpty());
     }
 
+    @Test
     public void test_clickLogQueue_initialization() {
         assertNotNull(searchLogHelper.clickLogQueue);
         assertTrue(searchLogHelper.clickLogQueue.isEmpty());

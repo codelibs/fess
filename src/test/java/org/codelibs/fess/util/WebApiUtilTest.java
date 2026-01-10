@@ -21,9 +21,11 @@ import java.lang.reflect.Method;
 
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class WebApiUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_setObject_noRequest() {
         // Test setObject when no HTTP request is available
         // This should not throw exception, just do nothing
@@ -34,6 +36,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setObject_withNullName() {
         // Test setObject with null name
         try {
@@ -43,6 +46,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setObject_withNullValue() {
         // Test setObject with null value
         try {
@@ -52,6 +56,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setObject_withEmptyName() {
         // Test setObject with empty name
         try {
@@ -61,31 +66,36 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getObject_noRequest() {
         // Test getObject when no HTTP request is available
         // This should return null
         Object result = WebApiUtil.getObject("testKey");
-        assertNull("getObject should return null when no request available", result);
+        assertNull(result, "getObject should return null when no request available");
     }
 
+    @Test
     public void test_getObject_withNullName() {
         // Test getObject with null name
         Object result = WebApiUtil.getObject(null);
-        assertNull("getObject should return null for null name", result);
+        assertNull(result, "getObject should return null for null name");
     }
 
+    @Test
     public void test_getObject_withEmptyName() {
         // Test getObject with empty name
         Object result = WebApiUtil.getObject("");
-        assertNull("getObject should return null for empty name", result);
+        assertNull(result, "getObject should return null for empty name");
     }
 
+    @Test
     public void test_getObject_nonExistentKey() {
         // Test getObject with non-existent key
         Object result = WebApiUtil.getObject("nonExistentKey");
-        assertNull("getObject should return null for non-existent key", result);
+        assertNull(result, "getObject should return null for non-existent key");
     }
 
+    @Test
     public void test_setError_withMessage_noRequest() {
         // Test setError with message when no HTTP request is available
         try {
@@ -95,6 +105,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setError_withException_noRequest() {
         // Test setError with exception when no HTTP request is available
         try {
@@ -104,6 +115,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setError_withNullMessage() {
         // Test setError with null message
         try {
@@ -113,6 +125,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setError_withNullException() {
         // Test setError with null exception
         // Note: WebApiException constructor calls e.getMessage() on null exception, causing NullPointerException
@@ -126,6 +139,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setError_withEmptyMessage() {
         // Test setError with empty message
         try {
@@ -135,6 +149,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setError_withVariousStatusCodes() {
         // Test setError with various HTTP status codes
         try {
@@ -152,6 +167,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_validate_noRequest() {
         // Test validate when no HTTP request is available
         try {
@@ -161,6 +177,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_validate_noError() {
         // Test validate when no error is set
         // This should not throw exception
@@ -171,6 +188,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_constructor_isPrivate() {
         // Verify that WebApiUtil has a private constructor (utility class pattern)
         try {
@@ -187,11 +205,13 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_class_isFinal() {
         // Verify that WebApiUtil is a final class
         assertTrue("WebApiUtil should be final class", java.lang.reflect.Modifier.isFinal(WebApiUtil.class.getModifiers()));
     }
 
+    @Test
     public void test_static_method_signatures() {
         // Verify all public static methods exist with correct signatures
         try {
@@ -232,6 +252,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_constant_WEB_API_EXCEPTION() {
         // Test that the constant WEB_API_EXCEPTION is used correctly
         // This is verified by checking the behavior matches expected constant usage
@@ -246,6 +267,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_utilityClass_pattern() {
         // Verify utility class design pattern compliance
 
@@ -267,19 +289,21 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generic_type_safety() {
         // Test generic type safety of getObject method
         // Since we're in test environment without request context, this will return null
         String stringResult = WebApiUtil.getObject("testString");
-        assertNull("Should return null in test environment", stringResult);
+        assertNull(stringResult, "Should return null in test environment");
 
         Integer intResult = WebApiUtil.getObject("testInteger");
-        assertNull("Should return null in test environment", intResult);
+        assertNull(intResult, "Should return null in test environment");
 
         Object objectResult = WebApiUtil.getObject("testObject");
-        assertNull("Should return null in test environment", objectResult);
+        assertNull(objectResult, "Should return null in test environment");
     }
 
+    @Test
     public void test_setObject_withDifferentTypes() {
         // Test setObject with different object types
         try {
@@ -301,6 +325,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_error_handling_edge_cases() {
         // Test error handling with edge cases
         try {
@@ -324,6 +349,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_method_parameter_validation() {
         // Test that methods handle parameter validation appropriately
 
@@ -366,6 +392,7 @@ public class WebApiUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_thread_safety() {
         // Test thread safety of utility methods
         final int threadCount = 10;

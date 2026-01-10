@@ -24,6 +24,9 @@ import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FacetQueryViewTest extends UnitFessTestCase {
 
@@ -32,9 +35,10 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     private TestFileTypeHelper testFileTypeHelper;
     private TestFessConfig testFessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         facetQueryView = new FacetQueryView();
         testFacetInfo = new TestFacetInfo();
         testFileTypeHelper = new TestFileTypeHelper();
@@ -46,12 +50,13 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         FacetQueryView view = new FacetQueryView();
         assertNotNull(view);
@@ -61,6 +66,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test title getter and setter
+    @Test
     public void test_getTitle() {
         assertNull(facetQueryView.getTitle());
 
@@ -69,6 +75,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
         assertEquals(testTitle, facetQueryView.getTitle());
     }
 
+    @Test
     public void test_setTitle() {
         String title1 = "Title 1";
         facetQueryView.setTitle(title1);
@@ -83,6 +90,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test query map operations
+    @Test
     public void test_getQueryMap() {
         Map<String, String> queryMap = facetQueryView.getQueryMap();
         assertNotNull(queryMap);
@@ -90,6 +98,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
         assertTrue(queryMap.isEmpty());
     }
 
+    @Test
     public void test_addQuery() {
         assertTrue(facetQueryView.getQueryMap().isEmpty());
 
@@ -108,6 +117,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test init() method without file type queries
+    @Test
     public void test_init_withoutFileTypeQueries() {
         facetQueryView.addQuery("label1", "field1:value1");
         facetQueryView.addQuery("label2", "field2:value2");
@@ -126,6 +136,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test init() method with file type queries
+    @Test
     public void test_init_withFileTypeQueries() {
         testFileTypeHelper.setTypes(new String[] { "pdf", "doc", "txt" });
 
@@ -179,6 +190,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test init() with duplicate file type values
+    @Test
     public void test_init_withDuplicateFileTypeValues() {
         testFileTypeHelper.setTypes(new String[] { "pdf", "doc" });
 
@@ -202,6 +214,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test init() with empty file types
+    @Test
     public void test_init_withEmptyFileTypes() {
         testFileTypeHelper.setTypes(new String[] {});
 
@@ -218,6 +231,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test toString() method
+    @Test
     public void test_toString() {
         facetQueryView.setTitle("Test Title");
         facetQueryView.addQuery("key1", "query1");
@@ -232,6 +246,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
         assertTrue(result.contains("key2=query2"));
     }
 
+    @Test
     public void test_toString_withNullTitle() {
         facetQueryView.addQuery("key1", "query1");
 
@@ -241,6 +256,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
         assertTrue(result.contains("key1=query1"));
     }
 
+    @Test
     public void test_toString_withEmptyQueryMap() {
         facetQueryView.setTitle("Empty Map Test");
 
@@ -251,6 +267,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test edge cases
+    @Test
     public void test_addQuery_withNullValues() {
         facetQueryView.addQuery(null, "query1");
         assertEquals("query1", facetQueryView.getQueryMap().get(null));
@@ -259,6 +276,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
         assertNull(facetQueryView.getQueryMap().get("key1"));
     }
 
+    @Test
     public void test_init_multipleCallsShouldNotDuplicate() {
         testFileTypeHelper.setTypes(new String[] { "pdf" });
         facetQueryView.addQuery("label1", "filetype:html");
@@ -277,6 +295,7 @@ public class FacetQueryViewTest extends UnitFessTestCase {
     }
 
     // Test complex scenarios
+    @Test
     public void test_init_withMixedQueries() {
         testFileTypeHelper.setTypes(new String[] { "pdf", "doc", "xls" });
 

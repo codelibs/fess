@@ -25,7 +25,7 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }

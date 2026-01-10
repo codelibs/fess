@@ -20,6 +20,10 @@ import org.lastaflute.di.core.assembler.AutoBindingDefFactory;
 import org.lastaflute.di.core.customizer.ComponentCustomizer;
 import org.lastaflute.di.core.meta.impl.InstanceDefFactory;
 import org.lastaflute.di.naming.NamingConvention;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 // NamingConventionImpl removed - using mock instead
 
 public class PagerCreatorTest extends UnitFessTestCase {
@@ -27,14 +31,16 @@ public class PagerCreatorTest extends UnitFessTestCase {
     private PagerCreator pagerCreator;
     private NamingConvention namingConvention;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         namingConvention = new MockNamingConvention();
         pagerCreator = new PagerCreator(namingConvention);
     }
 
     // Test constructor initialization
+    @Test
     public void test_constructor() {
         // Verify suffix is set correctly
         assertEquals(PagerCreator.SUFFIX, "Pager");
@@ -50,11 +56,13 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test getPagerCustomizer when no customizer is set
+    @Test
     public void test_getPagerCustomizer_null() {
         assertNull(pagerCreator.getPagerCustomizer());
     }
 
     // Test setPagerCustomizer and getPagerCustomizer
+    @Test
     public void test_setPagerCustomizer_and_getPagerCustomizer() {
         // Create a mock customizer
         ComponentCustomizer customizer = new ComponentCustomizer() {
@@ -72,6 +80,7 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test multiple set operations
+    @Test
     public void test_setPagerCustomizer_multiple_times() {
         // Create first customizer
         ComponentCustomizer customizer1 = new ComponentCustomizer() {
@@ -99,6 +108,7 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test setting null customizer
+    @Test
     public void test_setPagerCustomizer_null() {
         // Create and set a customizer
         ComponentCustomizer customizer = new ComponentCustomizer() {
@@ -116,6 +126,7 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test with different NamingConvention configurations
+    @Test
     public void test_constructor_with_custom_naming_convention() {
         // Create custom naming convention
         NamingConvention customNamingConvention = new MockNamingConvention() {
@@ -135,11 +146,13 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test inherited behavior from ComponentCreatorImpl
+    @Test
     public void test_getNamingConvention() {
         assertSame(namingConvention, pagerCreator.getNamingConvention());
     }
 
     // Test component name creation
+    @Test
     public void test_fromClassNameToComponentName() {
         // Test with class name ending with Pager
         String componentName = namingConvention.fromClassNameToComponentName("com.example.TestPager");
@@ -153,6 +166,7 @@ public class PagerCreatorTest extends UnitFessTestCase {
     }
 
     // Test class name creation from component name
+    @Test
     public void test_fromComponentNameToClassName() {
         // Test with valid component name - using custom method
         MockNamingConvention mockNaming = (MockNamingConvention) namingConvention;

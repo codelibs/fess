@@ -28,9 +28,11 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class QueryParserTest extends UnitFessTestCase {
 
+    @Test
     public void test_LuceneQueryParser() {
         QueryParser queryParser = new QueryParser();
 

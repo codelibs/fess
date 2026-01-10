@@ -26,8 +26,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.app.web.base.login.EntraIdCredential.EntraIdUser;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class EntraIdAuthenticatorTest extends UnitFessTestCase {
+    @Test
     public void test_addGroupOrRoleName() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         List<String> list = new ArrayList<>();
@@ -61,6 +63,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_setMaxGroupDepth() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
@@ -73,6 +76,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_setGroupCacheExpiry() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
@@ -85,6 +89,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_getParentGroup_withDepthLimit() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(2);
@@ -97,6 +102,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(0, result.getSecond().length);
     }
 
+    @Test
     public void test_getParentGroup_exactlyAtDepthLimit() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(5);
@@ -108,6 +114,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(0, result.getSecond().length);
     }
 
+    @Test
     public void test_getParentGroup_oneBeforeDepthLimit() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(5);
@@ -126,6 +133,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processParentGroup_callsOverloadWithDepth() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(3);
@@ -146,6 +154,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertNotNull(roleList);
     }
 
+    @Test
     public void test_processParentGroup_respectsDepthLimit() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(2);
@@ -161,6 +170,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertEquals(0, roleList.size());
     }
 
+    @Test
     public void test_setUseV2Endpoint() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
@@ -172,6 +182,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_defaultMaxGroupDepth() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
@@ -188,33 +199,37 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that processDirectMemberOf method exists with correct signature.
      */
+    @Test
     public void test_processDirectMemberOf_methodExists() throws Exception {
         Method method = EntraIdAuthenticator.class.getDeclaredMethod("processDirectMemberOf", EntraIdUser.class, List.class, List.class,
                 List.class, String.class);
-        assertNotNull("processDirectMemberOf method should exist", method);
+        assertNotNull(method, "processDirectMemberOf method should exist");
     }
 
     /**
      * Test that scheduleParentGroupLookup method exists with correct signature.
      */
+    @Test
     public void test_scheduleParentGroupLookup_methodExists() throws Exception {
         Method method = EntraIdAuthenticator.class.getDeclaredMethod("scheduleParentGroupLookup", EntraIdUser.class, List.class, List.class,
                 List.class);
-        assertNotNull("scheduleParentGroupLookup method should exist", method);
+        assertNotNull(method, "scheduleParentGroupLookup method should exist");
     }
 
     /**
      * Test that updateMemberOf still exists and is public.
      */
+    @Test
     public void test_updateMemberOf_methodExists() throws Exception {
         Method method = EntraIdAuthenticator.class.getMethod("updateMemberOf", EntraIdUser.class);
-        assertNotNull("updateMemberOf method should exist", method);
+        assertNotNull(method, "updateMemberOf method should exist");
         assertTrue("updateMemberOf should be public", java.lang.reflect.Modifier.isPublic(method.getModifiers()));
     }
 
     /**
      * Test processDirectMemberOf collects group IDs for parent lookup.
      */
+    @Test
     public void test_processDirectMemberOf_collectsGroupIds() throws Exception {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
 
@@ -234,15 +249,16 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         }
 
         // Verify lists remain valid after error
-        assertNotNull("groupList should not be null", groupList);
-        assertNotNull("roleList should not be null", roleList);
-        assertNotNull("groupIdsForParentLookup should not be null", groupIdsForParentLookup);
+        assertNotNull(groupList, "groupList should not be null");
+        assertNotNull(roleList, "roleList should not be null");
+        assertNotNull(groupIdsForParentLookup, "groupIdsForParentLookup should not be null");
     }
 
     /**
      * Test that scheduleParentGroupLookup uses TimeoutManager correctly.
      * This test verifies the method signature and can be called via reflection.
      */
+    @Test
     public void test_scheduleParentGroupLookup_schedulesTask() throws Exception {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         // Don't call init() to avoid SsoManager dependency
@@ -274,6 +290,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that empty groupIds list does not schedule any task.
      */
+    @Test
     public void test_updateMemberOf_emptyGroupIds_noScheduledTask() throws Exception {
         // This test verifies the logic: if groupIdsForParentLookup is empty,
         // scheduleParentGroupLookup should not be called
@@ -288,6 +305,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test concurrent calls to processDirectMemberOf.
      */
+    @Test
     public void test_processDirectMemberOf_threadSafety() throws Exception {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         // Don't call init() to avoid SsoManager dependency
@@ -327,6 +345,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that default groups and roles are preserved during lazy loading.
      */
+    @Test
     public void test_defaultGroupsAndRoles_preserved() throws Exception {
         TestableEntraIdAuthenticator authenticator = new TestableEntraIdAuthenticator();
 
@@ -334,13 +353,14 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
         List<String> defaultRoles = authenticator.getDefaultRoleList();
 
         // Default lists should be empty or contain configured defaults
-        assertNotNull("Default groups should not be null", defaultGroups);
-        assertNotNull("Default roles should not be null", defaultRoles);
+        assertNotNull(defaultGroups, "Default groups should not be null");
+        assertNotNull(defaultRoles, "Default roles should not be null");
     }
 
     /**
      * Test list isolation during concurrent updates.
      */
+    @Test
     public void test_listIsolation_duringConcurrentUpdates() throws Exception {
         List<String> originalGroups = new ArrayList<>();
         originalGroups.add("original-group");
@@ -356,6 +376,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that processParentGroup handles null user gracefully when depth limit is reached.
      */
+    @Test
     public void test_processParentGroup_nullUser_depthExceeded() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         authenticator.setMaxGroupDepth(5);
@@ -373,6 +394,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test addGroupOrRoleName with null value handling.
      */
+    @Test
     public void test_addGroupOrRoleName_withEmptyValue() {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         List<String> list = new ArrayList<>();
@@ -386,6 +408,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that lazy loading mechanism handles errors gracefully.
      */
+    @Test
     public void test_lazyLoading_errorHandling() throws Exception {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         // Don't call init() to avoid SsoManager dependency
@@ -414,6 +437,7 @@ public class EntraIdAuthenticatorTest extends UnitFessTestCase {
     /**
      * Test that multiple scheduleParentGroupLookup calls don't interfere.
      */
+    @Test
     public void test_multipleScheduledTasks_noInterference() throws Exception {
         EntraIdAuthenticator authenticator = new EntraIdAuthenticator();
         // Don't call init() to avoid SsoManager dependency

@@ -29,16 +29,21 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LdapManagerTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new SystemHelper(), "systemHelper");
     }
 
     @SuppressWarnings("serial")
+    @Test
     public void test_getSearchRoleName() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             public boolean isLdapIgnoreNetbiosName() {
@@ -66,6 +71,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertNull(ldapManager.getSearchRoleName("aaa"));
     }
 
+    @Test
     public void test_replaceWithUnderscores() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -90,6 +96,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("a_a", ldapManager.replaceWithUnderscores("a/a"));
     }
 
+    @Test
     public void test_allowEmptyGroupAndRole() {
         final AtomicBoolean allowEmptyPermission = new AtomicBoolean();
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -136,6 +143,7 @@ public class LdapManagerTest extends UnitFessTestCase {
     // Tests for LDAP Injection Prevention
     // ========================================================================
 
+    @Test
     public void test_escapeLDAPSearchFilter_withNull() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -144,6 +152,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("", ldapManager.escapeLDAPSearchFilter(null));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withEmptyString() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -151,6 +160,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("", ldapManager.escapeLDAPSearchFilter(""));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withNormalInput() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -161,6 +171,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("user.name", ldapManager.escapeLDAPSearchFilter("user.name"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withBackslash() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -171,6 +182,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("\\5c\\5c", ldapManager.escapeLDAPSearchFilter("\\\\"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withAsterisk() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -181,6 +193,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("\\2aadmin\\2a", ldapManager.escapeLDAPSearchFilter("*admin*"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withParentheses() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -192,6 +205,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("\\28objectClass=\\2a\\29", ldapManager.escapeLDAPSearchFilter("(objectClass=*)"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withNullByte() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -201,6 +215,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("test\\00value", ldapManager.escapeLDAPSearchFilter("test\0value"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withComplexInjectionAttempt() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -211,6 +226,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals(expected, ldapManager.escapeLDAPSearchFilter(injectionAttempt));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withAllSpecialCharacters() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -225,6 +241,7 @@ public class LdapManagerTest extends UnitFessTestCase {
     // Tests for Defensive Null/Blank Checks
     // ========================================================================
 
+    @Test
     public void test_getSAMAccountGroupName_withNullBindDn() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -234,6 +251,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_getSAMAccountGroupName_withBlankBindDn() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -246,6 +264,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_getSAMAccountGroupName_withNullGroupName() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -255,6 +274,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_getSAMAccountGroupName_withBlankGroupName() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -267,6 +287,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_changePassword_withNullUsername() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -281,6 +302,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(ldapManager.changePassword(null, "newPassword"));
     }
 
+    @Test
     public void test_changePassword_withBlankUsername() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -296,6 +318,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(ldapManager.changePassword("   ", "newPassword"));
     }
 
+    @Test
     public void test_changePassword_withNullPassword() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -310,6 +333,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(ldapManager.changePassword("testuser", null));
     }
 
+    @Test
     public void test_changePassword_withBlankPassword() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -325,6 +349,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertFalse(ldapManager.changePassword("testuser", "   "));
     }
 
+    @Test
     public void test_changePassword_withAdminDisabled() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -343,6 +368,7 @@ public class LdapManagerTest extends UnitFessTestCase {
     // Tests for Improved Error Handling
     // ========================================================================
 
+    @Test
     public void test_normalizePermissionName_withNull() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -363,6 +389,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_normalizePermissionName_withLowercaseEnabled() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -378,6 +405,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("admin", ldapManager.normalizePermissionName("admin"));
     }
 
+    @Test
     public void test_normalizePermissionName_withLowercaseDisabled() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -397,6 +425,7 @@ public class LdapManagerTest extends UnitFessTestCase {
     // Tests for Edge Cases
     // ========================================================================
 
+    @Test
     public void test_escapeLDAPSearchFilter_withUnicodeCharacters() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -407,6 +436,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("사용자", ldapManager.escapeLDAPSearchFilter("사용자"));
     }
 
+    @Test
     public void test_escapeLDAPSearchFilter_withMixedContent() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();
@@ -417,6 +447,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertEquals("test\\5cpath", ldapManager.escapeLDAPSearchFilter("test\\path"));
     }
 
+    @Test
     public void test_getSearchRoleName_withEdgeCases() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -440,6 +471,7 @@ public class LdapManagerTest extends UnitFessTestCase {
         assertNull(ldapManager.getSearchRoleName("dn=test"));
     }
 
+    @Test
     public void test_replaceWithUnderscores_withEdgeCases() {
         LdapManager ldapManager = new LdapManager();
         ldapManager.init();

@@ -33,6 +33,7 @@ import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.common.SetOnce;
+import org.junit.jupiter.api.Test;
 
 public class WebConfigTest extends UnitFessTestCase {
 
@@ -41,6 +42,7 @@ public class WebConfigTest extends UnitFessTestCase {
         return true;
     }
 
+    @Test
     public void test_initializeClientFactory() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -105,6 +107,7 @@ public class WebConfigTest extends UnitFessTestCase {
         assertTrue(Boolean.valueOf(initParamMap.get("robotsTxtEnabled").toString()).booleanValue());
     }
 
+    @Test
     public void test_initializeClientFactoryWithConfigParameter() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();

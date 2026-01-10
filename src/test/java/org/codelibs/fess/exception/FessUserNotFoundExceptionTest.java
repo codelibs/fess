@@ -16,9 +16,12 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withValidUsername() {
         // Test with a normal username
         String username = "testuser";
@@ -29,6 +32,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyUsername() {
         // Test with empty username
         String username = "";
@@ -39,6 +43,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullUsername() {
         // Test with null username
         String username = null;
@@ -49,6 +54,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withSpecialCharacters() {
         // Test with username containing special characters
         String username = "user@domain.com";
@@ -59,6 +65,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongUsername() {
         // Test with a very long username
         String username = "verylongusername".repeat(10);
@@ -69,6 +76,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withUnicodeCharacters() {
         // Test with username containing Unicode characters
         String username = "ユーザー名";
@@ -79,6 +87,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that FessUserNotFoundException is an instance of FessSystemException
         FessUserNotFoundException exception = new FessUserNotFoundException("testuser");
@@ -89,6 +98,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that the exception has a serialVersionUID field
         FessUserNotFoundException exception1 = new FessUserNotFoundException("user1");
@@ -98,6 +108,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(exception1.getClass(), exception2.getClass());
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that the exception has a proper stack trace
         FessUserNotFoundException exception = new FessUserNotFoundException("testuser");
@@ -111,6 +122,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(this.getClass().getName(), firstElement.getClassName());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String username = "nonexistentuser";
@@ -125,6 +137,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent exception type
         String username = "testuser";
@@ -139,6 +152,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_exceptionChaining() {
         // Test that the exception can be used in exception chaining
         String username = "testuser";
@@ -154,6 +168,7 @@ public class FessUserNotFoundExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test that multiple instances are independent
         FessUserNotFoundException exception1 = new FessUserNotFoundException("user1");

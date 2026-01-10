@@ -21,22 +21,26 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessApiFailureHookTest extends UnitFessTestCase {
 
     private FessApiFailureHook apiFailureHook;
     private FessConfig originalFessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         apiFailureHook = new FessApiFailureHook();
         originalFessConfig = ComponentUtil.getFessConfig();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (originalFessConfig != null) {
             ComponentUtil.setFessConfig(originalFessConfig);
         }
@@ -44,11 +48,13 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test basic initialization
+    @Test
     public void test_hookInitialization() {
         assertNotNull(apiFailureHook);
     }
 
     // Test API result status codes
+    @Test
     public void test_apiResultStatusCodes() {
         // Test OK status
         ApiResult okResult = new ApiResult.ApiResponse().status(Status.OK).result();
@@ -72,6 +78,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test API result with messages
+    @Test
     public void test_apiResultWithMessages() {
         String testMessage = "Test error message";
         ApiResult.ApiErrorResponse errorResponse = new ApiResult.ApiErrorResponse();
@@ -84,6 +91,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test configuration for JSON response
+    @Test
     public void test_configurationSettings() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -99,6 +107,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test error code generation
+    @Test
     public void test_errorCodeGeneration() {
         long timestamp = System.currentTimeMillis();
         String errorCode = "error_code:" + Long.toHexString(timestamp);
@@ -108,6 +117,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test with different exception types
+    @Test
     public void test_exceptionTypes() {
         // Test RuntimeException
         RuntimeException runtimeEx = new RuntimeException("Runtime error");
@@ -127,6 +137,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test JSON response creation helper
+    @Test
     public void test_jsonResponseCreation() {
         ApiResult.ApiErrorResponse errorResponse = new ApiResult.ApiErrorResponse();
         errorResponse.message("Success");
@@ -138,6 +149,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test multiple configurations
+    @Test
     public void test_multipleConfigurations() {
         // Test with exception included = true
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -174,6 +186,7 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     // Test case sensitivity for configuration values
+    @Test
     public void test_configurationCaseSensitivity() {
         String[] testValues = { "TRUE", "True", "true", "FALSE", "False", "false" };
 

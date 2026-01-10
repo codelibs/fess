@@ -32,6 +32,7 @@ import org.dbflute.util.DfTypeUtil;
 import org.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class PrefixQueryCommandTest extends QueryTestBase {
     private PrefixQueryCommand queryCommand;
@@ -56,10 +57,12 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         queryFieldConfig.notAnalyzedFieldSet = notAnalyzedFieldSet;
     }
 
+    @Test
     public void test_getQueryClassName() {
         assertEquals("PrefixQuery", queryCommand.getQueryClassName());
     }
 
+    @Test
     public void test_execute_withInvalidQuery() {
         QueryContext context = new QueryContext("test", false);
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
@@ -73,6 +76,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_convertPrefixQuery_withDefaultField() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term(Constants.DEFAULT_FIELD, "test"));
@@ -85,6 +89,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertPrefixQuery_withDefaultField_dismax() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term(Constants.DEFAULT_FIELD, "test"));
@@ -97,6 +102,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         // Query was processed successfully with boost
     }
 
+    @Test
     public void test_convertPrefixQuery_withSearchField() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term("title", "test"));
@@ -113,6 +119,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertPrefixQuery_withNotAnalyzedField() throws Exception {
         setNotAnalyzedFields("url", "site");
 
@@ -132,6 +139,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals(1.5f, pqb.boost());
     }
 
+    @Test
     public void test_convertPrefixQuery_withNonSearchField() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term("unknown_field", "test"));
@@ -144,6 +152,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_toLowercaseWildcard_enabled() {
         queryCommand.setLowercaseWildcard(true);
 
@@ -153,6 +162,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals("already_lower", queryCommand.toLowercaseWildcard("already_lower"));
     }
 
+    @Test
     public void test_toLowercaseWildcard_disabled() {
         queryCommand.setLowercaseWildcard(false);
 
@@ -162,6 +172,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals("already_lower", queryCommand.toLowercaseWildcard("already_lower"));
     }
 
+    @Test
     public void test_convertPrefixQuery_withUppercasePrefix_lowercaseEnabled() throws Exception {
         queryCommand.setLowercaseWildcard(true);
 
@@ -177,6 +188,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals("test", mpqb.value()); // Should be lowercase
     }
 
+    @Test
     public void test_convertPrefixQuery_withUppercasePrefix_lowercaseDisabled() throws Exception {
         queryCommand.setLowercaseWildcard(false);
 
@@ -192,6 +204,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals("TEST", mpqb.value()); // Should remain uppercase
     }
 
+    @Test
     public void test_convertPrefixQuery_withEmptyPrefix() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term("title", ""));
@@ -206,6 +219,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals("", mpqb.value());
     }
 
+    @Test
     public void test_convertPrefixQuery_withSpecialCharacters() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term("title", "test-123_abc"));
@@ -221,6 +235,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertPrefixQuery_withHighBoost() throws Exception {
         QueryContext context = new QueryContext("test", false);
         PrefixQuery prefixQuery = new PrefixQuery(new Term("title", "boost"));
@@ -235,6 +250,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertEquals(10.0f, mpqb.boost());
     }
 
+    @Test
     public void test_convertPrefixQuery_withNegativeImportantContentBoost() throws Exception {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -323,6 +339,7 @@ public class PrefixQueryCommandTest extends QueryTestBase {
         assertFalse(queryString.contains("important_content"));
     }
 
+    @Test
     public void test_register() {
         // Save the original processor
         QueryProcessor originalProcessor = ComponentUtil.getQueryProcessor();

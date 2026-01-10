@@ -23,6 +23,9 @@ import org.codelibs.fess.helper.CrawlerStatsHelper.StatsKeyObject;
 import org.codelibs.fess.helper.CrawlerStatsHelper.StatsObject;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlerStatsHelperTest extends UnitFessTestCase {
 
@@ -32,9 +35,10 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
 
     private ThreadLocal<String> localLogMsg = new ThreadLocal<>();
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         crawlerStatsHelper = new CrawlerStatsHelper() {
             @Override
@@ -45,6 +49,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         crawlerStatsHelper.init();
     }
 
+    @Test
     public void test_beginDone() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -61,6 +66,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_beginDoneWithRecord1() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -79,6 +85,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_beginDoneWithRecord2() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -99,6 +106,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_beginDoneWithRecord1WithStatsKeyObject() {
         StatsKeyObject key = new StatsKeyObject("id");
         crawlerStatsHelper.begin(key);
@@ -118,6 +126,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_beginDoneWithRecordOnLazy() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -140,6 +149,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_beginWithRecordAndDiscard() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -155,6 +165,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         localLogMsg.remove();
     }
 
+    @Test
     public void test_beginWithRecordOnDestroy() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -173,6 +184,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         localLogMsg.remove();
     }
 
+    @Test
     public void test_setLoggerName() {
         String originalLoggerName = crawlerStatsHelper.loggerName;
         crawlerStatsHelper.setLoggerName("test.stats.logger");
@@ -180,16 +192,19 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         crawlerStatsHelper.setLoggerName(originalLoggerName);
     }
 
+    @Test
     public void test_setMaxCacheSize() {
         crawlerStatsHelper.setMaxCacheSize(500);
         assertEquals(500, crawlerStatsHelper.maxCacheSize);
     }
 
+    @Test
     public void test_setCacheExpireAfterWrite() {
         crawlerStatsHelper.setCacheExpireAfterWrite(30000);
         assertEquals(30000, crawlerStatsHelper.cacheExpireAfterWrite);
     }
 
+    @Test
     public void test_recordWithStatsAction() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -206,6 +221,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[4].startsWith("finished:"));
     }
 
+    @Test
     public void test_numberKeyObject() {
         Integer key = 12345;
         crawlerStatsHelper.begin(key);
@@ -220,6 +236,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[3].startsWith("test_action:"));
     }
 
+    @Test
     public void test_longKeyObject() {
         Long key = 67890L;
         crawlerStatsHelper.begin(key);
@@ -234,6 +251,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[3].startsWith("test_action:"));
     }
 
+    @Test
     public void test_escapeValue() {
         String input = "test\twith\ttabs";
         String escaped = crawlerStatsHelper.escapeValue(input);
@@ -241,6 +259,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertFalse(escaped.contains("\t"));
     }
 
+    @Test
     public void test_statsKeyObjectWithoutUrl() {
         StatsKeyObject key = new StatsKeyObject("test_id");
         crawlerStatsHelper.begin(key);
@@ -255,6 +274,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[3].startsWith("action:"));
     }
 
+    @Test
     public void test_recordWithTabCharacters() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -266,6 +286,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertFalse(logMessage.contains("action\twith\ttabs:"));
     }
 
+    @Test
     public void test_unsupportedKeyType() {
         Object key = new Object();
         crawlerStatsHelper.begin(key);
@@ -275,6 +296,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_statsObjectIncrementDecrement() {
         StatsObject statsObject = new StatsObject();
         assertEquals(1, statsObject.count.get());
@@ -289,6 +311,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertEquals(0, statsObject.count.get());
     }
 
+    @Test
     public void test_multipleRecordsOfSameAction() {
         String key = "test";
         crawlerStatsHelper.begin(key);
@@ -310,6 +333,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertTrue(values[4].startsWith("different_action:"));
     }
 
+    @Test
     public void test_getUrlWithSpecialCharacters() {
         String urlWithTabs = "http://example.com/path\twith\ttabs";
         StatsKeyObject key = new StatsKeyObject("test");
@@ -323,6 +347,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertFalse(logMessage.contains("url:http://example.com/path\twith\ttabs"));
     }
 
+    @Test
     public void test_recordOnNonExistentKey() {
         String key = "non_existent";
         crawlerStatsHelper.record(key, "test_action");
@@ -330,6 +355,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_runOnThreadOnNonExistentKey() {
         String key = "non_existent";
         crawlerStatsHelper.runOnThread(key);
@@ -337,6 +363,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_doneOnNonExistentKey() {
         String key = "non_existent";
         crawlerStatsHelper.done(key);
@@ -344,6 +371,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         assertNull(localLogMsg.get());
     }
 
+    @Test
     public void test_discardOnNonExistentKey() {
         String key = "non_existent";
         crawlerStatsHelper.discard(key);
@@ -460,6 +488,7 @@ public class CrawlerStatsHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_urlQueueKeyObject() {
         TestUrlQueue urlQueue = new TestUrlQueue("queue_123", "http://example.com/test");
         crawlerStatsHelper.begin(urlQueue);

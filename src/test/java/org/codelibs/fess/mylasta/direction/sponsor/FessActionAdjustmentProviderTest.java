@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
 
@@ -28,6 +29,7 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         return true;
     }
 
+    @Test
     public void test_write_noConfig() throws Exception {
         final FessConfig fessConfig = createFessConfigWithResponseHeaders("");
         FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
@@ -37,6 +39,7 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         assertEquals(0, headerMap.size());
     }
 
+    @Test
     public void test_write_defaultHeadersOnly() throws Exception {
         final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=X-Def:def\n*=X-Def2:def2");
         FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
@@ -47,6 +50,7 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         assertEquals("def2", headerMap.get("X-Def2"));
     }
 
+    @Test
     public void test_write_defaultAndSpecificHtml() throws Exception {
         final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=X-Def:def\ntext/html=X-Html:htmlval");
         FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
@@ -57,6 +61,7 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         assertEquals("htmlval", headerMap.get("X-Html"));
     }
 
+    @Test
     public void test_write_defaultAndSpecificJson() throws Exception {
         final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=X-Def:def\napplication/json=X-Json:jsonval");
         FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);
@@ -67,6 +72,7 @@ public class FessActionAdjustmentProviderTest extends UnitFessTestCase {
         assertEquals("jsonval", headerMap.get("X-Json"));
     }
 
+    @Test
     public void test_write_contentTypeMismatch() throws Exception {
         final FessConfig fessConfig = createFessConfigWithResponseHeaders("*=X-Def:def\ntext/html=X-Html:htmlval");
         FessActionAdjustmentProvider provider = new FessActionAdjustmentProvider(fessConfig);

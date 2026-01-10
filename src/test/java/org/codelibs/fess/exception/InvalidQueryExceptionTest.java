@@ -19,9 +19,13 @@ import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.validation.VaMessenger;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class InvalidQueryExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessageCodeMessageAndCause() {
         // Setup
         final String message = "Invalid query syntax error";
@@ -38,6 +42,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withMessageCodeAndMessage() {
         // Setup
         final String message = "Query contains invalid characters";
@@ -53,6 +58,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullMessageCode() {
         // Setup
         final String message = "Invalid query with null message code";
@@ -68,6 +74,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Setup
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY);
@@ -83,6 +90,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Setup
         final String message = "Query validation failed";
@@ -98,6 +106,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withAllNullParameters() {
         // Execute
         final InvalidQueryException exception = new InvalidQueryException(null, null, null);
@@ -109,6 +118,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithNullMessageCode() {
         // Setup
         final String message = "Query error without message code";
@@ -123,6 +133,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithNullMessage() {
         // Setup
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY);
@@ -137,6 +148,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithBothNull() {
         // Execute
         final InvalidQueryException exception = new InvalidQueryException(null, null);
@@ -148,6 +160,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_inheritanceFromFessSystemException() {
         // Setup
         final String message = "Test inheritance hierarchy";
@@ -163,6 +176,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTracePresence() {
         // Setup
         final String message = "Query error with stack trace";
@@ -177,6 +191,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_differentMessageCodes() {
         // Setup - test with different message codes
         final String message = "Query validation error";
@@ -195,6 +210,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertNotSame(unknownException.getMessageCode(), parseException.getMessageCode());
     }
 
+    @Test
     public void test_complexMessageCode() {
         // Setup - test with a complex message code that includes parameters
         final String queryString = "field:value AND (";
@@ -211,6 +227,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(complexMessageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_causeChainPropagation() {
         // Setup - create a chain of exceptions
         final IllegalArgumentException rootCause = new IllegalArgumentException("Invalid character in query");
@@ -226,6 +243,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_emptyMessage() {
         // Setup
         final String message = "";
@@ -240,6 +258,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_messageWithSpecialCharacters() {
         // Setup
         final String message = "Query error: field:\"test value\" AND category:[A TO Z] OR tag:#hashtag @mention $special %wildcard";
@@ -255,6 +274,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_verifySerialVersionUID() {
         // Setup
         final String message = "Test serialization capability";
@@ -267,6 +287,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_longMessage() {
         // Setup - test with a very long message
         final StringBuilder longMessageBuilder = new StringBuilder();
@@ -285,6 +306,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_multipleExceptionTypes() {
         // Setup - test with different types of causes
         final String message = "Query processing error";
@@ -305,6 +327,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(oomCause, oomException.getCause());
     }
 
+    @Test
     public void test_messageCodeWithPropertyKey() {
         // Setup - test message code with different property keys
         final String message = "Query field error";
@@ -320,6 +343,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_getMessageCodeConsistency() {
         // Setup
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY);
@@ -338,6 +362,7 @@ public class InvalidQueryExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, retrievedCode1);
     }
 
+    @Test
     public void test_constructorParameterOrder() {
         // Setup - verify parameter order is correct
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY);

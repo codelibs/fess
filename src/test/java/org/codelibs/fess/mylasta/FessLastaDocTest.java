@@ -17,6 +17,7 @@ package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.meta.DocumentGenerator;
+import org.junit.jupiter.api.Test;
 
 public class FessLastaDocTest extends UnitFessTestCase {
 
@@ -24,6 +25,7 @@ public class FessLastaDocTest extends UnitFessTestCase {
     //                                                                           Component
     //                                                                           =========
     /*
+    @Test
     public void test_component() throws Exception {
         // ## Arrange ##
         String appWebPkg = ".app.web.";
@@ -48,6 +50,7 @@ public class FessLastaDocTest extends UnitFessTestCase {
     // ===================================================================================
     //                                                                            Document
     //                                                                            ========
+    @Test
     public void test_document() throws Exception {
         saveLastaDocMeta();
         assertTrue(true);

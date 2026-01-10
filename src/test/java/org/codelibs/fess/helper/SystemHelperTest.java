@@ -42,6 +42,9 @@ import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SystemHelperTest extends UnitFessTestCase {
 
@@ -49,9 +52,10 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     private final Map<String, String> envMap = new HashMap<>();
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         final File propFile = File.createTempFile("project", ".properties");
         propFile.deleteOnExit();
         FileUtil.writeBytes(propFile.getAbsolutePath(), "fess.version=98.76.5".getBytes());
@@ -93,10 +97,12 @@ public class SystemHelperTest extends UnitFessTestCase {
         ComponentUtil.register(systemHelper, "systemHelper");
     }
 
+    @Test
     public void test_getUsername() {
         assertEquals("guest", systemHelper.getUsername());
     }
 
+    @Test
     public void test_getCurrentTimeAsLocalDateTime() {
         final long current =
                 1000 * systemHelper.getCurrentTimeAsLocalDateTime().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
@@ -105,6 +111,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(now - 1000 + "<" + current + " : " + (current - now + 1000), now - 1000 < current);
     }
 
+    @Test
     public void test_getLogFilePath() {
         final File logFile = new File(systemHelper.getLogFilePath());
         assertEquals("logs", logFile.getName());
@@ -117,6 +124,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getForumLink() {
         getMockRequest().setLocale(Locale.ENGLISH);
         assertEquals("https://discuss.codelibs.org/c/FessEN/", systemHelper.getForumLink());
@@ -138,6 +146,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertNull(systemHelper.getForumLink());
     }
 
+    @Test
     public void test_getHelpLink() {
         getMockRequest().setLocale(Locale.ENGLISH);
         assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
@@ -149,6 +158,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("https://fess.codelibs.org/98.76/admin/xxx-guide.html", systemHelper.getHelpLink("xxx"));
     }
 
+    @Test
     public void test_getDesignJspFileName() {
         assertNull(systemHelper.getDesignJspFileName("xxx"));
         systemHelper.addDesignJspFileName("xxx", "yyy");
@@ -159,6 +169,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("yyy", designJspFileNames[0].getSecond());
     }
 
+    @Test
     public void test_setForceStop() {
         assertFalse(systemHelper.isForceStop());
         systemHelper.setForceStop(true);
@@ -167,18 +178,21 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.isForceStop());
     }
 
+    @Test
     public void test_generateDocId() {
         final String docId = systemHelper.generateDocId(Collections.emptyMap());
         assertNotNull(docId);
         assertEquals(32, docId.length());
     }
 
+    @Test
     public void test_abbreviateLongText() {
         assertEquals("", systemHelper.abbreviateLongText(""));
         assertEquals(4000, systemHelper.abbreviateLongText(Stream.generate(() -> "a").limit(4000).collect(Collectors.joining())).length());
         assertEquals(4000, systemHelper.abbreviateLongText(Stream.generate(() -> "a").limit(4001).collect(Collectors.joining())).length());
     }
 
+    @Test
     public void test_getLanguageItems() {
         final List<Map<String, String>> enItems = systemHelper.getLanguageItems(Locale.ENGLISH);
         assertEquals(55, enItems.size());
@@ -186,6 +200,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals(55, jaItems.size());
     }
 
+    @Test
     public void test_getHostnamet() {
         assertNotNull(systemHelper.getHostname());
         try {
@@ -202,6 +217,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isEoled() {
         assertEquals(systemHelper.getCurrentTimeAsLong() > systemHelper.eolTime, systemHelper.isEoled());
         final SystemHelper helper1 = new SystemHelper() {
@@ -222,12 +238,14 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(helper2.isEoled());
     }
 
+    @Test
     public void test_updateConfiguration() {
         assertNotNull(systemHelper.updateConfiguration());
         systemHelper.addUpdateConfigListener("XXX", () -> "OK");
         assertTrue(systemHelper.updateConfiguration().contains("XXX: OK"));
     }
 
+    @Test
     public void test_isChangedClusterState() {
         systemHelper.isChangedClusterState(0);
         assertFalse(systemHelper.isChangedClusterState(0));
@@ -236,16 +254,19 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.isChangedClusterState(2));
     }
 
+    @Test
     public void test_getRedirectResponseToLogin() {
         final HtmlResponse response = HtmlResponse.fromForwardPath("/");
         assertEquals(response, systemHelper.getRedirectResponseToLogin(response));
     }
 
+    @Test
     public void test_getRedirectResponseToRoot() {
         final HtmlResponse response = HtmlResponse.fromForwardPath("/");
         assertEquals(response, systemHelper.getRedirectResponseToRoot(response));
     }
 
+    @Test
     public void test_getLogLevel() {
         final String logLevel = systemHelper.getLogLevel();
         try {
@@ -262,10 +283,12 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createTempFile() {
         assertNotNull(systemHelper.createTempFile("test", ".txt"));
     }
 
+    @Test
     public void test_calibrateCpuLoad() {
         systemHelper.setSystemCpuCheckInterval(0L);
         systemHelper.calibrateCpuLoad();
@@ -273,6 +296,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         systemHelper.waitForNoWaitingThreads();
     }
 
+    @Test
     public void test_getVersion() {
         assertEquals("98.76.5", systemHelper.getVersion());
         assertEquals(98, systemHelper.getMajorVersion());
@@ -280,10 +304,12 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("98.76", systemHelper.getProductVersion());
     }
 
+    @Test
     public void test_getEnvMap() {
         assertNotNull(new SystemHelper().getEnvMap());
     }
 
+    @Test
     public void test_encodeUrlFilter() {
         String path = null;
         assertNull(systemHelper.encodeUrlFilter(path));
@@ -306,6 +332,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals(path, systemHelper.encodeUrlFilter(path));
     }
 
+    @Test
     public void test_normalizeHtmlLang() {
         assertEquals("ja", systemHelper.normalizeHtmlLang("ja"));
 
@@ -320,6 +347,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("en", systemHelper.normalizeHtmlLang("ja"));
     }
 
+    @Test
     public void test_normalizeLang() {
         String value = null;
         assertNull(systemHelper.normalizeLang(value));
@@ -361,6 +389,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("zh_TW", systemHelper.normalizeLang(value));
     }
 
+    @Test
     public void test_createSearchRole() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -377,6 +406,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("bbb\\ccc", systemHelper.createSearchRole("", "aaa\\bbb\\ccc"));
     }
 
+    @Test
     public void test_normalizeConfigPath() {
         assertEquals("", systemHelper.normalizeConfigPath(""));
         assertEquals("", systemHelper.normalizeConfigPath("#hash"));
@@ -389,6 +419,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("(?i)aaa", systemHelper.normalizeConfigPath("regexpIgnoreCase:aaa"));
     }
 
+    @Test
     public void test_getFilteredEnvMap() {
         Map<String, String> filteredEnvMap = systemHelper.getFilteredEnvMap("^FESS_ENV.*");
         assertEquals(0, filteredEnvMap.size());
@@ -407,6 +438,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("123", filteredEnvMap.get("FESS_ENV_TEST"));
     }
 
+    @Test
     public void test_isUserPermission() {
         assertTrue(systemHelper.isUserPermission("1test"));
 
@@ -417,6 +449,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.isUserPermission("Rtest"));
     }
 
+    @Test
     public void test_getSearchRole() {
         assertEquals("1test", systemHelper.getSearchRoleByUser("test"));
         assertEquals("Rtest", systemHelper.getSearchRoleByRole("test"));
@@ -427,6 +460,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("2", systemHelper.getSearchRoleByGroup(""));
     }
 
+    @Test
     public void test_parseProjectProperties() {
         try {
             new SystemHelper().parseProjectProperties(null);
@@ -436,6 +470,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_refreshDesignJspFiles() {
         final VirtualHostHelper virtualHostHelper = new VirtualHostHelper();
         ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
@@ -466,6 +501,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("ok", FileUtil.readText(fileList.get(0).toFile()));
     }
 
+    @Test
     public void test_updateSystemProperties() {
         final SystemHelper helper = new SystemHelper();
         final AtomicReference<String> appValue = new AtomicReference<>(StringUtil.EMPTY);
@@ -492,6 +528,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("test2", System.getProperty("test." + now));
     }
 
+    @Test
     public void test_getCurrentTime() {
         final Date currentTime = systemHelper.getCurrentTime();
         assertNotNull(currentTime);
@@ -499,12 +536,14 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(Math.abs(currentTime.getTime() - now) < 1000);
     }
 
+    @Test
     public void test_getCurrentTimeAsLong() {
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         final long now = System.currentTimeMillis();
         assertTrue(Math.abs(currentTime - now) < 1000);
     }
 
+    @Test
     public void test_destroy() {
         final AtomicReference<Boolean> hookExecuted = new AtomicReference<>(false);
         systemHelper.addShutdownHook(() -> hookExecuted.set(true));
@@ -512,6 +551,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(hookExecuted.get());
     }
 
+    @Test
     public void test_destroy_withException() {
         systemHelper.addShutdownHook(() -> {
             throw new RuntimeException("test exception");
@@ -524,6 +564,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getHelpUrl() {
         getMockRequest().setLocale(Locale.ENGLISH);
         String helpUrl = systemHelper.getHelpUrl("https://example.com/{lang}/{version}/test.html");
@@ -540,11 +581,13 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("https://example.com/98.76/test.html", helpUrl);
     }
 
+    @Test
     public void test_getDefaultHelpLink() {
         String defaultLink = systemHelper.getDefaultHelpLink("https://example.com/{lang}/{version}/test.html");
         assertEquals("https://example.com/98.76/test.html", defaultLink);
     }
 
+    @Test
     public void test_setupAdminHtmlData() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
@@ -563,6 +606,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setupAdminHtmlData_withEol() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
@@ -581,6 +625,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setupSearchHtmlData() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
@@ -599,6 +644,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setupSearchHtmlData_withEol() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
@@ -617,6 +663,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_reloadConfiguration() {
         try {
             systemHelper.reloadConfiguration();
@@ -626,6 +673,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_reloadConfiguration_withResetJobs() {
         try {
             systemHelper.reloadConfiguration(true);
@@ -642,6 +690,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createValidator() {
         try {
             final var validator = systemHelper.createValidator(ComponentUtil.getRequestManager(), null, new Class<?>[0]);
@@ -651,6 +700,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setLogLevel_invalidLevel() {
         final String originalLevel = systemHelper.getLogLevel();
         try {
@@ -661,6 +711,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createTempFile_permissions() {
         final File tempFile = systemHelper.createTempFile("test", ".tmp");
         assertNotNull(tempFile);
@@ -670,17 +721,20 @@ public class SystemHelperTest extends UnitFessTestCase {
         tempFile.delete();
     }
 
+    @Test
     public void test_calibrateCpuLoad_withTimeout() {
         systemHelper.setSystemCpuCheckInterval(100L);
         final boolean result = systemHelper.calibrateCpuLoad(1L);
         assertTrue(result || !result); // Can be either depending on CPU load
     }
 
+    @Test
     public void test_calibrateCpuLoad_zeroTimeout() {
         final boolean result = systemHelper.calibrateCpuLoad(0L);
         assertTrue(result);
     }
 
+    @Test
     public void test_getSystemCpuPercent() {
         final short cpuPercent = systemHelper.getSystemCpuPercent();
         // CPU percent can be -1 if not available or other negative values in test environment
@@ -688,12 +742,14 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(cpuPercent <= 100);
     }
 
+    @Test
     public void test_waitForNoWaitingThreads() {
         systemHelper.setSystemCpuCheckInterval(10L);
         systemHelper.waitForNoWaitingThreads();
         assertEquals(0, systemHelper.waitingThreadNames.size());
     }
 
+    @Test
     public void test_addUpdateConfigListener_withException() {
         systemHelper.addUpdateConfigListener("TestError", () -> {
             throw new RuntimeException("Test error");
@@ -703,6 +759,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("Test error"));
     }
 
+    @Test
     public void test_getFilteredEnvMap_emptyKey() {
         envMap.put("", "value");
         envMap.put("VALID_KEY", "valid_value");
@@ -712,12 +769,14 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("valid_value", filtered.get("VALID_KEY"));
     }
 
+    @Test
     public void test_normalizeConfigPath_edgeCases() {
         assertEquals("", systemHelper.normalizeConfigPath("   "));
         assertEquals("", systemHelper.normalizeConfigPath("#comment line"));
         assertEquals("test", systemHelper.normalizeConfigPath("  test  "));
     }
 
+    @Test
     public void test_encodeUrlFilter_specialChars() {
         systemHelper.filterPathEncoding = "UTF-8";
 
@@ -731,6 +790,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("test+space", result);
     }
 
+    @Test
     public void test_normalizeLang_caseVariations() {
         assertEquals("ja", systemHelper.normalizeLang("JA"));
         assertEquals("ja", systemHelper.normalizeLang("Ja"));
@@ -738,6 +798,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("zh_TW", systemHelper.normalizeLang("ZH-TW"));
     }
 
+    @Test
     public void test_normalizeHtmlLang_nullDefault() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -750,6 +811,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("ja", systemHelper.normalizeHtmlLang("ja"));
     }
 
+    @Test
     public void test_getLanguageItems_cacheException() {
         final List<Map<String, String>> items = systemHelper.getLanguageItems(new Locale("invalid"));
         assertNotNull(items);
@@ -757,6 +819,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertTrue(items.size() >= 1);
     }
 
+    @Test
     public void test_getHostname_unknownHost() {
         final SystemHelper mockSystemHelper = new SystemHelper() {
             @Override
@@ -782,6 +845,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_validatePassword_blank() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -822,6 +886,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("errors.blank_password", systemHelper.validatePassword("   "));
     }
 
+    @Test
     public void test_validatePassword_minLength() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -862,6 +927,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("123456789"));
     }
 
+    @Test
     public void test_validatePassword_requireUppercase() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -902,6 +968,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("PASSWORD"));
     }
 
+    @Test
     public void test_validatePassword_requireLowercase() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -942,6 +1009,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("password"));
     }
 
+    @Test
     public void test_validatePassword_requireDigit() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -982,6 +1050,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("123456"));
     }
 
+    @Test
     public void test_validatePassword_requireSpecialChar() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -1023,6 +1092,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("pass#word"));
     }
 
+    @Test
     public void test_validatePassword_blacklisted() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -1064,6 +1134,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("securepassword"));
     }
 
+    @Test
     public void test_validatePassword_allRequirements() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -1108,6 +1179,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertEquals("", systemHelper.validatePassword("MyP@ssw0rd"));
     }
 
+    @Test
     public void test_containsUppercase() {
         assertTrue(systemHelper.containsUppercase("A"));
         assertTrue(systemHelper.containsUppercase("aA"));
@@ -1117,6 +1189,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.containsUppercase(""));
     }
 
+    @Test
     public void test_containsLowercase() {
         assertTrue(systemHelper.containsLowercase("a"));
         assertTrue(systemHelper.containsLowercase("Aa"));
@@ -1126,6 +1199,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.containsLowercase(""));
     }
 
+    @Test
     public void test_containsDigit() {
         assertTrue(systemHelper.containsDigit("1"));
         assertTrue(systemHelper.containsDigit("a1"));
@@ -1135,6 +1209,7 @@ public class SystemHelperTest extends UnitFessTestCase {
         assertFalse(systemHelper.containsDigit(""));
     }
 
+    @Test
     public void test_containsSpecialChar() {
         assertTrue(systemHelper.containsSpecialChar("!"));
         assertTrue(systemHelper.containsSpecialChar("a!"));

@@ -16,9 +16,11 @@
 package org.codelibs.fess.dict.synonym;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class SynonymItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_new1() {
         final SynonymItem synonymItem = new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" });
         assertEquals(1, synonymItem.getId());
@@ -44,6 +46,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertTrue(synonymItem.isDeleted());
     }
 
+    @Test
     public void test_new2() {
         final SynonymItem synonymItem = new SynonymItem(1, new String[] { "A", "a" }, new String[] { "B", "b" });
         assertEquals(1, synonymItem.getId());
@@ -69,6 +72,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertTrue(synonymItem.isDeleted());
     }
 
+    @Test
     public void test_equals1() {
         final SynonymItem synonymItem1 = new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" });
 
@@ -81,6 +85,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertFalse(synonymItem1.equals(new SynonymItem(1, new String[] { "A", "c" }, new String[] { "B", "b" })));
     }
 
+    @Test
     public void test_equals2() {
         final SynonymItem synonymItem1 = new SynonymItem(1, new String[] { "a" }, new String[] { "b" });
 
@@ -90,6 +95,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertFalse(synonymItem1.equals(new SynonymItem(2, new String[] { "A" }, new String[] { "b" })));
     }
 
+    @Test
     public void test_toLineString() {
         assertEquals("a1,a2,a3=>b1,b2,b3",
                 new SynonymItem(1, new String[] { "a1", "a2", "a3" }, new String[] { "b1", "b2", "b3" }).toLineString());
@@ -99,6 +105,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("a", new SynonymItem(1, new String[] { "a" }, new String[] { "a" }).toLineString());
     }
 
+    @Test
     public void test_defensiveCopy_inputs() {
         // Test that getInputs() returns defensive copy
         String[] originalInputs = { "a", "b", "c" };
@@ -116,6 +123,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("c", inputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_outputs() {
         // Test that getOutputs() returns defensive copy
         String[] originalOutputs = { "x", "y", "z" };
@@ -133,6 +141,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("z", outputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_newInputs() {
         // Test that getNewInputs() returns defensive copy
         SynonymItem item = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });
@@ -150,6 +159,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("r", inputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_newOutputs() {
         // Test that getNewOutputs() returns defensive copy
         SynonymItem item = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });
@@ -167,6 +177,7 @@ public class SynonymItemTest extends UnitFessTestCase {
         assertEquals("r", outputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_nullArrays() {
         // Test that defensive copy handles null arrays correctly
         SynonymItem item1 = new SynonymItem(1, new String[] { "a" }, new String[] { "x" });

@@ -24,6 +24,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SsoManagerTest extends UnitFessTestCase {
 
@@ -31,9 +34,10 @@ public class SsoManagerTest extends UnitFessTestCase {
     private TestSsoAuthenticator testAuthenticator;
     private String currentSsoType = Constants.NONE;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ssoManager = new SsoManager() {
             @Override
             protected String getSsoType() {
@@ -44,38 +48,44 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         currentSsoType = Constants.NONE;
         super.tearDown();
     }
 
     // Test available() method
+    @Test
     public void test_available_withNoneSsoType() {
         currentSsoType = Constants.NONE;
         assertFalse(ssoManager.available());
     }
 
+    @Test
     public void test_available_withValidSsoType() {
         currentSsoType = "saml";
         assertTrue(ssoManager.available());
     }
 
+    @Test
     public void test_available_withEmptySsoType() {
         currentSsoType = "";
         assertTrue(ssoManager.available());
     }
 
+    @Test
     public void test_available_withNullSsoType() {
         currentSsoType = null;
         assertTrue(ssoManager.available());
     }
 
     // Test getLoginCredential() method
+    @Test
     public void test_getLoginCredential_whenNotAvailable() {
         currentSsoType = Constants.NONE;
         assertNull(ssoManager.getLoginCredential());
     }
 
+    @Test
     public void test_getLoginCredential_whenAvailableButNoAuthenticator() {
         currentSsoType = "invalid";
         ssoManager = new SsoManager() {
@@ -92,6 +102,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertNull(ssoManager.getLoginCredential());
     }
 
+    @Test
     public void test_getLoginCredential_withValidAuthenticator() {
         currentSsoType = "test";
         final LoginCredential expectedCredential = new TestLoginCredential("testuser");
@@ -115,12 +126,14 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test getResponse() method
+    @Test
     public void test_getResponse_whenNotAvailable() {
         currentSsoType = Constants.NONE;
         assertNull(ssoManager.getResponse(SsoResponseType.METADATA));
         assertNull(ssoManager.getResponse(SsoResponseType.LOGOUT));
     }
 
+    @Test
     public void test_getResponse_whenAvailableButNoAuthenticator() {
         currentSsoType = "invalid";
         ssoManager = new SsoManager() {
@@ -137,6 +150,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertNull(ssoManager.getResponse(SsoResponseType.METADATA));
     }
 
+    @Test
     public void test_getResponse_withValidAuthenticator() {
         currentSsoType = "test";
         final ActionResponse expectedResponse = HtmlResponse.asEmptyBody();
@@ -159,6 +173,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(expectedResponse, response);
     }
 
+    @Test
     public void test_getResponse_withNullResponseType() {
         currentSsoType = "test";
         ActionResponse expectedResponse = HtmlResponse.asEmptyBody();
@@ -182,12 +197,14 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test logout() method
+    @Test
     public void test_logout_whenNotAvailable() {
         currentSsoType = Constants.NONE;
         FessUserBean user = FessUserBean.empty();
         assertNull(ssoManager.logout(user));
     }
 
+    @Test
     public void test_logout_whenAvailableButNoAuthenticator() {
         currentSsoType = "invalid";
         ssoManager = new SsoManager() {
@@ -205,6 +222,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertNull(ssoManager.logout(user));
     }
 
+    @Test
     public void test_logout_withValidAuthenticator() {
         currentSsoType = "test";
         final String expectedLogoutUrl = "https://example.com/logout";
@@ -227,6 +245,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(expectedLogoutUrl, logoutUrl);
     }
 
+    @Test
     public void test_logout_withNullUser() {
         currentSsoType = "test";
         final String expectedLogoutUrl = "https://example.com/logout";
@@ -249,6 +268,7 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test getAuthenticator() method
+    @Test
     public void test_getAuthenticator_whenComponentExists() {
         currentSsoType = "test";
         ComponentUtil.register(testAuthenticator, "testAuthenticator");
@@ -265,6 +285,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(testAuthenticator, authenticator);
     }
 
+    @Test
     public void test_getAuthenticator_whenComponentDoesNotExist() {
         currentSsoType = "nonexistent";
         ssoManager = new SsoManager() {
@@ -279,6 +300,7 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test register() and getAuthenticators() methods
+    @Test
     public void test_register_singleAuthenticator() {
         ssoManager.register(testAuthenticator);
         SsoAuthenticator[] authenticators = ssoManager.getAuthenticators();
@@ -286,6 +308,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(testAuthenticator, authenticators[0]);
     }
 
+    @Test
     public void test_register_multipleAuthenticators() {
         TestSsoAuthenticator authenticator1 = new TestSsoAuthenticator();
         TestSsoAuthenticator authenticator2 = new TestSsoAuthenticator();
@@ -302,6 +325,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(authenticator3, authenticators[2]);
     }
 
+    @Test
     public void test_getAuthenticators_withNoRegisteredAuthenticators() {
         SsoAuthenticator[] authenticators = ssoManager.getAuthenticators();
         assertNotNull(authenticators);
@@ -309,6 +333,7 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test getSsoType() with actual FessConfig
+    @Test
     public void test_getSsoType_withFessConfig() {
         final String expectedSsoType = "openid";
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -324,6 +349,7 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test full integration scenarios
+    @Test
     public void test_fullScenario_ssoEnabled() {
         currentSsoType = "saml";
         final LoginCredential expectedCredential = new TestLoginCredential("samluser");
@@ -364,6 +390,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(expectedLogoutUrl, logoutUrl);
     }
 
+    @Test
     public void test_fullScenario_ssoDisabled() {
         currentSsoType = Constants.NONE;
 
@@ -378,6 +405,7 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     // Test backward compatibility: aad -> entraid mapping
+    @Test
     public void test_getAuthenticator_aadMapsToEntraid() {
         // Register an authenticator with the new "entraid" name
         ComponentUtil.register(testAuthenticator, "entraidAuthenticator");
@@ -397,6 +425,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(testAuthenticator, authenticator);
     }
 
+    @Test
     public void test_getAuthenticator_entraidDirectAccess() {
         // Register an authenticator with "entraid" name
         ComponentUtil.register(testAuthenticator, "entraidAuthenticator");
@@ -416,6 +445,7 @@ public class SsoManagerTest extends UnitFessTestCase {
         assertEquals(testAuthenticator, authenticator);
     }
 
+    @Test
     public void test_getLoginCredential_withAadSsoType() {
         final LoginCredential expectedCredential = new TestLoginCredential("entraiduser");
         testAuthenticator.setLoginCredential(expectedCredential);

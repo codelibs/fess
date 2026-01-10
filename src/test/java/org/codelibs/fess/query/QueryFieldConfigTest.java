@@ -23,14 +23,19 @@ import java.util.stream.Stream;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class QueryFieldConfigTest extends UnitFessTestCase {
 
     private QueryFieldConfig queryFieldConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
 
@@ -290,11 +295,12 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
+    @Test
     public void test_init() {
         // Test initialization with null fields
         queryFieldConfig.init();
@@ -343,6 +349,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.notAnalyzedFieldSet.size() > 0);
     }
 
+    @Test
     public void test_init_withExistingFields() {
         // Set existing fields before initialization
         String[] existingResponseFields = { "field1", "field2" };
@@ -388,6 +395,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.apiResponseFieldSet.contains("api2"));
     }
 
+    @Test
     public void test_init_withAdditionalAnalyzedFields() {
         // Save original config
         FessConfig originalConfig = ComponentUtil.getFessConfig();
@@ -432,6 +440,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_init_withAdditionalDefaultFields() {
         // Create custom FessConfig with additional default fields
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -507,6 +516,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(3.5f, queryFieldConfig.additionalDefaultList.get(3).getSecond());
     }
 
+    @Test
     public void test_setNotAnalyzedFields() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setNotAnalyzedFields(fields);
@@ -518,6 +528,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.notAnalyzedFieldSet.contains("field3"));
     }
 
+    @Test
     public void test_setNotAnalyzedFields_empty() {
         String[] fields = {};
         queryFieldConfig.setNotAnalyzedFields(fields);
@@ -526,6 +537,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(0, queryFieldConfig.notAnalyzedFieldSet.size());
     }
 
+    @Test
     public void test_isSortField() {
         String[] sortFields = { "score", "created", "modified", "title" };
         queryFieldConfig.setSortFields(sortFields);
@@ -542,6 +554,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isSortField(null));
     }
 
+    @Test
     public void test_isFacetField() {
         String[] facetFields = { "category", "type", "author", "date" };
         queryFieldConfig.setFacetFields(facetFields);
@@ -558,6 +571,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isFacetField(null));
     }
 
+    @Test
     public void test_isFacetSortValue() {
         // Test valid facet sort values
         assertTrue(queryFieldConfig.isFacetSortValue("count"));
@@ -571,6 +585,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isFacetSortValue("INDEX"));
     }
 
+    @Test
     public void test_setApiResponseFields() {
         String[] fields = { "api1", "api2", "api3" };
         queryFieldConfig.setApiResponseFields(fields);
@@ -582,6 +597,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.apiResponseFieldSet.contains("api3"));
     }
 
+    @Test
     public void test_setApiResponseFields_empty() {
         String[] fields = {};
         queryFieldConfig.setApiResponseFields(fields);
@@ -590,6 +606,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(0, queryFieldConfig.apiResponseFieldSet.size());
     }
 
+    @Test
     public void test_isApiResponseField() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setApiResponseFields(fields);
@@ -605,6 +622,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isApiResponseField(null));
     }
 
+    @Test
     public void test_isApiResponseField_nullSet() {
         queryFieldConfig.apiResponseFieldSet = null;
 
@@ -616,6 +634,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getResponseFields() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setResponseFields(fields);
@@ -624,6 +643,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setResponseFields() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setResponseFields(fields);
@@ -631,6 +651,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.responseFields);
     }
 
+    @Test
     public void test_getScrollResponseFields() {
         String[] fields = { "scroll1", "scroll2", "scroll3" };
         queryFieldConfig.setScrollResponseFields(fields);
@@ -639,6 +660,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setScrollResponseFields() {
         String[] fields = { "scroll1", "scroll2", "scroll3" };
         queryFieldConfig.setScrollResponseFields(fields);
@@ -646,6 +668,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.scrollResponseFields);
     }
 
+    @Test
     public void test_getCacheResponseFields() {
         String[] fields = { "cache1", "cache2", "cache3" };
         queryFieldConfig.setCacheResponseFields(fields);
@@ -654,6 +677,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setCacheResponseFields() {
         String[] fields = { "cache1", "cache2", "cache3" };
         queryFieldConfig.setCacheResponseFields(fields);
@@ -661,6 +685,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.cacheResponseFields);
     }
 
+    @Test
     public void test_getHighlightedFields() {
         String[] fields = { "highlight1", "highlight2", "highlight3" };
         queryFieldConfig.setHighlightedFields(fields);
@@ -669,6 +694,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setHighlightedFields() {
         String[] fields = { "highlight1", "highlight2", "highlight3" };
         queryFieldConfig.setHighlightedFields(fields);
@@ -676,6 +702,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.highlightedFields);
     }
 
+    @Test
     public void test_highlightedFields() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setHighlightedFields(fields);
@@ -691,6 +718,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(3, count.get());
     }
 
+    @Test
     public void test_highlightedFields_empty() {
         String[] fields = {};
         queryFieldConfig.setHighlightedFields(fields);
@@ -703,6 +731,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(0, count.get());
     }
 
+    @Test
     public void test_getSearchFields() {
         String[] fields = { "search1", "search2", "search3" };
         queryFieldConfig.setSearchFields(fields);
@@ -711,6 +740,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setSearchFields() {
         String[] fields = { "search1", "search2", "search3" };
         queryFieldConfig.setSearchFields(fields);
@@ -718,6 +748,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.searchFields);
     }
 
+    @Test
     public void test_getFacetFields() {
         String[] fields = { "facet1", "facet2", "facet3" };
         queryFieldConfig.setFacetFields(fields);
@@ -726,6 +757,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setFacetFields() {
         String[] fields = { "facet1", "facet2", "facet3" };
         queryFieldConfig.setFacetFields(fields);
@@ -733,6 +765,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.facetFields);
     }
 
+    @Test
     public void test_getSortFields() {
         String[] fields = { "sort1", "sort2", "sort3" };
         queryFieldConfig.setSortFields(fields);
@@ -741,6 +774,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, result);
     }
 
+    @Test
     public void test_setSortFields() {
         String[] fields = { "sort1", "sort2", "sort3" };
         queryFieldConfig.setSortFields(fields);
@@ -748,6 +782,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertSame(fields, queryFieldConfig.sortFields);
     }
 
+    @Test
     public void test_constants() {
         // Test that constants have expected values
         assertEquals("score", QueryFieldConfig.SCORE_FIELD);
@@ -757,6 +792,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals("score", QueryFieldConfig.SCORE_SORT_VALUE);
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor creates a valid instance
         QueryFieldConfig config = new QueryFieldConfig();
@@ -776,6 +812,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertEquals(0, config.additionalDefaultList.size());
     }
 
+    @Test
     public void test_isSortField_withEmptyArray() {
         queryFieldConfig.setSortFields(new String[] {});
 
@@ -784,6 +821,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isSortField(null));
     }
 
+    @Test
     public void test_isFacetField_withEmptyArray() {
         queryFieldConfig.setFacetFields(new String[] {});
 
@@ -792,6 +830,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertFalse(queryFieldConfig.isFacetField(null));
     }
 
+    @Test
     public void test_setNotAnalyzedFields_withDuplicates() {
         String[] fields = { "field1", "field2", "field1", "field3", "field2" };
         queryFieldConfig.setNotAnalyzedFields(fields);
@@ -803,6 +842,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.notAnalyzedFieldSet.contains("field3"));
     }
 
+    @Test
     public void test_setApiResponseFields_withDuplicates() {
         String[] fields = { "api1", "api2", "api1", "api3", "api2" };
         queryFieldConfig.setApiResponseFields(fields);
@@ -814,6 +854,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         assertTrue(queryFieldConfig.apiResponseFieldSet.contains("api3"));
     }
 
+    @Test
     public void test_highlightedFields_withNull() {
         queryFieldConfig.highlightedFields = null;
 
@@ -825,6 +866,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         });
     }
 
+    @Test
     public void test_init_withInvalidDefaultFields() {
         // Test with invalid default field formats
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -896,6 +938,7 @@ public class QueryFieldConfigTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_init_withEmptyAndWhitespaceAnalyzedFields() {
         // Save original config
         FessConfig originalConfig = ComponentUtil.getFessConfig();

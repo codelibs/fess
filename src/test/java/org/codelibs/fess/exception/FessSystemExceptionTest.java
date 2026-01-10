@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FessSystemExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Test exception message";
@@ -28,6 +30,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Test exception message with cause";
@@ -38,6 +41,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withCause() {
         // Test constructor with cause only
         Throwable cause = new IllegalArgumentException("Cause exception");
@@ -49,6 +53,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getMessage().contains("Cause exception"));
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         FessSystemException exception = new FessSystemException((String) null);
@@ -57,6 +62,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Test constructor with null cause
         String message = "Test with null cause";
@@ -66,6 +72,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with both null message and cause
         FessSystemException exception = new FessSystemException(null, null);
@@ -74,6 +81,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withCauseOnly_nullCause() {
         // Test constructor with null cause only
         FessSystemException exception = new FessSystemException((Throwable) null);
@@ -82,6 +90,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withSuppression() {
         // Test protected constructor with suppression enabled
         String message = "Test with suppression";
@@ -97,6 +106,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(suppressed, exception.getSuppressed()[0]);
     }
 
+    @Test
     public void test_constructor_withSuppressionDisabled() {
         // Test protected constructor with suppression disabled
         String message = "Test without suppression";
@@ -111,6 +121,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(0, exception.getSuppressed().length);
     }
 
+    @Test
     public void test_constructor_withWritableStackTrace() {
         // Test protected constructor with writable stack trace
         String message = "Test with writable stack trace";
@@ -123,6 +134,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_constructor_withNonWritableStackTrace() {
         // Test protected constructor with non-writable stack trace
         String message = "Test without writable stack trace";
@@ -135,6 +147,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(0, exception.getStackTrace().length);
     }
 
+    @Test
     public void test_exceptionChaining() {
         // Test exception chaining with multiple levels
         Exception rootCause = new Exception("Root cause");
@@ -146,6 +159,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, topException.getCause().getCause());
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is properly defined
         FessSystemException exception1 = new FessSystemException("Test");
@@ -155,6 +169,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         assertEquals(exception1.getClass(), exception2.getClass());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Expected error";
@@ -166,6 +181,7 @@ public class FessSystemExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String expectedMessage = "System error occurred";

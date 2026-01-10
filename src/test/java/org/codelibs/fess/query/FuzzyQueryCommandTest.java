@@ -28,6 +28,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.DisMaxQueryBuilder;
 import org.opensearch.index.query.FuzzyQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class FuzzyQueryCommandTest extends QueryTestBase {
 
@@ -41,11 +42,13 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test getQueryClassName method
+    @Test
     public void test_getQueryClassName() {
         assertEquals("FuzzyQuery", fuzzyQueryCommand.getQueryClassName());
     }
 
     // Test execute method with valid FuzzyQuery
+    @Test
     public void test_execute_withFuzzyQuery() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "fuzzy");
@@ -58,6 +61,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test execute method with invalid query type
+    @Test
     public void test_execute_withInvalidQuery() {
         QueryContext context = new QueryContext("test", false);
         Query invalidQuery = new TermQuery(new Term("field", "value"));
@@ -72,6 +76,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertFuzzyQuery with DEFAULT_FIELD
+    @Test
     public void test_convertFuzzyQuery_withDefaultField() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term(Constants.DEFAULT_FIELD, "fuzzy");
@@ -85,6 +90,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertFuzzyQuery with specific search field
+    @Test
     public void test_convertFuzzyQuery_withSearchField() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "fuzzy");
@@ -102,6 +108,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertFuzzyQuery with non-search field
+    @Test
     public void test_convertFuzzyQuery_withNonSearchField() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("unknown_field", "fuzzy");
@@ -115,6 +122,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertFuzzyQuery with different max edits
+    @Test
     public void test_convertFuzzyQuery_withMaxEdits() {
         QueryContext context = new QueryContext("test", false);
 
@@ -147,6 +155,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertFuzzyQuery with boost values
+    @Test
     public void test_convertFuzzyQuery_withBoost() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "fuzzy");
@@ -165,6 +174,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test with transpositions enabled
+    @Test
     public void test_convertFuzzyQuery_withTranspositionsEnabled() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "fuzzy");
@@ -177,6 +187,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test with transpositions disabled
+    @Test
     public void test_convertFuzzyQuery_withTranspositionsDisabled() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "fuzzy");
@@ -189,6 +200,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test field log and highlight additions
+    @Test
     public void test_convertFuzzyQuery_contextUpdates() {
         QueryContext context = new QueryContext("test", false);
         String searchText = "fuzzytext";
@@ -206,6 +218,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test with special characters in term text
+    @Test
     public void test_convertFuzzyQuery_withSpecialCharacters() {
         QueryContext context = new QueryContext("test", false);
         String[] specialTexts = { "test@email.com", "test-hyphen", "test_underscore", "test.period", "test+plus" };
@@ -221,6 +234,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test with empty term text
+    @Test
     public void test_convertFuzzyQuery_withEmptyTerm() {
         QueryContext context = new QueryContext("test", false);
         Term term = new Term("title", "");
@@ -232,6 +246,7 @@ public class FuzzyQueryCommandTest extends QueryTestBase {
     }
 
     // Test with various field names
+    @Test
     public void test_convertFuzzyQuery_withVariousFields() {
         QueryContext context = new QueryContext("test", false);
         String[] fields = { "title", "content", "url", "site", "host", "mimetype" };

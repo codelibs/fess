@@ -68,18 +68,23 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(FessXpathTransformerTest.class);
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
         // Register protocolHelper - it doesn't need FessConfig for the methods used in tests
         ComponentUtil.register(new ProtocolHelper(), "protocolHelper");
     }
 
+    @Test
     public void test_transform() throws Exception {
         String data = "<html><head><title>Test</title></head><body><h1>Header1</h1><p>This is a pen.</p></body></html>";
 
@@ -139,6 +144,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         FieldUtil.set(field, obj, value);
     }
 
+    @Test
     public void test_pruneNode() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
@@ -159,6 +165,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(null);
     }
 
+    @Test
     public void test_pruneNode_removeNoScript() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
@@ -188,6 +195,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(null);
     }
 
+    @Test
     public void test_pruneNode_removeScriptAndNoscript() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
@@ -217,6 +225,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(null);
     }
 
+    @Test
     public void test_pruneNode_removeDivId() throws Exception {
         final String data = "<html><body><br/><div>foo</div><div id=\"barid\">bar</div></body></html>";
         final Document document = getDocument(data);
@@ -246,6 +255,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(null);
     }
 
+    @Test
     public void test_pruneNode_removeDivClass() throws Exception {
         final String data = "<html><body><br/><div>foo</div><div class=\"barcls\">bar</div></body></html>";
         final Document document = getDocument(data);
@@ -275,6 +285,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(null);
     }
 
+    @Test
     public void test_processGoogleOffOn() throws Exception {
         final String data =
                 "<html><body>foo1<!--googleoff: index-->foo2<a href=\"index.html\">foo3</a>foo4<!--googleon: index-->foo5</body></html>";
@@ -287,6 +298,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"/><!--googleon: index-->foo5", output);
     }
 
+    @Test
     public void test_processXRobotsTags_no() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             @Override
@@ -310,6 +322,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(responseData.isNoFollow());
     }
 
+    @Test
     public void test_processXRobotsTag_noindexnofollow() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
@@ -339,6 +352,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processXRobotsTag_noindex() throws Exception {
         final String data = "<meta name=\"robots\" content=\"noindex\" /><a href=\"index.html\">aaa</a>";
 
@@ -371,6 +385,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processXRobotsTag_nofollow() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
@@ -393,6 +408,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertTrue(responseData.isNoFollow());
     }
 
+    @Test
     public void test_processMetaRobots_no() throws Exception {
         final String data = "<html><body>foo</body></html>";
         final Document document = getDocument(data);
@@ -419,6 +435,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(responseData.isNoFollow());
     }
 
+    @Test
     public void test_processMetaRobots_none() throws Exception {
         final String data = "<meta name=\"robots\" content=\"none\" />";
         final Document document = getDocument(data);
@@ -450,6 +467,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processMetaRobots_noindexnofollow() throws Exception {
         final String data = "<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW\" />";
         final Document document = getDocument(data);
@@ -481,6 +499,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processMetaRobots_noindex() throws Exception {
         final String data = "<meta name=\"robots\" content=\"noindex\" /><a href=\"index.html\">aaa</a>";
         final Document document = getDocument(data);
@@ -517,6 +536,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processMetaRobots_nofollow() throws Exception {
         final String data = "<meta name=\"robots\" content=\"nofollow\" />";
         final Document document = getDocument(data);
@@ -565,6 +585,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         return writer.toString();
     }
 
+    @Test
     public void test_getChildUrlRules() {
         assertEquals("", new FessXpathTransformer() {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
@@ -588,6 +609,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }.getChildUrlRules(null, null).map(v -> v.getFirst() + ":" + v.getSecond()).collect(Collectors.joining(",")));
     }
 
+    @Test
     public void test_convertChildUrlList() {
         final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer() {
             protected PathMappingHelper getPathMappingHelper() {
@@ -626,6 +648,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_removeCommentTag() {
         final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
         fessXpathTransformer.init();
@@ -646,6 +669,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("abc  -->123", fessXpathTransformer.removeCommentTag("abc<!-- <!-- foo --> -->123"));
     }
 
+    @Test
     public void test_canonicalXpath() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             protected Map<String, String> getConfigPrameterMap(final ResponseData responseData, final ConfigName config) {
@@ -699,6 +723,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSingleNodeValue() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
 
@@ -723,6 +748,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("aaa bbb ccc", value);
     }
 
+    @Test
     public void test_contentXpath() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
 
@@ -738,6 +764,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("bbb aaa", value);
     }
 
+    @Test
     public void test_getCanonicalUrl() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             @Override
@@ -773,6 +800,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("http://example1.com/", value);
     }
 
+    @Test
     public void test_normalizeCanonicalUrl() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         String value;
@@ -808,6 +836,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("http://hoge.com/aaa", value);
     }
 
+    @Test
     public void test_getBaseUri() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         URI value;
@@ -843,6 +872,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("https://hoge.com/aaa/", value.toString());
     }
 
+    @Test
     public void test_getThumbnailUrl_no() throws Exception {
 
         final FessXpathTransformer transformer = new FessXpathTransformer();
@@ -869,6 +899,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertNull(transformer.getThumbnailUrl(responseData, getDocument(data)));
     }
 
+    @Test
     public void test_getThumbnailUrl() throws Exception {
         String data = "<meta property=\"og:image\" content=\"http://example/foo.jpg\" />";
         String expected = "http://example/foo.jpg";
@@ -925,6 +956,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals(expected, transformer.getThumbnailUrl(responseData, document));
     }
 
+    @Test
     public void test_isValidUrl() {
         final FessXpathTransformer transformer = new FessXpathTransformer();
 
@@ -940,6 +972,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(transformer.isValidUrl("http://http://www.example.com"));
     }
 
+    @Test
     public void test_processFieldConfigs() {
         final FessXpathTransformer transformer = new FessXpathTransformer();
         final Map<String, String> params = Maps.of("foo", "cache", "bar", "overwrite", "baz", "cache|overwrite");

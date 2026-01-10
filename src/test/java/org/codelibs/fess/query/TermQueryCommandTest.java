@@ -34,6 +34,7 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.TermQueryBuilder;
 import org.opensearch.index.query.WildcardQueryBuilder;
 import org.opensearch.search.sort.SortBuilder;
+import org.junit.jupiter.api.Test;
 
 public class TermQueryCommandTest extends QueryTestBase {
     private static final Logger logger = LogManager.getLogger(TermQueryCommandTest.class);
@@ -436,6 +437,7 @@ public class TermQueryCommandTest extends QueryTestBase {
         });
     }
 
+    @Test
     public void test_convertTermQuery() throws Exception {
         setQueryType("bool");
         assertQueryBuilder(DefaultQueryBuilder.class,
@@ -472,6 +474,7 @@ public class TermQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_convertTermQuery_dismax() throws Exception {
         setQueryType("dismax");
         assertQueryBuilder(DefaultQueryBuilder.class,

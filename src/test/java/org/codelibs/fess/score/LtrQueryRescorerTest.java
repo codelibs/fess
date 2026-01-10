@@ -24,28 +24,34 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.search.rescore.QueryRescorerBuilder;
 import org.opensearch.search.rescore.RescorerBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LtrQueryRescorerTest extends UnitFessTestCase {
 
     private LtrQueryRescorer ltrQueryRescorer;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ltrQueryRescorer = new LtrQueryRescorer();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor works properly
         assertNotNull(new LtrQueryRescorer());
     }
 
+    @Test
     public void test_evaluate_withBlankModelName() {
         // Test when model name is blank
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -67,6 +73,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_evaluate_withNullModelName() {
         // Test when model name is null
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -88,6 +95,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_evaluate_withWhitespaceModelName() {
         // Test when model name contains only whitespace
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -109,6 +117,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_evaluate_withValidModelName() {
         // Test with valid model name
         final String testModelName = "test_model";
@@ -138,6 +147,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(testWindowSize, queryRescorerBuilder.windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_withEmptyParams() {
         // Test with empty parameters map
         final String testModelName = "test_model";
@@ -165,6 +175,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(testWindowSize, queryRescorerBuilder.windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_withNullParams() {
         // Test with null parameters - should throw NPE due to OpenSearch StoredLtrQueryBuilder requirements
         final String testModelName = "test_model";
@@ -193,6 +204,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_evaluate_withDifferentWindowSizes() {
         // Test with different window sizes
         final String testModelName = "test_model";
@@ -233,6 +245,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(1000, ((QueryRescorerBuilder) result).windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_withZeroWindowSize() {
         // Test with zero window size
         final String testModelName = "test_model";
@@ -255,6 +268,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(0, ((QueryRescorerBuilder) result).windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_withNegativeWindowSize() {
         // Test with negative window size
         final String testModelName = "test_model";
@@ -277,6 +291,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(-1, ((QueryRescorerBuilder) result).windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_withComplexParams() {
         // Test with complex parameter map including nested structures
         final String testModelName = "complex_model";
@@ -312,6 +327,7 @@ public class LtrQueryRescorerTest extends UnitFessTestCase {
         assertEquals(testWindowSize, queryRescorerBuilder.windowSize().intValue());
     }
 
+    @Test
     public void test_evaluate_multipleCallsWithDifferentConfigs() {
         // Test multiple calls with different configurations
         Map<String, Object> params = new HashMap<>();

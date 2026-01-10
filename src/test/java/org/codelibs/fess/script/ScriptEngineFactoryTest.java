@@ -20,23 +20,28 @@ import java.util.Map;
 
 import org.codelibs.fess.exception.ScriptEngineException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ScriptEngineFactoryTest extends UnitFessTestCase {
 
     private ScriptEngineFactory scriptEngineFactory;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         scriptEngineFactory = new ScriptEngineFactory();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         ScriptEngineFactory factory = new ScriptEngineFactory();
         assertNotNull(factory);
@@ -45,6 +50,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with valid parameters
+    @Test
     public void test_add_validParameters() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("testEngine", engine);
@@ -61,6 +67,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with uppercase name
+    @Test
     public void test_add_uppercaseName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("TESTENGINE", engine);
@@ -72,6 +79,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with mixed case name
+    @Test
     public void test_add_mixedCaseName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("TestEngine", engine);
@@ -83,6 +91,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with null name
+    @Test
     public void test_add_nullName() {
         TestScriptEngine engine = new TestScriptEngine();
         try {
@@ -95,6 +104,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with null engine
+    @Test
     public void test_add_nullEngine() {
         try {
             scriptEngineFactory.add("test", null);
@@ -106,6 +116,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with both null parameters
+    @Test
     public void test_add_bothNull() {
         try {
             scriptEngineFactory.add(null, null);
@@ -116,6 +127,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add multiple engines
+    @Test
     public void test_add_multipleEngines() {
         TestScriptEngine engine1 = new TestScriptEngine("engine1");
         TestScriptEngine engine2 = new TestScriptEngine("engine2");
@@ -136,6 +148,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add with overwriting existing engine
+    @Test
     public void test_add_overwriteExisting() {
         TestScriptEngine engine1 = new TestScriptEngine("first");
         TestScriptEngine engine2 = new TestScriptEngine("second");
@@ -149,6 +162,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with valid name
+    @Test
     public void test_getScriptEngine_validName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("myEngine", engine);
@@ -159,6 +173,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with uppercase query
+    @Test
     public void test_getScriptEngine_uppercaseQuery() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("test", engine);
@@ -169,6 +184,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with mixed case query
+    @Test
     public void test_getScriptEngine_mixedCaseQuery() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("test", engine);
@@ -179,6 +195,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with null name
+    @Test
     public void test_getScriptEngine_nullName() {
         try {
             scriptEngineFactory.getScriptEngine(null);
@@ -189,6 +206,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with non-existent name
+    @Test
     public void test_getScriptEngine_nonExistentName() {
         try {
             scriptEngineFactory.getScriptEngine("nonexistent");
@@ -199,6 +217,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine with empty string
+    @Test
     public void test_getScriptEngine_emptyString() {
         try {
             scriptEngineFactory.getScriptEngine("");
@@ -209,6 +228,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test getScriptEngine by class name
+    @Test
     public void test_getScriptEngine_byClassName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("myName", engine);
@@ -220,6 +240,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add with special characters in name
+    @Test
     public void test_add_specialCharactersInName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("test-engine.v1", engine);
@@ -230,6 +251,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test add with whitespace in name
+    @Test
     public void test_add_whitespaceInName() {
         TestScriptEngine engine = new TestScriptEngine();
         scriptEngineFactory.add("  test  ", engine);
@@ -241,6 +263,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test case sensitivity preservation in error messages
+    @Test
     public void test_getScriptEngine_errorMessagePreservesCase() {
         try {
             scriptEngineFactory.getScriptEngine("MyNonExistentEngine");
@@ -251,6 +274,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test engine replacement by class name
+    @Test
     public void test_add_replacementByClassName() {
         TestScriptEngine engine1 = new TestScriptEngine("first");
         TestScriptEngine engine2 = new TestScriptEngine("second");
@@ -268,6 +292,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test with engine that has very long class name
+    @Test
     public void test_add_longClassName() {
         VeryLongClassNameScriptEngineImplementation engine = new VeryLongClassNameScriptEngineImplementation();
         scriptEngineFactory.add("short", engine);
@@ -279,6 +304,7 @@ public class ScriptEngineFactoryTest extends UnitFessTestCase {
     }
 
     // Test concurrent-like scenario (sequential but simulating concurrent behavior)
+    @Test
     public void test_add_multipleSameNameSequential() {
         TestScriptEngine engine1 = new TestScriptEngine("v1");
         TestScriptEngine engine2 = new TestScriptEngine("v2");

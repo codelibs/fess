@@ -24,9 +24,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class JobProcessTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_processOnly() throws IOException {
         Process mockProcess = createMockProcess("test output\nline2");
 
@@ -38,6 +42,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertEquals("InputStreamThread", jobProcess.getInputStreamThread().getName());
     }
 
+    @Test
     public void test_constructor_withBufferSizeAndCallback() throws IOException {
         Process mockProcess = createMockProcess("callback test\nanother line");
         List<String> callbackResults = new ArrayList<>();
@@ -51,6 +56,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertEquals("InputStreamThread", jobProcess.getInputStreamThread().getName());
     }
 
+    @Test
     public void test_getProcess() throws IOException {
         Process mockProcess = createMockProcess("test");
         JobProcess jobProcess = new JobProcess(mockProcess);
@@ -60,6 +66,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertSame(mockProcess, retrievedProcess);
     }
 
+    @Test
     public void test_getInputStreamThread() throws IOException {
         Process mockProcess = createMockProcess("test data");
         JobProcess jobProcess = new JobProcess(mockProcess);
@@ -70,6 +77,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertEquals("InputStreamThread", thread.getName());
     }
 
+    @Test
     public void test_constructor_withZeroBufferSize() throws IOException {
         Process mockProcess = createMockProcess("test");
         JobProcess jobProcess = new JobProcess(mockProcess, 0, null);
@@ -77,6 +85,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(jobProcess.getInputStreamThread());
     }
 
+    @Test
     public void test_constructor_withNullCallback() throws IOException {
         Process mockProcess = createMockProcess("test");
         JobProcess jobProcess = new JobProcess(mockProcess, 10, null);
@@ -84,6 +93,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(jobProcess.getInputStreamThread());
     }
 
+    @Test
     public void test_integration_withInputStreamThread() throws IOException, InterruptedException {
         Process mockProcess = createMockProcess("integration test\nsecond line");
         List<String> callbackResults = new ArrayList<>();
@@ -104,6 +114,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertTrue(output.contains("second line"));
     }
 
+    @Test
     public void test_defaultBufferSizeConstant() throws IOException {
         Process mockProcess = createMockProcess("test");
         JobProcess jobProcess = new JobProcess(mockProcess);
@@ -111,6 +122,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(jobProcess.getInputStreamThread());
     }
 
+    @Test
     public void test_multipleJobProcesses() throws IOException {
         Process mockProcess1 = createMockProcess("process1 output");
         Process mockProcess2 = createMockProcess("process2 output");
@@ -122,6 +134,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotSame(jobProcess1.getInputStreamThread(), jobProcess2.getInputStreamThread());
     }
 
+    @Test
     public void test_constructor_withLargeBufferSize() throws IOException {
         Process mockProcess = createMockProcess("large buffer test");
         JobProcess jobProcess = new JobProcess(mockProcess, 10000, null);
@@ -129,6 +142,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(jobProcess.getInputStreamThread());
     }
 
+    @Test
     public void test_constructor_withMaxBufferSize() throws IOException {
         Process mockProcess = createMockProcess("max buffer test");
         JobProcess jobProcess = new JobProcess(mockProcess, InputStreamThread.MAX_BUFFER_SIZE, null);
@@ -136,6 +150,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(jobProcess.getInputStreamThread());
     }
 
+    @Test
     public void test_inputStreamThreadProcessOutput() throws IOException, InterruptedException {
         Process mockProcess = createMockProcess("line1\nline2\nline3\nline4\nline5");
         JobProcess jobProcess = new JobProcess(mockProcess, 3, null);
@@ -152,6 +167,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertTrue("Should have line5", thread.contains("line5"));
     }
 
+    @Test
     public void test_emptyInputStream() throws IOException, InterruptedException {
         Process mockProcess = createMockProcess("");
         JobProcess jobProcess = new JobProcess(mockProcess);
@@ -164,6 +180,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertEquals("", output);
     }
 
+    @Test
     public void test_callbackExceptionHandling() throws IOException, InterruptedException {
         Process mockProcess = createMockProcess("exception test");
         Consumer<String> faultyCallback = line -> {
@@ -179,6 +196,7 @@ public class JobProcessTest extends UnitFessTestCase {
         assertNotNull(thread);
     }
 
+    @Test
     public void test_inputStreamThreadProperties() throws IOException {
         Process mockProcess = createMockProcess("property test");
         JobProcess jobProcess = new JobProcess(mockProcess, 25, null);
@@ -189,13 +207,14 @@ public class JobProcessTest extends UnitFessTestCase {
         assertFalse("Thread should not be started yet", thread.isAlive());
     }
 
+    @Test
     public void test_processAssignment() throws IOException {
         Process mockProcess = createMockProcess("assignment test");
         JobProcess jobProcess = new JobProcess(mockProcess);
 
         Process assignedProcess = jobProcess.getProcess();
 
-        assertSame("Process should be exactly the same instance", mockProcess, assignedProcess);
+        assertSame(mockProcess, assignedProcess, "Process should be exactly the same instance");
     }
 
     private Process createMockProcess(String output) {

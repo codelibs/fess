@@ -25,9 +25,11 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
+import org.junit.jupiter.api.Test;
 
 public class QueryProcessorTest extends UnitFessTestCase {
 
+    @Test
     public void test_executeWithFilter() {
         final AtomicBoolean called = new AtomicBoolean(false);
         QueryProcessor queryProcessor = new QueryProcessor() {

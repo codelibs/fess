@@ -18,9 +18,11 @@ package org.codelibs.fess.exception;
 import jakarta.servlet.ServletException;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ServletRuntimeExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withServletException() {
         // Create a ServletException with a message
         String errorMessage = "Test servlet error message";
@@ -38,6 +40,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         assertTrue(runtimeException.getMessage().contains(errorMessage));
     }
 
+    @Test
     public void test_constructor_withServletExceptionWithCause() {
         // Create a root cause exception
         String rootCauseMessage = "Root cause error";
@@ -60,6 +63,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         assertTrue(runtimeException.getMessage().contains(servletErrorMessage));
     }
 
+    @Test
     public void test_constructor_withServletExceptionNoMessage() {
         // Create a ServletException without a message
         ServletException servletException = new ServletException();
@@ -75,6 +79,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         assertTrue(runtimeException.getMessage().contains(ServletException.class.getName()));
     }
 
+    @Test
     public void test_instanceOfRuntimeException() {
         // Create and wrap a ServletException
         ServletException servletException = new ServletException("Test error");
@@ -86,6 +91,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         assertTrue(runtimeException instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Create a ServletException with a specific message
         String errorMessage = "Stack trace test error";
@@ -105,6 +111,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         assertTrue(causeStackTrace.length > 0);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test that the exception can be thrown and caught properly
         ServletException originalException = new ServletException("Throw test");
@@ -121,6 +128,7 @@ public class ServletRuntimeExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_serialization() {
         // Test that the serialVersionUID is properly defined
         // This test verifies that the class can be instantiated and has the serial version UID

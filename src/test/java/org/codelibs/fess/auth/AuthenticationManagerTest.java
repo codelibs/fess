@@ -21,24 +21,30 @@ import java.util.List;
 import org.codelibs.fess.auth.chain.AuthenticationChain;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AuthenticationManagerTest extends UnitFessTestCase {
 
     private AuthenticationManager authenticationManager;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         authenticationManager = new AuthenticationManager();
     }
 
     // Test default constructor
+    @Test
     public void test_constructor() {
         AuthenticationManager manager = new AuthenticationManager();
         assertNotNull(manager);
     }
 
     // Test insert with no chains
+    @Test
     public void test_insert_noChains() {
         User user = createTestUser("testuser");
         authenticationManager.insert(user);
@@ -46,6 +52,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test insert with single chain
+    @Test
     public void test_insert_singleChain() {
         User user = createTestUser("testuser");
         TestAuthenticationChain chain = new TestAuthenticationChain();
@@ -58,6 +65,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test insert with multiple chains
+    @Test
     public void test_insert_multipleChains() {
         User user = createTestUser("testuser");
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
@@ -79,12 +87,14 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test changePassword with no chains
+    @Test
     public void test_changePassword_noChains() {
         boolean result = authenticationManager.changePassword("testuser", "newpass");
         assertTrue(result); // Returns true when no chains present
     }
 
     // Test changePassword with single chain success
+    @Test
     public void test_changePassword_singleChain_success() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = true;
@@ -99,6 +109,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test changePassword with single chain failure
+    @Test
     public void test_changePassword_singleChain_failure() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = false;
@@ -111,6 +122,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test changePassword with multiple chains all success
+    @Test
     public void test_changePassword_multipleChains_allSuccess() {
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
         TestAuthenticationChain chain2 = new TestAuthenticationChain();
@@ -132,6 +144,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test changePassword with multiple chains one failure
+    @Test
     public void test_changePassword_multipleChains_oneFailure() {
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
         TestAuthenticationChain chain2 = new TestAuthenticationChain();
@@ -154,6 +167,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test delete with no chains
+    @Test
     public void test_delete_noChains() {
         User user = createTestUser("testuser");
         authenticationManager.delete(user);
@@ -161,6 +175,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test delete with single chain
+    @Test
     public void test_delete_singleChain() {
         User user = createTestUser("testuser");
         TestAuthenticationChain chain = new TestAuthenticationChain();
@@ -173,6 +188,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test delete with multiple chains
+    @Test
     public void test_delete_multipleChains() {
         User user = createTestUser("testuser");
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
@@ -194,6 +210,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test load with no chains
+    @Test
     public void test_load_noChains() {
         User user = createTestUser("testuser");
         User result = authenticationManager.load(user);
@@ -201,6 +218,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test load with single chain
+    @Test
     public void test_load_singleChain() {
         User user = createTestUser("testuser");
         User loadedUser = createTestUser("loadeduser");
@@ -216,6 +234,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test load with multiple chains (chained loading)
+    @Test
     public void test_load_multipleChains() {
         User user = createTestUser("user0");
         User user1 = createTestUser("user1");
@@ -248,6 +267,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test load with null result from chain
+    @Test
     public void test_load_withNullResult() {
         User user = createTestUser("testuser");
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
@@ -269,6 +289,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test addChain single
+    @Test
     public void test_addChain_single() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         authenticationManager.addChain(chain);
@@ -280,6 +301,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test addChain multiple
+    @Test
     public void test_addChain_multiple() {
         TestAuthenticationChain chain1 = new TestAuthenticationChain();
         TestAuthenticationChain chain2 = new TestAuthenticationChain();
@@ -299,6 +321,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test addChain null handling
+    @Test
     public void test_addChain_withNull() {
         // ArrayUtils.addAll handles null gracefully by adding it to the array
         authenticationManager.addChain(null);
@@ -315,6 +338,7 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
     }
 
     // Test chains order preservation
+    @Test
     public void test_chains_orderPreservation() {
         List<TestAuthenticationChain> chains = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

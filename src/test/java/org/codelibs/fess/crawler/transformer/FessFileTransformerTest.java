@@ -28,12 +28,16 @@ import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessFileTransformerTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new DataSerializer(), "dataSerializer");
         // Setup protocolHelper with test configuration
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -78,7 +82,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
@@ -91,6 +95,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_decodeUrl_ok() throws Exception {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -124,6 +129,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         assertEquals(exp, transformer.decodeUrlAsName(url, false));
     }
 
+    @Test
     public void test_getFileName_ok() throws Exception {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -193,11 +199,13 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         assertEquals(exp, transformer.getFileName(url, Constants.UTF_8));
     }
 
+    @Test
     public void test_decodeUrl_null() throws Exception {
         final FessFileTransformer transformer = createInstance();
         assertNull(transformer.decodeUrlAsName(null, true));
     }
 
+    @Test
     public void test_getHost_ok() {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -252,6 +260,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_getHost_unexpected() {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -290,6 +299,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_getSite_ok() {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -351,6 +361,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
     }
 
+    @Test
     public void test_getSite_ok_len10() {
         String url, exp;
         final FessFileTransformer transformer = new FessFileTransformer() {
@@ -367,6 +378,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_getSite_unexpected() {
         String url, exp;
         final FessFileTransformer transformer = createInstance();
@@ -400,6 +412,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
         assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
     }
 
+    @Test
     public void test_processFieldConfigs() {
         final FessFileTransformer transformer = createInstance();
         final Map<String, String> params = Maps.of("foo", "cache", "bar", "overwrite", "baz", "cache|overwrite");

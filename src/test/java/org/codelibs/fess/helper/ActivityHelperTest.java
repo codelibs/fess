@@ -24,6 +24,9 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.credential.LoginCredential;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ActivityHelperTest extends UnitFessTestCase {
 
@@ -31,9 +34,10 @@ public class ActivityHelperTest extends UnitFessTestCase {
 
     private ThreadLocal<String> localLogMsg = new ThreadLocal<>();
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         activityHelper = new ActivityHelper() {
             @Override
             protected void printByLtsv(final Map<String, String> valueMap) {
@@ -61,6 +65,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         };
     }
 
+    @Test
     public void test_login() {
         activityHelper.useEcsFormat = false;
         activityHelper.login(OptionalThing.empty());
@@ -73,12 +78,14 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:LOGIN\tuser:testuser\tpermissions:111|222", localLogMsg.get());
     }
 
+    @Test
     public void test_loginFailure() {
         activityHelper.useEcsFormat = false;
         activityHelper.loginFailure(OptionalThing.empty());
         assertEquals("action:LOGIN_FAILURE", localLogMsg.get());
     }
 
+    @Test
     public void test_logout() {
         activityHelper.useEcsFormat = false;
         activityHelper.logout(OptionalThing.empty());
@@ -91,6 +98,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:LOGOUT\tuser:testuser\tpermissions:111|222", localLogMsg.get());
     }
 
+    @Test
     public void test_access() {
         activityHelper.useEcsFormat = false;
         activityHelper.access(OptionalThing.empty(), "/", "aaa");
@@ -103,6 +111,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:ACCESS\tuser:testuser\tpath:/aaa/bbb\texecute:ccc", localLogMsg.get());
     }
 
+    @Test
     public void test_permissionChanged() {
         activityHelper.useEcsFormat = false;
         activityHelper.permissionChanged(OptionalThing.empty());
@@ -115,6 +124,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:UPDATE_PERMISSION\tuser:testuser\tpermissions:111|222", localLogMsg.get());
     }
 
+    @Test
     public void test_print() {
         activityHelper.useEcsFormat = false;
         activityHelper.print("aaa", OptionalThing.empty(), Map.of());
@@ -127,6 +137,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:CCC\tuser:testuser\t111:222\t333:444", localLogMsg.get());
     }
 
+    @Test
     public void test_login_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.login(OptionalThing.empty());
@@ -145,6 +156,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    @Test
     public void test_loginFailure_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.loginFailure(OptionalThing.empty());
@@ -153,6 +165,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    @Test
     public void test_logout_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.logout(OptionalThing.empty());
@@ -171,6 +184,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    @Test
     public void test_access_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.access(OptionalThing.empty(), "/", "aaa");
@@ -189,6 +203,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    @Test
     public void test_permissionChanged_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.permissionChanged(OptionalThing.empty());
@@ -207,6 +222,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    @Test
     public void test_print_ecs() {
         activityHelper.useEcsFormat = true;
         activityHelper.print("aaa", OptionalThing.empty(), Map.of());
@@ -227,18 +243,22 @@ public class ActivityHelperTest extends UnitFessTestCase {
 
     // ===== Script Execution Audit Log Tests =====
 
+    @Test
     public void test_normalizeScript_null() {
         assertEquals("-", activityHelper.normalizeScript(null));
     }
 
+    @Test
     public void test_normalizeScript_empty() {
         assertEquals("", activityHelper.normalizeScript(""));
     }
 
+    @Test
     public void test_normalizeScript_normal() {
         assertEquals("return 1 + 2", activityHelper.normalizeScript("return 1 + 2"));
     }
 
+    @Test
     public void test_normalizeScript_withControlCharacters() {
         assertEquals("line1 line2 line3", activityHelper.normalizeScript("line1\nline2\rline3"));
         assertEquals("tab1_tab2", activityHelper.normalizeScript("tab1\ttab2"));
@@ -246,6 +266,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("mixed_   ", activityHelper.normalizeScript("mixed\t\n\r\n"));
     }
 
+    @Test
     public void test_normalizeScript_longScript() {
         // Create a script longer than 1000 characters
         StringBuilder sb = new StringBuilder();
@@ -261,6 +282,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(result.endsWith("..."));
     }
 
+    @Test
     public void test_normalizeScript_exactlyMaxLength() {
         // Create a script of exactly 1000 characters
         StringBuilder sb = new StringBuilder();
@@ -276,6 +298,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertFalse(result.endsWith("..."));
     }
 
+    @Test
     public void test_normalizeScript_lessThanMaxLength() {
         // Create a script of 999 characters
         StringBuilder sb = new StringBuilder();
@@ -331,6 +354,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_setLoggerName() {
         String originalLoggerName = activityHelper.loggerName;
         activityHelper.setLoggerName("test.logger");
@@ -338,6 +362,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         activityHelper.setLoggerName(originalLoggerName);
     }
 
+    @Test
     public void test_setPermissionSeparator() {
         activityHelper.setPermissionSeparator(",");
         activityHelper.useEcsFormat = false;
@@ -345,6 +370,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals("action:LOGIN\tuser:testuser\tpermissions:111,222", localLogMsg.get());
     }
 
+    @Test
     public void test_setEcsVersion() {
         activityHelper.setEcsVersion("2.0.0");
         activityHelper.useEcsFormat = true;
@@ -352,6 +378,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(localLogMsg.get().contains("\"ecs.version\":\"2.0.0\""));
     }
 
+    @Test
     public void test_setEcsServiceName() {
         activityHelper.setEcsServiceName("test-service");
         activityHelper.useEcsFormat = true;
@@ -359,6 +386,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(localLogMsg.get().contains("\"service.name\":\"test-service\""));
     }
 
+    @Test
     public void test_setEcsEventDataset() {
         activityHelper.setEcsEventDataset("test-dataset");
         activityHelper.useEcsFormat = true;
@@ -366,6 +394,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(localLogMsg.get().contains("\"event.dataset\":\"test-dataset\""));
     }
 
+    @Test
     public void test_setEnvMap() {
         Map<String, String> testEnv = new HashMap<>();
         testEnv.put("TEST_KEY", "TEST_VALUE");
@@ -373,12 +402,14 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertEquals(testEnv, activityHelper.getEnvMap());
     }
 
+    @Test
     public void test_getEnvMap_withoutCustomMap() {
         activityHelper.setEnvMap(null);
         Map<String, String> envMap = activityHelper.getEnvMap();
         assertNotNull(envMap);
     }
 
+    @Test
     public void test_init_withDockerEnvironment() {
         Map<String, String> dockerEnv = new HashMap<>();
         dockerEnv.put("FESS_APP_TYPE", "docker");
@@ -387,6 +418,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(activityHelper.useEcsFormat);
     }
 
+    @Test
     public void test_init_withNonDockerEnvironment() {
         Map<String, String> nonDockerEnv = new HashMap<>();
         nonDockerEnv.put("FESS_APP_TYPE", "standalone");
@@ -395,6 +427,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertFalse(activityHelper.useEcsFormat);
     }
 
+    @Test
     public void test_loginFailure_withCredential() {
         activityHelper.useEcsFormat = false;
         LoginCredential credential = new TestLoginCredential();
@@ -404,6 +437,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("class:TestLoginCredential"));
     }
 
+    @Test
     public void test_print_withTabReplacement() {
         activityHelper.useEcsFormat = false;
         Map<String, String> params = new HashMap<>();
@@ -414,6 +448,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("key\twith\ttabs:value_with_tabs"));
     }
 
+    @Test
     public void test_print_parameterSorting() {
         activityHelper.useEcsFormat = false;
         Map<String, String> params = new HashMap<>();
@@ -426,6 +461,7 @@ public class ActivityHelperTest extends UnitFessTestCase {
         assertTrue(result.indexOf("m_param") < result.indexOf("z_param"));
     }
 
+    @Test
     public void test_printByEcs_escaping() {
         activityHelper.useEcsFormat = true;
         Map<String, String> params = new HashMap<>();

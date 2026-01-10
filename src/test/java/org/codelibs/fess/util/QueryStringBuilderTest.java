@@ -25,13 +25,17 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class QueryStringBuilderTest extends UnitFessTestCase {
 
+    @Test
     public void test_query() {
         assertEquals("", getQuery("", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
     }
 
+    @Test
     public void test_conditions_q() {
         final String k = "q";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -41,6 +45,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("aaa bbb", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
 
+    @Test
     public void test_conditions_epq() {
         final String k = "epq";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -51,6 +56,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("\"aaa bbb\"", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
 
+    @Test
     public void test_conditions_oq() {
         final String k = "oq";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -61,6 +67,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("(aaa OR bbb)", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
 
+    @Test
     public void test_conditions_eq() {
         final String k = "nq";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -70,6 +77,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("NOT aaa NOT bbb", getAsQuery("111", Collections.singletonMap(k, new String[] { "aaa bbb" })));
     }
 
+    @Test
     public void test_escape() {
         assertEquals("\\/", getQuery("/", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
         assertEquals("aaa\\/bbb", getQuery("aaa/bbb", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
@@ -182,6 +190,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
 
     // Additional test methods for improved coverage
 
+    @Test
     public void test_conditions_filetype() {
         final String k = "filetype";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -190,6 +199,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("filetype:\"pdf\" filetype:\"doc\"", getAsQuery(Collections.singletonMap(k, new String[] { "pdf", "doc" })));
     }
 
+    @Test
     public void test_conditions_sitesearch() {
         final String k = "sitesearch";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -198,6 +208,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("site:example.com site:test.org", getAsQuery(Collections.singletonMap(k, new String[] { "example.com", "test.org" })));
     }
 
+    @Test
     public void test_conditions_timestamp() {
         final String k = "timestamp";
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
@@ -207,6 +218,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
                 getAsQuery(Collections.singletonMap(k, new String[] { "2023-01-01", "2023-12-31" })));
     }
 
+    @Test
     public void test_conditions_occurrence() {
         final String k = "occt";
         assertEquals("allintitle:", getAsQuery(Collections.singletonMap(k, new String[] { "allintitle" })));
@@ -215,6 +227,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "" })));
     }
 
+    @Test
     public void test_extraQueries() {
         assertEquals("test", getQuery("", new String[] { "test" }, Collections.emptyMap(), Collections.emptyMap(), false));
         assertEquals("test (query1 OR query2)",
@@ -225,6 +238,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
                 getQuery("", new String[] { "query1", "query2" }, Collections.emptyMap(), Collections.emptyMap(), false));
     }
 
+    @Test
     public void test_fields() {
         final Map<String, String[]> fields = Collections.singletonMap("title", new String[] { "test" });
         assertEquals("title:\"test\"", getQuery("", new String[0], fields, Collections.emptyMap(), false));
@@ -236,6 +250,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("", getQuery("", new String[0], nullFields, Collections.emptyMap(), false));
     }
 
+    @Test
     public void test_sortField() {
         final String query = new QueryStringBuilder().params(createSimpleParams("test")).sortField("score").build();
         assertEquals("test sort:score", query);
@@ -244,12 +259,14 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("test", queryWithoutSort);
     }
 
+    @Test
     public void test_quote() {
         // Test quote functionality through the builder behavior
         assertEquals("test", getQuery("test", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
         assertEquals("hello world", getQuery("hello world", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
     }
 
+    @Test
     public void test_escapeQuery() {
         // Test escaping functionality through escape parameter
         assertEquals("test", getQuery("test", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
@@ -260,6 +277,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("\\\\", getQuery("\\", new String[0], Collections.emptyMap(), Collections.emptyMap(), true));
     }
 
+    @Test
     public void test_isOccurrence() {
         // Test through occurrence conditions
         final String k = "occt";
@@ -268,12 +286,14 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertEquals("", getAsQuery(Collections.singletonMap(k, new String[] { "invalid" })));
     }
 
+    @Test
     public void test_escape_method() {
         // Test escape functionality through quote escaping in epq conditions
         final String k = "epq";
         assertEquals("\"a\\\"aa\"", getAsQuery(Collections.singletonMap(k, new String[] { "a\"aa" })));
     }
 
+    @Test
     public void test_complexConditions() {
         final Map<String, String[]> conditions = new HashMap<>();
         conditions.put("q", new String[] { "search term" });
@@ -292,6 +312,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertTrue(result.contains("site:example.com"));
     }
 
+    @Test
     public void test_builderChaining() {
         QueryStringBuilder builder = new QueryStringBuilder();
         assertSame(builder, builder.params(createSimpleParams("test")));
@@ -299,6 +320,7 @@ public class QueryStringBuilderTest extends UnitFessTestCase {
         assertSame(builder, builder.escape(true));
     }
 
+    @Test
     public void test_emptyAndNullInputs() {
         assertEquals("", getQuery(null, new String[0], Collections.emptyMap(), Collections.emptyMap(), false));
         assertEquals("", getQuery("", new String[0], Collections.emptyMap(), Collections.emptyMap(), false));

@@ -18,19 +18,25 @@ package org.codelibs.fess.mylasta.action;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessUserBeanTest extends UnitFessTestCase {
 
     private FessUserBean fessUserBean;
     private TestFessUser testUser;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         testUser = new TestFessUser();
         fessUserBean = new FessUserBean(testUser);
     }
 
+    @Test
     public void test_getUserId() {
         // Test with normal user
         testUser.setName("testuser");
@@ -41,6 +47,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertEquals("admin", fessUserBean.getUserId());
     }
 
+    @Test
     public void test_getPermissions() {
         // Test with empty permissions
         testUser.setPermissions(new String[] {});
@@ -62,6 +69,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertEquals("delete", permissions[2]);
     }
 
+    @Test
     public void test_getRoles() {
         // Test with empty roles
         testUser.setRoleNames(new String[] {});
@@ -83,6 +91,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertEquals("manager", roles[2]);
     }
 
+    @Test
     public void test_getGroups() {
         // Test with empty groups
         testUser.setGroupNames(new String[] {});
@@ -104,6 +113,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertEquals("managers", groups[2]);
     }
 
+    @Test
     public void test_isEditable() {
         // Test with non-editable user (default)
         testUser.setEditable(false);
@@ -114,6 +124,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertTrue(fessUserBean.isEditable());
     }
 
+    @Test
     public void test_hasRole() {
         // Test with no roles
         testUser.setRoleNames(new String[] {});
@@ -137,6 +148,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertFalse(fessUserBean.hasRole(null));
     }
 
+    @Test
     public void test_hasRoles() {
         // Test with no roles
         testUser.setRoleNames(new String[] {});
@@ -161,6 +173,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertFalse(fessUserBean.hasRoles(new String[] {}));
     }
 
+    @Test
     public void test_hasGroup() {
         // Test with no groups
         testUser.setGroupNames(new String[] {});
@@ -184,6 +197,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertFalse(fessUserBean.hasGroup(null));
     }
 
+    @Test
     public void test_hasGroups() {
         // Test with no groups
         testUser.setGroupNames(new String[] {});
@@ -208,6 +222,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertFalse(fessUserBean.hasGroups(new String[] {}));
     }
 
+    @Test
     public void test_getFessUser() {
         // Test that the same user object is returned
         assertSame(testUser, fessUserBean.getFessUser());
@@ -219,6 +234,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertSame(anotherUser, anotherBean.getFessUser());
     }
 
+    @Test
     public void test_empty() {
         // Test empty user bean creation
         FessUserBean emptyBean = FessUserBean.empty();
@@ -260,6 +276,7 @@ public class FessUserBeanTest extends UnitFessTestCase {
         assertFalse(emptyBean.hasGroups(new String[] { "developers" }));
     }
 
+    @Test
     public void test_serialization() {
         // Test that FessUserBean is serializable
         assertTrue(fessUserBean instanceof java.io.Serializable);

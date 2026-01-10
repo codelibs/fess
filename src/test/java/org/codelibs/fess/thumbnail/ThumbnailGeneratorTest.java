@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ThumbnailGeneratorTest extends UnitFessTestCase {
 
@@ -31,9 +34,10 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
     private File tempOutputFile;
     private Path tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         tempDir = Files.createTempDirectory("thumbnail-test");
         tempOutputFile = Files.createTempFile(tempDir, "thumbnail", ".png").toFile();
 
@@ -42,7 +46,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         // Clean up temp files
         if (tempOutputFile != null && tempOutputFile.exists()) {
             tempOutputFile.delete();
@@ -59,11 +63,13 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         super.tearDown();
     }
 
+    @Test
     public void test_getName() {
         // Test getting the generator name
         assertEquals("TestGenerator", thumbnailGenerator.getName());
     }
 
+    @Test
     public void test_generate_withValidThumbnailId() {
         // Test successful thumbnail generation
         String thumbnailId = "test-thumbnail-001";
@@ -71,22 +77,26 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertTrue(tempOutputFile.exists());
     }
 
+    @Test
     public void test_generate_withNullThumbnailId() {
         // Test generation with null thumbnail ID
         assertFalse(thumbnailGenerator.generate(null, tempOutputFile));
     }
 
+    @Test
     public void test_generate_withEmptyThumbnailId() {
         // Test generation with empty thumbnail ID
         assertFalse(thumbnailGenerator.generate("", tempOutputFile));
     }
 
+    @Test
     public void test_generate_withNullOutputFile() {
         // Test generation with null output file
         String thumbnailId = "test-thumbnail-002";
         assertFalse(thumbnailGenerator.generate(thumbnailId, null));
     }
 
+    @Test
     public void test_generate_withInvalidOutputPath() throws IOException {
         // Test generation with non-writable output file
         File readOnlyDir = Files.createTempDirectory(tempDir, "readonly").toFile();
@@ -100,6 +110,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         readOnlyDir.setWritable(true);
     }
 
+    @Test
     public void test_isTarget_withSupportedMimeType() {
         // Test with supported document type
         Map<String, Object> docMap = new HashMap<>();
@@ -107,6 +118,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertTrue(thumbnailGenerator.isTarget(docMap));
     }
 
+    @Test
     public void test_isTarget_withUnsupportedMimeType() {
         // Test with unsupported document type
         Map<String, Object> docMap = new HashMap<>();
@@ -114,17 +126,20 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertFalse(thumbnailGenerator.isTarget(docMap));
     }
 
+    @Test
     public void test_isTarget_withNullDocMap() {
         // Test with null document map
         assertFalse(thumbnailGenerator.isTarget(null));
     }
 
+    @Test
     public void test_isTarget_withEmptyDocMap() {
         // Test with empty document map
         Map<String, Object> docMap = new HashMap<>();
         assertFalse(thumbnailGenerator.isTarget(docMap));
     }
 
+    @Test
     public void test_isTarget_withNullMimeType() {
         // Test with null mimetype value
         Map<String, Object> docMap = new HashMap<>();
@@ -132,11 +147,13 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertFalse(thumbnailGenerator.isTarget(docMap));
     }
 
+    @Test
     public void test_isAvailable() {
         // Test availability check
         assertTrue(thumbnailGenerator.isAvailable());
     }
 
+    @Test
     public void test_destroy() {
         // Test destroy method - should not throw exception
         thumbnailGenerator.destroy();
@@ -144,6 +161,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertFalse(thumbnailGenerator.isAvailable());
     }
 
+    @Test
     public void test_createTask_withValidParams() {
         // Test task creation with valid parameters
         String path = "/path/to/document.pdf";
@@ -161,6 +179,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals("application/pdf", task.getValue3());
     }
 
+    @Test
     public void test_createTask_withNullPath() {
         // Test task creation with null path
         Map<String, Object> docMap = new HashMap<>();
@@ -170,6 +189,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertNull(task);
     }
 
+    @Test
     public void test_createTask_withEmptyPath() {
         // Test task creation with empty path
         Map<String, Object> docMap = new HashMap<>();
@@ -179,6 +199,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertNull(task);
     }
 
+    @Test
     public void test_createTask_withNullDocMap() {
         // Test task creation with null document map
         String path = "/path/to/document.pdf";
@@ -187,6 +208,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertNull(task);
     }
 
+    @Test
     public void test_createTask_withEmptyDocMap() {
         // Test task creation with empty document map
         String path = "/path/to/document.pdf";
@@ -196,6 +218,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertNull(task);
     }
 
+    @Test
     public void test_multipleGenerations() {
         // Test multiple thumbnail generations
         for (int i = 0; i < 5; i++) {
@@ -206,6 +229,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isTarget_withVariousMimeTypes() {
         // Test with various MIME types
         String[] supportedTypes = { "application/pdf", "image/jpeg", "image/png" };
@@ -224,6 +248,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_concurrentOperations() throws InterruptedException {
         // Test thread safety with concurrent operations
         final int threadCount = 10;

@@ -28,6 +28,7 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.RangeQueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class TermRangeQueryCommandTest extends QueryTestBase {
     private TermRangeQueryCommand queryCommand;
@@ -39,10 +40,12 @@ public class TermRangeQueryCommandTest extends QueryTestBase {
         queryCommand.register();
     }
 
+    @Test
     public void test_getQueryClassName() {
         assertEquals("TermRangeQuery", queryCommand.getQueryClassName());
     }
 
+    @Test
     public void test_execute_withInvalidQuery() {
         try {
             QueryContext context = new QueryContext("test", false);
@@ -55,6 +58,7 @@ public class TermRangeQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_convertTermRangeQuery_searchField_inclusive() throws Exception {
         QueryContext context = new QueryContext("test", false);
         TermRangeQuery query = new TermRangeQuery("title", new BytesRef("aaa"), new BytesRef("zzz"), true, true);

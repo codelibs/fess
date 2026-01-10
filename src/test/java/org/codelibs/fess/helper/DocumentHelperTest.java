@@ -21,14 +21,19 @@ import java.util.Map;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.extractor.impl.TikaExtractor;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DocumentHelperTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
+    @Test
     public void test_getContent() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -46,6 +51,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("123 abc", documentHelper.getContent(null, responseData, " 123\nabc ", dataMap));
     }
 
+    @Test
     public void test_getContent_maxAlphanum() {
         DocumentHelper documentHelper = new DocumentHelper() {
             protected int getMaxAlphanumTermSize() {
@@ -68,6 +74,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("12", documentHelper.getContent(null, responseData, " 123abc ", dataMap));
     }
 
+    @Test
     public void test_getContent_maxSymbol() {
         DocumentHelper documentHelper = new DocumentHelper() {
             protected int getMaxSymbolTermSize() {
@@ -100,6 +107,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("!\"", documentHelper.getContent(null, responseData, "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", dataMap));
     }
 
+    @Test
     public void test_getDigest() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -122,6 +130,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("１２３４５６７...", documentHelper.getDigest(responseData, "１２３４５６７８９０１２３４５６７８９０", dataMap, 10));
     }
 
+    @Test
     public void test_encodeSimilarDocHash() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -148,6 +157,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertNull(documentHelper.encodeSimilarDocHash(null));
     }
 
+    @Test
     public void test_decodeSimilarDocHash() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -174,6 +184,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertNull(documentHelper.decodeSimilarDocHash(null));
     }
 
+    @Test
     public void test_appendLineNumber() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -189,6 +200,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("L1:aaa\nL2:bbb\nL3:ccc", documentHelper.appendLineNumber("L", "aaa\nbbb\nccc"));
     }
 
+    @Test
     public void test_init() {
         DocumentHelper documentHelper = new DocumentHelper();
 
@@ -199,6 +211,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getTitle() {
         DocumentHelper documentHelper = new DocumentHelper();
         ResponseData responseData = new ResponseData();
@@ -218,6 +231,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("１２３ タイトル", documentHelper.getTitle(responseData, "　１２３　タイトル　", dataMap));
     }
 
+    @Test
     public void test_getContent_withTikaExtractor() {
         DocumentHelper documentHelper = new DocumentHelper();
         ResponseData responseData = new ResponseData();

@@ -20,17 +20,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AbstractConfigHelperTest extends UnitFessTestCase {
 
     private TestConfigHelper configHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         configHelper = new TestConfigHelper();
     }
 
+    @Test
     public void test_setReloadInterval() {
         assertEquals(1000L, configHelper.reloadInterval);
 
@@ -44,6 +49,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertEquals(-1L, configHelper.reloadInterval);
     }
 
+    @Test
     public void test_waitForNext_withPositiveInterval() throws InterruptedException {
         configHelper.setReloadInterval(20L);
 
@@ -57,6 +63,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertTrue("Expected less than 200ms sleep, got " + elapsed + "ms", elapsed < 200);
     }
 
+    @Test
     public void test_waitForNext_withZeroInterval() {
         configHelper.setReloadInterval(0L);
 
@@ -68,6 +75,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertTrue("Expected minimal sleep time, got " + elapsed + "ms", elapsed < 50);
     }
 
+    @Test
     public void test_waitForNext_withNegativeInterval() {
         configHelper.setReloadInterval(-100L);
 
@@ -79,6 +87,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertTrue("Expected minimal sleep time with negative interval, got " + elapsed + "ms", elapsed < 50);
     }
 
+    @Test
     public void test_update_callsLoad() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         configHelper.setLoadCallback(() -> {
@@ -92,6 +101,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertEquals(1, configHelper.getLoadCallCount());
     }
 
+    @Test
     public void test_update_multipleCallsIncrementLoadCount() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(3);
         configHelper.setLoadCallback(() -> {
@@ -107,6 +117,7 @@ public class AbstractConfigHelperTest extends UnitFessTestCase {
         assertEquals(3, configHelper.getLoadCallCount());
     }
 
+    @Test
     public void test_load_returnsExpectedValue() {
         configHelper.setLoadCallback(() -> 42);
         assertEquals(42, configHelper.load());

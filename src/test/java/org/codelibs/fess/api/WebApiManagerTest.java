@@ -29,9 +29,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class WebApiManagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_matches_withPathBasedImplementation() {
         // Test simple path-based matching
         WebApiManager manager = new TestWebApiManager("/api/v1");
@@ -47,12 +49,14 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertFalse(manager.matches(request));
     }
 
+    @Test
     public void test_matches_withNullRequest() {
         // Test null request handling
         WebApiManager manager = new TestWebApiManager("/api");
         assertFalse(manager.matches(null));
     }
 
+    @Test
     public void test_matches_withEmptyPath() {
         // Test empty path matching
         WebApiManager manager = new TestWebApiManager("");
@@ -65,6 +69,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertTrue(manager.matches(request));
     }
 
+    @Test
     public void test_matches_withRootPath() {
         // Test root path matching
         WebApiManager manager = new TestWebApiManager("/");
@@ -80,6 +85,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertTrue(manager.matches(request));
     }
 
+    @Test
     public void test_matches_withExactMatch() {
         // Test exact path matching
         WebApiManager manager = new ExactMatchWebApiManager("/api/search");
@@ -95,6 +101,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertFalse(manager.matches(request));
     }
 
+    @Test
     public void test_process_basicExecution() throws IOException, ServletException {
         // Test basic process execution
         TestWebApiManager manager = new TestWebApiManager("/api");
@@ -110,6 +117,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertFalse(chain.wasDoFilterCalled());
     }
 
+    @Test
     public void test_process_withChainContinuation() throws IOException, ServletException {
         // Test process with chain continuation
         ChainingWebApiManager manager = new ChainingWebApiManager();
@@ -124,6 +132,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertTrue(chain.wasDoFilterCalled());
     }
 
+    @Test
     public void test_process_withResponseWriting() throws IOException, ServletException {
         // Test process with response writing
         ResponseWritingWebApiManager manager = new ResponseWritingWebApiManager("test response");
@@ -138,6 +147,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertEquals(200, response.getStatus());
     }
 
+    @Test
     public void test_process_withErrorHandling() throws IOException, ServletException {
         // Test error handling in process
         ErrorWebApiManager manager = new ErrorWebApiManager();
@@ -154,6 +164,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_withNullParameters() throws IOException, ServletException {
         // Test null parameter handling
         TestWebApiManager manager = new TestWebApiManager("/api");
@@ -166,6 +177,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_withStatusCodeSetting() throws IOException, ServletException {
         // Test setting different status codes
         StatusCodeWebApiManager manager = new StatusCodeWebApiManager(404);
@@ -184,6 +196,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertEquals(201, response.getStatus());
     }
 
+    @Test
     public void test_process_withHeaderSetting() throws IOException, ServletException {
         // Test setting headers
         HeaderSettingWebApiManager manager = new HeaderSettingWebApiManager();
@@ -198,6 +211,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertEquals("no-cache", response.getHeader("Cache-Control"));
     }
 
+    @Test
     public void test_matches_withPatternMatching() throws IOException, ServletException {
         // Test regex pattern matching
         PatternWebApiManager manager = new PatternWebApiManager("^/api/v[0-9]+/.*");
@@ -217,6 +231,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertFalse(manager.matches(request));
     }
 
+    @Test
     public void test_matches_withSpecialCharacters() {
         // Test matching with special characters in path
         WebApiManager manager = new TestWebApiManager("/api/");
@@ -229,6 +244,7 @@ public class WebApiManagerTest extends UnitFessTestCase {
         assertTrue(manager.matches(request));
     }
 
+    @Test
     public void test_process_withMultipleOperations() throws IOException, ServletException {
         // Test multiple operations in process
         ComplexWebApiManager manager = new ComplexWebApiManager();

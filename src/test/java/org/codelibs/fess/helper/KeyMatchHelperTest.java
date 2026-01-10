@@ -29,19 +29,24 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class KeyMatchHelperTest extends UnitFessTestCase {
 
     private KeyMatchHelper keyMatchHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         keyMatchHelper = new KeyMatchHelper();
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         ComponentUtil.register(new VirtualHostHelper(), "virtualHostHelper");
     }
 
+    @Test
     public void test_init() {
         try {
             keyMatchHelper.init();
@@ -51,17 +56,20 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getQueryMap_exists() {
         Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> result = keyMatchHelper.getQueryMap("");
         assertNotNull(result);
     }
 
+    @Test
     public void test_getQueryMap_notExists() {
         Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> result = keyMatchHelper.getQueryMap("nonexistent");
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
+    @Test
     public void test_buildQuery_emptyKeywords() {
         try {
             List<String> keywordList = Collections.emptyList();
@@ -82,6 +90,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildQuery_nullKeywords() {
         List<String> keywordList = null;
         List<FilterFunctionBuilder> functionBuilders = new ArrayList<>();
@@ -100,6 +109,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getBoostedDocumentList_noBoostList() {
         KeyMatch keyMatch = new KeyMatch();
         keyMatch.setId("nonexistent");
@@ -117,6 +127,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         // assertEquals(0, result.size()); // Commented out due to variable scope
     }
 
+    @Test
     public void test_getBoostedDocumentList_withVirtualHost() {
         KeyMatch keyMatch = new KeyMatch();
         keyMatch.setId("km1");
@@ -134,6 +145,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         // assertEquals(0, result.size()); // Commented out due to variable scope // No data loaded for this virtual host
     }
 
+    @Test
     public void test_getBoostedDocumentList_blankVirtualHost() {
         KeyMatch keyMatch = new KeyMatch();
         keyMatch.setId("km1");
@@ -151,6 +163,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         // assertEquals(0, result.size()); // Commented out due to variable scope // No data loaded
     }
 
+    @Test
     public void test_toLowerCase_privateMethod() throws Exception {
         // Test private method using reflection
         Method method = KeyMatchHelper.class.getDeclaredMethod("toLowerCase", String.class);
@@ -172,6 +185,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         assertEquals("test123", result);
     }
 
+    @Test
     public void test_buildQuery_caseSensitivity() {
         List<String> keywordList = Arrays.asList("Java", "JAVA", "java");
         List<FilterFunctionBuilder> functionBuilders = new ArrayList<>();
@@ -189,6 +203,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         assertEquals(0, functionBuilders.size()); // No data loaded
     }
 
+    @Test
     public void test_load_emptyState() {
         try {
             int result = keyMatchHelper.load();
@@ -199,12 +214,14 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getQueryMap_nullKey() {
         Map<String, List<Tuple3<String, QueryBuilder, ScoreFunctionBuilder<?>>>> result = keyMatchHelper.getQueryMap(null);
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
+    @Test
     public void test_getBoostedDocumentList_emptyTerm() {
         KeyMatch keyMatch = new KeyMatch();
         keyMatch.setId("km1");
@@ -222,6 +239,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         // assertEquals(0, result.size()); // Commented out due to variable scope
     }
 
+    @Test
     public void test_getBoostedDocumentList_nullTerm() {
         KeyMatch keyMatch = new KeyMatch();
         keyMatch.setId("km1");
@@ -239,6 +257,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         // assertEquals(0, result.size()); // Commented out due to variable scope
     }
 
+    @Test
     public void test_buildQuery_withVariousKeywords() {
         List<String> keywordList = Arrays.asList("java", "programming", "search", "");
         List<FilterFunctionBuilder> functionBuilders = new ArrayList<>();
@@ -256,6 +275,7 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         assertEquals(0, functionBuilders.size()); // No data loaded
     }
 
+    @Test
     public void test_buildQuery_withNullKeywordsInList() {
         List<String> keywordList = Arrays.asList("java", null, "programming");
         List<FilterFunctionBuilder> functionBuilders = new ArrayList<>();
@@ -276,11 +296,13 @@ public class KeyMatchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_keyMatchHelper_constructor() {
         KeyMatchHelper helper = new KeyMatchHelper();
         assertNotNull(helper);
     }
 
+    @Test
     public void test_keyMatchHelper_inheritance() {
         assertTrue(keyMatchHelper instanceof AbstractConfigHelper);
     }

@@ -35,6 +35,10 @@ import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 
 import jakarta.servlet.ServletContext;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class GenerateThumbnailJobTest extends UnitFessTestCase {
 
@@ -45,9 +49,10 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     private TestServletContext testServletContext;
     private File tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         thumbnailJob = new GenerateThumbnailJob();
 
         // Create temporary directory
@@ -75,7 +80,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
         }
@@ -96,11 +101,13 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test getExecuteType method
+    @Test
     public void test_getExecuteType() {
         assertEquals(Constants.EXECUTE_TYPE_THUMBNAIL, thumbnailJob.getExecuteType());
     }
 
     // Test numOfThreads setter
+    @Test
     public void test_numOfThreads() {
         assertEquals(1, thumbnailJob.numOfThreads);
 
@@ -111,6 +118,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test cleanup setter
+    @Test
     public void test_cleanup() {
         assertFalse(thumbnailJob.cleanup);
 
@@ -121,6 +129,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with successful execution
+    @Test
     public void test_execute_success() {
         // Create necessary directories in temp dir
         new File(tempDir, "WEB-INF/lib").mkdirs();
@@ -144,6 +153,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with custom session ID
+    @Test
     public void test_execute_withCustomSessionId() {
         thumbnailJob.sessionId = "custom-session-456";
         thumbnailJob.cleanup();
@@ -157,6 +167,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with process failure
+    @Test
     public void test_execute_processFailure() {
         thumbnailJob.numOfThreads(1);
 
@@ -171,6 +182,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with timeout
+    @Test
     public void test_execute_withTimeout() {
         thumbnailJob.numOfThreads(2);
         thumbnailJob.timeout = 120; // Set timeout
@@ -187,6 +199,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with exception
+    @Test
     public void test_execute_withException() {
         thumbnailJob.numOfThreads(2);
 
@@ -201,6 +214,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test executeThumbnailGenerator with process failure
+    @Test
     public void test_executeThumbnailGenerator_processFailure() {
         thumbnailJob.numOfThreads(2);
 
@@ -219,6 +233,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test executeThumbnailGenerator with timeout
+    @Test
     public void test_executeThumbnailGenerator_withTimeout() {
         thumbnailJob.numOfThreads(1);
         thumbnailJob.timeout = 60;

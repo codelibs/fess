@@ -39,6 +39,9 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CustomSizeTest extends UnitFessTestCase {
 
@@ -80,27 +83,31 @@ public class CustomSizeTest extends UnitFessTestCase {
     private static class TestPayload implements Payload {
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     // Test annotation presence and structure
+    @Test
     public void test_annotationPresence() {
         assertTrue("CustomSize should be an annotation", CustomSize.class.isAnnotation());
     }
 
     // Test annotation retention policy
+    @Test
     public void test_retentionPolicy() {
         final Retention retention = CustomSize.class.getAnnotation(Retention.class);
-        assertNotNull("Retention annotation should be present", retention);
+        assertNotNull(retention, "Retention annotation should be present");
         assertEquals("Retention should be RUNTIME", RetentionPolicy.RUNTIME, retention.value());
     }
 
     // Test annotation target elements
+    @Test
     public void test_targetElements() {
         final Target target = CustomSize.class.getAnnotation(Target.class);
-        assertNotNull("Target annotation should be present", target);
+        assertNotNull(target, "Target annotation should be present");
 
         final Set<ElementType> expectedTargets = new HashSet<>(Arrays.asList(METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER));
         final Set<ElementType> actualTargets = new HashSet<>(Arrays.asList(target.value()));
@@ -109,24 +116,27 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test annotation is documented
+    @Test
     public void test_documented() {
         final Documented documented = CustomSize.class.getAnnotation(Documented.class);
-        assertNotNull("Documented annotation should be present", documented);
+        assertNotNull(documented, "Documented annotation should be present");
     }
 
     // Test Constraint annotation
+    @Test
     public void test_constraintAnnotation() {
         final Constraint constraint = CustomSize.class.getAnnotation(Constraint.class);
-        assertNotNull("Constraint annotation should be present", constraint);
+        assertNotNull(constraint, "Constraint annotation should be present");
         assertEquals("Validator class should be CustomSizeValidator", CustomSizeValidator.class, constraint.validatedBy()[0]);
     }
 
     // Test default values
+    @Test
     public void test_defaultValues() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testField");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Default message should match", "{jakarta.validation.constraints.Size.message}", getDefaultMessage());
         assertEquals("Default groups should be empty", 0, getDefaultGroups().length);
         assertEquals("Default payload should be empty", 0, getDefaultPayload().length);
@@ -135,76 +145,84 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test annotation on field
+    @Test
     public void test_annotationOnField() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testField");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("minKey should match", "test.min", annotation.minKey());
         assertEquals("maxKey should match", "test.max", annotation.maxKey());
         assertEquals("message should be default", "{jakarta.validation.constraints.Size.message}", annotation.message());
     }
 
     // Test annotation with only minKey
+    @Test
     public void test_annotationWithOnlyMinKey() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testFieldMinOnly");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("minKey should match", "test.min.only", annotation.minKey());
         assertEquals("maxKey should be empty", "", annotation.maxKey());
     }
 
     // Test annotation with only maxKey
+    @Test
     public void test_annotationWithOnlyMaxKey() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testFieldMaxOnly");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("minKey should be empty", "", annotation.minKey());
         assertEquals("maxKey should match", "test.max.only", annotation.maxKey());
     }
 
     // Test annotation with custom message
+    @Test
     public void test_annotationWithCustomMessage() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testFieldWithMessage");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Custom message should match", "Custom error message", annotation.message());
     }
 
     // Test annotation with groups
+    @Test
     public void test_annotationWithGroups() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testFieldWithGroups");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Groups length should be 1", 1, annotation.groups().length);
         assertEquals("Group class should match", TestGroup.class, annotation.groups()[0]);
     }
 
     // Test annotation with payload
+    @Test
     public void test_annotationWithPayload() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testFieldWithPayload");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Payload length should be 1", 1, annotation.payload().length);
         assertEquals("Payload class should match", TestPayload.class, annotation.payload()[0]);
     }
 
     // Test annotation on method
+    @Test
     public void test_annotationOnMethod() throws Exception {
         final Method method = CustomSizeTest.class.getMethod("testMethod");
         final CustomSize annotation = method.getAnnotation(CustomSize.class);
 
-        assertNotNull("Annotation should be present on method", annotation);
+        assertNotNull(annotation, "Annotation should be present on method");
         assertEquals("minKey should match", "method.min", annotation.minKey());
         assertEquals("maxKey should match", "method.max", annotation.maxKey());
     }
 
     // Test annotation type
+    @Test
     public void test_annotationType() throws Exception {
         final Field field = CustomSizeTest.class.getDeclaredField("testField");
         final CustomSize annotation = field.getAnnotation(CustomSize.class);
@@ -213,26 +231,27 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test all annotation methods exist
+    @Test
     public void test_annotationMethods() {
         try {
             final Method messageMethod = CustomSize.class.getMethod("message");
-            assertNotNull("message() method should exist", messageMethod);
+            assertNotNull(messageMethod, "message() method should exist");
             assertEquals("message() return type should be String", String.class, messageMethod.getReturnType());
 
             final Method groupsMethod = CustomSize.class.getMethod("groups");
-            assertNotNull("groups() method should exist", groupsMethod);
+            assertNotNull(groupsMethod, "groups() method should exist");
             assertEquals("groups() return type should be Class[]", Class[].class, groupsMethod.getReturnType());
 
             final Method payloadMethod = CustomSize.class.getMethod("payload");
-            assertNotNull("payload() method should exist", payloadMethod);
+            assertNotNull(payloadMethod, "payload() method should exist");
             assertEquals("payload() return type should be Class[]", Class[].class, payloadMethod.getReturnType());
 
             final Method minKeyMethod = CustomSize.class.getMethod("minKey");
-            assertNotNull("minKey() method should exist", minKeyMethod);
+            assertNotNull(minKeyMethod, "minKey() method should exist");
             assertEquals("minKey() return type should be String", String.class, minKeyMethod.getReturnType());
 
             final Method maxKeyMethod = CustomSize.class.getMethod("maxKey");
-            assertNotNull("maxKey() method should exist", maxKeyMethod);
+            assertNotNull(maxKeyMethod, "maxKey() method should exist");
             assertEquals("maxKey() return type should be String", String.class, maxKeyMethod.getReturnType());
         } catch (final NoSuchMethodException e) {
             fail("Required annotation method not found: " + e.getMessage());
@@ -240,6 +259,7 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test creating custom implementation of annotation
+    @Test
     public void test_customAnnotationImplementation() {
         final CustomSize customAnnotation = new CustomSize() {
             @Override
@@ -282,6 +302,7 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test annotation with empty keys
+    @Test
     public void test_annotationWithEmptyKeys() {
         final CustomSize emptyKeysAnnotation = new CustomSize() {
             @Override
@@ -322,6 +343,7 @@ public class CustomSizeTest extends UnitFessTestCase {
     }
 
     // Test annotation with multiple groups and payloads
+    @Test
     public void test_annotationWithMultipleGroupsAndPayloads() {
         final CustomSize multiAnnotation = new CustomSize() {
             @Override

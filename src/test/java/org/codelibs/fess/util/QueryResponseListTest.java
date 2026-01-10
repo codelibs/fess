@@ -25,8 +25,10 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class QueryResponseListTest extends UnitFessTestCase {
+    @Test
     public void test_calculatePageInfo_page0() {
         QueryResponseList qrList;
 
@@ -47,6 +49,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_calculatePageInfo_page1() {
         QueryResponseList qrList;
 
@@ -136,6 +139,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(20, qrList.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_calculatePageInfo_page2() {
         QueryResponseList qrList;
 
@@ -208,6 +212,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(40, qrList.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_calculatePageInfo_pageList() {
         QueryResponseList qrList;
         List<String> pnList;
@@ -304,6 +309,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_calculatePageInfo_collapse() {
         QueryResponseList qrList;
 
@@ -392,6 +398,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(40, qrList.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_constructor_full() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -418,6 +425,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1, qrList.getCurrentPageNumber());
     }
 
+    @Test
     public void test_constructor_withZeroPageSize() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         FacetResponse facetResponse = null;
@@ -435,6 +443,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.getCurrentPageNumber());
     }
 
+    @Test
     public void test_listOperations_add() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -454,6 +463,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(doc1, qrList.get(1));
     }
 
+    @Test
     public void test_listOperations_addAll() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -483,6 +493,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(doc2, qrList.get(2));
     }
 
+    @Test
     public void test_listOperations_remove() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -503,6 +514,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertTrue(qrList.isEmpty());
     }
 
+    @Test
     public void test_listOperations_contains() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -523,6 +535,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.containsAll(checkList));
     }
 
+    @Test
     public void test_listOperations_indexOperations() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -544,6 +557,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(-1, qrList.indexOf(doc3));
     }
 
+    @Test
     public void test_listOperations_iterators() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -573,6 +587,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(doc2, listIterator1.next());
     }
 
+    @Test
     public void test_listOperations_setAndClear() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -592,6 +607,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertTrue(qrList.isEmpty());
     }
 
+    @Test
     public void test_listOperations_subList() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -609,6 +625,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("Doc3", subList.get(2).get("title"));
     }
 
+    @Test
     public void test_listOperations_toArray() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -632,6 +649,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(doc2, typedArray[1]);
     }
 
+    @Test
     public void test_listOperations_removeAll_retainAll() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -658,6 +676,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.contains(doc3));
     }
 
+    @Test
     public void test_equalsAndHashCode() {
         List<Map<String, Object>> documentList1 = new ArrayList<>();
         List<Map<String, Object>> documentList2 = new ArrayList<>();
@@ -680,6 +699,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList1.equals(qrList2));
     }
 
+    @Test
     public void test_gettersAndSetters() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         FacetResponse facetResponse = null;
@@ -704,6 +724,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(1000L, qrList.getExecTime());
     }
 
+    @Test
     public void test_calculatePageInfo_withOffset() {
         QueryResponseList qrList = new QueryResponseList(null, 10, 20, 5) {
             @Override
@@ -724,6 +745,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(30, qrList.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_calculatePageInfo_withNegativeOffset() {
         QueryResponseList qrList = new QueryResponseList(null, 5, 20, 10) {
             @Override
@@ -740,6 +762,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.isExistPrevPage());
     }
 
+    @Test
     public void test_calculatePageInfo_pageNumberList_edgeCases() {
         // Test when current page is at the beginning
         QueryResponseList qrList = new QueryResponseList(null, 0, 10, 0) {
@@ -787,6 +810,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("16", pageList.get(10));
     }
 
+    @Test
     public void test_toString() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc = new HashMap<>();
@@ -809,6 +833,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains("partialResults=false"));
     }
 
+    @Test
     public void test_calculatePageInfo_extremeValues() {
         // Test with very large record count
         QueryResponseList qrList = new QueryResponseList(null, 0, 100, 0) {
@@ -843,6 +868,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.isExistPrevPage());
     }
 
+    @Test
     public void test_calculatePageInfo_currentEndRecordNumber_boundary() {
         // Test when currentEndRecordNumber would exceed allRecordCount
         QueryResponseList qrList = new QueryResponseList(null, 95, 10, 0) {
@@ -871,6 +897,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(20, qrList.getCurrentEndRecordNumber()); // start + pageSize
     }
 
+    @Test
     public void test_constructor_defaultValues() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -892,6 +919,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.getQueryTime());
     }
 
+    @Test
     public void test_constructor_testingConstructor() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc = new HashMap<>();
@@ -908,6 +936,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(doc, qrList.get(0));
     }
 
+    @Test
     public void test_calculatePageInfo_zeroAllRecordCount() {
         QueryResponseList qrList = new QueryResponseList(null, 0, 10, 0) {
             @Override
@@ -926,6 +955,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.isExistPrevPage());
     }
 
+    @Test
     public void test_listOperations_emptyOperations() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -950,6 +980,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertFalse(qrList.listIterator(0).hasNext());
     }
 
+    @Test
     public void test_listOperations_addAllEmpty() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -962,6 +993,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.size());
     }
 
+    @Test
     public void test_listOperations_removeAllEmpty() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc = new HashMap<>();
@@ -978,6 +1010,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, qrList.size());
     }
 
+    @Test
     public void test_facetResponse_constructor() {
         FacetResponse facetResponse = null;
         List<Map<String, Object>> documentList = new ArrayList<>();
@@ -989,6 +1022,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("lte", qrList.getAllRecordCountRelation());
     }
 
+    @Test
     public void test_calculatePageInfo_pageNumberList_singlePage() {
         QueryResponseList qrList = new QueryResponseList(null, 0, 50, 0) {
             @Override
@@ -1004,6 +1038,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("1", pageList.get(0));
     }
 
+    @Test
     public void test_calculatePageInfo_largePageRange() {
         // Test when we have more than 11 pages (pageRangeSize * 2 + 1)
         QueryResponseList qrList = new QueryResponseList(null, 50, 10, 0) {
@@ -1021,6 +1056,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals("11", pageList.get(10));
     }
 
+    @Test
     public void test_equals_differentTypes() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);
@@ -1030,6 +1066,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertTrue(qrList.equals(documentList)); // QueryResponseList equals delegates to parent list
     }
 
+    @Test
     public void test_listOperations_boundaryIndexes() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         Map<String, Object> doc1 = new HashMap<>();
@@ -1053,6 +1090,7 @@ public class QueryResponseListTest extends UnitFessTestCase {
         assertEquals(0, subList.size());
     }
 
+    @Test
     public void test_toString_withNullValues() {
         List<Map<String, Object>> documentList = new ArrayList<>();
         QueryResponseList qrList = new QueryResponseList(documentList, 0, 10, 0);

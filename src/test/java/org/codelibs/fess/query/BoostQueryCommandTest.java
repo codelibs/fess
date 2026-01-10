@@ -40,6 +40,7 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.TermQueryBuilder;
 import org.opensearch.index.query.WildcardQueryBuilder;
 import org.codelibs.fess.query.DefaultQueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class BoostQueryCommandTest extends QueryTestBase {
     private BoostQueryCommand boostQueryCommand;
@@ -64,11 +65,13 @@ public class BoostQueryCommandTest extends QueryTestBase {
         boostQueryCommand.register();
     }
 
+    @Test
     public void test_getQueryClassName() {
         // Test that getQueryClassName returns the correct class name
         assertEquals("BoostQuery", boostQueryCommand.getQueryClassName());
     }
 
+    @Test
     public void test_execute_withTermQuery() {
         // Test executing BoostQuery with a TermQuery inside
         Term term = new Term("field", "value");
@@ -90,6 +93,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withMatchAllDocsQuery() {
         // Test executing BoostQuery with a MatchAllDocsQuery inside
         MatchAllDocsQuery matchAllQuery = new MatchAllDocsQuery();
@@ -104,6 +108,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         assertEquals(3.0f, matchAllQueryBuilder.boost());
     }
 
+    @Test
     public void test_execute_withPhraseQuery() {
         // Test executing BoostQuery with a PhraseQuery inside
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -121,6 +126,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         // The boost is applied internally to the wrapped queries, not necessarily to the DefaultQueryBuilder itself
     }
 
+    @Test
     public void test_execute_withBooleanQuery() {
         // Test executing BoostQuery with a BooleanQuery inside
         BooleanQuery.Builder boolBuilder = new BooleanQuery.Builder();
@@ -139,6 +145,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         assertEquals(1.0f, boolQueryBuilder.boost());
     }
 
+    @Test
     public void test_execute_withPrefixQuery() {
         // Test executing BoostQuery with a PrefixQuery inside
         Term term = new Term("field", "pre");
@@ -154,6 +161,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         // The boost is applied internally to the wrapped queries
     }
 
+    @Test
     public void test_execute_withWildcardQuery() {
         // Test executing BoostQuery with a WildcardQuery inside
         Term term = new Term("field", "val*");
@@ -170,6 +178,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         // The boost is applied internally
     }
 
+    @Test
     public void test_execute_withFuzzyQuery() {
         // Test executing BoostQuery with a FuzzyQuery inside
         Term term = new Term("field", "fuzzy");
@@ -193,6 +202,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withNestedBoostQuery() {
         // Test executing BoostQuery with another BoostQuery inside (nested boost)
         Term term = new Term("field", "nested");
@@ -220,6 +230,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withNonBoostQuery() {
         // Test that execute throws InvalidQueryException when query is not a BoostQuery
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
@@ -235,6 +246,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withNullQuery() {
         // Test that execute handles null query
         QueryContext context = new QueryContext("test", false);
@@ -248,6 +260,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withComplexBooleanQuery() {
         // Test executing BoostQuery with a complex BooleanQuery containing multiple clauses
         BooleanQuery.Builder boolBuilder = new BooleanQuery.Builder();
@@ -272,6 +285,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         assertFalse(boolQueryBuilder.mustNot().isEmpty());
     }
 
+    @Test
     public void test_execute_withZeroBoost() {
         // Test executing BoostQuery with zero boost value
         Term term = new Term("field", "zero");
@@ -295,6 +309,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withNegativeBoost() {
         // Test that BoostQuery constructor doesn't allow negative boost values
         Term term = new Term("field", "negative");
@@ -309,6 +324,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withVeryLargeBoost() {
         // Test executing BoostQuery with very large boost value
         Term term = new Term("field", "large");
@@ -332,6 +348,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_register() {
         // Test that register method properly registers the command with QueryProcessor
         BoostQueryCommand newCommand = new BoostQueryCommand();
@@ -372,6 +389,7 @@ public class BoostQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_execute_withUnknownQueryType() {
         // Test executing BoostQuery with an unknown query type inside
         CustomQuery customQuery = new CustomQuery();

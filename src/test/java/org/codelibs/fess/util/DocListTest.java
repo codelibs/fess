@@ -19,8 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DocListTest extends UnitFessTestCase {
+    @Test
     public void test_DocList() {
         DocList docList = new DocList();
 
@@ -37,6 +39,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(0, docList.getProcessingTime());
     }
 
+    @Test
     public void test_addContentSize_multiple() {
         DocList docList = new DocList();
 
@@ -50,6 +53,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(350, docList.getContentSize());
     }
 
+    @Test
     public void test_addProcessingTime_multiple() {
         DocList docList = new DocList();
 
@@ -63,6 +67,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(35, docList.getProcessingTime());
     }
 
+    @Test
     public void test_addContentSize_negative() {
         DocList docList = new DocList();
 
@@ -76,6 +81,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(-30, docList.getContentSize());
     }
 
+    @Test
     public void test_addProcessingTime_negative() {
         DocList docList = new DocList();
 
@@ -89,6 +95,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(-30, docList.getProcessingTime());
     }
 
+    @Test
     public void test_addContentSize_zero() {
         DocList docList = new DocList();
 
@@ -100,6 +107,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(100, docList.getContentSize());
     }
 
+    @Test
     public void test_addProcessingTime_zero() {
         DocList docList = new DocList();
 
@@ -111,6 +119,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(100, docList.getProcessingTime());
     }
 
+    @Test
     public void test_list_operations_with_metrics() {
         DocList docList = new DocList();
 
@@ -143,6 +152,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(250, docList.getProcessingTime());
     }
 
+    @Test
     public void test_clear_with_elements() {
         DocList docList = new DocList();
 
@@ -164,6 +174,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(0, docList.getProcessingTime());
     }
 
+    @Test
     public void test_toString_empty() {
         DocList docList = new DocList();
         String result = docList.toString();
@@ -173,6 +184,7 @@ public class DocListTest extends UnitFessTestCase {
         assertTrue(result.contains("elementData=[]"));
     }
 
+    @Test
     public void test_toString_with_data() {
         DocList docList = new DocList();
 
@@ -191,12 +203,14 @@ public class DocListTest extends UnitFessTestCase {
         assertTrue(result.contains("id=1"));
     }
 
+    @Test
     public void test_serialization() {
         DocList docList = new DocList();
 
         assertTrue(docList instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_large_values() {
         DocList docList = new DocList();
 
@@ -215,6 +229,7 @@ public class DocListTest extends UnitFessTestCase {
         assertEquals(Long.MAX_VALUE, docList.getProcessingTime());
     }
 
+    @Test
     public void test_inheritance() {
         DocList docList = new DocList();
 

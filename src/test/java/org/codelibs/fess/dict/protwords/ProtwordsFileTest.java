@@ -30,6 +30,9 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ProtwordsFileTest extends UnitFessTestCase {
 
@@ -37,9 +40,10 @@ public class ProtwordsFileTest extends UnitFessTestCase {
     private File testFile;
     private SystemHelper systemHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create test file with content
         testFile = File.createTempFile("test_protwords", ".txt");
@@ -118,7 +122,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (testFile != null && testFile.exists()) {
             testFile.delete();
         }
@@ -131,19 +135,23 @@ public class ProtwordsFileTest extends UnitFessTestCase {
                 "test5\n";
     }
 
+    @Test
     public void test_getType() {
         assertEquals("protwords", protwordsFile.getType());
     }
 
+    @Test
     public void test_getPath() {
         assertEquals(testFile.getAbsolutePath(), protwordsFile.getPath());
     }
 
+    @Test
     public void test_getSimpleName() {
         String expected = testFile.getName();
         assertEquals(expected, protwordsFile.getSimpleName());
     }
 
+    @Test
     public void test_get_found() {
         // Load data first
         protwordsFile.reload(null);
@@ -155,6 +163,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals(1, item.get().getId());
     }
 
+    @Test
     public void test_get_notFound() {
         // Load data first
         protwordsFile.reload(null);
@@ -164,6 +173,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertFalse(item.isPresent());
     }
 
+    @Test
     public void test_get_withUnloadedData() {
         // Test getting item when data is not loaded yet
         OptionalEntity<ProtwordsItem> item = protwordsFile.get(1);
@@ -171,6 +181,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test1", item.get().getInput());
     }
 
+    @Test
     public void test_selectList_normal() {
         // Load data first
         protwordsFile.reload(null);
@@ -183,6 +194,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test3", list.get(2).getInput());
     }
 
+    @Test
     public void test_selectList_offset() {
         // Load data first
         protwordsFile.reload(null);
@@ -194,6 +206,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test\\4", list.get(1).getInput());
     }
 
+    @Test
     public void test_selectList_outOfBounds() {
         // Load data first
         protwordsFile.reload(null);
@@ -204,6 +217,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertTrue(list.isEmpty());
     }
 
+    @Test
     public void test_selectList_negativeOffset() {
         // Load data first
         protwordsFile.reload(null);
@@ -213,6 +227,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals(0, list.size());
     }
 
+    @Test
     public void test_selectList_exceedingSize() {
         // Load data first
         protwordsFile.reload(null);
@@ -224,6 +239,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test5", list.get(1).getInput());
     }
 
+    @Test
     public void test_selectList_withUnloadedData() {
         // Test selecting list when data is not loaded yet
         PagingList<ProtwordsItem> list = protwordsFile.selectList(0, 3);
@@ -231,6 +247,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test1", list.get(0).getInput());
     }
 
+    @Test
     public void test_insert() {
         // Create new item for insertion
         ProtwordsItem newItem = new ProtwordsItem(0, "newWord");
@@ -251,6 +268,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertTrue(found);
     }
 
+    @Test
     public void test_update() {
         // Load data first
         protwordsFile.reload(null);
@@ -268,6 +286,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("updatedWord", updatedItem.getInput());
     }
 
+    @Test
     public void test_delete() {
         // Load data first
         protwordsFile.reload(null);
@@ -286,6 +305,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_reload_withIOException() {
         // This test verifies error handling during reload
         // We'll test with invalid data or missing file
@@ -301,6 +321,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_reload_withEmptyLines() throws Exception {
         // Create content with empty lines and comments
         String content = "# Comment line\n" + "\n" + // empty line
@@ -321,6 +342,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("word2", result.get(2).getInput());
     }
 
+    @Test
     public void test_unescape() throws Exception {
         // Test with escaped characters (backslash sequences)
         String content = "test\\t1\n" + // escaped tab sequence
@@ -360,6 +382,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertTrue("Should find test3", foundTest3);
     }
 
+    @Test
     public void test_update_fromInputStream() throws IOException {
         // Create test input stream
         String content = "updated1\n" + "updated2\n";
@@ -375,6 +398,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("updated2", list.get(1).getInput());
     }
 
+    @Test
     public void test_toString() {
         protwordsFile.reload(null);
         String result = protwordsFile.toString();
@@ -384,6 +408,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertTrue(result.contains("protwordsItemList="));
     }
 
+    @Test
     public void test_ProtwordsUpdater_write_normalItem() {
         protwordsFile.reload(null);
 
@@ -402,6 +427,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_write_updateItem() {
         protwordsFile.reload(null);
 
@@ -421,6 +447,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_write_deleteItem() {
         protwordsFile.reload(null);
 
@@ -438,6 +465,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_write_mismatchException() {
         protwordsFile.reload(null);
 
@@ -460,6 +488,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_write_stringLine() {
         protwordsFile.reload(null);
 
@@ -472,6 +501,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_commit_withItem() {
         protwordsFile.reload(null);
 
@@ -489,6 +519,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_commit_withoutItem() {
         protwordsFile.reload(null);
 
@@ -502,6 +533,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_ProtwordsUpdater_fileCreationException() {
         // This test verifies that ProtwordsUpdater constructor properly handles exceptions
         // The actual exception handling is tested by ensuring the updater can be created
@@ -516,11 +548,11 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         try {
             // Create the updater successfully
             updater = protwordsFile.new ProtwordsUpdater(testItem);
-            assertNotNull("ProtwordsUpdater should be created", updater);
+            assertNotNull(updater, "ProtwordsUpdater should be created");
 
             // Verify it can handle the item properly
             ProtwordsItem result = updater.commit();
-            assertNotNull("Commit should return the item", result);
+            assertNotNull(result, "Commit should return the item");
             assertEquals("testWord", result.getInput());
         } catch (Exception e) {
             // If any exception occurs, it should be a DictionaryException
@@ -543,6 +575,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         // the constructor's exception handling implementation
     }
 
+    @Test
     public void test_concurrent_operations() {
         // Test concurrent read operations
         protwordsFile.reload(null);
@@ -557,6 +590,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertTrue(list.size() > 0);
     }
 
+    @Test
     public void test_reload_withLargeFile() throws Exception {
         // Create content with many items
         StringBuilder sb = new StringBuilder();
@@ -577,6 +611,7 @@ public class ProtwordsFileTest extends UnitFessTestCase {
         assertEquals("test100", list.get(99).getInput());
     }
 
+    @Test
     public void test_specialCharacters() throws Exception {
         // Test with special characters
         String content = "test1\n" + "日本語\n" + "word with spaces\n" + "\ttab\tword\t\n";

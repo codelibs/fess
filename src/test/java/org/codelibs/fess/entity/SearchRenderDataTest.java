@@ -26,17 +26,22 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.FacetResponse;
 import org.opensearch.search.aggregations.Aggregation;
 import org.opensearch.search.aggregations.Aggregations;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SearchRenderDataTest extends UnitFessTestCase {
 
     private SearchRenderData searchRenderData;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         searchRenderData = new SearchRenderData();
     }
 
+    @Test
     public void test_constructor() {
         assertNotNull(searchRenderData);
         assertNull(searchRenderData.getDocumentItems());
@@ -60,6 +65,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertNull(searchRenderData.getQueryId());
     }
 
+    @Test
     public void test_setAndGetDocumentItems() {
         // Test with null
         searchRenderData.setDocumentItems(null);
@@ -88,6 +94,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals("Test Document 1", searchRenderData.getDocumentItems().get(0).get("title"));
     }
 
+    @Test
     public void test_setAndGetFacetResponse() {
         // Test with null
         searchRenderData.setFacetResponse(null);
@@ -103,6 +110,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertTrue(facetResponse.getQueryCountMap().isEmpty());
     }
 
+    @Test
     public void test_setAndGetAppendHighlightParams() {
         // Test with null
         searchRenderData.setAppendHighlightParams(null);
@@ -118,6 +126,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(params, searchRenderData.getAppendHighlightParams());
     }
 
+    @Test
     public void test_setAndGetExecTime() {
         // Test with null
         searchRenderData.setExecTime(null);
@@ -132,6 +141,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals("0.123 sec", searchRenderData.getExecTime());
     }
 
+    @Test
     public void test_setAndGetPageSize() {
         // Test with zero
         searchRenderData.setPageSize(0);
@@ -149,6 +159,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-1, searchRenderData.getPageSize());
     }
 
+    @Test
     public void test_setAndGetCurrentPageNumber() {
         // Test with zero
         searchRenderData.setCurrentPageNumber(0);
@@ -166,6 +177,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-5, searchRenderData.getCurrentPageNumber());
     }
 
+    @Test
     public void test_setAndGetAllRecordCount() {
         // Test with zero
         searchRenderData.setAllRecordCount(0L);
@@ -183,6 +195,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-10L, searchRenderData.getAllRecordCount());
     }
 
+    @Test
     public void test_setAndGetAllRecordCountRelation() {
         // Test with null
         searchRenderData.setAllRecordCountRelation(null);
@@ -200,6 +213,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals("gte", searchRenderData.getAllRecordCountRelation());
     }
 
+    @Test
     public void test_setAndGetAllPageCount() {
         // Test with zero
         searchRenderData.setAllPageCount(0);
@@ -217,6 +231,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-2, searchRenderData.getAllPageCount());
     }
 
+    @Test
     public void test_setAndIsExistNextPage() {
         // Test with false
         searchRenderData.setExistNextPage(false);
@@ -231,6 +246,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertFalse(searchRenderData.isExistNextPage());
     }
 
+    @Test
     public void test_setAndIsExistPrevPage() {
         // Test with false
         searchRenderData.setExistPrevPage(false);
@@ -245,6 +261,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertFalse(searchRenderData.isExistPrevPage());
     }
 
+    @Test
     public void test_setAndGetCurrentStartRecordNumber() {
         // Test with zero
         searchRenderData.setCurrentStartRecordNumber(0L);
@@ -262,6 +279,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-1L, searchRenderData.getCurrentStartRecordNumber());
     }
 
+    @Test
     public void test_setAndGetCurrentEndRecordNumber() {
         // Test with zero
         searchRenderData.setCurrentEndRecordNumber(0L);
@@ -279,6 +297,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-100L, searchRenderData.getCurrentEndRecordNumber());
     }
 
+    @Test
     public void test_setAndGetPageNumberList() {
         // Test with null
         searchRenderData.setPageNumberList(null);
@@ -304,6 +323,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(specialPages, searchRenderData.getPageNumberList());
     }
 
+    @Test
     public void test_setAndIsPartialResults() {
         // Test with false
         searchRenderData.setPartialResults(false);
@@ -318,6 +338,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertFalse(searchRenderData.isPartialResults());
     }
 
+    @Test
     public void test_setAndGetQueryTime() {
         // Test with zero
         searchRenderData.setQueryTime(0L);
@@ -335,6 +356,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-50L, searchRenderData.getQueryTime());
     }
 
+    @Test
     public void test_setAndGetSearchQuery() {
         // Test with null
         searchRenderData.setSearchQuery(null);
@@ -359,6 +381,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(specialQuery, searchRenderData.getSearchQuery());
     }
 
+    @Test
     public void test_setAndGetRequestedTime() {
         // Test with zero
         searchRenderData.setRequestedTime(0L);
@@ -379,6 +402,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(-1000L, searchRenderData.getRequestedTime());
     }
 
+    @Test
     public void test_setAndGetQueryId() {
         // Test with null
         searchRenderData.setQueryId(null);
@@ -398,6 +422,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals("query-001", searchRenderData.getQueryId());
     }
 
+    @Test
     public void test_toString() {
         // Test with default values
         String defaultString = searchRenderData.toString();
@@ -442,6 +467,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertTrue(populatedString.contains("requestedTime=1000000"));
     }
 
+    @Test
     public void test_complexScenario() {
         // Simulate a typical search result scenario
         // Page 2 of search results with 10 items per page
@@ -497,6 +523,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertFalse(searchRenderData.isPartialResults());
     }
 
+    @Test
     public void test_edgeCases() {
         // Test with maximum values
         searchRenderData.setAllRecordCount(Long.MAX_VALUE);
@@ -529,6 +556,7 @@ public class SearchRenderDataTest extends UnitFessTestCase {
         assertEquals(Integer.MIN_VALUE, searchRenderData.getCurrentPageNumber());
     }
 
+    @Test
     public void test_nullSafety() {
         // Ensure all getters return appropriate values when setters haven't been called
         SearchRenderData freshData = new SearchRenderData();

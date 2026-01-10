@@ -16,9 +16,12 @@
 package org.codelibs.fess.dict.protwords;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class ProtwordsItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withIdZero() {
         // Test constructor with id = 0 (create mode)
         ProtwordsItem item = new ProtwordsItem(0, "testword");
@@ -28,6 +31,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("testword", item.getNewInput());
     }
 
+    @Test
     public void test_constructor_withNonZeroId() {
         // Test constructor with id != 0 (existing item)
         ProtwordsItem item = new ProtwordsItem(123, "existingword");
@@ -37,6 +41,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertNull(item.getNewInput());
     }
 
+    @Test
     public void test_getNewInput() {
         // Test getNewInput method
         ProtwordsItem item = new ProtwordsItem(1, "word");
@@ -46,6 +51,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("newword", item.getNewInput());
     }
 
+    @Test
     public void test_setNewInput() {
         // Test setNewInput method
         ProtwordsItem item = new ProtwordsItem(1, "word");
@@ -60,6 +66,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("", item.getNewInput());
     }
 
+    @Test
     public void test_getInput() {
         // Test getInput method
         ProtwordsItem item1 = new ProtwordsItem(1, "word1");
@@ -72,6 +79,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertNull(item3.getInput());
     }
 
+    @Test
     public void test_getInputValue() {
         // Test getInputValue method with non-null input
         ProtwordsItem item1 = new ProtwordsItem(1, "word");
@@ -86,6 +94,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("", item3.getInputValue());
     }
 
+    @Test
     public void test_isUpdated() {
         // Test isUpdated method
         ProtwordsItem item = new ProtwordsItem(1, "word");
@@ -101,6 +110,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertFalse(item.isUpdated());
     }
 
+    @Test
     public void test_isDeleted() {
         // Test isDeleted method
         ProtwordsItem item = new ProtwordsItem(1, "word");
@@ -116,6 +126,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertFalse(item.isDeleted());
     }
 
+    @Test
     public void test_hashCode() {
         // Test hashCode method
         ProtwordsItem item1 = new ProtwordsItem(1, "word");
@@ -132,6 +143,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals(item1.hashCode(), item1.hashCode());
     }
 
+    @Test
     public void test_hashCode_withNullInput() {
         // Test hashCode with null input - should not throw, returns consistent hash for null
         ProtwordsItem item1 = new ProtwordsItem(1, null);
@@ -148,6 +160,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals(item1.hashCode(), item1.hashCode());
     }
 
+    @Test
     public void test_equals() {
         // Test equals method
         ProtwordsItem item1 = new ProtwordsItem(1, "word");
@@ -178,6 +191,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertTrue(item2.equals(item1));
     }
 
+    @Test
     public void test_equals_withNullInput() {
         // Test equals with null input - should not throw, uses null-safe comparison
         ProtwordsItem item1 = new ProtwordsItem(1, null);
@@ -196,6 +210,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertTrue(item2.equals(item1));
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         ProtwordsItem item = new ProtwordsItem(123, "testword");
@@ -208,6 +223,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("ProtwordsItem [id=0, inputs=createword, newInputs=createword]", item2.toString());
     }
 
+    @Test
     public void test_toLineString() {
         // Test toLineString method with non-updated item
         ProtwordsItem item = new ProtwordsItem(1, "word");
@@ -226,6 +242,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("newword", newItem.toLineString());
     }
 
+    @Test
     public void test_toLineString_withEmptyInput() {
         // Test toLineString with empty input
         ProtwordsItem item = new ProtwordsItem(1, "");
@@ -235,6 +252,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("word", item.toLineString());
     }
 
+    @Test
     public void test_toLineString_withNullNewInput() {
         // Test toLineString when newInput is set back to null
         ProtwordsItem item = new ProtwordsItem(1, "originalword");
@@ -245,6 +263,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("originalword", item.toLineString());
     }
 
+    @Test
     public void test_getId() {
         // Test getId method inherited from DictionaryItem
         ProtwordsItem item1 = new ProtwordsItem(0, "word");
@@ -257,6 +276,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals(-1, item3.getId());
     }
 
+    @Test
     public void test_multipleUpdates() {
         // Test multiple updates to newInput
         ProtwordsItem item = new ProtwordsItem(1, "original");
@@ -285,6 +305,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals("third", item.toLineString());
     }
 
+    @Test
     public void test_specialCharacters() {
         // Test with special characters in input
         String specialInput = "test@#$%^&*()_+-=[]{}|;':\",./<>?";
@@ -299,6 +320,7 @@ public class ProtwordsItemTest extends UnitFessTestCase {
         assertEquals(newSpecialInput, item.toLineString());
     }
 
+    @Test
     public void test_whitespaceHandling() {
         // Test with various whitespace scenarios
         ProtwordsItem item1 = new ProtwordsItem(1, "  word  ");

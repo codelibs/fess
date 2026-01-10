@@ -16,17 +16,21 @@
 package org.codelibs.fess.ldap;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class LdapUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_escapeValue_null() {
         assertEquals("", LdapUtil.escapeValue(null));
     }
 
+    @Test
     public void test_escapeValue_empty() {
         assertEquals("", LdapUtil.escapeValue(""));
     }
 
+    @Test
     public void test_escapeValue_noSpecialChars() {
         assertEquals("admin", LdapUtil.escapeValue("admin"));
         assertEquals("john.doe", LdapUtil.escapeValue("john.doe"));
@@ -34,12 +38,14 @@ public class LdapUtilTest extends UnitFessTestCase {
         assertEquals("Test User", LdapUtil.escapeValue("Test User"));
     }
 
+    @Test
     public void test_escapeValue_backslash() {
         assertEquals("admin\\5ctest", LdapUtil.escapeValue("admin\\test"));
         assertEquals("\\5c", LdapUtil.escapeValue("\\"));
         assertEquals("a\\5cb\\5cc", LdapUtil.escapeValue("a\\b\\c"));
     }
 
+    @Test
     public void test_escapeValue_asterisk() {
         assertEquals("admin\\2a", LdapUtil.escapeValue("admin*"));
         assertEquals("\\2a", LdapUtil.escapeValue("*"));
@@ -47,6 +53,7 @@ public class LdapUtilTest extends UnitFessTestCase {
         assertEquals("test\\2auser", LdapUtil.escapeValue("test*user"));
     }
 
+    @Test
     public void test_escapeValue_parentheses() {
         assertEquals("\\28admin\\29", LdapUtil.escapeValue("(admin)"));
         assertEquals("\\28", LdapUtil.escapeValue("("));
@@ -54,11 +61,13 @@ public class LdapUtilTest extends UnitFessTestCase {
         assertEquals("user\\28test\\29name", LdapUtil.escapeValue("user(test)name"));
     }
 
+    @Test
     public void test_escapeValue_nullChar() {
         assertEquals("admin\\00test", LdapUtil.escapeValue("admin\0test"));
         assertEquals("\\00", LdapUtil.escapeValue("\0"));
     }
 
+    @Test
     public void test_escapeValue_mixedSpecialChars() {
         // Test LDAP injection attempt: admin*
         assertEquals("admin\\2a", LdapUtil.escapeValue("admin*"));
@@ -73,22 +82,26 @@ public class LdapUtilTest extends UnitFessTestCase {
         assertEquals("admin\\29\\28&\\28password=\\2a\\29\\29", LdapUtil.escapeValue("admin)(&(password=*))"));
     }
 
+    @Test
     public void test_escapeValue_allSpecialCharsInSequence() {
         assertEquals("\\5c\\2a\\28\\29\\00", LdapUtil.escapeValue("\\*()\0"));
     }
 
+    @Test
     public void test_escapeValue_unicodeCharacters() {
         // Unicode characters should pass through unchanged
         assertEquals("user", LdapUtil.escapeValue("user"));
         assertEquals("admin", LdapUtil.escapeValue("admin"));
     }
 
+    @Test
     public void test_escapeValue_longString() {
         String input = "a]".repeat(1000) + "*";
         String expected = "a]".repeat(1000) + "\\2a";
         assertEquals(expected, LdapUtil.escapeValue(input));
     }
 
+    @Test
     public void test_escapeValue_realWorldLdapInjectionAttempts() {
         // Authentication bypass attempt
         assertEquals("\\2a", LdapUtil.escapeValue("*"));

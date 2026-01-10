@@ -20,19 +20,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ScriptEngineTest extends UnitFessTestCase {
 
     private ScriptEngine scriptEngine;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         // Create a test implementation of ScriptEngine
         scriptEngine = new TestScriptEngine();
     }
 
     // Test evaluate method with valid template and parameters
+    @Test
     public void test_evaluate_withValidTemplateAndParams() {
         String template = "Hello ${name}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -43,6 +48,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with empty template
+    @Test
     public void test_evaluate_withEmptyTemplate() {
         String template = "";
         Map<String, Object> paramMap = new HashMap<>();
@@ -53,6 +59,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with null template
+    @Test
     public void test_evaluate_withNullTemplate() {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("key", "value");
@@ -62,6 +69,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with empty parameter map
+    @Test
     public void test_evaluate_withEmptyParamMap() {
         String template = "Static content";
         Map<String, Object> paramMap = Collections.emptyMap();
@@ -71,6 +79,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with null parameter map
+    @Test
     public void test_evaluate_withNullParamMap() {
         String template = "Template content";
 
@@ -79,6 +88,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with multiple parameters
+    @Test
     public void test_evaluate_withMultipleParams() {
         String template = "${greeting} ${name}, you are ${age} years old";
         Map<String, Object> paramMap = new HashMap<>();
@@ -91,6 +101,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with missing parameter
+    @Test
     public void test_evaluate_withMissingParameter() {
         String template = "Hello ${name} and ${other}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -102,6 +113,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with complex object as parameter
+    @Test
     public void test_evaluate_withComplexObject() {
         String template = "User: ${user.name}, Age: ${user.age}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -113,6 +125,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with special characters in template
+    @Test
     public void test_evaluate_withSpecialCharacters() {
         String template = "Price: $${price} (with ${discount}% off)";
         Map<String, Object> paramMap = new HashMap<>();
@@ -124,6 +137,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with nested expressions
+    @Test
     public void test_evaluate_withNestedExpressions() {
         String template = "${level1.level2.value}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -138,6 +152,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with numeric values
+    @Test
     public void test_evaluate_withNumericValues() {
         String template = "Result: ${number1} + ${number2} = ${sum}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -150,6 +165,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with boolean values
+    @Test
     public void test_evaluate_withBooleanValues() {
         String template = "Is active: ${active}, Is enabled: ${enabled}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -161,6 +177,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with null parameter value
+    @Test
     public void test_evaluate_withNullParameterValue() {
         String template = "Value is: ${value}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -171,6 +188,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with array as parameter
+    @Test
     public void test_evaluate_withArrayParameter() {
         String template = "Items: ${items}";
         Map<String, Object> paramMap = new HashMap<>();
@@ -182,6 +200,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method returns different object type
+    @Test
     public void test_evaluate_returnsObject() {
         scriptEngine = new ObjectReturningScriptEngine();
         String template = "return object";
@@ -194,6 +213,7 @@ public class ScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate method with error handling
+    @Test
     public void test_evaluate_withErrorTemplate() {
         scriptEngine = new ErrorHandlingScriptEngine();
         String template = "error";

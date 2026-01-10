@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class BoostDocPagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_BoostDocPage() {
         BoostDocPager boostdocpager = new BoostDocPager();
 

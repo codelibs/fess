@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class JobProcessingExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withCause() {
         // Test constructor with Throwable cause
         final Exception cause = new RuntimeException("Root cause");
@@ -29,6 +31,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals("java.lang.RuntimeException: Root cause", exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         final String message = "Job processing failed";
@@ -40,6 +43,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         final String message = "Job processing error occurred";
@@ -50,6 +54,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Test constructor with null cause
         final JobProcessingException exception = new JobProcessingException((Throwable) null);
@@ -59,6 +64,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and cause
         final JobProcessingException exception = new JobProcessingException(null, null);
@@ -68,6 +74,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         final JobProcessingException exception = new JobProcessingException((String) null);
@@ -77,6 +84,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         final String message = "";
@@ -87,6 +95,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withCauseChain() {
         // Test constructor with chained exceptions
         final Exception rootCause = new IllegalArgumentException("Invalid argument");
@@ -98,6 +107,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_inheritance() {
         // Test that JobProcessingException is a FessSystemException
         final JobProcessingException exception = new JobProcessingException("Test");
@@ -108,6 +118,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         final JobProcessingException exception = new JobProcessingException("Stack trace test");
@@ -121,6 +132,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals(this.getClass().getName(), topElement.getClassName());
     }
 
+    @Test
     public void test_serialization() {
         // Test that serialVersionUID is properly defined
         final JobProcessingException exception = new JobProcessingException("Serialization test");
@@ -129,6 +141,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_getMessage_withComplexCause() {
         // Test getMessage behavior with complex cause structure
         final Exception innerCause = new NullPointerException("NPE occurred");
@@ -140,6 +153,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getMessage().contains("State error"));
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test constructor with a very long message
         final StringBuilder longMessage = new StringBuilder();
@@ -153,6 +167,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withSpecialCharactersInMessage() {
         // Test constructor with special characters in message
         final String message = "Job failed with special chars: \n\t\r\"'<>&";
@@ -162,6 +177,7 @@ public class JobProcessingExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withUnicodeMessage() {
         // Test constructor with Unicode characters in message
         final String message = "ジョブ処理エラー: 失敗しました 😱";

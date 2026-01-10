@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.FacetResponse;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for SearchResult class and its builder pattern.
@@ -31,6 +32,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test basic SearchResult creation with builder.
      */
+    @Test
     public void test_basicSearchResultCreation() {
         final SearchResult result = SearchResult.create()
                 .allRecordCount(100)
@@ -52,6 +54,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult with documents.
      */
+    @Test
     public void test_searchResultWithDocuments() {
         final Map<String, Object> doc1 = new HashMap<>();
         doc1.put("_id", "doc1");
@@ -72,6 +75,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult with partial results flag.
      */
+    @Test
     public void test_searchResultWithPartialResults() {
         final SearchResult result = SearchResult.create().allRecordCount(1000).partialResults(true).build();
 
@@ -81,6 +85,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult with facet response.
      */
+    @Test
     public void test_searchResultWithFacetResponse() {
         final FacetResponse facetResponse = new FacetResponse(null);
         final SearchResult result = SearchResult.create().allRecordCount(100).facetResponse(facetResponse).build();
@@ -92,6 +97,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult default relation is GREATER_THAN_OR_EQUAL_TO.
      */
+    @Test
     public void test_defaultRelation() {
         final SearchResult result = SearchResult.create().allRecordCount(100).build();
 
@@ -101,6 +107,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult with zero record count.
      */
+    @Test
     public void test_zeroRecordCount() {
         final SearchResult result = SearchResult.create().allRecordCount(0).build();
 
@@ -111,6 +118,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult toString method.
      */
+    @Test
     public void test_toString() {
         final SearchResult result = SearchResult.create().allRecordCount(100).queryTime(50).build();
 
@@ -123,6 +131,7 @@ public class SearchResultTest extends UnitFessTestCase {
     /**
      * Test SearchResult with all fields populated.
      */
+    @Test
     public void test_allFieldsPopulated() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("_id", "doc1");

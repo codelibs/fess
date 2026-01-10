@@ -21,25 +21,30 @@ import java.util.Set;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PingResponseTest extends UnitFessTestCase {
 
     private FessConfig originalConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         originalConfig = ComponentUtil.getFessConfig();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (originalConfig != null) {
             ComponentUtil.register(originalConfig, "fessConfig");
         }
         super.tearDown();
     }
 
+    @Test
     public void test_getStatus_returnsCorrectValue() {
         // Since we cannot easily create a real ClusterHealthResponse without a running cluster,
         // we'll test the class behavior through unit tests that verify the logic
@@ -61,6 +66,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_getClusterName_returnsCorrectValue() {
         // Test cluster name getter exists
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -77,6 +83,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_getClusterStatus_returnsCorrectValue() {
         // Test cluster status getter exists
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -93,6 +100,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_getMessage_returnsCorrectValue() {
         // Test message getter exists
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -109,6 +117,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_fieldSetConfiguration() {
         // Test that field set configuration is properly handled
         Set<String> fieldSet = new HashSet<>();
@@ -130,6 +139,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertTrue(mockConfig.getApiPingEsFieldSet().contains("status"));
     }
 
+    @Test
     public void test_emptyFieldSet() {
         // Test with empty field set
         FessConfig mockConfig = new FessConfig.SimpleImpl() {
@@ -145,6 +155,7 @@ public class PingResponseTest extends UnitFessTestCase {
         assertEquals(0, mockConfig.getApiPingEsFieldSet().size());
     }
 
+    @Test
     public void test_fullFieldSet() {
         // Test with full field set
         Set<String> fieldSet = createFullFieldSet();

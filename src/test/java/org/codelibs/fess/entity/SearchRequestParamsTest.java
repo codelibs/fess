@@ -28,80 +28,95 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SearchRequestParamsTest extends UnitFessTestCase {
 
     private SearchRequestParams searchRequestParams;
     private TestSearchRequestParams testParams;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         testParams = new TestSearchRequestParams();
         searchRequestParams = testParams;
     }
 
     // Test for hasConditionQuery method
+    @Test
     public void test_hasConditionQuery_withQuery() {
         // Test with query parameter
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] { "test query" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withEmptyQuery() {
         // Test with empty query parameter
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] { "" });
         assertFalse(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withBlankQuery() {
         // Test with blank query parameter
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] { "   " });
         assertFalse(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withMultipleEmptyQueries() {
         // Test with multiple empty strings
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] { "", "  ", null });
         assertFalse(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withExactPhraseQuery() {
         // Test with exact phrase query
         testParams.conditions.put(SearchRequestParams.AS_EPQ, new String[] { "exact phrase" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withOrQuery() {
         // Test with OR query
         testParams.conditions.put(SearchRequestParams.AS_OQ, new String[] { "option1 option2" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withNegativeQuery() {
         // Test with negative query
         testParams.conditions.put(SearchRequestParams.AS_NQ, new String[] { "exclude this" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withTimestamp() {
         // Test with timestamp
         testParams.conditions.put(SearchRequestParams.AS_TIMESTAMP, new String[] { "2024-01-01" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withSiteSearch() {
         // Test with site search
         testParams.conditions.put(SearchRequestParams.AS_SITESEARCH, new String[] { "example.com" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withFileType() {
         // Test with file type
         testParams.conditions.put(SearchRequestParams.AS_FILETYPE, new String[] { "pdf" });
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withMultipleConditions() {
         // Test with multiple conditions
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] { "search term" });
@@ -110,17 +125,20 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertTrue(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withNoConditions() {
         // Test with no conditions
         assertFalse(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withNullValues() {
         // Test with null values
         testParams.conditions.put(SearchRequestParams.AS_Q, null);
         assertFalse(searchRequestParams.hasConditionQuery());
     }
 
+    @Test
     public void test_hasConditionQuery_withEmptyArray() {
         // Test with empty array
         testParams.conditions.put(SearchRequestParams.AS_Q, new String[] {});
@@ -128,35 +146,43 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     }
 
     // Test for isEmptyArray method
+    @Test
     public void test_isEmptyArray_withNull() {
         assertTrue(searchRequestParams.isEmptyArray(null));
     }
 
+    @Test
     public void test_isEmptyArray_withEmptyArray() {
         assertTrue(searchRequestParams.isEmptyArray(new String[] {}));
     }
 
+    @Test
     public void test_isEmptyArray_withBlankStrings() {
         assertTrue(searchRequestParams.isEmptyArray(new String[] { "", "  ", "\t", "\n" }));
     }
 
+    @Test
     public void test_isEmptyArray_withNullElements() {
         assertTrue(searchRequestParams.isEmptyArray(new String[] { null, null }));
     }
 
+    @Test
     public void test_isEmptyArray_withMixedBlankAndNull() {
         assertTrue(searchRequestParams.isEmptyArray(new String[] { null, "", "  " }));
     }
 
+    @Test
     public void test_isEmptyArray_withNonEmptyString() {
         assertFalse(searchRequestParams.isEmptyArray(new String[] { "value" }));
     }
 
+    @Test
     public void test_isEmptyArray_withMixedEmptyAndNonEmpty() {
         assertFalse(searchRequestParams.isEmptyArray(new String[] { "", "value", "  " }));
     }
 
     // Test for simplifyArray static method
+    @Test
     public void test_simplifyArray_withDuplicates() {
         String[] input = { "a", "b", "a", "c", "b" };
         String[] result = SearchRequestParams.simplifyArray(input);
@@ -166,6 +192,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("c", result[2]);
     }
 
+    @Test
     public void test_simplifyArray_withBlanks() {
         String[] input = { "a", "", "b", "  ", null, "c" };
         String[] result = SearchRequestParams.simplifyArray(input);
@@ -175,12 +202,14 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("c", result[2]);
     }
 
+    @Test
     public void test_simplifyArray_withAllBlanks() {
         String[] input = { "", "  ", null };
         String[] result = SearchRequestParams.simplifyArray(input);
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_simplifyArray_withNoDuplicates() {
         String[] input = { "a", "b", "c" };
         String[] result = SearchRequestParams.simplifyArray(input);
@@ -190,6 +219,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("c", result[2]);
     }
 
+    @Test
     public void test_simplifyArray_withSingleElement() {
         String[] input = { "single" };
         String[] result = SearchRequestParams.simplifyArray(input);
@@ -197,6 +227,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("single", result[0]);
     }
 
+    @Test
     public void test_simplifyArray_withEmpty() {
         String[] input = {};
         String[] result = SearchRequestParams.simplifyArray(input);
@@ -204,6 +235,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     }
 
     // Test for getParamValueArray static method
+    @Test
     public void test_getParamValueArray() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("test", new String[] { "value1", "value2", "value1" });
@@ -213,12 +245,14 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("value2", result[1]);
     }
 
+    @Test
     public void test_getParamValueArray_withNullParam() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         String[] result = SearchRequestParams.getParamValueArray(request, "nonexistent");
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_getParamValueArray_withBlankValues() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("test", new String[] { "value", "", "  ", null });
@@ -228,6 +262,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     }
 
     // Test for createFacetInfo method
+    @Test
     public void test_createFacetInfo_withFieldsAndQueries() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("facet.field", new String[] { "field1", "field2" });
@@ -251,6 +286,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("other", facetInfo.missing);
     }
 
+    @Test
     public void test_createFacetInfo_withOnlyFields() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("facet.field", new String[] { "field1" });
@@ -264,6 +300,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertNull(facetInfo.minDocCount);
     }
 
+    @Test
     public void test_createFacetInfo_withOnlyQueries() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("facet.query", new String[] { "query1" });
@@ -275,6 +312,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertEquals("query1", facetInfo.query[0]);
     }
 
+    @Test
     public void test_createFacetInfo_withNoFieldsOrQueries() {
         MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -282,6 +320,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
         assertNull(facetInfo);
     }
 
+    @Test
     public void test_createFacetInfo_withBlankParameters() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setParameterValues("facet.field", new String[] { "field1" });
@@ -295,6 +334,7 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     }
 
     // Test for createGeoInfo method
+    @Test
     public void test_createGeoInfo() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         GeoInfo geoInfo = searchRequestParams.createGeoInfo(request);
@@ -302,16 +342,19 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     }
 
     // Test for getTrackTotalHits method
+    @Test
     public void test_getTrackTotalHits() {
         assertNull(searchRequestParams.getTrackTotalHits());
     }
 
     // Test for getMinScore method
+    @Test
     public void test_getMinScore() {
         assertNull(searchRequestParams.getMinScore());
     }
 
     // Test for getResponseFields method
+    @Test
     public void test_getResponseFields() {
         // Setup mock QueryFieldConfig
         QueryFieldConfig queryFieldConfig = new QueryFieldConfig() {

@@ -25,8 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class KuromojiCSVUtilTest extends UnitFessTestCase {
+    @Test
     public void test_parse_basic() {
         String value;
         List<String> expected;
@@ -68,6 +70,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertThat(actual, is(expected));
     }
 
+    @Test
     public void test_parse_quoted_values() {
         String value;
         String[] result;
@@ -101,6 +104,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"another quoted\"", result[2]);
     }
 
+    @Test
     public void test_parse_escaped_quotes() {
         String value;
         String[] result;
@@ -128,6 +132,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"another \"\"escaped\"\"\"", result[2]);
     }
 
+    @Test
     public void test_parse_empty_values() {
         String value;
         String[] result;
@@ -158,6 +163,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"\"", result[2]);
     }
 
+    @Test
     public void test_parse_whitespace() {
         String value;
         String[] result;
@@ -185,6 +191,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"quoted\ttab\"", result[1]);
     }
 
+    @Test
     public void test_parse_invalid_quotes() {
         String value;
         String[] result;
@@ -210,6 +217,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_parse_special_characters() {
         String value;
         String[] result;
@@ -245,6 +253,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"#hashtag\"", result[2]);
     }
 
+    @Test
     public void test_parse_single_field() {
         String value;
         String[] result;
@@ -268,6 +277,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"\"", result[0]);
     }
 
+    @Test
     public void test_quoteEscape_basic() {
         String input;
         String result;
@@ -293,6 +303,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"text \"\"with\"\" quotes, and commas\"", result);
     }
 
+    @Test
     public void test_quoteEscape_edge_cases() {
         String input;
         String result;
@@ -323,6 +334,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\",\"", result);
     }
 
+    @Test
     public void test_quoteEscape_special_characters() {
         String input;
         String result;
@@ -348,6 +360,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("\"\"🚀\"\" rocket", result);
     }
 
+    @Test
     public void test_quoteEscape_null_input() {
         // Test null input handling
         try {
@@ -358,6 +371,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_parse_null_input() {
         // Test null input handling
         try {
@@ -368,6 +382,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_roundtrip_parsing() {
         // Test that parse(quoteEscape(x)) works correctly for simple values
         // Note: The implementation has a quirk where strings with escaped quotes don't get unquoted
@@ -400,6 +415,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         assertEquals("with \"\"quotes\"\"", parsed[0]); // NOT the original - this is the quirk
     }
 
+    @Test
     public void test_constructor_isPrivate() {
         // Verify that KuromojiCSVUtil has a private constructor (utility class pattern)
         try {
@@ -416,11 +432,13 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_class_isFinal() {
         // Verify that KuromojiCSVUtil is a final class
         assertTrue("KuromojiCSVUtil should be final class", java.lang.reflect.Modifier.isFinal(KuromojiCSVUtil.class.getModifiers()));
     }
 
+    @Test
     public void test_static_method_signatures() {
         // Verify all public static methods exist with correct signatures
         try {
@@ -441,6 +459,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_utilityClass_pattern() {
         // Verify utility class design pattern compliance
 
@@ -462,6 +481,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_parse_large_input() {
         // Test with large input to ensure performance
         StringBuilder sb = new StringBuilder();
@@ -481,6 +501,7 @@ public class KuromojiCSVUtilTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_parse_complex_scenarios() {
         String value;
         String[] result;

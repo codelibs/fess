@@ -58,6 +58,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.opensearch.action.search.SearchRequestBuilder;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class IndexUpdaterTest extends UnitFessTestCase {
 
@@ -76,9 +80,10 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     private FavoriteLogBhv favoriteLogBhv;
     private IngestFactory ingestFactory;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Initialize IndexUpdater
         indexUpdater = new IndexUpdater();
@@ -119,7 +124,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         if (indexUpdater != null && indexUpdater.isAlive()) {
             indexUpdater.setFinishCrawling(true);
             indexUpdater.interrupt();
@@ -129,12 +134,14 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test initialization
+    @Test
     public void test_init() {
         indexUpdater.init();
         assertNotNull(indexUpdater);
     }
 
     // Test initialization with IngestFactory
+    @Test
     public void test_init_withIngestFactory() {
         ComponentUtil.register(ingestFactory, "ingestFactory");
         indexUpdater.init();
@@ -142,6 +149,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test destroy when crawling is not finished
+    @Test
     public void test_destroy_notFinished() {
         final List<Crawler> crawlerList = new ArrayList<>();
         final TestCrawler crawler = new TestCrawler();
@@ -155,6 +163,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test destroy when crawling is finished
+    @Test
     public void test_destroy_finished() {
         indexUpdater.finishCrawling = true;
         indexUpdater.destroy();
@@ -164,6 +173,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addFinishedSessionId
+    @Test
     public void test_addFinishedSessionId() {
         final String sessionId = "session123";
         indexUpdater.addFinishedSessionId(sessionId);
@@ -171,6 +181,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addFinishedSessionId with multiple sessions
+    @Test
     public void test_addFinishedSessionId_multiple() {
         indexUpdater.addFinishedSessionId("session1");
         indexUpdater.addFinishedSessionId("session2");
@@ -183,6 +194,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run method with null DataService
+    @Test
     public void test_run_nullDataService() {
         indexUpdater.dataService = null;
         try {
@@ -194,6 +206,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run method basic flow
+    @Test
     public void test_run_basicFlow() throws Exception {
         final List<String> sessionIdList = Arrays.asList("session1");
         indexUpdater.setSessionIdList(sessionIdList);
@@ -228,6 +241,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test updateDocument with boost matcher
+    @Test
     public void test_updateDocument_withBoostMatcher() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "http://example.com");
@@ -252,6 +266,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test updateDocument without boost
+    @Test
     public void test_updateDocument_withoutBoost() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "http://example.com");
@@ -263,6 +278,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test updateDocument with existing doc_id
+    @Test
     public void test_updateDocument_existingDocId() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("doc_id", "existing_id");
@@ -274,6 +290,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addBoostValue
+    @Test
     public void test_addBoostValue() {
         final Map<String, Object> doc = new HashMap<>();
         indexUpdater.addBoostValue(doc, 3.5f);
@@ -282,6 +299,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addClickCountField with URL
+    @Test
     public void test_addClickCountField_withUrl() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "http://example.com");
@@ -294,6 +312,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addClickCountField without URL
+    @Test
     public void test_addClickCountField_withoutUrl() {
         final Map<String, Object> doc = new HashMap<>();
 
@@ -303,6 +322,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addClickCountField with blank URL
+    @Test
     public void test_addClickCountField_blankUrl() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "   ");
@@ -313,6 +333,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addFavoriteCountField with URL
+    @Test
     public void test_addFavoriteCountField_withUrl() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("url", "http://example.com");
@@ -325,6 +346,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addFavoriteCountField without URL
+    @Test
     public void test_addFavoriteCountField_withoutUrl() {
         final Map<String, Object> doc = new HashMap<>();
 
@@ -334,6 +356,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test ingest with null IngestFactory
+    @Test
     public void test_ingest_nullIngestFactory() {
         ComponentUtil.register(null, "ingestFactory");
         indexUpdater.init();
@@ -348,6 +371,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test ingest with IngestFactory
+    @Test
     public void test_ingest_withIngestFactory() {
         final Map<String, Object> doc = new HashMap<>();
         doc.put("test", "value");
@@ -361,6 +385,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test ingest with exception in ingester
+    @Test
     public void test_ingest_withException() {
         final TestIngestFactory factory = (TestIngestFactory) ingestFactory;
         factory.setThrowException(true);
@@ -375,6 +400,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test setters and getters
+    @Test
     public void test_gettersAndSetters() {
         // Test sessionIdList
         final List<String> sessionIdList = Arrays.asList("session1", "session2");
@@ -404,6 +430,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test setUncaughtExceptionHandler
+    @Test
     public void test_setUncaughtExceptionHandler() {
         final AtomicBoolean handlerCalled = new AtomicBoolean(false);
         final Thread.UncaughtExceptionHandler handler = (t, e) -> handlerCalled.set(true);
@@ -413,6 +440,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test setDefaultUncaughtExceptionHandler
+    @Test
     public void test_setDefaultUncaughtExceptionHandler() {
         final Thread.UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
         try {
@@ -425,6 +453,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run with ContainerNotAvailableException
+    @Test
     public void test_run_containerNotAvailable() throws Exception {
         final List<String> sessionIdList = Arrays.asList("session1");
         indexUpdater.setSessionIdList(sessionIdList);
@@ -444,6 +473,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run with max empty list count exceeded
+    @Test
     public void test_run_maxEmptyListCountExceeded() throws Exception {
         final List<String> sessionIdList = Arrays.asList("session1");
         indexUpdater.setSessionIdList(sessionIdList);
@@ -467,6 +497,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run with max error count exceeded
+    @Test
     public void test_run_maxErrorCountExceeded() throws Exception {
         final List<String> sessionIdList = Arrays.asList("session1");
         indexUpdater.setSessionIdList(sessionIdList);
@@ -496,6 +527,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     // Test run with component not available
+    @Test
     public void test_run_componentNotAvailable() throws Exception {
         final List<String> sessionIdList = Arrays.asList("session1");
         indexUpdater.setSessionIdList(sessionIdList);

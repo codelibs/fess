@@ -28,15 +28,20 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LdapUserTest extends UnitFessTestCase {
 
     private LdapUser ldapUser;
     private Hashtable<String, String> testEnv;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         testEnv = new Hashtable<>();
         testEnv.put("test.key", "test.value");
         ldapUser = new LdapUser(testEnv, "testuser");
@@ -50,10 +55,11 @@ public class LdapUserTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_constructor() {
         // Test constructor initializes fields correctly
         LdapUser user = new LdapUser(testEnv, "username");
@@ -62,6 +68,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertNull(user.permissions);
     }
 
+    @Test
     public void test_getName() {
         // Test getName returns the correct name
         assertEquals("testuser", ldapUser.getName());
@@ -79,6 +86,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertNull(user4.getName());
     }
 
+    @Test
     public void test_getEnvironment() {
         // Test getEnvironment returns the correct environment
         Hashtable<String, String> env = ldapUser.getEnvironment();
@@ -91,6 +99,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertTrue(user.getEnvironment().isEmpty());
     }
 
+    @Test
     public void test_getPermissions_withoutLdapConfig() {
         // Test when baseDn or accountFilter is blank
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -114,6 +123,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertSame(permissions, permissions2);
     }
 
+    @Test
     public void test_getPermissions_withBaseDnOnly() {
         // Test when only baseDn is set
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -133,6 +143,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals(0, permissions.length);
     }
 
+    @Test
     public void test_getPermissions_withAccountFilterOnly() {
         // Test when only accountFilter is set
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -152,6 +163,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals(0, permissions.length);
     }
 
+    @Test
     public void test_getPermissions_withLdapConfig() {
         // Test with LDAP configuration
         final AtomicBoolean activityHelperCalled = new AtomicBoolean(false);
@@ -231,6 +243,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertSame(permissions, permissions2);
     }
 
+    @Test
     public void test_getPermissions_withDuplicates() {
         // Test duplicate removal
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -282,6 +295,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals("Uuser", permissions[2]);
     }
 
+    @Test
     public void test_getRoleNames() {
         // Test getting role names from permissions
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -332,6 +346,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals("role2", roleNames[1]);
     }
 
+    @Test
     public void test_getRoleNames_empty() {
         // Test when no roles match the prefix
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -351,6 +366,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals(0, roleNames.length);
     }
 
+    @Test
     public void test_getGroupNames() {
         // Test getting group names from permissions
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -401,6 +417,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals("group2", groupNames[1]);
     }
 
+    @Test
     public void test_getGroupNames_empty() {
         // Test when no groups match the prefix
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -420,6 +437,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals(0, groupNames.length);
     }
 
+    @Test
     public void test_isEditable_enabled() {
         // Test when admin is enabled for the user
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -433,6 +451,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertTrue(ldapUser.isEditable());
     }
 
+    @Test
     public void test_isEditable_disabled() {
         // Test when admin is disabled for the user
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
@@ -446,6 +465,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertFalse(ldapUser.isEditable());
     }
 
+    @Test
     public void test_distinct_nullInput() {
         // Test distinct with null input
         String[] result = invokeDistinct(null);
@@ -454,6 +474,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertSame(StringUtil.EMPTY_STRINGS, result);
     }
 
+    @Test
     public void test_distinct_emptyArray() {
         // Test distinct with empty array
         String[] input = new String[0];
@@ -461,6 +482,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertSame(input, result);
     }
 
+    @Test
     public void test_distinct_singleElement() {
         // Test distinct with single element
         String[] input = new String[] { "element" };
@@ -468,6 +490,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertSame(input, result);
     }
 
+    @Test
     public void test_distinct_noDuplicates() {
         // Test distinct with no duplicates
         String[] input = new String[] { "a", "b", "c" };
@@ -478,6 +501,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals("c", result[2]);
     }
 
+    @Test
     public void test_distinct_withDuplicates() {
         // Test distinct with duplicates
         String[] input = new String[] { "a", "b", "a", "c", "b", "a" };
@@ -488,6 +512,7 @@ public class LdapUserTest extends UnitFessTestCase {
         assertEquals("c", result[2]);
     }
 
+    @Test
     public void test_distinct_withNullElements() {
         // Test distinct with null elements
         String[] input = new String[] { "a", null, "b", null, "a" };

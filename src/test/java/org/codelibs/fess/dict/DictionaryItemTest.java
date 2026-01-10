@@ -16,46 +16,56 @@
 package org.codelibs.fess.dict;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DictionaryItemTest extends UnitFessTestCase {
 
     private TestDictionaryItem dictionaryItem;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         dictionaryItem = new TestDictionaryItem();
     }
 
+    @Test
     public void test_getId_defaultValue() {
         // Test that default ID value is 0
         assertEquals(0L, dictionaryItem.getId());
     }
 
+    @Test
     public void test_getId_afterSetting() {
         // Test getting ID after setting it
         dictionaryItem.id = 123L;
         assertEquals(123L, dictionaryItem.getId());
     }
 
+    @Test
     public void test_getId_negativeValue() {
         // Test with negative ID value
         dictionaryItem.id = -456L;
         assertEquals(-456L, dictionaryItem.getId());
     }
 
+    @Test
     public void test_getId_maxValue() {
         // Test with maximum Long value
         dictionaryItem.id = Long.MAX_VALUE;
         assertEquals(Long.MAX_VALUE, dictionaryItem.getId());
     }
 
+    @Test
     public void test_getId_minValue() {
         // Test with minimum Long value
         dictionaryItem.id = Long.MIN_VALUE;
         assertEquals(Long.MIN_VALUE, dictionaryItem.getId());
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test that different instances have independent ID values
         TestDictionaryItem item1 = new TestDictionaryItem();
@@ -73,6 +83,7 @@ public class DictionaryItemTest extends UnitFessTestCase {
         assertEquals(200L, item2.getId());
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor creates a valid instance
         TestDictionaryItem newItem = new TestDictionaryItem();
@@ -80,6 +91,7 @@ public class DictionaryItemTest extends UnitFessTestCase {
         assertEquals(0L, newItem.getId());
     }
 
+    @Test
     public void test_idFieldAccess() {
         // Test direct field access through inheritance
         TestDictionaryItem item = new TestDictionaryItem();
@@ -94,6 +106,7 @@ public class DictionaryItemTest extends UnitFessTestCase {
         assertEquals(999L, item.id);
     }
 
+    @Test
     public void test_sequentialIdAssignment() {
         // Test sequential ID assignment pattern
         TestDictionaryItem[] items = new TestDictionaryItem[5];
@@ -108,6 +121,7 @@ public class DictionaryItemTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_idModification() {
         // Test modifying ID value multiple times
         TestDictionaryItem item = new TestDictionaryItem();

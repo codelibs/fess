@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withUrlMessageAndException() {
         // Test with URL, message, and exception (abort defaults to false)
         String url = "http://example.com/test";
@@ -33,6 +35,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withUrlMessageExceptionAndAbortTrue() {
         // Test with URL, message, exception, and abort set to true
         String url = "http://example.com/test2";
@@ -48,6 +51,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withUrlMessageExceptionAndAbortFalse() {
         // Test with URL, message, exception, and abort explicitly set to false
         String url = "http://example.com/test3";
@@ -63,6 +67,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_getUrl_withNullUrl() {
         // Test with null URL
         String url = null;
@@ -76,6 +81,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_getUrl_withEmptyUrl() {
         // Test with empty URL
         String url = "";
@@ -89,6 +95,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test with null message
         String url = "http://example.com/test";
@@ -103,6 +110,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withNullException() {
         // Test with null exception
         String url = "http://example.com/test";
@@ -117,6 +125,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withAllNullParameters() {
         // Test with all null parameters except abort
         String url = null;
@@ -132,6 +141,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(exception.aborted());
     }
 
+    @Test
     public void test_aborted_multipleCallsReturnSameValue() {
         // Test that multiple calls to aborted() return the same value
         String url = "http://example.com/test";
@@ -147,6 +157,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(exception.aborted());
     }
 
+    @Test
     public void test_getUrl_multipleCallsReturnSameValue() {
         // Test that multiple calls to getUrl() return the same value
         String url = "http://example.com/test";
@@ -161,6 +172,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertEquals(url, exception.getUrl());
     }
 
+    @Test
     public void test_constructor_withLongUrl() {
         // Test with very long URL
         StringBuilder longUrlBuilder = new StringBuilder("http://example.com/");
@@ -178,6 +190,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test with very long message
         String url = "http://example.com/test";
@@ -195,6 +208,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withNestedExceptions() {
         // Test with nested exceptions
         String url = "http://example.com/test";
@@ -213,6 +227,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withSpecialCharactersInUrl() {
         // Test with special characters in URL
         String url = "http://example.com/test?param=value&other=value#fragment";
@@ -226,6 +241,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructor_withUnicodeInMessage() {
         // Test with Unicode characters in message
         String url = "http://example.com/test";
@@ -239,6 +255,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_OutOfMemoryError() {
         // Test that constructor accepts Error as cause (verifies Throwable parameter change)
         String url = "http://example.com/large-dataset";
@@ -256,6 +273,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_OutOfMemoryErrorWithAbort() {
         // Test Error with abort flag
         String url = "http://example.com/critical-resource";
@@ -270,6 +288,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_StackOverflowError() {
         // Test with StackOverflowError
         String url = "http://example.com/recursive-content";
@@ -284,6 +303,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_AssertionError() {
         // Test with AssertionError
         String url = "http://example.com/invalid-state";
@@ -298,6 +318,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_LinkageError() {
         // Test with LinkageError subclass
         String url = "http://example.com/data";
@@ -312,6 +333,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_BackwardCompatibilityWithException() {
         // Verify backward compatibility - Exception types still work
         String url = "http://example.com/test";
@@ -333,6 +355,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(exception3.getCause() instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructorWithThrowableCause_NullError() {
         // Test with null Error
         String url = "http://example.com/test";
@@ -347,6 +370,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertFalse(exception.aborted());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_ChainedErrorsAndExceptions() {
         // Test with mixed Errors and Exceptions in cause chain
         String url = "http://example.com/complex-error";
@@ -373,6 +397,7 @@ public class DataStoreCrawlingExceptionTest extends UnitFessTestCase {
         assertTrue(cause3 instanceof NullPointerException);
     }
 
+    @Test
     public void test_constructorWithThrowableCause_VirtualMachineError() {
         // Test with VirtualMachineError
         String url = "http://example.com/vm-error";

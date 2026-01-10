@@ -43,15 +43,19 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.TermQueryBuilder;
 import org.opensearch.index.query.TermsQueryBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class IndexingHelperTest extends UnitFessTestCase {
     private IndexingHelper indexingHelper;
 
     private long documentSizeByQuery = 0L;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         indexingHelper = new IndexingHelper() {
             @Override
@@ -83,6 +87,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         }, WebConfigService.class.getCanonicalName());
     }
 
+    @Test
     public void test_sendDocuments() {
         documentSizeByQuery = 0L;
         final AtomicReference<String> sentIndex = new AtomicReference<>();
@@ -127,6 +132,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals("fess.update", sentIndex.get());
     }
 
+    @Test
     public void test_deleteOldDocuments() {
         documentSizeByQuery = 0L;
         final List<String> deletedDocIdList = new ArrayList<>();
@@ -215,6 +221,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals("1", deletedDocIdList.get(0));
     }
 
+    @Test
     public void test_updateDocument() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -240,6 +247,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(value, resultMap.get("value"));
     }
 
+    @Test
     public void test_deleteDocument() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -259,6 +267,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(id, resultMap.get("id"));
     }
 
+    @Test
     public void test_deleteDocumentByUrl() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -281,6 +290,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(url, resultMap.get("url"));
     }
 
+    @Test
     public void test_deleteDocumentsByDocId() {
         final Map<String, Object> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -309,6 +319,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals("001", ((List<String>) resultMap.get("ids")).get(0));
     }
 
+    @Test
     public void test_deleteDocumentByQuery() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -331,6 +342,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(url, resultMap.get("url"));
     }
 
+    @Test
     public void test_getDocument() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -355,6 +367,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(3, document.size());
     }
 
+    @Test
     public void test_getDocumentListByPrefixId() {
         documentSizeByQuery = 1L;
         final Map<String, String> resultMap = new HashMap<>();
@@ -381,6 +394,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(1, documents.size());
     }
 
+    @Test
     public void test_deleteChildDocument() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -405,6 +419,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals("parent_id", resultMap.get("field"));
     }
 
+    @Test
     public void test_getChildDocumentList() {
         documentSizeByQuery = 1L;
         final Map<String, String> resultMap = new HashMap<>();
@@ -430,6 +445,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(1, documents.size());
     }
 
+    @Test
     public void test_getDocumentListByQuery() {
         documentSizeByQuery = 1L;
         final Map<String, String> resultMap = new HashMap<>();
@@ -456,6 +472,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(1, documents.size());
     }
 
+    @Test
     public void test_deleteBySessionId() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -480,6 +497,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(sessionId, resultMap.get("value"));
     }
 
+    @Test
     public void test_deleteByConfigId() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -504,6 +522,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(configId, resultMap.get("value"));
     }
 
+    @Test
     public void test_deleteByVirtualHost() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -528,12 +547,14 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(virtualHost, resultMap.get("value"));
     }
 
+    @Test
     public void test_calculateDocumentSize() {
         assertEquals(0, indexingHelper.calculateDocumentSize(Collections.emptyMap()));
         assertEquals(118, indexingHelper.calculateDocumentSize(Map.of("id", "test")));
         assertEquals(249, indexingHelper.calculateDocumentSize(Map.of("id", "test", "url", "http://test.com/")));
     }
 
+    @Test
     public void test_setMaxRetryCount() {
         indexingHelper.setMaxRetryCount(10);
         assertEquals(10, indexingHelper.maxRetryCount);
@@ -542,6 +563,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(0, indexingHelper.maxRetryCount);
     }
 
+    @Test
     public void test_setDefaultRowSize() {
         indexingHelper.setDefaultRowSize(50);
         assertEquals(50, indexingHelper.defaultRowSize);
@@ -550,6 +572,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(1000, indexingHelper.defaultRowSize);
     }
 
+    @Test
     public void test_setRequestInterval() {
         indexingHelper.setRequestInterval(1000L);
         assertEquals(1000L, indexingHelper.requestInterval);
@@ -558,6 +581,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(0L, indexingHelper.requestInterval);
     }
 
+    @Test
     public void test_deleteBySessionId_withClient() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -582,6 +606,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(sessionId, resultMap.get("value"));
     }
 
+    @Test
     public void test_deleteByConfigId_withClient() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -606,6 +631,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(configId, resultMap.get("value"));
     }
 
+    @Test
     public void test_deleteByVirtualHost_withClient() {
         final Map<String, String> resultMap = new HashMap<>();
         final SearchEngineClient client = new SearchEngineClient() {
@@ -630,6 +656,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(virtualHost, resultMap.get("value"));
     }
 
+    @Test
     public void test_getDocument_notFound() {
         final SearchEngineClient client = new SearchEngineClient() {
             @Override
@@ -644,6 +671,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertNull(document);
     }
 
+    @Test
     public void test_getDocumentListByQuery_withNullFields() {
         documentSizeByQuery = 1L;
         final Map<String, String> resultMap = new HashMap<>();
@@ -667,6 +695,7 @@ public class IndexingHelperTest extends UnitFessTestCase {
         assertEquals(1, documents.size());
     }
 
+    @Test
     public void test_calculateDocumentSize_withNullValue() {
         final Map<String, Object> docMap = new HashMap<>();
         docMap.put("id", "test");

@@ -28,6 +28,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CorsHandlerTest extends UnitFessTestCase {
 
@@ -38,9 +41,10 @@ public class CorsHandlerTest extends UnitFessTestCase {
     private ServletRequest processRequest;
     private ServletResponse processResponse;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         responseHeaders = new HashMap<>();
         processCalled = false;
         processOrigin = null;
@@ -71,6 +75,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test that all CORS header constants are defined correctly
+    @Test
     public void test_corsHeaderConstants() {
         assertEquals("Access-Control-Allow-Origin", CorsHandler.ACCESS_CONTROL_ALLOW_ORIGIN);
         assertEquals("Access-Control-Allow-Headers", CorsHandler.ACCESS_CONTROL_ALLOW_HEADERS);
@@ -81,6 +86,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test that constants are protected static final
+    @Test
     public void test_constantsModifiers() throws Exception {
         Field[] fields = CorsHandler.class.getDeclaredFields();
         for (Field field : fields) {
@@ -94,11 +100,13 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test that CorsHandler is abstract
+    @Test
     public void test_isAbstractClass() {
         assertTrue("CorsHandler should be abstract", Modifier.isAbstract(CorsHandler.class.getModifiers()));
     }
 
     // Test that process method is abstract
+    @Test
     public void test_processMethodIsAbstract() throws Exception {
         try {
             java.lang.reflect.Method processMethod =
@@ -111,6 +119,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         CorsHandler handler = new CorsHandler() {
             @Override
@@ -122,6 +131,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test process method with null origin
+    @Test
     public void test_processWithNullOrigin() {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
@@ -129,12 +139,13 @@ public class CorsHandlerTest extends UnitFessTestCase {
         corsHandler.process(null, request, response);
 
         assertTrue("process should be called", processCalled);
-        assertNull("origin should be null", processOrigin);
+        assertNull(processOrigin, "origin should be null");
         assertEquals(request, processRequest);
         assertEquals(response, processResponse);
     }
 
     // Test process method with empty origin
+    @Test
     public void test_processWithEmptyOrigin() {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
@@ -148,6 +159,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test process method with valid origin
+    @Test
     public void test_processWithValidOrigin() {
         String testOrigin = "https://example.com";
         HttpServletRequest request = createMockRequest();
@@ -167,6 +179,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test process method with multiple origins
+    @Test
     public void test_processWithMultipleOrigins() {
         String[] testOrigins = { "https://example.com", "https://test.example.com", "http://localhost:8080" };
 
@@ -183,12 +196,13 @@ public class CorsHandlerTest extends UnitFessTestCase {
             assertEquals(origin, processOrigin);
 
             List<String> originHeaders = responseHeaders.get("Access-Control-Allow-Origin");
-            assertNotNull("Headers should be set for origin: " + origin, originHeaders);
+            assertNotNull(originHeaders, "Headers should be set for origin: " + origin);
             assertTrue(originHeaders.contains(origin));
         }
     }
 
     // Test process method with wildcard origin
+    @Test
     public void test_processWithWildcardOrigin() {
         String wildcardOrigin = "*";
         HttpServletRequest request = createMockRequest();
@@ -205,6 +219,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test that all expected headers are set
+    @Test
     public void test_allCorsHeadersAreSet() {
         String testOrigin = "https://example.com";
         HttpServletRequest request = createMockRequest();
@@ -213,15 +228,16 @@ public class CorsHandlerTest extends UnitFessTestCase {
         corsHandler.process(testOrigin, request, response);
 
         // Check all CORS headers are present
-        assertNotNull("Allow-Origin header should be set", responseHeaders.get("Access-Control-Allow-Origin"));
-        assertNotNull("Allow-Methods header should be set", responseHeaders.get("Access-Control-Allow-Methods"));
-        assertNotNull("Allow-Headers header should be set", responseHeaders.get("Access-Control-Allow-Headers"));
-        assertNotNull("Max-Age header should be set", responseHeaders.get("Access-Control-Max-Age"));
-        assertNotNull("Allow-Credentials header should be set", responseHeaders.get("Access-Control-Allow-Credentials"));
-        assertNotNull("Allow-Private-Network header should be set", responseHeaders.get("Access-Control-Allow-Private-Network"));
+        assertNotNull(responseHeaders.get("Access-Control-Allow-Origin"), "Allow-Origin header should be set");
+        assertNotNull(responseHeaders.get("Access-Control-Allow-Methods"), "Allow-Methods header should be set");
+        assertNotNull(responseHeaders.get("Access-Control-Allow-Headers"), "Allow-Headers header should be set");
+        assertNotNull(responseHeaders.get("Access-Control-Max-Age"), "Max-Age header should be set");
+        assertNotNull(responseHeaders.get("Access-Control-Allow-Credentials"), "Allow-Credentials header should be set");
+        assertNotNull(responseHeaders.get("Access-Control-Allow-Private-Network"), "Allow-Private-Network header should be set");
     }
 
     // Test process with non-HttpServletResponse
+    @Test
     public void test_processWithNonHttpServletResponse() {
         String testOrigin = "https://example.com";
         HttpServletRequest request = createMockRequest();
@@ -306,6 +322,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test multiple process calls
+    @Test
     public void test_multipleProcessCalls() {
         HttpServletRequest request = createMockRequest();
         HttpServletResponse response = createMockResponse();
@@ -321,6 +338,7 @@ public class CorsHandlerTest extends UnitFessTestCase {
     }
 
     // Test constants are not modifiable (ensure they're final)
+    @Test
     public void test_constantsAreImmutable() throws Exception {
         Field originField = CorsHandler.class.getDeclaredField("ACCESS_CONTROL_ALLOW_ORIGIN");
         assertTrue("ACCESS_CONTROL_ALLOW_ORIGIN should be final", Modifier.isFinal(originField.getModifiers()));

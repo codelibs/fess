@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withComponentName() {
         // Test constructor with component name only
         String componentName = "testComponent";
@@ -29,6 +31,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(componentName, exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withComponentNameAndCause() {
         // Test constructor with component name and cause
         String componentName = "myComponent";
@@ -40,6 +43,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(componentName, exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withCause() {
         // Test constructor with cause only
         Throwable cause = new IllegalStateException("Container initialization failed");
@@ -51,6 +55,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("container", exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withNullComponentName() {
         // Test constructor with null component name
         ContainerNotAvailableException exception = new ContainerNotAvailableException((String) null);
@@ -60,6 +65,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertNull(exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withEmptyComponentName() {
         // Test constructor with empty component name
         String componentName = "";
@@ -70,6 +76,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(componentName, exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withNullComponentNameAndCause() {
         // Test constructor with null component name and valid cause
         Throwable cause = new RuntimeException("Test cause");
@@ -80,6 +87,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertNull(exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withComponentNameAndNullCause() {
         // Test constructor with component name and null cause
         String componentName = "testService";
@@ -90,6 +98,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(componentName, exception.getComponentName());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Test constructor with null cause only
         ContainerNotAvailableException exception = new ContainerNotAvailableException((Throwable) null);
@@ -100,6 +109,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("container", exception.getComponentName());
     }
 
+    @Test
     public void test_getComponentName() {
         // Test getComponentName method with various scenarios
         String componentName1 = "dataSource";
@@ -113,6 +123,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("anotherComponent", exception3.getComponentName());
     }
 
+    @Test
     public void test_exceptionChaining() {
         // Test exception chaining with multiple levels
         Exception rootCause = new Exception("Root cause");
@@ -125,6 +136,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, topException.getCause().getCause());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String componentName = "cacheManager";
@@ -137,6 +149,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String componentName = "searchEngine";
@@ -151,6 +164,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that ContainerNotAvailableException is an instance of FessSystemException
         ContainerNotAvailableException exception = new ContainerNotAvailableException("test");
@@ -158,6 +172,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is properly defined
         ContainerNotAvailableException exception1 = new ContainerNotAvailableException("test");
@@ -167,6 +182,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(exception1.getClass(), exception2.getClass());
     }
 
+    @Test
     public void test_componentNameWithSpecialCharacters() {
         // Test component name with special characters
         String componentName = "my-component_v2.0@service";
@@ -176,6 +192,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(componentName, exception.getComponentName());
     }
 
+    @Test
     public void test_longComponentName() {
         // Test with a very long component name
         String longName = "com.example.very.long.package.name.with.many.nested.levels.MyVeryLongComponentNameThatExceedsNormalLength";
@@ -185,6 +202,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals(longName, exception.getComponentName());
     }
 
+    @Test
     public void test_messageFormatting() {
         // Test message formatting for different constructors
         ContainerNotAvailableException exception1 = new ContainerNotAvailableException("service1");
@@ -197,6 +215,7 @@ public class ContainerNotAvailableExceptionTest extends UnitFessTestCase {
         assertEquals("Container is not available.", exception3.getMessage());
     }
 
+    @Test
     public void test_causeOnlyConstructorWithMessage() {
         // Test that cause-only constructor properly handles the cause
         String causeMessage = "Initialization failed";

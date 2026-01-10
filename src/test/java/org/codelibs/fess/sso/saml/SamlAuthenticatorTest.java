@@ -23,16 +23,20 @@ import java.util.Map;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SamlAuthenticatorTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
@@ -93,12 +97,14 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         defaultSettingsField.set(authenticator, settings);
     }
 
+    @Test
     public void test_authenticatorInstantiation() {
         // Verify authenticator can be instantiated without errors
         SamlAuthenticator authenticator = new SamlAuthenticator();
         assertNotNull(authenticator);
     }
 
+    @Test
     public void test_defaultSettings_emailAddressCorrect() throws Exception {
         // Test that the email typo fix is correct: support@@example.com -> support@example.com
         Map<String, Object> defaultSettings = createDefaultSettings();
@@ -123,6 +129,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals(1, supportEmail.chars().filter(ch -> ch == '@').count());
     }
 
+    @Test
     public void test_defaultSettings_securityConfiguration() throws Exception {
         // Verify security settings are properly configured with appropriate defaults
         Map<String, Object> defaultSettings = createDefaultSettings();
@@ -146,6 +153,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertNotNull(defaultSettings.get("onelogin.saml2.security.want_xml_validation"));
     }
 
+    @Test
     public void test_defaultSettings_organizationInfo() throws Exception {
         Map<String, Object> defaultSettings = createDefaultSettings();
 
@@ -155,6 +163,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("https://fess.codelibs.org/", defaultSettings.get("onelogin.saml2.organization.url"));
     }
 
+    @Test
     public void test_defaultSettings_serviceProviderConfig() throws Exception {
         Map<String, Object> defaultSettings = createDefaultSettings();
 
@@ -173,6 +182,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", defaultSettings.get("onelogin.saml2.sp.nameidformat"));
     }
 
+    @Test
     public void test_buildDefaultUrl_withDefaultBaseUrl() throws Exception {
         // Test that buildDefaultUrl returns http://localhost:8080 when no property is set
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -192,6 +202,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("http://localhost:8080/sso/metadata", url);
     }
 
+    @Test
     public void test_buildDefaultUrl_withCustomBaseUrl() throws Exception {
         // Test that buildDefaultUrl uses custom base URL from property
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -215,6 +226,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultUrl_withTrailingSlash() throws Exception {
         // Test that trailing slash is handled correctly
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -238,6 +250,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultUrl_withPortInCustomUrl() throws Exception {
         // Test that custom URL with port is handled correctly
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -261,6 +274,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultUrl_allEndpoints() throws Exception {
         // Test all SAML endpoints are built correctly
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -289,6 +303,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultUrl_emptyProperty() throws Exception {
         // Test that empty property falls back to default
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -312,6 +327,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultUrl_whitespaceProperty() throws Exception {
         // Test that whitespace-only property falls back to default
         SamlAuthenticator authenticator = new SamlAuthenticator();
@@ -335,6 +351,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_contactInformation() throws Exception {
         Map<String, Object> defaultSettings = createDefaultSettings();
 
@@ -355,6 +372,7 @@ public class SamlAuthenticatorTest extends UnitFessTestCase {
         assertEquals("technical@example.com", techEmail);
     }
 
+    @Test
     public void test_emailTypoFix_supportEmail() throws Exception {
         // This test specifically verifies the typo fix: support@@example.com -> support@example.com
         Map<String, Object> defaultSettings = createDefaultSettings();

@@ -27,10 +27,12 @@ import javax.imageio.stream.ImageInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(HtmlTagBasedGeneratorTest.class);
 
+    @Test
     public void test_saveImage() throws Exception {
         // Note: This test requires FessConfig from ComponentUtil
         // We skip it when container is not initialized
@@ -111,6 +113,7 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
 
     // Tests for atomic file operations (TOCTOU fix)
 
+    @Test
     public void test_createDirectories_nestedPath() throws Exception {
         // Test that Files.createDirectories works correctly for nested paths
         Path tempDir = Files.createTempDirectory("toctou_test");
@@ -128,6 +131,7 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createDirectories_existingPath() throws Exception {
         // Test that Files.createDirectories is idempotent (no exception on existing dir)
         Path tempDir = Files.createTempDirectory("toctou_test");
@@ -144,6 +148,7 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteIfExists_existingFile() throws Exception {
         // Test that Files.deleteIfExists works correctly for existing files
         Path tempFile = Files.createTempFile("toctou_test", ".tmp");
@@ -159,6 +164,7 @@ public class HtmlTagBasedGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteIfExists_nonExistingFile() throws Exception {
         // Test that Files.deleteIfExists doesn't throw on non-existing file
         Path tempDir = Files.createTempDirectory("toctou_test");

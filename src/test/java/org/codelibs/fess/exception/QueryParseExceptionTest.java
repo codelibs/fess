@@ -17,9 +17,11 @@ package org.codelibs.fess.exception;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class QueryParseExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor() {
         // Test constructor with ParseException cause
         ParseException parseException = new ParseException("Test parse error");
@@ -31,6 +33,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertTrue(queryParseException instanceof RuntimeException);
     }
 
+    @Test
     public void test_getMessage() {
         // Test that message is inherited from the cause
         String errorMessage = "Invalid query syntax";
@@ -40,6 +43,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertEquals("org.apache.lucene.queryparser.classic.ParseException: " + errorMessage, queryParseException.getMessage());
     }
 
+    @Test
     public void test_getCause() {
         // Test that the cause is properly set and retrievable
         ParseException parseException = new ParseException("Query parsing failed");
@@ -52,6 +56,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertEquals("Query parsing failed", cause.getMessage());
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly set
         ParseException parseException = new ParseException("Stack trace test");
@@ -62,6 +67,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertTrue(stackTrace.length > 0);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that the exception is serializable
         ParseException parseException = new ParseException("Serialization test");
@@ -72,6 +78,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertTrue(queryParseException instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_inheritanceHierarchy() {
         // Test the inheritance hierarchy
         ParseException parseException = new ParseException("Hierarchy test");
@@ -85,6 +92,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertTrue(queryParseException instanceof Throwable);
     }
 
+    @Test
     public void test_nullHandling() {
         // Test with null ParseException
         QueryParseException queryParseException = new QueryParseException(null);
@@ -94,6 +102,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         // This is expected behavior for exceptions with null cause
     }
 
+    @Test
     public void test_nestedCause() {
         // Test with nested exceptions
         RuntimeException rootCause = new RuntimeException("Root cause");
@@ -105,6 +114,7 @@ public class QueryParseExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, queryParseException.getCause().getCause());
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String errorMessage = "ToString test error";

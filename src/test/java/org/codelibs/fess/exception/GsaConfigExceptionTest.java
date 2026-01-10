@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class GsaConfigExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithMessage() {
         // Test constructor with message only
         String message = "GSA configuration error occurred";
@@ -29,6 +31,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndCause() {
         // Test constructor with message and cause
         String message = "GSA configuration error with cause";
@@ -42,6 +45,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause exception", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithNullMessage() {
         // Test constructor with null message
         GsaConfigException exception = new GsaConfigException(null);
@@ -51,6 +55,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndCause() {
         // Test constructor with null message and null cause
         GsaConfigException exception = new GsaConfigException(null, null);
@@ -60,6 +65,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndValidCause() {
         // Test constructor with null message and valid cause
         Throwable cause = new IllegalArgumentException("Invalid argument");
@@ -72,6 +78,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertEquals("Invalid argument", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -82,6 +89,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that GsaConfigException is an instance of FessSystemException
         GsaConfigException exception = new GsaConfigException("Test");
@@ -92,6 +100,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialization() {
         // Test serialVersionUID is properly defined
         GsaConfigException exception = new GsaConfigException("Serialization test");
@@ -102,6 +111,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly preserved
         String message = "GSA error with stack trace";
@@ -116,6 +126,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getCause().getStackTrace().length > 0);
     }
 
+    @Test
     public void test_multiLevelCause() {
         // Test with nested exceptions
         Throwable rootCause = new IllegalStateException("Root problem");
@@ -134,6 +145,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertEquals("Root problem", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_messageWithSpecialCharacters() {
         // Test constructor with message containing special characters
         String message = "GSA error: config file not found at /path/to/config.xml\n" + "Details: \"file\" does not exist\t[TAB]\r\n"
@@ -144,6 +156,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_veryLongMessage() {
         // Test with very long message
         StringBuilder sb = new StringBuilder();
@@ -158,6 +171,7 @@ public class GsaConfigExceptionTest extends UnitFessTestCase {
         assertEquals(longMessage, exception.getMessage());
     }
 
+    @Test
     public void test_differentCauseTypes() {
         // Test with different types of cause exceptions
 

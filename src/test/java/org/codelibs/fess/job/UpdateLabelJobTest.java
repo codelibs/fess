@@ -30,14 +30,19 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.script.Script;
 import org.opensearch.script.ScriptType;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class UpdateLabelJobTest extends UnitFessTestCase {
 
     private UpdateLabelJob updateLabelJob;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         updateLabelJob = new UpdateLabelJob();
 
         // Setup mock components
@@ -108,6 +113,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test execute() method with successful processing
+    @Test
     public void test_execute_success() {
         String result = updateLabelJob.execute();
         assertNotNull(result);
@@ -116,6 +122,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test execute() method with query builder
+    @Test
     public void test_execute_withQueryBuilder() {
         QueryBuilder queryBuilder = QueryBuilders.termQuery("field", "value");
         updateLabelJob.query(queryBuilder);
@@ -127,6 +134,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test execute() method with exception handling
+    @Test
     public void test_execute_withException() {
         // Register a mock that throws exception
         SearchEngineClient exceptionClient = new SearchEngineClient() {
@@ -146,6 +154,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test query() method
+    @Test
     public void test_query() {
         QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
         UpdateLabelJob returnedJob = updateLabelJob.query(queryBuilder);
@@ -155,6 +164,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test query() method with null
+    @Test
     public void test_query_withNull() {
         updateLabelJob.query(null);
 
@@ -166,6 +176,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         UpdateLabelJob job = new UpdateLabelJob();
         assertNotNull(job);
@@ -173,6 +184,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test processing documents with various URL conditions
+    @Test
     public void test_execute_variousUrlConditions() {
         String result = updateLabelJob.execute();
         assertNotNull(result);
@@ -181,6 +193,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test with empty label set
+    @Test
     public void test_execute_withEmptyLabelSet() {
         // Override mock to return empty label set
         LabelTypeHelper emptyLabelHelper = new LabelTypeHelper() {
@@ -208,6 +221,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test script generation with multiple labels
+    @Test
     public void test_execute_scriptGenerationWithMultipleLabels() {
         // This test verifies that the job executes correctly
         // Note: We can't easily test the actual script generation because the mock doesn't call the processor
@@ -218,6 +232,7 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
     }
 
     // Test handling of processing exception
+    @Test
     public void test_execute_withProcessingException() {
         // Create a mock that returns 0 to simulate processing error
         SearchEngineClient errorClient = new SearchEngineClient() {

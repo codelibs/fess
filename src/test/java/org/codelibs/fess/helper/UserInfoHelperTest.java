@@ -25,9 +25,12 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 
 import jakarta.servlet.http.Cookie;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class UserInfoHelperTest extends UnitFessTestCase {
 
+    @Test
     public void test_getUserCodeFromRequest() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
 
@@ -79,6 +82,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertNull(userInfoHelper.getUserCodeFromRequest(request));
     }
 
+    @Test
     public void test_createUserCodeFromUserId() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         assertEquals("009ab986effa1a9664ada54eb81d7fce", userInfoHelper.createUserCodeFromUserId("a"));
@@ -90,6 +94,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
                 .createUserCodeFromUserId("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"));
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNotNull() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
 
@@ -100,6 +105,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertFalse(userInfoHelper.isSecureCookie());
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNull_xForwardedProto_https() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -110,6 +116,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertTrue(userInfoHelper.isSecureCookie());
     }
 
+    @Test
     public void test_isSecureCookie_noRequest() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -117,6 +124,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertFalse(userInfoHelper.isSecureCookie());
     }
 
+    @Test
     public void test_getUserCodeFromCookie() {
         UserInfoHelper userInfoHelper = new UserInfoHelper() {
             @Override
@@ -140,6 +148,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertEquals("12345abcde12345ABCDE", userInfoHelper.getUserCodeFromCookie(request));
     }
 
+    @Test
     public void test_deleteUserCodeFromCookie() {
         UserInfoHelper userInfoHelper = new UserInfoHelper() {
             @Override
@@ -158,6 +167,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         userInfoHelper.deleteUserCodeFromCookie(request);
     }
 
+    @Test
     public void test_getId() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         String id1 = userInfoHelper.getId();
@@ -172,6 +182,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertTrue(id2.matches("[0-9a-f]+"));
     }
 
+    @Test
     public void test_storeQueryId() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();
@@ -190,6 +201,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_storeQueryId_emptyDocuments() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();
@@ -203,6 +215,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getResultDocIds_nonExistentQuery() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();
@@ -211,6 +224,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertEquals(0, docIds.length);
     }
 
+    @Test
     public void test_setters() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
 
@@ -225,6 +239,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNull_xForwardedProto_http() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -235,6 +250,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertFalse(userInfoHelper.isSecureCookie());
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNull_xForwardedProto_mixed_case() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -245,6 +261,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertTrue(userInfoHelper.isSecureCookie());
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNull_noXForwardedProto_secure() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -260,6 +277,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isSecureCookie_cookieSecureNull_noXForwardedProto_notSecure() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         userInfoHelper.setCookieSecure(null);
@@ -275,6 +293,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getUserCode_withAttributeSet() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();
@@ -283,6 +302,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertEquals("testUserCode", userInfoHelper.getUserCode());
     }
 
+    @Test
     public void test_getUserCode_withValidRequestParameter() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();
@@ -291,6 +311,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         assertEquals("12345abcde12345ABCDE", userInfoHelper.getUserCode());
     }
 
+    @Test
     public void test_getUserCode_withValidCookie() {
         UserInfoHelper userInfoHelper = new UserInfoHelper() {
             @Override
@@ -323,6 +344,7 @@ public class UserInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getUserCode_generatesNewId() {
         UserInfoHelper userInfoHelper = new UserInfoHelper();
         MockletHttpServletRequest request = getMockRequest();

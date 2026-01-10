@@ -24,18 +24,23 @@ import java.util.regex.Pattern;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PathMappingHelperTest extends UnitFessTestCase {
 
     public PathMappingHelper pathMappingHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         pathMappingHelper = new PathMappingHelper();
         pathMappingHelper.init();
     }
 
+    @Test
     public void test_setPathMappingList() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -51,6 +56,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_replaceUrl() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -65,6 +71,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("http://localhost/user/", pathMappingHelper.replaceUrl(sessionId, url));
     }
 
+    @Test
     public void test_replaceUrls() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -87,12 +94,14 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("aaa\"http://localhost/user/\"bbb", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_setPathMappingList_withNullSessionId() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         pathMappingHelper.setPathMappingList(null, pathMappingList);
         assertNull(pathMappingHelper.getPathMappingList("test"));
     }
 
+    @Test
     public void test_setPathMappingList_withNullList() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -103,24 +112,29 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertNull(pathMappingHelper.getPathMappingList(sessionId));
     }
 
+    @Test
     public void test_removePathMappingList_withNullSessionId() {
         pathMappingHelper.removePathMappingList(null);
     }
 
+    @Test
     public void test_getPathMappingList_withNullSessionId() {
         assertNull(pathMappingHelper.getPathMappingList(null));
     }
 
+    @Test
     public void test_replaceUrl_withNullSessionId() {
         final String url = "file:///home/user/";
         assertEquals(url, pathMappingHelper.replaceUrl((String) null, url));
     }
 
+    @Test
     public void test_replaceUrl_withNonExistentSessionId() {
         final String url = "file:///home/user/";
         assertEquals(url, pathMappingHelper.replaceUrl("nonexistent", url));
     }
 
+    @Test
     public void test_replaceUrl_withEmptyList() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -130,6 +144,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals(url, pathMappingHelper.replaceUrl(sessionId, url));
     }
 
+    @Test
     public void test_replaceUrl_withMultiplePathMappings() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -150,6 +165,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("https://server/user/", pathMappingHelper.replaceUrl(sessionId, url));
     }
 
+    @Test
     public void test_replaceUrls_withNullReplacement() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -163,6 +179,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("\"user/\"", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrls_withEmptyReplacement() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -176,12 +193,14 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("\"user/\"", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrls_withNullCachedList() {
         pathMappingHelper.cachedPathMappingList = null;
         String text = "\"file:///home/user/\"";
         assertEquals(text, pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrl_withNullCachedList() {
         pathMappingHelper.cachedPathMappingList = null;
         String url = "file:///home/user/";
@@ -189,6 +208,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertNotNull(result);
     }
 
+    @Test
     public void test_replaceUrls_withMultipleQuotedStrings() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -202,6 +222,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("\"http://localhost/user1/\" and \"http://localhost/user2/\"", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrls_withNoQuotes() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -215,6 +236,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("file:///home/user/", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_getProcessTypeList_crawlerMode() {
         System.setProperty("lasta.env", Constants.EXECUTE_TYPE_CRAWLER);
         try {
@@ -226,6 +248,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getProcessTypeList_defaultMode() {
         System.clearProperty("lasta.env");
         final List<String> ptList = pathMappingHelper.getProcessTypeList();
@@ -234,6 +257,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertTrue(ptList.contains(Constants.PROCESS_TYPE_BOTH));
     }
 
+    @Test
     public void test_getProcessTypeList_nonCrawlerMode() {
         System.setProperty("lasta.env", "other");
         try {
@@ -246,6 +270,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createPathMatcher_encodeUrl() {
         final Pattern pattern = Pattern.compile("test");
         final Matcher matcher = pattern.matcher("test");
@@ -255,6 +280,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("http://example.com/test+path", result);
     }
 
+    @Test
     public void test_createPathMatcher_normalReplacement() {
         final Pattern pattern = Pattern.compile("test");
         final Matcher matcher = pattern.matcher("test");
@@ -264,18 +290,21 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("replacement", result);
     }
 
+    @Test
     public void test_load_withoutPathMappingBhv() {
         final PathMappingHelper helper = new PathMappingHelper();
         int result = helper.load();
         assertEquals(0, result);
     }
 
+    @Test
     public void test_init_called() {
         final PathMappingHelper helper = new PathMappingHelper();
         helper.init();
         assertNotNull(helper.cachedPathMappingList);
     }
 
+    @Test
     public void test_replaceUrl_withEmptyUrl() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -290,6 +319,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("", pathMappingHelper.replaceUrl(sessionId, url));
     }
 
+    @Test
     public void test_replaceUrls_withEmptyText() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -303,6 +333,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrl_displayMode() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -316,6 +347,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("http://localhost/user/", pathMappingHelper.replaceUrl(url));
     }
 
+    @Test
     public void test_replaceUrl_displayMode_withEmptyUrl() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -329,6 +361,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("", pathMappingHelper.replaceUrl(url));
     }
 
+    @Test
     public void test_replaceUrl_withComplexRegex() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
@@ -343,6 +376,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("http://localhost/home/user/", pathMappingHelper.replaceUrl(sessionId, url));
     }
 
+    @Test
     public void test_replaceUrls_withSpecialCharacters() {
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();
         final PathMapping pathMapping = new PathMapping();
@@ -356,6 +390,7 @@ public class PathMappingHelperTest extends UnitFessTestCase {
         assertEquals("\"http://localhost/user with spaces/\"", pathMappingHelper.replaceUrls(text));
     }
 
+    @Test
     public void test_replaceUrl_withSpecialCharacters() {
         final String sessionId = "test";
         final List<PathMapping> pathMappingList = new ArrayList<PathMapping>();

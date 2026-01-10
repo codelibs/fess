@@ -39,6 +39,9 @@ import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class UriTypeTest extends UnitFessTestCase {
 
@@ -95,27 +98,31 @@ public class UriTypeTest extends UnitFessTestCase {
     private static class AnotherTestPayload implements Payload {
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     // Test annotation presence and structure
+    @Test
     public void test_annotationPresence() {
         assertTrue("UriType should be an annotation", UriType.class.isAnnotation());
     }
 
     // Test annotation retention policy
+    @Test
     public void test_retentionPolicy() {
         final Retention retention = UriType.class.getAnnotation(Retention.class);
-        assertNotNull("Retention annotation should be present", retention);
+        assertNotNull(retention, "Retention annotation should be present");
         assertEquals("Retention should be RUNTIME", RetentionPolicy.RUNTIME, retention.value());
     }
 
     // Test annotation target elements
+    @Test
     public void test_targetElements() {
         final Target target = UriType.class.getAnnotation(Target.class);
-        assertNotNull("Target annotation should be present", target);
+        assertNotNull(target, "Target annotation should be present");
 
         final Set<ElementType> expectedTargets = new HashSet<>(Arrays.asList(METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER));
         final Set<ElementType> actualTargets = new HashSet<>(Arrays.asList(target.value()));
@@ -124,20 +131,23 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test annotation is documented
+    @Test
     public void test_documented() {
         final Documented documented = UriType.class.getAnnotation(Documented.class);
-        assertNotNull("Documented annotation should be present", documented);
+        assertNotNull(documented, "Documented annotation should be present");
     }
 
     // Test Constraint annotation
+    @Test
     public void test_constraintAnnotation() {
         final Constraint constraint = UriType.class.getAnnotation(Constraint.class);
-        assertNotNull("Constraint annotation should be present", constraint);
+        assertNotNull(constraint, "Constraint annotation should be present");
         assertEquals("Validator class should be UriTypeValidator", UriTypeValidator.class, constraint.validatedBy()[0]);
         assertEquals("Should have exactly one validator", 1, constraint.validatedBy().length);
     }
 
     // Test default values
+    @Test
     public void test_defaultValues() throws Exception {
         assertEquals("Default message should match", "{org.lastaflute.validator.constraints.UriType.message}", getDefaultMessage());
         assertEquals("Default groups should be empty", 0, getDefaultGroups().length);
@@ -145,11 +155,12 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test annotation on field with WEB protocol
+    @Test
     public void test_annotationOnFieldWithWebProtocol() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWeb");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("protocolType should be WEB", ProtocolType.WEB, annotation.protocolType());
         assertEquals("message should be default", "{org.lastaflute.validator.constraints.UriType.message}", annotation.message());
         assertEquals("groups should be empty", 0, annotation.groups().length);
@@ -157,92 +168,101 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test annotation on field with FILE protocol
+    @Test
     public void test_annotationOnFieldWithFileProtocol() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldFile");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("protocolType should be FILE", ProtocolType.FILE, annotation.protocolType());
         assertEquals("message should be default", "{org.lastaflute.validator.constraints.UriType.message}", annotation.message());
     }
 
     // Test annotation with custom message
+    @Test
     public void test_annotationWithCustomMessage() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWithMessage");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Custom message should match", "Custom URI validation error", annotation.message());
         assertEquals("protocolType should be WEB", ProtocolType.WEB, annotation.protocolType());
     }
 
     // Test annotation with groups
+    @Test
     public void test_annotationWithGroups() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWithGroups");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Groups length should be 1", 1, annotation.groups().length);
         assertEquals("Group class should match", TestGroup.class, annotation.groups()[0]);
     }
 
     // Test annotation with payload
+    @Test
     public void test_annotationWithPayload() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWithPayload");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Payload length should be 1", 1, annotation.payload().length);
         assertEquals("Payload class should match", TestPayload.class, annotation.payload()[0]);
     }
 
     // Test annotation with multiple groups
+    @Test
     public void test_annotationWithMultipleGroups() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWithMultipleGroups");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Groups length should be 2", 2, annotation.groups().length);
         assertEquals("First group should be TestGroup", TestGroup.class, annotation.groups()[0]);
         assertEquals("Second group should be AnotherTestGroup", AnotherTestGroup.class, annotation.groups()[1]);
     }
 
     // Test annotation with multiple payloads
+    @Test
     public void test_annotationWithMultiplePayloads() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWithMultiplePayloads");
         final UriType annotation = field.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on field", annotation);
+        assertNotNull(annotation, "Annotation should be present on field");
         assertEquals("Payload length should be 2", 2, annotation.payload().length);
         assertEquals("First payload should be TestPayload", TestPayload.class, annotation.payload()[0]);
         assertEquals("Second payload should be AnotherTestPayload", AnotherTestPayload.class, annotation.payload()[1]);
     }
 
     // Test annotation on method
+    @Test
     public void test_annotationOnMethod() throws Exception {
         final Method method = UriTypeTest.class.getMethod("testMethod");
         final UriType annotation = method.getAnnotation(UriType.class);
 
-        assertNotNull("Annotation should be present on method", annotation);
+        assertNotNull(annotation, "Annotation should be present on method");
         assertEquals("protocolType should be WEB", ProtocolType.WEB, annotation.protocolType());
         assertEquals("message should be default", "{org.lastaflute.validator.constraints.UriType.message}", annotation.message());
     }
 
     // Test annotation on parameter
+    @Test
     public void test_annotationOnParameter() throws Exception {
         final Method method = UriTypeTest.class.getMethod("testMethodWithParameter", String.class);
         final Annotation[][] paramAnnotations = method.getParameterAnnotations();
 
-        assertNotNull("Parameter annotations should exist", paramAnnotations);
+        assertNotNull(paramAnnotations, "Parameter annotations should exist");
         assertEquals("Should have one parameter", 1, paramAnnotations.length);
         assertEquals("Parameter should have one annotation", 1, paramAnnotations[0].length);
 
         final UriType annotation = (UriType) paramAnnotations[0][0];
-        assertNotNull("UriType annotation should be present on parameter", annotation);
+        assertNotNull(annotation, "UriType annotation should be present on parameter");
         assertEquals("protocolType should be FILE", ProtocolType.FILE, annotation.protocolType());
     }
 
     // Test annotation type
+    @Test
     public void test_annotationType() throws Exception {
         final Field field = UriTypeTest.class.getDeclaredField("testFieldWeb");
         final UriType annotation = field.getAnnotation(UriType.class);
@@ -251,22 +271,23 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test all annotation methods exist
+    @Test
     public void test_annotationMethods() {
         try {
             final Method protocolTypeMethod = UriType.class.getMethod("protocolType");
-            assertNotNull("protocolType() method should exist", protocolTypeMethod);
+            assertNotNull(protocolTypeMethod, "protocolType() method should exist");
             assertEquals("protocolType() return type should be ProtocolType", ProtocolType.class, protocolTypeMethod.getReturnType());
 
             final Method messageMethod = UriType.class.getMethod("message");
-            assertNotNull("message() method should exist", messageMethod);
+            assertNotNull(messageMethod, "message() method should exist");
             assertEquals("message() return type should be String", String.class, messageMethod.getReturnType());
 
             final Method groupsMethod = UriType.class.getMethod("groups");
-            assertNotNull("groups() method should exist", groupsMethod);
+            assertNotNull(groupsMethod, "groups() method should exist");
             assertEquals("groups() return type should be Class[]", Class[].class, groupsMethod.getReturnType());
 
             final Method payloadMethod = UriType.class.getMethod("payload");
-            assertNotNull("payload() method should exist", payloadMethod);
+            assertNotNull(payloadMethod, "payload() method should exist");
             assertEquals("payload() return type should be Class[]", Class[].class, payloadMethod.getReturnType());
         } catch (final NoSuchMethodException e) {
             fail("Required annotation method not found: " + e.getMessage());
@@ -274,6 +295,7 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test creating custom implementation of annotation
+    @Test
     public void test_customAnnotationImplementation() {
         final UriType customAnnotation = new UriType() {
             @Override
@@ -310,6 +332,7 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test annotation with FILE protocol type
+    @Test
     public void test_annotationWithFileProtocolType() {
         final UriType fileAnnotation = new UriType() {
             @Override
@@ -345,6 +368,7 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test annotation with multiple groups and payloads
+    @Test
     public void test_annotationWithMultipleGroupsAndPayloads() {
         final UriType multiAnnotation = new UriType() {
             @Override
@@ -384,6 +408,7 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test ProtocolType enum values
+    @Test
     public void test_protocolTypeEnumValues() {
         final ProtocolType[] values = ProtocolType.values();
         assertEquals("Should have 2 protocol types", 2, values.length);
@@ -403,35 +428,40 @@ public class UriTypeTest extends UnitFessTestCase {
     }
 
     // Test ProtocolType valueOf
+    @Test
     public void test_protocolTypeValueOf() {
         assertEquals("valueOf(\"WEB\") should return WEB", ProtocolType.WEB, ProtocolType.valueOf("WEB"));
         assertEquals("valueOf(\"FILE\") should return FILE", ProtocolType.FILE, ProtocolType.valueOf("FILE"));
     }
 
     // Test ProtocolType name
+    @Test
     public void test_protocolTypeName() {
         assertEquals("WEB.name() should return \"WEB\"", "WEB", ProtocolType.WEB.name());
         assertEquals("FILE.name() should return \"FILE\"", "FILE", ProtocolType.FILE.name());
     }
 
     // Test ProtocolType ordinal
+    @Test
     public void test_protocolTypeOrdinal() {
         assertEquals("WEB.ordinal() should be 0", 0, ProtocolType.WEB.ordinal());
         assertEquals("FILE.ordinal() should be 1", 1, ProtocolType.FILE.ordinal());
     }
 
     // Test protocolType is required
+    @Test
     public void test_protocolTypeIsRequired() {
         try {
             final Method method = UriType.class.getMethod("protocolType");
-            assertNotNull("protocolType method should exist", method);
-            assertNull("protocolType should not have default value", method.getDefaultValue());
+            assertNotNull(method, "protocolType method should exist");
+            assertNull(method.getDefaultValue(), "protocolType should not have default value");
         } catch (final NoSuchMethodException e) {
             fail("protocolType method should exist");
         }
     }
 
     // Test annotation hashCode and equals behavior
+    @Test
     public void test_annotationHashCodeAndEquals() throws Exception {
         final Field field1 = UriTypeTest.class.getDeclaredField("testFieldWeb");
         final UriType annotation1 = field1.getAnnotation(UriType.class);
@@ -439,8 +469,8 @@ public class UriTypeTest extends UnitFessTestCase {
         final Field field2 = UriTypeTest.class.getDeclaredField("testFieldFile");
         final UriType annotation2 = field2.getAnnotation(UriType.class);
 
-        assertNotNull("First annotation should exist", annotation1);
-        assertNotNull("Second annotation should exist", annotation2);
+        assertNotNull(annotation1, "First annotation should exist");
+        assertNotNull(annotation2, "Second annotation should exist");
 
         // Annotations with different protocol types should not be equal
         assertFalse("Annotations with different protocol types should not be equal", annotation1.equals(annotation2));

@@ -50,6 +50,9 @@ import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class QueryHelperTest extends UnitFessTestCase {
 
@@ -57,9 +60,10 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     private QueryFieldConfig queryFieldConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         queryHelper = new QueryHelper() {
             protected QueryParser getQueryParser() {
                 QueryParser queryParser = new QueryParser();
@@ -132,6 +136,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         });
     }
 
+    @Test
     public void test_build_simple() {
         setQueryType("bool");
 
@@ -152,6 +157,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("QUERY "));
     }
 
+    @Test
     public void test_build_simple_dismax() {
         setQueryType("dismax");
 
@@ -172,6 +178,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("QUERY "));
     }
 
+    @Test
     public void test_build_multiple() {
         float titleBoost = 0.5f;
         float contentBoost = 0.05f;
@@ -198,6 +205,7 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_build_boost() {
         setQueryType("bool");
         assertQueryContext(
@@ -219,6 +227,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("title:QUERY1^10"));
     }
 
+    @Test
     public void test_build_wildcard() {
         setQueryType("bool");
         assertQueryContext(
@@ -258,6 +267,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("aaa:*bbb*"));
     }
 
+    @Test
     public void test_build_phrase() {
         setQueryType("bool");
         assertQueryContext(
@@ -275,6 +285,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("title:\"QUERY1 QUERY2\""));
     }
 
+    @Test
     public void test_build_prefix() {
         setQueryType("bool");
         assertQueryContext(
@@ -298,6 +309,7 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_build_escape() {
         setQueryType("bool");
         assertQueryContext(
@@ -316,6 +328,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("title:aaa\\:bbb"));
     }
 
+    @Test
     public void test_build_site() {
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"prefix\":{\"site\":{\"value\":\"fess.codelibs.org\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
@@ -324,6 +337,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("site:fess.codelibs.org"));
     }
 
+    @Test
     public void test_build_allintitle() {
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"wildcard\":{\"title\":{\"wildcard\":\"*\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
@@ -344,6 +358,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("allintitle: aaa bbb"));
     }
 
+    @Test
     public void test_build_allinurl() {
         assertQueryContext(
                 "{\"function_score\":{\"query\":{\"wildcard\":{\"url\":{\"wildcard\":\"*\",\"boost\":1.0}}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}",
@@ -365,6 +380,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("allinurl: aaa bbb"));
     }
 
+    @Test
     public void test_build_sort() {
         String query =
                 "{\"function_score\":{\"query\":{\"match_all\":{\"boost\":1.0}},\"functions\":[{\"filter\":{\"match_all\":{\"boost\":1.0}},\"field_value_factor\":{\"field\":\"boost\",\"factor\":1.0,\"modifier\":\"none\"}}],\"score_mode\":\"multiply\",\"max_boost\":3.4028235E38,\"boost\":1.0}}";
@@ -405,6 +421,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_build_fuzzy() {
         setQueryType("bool");
         assertQueryContext(
@@ -428,6 +445,7 @@ public class QueryHelperTest extends UnitFessTestCase {
                 buildQuery("aaa:QUERY1~0.5"));
     }
 
+    @Test
     public void test_build_range() {
         setQueryType("bool");
         assertQueryContext(
@@ -590,53 +608,64 @@ public class QueryHelperTest extends UnitFessTestCase {
 
     // Additional test methods for improved coverage
 
+    @Test
     public void test_getSortPrefix() {
         assertEquals("sort:", queryHelper.getSortPrefix());
     }
 
+    @Test
     public void test_setSortPrefix() {
         queryHelper.setSortPrefix("customSort:");
         assertEquals("customSort:", queryHelper.getSortPrefix());
     }
 
+    @Test
     public void test_getAdditionalQuery() {
         assertNull(queryHelper.getAdditionalQuery());
     }
 
+    @Test
     public void test_setAdditionalQuery() {
         queryHelper.setAdditionalQuery("additional query");
         assertEquals("additional query", queryHelper.getAdditionalQuery());
     }
 
+    @Test
     public void test_setHighlightPrefix() {
         queryHelper.setHighlightPrefix("highlight_");
         assertEquals("highlight_", queryHelper.getHighlightPrefix());
     }
 
+    @Test
     public void test_getHighlightPrefix() {
         assertEquals("hl_", queryHelper.getHighlightPrefix());
     }
 
+    @Test
     public void test_getDefaultFacetInfo() {
         assertNull(queryHelper.getDefaultFacetInfo());
     }
 
+    @Test
     public void test_setDefaultFacetInfo() {
         FacetInfo facetInfo = new FacetInfo();
         queryHelper.setDefaultFacetInfo(facetInfo);
         assertEquals(facetInfo, queryHelper.getDefaultFacetInfo());
     }
 
+    @Test
     public void test_getDefaultGeoInfo() {
         assertNull(queryHelper.getDefaultGeoInfo());
     }
 
+    @Test
     public void test_setDefaultGeoInfo() {
         GeoInfo geoInfo = new GeoInfo(getMockRequest());
         queryHelper.setDefaultGeoInfo(geoInfo);
         assertEquals(geoInfo, queryHelper.getDefaultGeoInfo());
     }
 
+    @Test
     public void test_generateId() {
         String id1 = queryHelper.generateId();
         String id2 = queryHelper.generateId();
@@ -648,6 +677,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertFalse(id1.contains("-"));
     }
 
+    @Test
     public void test_generateId_format() {
         String id = queryHelper.generateId();
         // UUID without dashes should be 32 characters
@@ -655,6 +685,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(id.matches("[a-f0-9]{32}"));
     }
 
+    @Test
     public void test_addDefaultSort_singleField() {
         queryHelper.addDefaultSort("timestamp", "DESC");
 
@@ -664,6 +695,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.sortBuilders().get(0).toString().contains("desc"));
     }
 
+    @Test
     public void test_addDefaultSort_multipleFields() {
         queryHelper.addDefaultSort("timestamp", "DESC");
         queryHelper.addDefaultSort("title", "ASC");
@@ -672,6 +704,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals(2, context.sortBuilders().size());
     }
 
+    @Test
     public void test_addDefaultSort_scoreField() {
         queryHelper.addDefaultSort("_score", "DESC");
 
@@ -680,6 +713,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.sortBuilders().get(0).toString().contains("_score"));
     }
 
+    @Test
     public void test_addDefaultSort_docScoreField() {
         queryHelper.addDefaultSort("doc_score", "ASC");
 
@@ -688,6 +722,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.sortBuilders().get(0).toString().contains("_score"));
     }
 
+    @Test
     public void test_addBoostFunction_scoreFunction() {
         queryHelper.addBoostFunction(ScoreFunctionBuilders.weightFactorFunction(2.0f));
 
@@ -696,6 +731,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.getQueryBuilder().toString().contains("function_score"));
     }
 
+    @Test
     public void test_addBoostFunction_withFilter() {
         QueryBuilder filter = QueryBuilders.termQuery("category", "test");
         queryHelper.addBoostFunction(filter, ScoreFunctionBuilders.weightFactorFunction(2.0f));
@@ -704,6 +740,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.getQueryBuilder().toString().contains("function_score"));
     }
 
+    @Test
     public void test_build_withAdditionalQuery() {
         queryHelper.setAdditionalQuery("additional:test");
 
@@ -715,6 +752,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("main query additional:test", context.getQueryString());
     }
 
+    @Test
     public void test_build_withAdditionalQuery_emptyMainQuery() {
         queryHelper.setAdditionalQuery("additional:test");
 
@@ -726,6 +764,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("*", context.getQueryString());
     }
 
+    @Test
     public void test_build_withAdditionalQuery_nullMainQuery() {
         queryHelper.setAdditionalQuery("additional:test");
 
@@ -737,6 +776,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("*", context.getQueryString());
     }
 
+    @Test
     public void test_build_adminSearch() {
         QueryContext context = queryHelper.build(SearchRequestType.ADMIN_SEARCH, "test", ctx -> {
             // Admin search should not add virtual host filter
@@ -746,6 +786,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertNotNull(context);
     }
 
+    @Test
     public void test_buildRoleQuery_emptyRoleSet() {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         queryHelper.buildRoleQuery(Set.of(), boolQuery);
@@ -754,6 +795,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(boolQuery.toString().contains("filter"));
     }
 
+    @Test
     public void test_buildRoleQuery_withRoles() {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         Set<String> roles = Set.of("role1", "role2");
@@ -766,6 +808,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(queryString.contains("filter"));
     }
 
+    @Test
     public void test_createFieldSortBuilder_normalField() {
         // Using reflection to test protected method
         try {
@@ -783,6 +826,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createFieldSortBuilder_scoreField() {
         try {
             java.lang.reflect.Method method =
@@ -799,6 +843,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getRescorers_emptyList() {
         java.util.Map<String, Object> params = new java.util.HashMap<>();
         org.opensearch.search.rescore.RescorerBuilder<?>[] rescorers = queryHelper.getRescorers(params);
@@ -807,6 +852,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals(0, rescorers.length);
     }
 
+    @Test
     public void test_addQueryRescorer() {
         org.codelibs.fess.score.QueryRescorer mockRescorer = new org.codelibs.fess.score.QueryRescorer() {
             @Override
@@ -824,18 +870,21 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals(0, rescorers.length); // Should be 0 because rescorer returns null
     }
 
+    @Test
     public void test_processJsonSearchPreference_queryPref() {
         String result = queryHelper.processJsonSearchPreference(null, "test query");
         // This will return the hashCode of the query as string
         assertEquals(Integer.toString("test query".hashCode()), result);
     }
 
+    @Test
     public void test_processGsaSearchPreference_queryPref() {
         String result = queryHelper.processGsaSearchPreference(null, "test query");
         // This will return the hashCode of the query as string
         assertEquals(Integer.toString("test query".hashCode()), result);
     }
 
+    @Test
     public void test_build_invalidQuery() {
         try {
             queryHelper.build(SearchRequestType.SEARCH, "invalid:query[", ctx -> {
@@ -849,6 +898,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildBaseQuery_invalidQuery() {
         try {
             queryHelper.buildBaseQuery(new QueryContext("field:[invalid", true), ctx -> {
@@ -862,6 +912,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_build_emptyQuery() {
         QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "", ctx -> {
             ctx.skipRoleQuery();
@@ -871,6 +922,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("*", context.getQueryString());
     }
 
+    @Test
     public void test_build_whitespaceQuery() {
         QueryContext context = queryHelper.build(SearchRequestType.SEARCH, "   ", ctx -> {
             ctx.skipRoleQuery();
@@ -880,6 +932,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("*", context.getQueryString());
     }
 
+    @Test
     public void test_build_nullQuery() {
         QueryContext context = queryHelper.build(SearchRequestType.SEARCH, null, ctx -> {
             ctx.skipRoleQuery();
@@ -889,6 +942,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertEquals("*", context.getQueryString());
     }
 
+    @Test
     public void test_addDefaultSort_caseInsensitive() {
         // Test case insensitive order
         queryHelper.addDefaultSort("timestamp", "desc");
@@ -898,6 +952,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.sortBuilders().get(0).toString().contains("desc"));
     }
 
+    @Test
     public void test_addDefaultSort_invalidOrder() {
         // Invalid order should default to ASC
         queryHelper.addDefaultSort("timestamp", "invalid");
@@ -907,6 +962,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         assertTrue(context.sortBuilders().get(0).toString().contains("asc"));
     }
 
+    @Test
     public void test_constant_preferenceQuery() {
         assertEquals("_query", QueryHelper.PREFERENCE_QUERY);
     }

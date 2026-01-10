@@ -24,13 +24,17 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class QueryCommandTest extends UnitFessTestCase {
     private QueryCommand queryCommand;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Setup FessConfig with proper initialization
         FessConfig.SimpleImpl fessConfig = new FessConfig.SimpleImpl() {
@@ -269,6 +273,7 @@ public class QueryCommandTest extends UnitFessTestCase {
         };
     }
 
+    @Test
     public void test_buildMatchPhraseQuery() {
         assertQueryBuilder("test", "", MatchPhraseQueryBuilder.class);
         assertQueryBuilder("test", "test", MatchPhraseQueryBuilder.class);

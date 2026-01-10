@@ -22,39 +22,48 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
 
     private FessUserTimeZoneProcessProvider provider;
     private RequestManager requestManager;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         provider = new FessUserTimeZoneProcessProvider();
         requestManager = createMockRequestManager();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         provider = null;
         requestManager = null;
         super.tearDown();
     }
 
     // Test isUseTimeZoneHandling() method
+    @Test
     public void test_isUseTimeZoneHandling() {
         // Verify that time zone handling is disabled
         assertFalse(provider.isUseTimeZoneHandling());
     }
 
     // Test isAcceptCookieTimeZone() method
+    @Test
     public void test_isAcceptCookieTimeZone() {
         // Verify that cookie time zone is not accepted
         assertFalse(provider.isAcceptCookieTimeZone());
     }
 
     // Test findBusinessTimeZone() method
+    @Test
     public void test_findBusinessTimeZone() {
         // Setup
         ActionRuntime runtimeMeta = null; // Can be null as it's not used in the implementation
@@ -68,6 +77,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test getRequestedTimeZone() method
+    @Test
     public void test_getRequestedTimeZone() {
         // Execute
         TimeZone result = provider.getRequestedTimeZone(requestManager);
@@ -79,6 +89,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test getRequestedTimeZone() with different default time zone
+    @Test
     public void test_getRequestedTimeZone_withDifferentDefaultTimeZone() {
         // Store original time zone
         TimeZone originalTimeZone = TimeZone.getDefault();
@@ -105,6 +116,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test toString() method
+    @Test
     public void test_toString() {
         // Execute
         String result = provider.toString();
@@ -122,6 +134,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test toString() format consistency
+    @Test
     public void test_toString_formatConsistency() {
         // Create multiple instances and verify consistent format
         FessUserTimeZoneProcessProvider provider1 = new FessUserTimeZoneProcessProvider();
@@ -139,6 +152,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test static field initialization
+    @Test
     public void test_centralTimeZone_initialization() {
         // Verify that centralTimeZone is properly initialized
         assertNotNull(FessUserTimeZoneProcessProvider.centralTimeZone);
@@ -156,6 +170,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test with null RequestManager (edge case)
+    @Test
     public void test_getRequestedTimeZone_withNullRequestManager() {
         // Execute with null request manager
         TimeZone result = provider.getRequestedTimeZone(null);
@@ -166,6 +181,7 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     // Test findBusinessTimeZone with null parameters
+    @Test
     public void test_findBusinessTimeZone_withNullParameters() {
         // Execute with null parameters
         OptionalThing<TimeZone> result = provider.findBusinessTimeZone(null, null);

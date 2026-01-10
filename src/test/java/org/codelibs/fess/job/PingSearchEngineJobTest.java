@@ -26,18 +26,23 @@ import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.lastaflute.core.mail.Postbox;
 import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.opensearch.cluster.health.ClusterHealthStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PingSearchEngineJobTest extends UnitFessTestCase {
 
     private PingSearchEngineJob pingSearchEngineJob;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         pingSearchEngineJob = new PingSearchEngineJob();
     }
 
     // Test normal operation with GREEN status and state change
+    @Test
     public void test_execute_greenStatusNoChange() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -75,6 +80,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test normal operation with YELLOW status and no state change
+    @Test
     public void test_execute_yellowStatusNoChange() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -112,6 +118,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test RED status with state change
+    @Test
     public void test_execute_redStatusNoChange() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -156,6 +163,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test state change with notification enabled
+    @Test
     public void test_execute_stateChangeWithNotification() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -214,6 +222,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test state change with empty notification addresses
+    @Test
     public void test_execute_stateChangeEmptyNotificationAddresses() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -272,6 +281,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test with null notification addresses
+    @Test
     public void test_execute_nullNotificationAddresses() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -329,6 +339,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test with whitespace in notification addresses
+    @Test
     public void test_execute_whitespaceInNotificationAddresses() {
         // Setup mock components
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -386,6 +397,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         // Test that constructor creates instance without error
         PingSearchEngineJob job = new PingSearchEngineJob();
@@ -393,6 +405,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test different cluster names
+    @Test
     public void test_execute_differentClusterNames() {
         // Test with production cluster name
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
@@ -441,6 +454,7 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
     }
 
     // Test with exception during ping
+    @Test
     public void test_execute_pingException() {
         SearchEngineClient searchEngineClient = new SearchEngineClient() {
             @Override

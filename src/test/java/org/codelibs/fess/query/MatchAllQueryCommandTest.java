@@ -25,6 +25,9 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.MatchAllQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class MatchAllQueryCommandTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(MatchAllQueryCommandTest.class);
@@ -234,9 +237,10 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         });
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Setup FessConfig
         setupMockFessConfig();
@@ -262,10 +266,11 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_getQueryClassName() {
         // Test that getQueryClassName returns the correct class name
         String className = matchAllQueryCommand.getQueryClassName();
@@ -273,6 +278,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals(MatchAllDocsQuery.class.getSimpleName(), className);
     }
 
+    @Test
     public void test_execute() {
         // Test execute method with normal parameters
         QueryContext context = new QueryContext("*:*", false);
@@ -289,6 +295,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals("{\"match_all\":{\"boost\":1.0}}", json);
     }
 
+    @Test
     public void test_execute_withDifferentBoost() {
         // Test execute method with different boost value
         QueryContext context = new QueryContext("*:*", false);
@@ -305,6 +312,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals("{\"match_all\":{\"boost\":2.5}}", json);
     }
 
+    @Test
     public void test_execute_withNullContext() {
         // Test execute method with null context
         MatchAllDocsQuery query = new MatchAllDocsQuery();
@@ -316,6 +324,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withNullQuery() {
         // Test execute method with null query
         QueryContext context = new QueryContext("*:*", false);
@@ -327,6 +336,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withZeroBoost() {
         // Test execute method with zero boost
         QueryContext context = new QueryContext("*:*", false);
@@ -339,6 +349,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withNegativeBoost() {
         // Test execute method with negative boost - should throw exception
         QueryContext context = new QueryContext("*:*", false);
@@ -354,6 +365,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_multipleInvocations() {
         // Test that multiple invocations return consistent results
         QueryContext context = new QueryContext("*:*", false);
@@ -376,6 +388,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals(json1, json2);
     }
 
+    @Test
     public void test_execute_withVeryLargeBoost() {
         // Test execute method with very large boost value
         QueryContext context = new QueryContext("*:*", false);
@@ -388,6 +401,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withFloatInfinityBoost() {
         // Test execute method with infinity boost value
         QueryContext context = new QueryContext("*:*", false);
@@ -400,6 +414,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withNaNBoost() {
         // Test execute method with NaN boost value
         QueryContext context = new QueryContext("*:*", false);
@@ -412,12 +427,14 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor creates a valid instance
         MatchAllQueryCommand command = new MatchAllQueryCommand();
         assertNotNull(command);
     }
 
+    @Test
     public void test_execute_logOutput() {
         // Test that execute method logs debug output when debug is enabled
         QueryContext context = new QueryContext("*:*", false);
@@ -434,6 +451,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         logger.info("Execute method called with query: {} and boost: {}", query, boost);
     }
 
+    @Test
     public void test_execute_withHighBoost() {
         // Test execute with high boost value
         QueryContext context = new QueryContext("test", false);
@@ -449,6 +467,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals("{\"match_all\":{\"boost\":10.0}}", json);
     }
 
+    @Test
     public void test_execute_withSmallBoost() {
         // Test execute with small boost value
         QueryContext context = new QueryContext("test", false);
@@ -461,6 +480,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withNormalizedBoost() {
         // Test execute with normalized boost value
         QueryContext context = new QueryContext("test", false);
@@ -477,6 +497,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertEquals("{\"match_all\":{\"boost\":1.0}}", json);
     }
 
+    @Test
     public void test_execute_withEmptyContext() {
         // Test execute with empty query string context
         QueryContext context = new QueryContext("", false);
@@ -489,6 +510,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withWhitespaceContext() {
         // Test execute with whitespace query string context
         QueryContext context = new QueryContext("   ", false);
@@ -501,6 +523,7 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         assertTrue(result instanceof MatchAllQueryBuilder);
     }
 
+    @Test
     public void test_execute_withContextHavingSpecialCharacters() {
         // Test execute with context having special characters
         QueryContext context = new QueryContext("!@#$%^&*()", false);

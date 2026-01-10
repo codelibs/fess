@@ -22,20 +22,25 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessLabelsTest extends UnitFessTestCase {
 
     private FessLabels fessLabels;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         fessLabels = new FessLabels();
     }
 
     /**
      * Test that assertPropertyNotNull throws exception for null input
      */
+    @Test
     public void test_assertPropertyNotNull_withNull() {
         try {
             // Create a test instance that extends FessLabels
@@ -50,6 +55,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test that assertPropertyNotNull does not throw exception for non-null input
      */
+    @Test
     public void test_assertPropertyNotNull_withNonNull() {
         TestFessLabels labels = new TestFessLabels();
         // Should not throw exception
@@ -70,6 +76,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test serialVersionUID exists and has correct value
      */
+    @Test
     public void test_serialVersionUID() throws Exception {
         Field serialVersionField = FessLabels.class.getDeclaredField("serialVersionUID");
         assertNotNull(serialVersionField);
@@ -83,6 +90,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test that all label constants follow the naming convention
      */
+    @Test
     public void test_labelConstantsNamingConvention() throws Exception {
         Field[] fields = FessLabels.class.getDeclaredFields();
         Pattern labelPattern = Pattern.compile("^LABELS_[A-Za-z0-9_]+$");
@@ -107,6 +115,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test that all label constants have unique values
      */
+    @Test
     public void test_labelConstantsUniqueness() throws Exception {
         Field[] fields = FessLabels.class.getDeclaredFields();
         Set<String> values = new HashSet<>();
@@ -126,6 +135,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test specific label constants exist and have correct values
      */
+    @Test
     public void test_specificLabelConstants() {
         // Test common labels
         assertEquals("{labels.authRealm}", FessLabels.LABELS_AUTH_REALM);
@@ -205,6 +215,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test that FessLabels extends UserMessages
      */
+    @Test
     public void test_extendsUserMessages() {
         assertTrue(org.lastaflute.core.message.UserMessages.class.isAssignableFrom(FessLabels.class));
     }
@@ -212,6 +223,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test field count to ensure no unexpected fields are added
      */
+    @Test
     public void test_fieldCount() throws Exception {
         Field[] fields = FessLabels.class.getDeclaredFields();
         int labelConstantCount = 0;
@@ -233,6 +245,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test that label constant values match their field names
      */
+    @Test
     public void test_labelConstantValueMatchesName() throws Exception {
         Field[] fields = FessLabels.class.getDeclaredFields();
 
@@ -262,6 +275,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test instance creation
      */
+    @Test
     public void test_instanceCreation() {
         FessLabels labels = new FessLabels();
         assertNotNull(labels);
@@ -271,6 +285,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test reflection access to constants
      */
+    @Test
     public void test_reflectionAccess() throws Exception {
         Class<?> clazz = FessLabels.class;
         Field field = clazz.getField("LABELS_LOGIN");
@@ -285,6 +300,7 @@ public class FessLabelsTest extends UnitFessTestCase {
     /**
      * Test for search options menu labels
      */
+    @Test
     public void test_searchOptionsMenuLabels() {
         assertEquals("{labels.searchoptions_menu_labels}", FessLabels.LABELS_searchoptions_menu_labels);
     }

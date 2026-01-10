@@ -32,13 +32,17 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SearchHelperTest extends UnitFessTestCase {
     private SearchHelper searchHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         searchHelper = new SearchHelper();
         setupMockComponents();
     }
@@ -48,6 +52,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockSystemHelper(), "systemHelper");
     }
 
+    @Test
     public void test_serializeParameters() {
         RequestParameter[] params = new RequestParameter[] { new RequestParameter("q", new String[] { "test" }),
                 new RequestParameter("lang", new String[] { "en", "ja" }) };
@@ -60,6 +65,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertTrue(json.contains("lang"));
     }
 
+    @Test
     public void test_store_and_getSearchParameters() {
         getMockRequest().setParameter("q", "test");
         getMockRequest().setParameter("lang", new String[] { "en", "ja" });
@@ -84,6 +90,7 @@ public class SearchHelperTest extends UnitFessTestCase {
     }
 
     // Test addRewriter method
+    @Test
     public void test_addRewriter() {
         SearchHelper.SearchRequestParamsRewriter rewriter = p -> p;
 
@@ -94,6 +101,7 @@ public class SearchHelperTest extends UnitFessTestCase {
     }
 
     // Test getLanguages method
+    @Test
     public void test_getLanguages_fromParams() {
         SearchRequestParams params = createMockSearchRequestParams();
         ((MockSearchRequestParams) params).setLanguages(new String[] { "en", "ja" });
@@ -119,6 +127,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getLanguages_withAllLanguages() {
         SearchRequestParams params = createMockSearchRequestParams();
         ((MockSearchRequestParams) params).setLanguages(new String[] { "en", Constants.ALL_LANGUAGES, "ja" });
@@ -143,6 +152,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getLanguages_fromBrowserLocale() {
         SearchRequestParams params = createMockSearchRequestParams();
         ((MockSearchRequestParams) params).setLanguages(null);
@@ -155,6 +165,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertTrue(languages.length >= 0);
     }
 
+    @Test
     public void test_getLanguages_withInvalidLang() {
         SearchRequestParams params = createMockSearchRequestParams();
         String longString = "a".repeat(1001);
@@ -181,6 +192,7 @@ public class SearchHelperTest extends UnitFessTestCase {
     }
 
     // Test rewrite method
+    @Test
     public void test_rewrite_withNoRewriters() {
         SearchRequestParams params = createMockSearchRequestParams();
 
@@ -189,6 +201,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(params, result);
     }
 
+    @Test
     public void test_rewrite_withRewriters() {
         SearchRequestParams params = createMockSearchRequestParams();
         SearchHelper.SearchRequestParamsRewriter rewriter1 = p -> {
@@ -209,6 +222,7 @@ public class SearchHelperTest extends UnitFessTestCase {
     }
 
     // Test storeSearchParameters with various scenarios
+    @Test
     public void test_storeSearchParameters_withRequiredKeys() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -226,6 +240,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertTrue(cookies.length > 0);
     }
 
+    @Test
     public void test_storeSearchParameters_missingRequiredKeys() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -243,6 +258,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(0, cookies.length);
     }
 
+    @Test
     public void test_storeSearchParameters_emptyRequiredKey() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -260,6 +276,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(0, cookies.length);
     }
 
+    @Test
     public void test_storeSearchParameters_withSecureConfig() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -284,6 +301,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals("example.com", cookies[0].getDomain());
     }
 
+    @Test
     public void test_storeSearchParameters_withForwardedProto() {
         getMockRequest().addHeader("X-Forwarded-Proto", "https");
         getMockRequest().setParameter("q", "test");
@@ -296,6 +314,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertTrue(cookies[0].getSecure());
     }
 
+    @Test
     public void test_storeSearchParameters_exceedsMaxLength() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -313,6 +332,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(0, cookies.length);
     }
 
+    @Test
     public void test_storeSearchParameters_noValidParameters() {
         ComponentUtil.setFessConfig(new MockFessConfig() {
             @Override
@@ -331,12 +351,14 @@ public class SearchHelperTest extends UnitFessTestCase {
     }
 
     // Test getSearchParameters with various scenarios
+    @Test
     public void test_getSearchParameters_noCookies() {
         RequestParameter[] result = searchHelper.getSearchParameters();
 
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_getSearchParameters_invalidCookie() {
         Cookie invalidCookie = new Cookie("FESS_SEARCH_PARAM", "invalid-data");
         getMockRequest().addCookie(invalidCookie);
@@ -346,6 +368,7 @@ public class SearchHelperTest extends UnitFessTestCase {
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_gzipCompress_and_gzipDecompress() {
         String testData =
                 "This is test data for compression that should be long enough to actually compress effectively when using gzip compression algorithm";

@@ -19,14 +19,17 @@ import org.apache.catalina.Context;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.webresources.StandardRoot;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FessWebResourceRootTest extends UnitFessTestCase {
 
+    @Test
     public void test_classExists() {
         // Basic test to verify the class exists and has the correct structure
-        assertNotNull("FessWebResourceRoot class should exist", FessWebResourceRoot.class);
+        assertNotNull(FessWebResourceRoot.class, "FessWebResourceRoot class should exist");
     }
 
+    @Test
     public void test_inheritance() {
         // Verify that FessWebResourceRoot extends StandardRoot
         assertTrue("FessWebResourceRoot should extend StandardRoot", StandardRoot.class.isAssignableFrom(FessWebResourceRoot.class));
@@ -34,6 +37,7 @@ public class FessWebResourceRootTest extends UnitFessTestCase {
                 WebResourceRoot.class.isAssignableFrom(FessWebResourceRoot.class));
     }
 
+    @Test
     public void test_classStructure() {
         // Basic class structure tests that don't require complex mocking
         assertEquals("FessWebResourceRoot should be in correct package", "org.codelibs.fess.tomcat.webresources.FessWebResourceRoot",
@@ -48,30 +52,34 @@ public class FessWebResourceRootTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_methodsExist() {
         // Verify that processWebInfLib method is overridden (it's protected so we can't call it directly)
         try {
             final java.lang.reflect.Method method = FessWebResourceRoot.class.getDeclaredMethod("processWebInfLib");
-            assertNotNull("processWebInfLib method should exist", method);
+            assertNotNull(method, "processWebInfLib method should exist");
             assertTrue("processWebInfLib should be protected", java.lang.reflect.Modifier.isProtected(method.getModifiers()));
         } catch (final NoSuchMethodException e) {
             fail("processWebInfLib method should exist");
         }
     }
 
+    @Test
     public void test_packageStructure() {
         // Verify the class is in the expected package structure
         final Package pkg = FessWebResourceRoot.class.getPackage();
-        assertNotNull("Package should not be null", pkg);
+        assertNotNull(pkg, "Package should not be null");
         assertEquals("Should be in correct package", "org.codelibs.fess.tomcat.webresources", pkg.getName());
     }
 
+    @Test
     public void test_isPublicClass() {
         assertTrue("FessWebResourceRoot should be public", java.lang.reflect.Modifier.isPublic(FessWebResourceRoot.class.getModifiers()));
         assertFalse("FessWebResourceRoot should not be abstract",
                 java.lang.reflect.Modifier.isAbstract(FessWebResourceRoot.class.getModifiers()));
     }
 
+    @Test
     public void test_constructorSignature() {
         // Verify constructor parameter types
         try {

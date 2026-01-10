@@ -22,9 +22,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class SsoLoginExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "SSO login failed";
@@ -34,6 +38,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "SSO authentication error";
@@ -46,6 +51,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals("Token validation failed", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         SsoLoginException exception = new SsoLoginException(null);
@@ -54,6 +60,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         SsoLoginException exception = new SsoLoginException(null, null);
@@ -62,6 +69,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -71,6 +79,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "SSO configuration error";
@@ -80,6 +89,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withDifferentExceptionTypes() {
         // Test with different exception types as cause
         String message = "SSO provider communication error";
@@ -103,6 +113,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertTrue(exception3.getCause() instanceof NullPointerException);
     }
 
+    @Test
     public void test_inheritance() {
         // Test that SsoLoginException extends FessSystemException
         SsoLoginException exception = new SsoLoginException("Test");
@@ -113,6 +124,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         SsoLoginException exception = new SsoLoginException("Stack trace test");
@@ -126,6 +138,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(this.getClass().getName(), topElement.getClassName());
     }
 
+    @Test
     public void test_nestedExceptions() {
         // Test nested exception handling
         Exception level3 = new RuntimeException("Level 3 error");
@@ -154,6 +167,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(cause3.getCause());
     }
 
+    @Test
     public void test_serialization() throws Exception {
         // Test serialization and deserialization
         String message = "Serializable SSO exception";
@@ -178,6 +192,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(originalException.getCause().getMessage(), deserializedException.getCause().getMessage());
     }
 
+    @Test
     public void test_getMessage() {
         // Test getMessage() method
         String message = "Custom SSO error message";
@@ -191,6 +206,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(specialMessage, specialException.getMessage());
     }
 
+    @Test
     public void test_toString() {
         // Test toString() method
         String message = "SSO toString test";
@@ -202,6 +218,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_longMessage() {
         // Test with very long message
         StringBuilder longMessage = new StringBuilder();
@@ -214,6 +231,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_getCause() {
         // Test getCause() method explicitly
         Exception cause = new IllegalArgumentException("Invalid SSO token");
@@ -225,6 +243,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals("Invalid SSO token", retrievedCause.getMessage());
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test creating multiple instances
         SsoLoginException exception1 = new SsoLoginException("Error 1");
@@ -240,6 +259,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals("Error 3", exception3.getMessage());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_OutOfMemoryError() {
         // Test that constructor accepts Error as cause (verifies Throwable parameter change)
         String message = "SSO login failed due to memory error";
@@ -253,6 +273,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals("Not enough memory for SSO login", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_StackOverflowError() {
         // Test with StackOverflowError as cause
         String message = "SSO login recursive overflow";
@@ -264,6 +285,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_AssertionError() {
         // Test with AssertionError as cause
         String message = "SSO login assertion violation";
@@ -275,6 +297,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_LinkageError() {
         // Test with LinkageError subclass
         String message = "SSO login class loading error";
@@ -287,6 +310,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_BackwardCompatibility() {
         // Verify backward compatibility with Exception parameter
         String message = "SSO login failed";
@@ -305,6 +329,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertTrue(exception3.getCause() instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructorWithThrowableCause_NullError() {
         // Test with null Error (should work same as null Exception)
         String message = "SSO login error with null cause";
@@ -315,6 +340,7 @@ public class SsoLoginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_ChainedErrorsAndExceptions() {
         // Test with chain containing both Errors and Exceptions
         String message = "SSO login complex error chain";

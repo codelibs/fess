@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class PluginExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Plugin error occurred";
@@ -29,6 +31,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Plugin initialization failed";
@@ -40,6 +43,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         PluginException exception = new PluginException(null);
@@ -49,6 +53,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         PluginException exception = new PluginException(null, null);
@@ -58,6 +63,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -68,6 +74,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Plugin error with null cause";
@@ -78,6 +85,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_exceptionChaining() {
         // Test exception chaining
         Throwable rootCause = new IllegalArgumentException("Invalid argument");
@@ -91,6 +99,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that PluginException is an instance of FessSystemException
         PluginException exception = new PluginException("Test message");
@@ -101,6 +110,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching PluginException
         String expectedMessage = "Plugin loading failed";
@@ -113,6 +123,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching PluginException with cause
         String expectedMessage = "Plugin configuration error";
@@ -126,6 +137,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly set
         PluginException exception = new PluginException("Stack trace test");
@@ -139,6 +151,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertEquals("test_stackTrace", firstElement.getMethodName());
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that the exception is serializable
         PluginException exception = new PluginException("Serialization test");
@@ -147,6 +160,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_longMessage() {
         // Test with a very long message
         StringBuilder sb = new StringBuilder();
@@ -161,6 +175,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertEquals(longMessage, exception.getMessage());
     }
 
+    @Test
     public void test_multiLevelExceptionChain() {
         // Test multi-level exception chain
         Throwable level3 = new NullPointerException("Null value");
@@ -178,6 +193,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertEquals("Null value", exception.getCause().getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_toStringMethod() {
         // Test toString method behavior
         String message = "Plugin toString test";
@@ -189,6 +205,7 @@ public class PluginExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_toStringMethodWithCause() {
         // Test toString method behavior with cause
         String message = "Plugin error with cause";

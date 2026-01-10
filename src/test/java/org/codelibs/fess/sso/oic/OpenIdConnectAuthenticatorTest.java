@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.sso.oic;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -27,8 +27,10 @@ import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.junit.jupiter.api.Test;
 
 public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
+    @Test
     public void test_parseJwtClaim() throws IOException {
         // Setup
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -52,6 +54,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertArrayEquals(new String[] { "group1", "group2" }, credential.getUserGroups());
     }
 
+    @Test
     public void test_jwtSignatureAttributeName() throws IOException {
         // Verify the typo fix: jwtSigniture -> jwtSignature
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -70,6 +73,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals("test@example.com", attributes.get("email"));
     }
 
+    @Test
     public void test_parseJwtClaim_withNestedObjects() throws IOException {
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
         final Map<String, Object> attributes = new HashMap<>();
@@ -88,6 +92,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals("Tokyo", address.get("city"));
     }
 
+    @Test
     public void test_parseJwtClaim_withArrayTypes() throws IOException {
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
         final Map<String, Object> attributes = new HashMap<>();
@@ -105,6 +110,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals(true, attributes.get("active"));
     }
 
+    @Test
     public void test_parseJwtClaim_withNumericTypes() throws IOException {
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
         final Map<String, Object> attributes = new HashMap<>();
@@ -125,6 +131,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertTrue(attributes.get("score") instanceof Double);
     }
 
+    @Test
     public void test_parseJwtClaim_withNullValues() throws IOException {
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
         final Map<String, Object> attributes = new HashMap<>();
@@ -140,6 +147,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertNull(attributes.get("middlename"));
     }
 
+    @Test
     public void test_authenticatorInstantiation() {
         // Verify authenticator can be instantiated without errors
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -149,6 +157,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertNotNull(authenticator);
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_withDefaultBaseUrl() throws Exception {
         // Test that buildDefaultRedirectUrl returns http://localhost:8080/sso/ when no property is set
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -168,6 +177,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         assertEquals("http://localhost:8080/sso/", url);
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_withCustomBaseUrl() throws Exception {
         // Test that buildDefaultRedirectUrl uses custom base URL from property
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -191,6 +201,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_withTrailingSlash() throws Exception {
         // Test that trailing slash is handled correctly
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -214,6 +225,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_withPortInCustomUrl() throws Exception {
         // Test that custom URL with port is handled correctly
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -237,6 +249,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_emptyProperty() throws Exception {
         // Test that empty property falls back to default
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
@@ -260,6 +273,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildDefaultRedirectUrl_whitespaceProperty() throws Exception {
         // Test that whitespace-only property falls back to default
         OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();

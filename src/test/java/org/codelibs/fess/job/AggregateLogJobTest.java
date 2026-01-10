@@ -18,23 +18,29 @@ package org.codelibs.fess.job;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AggregateLogJobTest extends UnitFessTestCase {
 
     private AggregateLogJob aggregateLogJob;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         aggregateLogJob = new AggregateLogJob();
     }
 
+    @Test
     public void test_constructor() {
         // Test default constructor
         AggregateLogJob job = new AggregateLogJob();
         assertNotNull(job);
     }
 
+    @Test
     public void test_execute_success() {
         // Setup mock SearchLogHelper that succeeds
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -53,6 +59,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertEquals("", result);
     }
 
+    @Test
     public void test_execute_withException() {
         // Setup mock SearchLogHelper that throws exception
         final String errorMessage = "Test exception occurred";
@@ -73,6 +80,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withNullPointerException() {
         // Setup mock SearchLogHelper that throws NullPointerException
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -92,6 +100,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withCustomException() {
         // Setup mock SearchLogHelper that throws custom exception
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -111,6 +120,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_multipleErrors() {
         // Test with multiple calls to execute() with errors
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -138,6 +148,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertFalse(result1.equals(result2));
     }
 
+    @Test
     public void test_execute_withEmptyStringException() {
         // Setup mock SearchLogHelper that throws exception with empty message
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -156,6 +167,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertEquals("\n", result);
     }
 
+    @Test
     public void test_execute_withNullMessageException() {
         // Setup mock SearchLogHelper that throws exception with null message
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -175,6 +187,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withNestedExceptionCause() {
         // Setup mock SearchLogHelper that throws nested exception
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -195,6 +208,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_concurrentCalls() {
         // Setup mock SearchLogHelper for concurrent testing
         final Object lock = new Object();
@@ -227,6 +241,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertEquals("", result3);
     }
 
+    @Test
     public void test_execute_performanceWithLargeErrorMessage() {
         // Test with very large error message
         final StringBuilder largeMessage = new StringBuilder();
@@ -253,6 +268,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withCheckedExceptionWrapped() {
         // Setup mock SearchLogHelper that throws wrapped checked exception
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -276,6 +292,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withOutOfMemoryError() {
         // Test handling of Error (not Exception) - should NOT be caught by Exception handler
         SearchLogHelper mockSearchLogHelper = new SearchLogHelper() {
@@ -296,6 +313,7 @@ public class AggregateLogJobTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_multipleDifferentExceptions() {
         // Test job behavior with different exception types in sequence
         final int[] callCount = { 0 };

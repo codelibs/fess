@@ -16,6 +16,9 @@
 package org.codelibs.fess.crawler.interval;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for FessIntervalController.
@@ -23,19 +26,21 @@ import org.codelibs.fess.unit.UnitFessTestCase;
  */
 public class FessIntervalControllerTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     /**
      * Test that FessIntervalController can be instantiated correctly
      */
+    @Test
     public void test_constructor() {
         FessIntervalController controller = new FessIntervalController();
         assertNotNull(controller);
@@ -44,6 +49,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test getter and setter for delayMillisAfterProcessing
      */
+    @Test
     public void test_delayMillisAfterProcessing() {
         FessIntervalController controller = new FessIntervalController();
 
@@ -60,6 +66,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test getter and setter for delayMillisAtNoUrlInQueue
      */
+    @Test
     public void test_delayMillisAtNoUrlInQueue() {
         FessIntervalController controller = new FessIntervalController();
 
@@ -76,6 +83,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test getter and setter for delayMillisBeforeProcessing
      */
+    @Test
     public void test_delayMillisBeforeProcessing() {
         FessIntervalController controller = new FessIntervalController();
 
@@ -92,6 +100,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test getter and setter for delayMillisForWaitingNewUrl
      */
+    @Test
     public void test_delayMillisForWaitingNewUrl() {
         FessIntervalController controller = new FessIntervalController();
 
@@ -108,6 +117,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test that all delay values can be set together without conflicts
      */
+    @Test
     public void test_multipleDelaySettings() {
         FessIntervalController controller = new FessIntervalController();
 
@@ -128,6 +138,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
      * Note: This is a basic smoke test since full integration testing
      * requires ComponentUtil and other dependencies
      */
+    @Test
     public void test_delayForWaitingNewUrl_noExceptions() {
         FessIntervalController controller = new FessIntervalController();
         controller.setDelayMillisForWaitingNewUrl(0L); // Set to 0 to avoid actual delay
@@ -146,6 +157,7 @@ public class FessIntervalControllerTest extends UnitFessTestCase {
     /**
      * Test boundary values for delay settings
      */
+    @Test
     public void test_delayBoundaryValues() {
         FessIntervalController controller = new FessIntervalController();
 

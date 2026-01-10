@@ -15,14 +15,17 @@
  */
 package org.codelibs.fess.dict.mapping;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class CharMappingItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withValidInputs() {
         CharMappingItem item = new CharMappingItem(1L, new String[] { "input" }, "output");
 
@@ -33,6 +36,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("output", item.getOutput());
     }
 
+    @Test
     public void test_constructor_withIdZero() {
         // Test when id is 0 (create mode)
         String[] inputs = { "x", "y" };
@@ -46,6 +50,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("result", item.getNewOutput());
     }
 
+    @Test
     public void test_constructor_withNewlineInOutput() {
         // Test newline replacement in output
         String[] inputs = { "input" };
@@ -54,6 +59,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("line1 line2", item.getOutput());
     }
 
+    @Test
     public void test_constructor_withNullOutput() {
         // Test with null output
         String[] inputs = { "input" };
@@ -62,6 +68,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertNull(item.getOutput());
     }
 
+    @Test
     public void test_constructor_withUnsortedInputs() {
         // Test that inputs are sorted during construction
         String[] inputs = { "z", "a", "m" };
@@ -72,6 +79,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("z", item.getInputs()[2]);
     }
 
+    @Test
     public void test_getNewInputs_setNewInputs() {
         String[] inputs = { "old" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -88,6 +96,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("new2", item.getNewInputs()[1]);
     }
 
+    @Test
     public void test_getNewOutput_setNewOutput() {
         String[] inputs = { "input" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "oldOutput");
@@ -100,6 +109,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("newOutput", item.getNewOutput());
     }
 
+    @Test
     public void test_setNewOutput_withNewline() {
         String[] inputs = { "input" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -109,6 +119,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("line1 line2 line3", item.getNewOutput());
     }
 
+    @Test
     public void test_setNewOutput_withNull() {
         String[] inputs = { "input" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -117,6 +128,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertNull(item.getNewOutput());
     }
 
+    @Test
     public void test_getInputsValue() {
         // Test with multiple inputs
         String[] inputs = { "a", "b", "c" };
@@ -126,6 +138,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("a\nb\nc", inputsValue);
     }
 
+    @Test
     public void test_getInputsValue_withSingleInput() {
         // Test with single input
         String[] inputs = { "single" };
@@ -134,6 +147,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("single", item.getInputsValue());
     }
 
+    @Test
     public void test_getInputsValue_withNullInputs() {
         // Create item and then set inputs to null via reflection or subclass
         CharMappingItem item = new CharMappingItem(1L, new String[] { "temp" }, "output") {
@@ -153,6 +167,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("", emptyItem.getInputsValue());
     }
 
+    @Test
     public void test_isUpdated() {
         String[] inputs = { "input" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -173,6 +188,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertFalse(item.isUpdated());
     }
 
+    @Test
     public void test_isDeleted() {
         String[] inputs = { "input" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -190,6 +206,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertFalse(item.isDeleted());
     }
 
+    @Test
     public void test_sort() {
         String[] inputs = { "z", "a", "m" };
         String[] newInputs = { "9", "1", "5" };
@@ -216,6 +233,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("9", item.getNewInputs()[2]);
     }
 
+    @Test
     public void test_sort_withNullArrays() {
         // Test sort with null arrays doesn't throw exception
         CharMappingItem item = new CharMappingItem(1L, new String[] { "a" }, "output");
@@ -228,6 +246,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("a", item.getInputs()[0]);
     }
 
+    @Test
     public void test_hashCode() {
         String[] inputs1 = { "a", "b" };
         String[] inputs2 = { "a", "b" };
@@ -248,6 +267,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertNotSame(item1.hashCode(), item4.hashCode());
     }
 
+    @Test
     public void test_hashCode_withNullOutput() {
         // Test hashCode with null output - should not throw, returns consistent hash for null
         String[] inputs1 = { "a", "b" };
@@ -266,6 +286,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals(item1.hashCode(), item1.hashCode());
     }
 
+    @Test
     public void test_equals() {
         String[] inputs1 = { "a", "b" };
         String[] inputs2 = { "b", "a" }; // Different order
@@ -297,6 +318,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertFalse(item1.equals("string"));
     }
 
+    @Test
     public void test_equals_withUnsortedInputs() {
         // Test that equals works correctly even when inputs are initially unsorted
         String[] inputs1 = { "z", "a", "m" };
@@ -308,6 +330,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertTrue(item1.equals(item2));
     }
 
+    @Test
     public void test_equals_withNullOutput() {
         // Test equals with null output - should not throw, uses null-safe comparison
         String[] inputs1 = { "a", "b" };
@@ -334,6 +357,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertTrue(item2.equals(item1));
     }
 
+    @Test
     public void test_toString() {
         String[] inputs = { "a", "b" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -348,6 +372,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertTrue(str.contains("newOutput=newOutput"));
     }
 
+    @Test
     public void test_toLineString_withoutUpdates() {
         String[] inputs = { "a", "b", "c" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -355,6 +380,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("a,b,c=>output", item.toLineString());
     }
 
+    @Test
     public void test_toLineString_withUpdates() {
         String[] inputs = { "old1", "old2" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "oldOutput");
@@ -366,6 +392,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("new1,new2,new3=>newOutput", item.toLineString());
     }
 
+    @Test
     public void test_toLineString_withSingleInput() {
         String[] inputs = { "single" };
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -373,6 +400,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("single=>output", item.toLineString());
     }
 
+    @Test
     public void test_toLineString_withEmptyInputs() {
         String[] inputs = {};
         CharMappingItem item = new CharMappingItem(1L, inputs, "output");
@@ -380,12 +408,14 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("=>output", item.toLineString());
     }
 
+    @Test
     public void test_getId() {
         // Test getId method from parent class
         CharMappingItem item = new CharMappingItem(42L, new String[] { "input" }, "output");
         assertEquals(42L, item.getId());
     }
 
+    @Test
     public void test_getCreatedBy_getCreatedTime() {
         // Test inherited methods from DictionaryItem
         CharMappingItem item = new CharMappingItem(1L, new String[] { "input" }, "output");
@@ -397,6 +427,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("output", item.getOutput());
     }
 
+    @Test
     public void test_defensiveCopy_inputs() {
         // Test that getInputs() returns defensive copy
         String[] originalInputs = { "a", "b", "c" };
@@ -414,6 +445,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("c", inputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_newInputs() {
         // Test that getNewInputs() returns defensive copy
         CharMappingItem item = new CharMappingItem(1L, new String[] { "a" }, "output");
@@ -431,6 +463,7 @@ public class CharMappingItemTest extends UnitFessTestCase {
         assertEquals("r", inputs2[2]);
     }
 
+    @Test
     public void test_defensiveCopy_nullArrays() {
         // Test that defensive copy handles null arrays correctly
         CharMappingItem item1 = new CharMappingItem(1L, new String[] { "a" }, "output");

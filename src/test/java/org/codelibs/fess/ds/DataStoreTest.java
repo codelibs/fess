@@ -26,16 +26,21 @@ import org.codelibs.fess.ds.callback.IndexUpdateCallback;
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DataStoreTest extends UnitFessTestCase {
 
     private DataStore dataStore;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
+    @Test
     public void test_store_basic() {
         // Create a simple DataStore implementation for testing
         final AtomicBoolean storeCalled = new AtomicBoolean(false);
@@ -81,6 +86,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertEquals("value2", capturedParams.get().getAsString("key2"));
     }
 
+    @Test
     public void test_store_withNullConfig() {
         // Test store with null config
         final AtomicBoolean storeCalled = new AtomicBoolean(false);
@@ -107,6 +113,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertTrue(storeCalled.get());
     }
 
+    @Test
     public void test_store_withNullCallback() {
         // Test store with null callback
         final AtomicBoolean storeCalled = new AtomicBoolean(false);
@@ -133,6 +140,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertTrue(storeCalled.get());
     }
 
+    @Test
     public void test_store_withNullParams() {
         // Test store with null params
         final AtomicBoolean storeCalled = new AtomicBoolean(false);
@@ -159,6 +167,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertTrue(storeCalled.get());
     }
 
+    @Test
     public void test_stop() {
         // Test stop method
         final AtomicBoolean stopCalled = new AtomicBoolean(false);
@@ -181,6 +190,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertTrue(stopCalled.get());
     }
 
+    @Test
     public void test_stop_multipleCalls() {
         // Test multiple stop calls
         final AtomicInteger stopCallCount = new AtomicInteger(0);
@@ -205,6 +215,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertEquals(3, stopCallCount.get());
     }
 
+    @Test
     public void test_store_and_stop_lifecycle() {
         // Test full lifecycle: store then stop
         final AtomicBoolean storeCalled = new AtomicBoolean(false);
@@ -239,6 +250,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertFalse(isActive.get());
     }
 
+    @Test
     public void test_store_withComplexParams() {
         // Test store with complex parameters
         final AtomicReference<DataStoreParams> capturedParams = new AtomicReference<>();
@@ -285,6 +297,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertNotNull(captured.get("map"));
     }
 
+    @Test
     public void test_store_withCallbackInteraction() {
         // Test store with callback interaction
         final TestIndexUpdateCallback callback = new TestIndexUpdateCallback();
@@ -324,6 +337,7 @@ public class DataStoreTest extends UnitFessTestCase {
         assertTrue(callback.isCommitted());
     }
 
+    @Test
     public void test_multiple_datastore_instances() {
         // Test multiple DataStore instances working independently
         final AtomicInteger store1CallCount = new AtomicInteger(0);

@@ -23,16 +23,21 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.opensearch.index.query.MatchAllQueryBuilder;
 import org.opensearch.search.rescore.QueryRescorerBuilder;
 import org.opensearch.search.rescore.RescorerBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class QueryRescorerTest extends UnitFessTestCase {
 
     private QueryRescorer queryRescorer;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
+    @Test
     public void test_evaluate_withNullParams() {
         // Test implementation that returns null
         queryRescorer = new QueryRescorer() {
@@ -45,6 +50,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(queryRescorer.evaluate(null));
     }
 
+    @Test
     public void test_evaluate_withEmptyParams() {
         // Test implementation that returns null for empty params
         queryRescorer = new QueryRescorer() {
@@ -61,6 +67,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(queryRescorer.evaluate(new HashMap<>()));
     }
 
+    @Test
     public void test_evaluate_withParams() {
         // Test implementation that returns a RescorerBuilder
         queryRescorer = new QueryRescorer() {
@@ -80,6 +87,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNotNull(result);
     }
 
+    @Test
     public void test_evaluate_multipleImplementations() {
         // Test with first implementation
         QueryRescorer rescorer1 = new QueryRescorer() {
@@ -104,6 +112,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(rescorer2.evaluate(params));
     }
 
+    @Test
     public void test_evaluate_withDifferentParamTypes() {
         queryRescorer = new QueryRescorer() {
             @Override
@@ -148,6 +157,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(queryRescorer.evaluate(unknownParams));
     }
 
+    @Test
     public void test_evaluate_withNestedParams() {
         queryRescorer = new QueryRescorer() {
             @Override
@@ -183,6 +193,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(queryRescorer.evaluate(flatParams));
     }
 
+    @Test
     public void test_evaluate_withLargeParams() {
         queryRescorer = new QueryRescorer() {
             @Override
@@ -208,6 +219,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         assertNull(queryRescorer.evaluate(smallParams));
     }
 
+    @Test
     public void test_evaluate_exceptionHandling() {
         queryRescorer = new QueryRescorer() {
             @Override
@@ -236,6 +248,7 @@ public class QueryRescorerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_evaluate_concurrency() {
         queryRescorer = new QueryRescorer() {
             private int callCount = 0;

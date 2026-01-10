@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for FessCrawlerThread.
@@ -30,6 +31,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
  */
 public class FessCrawlerThreadTest extends UnitFessTestCase {
 
+    @Test
     public void test_getClientRuleList() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -58,6 +60,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     /**
      * Test HTTP status code constants are defined correctly
      */
+    @Test
     public void test_httpStatusCodeConstants() {
         // Verify the constants are accessible via reflection or by checking their usage
         // Since the constants are private, we test their values indirectly
@@ -74,21 +77,23 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     /**
      * Test getAnchorSet with null input
      */
+    @Test
     public void test_getAnchorSet_withNull() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
         Set<RequestData> result = crawlerThread.getAnchorSet(null);
-        assertNull("getAnchorSet should return null for null input", result);
+        assertNull(result, "getAnchorSet should return null for null input");
     }
 
     /**
      * Test getAnchorSet with single string
      */
+    @Test
     public void test_getAnchorSet_withSingleString() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
         Set<RequestData> result = crawlerThread.getAnchorSet("http://example.com");
-        assertNotNull("getAnchorSet should not return null for valid string", result);
+        assertNotNull(result, "getAnchorSet should not return null for valid string");
         assertEquals(1, result.size());
 
         RequestData requestData = result.iterator().next();
@@ -98,19 +103,21 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     /**
      * Test getAnchorSet with blank string
      */
+    @Test
     public void test_getAnchorSet_withBlankString() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
         Set<RequestData> result = crawlerThread.getAnchorSet("");
-        assertNull("getAnchorSet should return null for blank string", result);
+        assertNull(result, "getAnchorSet should return null for blank string");
 
         result = crawlerThread.getAnchorSet("   ");
-        assertNull("getAnchorSet should return null for whitespace string", result);
+        assertNull(result, "getAnchorSet should return null for whitespace string");
     }
 
     /**
      * Test getAnchorSet with list of URLs
      */
+    @Test
     public void test_getAnchorSet_withList() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -120,13 +127,14 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add("http://example.com/page3");
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNotNull("getAnchorSet should not return null for valid list", result);
+        assertNotNull(result, "getAnchorSet should not return null for valid list");
         assertEquals(3, result.size());
     }
 
     /**
      * Test getAnchorSet with list containing nulls
      */
+    @Test
     public void test_getAnchorSet_withListContainingNulls() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -137,13 +145,14 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add(null);
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNotNull("getAnchorSet should filter out null values", result);
+        assertNotNull(result, "getAnchorSet should filter out null values");
         assertEquals(2, result.size());
     }
 
     /**
      * Test getAnchorSet with list containing blank strings
      */
+    @Test
     public void test_getAnchorSet_withListContainingBlanks() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -155,25 +164,27 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add("http://example.com/page3");
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNotNull("getAnchorSet should filter out blank strings", result);
+        assertNotNull(result, "getAnchorSet should filter out blank strings");
         assertEquals(3, result.size());
     }
 
     /**
      * Test getAnchorSet with empty list
      */
+    @Test
     public void test_getAnchorSet_withEmptyList() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
         List<String> urls = new ArrayList<>();
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNull("getAnchorSet should return null for empty list", result);
+        assertNull(result, "getAnchorSet should return null for empty list");
     }
 
     /**
      * Test getAnchorSet with list containing only nulls and blanks
      */
+    @Test
     public void test_getAnchorSet_withListContainingOnlyNullsAndBlanks() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -184,24 +195,26 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add(null);
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNull("getAnchorSet should return null when all items are filtered out", result);
+        assertNull(result, "getAnchorSet should return null when all items are filtered out");
     }
 
     /**
      * Test getAnchorSet with unsupported object type
      */
+    @Test
     public void test_getAnchorSet_withUnsupportedType() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
         Integer unsupportedType = 123;
 
         Set<RequestData> result = crawlerThread.getAnchorSet(unsupportedType);
-        assertNull("getAnchorSet should return null for unsupported type", result);
+        assertNull(result, "getAnchorSet should return null for unsupported type");
     }
 
     /**
      * Test getAnchorSet with mixed valid and invalid URLs
      */
+    @Test
     public void test_getAnchorSet_withMixedValidAndInvalid() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -214,7 +227,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add("   ");
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNotNull("getAnchorSet should return valid URLs only", result);
+        assertNotNull(result, "getAnchorSet should return valid URLs only");
         assertEquals(3, result.size());
 
         // Verify the URLs are correct
@@ -231,14 +244,16 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
     /**
      * Test that FessCrawlerThread can be instantiated
      */
+    @Test
     public void test_constructor() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
-        assertNotNull("FessCrawlerThread should be instantiable", crawlerThread);
+        assertNotNull(crawlerThread, "FessCrawlerThread should be instantiable");
     }
 
     /**
      * Test URL deduplication in getAnchorSet
      */
+    @Test
     public void test_getAnchorSet_deduplication() {
         FessCrawlerThread crawlerThread = new FessCrawlerThread();
 
@@ -250,7 +265,7 @@ public class FessCrawlerThreadTest extends UnitFessTestCase {
         urls.add("http://example.com/page2"); // Duplicate
 
         Set<RequestData> result = crawlerThread.getAnchorSet(urls);
-        assertNotNull("getAnchorSet should handle duplicates", result);
+        assertNotNull(result, "getAnchorSet should handle duplicates");
 
         // Since it returns a Set, duplicates should be handled by URL comparison
         // The exact behavior depends on RequestData.equals() implementation

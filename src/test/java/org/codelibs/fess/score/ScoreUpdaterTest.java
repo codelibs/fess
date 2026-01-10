@@ -19,30 +19,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ScoreUpdaterTest extends UnitFessTestCase {
 
     private ScoreUpdater scoreUpdater;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         scoreUpdater = new ScoreUpdater();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         ScoreUpdater updater = new ScoreUpdater();
         assertNotNull(updater);
     }
 
     // Test execute with empty list
+    @Test
     public void test_execute_emptyList() {
         String result = scoreUpdater.execute();
         assertEquals("", result);
     }
 
     // Test execute with single booster
+    @Test
     public void test_execute_singleBooster() {
         TestScoreBooster booster = new TestScoreBooster(100L);
         scoreUpdater.addScoreBooster(booster);
@@ -52,6 +59,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test execute with multiple boosters
+    @Test
     public void test_execute_multipleBoosters() {
         TestScoreBooster booster1 = new TestScoreBooster(100L);
         TestScoreBooster booster2 = new TestScoreBooster(200L);
@@ -65,6 +73,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test execute with exception in booster
+    @Test
     public void test_execute_withException() {
         TestScoreBooster booster1 = new TestScoreBooster(100L);
         ExceptionScoreBooster booster2 = new ExceptionScoreBooster();
@@ -81,6 +90,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addScoreBooster with different priorities
+    @Test
     public void test_addScoreBooster_sortsByPriority() {
         PriorityTrackingBooster booster1 = new PriorityTrackingBooster(1, 100L);
         PriorityTrackingBooster booster2 = new PriorityTrackingBooster(3, 200L);
@@ -104,6 +114,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test addScoreBooster with same priorities
+    @Test
     public void test_addScoreBooster_samePriority() {
         TestScoreBooster booster1 = new TestScoreBooster(100L);
         booster1.setPriority(1);
@@ -125,6 +136,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test execute result format
+    @Test
     public void test_execute_resultFormat() {
         TestScoreBooster booster1 = new TestScoreBooster(123L);
         TestScoreBooster booster2 = new TestScoreBooster(456L);
@@ -142,6 +154,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test with null pointer exception
+    @Test
     public void test_execute_nullPointerException() {
         NullPointerScoreBooster booster = new NullPointerScoreBooster();
         scoreUpdater.addScoreBooster(booster);
@@ -152,6 +165,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test with negative priority
+    @Test
     public void test_addScoreBooster_negativePriority() {
         PriorityTrackingBooster booster1 = new PriorityTrackingBooster(-1, 100L);
         PriorityTrackingBooster booster2 = new PriorityTrackingBooster(0, 200L);
@@ -175,6 +189,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test with RuntimeException
+    @Test
     public void test_execute_withRuntimeException() {
         RuntimeExceptionScoreBooster booster = new RuntimeExceptionScoreBooster();
         scoreUpdater.addScoreBooster(booster);
@@ -184,6 +199,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test large number of boosters
+    @Test
     public void test_execute_manyBoosters() {
         for (int i = 0; i < 100; i++) {
             TestScoreBooster booster = new TestScoreBooster(i);
@@ -196,6 +212,7 @@ public class ScoreUpdaterTest extends UnitFessTestCase {
     }
 
     // Test priority sorting with large range
+    @Test
     public void test_addScoreBooster_largePriorityRange() {
         PriorityTrackingBooster booster1 = new PriorityTrackingBooster(Integer.MIN_VALUE, 100L);
         PriorityTrackingBooster booster2 = new PriorityTrackingBooster(Integer.MAX_VALUE, 200L);

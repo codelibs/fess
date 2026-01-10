@@ -21,9 +21,11 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 import com.google.common.io.BaseEncoding;
+import org.junit.jupiter.api.Test;
 
 public class FacetResponseTest extends UnitFessTestCase {
 
+    @Test
     public void test_base64_encoding_decoding() {
         // Test that base64 encoding and decoding works correctly
         String originalString = "test field with spaces";
@@ -33,6 +35,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(originalString, decoded);
     }
 
+    @Test
     public void test_facet_constants() {
         // Test that the constants are available
         assertNotNull(Constants.FACET_FIELD_PREFIX);
@@ -41,6 +44,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals("query:", Constants.FACET_QUERY_PREFIX);
     }
 
+    @Test
     public void test_unicode_base64_encoding() {
         // Test that unicode strings are properly encoded/decoded
         String unicodeString = "日本語テスト";
@@ -50,6 +54,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(unicodeString, decoded);
     }
 
+    @Test
     public void test_special_characters_base64_encoding() {
         // Test that special characters are properly encoded/decoded
         String specialString = "field-with.special_chars@domain.com";
@@ -59,6 +64,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(specialString, decoded);
     }
 
+    @Test
     public void test_empty_string_base64_encoding() {
         // Test that empty strings are properly encoded/decoded
         String emptyString = "";
@@ -68,6 +74,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(emptyString, decoded);
     }
 
+    @Test
     public void test_facet_prefix_usage() {
         // Test that facet prefixes can be used correctly
         String fieldName = "category";
@@ -85,6 +92,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertTrue(fullQueryName.contains(encodedQueryName));
     }
 
+    @Test
     public void test_field_name_extraction() {
         // Test that field names can be extracted from encoded strings
         String originalFieldName = "author";
@@ -100,6 +108,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(originalFieldName, extractedFieldName);
     }
 
+    @Test
     public void test_query_name_extraction() {
         // Test that query names can be extracted from encoded strings
         String originalQueryName = "content:important";
@@ -115,6 +124,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         assertEquals(originalQueryName, extractedQueryName);
     }
 
+    @Test
     public void test_complex_field_names() {
         // Test various complex field names
         String[] fieldNames = { "simple_field", "field-with-dashes", "field.with.dots", "field_with_underscores", "fieldWithCamelCase",
@@ -127,6 +137,7 @@ public class FacetResponseTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_complex_query_strings() {
         // Test various complex query strings
         String[] queryStrings = { "title:test", "content:\"quoted value\"", "field:value AND other:value", "field:value OR other:value",

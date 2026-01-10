@@ -31,13 +31,17 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class RoleQueryHelperTest extends UnitFessTestCase {
     public CachedCipher cipher;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         cipher = new CachedCipher();
         cipher.setKey("1234567890123456");
 
@@ -76,6 +80,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         return roleSet;
     }
 
+    @Test
     public void test_buildByParameter() {
         final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
             protected long getCurrentTime() {
@@ -132,6 +137,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_buildByHeader() {
         final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
             protected long getCurrentTime() {
@@ -192,6 +198,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_buildByCookie() {
         final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
             protected long getCurrentTime() {
@@ -263,6 +270,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_decodedRoleList() {
         final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
             protected long getCurrentTime() {
@@ -331,6 +339,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("role3"));
     }
 
+    @Test
     public void test_decodedRoleList_withCipher() {
         final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper() {
             protected long getCurrentTime() {
@@ -400,6 +409,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("role3"));
     }
 
+    @Test
     public void test_build_searchRequestType() {
         try {
             final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
@@ -419,6 +429,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_build_withRequest() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
             @Override
@@ -438,6 +449,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("cached_role"));
     }
 
+    @Test
     public void test_build_withParameterAndHeader() {
         try {
             final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
@@ -464,6 +476,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_build_withCookieMapping() {
         try {
             final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
@@ -485,6 +498,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addCookieNameMapping() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 
@@ -500,6 +514,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals("administrator", roleQueryHelper.cookieNameMap.get("admin"));
     }
 
+    @Test
     public void test_addRoleFromCookieMapping() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.addCookieNameMapping("auth", "authenticated");
@@ -512,6 +527,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("authenticated"));
     }
 
+    @Test
     public void test_addRoleFromCookieMapping_noMapping() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.addCookieNameMapping("auth", "authenticated");
@@ -523,6 +539,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_buildByCookieNameMapping() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.addCookieNameMapping("admin", "administrator");
@@ -543,6 +560,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("regular_user"));
     }
 
+    @Test
     public void test_buildByCookieNameMapping_noCookies() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.addCookieNameMapping("admin", "administrator");
@@ -553,6 +571,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_parseRoleSet_expiredTimestamp() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
             @Override
@@ -572,6 +591,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_parseRoleSet_negativeTimestamp() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper() {
             @Override
@@ -591,6 +611,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_parseRoleSet_invalidTimestamp() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 
@@ -602,6 +623,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_parseRoleSet_maxAgeZero() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.maxAge = 0;
@@ -616,6 +638,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("role2"));
     }
 
+    @Test
     public void test_parseRoleSet_emptyRoles() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.valueSeparator = "";
@@ -630,6 +653,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("role2"));
     }
 
+    @Test
     public void test_parseRoleSet_customSeparators() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.valueSeparator = "|";
@@ -644,6 +668,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleSet.size() >= 0);
     }
 
+    @Test
     public void test_parseRoleSet_decryptionFailure() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
         roleQueryHelper.cipher = cipher;
@@ -656,6 +681,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, roleSet.size());
     }
 
+    @Test
     public void test_setters() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 
@@ -691,6 +717,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertEquals(300, roleQueryHelper.maxAge);
     }
 
+    @Test
     public void test_init() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 
@@ -702,6 +729,7 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(roleQueryHelper.defaultRoleList.size() >= 0);
     }
 
+    @Test
     public void test_getCurrentTime() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 
@@ -713,10 +741,12 @@ public class RoleQueryHelperTest extends UnitFessTestCase {
         assertTrue(Math.abs(currentTime - currentTimeMillis) < 1000);
     }
 
+    @Test
     public void test_constants() {
         assertEquals("userRoles", RoleQueryHelper.USER_ROLES);
     }
 
+    @Test
     public void test_defaultValues() {
         final RoleQueryHelper roleQueryHelper = new RoleQueryHelper();
 

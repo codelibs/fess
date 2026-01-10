@@ -33,14 +33,18 @@ import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DataIndexHelperTest extends UnitFessTestCase {
 
     private DataIndexHelper dataIndexHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         dataIndexHelper = new DataIndexHelper();
         setupMockComponents();
         // Reduce default interval to minimize test execution time
@@ -127,6 +131,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new FastMockDataConfigBhv(), DataConfigBhv.class.getCanonicalName());
     }
 
+    @Test
     public void test_crawl_withSessionId_emptyConfigList() {
         try {
             dataIndexHelper.crawl("test-session");
@@ -136,6 +141,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_crawl_withConfigIdList_emptyList() {
         try {
             List<String> configIds = Arrays.asList("id1", "id2");
@@ -146,6 +152,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setCrawlingExecutionInterval() {
         long interval = 100L; // Keep test intervals short
         dataIndexHelper.setCrawlingExecutionInterval(interval);
@@ -160,6 +167,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setCrawlerPriority() {
         int priority = Thread.NORM_PRIORITY; // Use normal priority for tests
         dataIndexHelper.setCrawlerPriority(priority);
@@ -174,6 +182,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_crawl_with_force_stop() {
         // Set force stop to true immediately to avoid thread operations
         SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -189,6 +198,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_crawl_with_short_intervals() {
         try {
             // Test with minimal interval
@@ -200,6 +210,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_thread_priority_settings() {
         // Test basic priority configurations without creating threads
         dataIndexHelper.setCrawlerPriority(Thread.MIN_PRIORITY);
@@ -208,6 +219,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         assertTrue("Priority settings should be fast", true);
     }
 
+    @Test
     public void test_multiple_quick_operations() {
         try {
             // Multiple quick operations to verify overall performance
@@ -221,6 +233,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_configuration_validation() {
         // Test configuration without actual crawling
         dataIndexHelper.setCrawlingExecutionInterval(1L);
@@ -228,6 +241,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         assertTrue("Configuration should be fast", true);
     }
 
+    @Test
     public void test_empty_session_handling() {
         try {
             dataIndexHelper.crawl("");
@@ -238,14 +252,16 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_component_integration() {
         // Test that all mock components are properly registered
-        assertNotNull("CrawlingConfigHelper should be registered", ComponentUtil.getComponent("crawlingConfigHelper"));
-        assertNotNull("SystemHelper should be registered", ComponentUtil.getSystemHelper());
-        assertNotNull("FessConfig should be set", ComponentUtil.getFessConfig());
+        assertNotNull(ComponentUtil.getComponent("crawlingConfigHelper"), "CrawlingConfigHelper should be registered");
+        assertNotNull(ComponentUtil.getSystemHelper(), "SystemHelper should be registered");
+        assertNotNull(ComponentUtil.getFessConfig(), "FessConfig should be set");
         assertTrue("Component integration test should be fast", true);
     }
 
+    @Test
     public void test_basic_functionality() {
         // Basic functionality test without complex operations
         try {
@@ -257,6 +273,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_interval_boundary_values() {
         // Test interval boundary values quickly
         dataIndexHelper.setCrawlingExecutionInterval(0L);
@@ -265,6 +282,7 @@ public class DataIndexHelperTest extends UnitFessTestCase {
         assertTrue("Boundary value tests should be fast", true);
     }
 
+    @Test
     public void test_performance_optimization() {
         // Verify that performance optimizations are working
         long startTime = System.currentTimeMillis();

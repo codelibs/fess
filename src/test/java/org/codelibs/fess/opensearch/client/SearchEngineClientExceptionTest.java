@@ -16,9 +16,11 @@
 package org.codelibs.fess.opensearch.client;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class SearchEngineClientExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Test error message";
@@ -29,6 +31,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Test error message";
@@ -40,6 +43,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         SearchEngineClientException exception = new SearchEngineClientException(null);
@@ -49,6 +53,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         SearchEngineClientException exception = new SearchEngineClientException(null, null);
@@ -58,6 +63,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -68,6 +74,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Test error message";
@@ -78,6 +85,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndValidCause() {
         // Test constructor with null message and valid cause
         Throwable cause = new IllegalArgumentException("Invalid argument");
@@ -88,6 +96,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test constructor with long message
         StringBuilder sb = new StringBuilder();
@@ -102,6 +111,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNestedCause() {
         // Test constructor with nested exceptions
         Throwable rootCause = new IllegalStateException("Root cause");
@@ -115,6 +125,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_constructor_withSpecialCharactersInMessage() {
         // Test constructor with special characters in message
         String message = "Error with special chars: \n\t\r\"'<>&";
@@ -125,6 +136,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has serialVersionUID defined
         String message = "Serialization test";
@@ -135,6 +147,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         String message = "Stack trace test";
@@ -154,6 +167,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String message = "Throw and catch test";
@@ -166,6 +180,7 @@ public class SearchEngineClientExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String message = "Throw and catch with cause test";

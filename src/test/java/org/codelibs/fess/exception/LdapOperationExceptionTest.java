@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class LdapOperationExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "LDAP operation failed";
@@ -28,6 +30,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "LDAP operation failed with error";
@@ -39,6 +42,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertEquals("Connection timeout", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         LdapOperationException exception = new LdapOperationException(null);
@@ -47,6 +51,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         LdapOperationException exception = new LdapOperationException(null, null);
@@ -55,6 +60,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -64,6 +70,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "LDAP error occurred";
@@ -73,6 +80,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_inheritanceFromFessSystemException() {
         // Test that LdapOperationException is properly inherited from FessSystemException
         LdapOperationException exception = new LdapOperationException("Test");
@@ -83,6 +91,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that exception is serializable
         String message = "Serialization test";
@@ -92,6 +101,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertNotNull(exception);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         LdapOperationException exception = new LdapOperationException("Stack trace test");
@@ -110,6 +120,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_nestedExceptions() {
         // Test nested exception handling
         Exception innerCause = new IllegalArgumentException("Invalid LDAP parameter");
@@ -123,6 +134,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertEquals("Invalid LDAP parameter", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "LDAP authentication failed";
@@ -136,6 +148,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String expectedMessage = "LDAP connection error";
@@ -152,6 +165,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getMessage_consistency() {
         // Test message consistency across different scenarios
         String message1 = "LDAP bind failed";
@@ -169,6 +183,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertFalse(exception1.getMessage().equals(exception2.getMessage()));
     }
 
+    @Test
     public void test_longMessage() {
         // Test with very long message
         StringBuilder longMessage = new StringBuilder();
@@ -183,6 +198,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getMessage().length() > 10000);
     }
 
+    @Test
     public void test_specialCharactersInMessage() {
         // Test with special characters in message
         String message = "LDAP error: \n\t\r Special chars: @#$%^&*(){}[]|\\:;\"'<>,.?/~`";
@@ -191,6 +207,7 @@ public class LdapOperationExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_unicodeMessage() {
         // Test with Unicode characters in message
         String message = "LDAP エラー: 接続失敗 🔒 ñ ü é";

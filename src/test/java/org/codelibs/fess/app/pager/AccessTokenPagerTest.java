@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class AccessTokenPagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_AccessTokenPager() {
         AccessTokenPager accesstokenpager = new AccessTokenPager();
 

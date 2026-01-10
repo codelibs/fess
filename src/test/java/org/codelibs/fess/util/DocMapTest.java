@@ -24,8 +24,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DocMapTest extends UnitFessTestCase {
+    @Test
     public void test_DocList() {
         Map<String, Object> value = new LinkedHashMap<>();
         DocMap docMap = new DocMap(value);
@@ -47,6 +49,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue(docMap.isEmpty());
     }
 
+    @Test
     public void test_constructor() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -56,6 +59,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals(0, docMap.size());
     }
 
+    @Test
     public void test_basic_operations() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -75,6 +79,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertFalse(docMap.containsValue("nonexistent"));
     }
 
+    @Test
     public void test_put_and_get() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -88,6 +93,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertNull(docMap.get("nonexistent"));
     }
 
+    @Test
     public void test_remove() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -105,6 +111,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue(docMap.containsKey("key2"));
     }
 
+    @Test
     public void test_putAll() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -122,6 +129,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals("value3", docMap.get("key3"));
     }
 
+    @Test
     public void test_clear() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -137,6 +145,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertNull(docMap.get("key2"));
     }
 
+    @Test
     public void test_keySet() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -152,6 +161,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue(keySet.contains("key3"));
     }
 
+    @Test
     public void test_values() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -167,6 +177,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue(values.contains("value3"));
     }
 
+    @Test
     public void test_entrySet_without_lang() {
         Map<String, Object> parentMap = new LinkedHashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -182,6 +193,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals(parentEntrySet, entrySet);
     }
 
+    @Test
     public void test_entrySet_with_lang_key() {
         Map<String, Object> parentMap = new LinkedHashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -204,6 +216,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue(Arrays.asList(keys).contains("zebra"));
     }
 
+    @Test
     public void test_entrySet_with_lang_key_ordering() {
         Map<String, Object> parentMap = new LinkedHashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -222,6 +235,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertTrue("Should contain all keys", Arrays.asList(keys).contains("c_key"));
     }
 
+    @Test
     public void test_entrySet_with_only_lang_key() {
         Map<String, Object> parentMap = new LinkedHashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -235,6 +249,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals("lang", keys[0]);
     }
 
+    @Test
     public void test_entrySet_multiple_lang_keys() {
         Map<String, Object> parentMap = new LinkedHashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -250,6 +265,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals("Should have 2 keys", 2, keys.length);
     }
 
+    @Test
     public void test_isEmpty_and_size() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -270,6 +286,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals(0, docMap.size());
     }
 
+    @Test
     public void test_containsKey_and_containsValue() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -286,6 +303,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertFalse(docMap.containsValue("nonexistent"));
     }
 
+    @Test
     public void test_null_values() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);
@@ -299,6 +317,7 @@ public class DocMapTest extends UnitFessTestCase {
         assertEquals("newValue", docMap.get("nullKey"));
     }
 
+    @Test
     public void test_map_interface_compliance() {
         Map<String, Object> parentMap = new HashMap<>();
         DocMap docMap = new DocMap(parentMap);

@@ -16,9 +16,12 @@
 package org.codelibs.fess.dict.stopwords;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class StopwordsItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withIdZero() {
         // Test when id is 0 (create mode)
         StopwordsItem item = new StopwordsItem(0, "the");
@@ -27,6 +30,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("the", item.getNewInput());
     }
 
+    @Test
     public void test_constructor_withNonZeroId() {
         // Test when id is not 0 (existing item)
         StopwordsItem item = new StopwordsItem(123, "and");
@@ -35,6 +39,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertNull(item.getNewInput());
     }
 
+    @Test
     public void test_getNewInput_setNewInput() {
         // Test getter and setter for newInput
         StopwordsItem item = new StopwordsItem(1, "or");
@@ -50,6 +55,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertNull(item.getNewInput());
     }
 
+    @Test
     public void test_getInput() {
         // Test getInput method
         StopwordsItem item1 = new StopwordsItem(1, "test");
@@ -62,6 +68,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertNull(item3.getInput());
     }
 
+    @Test
     public void test_getInputValue() {
         // Test getInputValue method with various inputs
         StopwordsItem item1 = new StopwordsItem(1, "word");
@@ -75,6 +82,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("", item3.getInputValue());
     }
 
+    @Test
     public void test_isUpdated() {
         // Test isUpdated method
         StopwordsItem item = new StopwordsItem(1, "original");
@@ -90,6 +98,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertFalse(item.isUpdated());
     }
 
+    @Test
     public void test_isDeleted() {
         // Test isDeleted method
         StopwordsItem item = new StopwordsItem(1, "word");
@@ -106,6 +115,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertFalse(item.isDeleted());
     }
 
+    @Test
     public void test_hashCode() {
         // Test hashCode method
         StopwordsItem item1 = new StopwordsItem(1, "test");
@@ -121,6 +131,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertNotSame(item1.hashCode(), item4.hashCode());
     }
 
+    @Test
     public void test_hashCode_withNullInput() {
         // Test hashCode with null input - should not throw, returns consistent hash for null
         StopwordsItem item1 = new StopwordsItem(1, null);
@@ -137,6 +148,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals(item1.hashCode(), item1.hashCode());
     }
 
+    @Test
     public void test_equals() {
         // Test equals method
         StopwordsItem item1 = new StopwordsItem(1, "test");
@@ -160,6 +172,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertFalse(item1.equals(new Object()));
     }
 
+    @Test
     public void test_equals_withNewInput() {
         // Test equals method with newInput set
         StopwordsItem item1 = new StopwordsItem(1, "test");
@@ -172,6 +185,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertTrue(item1.equals(item2));
     }
 
+    @Test
     public void test_equals_withNullInput() {
         // Test equals with null input - should not throw, uses null-safe comparison
         StopwordsItem item1 = new StopwordsItem(1, null);
@@ -190,6 +204,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertTrue(item2.equals(item1));
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         StopwordsItem item = new StopwordsItem(123, "word");
@@ -202,6 +217,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("StopwordsItem [id=123, inputs=word, newInputs=]", item.toString());
     }
 
+    @Test
     public void test_toLineString() {
         // Test toLineString method
         StopwordsItem item = new StopwordsItem(1, "original");
@@ -220,6 +236,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("original", item.toLineString());
     }
 
+    @Test
     public void test_toLineString_withEmptyInput() {
         // Test toLineString with empty original input
         StopwordsItem item = new StopwordsItem(1, "");
@@ -229,6 +246,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("new", item.toLineString());
     }
 
+    @Test
     public void test_getId() {
         // Test getId method from parent class
         StopwordsItem item1 = new StopwordsItem(0, "word1");
@@ -241,6 +259,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals(-1, item3.getId());
     }
 
+    @Test
     public void test_createMode() {
         // Test special behavior when id is 0 (create mode)
         StopwordsItem createItem = new StopwordsItem(0, "newword");
@@ -255,6 +274,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("existingword", existingItem.toLineString());
     }
 
+    @Test
     public void test_multipleUpdates() {
         // Test multiple updates to newInput
         StopwordsItem item = new StopwordsItem(1, "original");
@@ -280,6 +300,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertFalse(item.isDeleted());
     }
 
+    @Test
     public void test_specialCharacters() {
         // Test with special characters
         String specialInput = "test@#$%^&*()_+-=[]{}|;':\",./<>?";
@@ -293,6 +314,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals(newSpecialInput, item.toLineString());
     }
 
+    @Test
     public void test_whitespaceHandling() {
         // Test with various whitespace
         StopwordsItem item1 = new StopwordsItem(1, " ");
@@ -308,6 +330,7 @@ public class StopwordsItemTest extends UnitFessTestCase {
         assertEquals("  word  ", item3.toLineString());
     }
 
+    @Test
     public void test_longStrings() {
         // Test with long strings
         StringBuilder longString = new StringBuilder();

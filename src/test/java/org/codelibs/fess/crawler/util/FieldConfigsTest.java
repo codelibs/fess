@@ -20,13 +20,16 @@ import java.util.Map;
 
 import org.apache.groovy.util.Maps;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FieldConfigsTest extends UnitFessTestCase {
+    @Test
     public void test_empty() {
         final FieldConfigs fieldConfigs = new FieldConfigs(Collections.emptyMap());
         assertTrue(fieldConfigs.getConfig("test").isEmpty());
     }
 
+    @Test
     public void test_values() {
         final Map<String, String> params = Maps.of("foo", "bar");
         FieldConfigs fieldConfigs = new FieldConfigs(params);
@@ -37,6 +40,7 @@ public class FieldConfigsTest extends UnitFessTestCase {
         assertEquals("bar", fieldConfigs.getConfig("foo").map(FieldConfigs.Config::getValues).orElse(new String[0])[0]);
     }
 
+    @Test
     public void test_cache_true() {
         final Map<String, String> params = Maps.of("foo", "true");
         FieldConfigs fieldConfigs = new FieldConfigs(params);
@@ -45,6 +49,7 @@ public class FieldConfigsTest extends UnitFessTestCase {
         assertFalse(fieldConfigs.getConfig("foo").map(FieldConfigs.Config::isOverwrite).orElse(false));
     }
 
+    @Test
     public void test_cache() {
         final Map<String, String> params = Maps.of("foo", "cache");
         FieldConfigs fieldConfigs = new FieldConfigs(params);
@@ -53,6 +58,7 @@ public class FieldConfigsTest extends UnitFessTestCase {
         assertFalse(fieldConfigs.getConfig("foo").map(FieldConfigs.Config::isOverwrite).orElse(false));
     }
 
+    @Test
     public void test_overwrite() {
         final Map<String, String> params = Maps.of("foo", "overwrite");
         FieldConfigs fieldConfigs = new FieldConfigs(params);
@@ -61,6 +67,7 @@ public class FieldConfigsTest extends UnitFessTestCase {
         assertTrue(fieldConfigs.getConfig("foo").map(FieldConfigs.Config::isOverwrite).orElse(false));
     }
 
+    @Test
     public void test_cache_overwrite() {
         final Map<String, String> params = Maps.of("foo", "cache|overwrite");
         FieldConfigs fieldConfigs = new FieldConfigs(params);

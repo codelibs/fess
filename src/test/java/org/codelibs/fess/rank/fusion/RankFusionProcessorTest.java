@@ -29,11 +29,13 @@ import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
 
 public class RankFusionProcessorTest extends UnitFessTestCase {
 
     private static final String ID_FIELD = "_id";
 
+    @Test
     public void test_default_1000docs_10size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;
@@ -95,6 +97,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher10_45_45_1000docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;
@@ -208,6 +211,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher0_0docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 0;
@@ -235,6 +239,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher0_10docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 10;
@@ -262,6 +267,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher0_1000docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;
@@ -289,6 +295,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher10_0docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 0;
@@ -316,6 +323,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher10_10docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 10;
@@ -343,6 +351,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher10_1000docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;
@@ -370,6 +379,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher1000_0docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 0;
@@ -397,6 +407,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher1000_10docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 10;
@@ -424,6 +435,7 @@ public class RankFusionProcessorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_1searcher1000_1000docs_100size() throws Exception {
         String query = "*";
         int allRecordCount = 1000;

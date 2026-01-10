@@ -20,11 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class EmptyGeneratorTest extends UnitFessTestCase {
 
     private EmptyGenerator emptyGenerator;
 
+    @Test
     public void test_generate() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -37,6 +39,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertFalse(emptyGenerator.generate(null, null));
     }
 
+    @Test
     public void test_destroy() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -48,6 +51,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         emptyGenerator.destroy();
     }
 
+    @Test
     public void test_isAvailable() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -58,6 +62,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertTrue(emptyGenerator.isAvailable());
     }
 
+    @Test
     public void test_isTarget() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -79,6 +84,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getName() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -95,6 +101,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertEquals("newName", emptyGenerator.getName());
     }
 
+    @Test
     public void test_addCondition() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -113,6 +120,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         emptyGenerator.addCondition("mime", "text/.*");
     }
 
+    @Test
     public void test_setDirectoryNameLength() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -133,6 +141,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertEquals(-1, emptyGenerator.directoryNameLength);
     }
 
+    @Test
     public void test_setMaxRedirectCount() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -149,6 +158,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertEquals(0, emptyGenerator.maxRedirectCount);
     }
 
+    @Test
     public void test_expandPath() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();
@@ -163,6 +173,7 @@ public class EmptyGeneratorTest extends UnitFessTestCase {
         assertEquals("other/path", emptyGenerator.expandPath("other/path"));
     }
 
+    @Test
     public void test_createTask() {
         // Initialize without container
         emptyGenerator = new EmptyGenerator();

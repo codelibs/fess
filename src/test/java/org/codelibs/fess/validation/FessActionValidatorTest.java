@@ -20,19 +20,23 @@ import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.validation.ActionValidator;
+import org.junit.jupiter.api.Test;
 
 public class FessActionValidatorTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor() {
         // Test basic class structure without complex mocking
         assertEquals("FessActionValidator should be in correct package", "org.codelibs.fess.validation.FessActionValidator",
                 FessActionValidator.class.getName());
     }
 
+    @Test
     public void test_inheritance() {
         assertTrue("FessActionValidator should extend ActionValidator", ActionValidator.class.isAssignableFrom(FessActionValidator.class));
     }
 
+    @Test
     public void test_constructorExists() {
         // Verify constructor exists with expected parameters
         try {
@@ -43,6 +47,7 @@ public class FessActionValidatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_classStructure() {
         // Verify the class is generic
         final java.lang.reflect.TypeVariable<?>[] typeParameters = FessActionValidator.class.getTypeParameters();
@@ -50,12 +55,14 @@ public class FessActionValidatorTest extends UnitFessTestCase {
         assertEquals("Type parameter should be MESSAGES", "MESSAGES", typeParameters[0].getName());
     }
 
+    @Test
     public void test_packageStructure() {
         final Package pkg = FessActionValidator.class.getPackage();
-        assertNotNull("Package should not be null", pkg);
+        assertNotNull(pkg, "Package should not be null");
         assertEquals("Should be in correct package", "org.codelibs.fess.validation", pkg.getName());
     }
 
+    @Test
     public void test_isPublicClass() {
         assertTrue("FessActionValidator should be public", java.lang.reflect.Modifier.isPublic(FessActionValidator.class.getModifiers()));
     }

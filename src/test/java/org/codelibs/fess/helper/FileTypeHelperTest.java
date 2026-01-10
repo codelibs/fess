@@ -18,17 +18,22 @@ package org.codelibs.fess.helper;
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FileTypeHelperTest extends UnitFessTestCase {
 
     private FileTypeHelper fileTypeHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         fileTypeHelper = new FileTypeHelper();
     }
 
+    @Test
     public void test_init() {
         try {
             fileTypeHelper.init();
@@ -37,6 +42,7 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_add() {
         fileTypeHelper.add("application/pdf", "pdf");
         assertEquals("pdf", fileTypeHelper.get("application/pdf"));
@@ -48,6 +54,7 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("image", fileTypeHelper.get("image/jpeg"));
     }
 
+    @Test
     public void test_get() {
         fileTypeHelper.add("application/pdf", "pdf");
         fileTypeHelper.add("text/plain", "text");
@@ -59,15 +66,18 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("others", fileTypeHelper.get("non/existent"));
     }
 
+    @Test
     public void test_get_withNullMimetype() {
         assertEquals("others", fileTypeHelper.get(null));
     }
 
+    @Test
     public void test_get_withEmptyMimetype() {
         assertEquals("others", fileTypeHelper.get(""));
         assertEquals("others", fileTypeHelper.get(" "));
     }
 
+    @Test
     public void test_get_withBlankFiletype() {
         fileTypeHelper.add("test/blank", "");
         assertEquals("others", fileTypeHelper.get("test/blank"));
@@ -76,10 +86,12 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("others", fileTypeHelper.get("test/null"));
     }
 
+    @Test
     public void test_getDefaultValue() {
         assertEquals("others", fileTypeHelper.getDefaultValue());
     }
 
+    @Test
     public void test_setDefaultValue() {
         fileTypeHelper.setDefaultValue("unknown");
         assertEquals("unknown", fileTypeHelper.getDefaultValue());
@@ -88,18 +100,21 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("unknown", fileTypeHelper.get("non/existent"));
     }
 
+    @Test
     public void test_setDefaultValue_withNull() {
         fileTypeHelper.setDefaultValue(null);
         assertNull(fileTypeHelper.getDefaultValue());
         assertNull(fileTypeHelper.get("non/existent"));
     }
 
+    @Test
     public void test_setDefaultValue_withEmpty() {
         fileTypeHelper.setDefaultValue("");
         assertEquals("", fileTypeHelper.getDefaultValue());
         assertEquals("", fileTypeHelper.get("non/existent"));
     }
 
+    @Test
     public void test_getTypes() {
         String[] types = fileTypeHelper.getTypes();
         assertNotNull(types);
@@ -118,6 +133,7 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("text", types[2]);
     }
 
+    @Test
     public void test_getTypes_withDuplicates() {
         fileTypeHelper.add("application/pdf", "document");
         fileTypeHelper.add("application/msword", "document");
@@ -131,12 +147,14 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("text", types[1]);
     }
 
+    @Test
     public void test_getTypes_empty() {
         String[] types = fileTypeHelper.getTypes();
         assertNotNull(types);
         assertEquals(0, types.length);
     }
 
+    @Test
     public void test_add_overwrite() {
         fileTypeHelper.add("application/pdf", "pdf");
         assertEquals("pdf", fileTypeHelper.get("application/pdf"));
@@ -145,21 +163,25 @@ public class FileTypeHelperTest extends UnitFessTestCase {
         assertEquals("document", fileTypeHelper.get("application/pdf"));
     }
 
+    @Test
     public void test_add_withNullMimetype() {
         fileTypeHelper.add(null, "test");
         assertEquals("test", fileTypeHelper.get(null));
     }
 
+    @Test
     public void test_add_withEmptyMimetype() {
         fileTypeHelper.add("", "empty");
         assertEquals("empty", fileTypeHelper.get(""));
     }
 
+    @Test
     public void test_add_withNullFiletype() {
         fileTypeHelper.add("test/null", null);
         assertEquals("others", fileTypeHelper.get("test/null"));
     }
 
+    @Test
     public void test_add_withEmptyFiletype() {
         fileTypeHelper.add("test/empty", "");
         assertEquals("others", fileTypeHelper.get("test/empty"));

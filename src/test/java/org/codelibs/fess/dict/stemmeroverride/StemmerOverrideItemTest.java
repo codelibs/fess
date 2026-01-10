@@ -16,9 +16,11 @@
 package org.codelibs.fess.dict.stemmeroverride;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class StemmerOverrideItemTest extends UnitFessTestCase {
 
+    @Test
     public void test_new1() {
         final StemmerOverrideItem stemmerOverrideItem = new StemmerOverrideItem(1, "aaa", "a");
         assertEquals(1, stemmerOverrideItem.getId());
@@ -40,6 +42,7 @@ public class StemmerOverrideItemTest extends UnitFessTestCase {
         assertTrue(stemmerOverrideItem.isDeleted());
     }
 
+    @Test
     public void test_equals1() {
         final StemmerOverrideItem stemmerOverrideItem1 = new StemmerOverrideItem(1, "aaa", "a");
 
@@ -51,6 +54,7 @@ public class StemmerOverrideItemTest extends UnitFessTestCase {
         assertFalse(stemmerOverrideItem1.equals(new StemmerOverrideItem(2, "aaa", "b")));
     }
 
+    @Test
     public void test_toLineString() {
         assertEquals("aaa=>a", new StemmerOverrideItem(1, "aaa", "a").toLineString());
         assertEquals("=>", new StemmerOverrideItem(1, "", "").toLineString());
