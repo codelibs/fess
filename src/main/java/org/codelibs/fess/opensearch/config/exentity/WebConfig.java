@@ -32,8 +32,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
-import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.http.config.WebAuthenticationConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.config.bsentity.BsWebConfig;
@@ -188,11 +188,11 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         }
 
         final List<WebAuthentication> webAuthList = webAuthenticationService.getWebAuthenticationList(getId());
-        final List<Authentication> basicAuthList = new ArrayList<>();
+        final List<WebAuthenticationConfig> authConfigList = new ArrayList<>();
         for (final WebAuthentication webAuth : webAuthList) {
-            basicAuthList.add(webAuth.getAuthentication());
+            authConfigList.add(webAuth.getWebAuthenticationConfig());
         }
-        paramMap.put(HcHttpClient.AUTHENTICATIONS_PROPERTY, basicAuthList.toArray(new Authentication[basicAuthList.size()]));
+        paramMap.put(HcHttpClient.AUTHENTICATIONS_PROPERTY, authConfigList.toArray(new WebAuthenticationConfig[authConfigList.size()]));
 
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
