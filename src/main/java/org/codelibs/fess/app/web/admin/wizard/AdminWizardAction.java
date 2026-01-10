@@ -216,7 +216,8 @@ public class AdminWizardAction extends FessAdminAction {
                     wConfig.setDepth(form.depth);
                 }
                 wConfig.setExcludedDocUrls(getDefaultString("default.config.web.excludedDocUrls", StringUtil.EMPTY));
-                wConfig.setExcludedUrls(getDefaultString("default.config.web.excludedUrls", StringUtil.EMPTY));
+                wConfig.setExcludedUrls(getDefaultString("default.config.web.excludedUrls",
+                        fessConfig.getCrawlerDocumentHtmlDefaultExcludeIndexPatterns()));
                 wConfig.setIncludedDocUrls(getDefaultString("default.config.web.includedDocUrls", StringUtil.EMPTY));
                 wConfig.setIncludedUrls(getDefaultString("default.config.web.includedUrls", StringUtil.EMPTY));
                 wConfig.setIntervalTime(getDefaultInteger("default.config.web.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
