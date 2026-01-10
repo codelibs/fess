@@ -15,26 +15,18 @@
  */
 package org.codelibs.fess.opensearch.config.exentity;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.auth.DigestScheme;
-import org.apache.http.impl.auth.NTLMScheme;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.WebConfigService;
-import org.codelibs.fess.crawler.client.http.Authentication;
-import org.codelibs.fess.crawler.client.http.form.FormScheme;
-import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
-import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
+import org.codelibs.fess.crawler.client.http.config.CredentialsConfig;
+import org.codelibs.fess.crawler.client.http.config.CredentialsConfig.CredentialsType;
+import org.codelibs.fess.crawler.client.http.config.WebAuthenticationConfig;
+import org.codelibs.fess.crawler.client.http.config.WebAuthenticationConfig.AuthSchemeType;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.opensearch.config.bsentity.BsWebAuthentication;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
@@ -53,76 +45,61 @@ public class WebAuthentication extends BsWebAuthentication {
 
     private WebConfig webConfig;
 
-    public Authentication getAuthentication() {
-        return new AuthenticationImpl(getAuthScope(), getCredentials(), getAuthScheme());
-    }
-
-    private AuthScheme getAuthScheme() {
-        final String scheme = getProtocolScheme();
-        if (Constants.BASIC.equals(scheme)) {
-            return new BasicScheme();
-        }
-        if (Constants.DIGEST.equals(scheme)) {
-            return new DigestScheme();
-        }
-        if (Constants.NTLM.equals(scheme)) {
-            final Properties props = new Properties();
-            getWebConfig().getConfigParameterMap(ConfigName.CONFIG)
-                    .entrySet()
-                    .stream()
-                    .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX))
-                    .forEach(e -> {
-                        props.setProperty(e.getKey(), e.getValue());
-                    });
-            return new NTLMScheme(new JcifsEngine(props));
-        }
-        if (Constants.FORM.equals(scheme)) {
-            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
-            return new FormScheme(parameterMap);
-        }
-        return null;
-    }
-
-    private AuthScope getAuthScope() {
-        if (StringUtil.isBlank(getHostname())) {
-            return AuthScope.ANY;
-        }
-
-        int p;
-        if (getPort() == null) {
-            p = AuthScope.ANY_PORT;
-        } else {
-            p = getPort();
-        }
-
-        String r = getAuthRealm();
-        if (StringUtil.isBlank(r)) {
-            r = AuthScope.ANY_REALM;
-        }
-
-        String s = getProtocolScheme();
-        if (StringUtil.isBlank(s) || Constants.NTLM.equals(s)) {
-            s = AuthScope.ANY_SCHEME;
-        }
-
-        return new AuthScope(getHostname(), p, r, s);
-    }
-
-    private Credentials getCredentials() {
+    public WebAuthenticationConfig getWebAuthenticationConfig() {
         if (StringUtil.isEmpty(getUsername())) {
             throw new CrawlerSystemException(
                     "Username is empty in WebAuthentication configuration. A valid username must be provided for authentication.");
         }
 
-        if (Constants.NTLM.equals(getProtocolScheme())) {
-            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
-            final String workstation = parameterMap.get("workstation");
-            final String domain = parameterMap.get("domain");
-            return new NTCredentials(getUsername(), getPassword(), workstation == null ? StringUtil.EMPTY : workstation,
-                    domain == null ? StringUtil.EMPTY : domain);
+        final WebAuthenticationConfig config = new WebAuthenticationConfig();
+
+        // host/port/realm: only set if not blank (null means "any" - AuthScope.ANY equivalent)
+        if (StringUtil.isNotBlank(getHostname())) {
+            config.setHost(getHostname());
+        }
+        if (getPort() != null) {
+            config.setPort(getPort());
+        }
+        if (StringUtil.isNotBlank(getAuthRealm())) {
+            config.setRealm(getAuthRealm());
         }
 
-        return new UsernamePasswordCredentials(getUsername(), getPassword() == null ? StringUtil.EMPTY : getPassword());
+        // AuthSchemeType の設定
+        final String scheme = getProtocolScheme();
+        if (Constants.BASIC.equals(scheme)) {
+            config.setAuthSchemeType(AuthSchemeType.BASIC);
+        } else if (Constants.DIGEST.equals(scheme)) {
+            config.setAuthSchemeType(AuthSchemeType.DIGEST);
+        } else if (Constants.NTLM.equals(scheme)) {
+            config.setAuthSchemeType(AuthSchemeType.NTLM);
+            // Pass jcifs.* properties via formParameters for NTLM configuration
+            final Map<String, String> jcifsParams = new HashMap<>();
+            getWebConfig().getConfigParameterMap(ConfigName.CONFIG)
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().startsWith(Config.JCIFS_PREFIX))
+                    .forEach(e -> jcifsParams.put(e.getKey(), e.getValue()));
+            if (!jcifsParams.isEmpty()) {
+                config.setNtlmParameters(jcifsParams);
+            }
+        } else if (Constants.FORM.equals(scheme)) {
+            config.setAuthSchemeType(AuthSchemeType.FORM);
+            config.setFormParameters(ParameterUtil.parse(getParameters()));
+        }
+
+        // Credentials の設定
+        final CredentialsConfig credentials = new CredentialsConfig();
+        credentials.setUsername(getUsername());
+        credentials.setPassword(getPassword() == null ? StringUtil.EMPTY : getPassword());
+        if (Constants.NTLM.equals(scheme)) {
+            credentials.setType(CredentialsType.NTLM);
+            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
+            credentials.setDomain(parameterMap.get("domain"));
+            credentials.setWorkstation(parameterMap.get("workstation"));
+        }
+        config.setCredentials(credentials);
+
+        return config;
     }
 
     public WebConfig getWebConfig() {
