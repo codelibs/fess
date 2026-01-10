@@ -37,6 +37,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ContentTypeUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
@@ -200,33 +201,9 @@ public class SearchEngineApiManager extends BaseApiManager {
      */
     protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         if (StringUtil.isNotBlank(path)) {
-            final String lowerPath = path.toLowerCase(Locale.ROOT);
-            if (lowerPath.endsWith(".html")) {
-                response.setContentType("text/html;charset=utf-8");
-            } else if (lowerPath.endsWith(".css")) {
-                response.setContentType("text/css");
-            } else if (lowerPath.endsWith(".eot")) {
-                response.setContentType("application/vnd.ms-fontobject");
-            } else if (lowerPath.endsWith(".ico")) {
-                response.setContentType("image/vnd.microsoft.icon");
-            } else if (lowerPath.endsWith(".js")) {
-                response.setContentType("text/javascript");
-            } else if (lowerPath.endsWith(".json")) {
-                response.setContentType("application/json");
-            } else if (lowerPath.endsWith(".otf")) {
-                response.setContentType("font/otf");
-            } else if (lowerPath.endsWith(".svg")) {
-                response.setContentType("image/svg+xml");
-            } else if (lowerPath.endsWith(".ttf")) {
-                response.setContentType("font/ttf");
-            } else if (lowerPath.endsWith(".txt")) {
-                response.setContentType("text/plain");
-            } else if (lowerPath.endsWith(".woff")) {
-                response.setContentType("font/woff");
-            } else if (lowerPath.endsWith(".woff2")) {
-                response.setContentType("font/woff2");
-            } else if (lowerPath.endsWith("/")) {
-                response.setContentType("text/html;charset=utf-8");
+            final String contentType = ContentTypeUtil.getContentType(path);
+            if (contentType != null) {
+                response.setContentType(contentType);
             }
         }
 
