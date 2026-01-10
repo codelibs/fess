@@ -33,7 +33,9 @@ public class WebAuthPagerTest extends UnitFessTestCase {
         assertEquals(25, webAuthPager.getPageSize());
         assertEquals(1, webAuthPager.getCurrentPageNumber());
         assertNull(webAuthPager.id);
-        assertNull(webAuthPager.hostname);
+        assertNull(webAuthPager.port);
+        assertNull(webAuthPager.username);
+        assertNull(webAuthPager.webConfigId);
         assertNull(webAuthPager.versionNo);
 
         webAuthPager.setAllRecordCount(999);
@@ -61,7 +63,9 @@ public class WebAuthPagerTest extends UnitFessTestCase {
     public void test_clear() {
         WebAuthPager webAuthPager = new WebAuthPager();
         webAuthPager.id = "testId";
-        webAuthPager.hostname = "test.example.com";
+        webAuthPager.port = "8080";
+        webAuthPager.username = "testUser";
+        webAuthPager.webConfigId = "webConfig1";
         webAuthPager.versionNo = "1";
         webAuthPager.setAllRecordCount(100);
         webAuthPager.setAllPageCount(10);
@@ -71,7 +75,9 @@ public class WebAuthPagerTest extends UnitFessTestCase {
         webAuthPager.clear();
 
         assertNull(webAuthPager.id);
-        assertNull(webAuthPager.hostname);
+        assertNull(webAuthPager.port);
+        assertNull(webAuthPager.username);
+        assertNull(webAuthPager.webConfigId);
         assertNull(webAuthPager.versionNo);
         assertEquals(0, webAuthPager.getAllRecordCount());
         assertEquals(0, webAuthPager.getAllPageCount());

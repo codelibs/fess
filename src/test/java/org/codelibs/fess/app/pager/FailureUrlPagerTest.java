@@ -34,7 +34,9 @@ public class FailureUrlPagerTest extends UnitFessTestCase {
         assertEquals(1, failureUrlPager.getCurrentPageNumber());
         assertNull(failureUrlPager.id);
         assertNull(failureUrlPager.url);
-        assertNull(failureUrlPager.versionNo);
+        assertNull(failureUrlPager.threadName);
+        assertNull(failureUrlPager.errorCount);
+        assertNull(failureUrlPager.errorName);
 
         failureUrlPager.setAllRecordCount(999);
         assertEquals(999, failureUrlPager.getAllRecordCount());
@@ -62,7 +64,9 @@ public class FailureUrlPagerTest extends UnitFessTestCase {
         FailureUrlPager failureUrlPager = new FailureUrlPager();
         failureUrlPager.id = "testId";
         failureUrlPager.url = "http://test.example.com";
-        failureUrlPager.versionNo = "1";
+        failureUrlPager.threadName = "crawler-1";
+        failureUrlPager.errorCount = "5";
+        failureUrlPager.errorName = "ConnectionTimeout";
         failureUrlPager.setAllRecordCount(100);
         failureUrlPager.setAllPageCount(10);
         failureUrlPager.setExistPrePage(true);
@@ -72,7 +76,9 @@ public class FailureUrlPagerTest extends UnitFessTestCase {
 
         assertNull(failureUrlPager.id);
         assertNull(failureUrlPager.url);
-        assertNull(failureUrlPager.versionNo);
+        assertNull(failureUrlPager.threadName);
+        assertNull(failureUrlPager.errorCount);
+        assertNull(failureUrlPager.errorName);
         assertEquals(0, failureUrlPager.getAllRecordCount());
         assertEquals(0, failureUrlPager.getAllPageCount());
         assertFalse(failureUrlPager.isExistPrePage());

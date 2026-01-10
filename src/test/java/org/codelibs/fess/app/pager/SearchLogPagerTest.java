@@ -32,9 +32,11 @@ public class SearchLogPagerTest extends UnitFessTestCase {
         assertEquals(false, searchLogPager.isExistNextPage());
         assertEquals(25, searchLogPager.getPageSize());
         assertEquals(1, searchLogPager.getCurrentPageNumber());
-        assertNull(searchLogPager.id);
-        assertNull(searchLogPager.searchWord);
-        assertNull(searchLogPager.versionNo);
+        assertNull(searchLogPager.queryId);
+        assertNull(searchLogPager.userSessionId);
+        assertNull(searchLogPager.requestedTimeRange);
+        assertNull(searchLogPager.accessType);
+        assertEquals(SearchLogPager.LOG_TYPE_SEARCH, searchLogPager.logType);
 
         searchLogPager.setAllRecordCount(999);
         assertEquals(999, searchLogPager.getAllRecordCount());
@@ -60,9 +62,11 @@ public class SearchLogPagerTest extends UnitFessTestCase {
 
     public void test_clear() {
         SearchLogPager searchLogPager = new SearchLogPager();
-        searchLogPager.id = "testId";
-        searchLogPager.searchWord = "testSearchWord";
-        searchLogPager.versionNo = "1";
+        searchLogPager.queryId = "testQueryId";
+        searchLogPager.userSessionId = "testSessionId";
+        searchLogPager.requestedTimeRange = "2025-01-01 00:00 - 2025-01-02 00:00";
+        searchLogPager.accessType = "web";
+        searchLogPager.logType = SearchLogPager.LOG_TYPE_CLICK;
         searchLogPager.setAllRecordCount(100);
         searchLogPager.setAllPageCount(10);
         searchLogPager.setExistPrePage(true);
@@ -70,12 +74,21 @@ public class SearchLogPagerTest extends UnitFessTestCase {
 
         searchLogPager.clear();
 
-        assertNull(searchLogPager.id);
-        assertNull(searchLogPager.searchWord);
-        assertNull(searchLogPager.versionNo);
+        assertNull(searchLogPager.queryId);
+        assertNull(searchLogPager.userSessionId);
+        assertNull(searchLogPager.requestedTimeRange);
+        assertNull(searchLogPager.accessType);
+        assertEquals(SearchLogPager.LOG_TYPE_SEARCH, searchLogPager.logType);
         assertEquals(0, searchLogPager.getAllRecordCount());
         assertEquals(0, searchLogPager.getAllPageCount());
         assertFalse(searchLogPager.isExistPrePage());
         assertFalse(searchLogPager.isExistNextPage());
+    }
+
+    public void test_logTypeConstants() {
+        assertEquals("search", SearchLogPager.LOG_TYPE_SEARCH);
+        assertEquals("click", SearchLogPager.LOG_TYPE_CLICK);
+        assertEquals("favorite", SearchLogPager.LOG_TYPE_FAVORITE);
+        assertEquals("user_info", SearchLogPager.LOG_TYPE_USERINFO);
     }
 }

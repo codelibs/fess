@@ -33,7 +33,9 @@ public class FileAuthPagerTest extends UnitFessTestCase {
         assertEquals(25, fileAuthPager.getPageSize());
         assertEquals(1, fileAuthPager.getCurrentPageNumber());
         assertNull(fileAuthPager.id);
-        assertNull(fileAuthPager.hostname);
+        assertNull(fileAuthPager.port);
+        assertNull(fileAuthPager.username);
+        assertNull(fileAuthPager.fileConfigId);
         assertNull(fileAuthPager.versionNo);
 
         fileAuthPager.setAllRecordCount(999);
@@ -61,7 +63,9 @@ public class FileAuthPagerTest extends UnitFessTestCase {
     public void test_clear() {
         FileAuthPager fileAuthPager = new FileAuthPager();
         fileAuthPager.id = "testId";
-        fileAuthPager.hostname = "test.example.com";
+        fileAuthPager.port = "445";
+        fileAuthPager.username = "testUser";
+        fileAuthPager.fileConfigId = "fileConfig1";
         fileAuthPager.versionNo = "1";
         fileAuthPager.setAllRecordCount(100);
         fileAuthPager.setAllPageCount(10);
@@ -71,7 +75,9 @@ public class FileAuthPagerTest extends UnitFessTestCase {
         fileAuthPager.clear();
 
         assertNull(fileAuthPager.id);
-        assertNull(fileAuthPager.hostname);
+        assertNull(fileAuthPager.port);
+        assertNull(fileAuthPager.username);
+        assertNull(fileAuthPager.fileConfigId);
         assertNull(fileAuthPager.versionNo);
         assertEquals(0, fileAuthPager.getAllRecordCount());
         assertEquals(0, fileAuthPager.getAllPageCount());

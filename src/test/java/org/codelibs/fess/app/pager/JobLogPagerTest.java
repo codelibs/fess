@@ -34,7 +34,9 @@ public class JobLogPagerTest extends UnitFessTestCase {
         assertEquals(1, jobLogPager.getCurrentPageNumber());
         assertNull(jobLogPager.id);
         assertNull(jobLogPager.jobName);
-        assertNull(jobLogPager.versionNo);
+        assertNull(jobLogPager.jobStatus);
+        assertNull(jobLogPager.target);
+        assertNull(jobLogPager.scriptType);
 
         jobLogPager.setAllRecordCount(999);
         assertEquals(999, jobLogPager.getAllRecordCount());
@@ -62,7 +64,9 @@ public class JobLogPagerTest extends UnitFessTestCase {
         JobLogPager jobLogPager = new JobLogPager();
         jobLogPager.id = "testId";
         jobLogPager.jobName = "testJobName";
-        jobLogPager.versionNo = "1";
+        jobLogPager.jobStatus = "running";
+        jobLogPager.target = "all";
+        jobLogPager.scriptType = "groovy";
         jobLogPager.setAllRecordCount(100);
         jobLogPager.setAllPageCount(10);
         jobLogPager.setExistPrePage(true);
@@ -72,7 +76,9 @@ public class JobLogPagerTest extends UnitFessTestCase {
 
         assertNull(jobLogPager.id);
         assertNull(jobLogPager.jobName);
-        assertNull(jobLogPager.versionNo);
+        assertNull(jobLogPager.jobStatus);
+        assertNull(jobLogPager.target);
+        assertNull(jobLogPager.scriptType);
         assertEquals(0, jobLogPager.getAllRecordCount());
         assertEquals(0, jobLogPager.getAllPageCount());
         assertFalse(jobLogPager.isExistPrePage());
