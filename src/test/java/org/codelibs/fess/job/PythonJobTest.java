@@ -38,6 +38,7 @@ import org.lastaflute.job.subsidiary.CronConsumer;
 
 import jakarta.servlet.ServletContext;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -72,6 +73,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();

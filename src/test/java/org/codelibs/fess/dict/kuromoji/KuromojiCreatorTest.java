@@ -16,6 +16,7 @@
 package org.codelibs.fess.dict.kuromoji;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -29,6 +30,7 @@ public class KuromojiCreatorTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         super.tearDown();
     }

@@ -40,6 +40,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.job.LaJobRuntime;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -158,6 +159,7 @@ public class ExecJobTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         FileUtils.deleteQuietly(tempDir);
 

@@ -28,6 +28,7 @@ import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -82,6 +83,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();

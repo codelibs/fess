@@ -20,6 +20,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.security.InvertibleCryptographer;
 import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -78,6 +79,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         if (originalFessConfig != null) {
             ComponentUtil.setFessConfig(originalFessConfig);

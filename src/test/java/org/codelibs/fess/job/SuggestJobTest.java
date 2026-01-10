@@ -35,6 +35,7 @@ import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 
 import jakarta.servlet.ServletContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -80,6 +81,7 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         // Clean up temp directory
         if (tempDir != null && tempDir.exists()) {

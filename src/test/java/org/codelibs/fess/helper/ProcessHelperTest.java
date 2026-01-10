@@ -25,6 +25,7 @@ import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.JobProcess;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -41,6 +42,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         // Clean up any running processes
         processHelper.destroy();

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +88,7 @@ public class DictTests extends CrudTestBase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() {
         // do nothing
     }

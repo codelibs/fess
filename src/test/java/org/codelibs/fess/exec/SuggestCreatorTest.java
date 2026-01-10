@@ -33,6 +33,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -49,6 +50,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         super.tearDown();
     }

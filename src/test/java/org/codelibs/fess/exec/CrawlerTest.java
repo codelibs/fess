@@ -53,6 +53,7 @@ import org.dbflute.mail.CardView;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -253,6 +254,7 @@ public class CrawlerTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         super.tearDown();
         // Clear static fields

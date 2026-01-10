@@ -59,6 +59,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.opensearch.action.search.SearchRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -124,6 +125,7 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         if (indexUpdater != null && indexUpdater.isAlive()) {
             indexUpdater.setFinishCrawling(true);

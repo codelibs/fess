@@ -34,6 +34,7 @@ import org.codelibs.fess.opensearch.config.cbean.ThumbnailQueueCB;
 import org.codelibs.fess.opensearch.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.opensearch.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -90,6 +91,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         if (thumbnailManager != null) {
             try {

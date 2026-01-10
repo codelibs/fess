@@ -36,6 +36,7 @@ import org.codelibs.curl.CurlResponse;
 import java.io.FileInputStream;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -129,6 +130,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         if (testFile != null && testFile.exists()) {
             testFile.delete();

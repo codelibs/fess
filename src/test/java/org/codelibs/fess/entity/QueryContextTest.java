@@ -36,6 +36,7 @@ import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.Filter
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.opensearch.search.sort.SortBuilder;
 import org.opensearch.search.sort.SortBuilders;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -65,6 +66,7 @@ public class QueryContextTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();

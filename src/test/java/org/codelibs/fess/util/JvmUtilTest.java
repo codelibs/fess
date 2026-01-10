@@ -16,6 +16,7 @@
 package org.codelibs.fess.util;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 public class JvmUtilTest extends UnitFessTestCase {
@@ -276,6 +277,7 @@ public class JvmUtilTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         // Restore original java.version property if it exists
         String originalVersion = System.getProperty("java.version");

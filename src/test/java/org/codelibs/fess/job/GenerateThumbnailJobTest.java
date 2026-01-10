@@ -36,6 +36,7 @@ import org.codelibs.fess.util.JobProcess;
 
 import jakarta.servlet.ServletContext;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -80,6 +81,7 @@ public class GenerateThumbnailJobTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);

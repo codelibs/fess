@@ -43,6 +43,7 @@ import org.dbflute.cbean.result.PagingResultBean;
 
 import jakarta.servlet.ServletContext;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -73,6 +74,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         super.tearDown();
     }
