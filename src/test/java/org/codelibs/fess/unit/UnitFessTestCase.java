@@ -18,6 +18,7 @@ package org.codelibs.fess.unit;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.lastaflute.WebContainerTestCase;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 
 public abstract class UnitFessTestCase extends WebContainerTestCase {
     @Override
@@ -30,5 +31,57 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
+    }
+
+    @Override
+    protected boolean isAssertionEqualsNumberInsensitive() {
+        return true;
+    }
+
+    // ===== Assert methods for JUnit 5 compatibility =====
+
+    // fail with message
+    protected void fail(String message) {
+        Assertions.fail(message);
+    }
+
+    // assertTrue - JUnit 4 style (message first)
+    protected void assertTrue(String message, boolean condition) {
+        Assertions.assertTrue(condition, message);
+    }
+
+    // assertTrue - JUnit 5 style (message last)
+    protected void assertTrue(boolean condition, String message) {
+        Assertions.assertTrue(condition, message);
+    }
+
+    // assertFalse - JUnit 4 style (message first)
+    protected void assertFalse(String message, boolean condition) {
+        Assertions.assertFalse(condition, message);
+    }
+
+    // assertFalse - JUnit 5 style (message last)
+    protected void assertFalse(boolean condition, String message) {
+        Assertions.assertFalse(condition, message);
+    }
+
+    // assertNull - JUnit 5 style only (to avoid ambiguity with String actual)
+    protected void assertNull(Object actual, String message) {
+        Assertions.assertNull(actual, message);
+    }
+
+    // assertNotNull - JUnit 5 style only (to avoid ambiguity with String actual)
+    protected void assertNotNull(Object actual, String message) {
+        Assertions.assertNotNull(actual, message);
+    }
+
+    // assertEquals - JUnit 4 style (message first) - Object version
+    protected void assertEquals(String message, Object expected, Object actual) {
+        Assertions.assertEquals(expected, actual, message);
+    }
+
+    // assertEquals - JUnit 4 style (message first) - int version
+    protected void assertEquals(String message, int expected, int actual) {
+        Assertions.assertEquals(expected, actual, message);
     }
 }
