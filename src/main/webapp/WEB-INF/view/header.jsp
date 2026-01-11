@@ -77,6 +77,13 @@
 								</la:link></li>
 						</c:when>
 					</c:choose>
+					<c:if test="${chatEnabled}">
+						<li class="nav-item"><la:link href="/chat" styleClass="nav-link" role="button" aria-haspopup="true"
+								aria-expanded="false">
+								<i class="fa fa-fw fa-robot" aria-hidden="true"></i>
+								<span><la:message key="labels.chat_ai_mode" /></span>
+							</la:link></li>
+					</c:if>
 					<li class="nav-item"><la:link href="/help" styleClass="nav-link" role="help" aria-haspopup="true"
 							aria-expanded="false">
 							<i class="fa fa-fw fa-question-circle" aria-hidden="true"></i>

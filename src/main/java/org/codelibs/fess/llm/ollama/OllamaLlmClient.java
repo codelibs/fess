@@ -1,0 +1,355 @@
+/*
+ * Copyright 2012-2025 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.llm.ollama;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.llm.LlmChatRequest;
+import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmClient;
+import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmMessage;
+import org.codelibs.fess.llm.LlmStreamCallback;
+import org.codelibs.fess.util.ComponentUtil;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+/**
+ * LLM client implementation for Ollama.
+ *
+ * Ollama provides a local LLM server that can run various models
+ * like Llama, Mistral, etc. on your own hardware.
+ *
+ * @see <a href="https://ollama.ai/">Ollama</a>
+ */
+public class OllamaLlmClient implements LlmClient {
+
+    private static final Logger logger = LogManager.getLogger(OllamaLlmClient.class);
+    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
+    private static final String NAME = "ollama";
+
+    private OkHttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * Default constructor.
+     */
+    public OllamaLlmClient() {
+        // Default constructor
+    }
+
+    /**
+     * Initializes the HTTP client.
+     */
+    public void init() {
+        final int timeout = getTimeout();
+        httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
+                .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+                .build();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialized OllamaLlmClient with timeout: {}ms", timeout);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        final String apiUrl = getApiUrl();
+        if (StringUtil.isBlank(apiUrl)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ollama is not available. apiUrl is blank");
+            }
+            return false;
+        }
+        try {
+            final Request request = new Request.Builder().url(apiUrl + "/api/tags").get().build();
+            try (Response response = getHttpClient().newCall(request).execute()) {
+                final boolean available = response.isSuccessful();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Ollama availability check. url={}, statusCode={}, available={}", apiUrl, response.code(), available);
+                }
+                return available;
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ollama is not available. url={}, error={}", apiUrl, e.getMessage());
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public LlmChatResponse chat(final LlmChatRequest request) {
+        final String url = getApiUrl() + "/api/chat";
+        final Map<String, Object> requestBody = buildRequestBody(request, false);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending chat request to Ollama. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+                    request.getMessages().size());
+        }
+
+        try {
+            final String json = objectMapper.writeValueAsString(requestBody);
+            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE)).build();
+
+            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    logger.warn("Ollama API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    throw new LlmException("Ollama API error: " + response.code() + " " + response.message());
+                }
+
+                final String responseBody = response.body() != null ? response.body().string() : "";
+                final JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+                final LlmChatResponse chatResponse = new LlmChatResponse();
+                if (jsonNode.has("message") && jsonNode.get("message").has("content")) {
+                    chatResponse.setContent(jsonNode.get("message").get("content").asText());
+                }
+                if (jsonNode.has("done_reason")) {
+                    chatResponse.setFinishReason(jsonNode.get("done_reason").asText());
+                }
+                if (jsonNode.has("model")) {
+                    chatResponse.setModel(jsonNode.get("model").asText());
+                }
+                if (jsonNode.has("prompt_eval_count")) {
+                    chatResponse.setPromptTokens(jsonNode.get("prompt_eval_count").asInt());
+                }
+                if (jsonNode.has("eval_count")) {
+                    chatResponse.setCompletionTokens(jsonNode.get("eval_count").asInt());
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Received chat response from Ollama. model={}, promptTokens={}, completionTokens={}, contentLength={}",
+                            chatResponse.getModel(), chatResponse.getPromptTokens(), chatResponse.getCompletionTokens(),
+                            chatResponse.getContent() != null ? chatResponse.getContent().length() : 0);
+                }
+
+                return chatResponse;
+            }
+        } catch (final LlmException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("Failed to call Ollama API. url={}, error={}", url, e.getMessage(), e);
+            throw new LlmException("Failed to call Ollama API", e);
+        }
+    }
+
+    @Override
+    public void streamChat(final LlmChatRequest request, final LlmStreamCallback callback) {
+        final String url = getApiUrl() + "/api/chat";
+        final Map<String, Object> requestBody = buildRequestBody(request, true);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting streaming chat request to Ollama. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+                    request.getMessages().size());
+        }
+
+        try {
+            final String json = objectMapper.writeValueAsString(requestBody);
+            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE)).build();
+
+            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    logger.warn("Ollama streaming API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    throw new LlmException("Ollama API error: " + response.code() + " " + response.message());
+                }
+
+                if (response.body() == null) {
+                    logger.warn("Empty response from Ollama streaming API. url={}", url);
+                    throw new LlmException("Empty response from Ollama");
+                }
+
+                int chunkCount = 0;
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (StringUtil.isBlank(line)) {
+                            continue;
+                        }
+                        try {
+                            final JsonNode jsonNode = objectMapper.readTree(line);
+                            final boolean done = jsonNode.has("done") && jsonNode.get("done").asBoolean();
+
+                            if (jsonNode.has("message") && jsonNode.get("message").has("content")) {
+                                final String content = jsonNode.get("message").get("content").asText();
+                                callback.onChunk(content, done);
+                                chunkCount++;
+                            } else if (done) {
+                                callback.onChunk("", true);
+                            }
+
+                            if (done) {
+                                break;
+                            }
+                        } catch (final JsonProcessingException e) {
+                            logger.warn("Failed to parse Ollama streaming response. line={}", line, e);
+                        }
+                    }
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Completed streaming chat from Ollama. url={}, chunkCount={}", url, chunkCount);
+                }
+            }
+        } catch (final LlmException e) {
+            callback.onError(e);
+            throw e;
+        } catch (final IOException e) {
+            logger.warn("Failed to stream from Ollama API. url={}, error={}", url, e.getMessage(), e);
+            final LlmException llmException = new LlmException("Failed to stream from Ollama API", e);
+            callback.onError(llmException);
+            throw llmException;
+        }
+    }
+
+    /**
+     * Builds the request body for the Ollama API.
+     *
+     * @param request the chat request
+     * @param stream whether to enable streaming
+     * @return the request body as a map
+     */
+    protected Map<String, Object> buildRequestBody(final LlmChatRequest request, final boolean stream) {
+        final Map<String, Object> body = new HashMap<>();
+
+        // Model
+        String model = request.getModel();
+        if (StringUtil.isBlank(model)) {
+            model = getModel();
+        }
+        body.put("model", model);
+
+        // Messages
+        final List<Map<String, String>> messages = request.getMessages().stream().map(this::convertMessage).collect(Collectors.toList());
+        body.put("messages", messages);
+
+        // Stream
+        body.put("stream", stream);
+
+        // Options
+        final Map<String, Object> options = new HashMap<>();
+        if (request.getTemperature() != null) {
+            options.put("temperature", request.getTemperature());
+        } else {
+            options.put("temperature", getTemperature());
+        }
+        if (request.getMaxTokens() != null) {
+            options.put("num_predict", request.getMaxTokens());
+        } else {
+            options.put("num_predict", getMaxTokens());
+        }
+        if (!options.isEmpty()) {
+            body.put("options", options);
+        }
+
+        return body;
+    }
+
+    /**
+     * Converts an LlmMessage to a map for the API request.
+     *
+     * @param message the message to convert
+     * @return the message as a map
+     */
+    protected Map<String, String> convertMessage(final LlmMessage message) {
+        final Map<String, String> map = new HashMap<>();
+        map.put("role", message.getRole());
+        map.put("content", message.getContent());
+        return map;
+    }
+
+    /**
+     * Gets the HTTP client, initializing it if necessary.
+     *
+     * @return the HTTP client
+     */
+    protected OkHttpClient getHttpClient() {
+        if (httpClient == null) {
+            init();
+        }
+        return httpClient;
+    }
+
+    /**
+     * Gets the Ollama API URL.
+     *
+     * @return the API URL
+     */
+    protected String getApiUrl() {
+        return ComponentUtil.getFessConfig().getRagLlmOllamaApiUrl();
+    }
+
+    /**
+     * Gets the Ollama model name.
+     *
+     * @return the model name
+     */
+    protected String getModel() {
+        return ComponentUtil.getFessConfig().getRagLlmOllamaModel();
+    }
+
+    /**
+     * Gets the request timeout in milliseconds.
+     *
+     * @return the timeout in milliseconds
+     */
+    protected int getTimeout() {
+        return ComponentUtil.getFessConfig().getRagLlmOllamaTimeoutAsInteger();
+    }
+
+    /**
+     * Gets the temperature parameter.
+     *
+     * @return the temperature
+     */
+    protected double getTemperature() {
+        return ComponentUtil.getFessConfig().getRagChatTemperatureAsDecimal().doubleValue();
+    }
+
+    /**
+     * Gets the maximum tokens for the response.
+     *
+     * @return the maximum tokens
+     */
+    protected int getMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
+    }
+}

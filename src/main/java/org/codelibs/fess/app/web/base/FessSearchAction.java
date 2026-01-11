@@ -39,6 +39,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
+import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.LoginManager;
@@ -106,6 +107,10 @@ public abstract class FessSearchAction extends FessBaseAction {
     /** Helper for managing popular search words and suggestions. */
     @Resource
     protected PopularWordHelper popularWordHelper;
+
+    /** Client for RAG chat functionality. */
+    @Resource
+    protected ChatClient chatClient;
 
     /** The HTTP servlet request object for the current request. */
     @Resource
@@ -191,6 +196,7 @@ public abstract class FessSearchAction extends FessBaseAction {
                         .orElse(false));
 
         runtime.registerData("pageLoginLink", fessConfig.isLoginLinkEnabled());
+        runtime.registerData("chatEnabled", chatClient.isAvailable());
     }
 
     // ===================================================================================

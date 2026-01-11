@@ -12,4 +12,6 @@
 	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">
 	</component>
 
+	<component name="chatApiManager" class="org.codelibs.fess.api.chat.ChatApiManager">
+	</component>
 </components>

@@ -8,6 +8,7 @@
 	<include path="esflute_config.xml"/>
 	<include path="esflute_user.xml"/>
 	<include path="esflute_log.xml"/>
+	<include path="fess_llm.xml"/>
 
 	<component name="curlHelper" class="org.codelibs.fess.helper.CurlHelper">
 	</component>
