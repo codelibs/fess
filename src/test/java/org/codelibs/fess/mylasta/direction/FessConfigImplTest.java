@@ -19,14 +19,19 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessConfigImplTest extends UnitFessTestCase {
 
     private FessConfigImpl fessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create FessConfigImpl with overridden get method for testing
         fessConfig = new FessConfigImpl() {
@@ -61,12 +66,14 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test basic property retrieval
+    @Test
     public void test_get_basicProperty() {
         // Test getting a property from the config
         String value = fessConfig.get("domain.title");
@@ -78,6 +85,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test system property override
+    @Test
     public void test_get_systemPropertyOverride() {
         // Set system property that should override config
         String testKey = "test.property";
@@ -95,6 +103,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test caching mechanism
+    @Test
     public void test_get_caching() {
         // Get property twice to test caching behavior
         String testKey = "domain.title";
@@ -107,6 +116,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test property that should be consistent
+    @Test
     public void test_get_propertyFilter() {
         // Test a regular property that passes through
         String value = fessConfig.get("domain.title");
@@ -114,6 +124,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test null property handling
+    @Test
     public void test_get_nullProperty() {
         // Test getting non-existent property
         try {
@@ -126,6 +137,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test system property without prefix
+    @Test
     public void test_get_systemPropertyWithoutPrefix() {
         // Set system property without FESS_CONFIG_PREFIX
         String testKey = "test.property";
@@ -144,6 +156,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test multiple gets with different keys
+    @Test
     public void test_get_multipleKeys() {
         // Test getting multiple different properties
         String value1 = fessConfig.get("domain.title");
@@ -155,6 +168,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test empty string property value
+    @Test
     public void test_get_emptyStringValue() {
         String testKey = "empty.property";
         System.setProperty(Constants.FESS_CONFIG_PREFIX + testKey, "");
@@ -169,6 +183,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test property filter returning null simulation
+    @Test
     public void test_get_filterReturnsNull() {
         // The filter.null property is configured to simulate null filter behavior
         try {
@@ -181,6 +196,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test concurrent access
+    @Test
     public void test_get_concurrentAccess() throws InterruptedException {
         // Create multiple threads accessing the same property
         final String testKey = "domain.title";
@@ -213,6 +229,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test with non-existent config
+    @Test
     public void test_initialize_invalidConfigFile() {
         // Test getting a property that doesn't exist
         FessConfigImpl invalidConfig = new FessConfigImpl() {
@@ -234,6 +251,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test special characters in property values
+    @Test
     public void test_get_specialCharacters() {
         String testKey = "special.chars";
         String specialValue = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
@@ -249,6 +267,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test property with spaces
+    @Test
     public void test_get_propertyWithSpaces() {
         String testKey = "property.with.spaces";
         String valueWithSpaces = "  value with spaces  ";
@@ -264,6 +283,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test cache behavior with system property changes
+    @Test
     public void test_get_cacheAfterSystemPropertyChange() {
         String testKey = "cache.test";
         String initialValue = "initial";
@@ -290,6 +310,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test getting numeric configuration values
+    @Test
     public void test_get_numericValues() {
         String intKey = "numeric.int";
         String floatKey = "numeric.float";
@@ -310,6 +331,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test getting boolean configuration values
+    @Test
     public void test_get_booleanValues() {
         String trueKey = "boolean.true";
         String falseKey = "boolean.false";
@@ -330,6 +352,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test getting array-like configuration values
+    @Test
     public void test_get_arrayValues() {
         String arrayKey = "array.values";
         String arrayValue = "value1,value2,value3";
@@ -345,6 +368,7 @@ public class FessConfigImplTest extends UnitFessTestCase {
     }
 
     // Test property key with dots
+    @Test
     public void test_get_propertyKeyWithDots() {
         String dottedKey = "deeply.nested.property.key";
         String dottedValue = "nested-value";

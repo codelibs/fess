@@ -41,26 +41,33 @@ import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class WebApiRequestTest extends UnitFessTestCase {
 
     private WebApiRequest webApiRequest;
     private MockHttpServletRequest mockRequest;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         mockRequest = new MockHttpServletRequest();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         webApiRequest = null;
         mockRequest = null;
         super.tearDown();
     }
 
     // Test constructor with various servlet path values
+    @Test
     public void test_constructor_withNormalServletPath() {
         final String servletPath = "/api/v1/search";
         webApiRequest = new WebApiRequest(mockRequest, servletPath);
@@ -68,6 +75,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(servletPath, webApiRequest.servletPath);
     }
 
+    @Test
     public void test_constructor_withEmptyServletPath() {
         final String servletPath = "";
         webApiRequest = new WebApiRequest(mockRequest, servletPath);
@@ -75,6 +83,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(servletPath, webApiRequest.servletPath);
     }
 
+    @Test
     public void test_constructor_withNullServletPath() {
         final String servletPath = null;
         webApiRequest = new WebApiRequest(mockRequest, servletPath);
@@ -82,6 +91,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertNull(webApiRequest.servletPath);
     }
 
+    @Test
     public void test_constructor_withSpecialCharactersInPath() {
         final String servletPath = "/api/v1/search?query=test&page=1";
         webApiRequest = new WebApiRequest(mockRequest, servletPath);
@@ -90,6 +100,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test getServletPath method without SAStruts.method in query string
+    @Test
     public void test_getServletPath_withoutSAStrutsMethod_returnsCustomPath() {
         final String customPath = "/api/v1/search";
         mockRequest.setQueryString("query=test&page=1");
@@ -98,6 +109,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(customPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withNullQueryString_returnsCustomPath() {
         final String customPath = "/api/v1/documents";
         mockRequest.setQueryString(null);
@@ -106,6 +118,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(customPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withEmptyQueryString_returnsCustomPath() {
         final String customPath = "/api/v1/users";
         mockRequest.setQueryString("");
@@ -115,6 +128,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test getServletPath method with SAStruts.method in query string
+    @Test
     public void test_getServletPath_withSAStrutsMethodAtBeginning_returnsSuperPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -125,6 +139,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(originalPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withSAStrutsMethodInMiddle_returnsSuperPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -135,6 +150,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(originalPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withSAStrutsMethodAtEnd_returnsSuperPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -145,6 +161,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(originalPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withOnlySAStrutsMethod_returnsSuperPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -156,6 +173,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test edge cases for SAStruts.method detection
+    @Test
     public void test_getServletPath_withSAStrutsMethodSubstring_returnsSuperPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -168,6 +186,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
         assertEquals(originalPath, webApiRequest.getServletPath());
     }
 
+    @Test
     public void test_getServletPath_withPartialSAStrutsMethod_returnsCustomPath() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/search";
@@ -180,6 +199,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test wrapper functionality inheritance
+    @Test
     public void test_inheritedMethods_areProperlyDelegated() {
         final String customPath = "/api/v1/test";
         final String testHeader = "X-Test-Header";
@@ -198,6 +218,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test multiple calls to getServletPath
+    @Test
     public void test_getServletPath_multipleCallsReturnSameResult() {
         final String customPath = "/api/v1/consistent";
         mockRequest.setQueryString("query=test");
@@ -213,6 +234,7 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     // Test with changing query string (though typically wouldn't change in real scenario)
+    @Test
     public void test_getServletPath_withChangingQueryString() {
         final String originalPath = "/original/path";
         final String customPath = "/api/v1/dynamic";

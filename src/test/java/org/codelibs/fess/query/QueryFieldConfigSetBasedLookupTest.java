@@ -18,6 +18,11 @@ package org.codelibs.fess.query;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for Set-based field lookup improvements in QueryFieldConfig.
@@ -28,9 +33,10 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
 
     private QueryFieldConfig queryFieldConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         FessConfig fessConfig = createTestFessConfig();
         ComponentUtil.setFessConfig(fessConfig);
@@ -39,7 +45,8 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
@@ -47,6 +54,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that setting search fields creates both array and Set.
      */
+    @Test
     public void test_setSearchFields_createsSet() {
         String[] fields = { "field1", "field2", "field3" };
         queryFieldConfig.setSearchFields(fields);
@@ -67,6 +75,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that setting facet fields creates both array and Set.
      */
+    @Test
     public void test_setFacetFields_createsSet() {
         String[] fields = { "facet1", "facet2", "facet3" };
         queryFieldConfig.setFacetFields(fields);
@@ -87,6 +96,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that setting sort fields creates both array and Set.
      */
+    @Test
     public void test_setSortFields_createsSet() {
         String[] fields = { "sort1", "sort2", "sort3" };
         queryFieldConfig.setSortFields(fields);
@@ -108,6 +118,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
      * Test isSortField with empty array - should return false, not throw exception.
      * This test addresses the Copilot AI concern about empty arrays.
      */
+    @Test
     public void test_isSortField_withEmptyArray_returnsFalse() {
         String[] emptyFields = {};
         queryFieldConfig.setSortFields(emptyFields);
@@ -126,6 +137,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
      * Test isFacetField with empty array - should return false, not throw exception.
      * This test addresses the Copilot AI concern about empty arrays.
      */
+    @Test
     public void test_isFacetField_withEmptyArray_returnsFalse() {
         String[] emptyFields = {};
         queryFieldConfig.setFacetFields(emptyFields);
@@ -144,6 +156,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that isSortField correctly handles null sortFieldSet.
      */
+    @Test
     public void test_isSortField_withNullSet_returnsFalse() {
         queryFieldConfig.sortFieldSet = null;
 
@@ -155,6 +168,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that isFacetField correctly handles null facetFieldSet.
      */
+    @Test
     public void test_isFacetField_withNullSet_returnsFalse() {
         queryFieldConfig.facetFieldSet = null;
 
@@ -166,6 +180,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that init() creates Sets when arrays are initialized.
      */
+    @Test
     public void test_init_createsSets() {
         queryFieldConfig.init();
 
@@ -195,6 +210,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
      * Test that Set lookup behavior is identical to original array-based lookup.
      * This ensures backward compatibility.
      */
+    @Test
     public void test_isSortField_behaviourIdenticalToArrayLookup() {
         String[] fields = { "score", "created", "modified" };
         queryFieldConfig.setSortFields(fields);
@@ -214,6 +230,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that Set lookup behavior is identical to original array-based lookup for facet fields.
      */
+    @Test
     public void test_isFacetField_behaviourIdenticalToArrayLookup() {
         String[] fields = { "category", "type", "author" };
         queryFieldConfig.setFacetFields(fields);
@@ -235,6 +252,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that updating fields via setter updates both array and Set.
      */
+    @Test
     public void test_updateFields_updatesSetAndArray() {
         // Initial setup
         String[] initialFields = { "field1", "field2" };
@@ -264,6 +282,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
     /**
      * Test that Sets handle duplicate values correctly (deduplication).
      */
+    @Test
     public void test_setFields_withDuplicates_deduplicatesInSet() {
         String[] fieldsWithDuplicates = { "field1", "field2", "field1", "field3", "field2" };
         queryFieldConfig.setSearchFields(fieldsWithDuplicates);
@@ -282,6 +301,7 @@ public class QueryFieldConfigSetBasedLookupTest extends UnitFessTestCase {
      * Test performance improvement of Set-based lookup over array-based lookup.
      * This is a micro-benchmark to demonstrate the O(1) vs O(n) improvement.
      */
+    @Test
     public void test_lookupPerformance_SetFasterThanArray() {
         // Create a large array of fields
         int fieldCount = 1000;

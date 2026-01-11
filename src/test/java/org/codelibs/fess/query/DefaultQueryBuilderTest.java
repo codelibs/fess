@@ -17,8 +17,10 @@ package org.codelibs.fess.query;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.opensearch.index.query.QueryBuilders;
+import org.junit.jupiter.api.Test;
 
 public class DefaultQueryBuilderTest extends UnitFessTestCase {
+    @Test
     public void test_invalid_null() {
         try {
             new DefaultQueryBuilder(null);
@@ -28,6 +30,7 @@ public class DefaultQueryBuilderTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_invalid_query() {
         try {
             new DefaultQueryBuilder(QueryBuilders.matchAllQuery());

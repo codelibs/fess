@@ -24,19 +24,24 @@ import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.job.LaCron;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class JobHelperTest extends UnitFessTestCase {
 
     private JobHelper jobHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         jobHelper = new JobHelper();
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         ComponentUtil.register(new MockJobLogBhv(), JobLogBhv.class.getCanonicalName());
     }
 
+    @Test
     public void test_register_with_null_scheduledJob() {
         try {
             jobHelper.register((ScheduledJob) null);
@@ -49,6 +54,7 @@ public class JobHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_register_with_cron_null_scheduledJob() {
         try {
             LaCron mockCron = new MockLaCron();
@@ -62,6 +68,7 @@ public class JobHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setMonitorInterval() {
         jobHelper.setMonitorInterval(3600);
         assertEquals(3600, jobHelper.monitorInterval);
@@ -70,10 +77,12 @@ public class JobHelperTest extends UnitFessTestCase {
         assertEquals(1800, jobHelper.monitorInterval);
     }
 
+    @Test
     public void test_getJobRuntime_null() {
         assertNull(jobHelper.getJobRuntime());
     }
 
+    @Test
     public void test_monitorTarget_expired_withoutEndTime() {
         JobLog jobLog = new JobLog();
         jobLog.setId("test-log-1");
@@ -91,6 +100,7 @@ public class JobHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_monitorTarget_expired_withEndTime() {
         JobLog jobLog = new JobLog();
         jobLog.setId("test-log-2");
@@ -107,6 +117,7 @@ public class JobHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_startMonitorTask() {
         JobLog jobLog = new JobLog();
         jobLog.setId("test-log-3");
@@ -116,11 +127,13 @@ public class JobHelperTest extends UnitFessTestCase {
         assertNotNull(task);
     }
 
+    @Test
     public void test_monitorInterval_defaultValue() {
         JobHelper helper = new JobHelper();
         assertEquals(3600, helper.monitorInterval); // Default 1 hour
     }
 
+    @Test
     public void test_monitorTarget_constructor() {
         JobLog jobLog = new JobLog();
         jobLog.setId("test-log-4");

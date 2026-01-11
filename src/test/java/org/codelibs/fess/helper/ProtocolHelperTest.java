@@ -18,8 +18,10 @@ package org.codelibs.fess.helper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
 
 public class ProtocolHelperTest extends UnitFessTestCase {
+    @Test
     public void test_add_httpx() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -60,6 +62,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(2, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_add_smbx() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -100,6 +103,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(3, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_loadProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
         protocolHelper.loadProtocols("org.codelibs.fess.test.net.protocol");
@@ -108,6 +112,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(1, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_init_emptyProtocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -128,6 +133,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(0, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_init_nullProtocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -148,6 +154,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(0, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_init_withSpaces() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -174,6 +181,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals("smb:", protocolHelper.getFileProtocols()[1]);
     }
 
+    @Test
     public void test_init_withBlankEntries() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -200,6 +208,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals("smb:", protocolHelper.getFileProtocols()[1]);
     }
 
+    @Test
     public void test_isValidWebProtocol_validUrls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -223,6 +232,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidWebProtocol("https://test.local/path"));
     }
 
+    @Test
     public void test_isValidWebProtocol_invalidUrls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -248,6 +258,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertFalse(protocolHelper.isValidWebProtocol("xyz"));
     }
 
+    @Test
     public void test_isValidFileProtocol_validUrls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -270,6 +281,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("file://"));
     }
 
+    @Test
     public void test_isValidFileProtocol_invalidUrls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -295,6 +307,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertFalse(protocolHelper.isValidFileProtocol("xyz"));
     }
 
+    @Test
     public void test_addWebProtocol_newProtocol() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -320,6 +333,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidWebProtocol("https://example.com"));
     }
 
+    @Test
     public void test_addWebProtocol_duplicateProtocol() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -345,6 +359,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(2, protocolHelper.getWebProtocols().length); // Should not increase
     }
 
+    @Test
     public void test_addFileProtocol_newProtocol() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -370,6 +385,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("smb://server/share"));
     }
 
+    @Test
     public void test_addFileProtocol_duplicateProtocol() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -395,6 +411,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(2, protocolHelper.getFileProtocols().length); // Should not increase
     }
 
+    @Test
     public void test_addWebProtocol_emptyString() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -417,6 +434,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(":", protocolHelper.getWebProtocols()[originalLength]);
     }
 
+    @Test
     public void test_addFileProtocol_emptyString() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -439,6 +457,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(":", protocolHelper.getFileProtocols()[originalLength]);
     }
 
+    @Test
     public void test_loadProtocols_invalidPackage() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -450,6 +469,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(0, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_loadProtocols_emptyPackage() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -460,6 +480,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(0, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_isValidWebProtocol_nullUrl() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -485,6 +506,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isValidFileProtocol_nullUrl() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -510,6 +532,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getProtocols_arrayImmutability() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -539,6 +562,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals("smb:", fileProtocols[1]);
     }
 
+    @Test
     public void test_multipleAddProtocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -572,6 +596,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("nfs://server/path"));
     }
 
+    @Test
     public void test_s3_gcs_protocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -603,6 +628,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertFalse(protocolHelper.isValidWebProtocol("gcs://bucket/path"));
     }
 
+    @Test
     public void test_s3_gcs_protocols_add_dynamically() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -636,6 +662,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertEquals(4, protocolHelper.getFileProtocols().length);
     }
 
+    @Test
     public void test_s3_gcs_protocols_various_urls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -673,6 +700,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isValidFileProtocol("gcs://bucket/path/file%20with%20spaces.txt"));
     }
 
+    @Test
     public void test_s3_gcs_protocols_invalid_urls() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -700,6 +728,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertFalse(protocolHelper.isValidFileProtocol("gcss://bucket/path")); // similar but not gcs
     }
 
+    @Test
     public void test_all_file_protocols_together() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -732,6 +761,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertFalse(protocolHelper.isValidFileProtocol("https://example.com"));
     }
 
+    @Test
     public void test_specialCharactersInProtocols() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -766,6 +796,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
     //                                                              isFilePathProtocol Tests
     //                                                              =========================
 
+    @Test
     public void test_isFilePathProtocol_validProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -778,6 +809,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isFilePathProtocol("gcs://bucket/path"));
     }
 
+    @Test
     public void test_isFilePathProtocol_invalidProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -793,6 +825,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
     //                                                              isFileSystemPath Tests
     //                                                              =======================
 
+    @Test
     public void test_isFileSystemPath_validProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -806,6 +839,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.isFileSystemPath("gcs://bucket/path"));
     }
 
+    @Test
     public void test_isFileSystemPath_invalidProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -821,6 +855,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
     //                                                              shouldSkipUrlDecode Tests
     //                                                              ==========================
 
+    @Test
     public void test_shouldSkipUrlDecode_skipProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -831,6 +866,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.shouldSkipUrlDecode("gcs://bucket/path"));
     }
 
+    @Test
     public void test_shouldSkipUrlDecode_decodeProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -846,6 +882,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
     //                                                              hasKnownProtocol Tests
     //                                                              =======================
 
+    @Test
     public void test_hasKnownProtocol_knownProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 
@@ -859,6 +896,7 @@ public class ProtocolHelperTest extends UnitFessTestCase {
         assertTrue(protocolHelper.hasKnownProtocol("gcs://bucket/path"));
     }
 
+    @Test
     public void test_hasKnownProtocol_unknownProtocols() {
         final ProtocolHelper protocolHelper = new ProtocolHelper();
 

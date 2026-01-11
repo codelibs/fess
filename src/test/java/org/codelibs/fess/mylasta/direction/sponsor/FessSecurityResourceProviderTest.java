@@ -18,6 +18,11 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.core.security.InvertibleCryptographer;
 import org.lastaflute.core.security.OneWayCryptographer;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessSecurityResourceProviderTest extends UnitFessTestCase {
 
@@ -25,9 +30,10 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     private InvertibleCryptographer invertibleCryptographer;
     private OneWayCryptographer oneWayCryptographer;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create InvertibleCryptographer with AES
         invertibleCryptographer = InvertibleCryptographer.createAesCipher("1234567890123456");
@@ -39,6 +45,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor_withValidParameters() {
         // Test normal construction
         assertNotNull(securityResourceProvider);
@@ -53,6 +60,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(oneWayCryptographer, providedOneWay);
     }
 
+    @Test
     public void test_constructor_withNullInvertibleCryptographer() {
         // Test with null InvertibleCryptographer
         FessSecurityResourceProvider provider = new FessSecurityResourceProvider(null, oneWayCryptographer);
@@ -62,6 +70,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(oneWayCryptographer, provider.providePrimaryOneWayCryptographer());
     }
 
+    @Test
     public void test_constructor_withNullOneWayCryptographer() {
         // Test with null OneWayCryptographer
         FessSecurityResourceProvider provider = new FessSecurityResourceProvider(invertibleCryptographer, null);
@@ -71,6 +80,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertNull(provider.providePrimaryOneWayCryptographer());
     }
 
+    @Test
     public void test_constructor_withBothNull() {
         // Test with both cryptographers null
         FessSecurityResourceProvider provider = new FessSecurityResourceProvider(null, null);
@@ -80,6 +90,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test providePrimaryInvertibleCryptographer
+    @Test
     public void test_providePrimaryInvertibleCryptographer() {
         // Test that the method returns the same instance
         InvertibleCryptographer first = securityResourceProvider.providePrimaryInvertibleCryptographer();
@@ -91,6 +102,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertSame(invertibleCryptographer, first);
     }
 
+    @Test
     public void test_providePrimaryInvertibleCryptographer_consistency() {
         // Test multiple calls return consistent results
         for (int i = 0; i < 10; i++) {
@@ -101,6 +113,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test providePrimaryOneWayCryptographer
+    @Test
     public void test_providePrimaryOneWayCryptographer() {
         // Test that the method returns the same instance
         OneWayCryptographer first = securityResourceProvider.providePrimaryOneWayCryptographer();
@@ -112,6 +125,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertSame(oneWayCryptographer, first);
     }
 
+    @Test
     public void test_providePrimaryOneWayCryptographer_consistency() {
         // Test multiple calls return consistent results
         for (int i = 0; i < 10; i++) {
@@ -122,6 +136,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with different cipher types
+    @Test
     public void test_withBlowfishCipher() {
         // Test with Blowfish cipher
         InvertibleCryptographer blowfish = InvertibleCryptographer.createBlowfishCipher("secretkey");
@@ -132,6 +147,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(oneWayCryptographer, provider.providePrimaryOneWayCryptographer());
     }
 
+    @Test
     public void test_withDesCipher() {
         // Test with DES cipher
         InvertibleCryptographer des = InvertibleCryptographer.createDesCipher("12345678");
@@ -143,6 +159,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with different hash algorithms
+    @Test
     public void test_withSha512Cryptographer() {
         // Test with SHA512
         OneWayCryptographer sha512 = OneWayCryptographer.createSha512Cryptographer();
@@ -153,6 +170,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(sha512, provider.providePrimaryOneWayCryptographer());
     }
 
+    @Test
     public void test_withMd5Cryptographer() {
         // Test with MD5
         OneWayCryptographer md5 = new OneWayCryptographer("MD5", OneWayCryptographer.ENCODING_UTF8);
@@ -164,6 +182,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test encryption and decryption functionality
+    @Test
     public void test_invertibleCryptography() {
         // Test that invertible cryptography works correctly
         InvertibleCryptographer cryptographer = securityResourceProvider.providePrimaryInvertibleCryptographer();
@@ -178,6 +197,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(plainText, decrypted);
     }
 
+    @Test
     public void test_invertibleCryptography_withEmptyString() {
         // Test with empty string
         InvertibleCryptographer cryptographer = securityResourceProvider.providePrimaryInvertibleCryptographer();
@@ -191,6 +211,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(plainText, decrypted);
     }
 
+    @Test
     public void test_invertibleCryptography_withSpecialCharacters() {
         // Test with special characters
         InvertibleCryptographer cryptographer = securityResourceProvider.providePrimaryInvertibleCryptographer();
@@ -205,12 +226,14 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertEquals(plainText, decrypted);
     }
 
+    @Test
     public void test_oneWayCryptography() {
         // Test that one-way cryptographer is available
         OneWayCryptographer cryptographer = securityResourceProvider.providePrimaryOneWayCryptographer();
         assertNotNull(cryptographer);
     }
 
+    @Test
     public void test_oneWayCryptography_consistency() {
         // Test that same cryptographer instance is returned
         OneWayCryptographer cryptographer1 = securityResourceProvider.providePrimaryOneWayCryptographer();
@@ -221,6 +244,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
         assertSame(cryptographer1, cryptographer2);
     }
 
+    @Test
     public void test_oneWayCryptography_withDifferentProviders() {
         // Test with different providers
         OneWayCryptographer sha256 = OneWayCryptographer.createSha256Cryptographer();
@@ -235,6 +259,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test thread safety
+    @Test
     public void test_threadSafety() {
         // Test that the provider returns the same instances in multi-threaded environment
         final int threadCount = 10;
@@ -268,6 +293,7 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with multiple providers
+    @Test
     public void test_multipleProviders() {
         // Test that multiple providers can coexist independently
         InvertibleCryptographer inver1 = InvertibleCryptographer.createAesCipher("key1key1key1key1");

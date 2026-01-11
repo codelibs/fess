@@ -31,6 +31,7 @@ import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.TermQueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class BooleanQueryCommandTest extends QueryTestBase {
 
@@ -48,11 +49,13 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test getQueryClassName method
+    @Test
     public void test_getQueryClassName() {
         assertEquals("BooleanQuery", booleanQueryCommand.getQueryClassName());
     }
 
     // Test execute method with valid BooleanQuery
+    @Test
     public void test_execute_withBooleanQuery() {
         // Create a simple BooleanQuery with MUST clause
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
@@ -71,6 +74,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test execute method with non-BooleanQuery (should throw exception)
+    @Test
     public void test_execute_withNonBooleanQuery() {
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
         QueryContext context = new QueryContext("test", false);
@@ -84,6 +88,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with MUST clause
+    @Test
     public void test_convertBooleanQuery_withMustClause() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
@@ -102,6 +107,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with SHOULD clause
+    @Test
     public void test_convertBooleanQuery_withShouldClause() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery1 = new TermQuery(new Term("field1", "value1"));
@@ -122,6 +128,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with MUST_NOT clause
+    @Test
     public void test_convertBooleanQuery_withMustNotClause() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
@@ -144,6 +151,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with mixed clauses
+    @Test
     public void test_convertBooleanQuery_withMixedClauses() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery1 = new TermQuery(new Term("field1", "value1"));
@@ -169,6 +177,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with empty BooleanQuery
+    @Test
     public void test_convertBooleanQuery_withEmptyQuery() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         BooleanQuery booleanQuery = boolQueryBuilder.build();
@@ -180,6 +189,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with null queryBuilder from processor
+    @Test
     public void test_convertBooleanQuery_withNullQueryBuilder() {
         // Create processor that returns null
         QueryProcessor nullProcessor = new QueryProcessor() {
@@ -203,6 +213,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with nested BooleanQuery
+    @Test
     public void test_convertBooleanQuery_withNestedBooleanQuery() {
         // Create inner BooleanQuery
         BooleanQuery.Builder innerBoolQueryBuilder = new BooleanQuery.Builder();
@@ -230,6 +241,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test convertBooleanQuery with boost value
+    @Test
     public void test_convertBooleanQuery_withBoost() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery = new TermQuery(new Term("field", "value"));
@@ -248,6 +260,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test with FILTER occur type (which maps to default case)
+    @Test
     public void test_convertBooleanQuery_withFilterClause() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         TermQuery termQuery1 = new TermQuery(new Term("field1", "value1"));
@@ -270,6 +283,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test execute with MatchAllDocsQuery wrapped in BooleanQuery
+    @Test
     public void test_execute_withMatchAllDocsQuery() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
         MatchAllDocsQuery matchAllQuery = new MatchAllDocsQuery();
@@ -284,6 +298,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test to ensure high coverage of edge cases
+    @Test
     public void test_convertBooleanQuery_multipleShouldClauses() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
 
@@ -305,6 +320,7 @@ public class BooleanQueryCommandTest extends QueryTestBase {
     }
 
     // Test complex query with all clause types
+    @Test
     public void test_convertBooleanQuery_complexQuery() {
         BooleanQuery.Builder boolQueryBuilder = new BooleanQuery.Builder();
 

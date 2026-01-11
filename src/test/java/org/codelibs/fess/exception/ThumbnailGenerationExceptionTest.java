@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithMessage() {
         // Test constructor with message only
         String message = "Thumbnail generation failed";
@@ -28,6 +30,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndCause() {
         // Test constructor with message and cause
         String message = "Failed to generate thumbnail for document";
@@ -39,6 +42,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals("Image processing error", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithNullMessage() {
         // Test constructor with null message
         ThumbnailGenerationException exception = new ThumbnailGenerationException(null);
@@ -47,6 +51,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndCause() {
         // Test constructor with null message and null cause
         ThumbnailGenerationException exception = new ThumbnailGenerationException(null, null);
@@ -55,6 +60,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -64,6 +70,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Thumbnail error";
@@ -73,6 +80,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Test that ThumbnailGenerationException is an instance of FessSystemException
         ThumbnailGenerationException exception = new ThumbnailGenerationException("Test");
@@ -83,6 +91,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTraceForMessageOnlyConstructor() {
         // Test that stack trace is not writable when using message-only constructor
         ThumbnailGenerationException exception = new ThumbnailGenerationException("Test message");
@@ -91,6 +100,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals(0, exception.getStackTrace().length);
     }
 
+    @Test
     public void test_stackTraceForMessageAndCauseConstructor() {
         // Test that stack trace is available when using message and cause constructor
         ThumbnailGenerationException exception = new ThumbnailGenerationException("Test", new Exception());
@@ -99,6 +109,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_multipleNestedExceptions() {
         // Test with multiple nested exceptions
         Exception innerCause = new IllegalArgumentException("Invalid image format");
@@ -112,6 +123,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals("Invalid image format", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has serialVersionUID
         ThumbnailGenerationException exception = new ThumbnailGenerationException("Test serialization");
@@ -120,6 +132,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Thumbnail generation failed for file.jpg";
@@ -130,6 +143,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_toStringWithCause() {
         // Test toString method with cause
         String message = "Failed to generate thumbnail";
@@ -141,6 +155,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_constructorWithThrowableCause_Error() {
         // Test that the constructor can accept Error as cause (not just Exception)
         // This verifies the change from Exception to Throwable parameter
@@ -155,6 +170,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals("Not enough memory", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_StackOverflowError() {
         // Test with StackOverflowError as cause
         String message = "Thumbnail generation failed";
@@ -167,6 +183,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_AssertionError() {
         // Test with AssertionError as cause
         String message = "Assertion failed during thumbnail generation";
@@ -178,6 +195,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_RuntimeException() {
         // Test that RuntimeException still works (backward compatibility)
         String message = "Runtime error during thumbnail generation";
@@ -189,6 +207,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals(runtimeException, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_CheckedException() {
         // Test with checked exception (IOException)
         String message = "IO error during thumbnail generation";
@@ -200,6 +219,7 @@ public class ThumbnailGenerationExceptionTest extends UnitFessTestCase {
         assertEquals(checkedException, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_NestedErrorAndException() {
         // Test with nested Error and Exception
         String message = "Complex error during thumbnail generation";

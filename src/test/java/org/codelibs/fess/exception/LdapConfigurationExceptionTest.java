@@ -16,9 +16,12 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class LdapConfigurationExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test with a normal message
         String message = "LDAP configuration error occurred";
@@ -29,6 +32,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test with null message
         LdapConfigurationException exception = new LdapConfigurationException(null);
@@ -38,6 +42,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test with empty message
         String message = "";
@@ -48,6 +53,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test with a long message
         StringBuilder sb = new StringBuilder();
@@ -63,6 +69,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_inheritance() {
         // Test that LdapConfigurationException extends FessSystemException
         LdapConfigurationException exception = new LdapConfigurationException("test");
@@ -73,6 +80,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is generated properly
         LdapConfigurationException exception = new LdapConfigurationException("Stack trace test");
@@ -87,6 +95,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertEquals(this.getClass().getName(), firstElement.getClassName());
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception is serializable
         String message = "Serialization test";
@@ -100,6 +109,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertEquals(exception.getMessage(), exception2.getMessage());
     }
 
+    @Test
     public void test_toString() {
         // Test the toString method
         String message = "LDAP configuration is invalid";
@@ -111,6 +121,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test creating multiple instances with different messages
         LdapConfigurationException exception1 = new LdapConfigurationException("Error 1");
@@ -127,6 +138,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertNotSame(exception1, exception3);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String errorMessage = "LDAP server not reachable";
@@ -141,6 +153,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent exception type
         String errorMessage = "LDAP bind DN is invalid";
@@ -155,6 +168,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsRuntimeException() {
         // Test catching as RuntimeException
         String errorMessage = "LDAP search base is missing";
@@ -167,6 +181,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_specialCharactersInMessage() {
         // Test with special characters in message
         String message = "LDAP error: \"Invalid <config>\" & 'bad chars' @ #$%^&*()";
@@ -175,6 +190,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_unicodeCharactersInMessage() {
         // Test with Unicode characters in message
         String message = "LDAP設定エラー: 接続失敗 🚫 ñ é ü ß";
@@ -183,6 +199,7 @@ public class LdapConfigurationExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_newlineCharactersInMessage() {
         // Test with newline characters in message
         String message = "LDAP error:\n- Connection failed\n- Invalid credentials\n- Timeout";

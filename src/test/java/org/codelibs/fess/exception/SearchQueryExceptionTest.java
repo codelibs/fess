@@ -16,9 +16,12 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class SearchQueryExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithMessageAndCause() {
         // Test constructor with message and cause
         String message = "Query parsing failed";
@@ -32,6 +35,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructorWithMessage() {
         // Test constructor with message only
         String message = "Search query is invalid";
@@ -43,6 +47,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructorWithCause() {
         // Test constructor with cause only
         Exception cause = new NullPointerException("Query object is null");
@@ -54,6 +59,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructorWithNullMessage() {
         // Test constructor with null message
         SearchQueryException exception = new SearchQueryException((String) null);
@@ -63,6 +69,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructorWithNullCause() {
         // Test constructor with null cause
         SearchQueryException exception = new SearchQueryException((Throwable) null);
@@ -72,6 +79,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructorWithNullMessageAndCause() {
         // Test constructor with null message and null cause
         SearchQueryException exception = new SearchQueryException(null, null);
@@ -81,6 +89,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructorWithEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -91,6 +100,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Query processing error";
@@ -101,6 +111,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithNullMessageAndValidCause() {
         // Test constructor with null message and valid cause
         Exception cause = new RuntimeException("Runtime error");
@@ -112,6 +123,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_nestedExceptionChain() {
         // Test nested exception chain
         Exception rootCause = new IllegalStateException("Root cause");
@@ -125,6 +137,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_exceptionSerialization() {
         // Test that the exception is serializable
         String message = "Serialization test";
@@ -137,6 +150,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_stackTracePresence() {
         // Test that stack trace is present
         SearchQueryException exception = new SearchQueryException("Stack trace test");
@@ -156,6 +170,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_inheritanceHierarchy() {
         // Test inheritance hierarchy
         SearchQueryException exception = new SearchQueryException("Inheritance test");
@@ -167,6 +182,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_multipleInstantiations() {
         // Test multiple instantiations with different constructors
         SearchQueryException exception1 = new SearchQueryException("Exception 1");
@@ -182,6 +198,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertNotNull(exception3.getCause());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Test throw and catch";
@@ -196,6 +213,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwWithCauseAndCatch() {
         // Test throwing with cause and catching
         String expectedMessage = "Test with cause";
@@ -211,6 +229,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_catchAsFessSystemException() {
         // Test catching as parent exception type
         String message = "Polymorphism test";
@@ -225,6 +244,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_longMessageHandling() {
         // Test handling of long messages
         StringBuilder longMessage = new StringBuilder();
@@ -239,6 +259,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getMessage().length() > 10000);
     }
 
+    @Test
     public void test_specialCharactersInMessage() {
         // Test special characters in message
         String message = "Special chars: \n\t\r\"'<>&{}[]()!@#$%^&*";
@@ -248,6 +269,7 @@ public class SearchQueryExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_unicodeInMessage() {
         // Test unicode characters in message
         String message = "Unicode test: 日本語 中文 한국어 🚀 ñ é ü";

@@ -20,18 +20,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.job.JobExecutor.ShutdownListener;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class JobExecutorTest extends UnitFessTestCase {
 
     private JobExecutor jobExecutor;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         // Create a concrete implementation for testing
         jobExecutor = new TestJobExecutor();
     }
 
+    @Test
     public void test_execute() {
         // Test execute method
         String scriptType = "test";
@@ -54,6 +59,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals("Executed:  ", result);
     }
 
+    @Test
     public void test_addShutdownListener() {
         // Test adding shutdown listener
         AtomicBoolean shutdownCalled = new AtomicBoolean(false);
@@ -73,6 +79,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertTrue(shutdownCalled.get());
     }
 
+    @Test
     public void test_addShutdownListener_replace() {
         // Test replacing shutdown listener
         AtomicInteger callCount = new AtomicInteger(0);
@@ -103,6 +110,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals(10, callCount.get());
     }
 
+    @Test
     public void test_shutdown() {
         // Test shutdown with listener
         AtomicBoolean shutdownCalled = new AtomicBoolean(false);
@@ -118,6 +126,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertTrue(shutdownCalled.get());
     }
 
+    @Test
     public void test_shutdown_withoutListener() {
         // Test shutdown without listener should throw NullPointerException
         try {
@@ -129,6 +138,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_shutdown_multipleCalls() {
         // Test multiple shutdown calls
         AtomicInteger shutdownCount = new AtomicInteger(0);
@@ -149,6 +159,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals(3, shutdownCount.get());
     }
 
+    @Test
     public void test_shutdownListener_interface() {
         // Test anonymous ShutdownListener implementation
         final AtomicBoolean flag = new AtomicBoolean(false);
@@ -164,6 +175,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertTrue(flag.get());
     }
 
+    @Test
     public void test_shutdownListener_lambda() {
         // Test lambda implementation of ShutdownListener
         final AtomicBoolean flag = new AtomicBoolean(false);
@@ -174,6 +186,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertTrue(flag.get());
     }
 
+    @Test
     public void test_shutdownListener_exceptionHandling() {
         // Test exception thrown in shutdown listener
         jobExecutor.addShutdownListener(new ShutdownListener() {
@@ -191,6 +204,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addShutdownListener_null() {
         // Test adding null listener
         jobExecutor.addShutdownListener(null);
@@ -206,6 +220,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleJobExecutors() {
         // Test multiple JobExecutor instances
         JobExecutor executor1 = new TestJobExecutor();
@@ -226,6 +241,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals(1, counter2.get());
     }
 
+    @Test
     public void test_execute_differentScriptTypes() {
         // Test different script types
         Object result = jobExecutor.execute("javascript", "console.log('test')");
@@ -238,6 +254,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals("Executed: groovy println 'test'", result);
     }
 
+    @Test
     public void test_execute_specialCharacters() {
         // Test scripts with special characters
         Object result = jobExecutor.execute("test", "script with\nnewline");
@@ -253,6 +270,7 @@ public class JobExecutorTest extends UnitFessTestCase {
         assertEquals("Executed: test script with 'single quotes'", result);
     }
 
+    @Test
     public void test_execute_longScript() {
         // Test with long script
         StringBuilder longScript = new StringBuilder();

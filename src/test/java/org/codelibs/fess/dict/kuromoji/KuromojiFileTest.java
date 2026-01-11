@@ -21,6 +21,10 @@ import java.util.List;
 
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class KuromojiFileTest extends UnitFessTestCase {
     private KuromojiFile kuromojiFile;
@@ -39,14 +43,16 @@ public class KuromojiFileTest extends UnitFessTestCase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() throws Exception {
         file1.delete();
     }
     */
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         kuromojiFile = new KuromojiFile("1", "dummy", new Date());
         List<KuromojiItem> itemList = new ArrayList<>();
         itemList.add(new KuromojiItem(1, "token1", "seg1", "reading1", "pos1"));
@@ -55,6 +61,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         kuromojiFile.kuromojiItemList = itemList;
     }
 
+    @Test
     public void test_selectList() {
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0, 20);
         assertEquals(3, itemList1.size());
@@ -72,6 +79,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals(0, kuromojiFile.selectList(-1, 5).size());
     }
 
+    @Test
     public void test_selectList2() {
         final PagingList<KuromojiItem> itemList = kuromojiFile.selectList(0, 5);
         for (int i = 0; i < itemList.size(); i++) {
@@ -87,6 +95,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
 
     /*
     // TODO
+    @Test
     public void test_insert() {
         final KuromojiFile kuromojiFile = new KuromojiFile(file1);
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,
@@ -116,6 +125,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertEquals("pos5", itemList3.get(4).getPos());
     }
 
+    @Test
     public void test_update() {
         final KuromojiFile kuromojiFile = new KuromojiFile(file1);
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,
@@ -155,6 +165,7 @@ public class KuromojiFileTest extends UnitFessTestCase {
         assertFalse(kuromojiItem4.isUpdated());
     }
 
+    @Test
     public void test_delete() throws Exception {
         final KuromojiFile kuromojiFile = new KuromojiFile(file1);
         final PagingList<KuromojiItem> itemList1 = kuromojiFile.selectList(0,

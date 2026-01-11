@@ -34,13 +34,17 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AbstractDataStoreTest extends UnitFessTestCase {
     public AbstractDataStore dataStore;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         dataStore = new AbstractDataStore() {
             @Override
             protected String getName() {
@@ -82,6 +86,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
         }.register();
     }
 
+    @Test
     public void test_convertValue() {
         String value;
         final Map<String, Object> paramMap = new HashMap<>();
@@ -117,6 +122,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
      * Test that the volatile alive field is visible across threads.
      * One thread sets alive to false, other threads should see the change immediately.
      */
+    @Test
     public void test_aliveField_volatileVisibility() throws Exception {
         // Ensure alive starts as true
         assertTrue(dataStore.alive);
@@ -195,6 +201,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
     /**
      * Test stop() method sets alive to false and is visible to other threads.
      */
+    @Test
     public void test_stop_volatileVisibility() throws Exception {
         assertTrue(dataStore.alive);
 
@@ -230,6 +237,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
      * Test concurrent access to stop() method.
      * Multiple threads call stop() simultaneously - should be safe.
      */
+    @Test
     public void test_stop_concurrentAccess() throws Exception {
         final int threadCount = 10;
         final Thread[] threads = new Thread[threadCount];
@@ -258,7 +266,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
         }
 
         // Verify alive is false
@@ -268,6 +276,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
     /**
      * Test that multiple threads can safely read alive field while one writes.
      */
+    @Test
     public void test_aliveField_concurrentReadWrite() throws Exception {
         dataStore.alive = true;
 
@@ -322,7 +331,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
 
         // Verify no exceptions
         for (int i = 0; i <= readerCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
         }
 
         // Verify all readers completed all iterations
@@ -334,6 +343,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
     /**
      * Test getName() method can be called concurrently without issues.
      */
+    @Test
     public void test_getName_concurrentAccess() throws Exception {
         final int threadCount = 10;
         final Thread[] threads = new Thread[threadCount];
@@ -363,7 +373,7 @@ public class AbstractDataStoreTest extends UnitFessTestCase {
 
         // Verify no exceptions
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
             assertEquals("Thread " + i + " got wrong name", "Test", results[i]);
         }
     }

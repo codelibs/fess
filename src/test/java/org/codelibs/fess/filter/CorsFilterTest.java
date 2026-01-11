@@ -28,6 +28,11 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CorsFilterTest extends UnitFessTestCase {
 
@@ -37,9 +42,10 @@ public class CorsFilterTest extends UnitFessTestCase {
     private TestHttpServletResponse mockResponse;
     private TestFilterChain mockFilterChain;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         corsFilter = new CorsFilter();
         corsHandlerFactory = new TestCorsHandlerFactory();
         // Initialize mocks
@@ -50,12 +56,20 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
+    private void resetMocks() {
+        mockRequest = new TestHttpServletRequest();
+        mockResponse = new TestHttpServletResponse();
+        mockFilterChain = new TestFilterChain();
+    }
+
     // Test with no Origin header
+    @Test
     public void test_doFilter_noOriginHeader() throws IOException, ServletException {
         mockRequest.setHeader("Origin", null);
 
@@ -66,6 +80,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with blank Origin header
+    @Test
     public void test_doFilter_blankOriginHeader() throws IOException, ServletException {
         mockRequest.setHeader("Origin", "");
 
@@ -76,6 +91,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with whitespace-only Origin header
+    @Test
     public void test_doFilter_whitespaceOriginHeader() throws IOException, ServletException {
         mockRequest.setHeader("Origin", "   ");
 
@@ -86,6 +102,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with valid Origin but no CorsHandler found
+    @Test
     public void test_doFilter_noCorsHandler() throws IOException, ServletException {
         mockRequest.setHeader("Origin", "http://example.com");
         corsHandlerFactory.setHandler(null);
@@ -98,6 +115,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with valid Origin and CorsHandler found (non-OPTIONS request)
+    @Test
     public void test_doFilter_withCorsHandler_nonOptions() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -117,6 +135,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with valid Origin and CorsHandler found (POST request)
+    @Test
     public void test_doFilter_withCorsHandler_post() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -132,6 +151,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with valid Origin and CorsHandler found (PUT request)
+    @Test
     public void test_doFilter_withCorsHandler_put() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -147,6 +167,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with valid Origin and CorsHandler found (DELETE request)
+    @Test
     public void test_doFilter_withCorsHandler_delete() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -162,6 +183,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with OPTIONS request (preflight)
+    @Test
     public void test_doFilter_withCorsHandler_options() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -179,6 +201,7 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with OPTIONS request but no CorsHandler
+    @Test
     public void test_doFilter_options_noCorsHandler() throws IOException, ServletException {
         String origin = "http://example.com";
         mockRequest.setHeader("Origin", origin);
@@ -193,11 +216,12 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test with different origin formats
+    @Test
     public void test_doFilter_differentOrigins() throws Exception {
         String[] origins = { "http://localhost:8080", "https://example.com", "http://subdomain.example.com", "https://example.com:3000" };
 
         for (String origin : origins) {
-            setUp(); // Reset for each test
+            resetMocks(); // Reset for each test
             mockRequest.setHeader("Origin", origin);
             mockRequest.setMethod("GET");
             TestCorsHandler handler = new TestCorsHandler();
@@ -212,12 +236,14 @@ public class CorsFilterTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         CorsFilter filter = new CorsFilter();
         assertNotNull(filter);
     }
 
     // Test OPTIONS constant
+    @Test
     public void test_optionsConstant() {
         assertEquals("OPTIONS", CorsFilter.OPTIONS);
     }

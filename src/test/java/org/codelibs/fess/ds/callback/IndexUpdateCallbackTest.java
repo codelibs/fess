@@ -22,9 +22,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class IndexUpdateCallbackTest extends UnitFessTestCase {
 
+    @Test
     public void test_interface_methods() {
         // Test with anonymous implementation
         IndexUpdateCallback callback = new IndexUpdateCallback() {
@@ -79,6 +81,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         callback.commit();
     }
 
+    @Test
     public void test_multiple_implementations() {
         // Test with different implementations to ensure interface contract
         IndexUpdateCallback callback1 = createMockCallback(10, 500);
@@ -105,6 +108,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         callback2.commit();
     }
 
+    @Test
     public void test_store_with_null_parameters() {
         // Test handling of null parameters
         IndexUpdateCallback callback = new IndexUpdateCallback() {
@@ -138,6 +142,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         assertEquals(-1L, callback.getDocumentSize());
     }
 
+    @Test
     public void test_store_with_empty_map() {
         // Test with empty data map
         final AtomicInteger storeCount = new AtomicInteger(0);
@@ -170,6 +175,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         assertEquals(1L, callback.getDocumentSize());
     }
 
+    @Test
     public void test_commit_behavior() {
         // Test commit behavior with state tracking
         final AtomicInteger commitCount = new AtomicInteger(0);
@@ -229,6 +235,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         assertEquals(5L, documentsBeforeCommit.get());
     }
 
+    @Test
     public void test_execution_time_tracking() {
         // Test execution time tracking
         IndexUpdateCallback callback = new IndexUpdateCallback() {
@@ -271,6 +278,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         assertTrue(callback.getExecuteTime() >= 10L);
     }
 
+    @Test
     public void test_concurrent_stores() {
         // Test thread-safe implementation
         final AtomicLong counter = new AtomicLong(0);
@@ -328,6 +336,7 @@ public class IndexUpdateCallbackTest extends UnitFessTestCase {
         callback.commit();
     }
 
+    @Test
     public void test_store_with_various_data_types() {
         // Test storing various data types
         final AtomicInteger callCount = new AtomicInteger(0);

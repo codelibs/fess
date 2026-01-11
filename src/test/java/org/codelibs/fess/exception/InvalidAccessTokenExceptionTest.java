@@ -16,9 +16,13 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withTypeAndMessage() {
         // Test constructor with type and message
         String type = "Bearer";
@@ -30,6 +34,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullType() {
         // Test constructor with null type
         String type = null;
@@ -41,6 +46,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         String type = "OAuth2";
@@ -52,6 +58,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullTypeAndMessage() {
         // Test constructor with both null type and message
         String type = null;
@@ -63,6 +70,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyType() {
         // Test constructor with empty type string
         String type = "";
@@ -74,6 +82,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message string
         String type = "JWT";
@@ -85,6 +94,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongTypeAndMessage() {
         // Test constructor with long strings
         String type = "VeryLongTokenTypeNameForTestingPurposes";
@@ -97,6 +107,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withSpecialCharacters() {
         // Test constructor with special characters
         String type = "Token-Type_123!@#";
@@ -108,6 +119,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withWhitespaceType() {
         // Test constructor with whitespace in type
         String type = "  Bearer Token  ";
@@ -119,6 +131,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_getType_immutability() {
         // Test that getType returns the same value consistently
         String type = "ApiKey";
@@ -132,6 +145,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertEquals(type, firstCall);
     }
 
+    @Test
     public void test_inheritanceFromFessSystemException() {
         // Test that InvalidAccessTokenException is properly inherited from FessSystemException
         String type = "SessionToken";
@@ -144,6 +158,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedType = "OAuth";
@@ -158,6 +173,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent exception type
         String type = "BasicAuth";
@@ -173,6 +189,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleExceptionInstances() {
         // Test multiple instances are independent
         InvalidAccessTokenException exception1 = new InvalidAccessTokenException("Type1", "Message1");
@@ -186,6 +203,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertNotSame(exception1, exception2);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is properly defined
         InvalidAccessTokenException exception1 = new InvalidAccessTokenException("Type", "Message");
@@ -195,6 +213,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertEquals(exception1.getClass(), exception2.getClass());
     }
 
+    @Test
     public void test_stackTracePopulated() {
         // Test that stack trace is properly populated
         InvalidAccessTokenException exception = new InvalidAccessTokenException("JWT", "Invalid signature");
@@ -208,6 +227,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertEquals("test_stackTracePopulated", firstElement.getMethodName());
     }
 
+    @Test
     public void test_toString() {
         // Test toString method (inherited from Throwable)
         String type = "CustomToken";
@@ -219,6 +239,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_variousTokenTypes() {
         // Test with various common token types
         String[] tokenTypes = { "Bearer", "JWT", "OAuth", "OAuth2", "APIKey", "Session", "Basic", "Digest", "SAML", "OpenID" };
@@ -232,6 +253,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_unicodeSupport() {
         // Test with Unicode characters
         String type = "トークン";
@@ -242,6 +264,7 @@ public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_exceptionInComplexScenario() {
         // Test exception in a more complex scenario
         InvalidAccessTokenException exception = null;

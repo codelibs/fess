@@ -21,6 +21,10 @@ import java.util.List;
 
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SynonymFileTest extends UnitFessTestCase {
     private SynonymFile synonymFile;
@@ -28,9 +32,10 @@ public class SynonymFileTest extends UnitFessTestCase {
     // TODO
     /*
     private File file1;
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         file1 = File.createTempFile("synonym", ".txt");
         FileUtil.writeBytes(file1.getAbsolutePath(),
                 "a1=>A1\nb1,b2 => B1\nc1 => C1, C2\nx1,X1\ny1, Y1, y2"
@@ -40,14 +45,16 @@ public class SynonymFileTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         file1.delete();
     }
     */
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         synonymFile = new SynonymFile("1", "dummy", new Date());
         List<SynonymItem> itemList = new ArrayList<>();
         itemList.add(new SynonymItem(1, new String[] { "a1" }, new String[] { "A1" }));
@@ -58,6 +65,7 @@ public class SynonymFileTest extends UnitFessTestCase {
         synonymFile.synonymItemList = itemList;
     }
 
+    @Test
     public void test_selectList() {
         final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20); // error occurs
         assertEquals(5, itemList1.size());
@@ -75,6 +83,7 @@ public class SynonymFileTest extends UnitFessTestCase {
         assertEquals(0, synonymFile.selectList(-1, 5).size());
     }
 
+    @Test
     public void test_selectList2() {
         final PagingList<SynonymItem> itemList = synonymFile.selectList(0, 5);
         assertEquals(1, itemList.get(0).getInputs().length);
@@ -117,6 +126,7 @@ public class SynonymFileTest extends UnitFessTestCase {
     }
 
     /*
+    @Test
     public void test_insert() {
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
          assertEquals(5, itemList1.size());
@@ -140,6 +150,7 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertEquals("z2", itemList3.get(6).getOutputs()[1]);
      }
 
+     @Test
      public void test_update() {
          final SynonymFile synonymFile = new SynonymFile(file1);
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);
@@ -176,6 +187,7 @@ public class SynonymFileTest extends UnitFessTestCase {
          assertFalse(synonymItem2.isUpdated());
      }
 
+     @Test
      public void test_delete() throws Exception {
          final SynonymFile synonymFile = new SynonymFile(file1);
          final PagingList<SynonymItem> itemList1 = synonymFile.selectList(0, 20);

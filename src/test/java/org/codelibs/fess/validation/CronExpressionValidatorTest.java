@@ -18,22 +18,28 @@ package org.codelibs.fess.validation;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.ConstraintValidatorContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CronExpressionValidatorTest extends UnitFessTestCase {
 
     public CronExpressionValidator validator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         validator = new CronExpressionValidator();
     }
 
+    @Test
     public void test_isValid_nullValue() {
         final ConstraintValidatorContext context = null;
         assertTrue(validator.isValid(null, context));
     }
 
+    @Test
     public void test_isValid_blankValue() {
         final ConstraintValidatorContext context = null;
         assertTrue(validator.isValid(" ", context));
@@ -42,11 +48,13 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
         assertTrue(validator.isValid("\n", context));
     }
 
+    @Test
     public void test_isValid_emptyValue() {
         final ConstraintValidatorContext context = null;
         assertTrue(validator.isValid("", context));
     }
 
+    @Test
     public void test_determineValid_nullAndBlank() {
         assertTrue(validator.determineValid(null));
         assertTrue(validator.determineValid(""));
@@ -56,17 +64,20 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
         assertTrue(validator.determineValid("\n"));
     }
 
+    @Test
     public void test_initialize() {
         final CronExpression cronExpression = null;
         validator.initialize(cronExpression);
     }
 
+    @Test
     public void test_determineValid_invalidExpressions() {
         assertFalse(validator.determineValid("invalid"));
         assertFalse(validator.determineValid("too many fields here * * * * * * *"));
         assertFalse(validator.determineValid("* * * *"));
     }
 
+    @Test
     public void test_isValid_basicInvalidCronExpression() {
         final ConstraintValidatorContext context = null;
         assertFalse(validator.isValid("invalid cron", context));
@@ -75,6 +86,7 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
     }
 
     // Test common valid cron patterns that are likely to work
+    @Test
     public void test_basicValidCronExpressions() {
         final ConstraintValidatorContext context = null;
 
@@ -89,11 +101,12 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
         for (String cron : potentiallyValidCrons) {
             boolean result = validator.isValid(cron, context);
             // Don't assert true/false here, just test that method doesn't throw
-            assertNotNull("Validation should return a boolean result for: " + cron, Boolean.valueOf(result));
+            assertNotNull(Boolean.valueOf(result), "Validation should return a boolean result for: " + cron);
         }
     }
 
     // Test edge cases to understand the validation behavior
+    @Test
     public void test_edgeCaseBehavior() {
         String[] edgeCases = { "0 0 25 * * ?", // Invalid day of month
                 "0 60 * * * ?", // Invalid minute
@@ -104,10 +117,11 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
         for (String cron : edgeCases) {
             boolean result = validator.determineValid(cron);
             // Test that validation completes without exception
-            assertNotNull("Validation should return a boolean result for edge case: " + cron, Boolean.valueOf(result));
+            assertNotNull(Boolean.valueOf(result), "Validation should return a boolean result for edge case: " + cron);
         }
     }
 
+    @Test
     public void test_constructorAndInitialize() {
         assertNotNull(validator);
 

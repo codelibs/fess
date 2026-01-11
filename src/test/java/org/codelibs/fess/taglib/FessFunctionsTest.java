@@ -18,14 +18,17 @@ package org.codelibs.fess.taglib;
 import java.util.Date;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FessFunctionsTest extends UnitFessTestCase {
+    @Test
     public void test_formatNumber() {
         assertEquals("0", FessFunctions.formatNumber(0, "###,###"));
         assertEquals("1,000", FessFunctions.formatNumber(1000, "###,###"));
         assertEquals("1,000,000", FessFunctions.formatNumber(1000000, "###,###"));
     }
 
+    @Test
     public void test_formatFileSize() {
         assertEquals("0", FessFunctions.formatFileSize(0));
         assertEquals("1000", FessFunctions.formatFileSize(1000));
@@ -35,6 +38,7 @@ public class FessFunctionsTest extends UnitFessTestCase {
         assertEquals("909.5T", FessFunctions.formatFileSize(1000000000000000L));
     }
 
+    @Test
     public void test_parseDate() {
         Date date;
 
@@ -60,6 +64,7 @@ public class FessFunctionsTest extends UnitFessTestCase {
         assertEquals("2004-04-01T08:34:56.000Z", FessFunctions.formatDate(date));
     }
 
+    @Test
     public void test_formatCode() {
         String code;
         String value;
@@ -117,6 +122,7 @@ public class FessFunctionsTest extends UnitFessTestCase {
         assertEquals("<pre class=\"prettyprint linenums:10\">\nccc</pre>", value);
     }
 
+    @Test
     public void test_maskEmail() {
         String value;
 

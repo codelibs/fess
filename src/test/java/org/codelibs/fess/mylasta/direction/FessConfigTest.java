@@ -22,14 +22,18 @@ import java.util.Map;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessConfigTest extends UnitFessTestCase {
 
     private FessConfig fessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         fessConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
 
@@ -214,160 +218,199 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test basic configuration properties
+    @Test
     public void test_domainTitle() {
         assertEquals("Fess", fessConfig.getDomainTitle());
     }
 
+    @Test
     public void test_searchEngineType() {
         assertEquals("default", fessConfig.getSearchEngineType());
     }
 
+    @Test
     public void test_searchEngineHttpUrl() {
         assertEquals("http://localhost:9201", fessConfig.getSearchEngineHttpUrl());
     }
 
+    @Test
     public void test_searchEngineHeartbeatInterval() {
         assertEquals(Integer.valueOf(10000), fessConfig.getSearchEngineHeartbeatIntervalAsInteger());
     }
 
+    @Test
     public void test_appCipherAlgorithm() {
         assertEquals("aes", fessConfig.getAppCipherAlgorithm());
     }
 
+    @Test
     public void test_appCipherKey() {
         assertEquals("___change__me___", fessConfig.getAppCipherKey());
     }
 
+    @Test
     public void test_appEncryptPropertyPattern() {
         assertEquals(".*password|.*key|.*token|.*secret", fessConfig.getAppEncryptPropertyPattern());
     }
 
+    @Test
     public void test_appExtensionNames() {
         assertEquals("jpg,jpeg,gif,png", fessConfig.getAppExtensionNames());
     }
 
+    @Test
     public void test_jobMaxCrawlerProcesses() {
         assertEquals(Integer.valueOf(3), fessConfig.getJobMaxCrawlerProcessesAsInteger());
     }
 
+    @Test
     public void test_maxLogOutputLength() {
         assertEquals(Integer.valueOf(4000), fessConfig.getMaxLogOutputLengthAsInteger());
     }
 
     // Test index field configurations
+    @Test
     public void test_indexFieldFavoriteCount() {
         assertEquals("favorite_count", fessConfig.getIndexFieldFavoriteCount());
     }
 
+    @Test
     public void test_indexFieldClickCount() {
         assertEquals("click_count", fessConfig.getIndexFieldClickCount());
     }
 
+    @Test
     public void test_indexFieldConfigId() {
         assertEquals("config_id", fessConfig.getIndexFieldConfigId());
     }
 
+    @Test
     public void test_indexFieldExpires() {
         assertEquals("expires", fessConfig.getIndexFieldExpires());
     }
 
+    @Test
     public void test_indexFieldUrl() {
         assertEquals("url", fessConfig.getIndexFieldUrl());
     }
 
+    @Test
     public void test_indexFieldDocId() {
         assertEquals("doc_id", fessConfig.getIndexFieldDocId());
     }
 
+    @Test
     public void test_indexFieldId() {
         assertEquals("id", fessConfig.getIndexFieldId());
     }
 
+    @Test
     public void test_indexFieldVersion() {
         assertEquals("_version", fessConfig.getIndexFieldVersion());
     }
 
+    @Test
     public void test_indexFieldSeqNo() {
         assertEquals("_seq_no", fessConfig.getIndexFieldSeqNo());
     }
 
+    @Test
     public void test_indexFieldPrimaryTerm() {
         assertEquals("_primary_term", fessConfig.getIndexFieldPrimaryTerm());
     }
 
+    @Test
     public void test_indexFieldLang() {
         assertEquals("lang", fessConfig.getIndexFieldLang());
     }
 
+    @Test
     public void test_indexFieldHasCache() {
         assertEquals("has_cache", fessConfig.getIndexFieldHasCache());
     }
 
+    @Test
     public void test_indexFieldLastModified() {
         assertEquals("last_modified", fessConfig.getIndexFieldLastModified());
     }
 
+    @Test
     public void test_indexFieldAnchor() {
         assertEquals("anchor", fessConfig.getIndexFieldAnchor());
     }
 
+    @Test
     public void test_indexFieldSegment() {
         assertEquals("segment", fessConfig.getIndexFieldSegment());
     }
 
+    @Test
     public void test_indexFieldRole() {
         assertEquals("role", fessConfig.getIndexFieldRole());
     }
 
+    @Test
     public void test_indexFieldBoost() {
         assertEquals("boost", fessConfig.getIndexFieldBoost());
     }
 
+    @Test
     public void test_indexFieldTitle() {
         assertEquals("title", fessConfig.getIndexFieldTitle());
     }
 
+    @Test
     public void test_indexFieldContent() {
         assertEquals("content", fessConfig.getIndexFieldContent());
     }
 
+    @Test
     public void test_indexFieldCache() {
         assertEquals("cache", fessConfig.getIndexFieldCache());
     }
 
+    @Test
     public void test_indexFieldDigest() {
         assertEquals("digest", fessConfig.getIndexFieldDigest());
     }
 
+    @Test
     public void test_indexFieldHost() {
         assertEquals("host", fessConfig.getIndexFieldHost());
     }
 
+    @Test
     public void test_indexFieldSite() {
         assertEquals("site", fessConfig.getIndexFieldSite());
     }
 
+    @Test
     public void test_indexFieldContentLength() {
         assertEquals("content_length", fessConfig.getIndexFieldContentLength());
     }
 
+    @Test
     public void test_indexFieldFiletype() {
         assertEquals("filetype", fessConfig.getIndexFieldFiletype());
     }
 
+    @Test
     public void test_indexFieldFilename() {
         assertEquals("filename", fessConfig.getIndexFieldFilename());
     }
 
+    @Test
     public void test_indexFieldThumbnail() {
         assertEquals("thumbnail", fessConfig.getIndexFieldThumbnail());
     }
 
+    @Test
     public void test_indexFieldMimetype() {
         assertEquals("mimetype", fessConfig.getIndexFieldMimetype());
     }
 
     // Test admin field configurations
+    @Test
     public void test_indexAdminArrayFields() {
         String[] fields = fessConfig.getIndexAdminArrayFields().split(",");
         assertEquals(2, fields.length);
@@ -375,6 +418,7 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals("roles", fields[1]);
     }
 
+    @Test
     public void test_indexAdminDateFields() {
         String[] fields = fessConfig.getIndexAdminDateFields().split(",");
         assertEquals(3, fields.length);
@@ -383,12 +427,14 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals("end_time", fields[2]);
     }
 
+    @Test
     public void test_indexAdminIntegerFields() {
         String[] fields = fessConfig.getIndexAdminIntegerFields().split(",");
         assertEquals(1, fields.length);
         assertEquals("boost", fields[0]);
     }
 
+    @Test
     public void test_indexAdminLongFields() {
         String fieldsStr = fessConfig.getIndexAdminLongFields();
         assertEquals("", fieldsStr);
@@ -396,6 +442,7 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals(0, fields.length);
     }
 
+    @Test
     public void test_indexAdminFloatFields() {
         String fieldsStr = fessConfig.getIndexAdminFloatFields();
         assertEquals("", fieldsStr);
@@ -403,6 +450,7 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals(0, fields.length);
     }
 
+    @Test
     public void test_indexAdminDoubleFields() {
         String fieldsStr = fessConfig.getIndexAdminDoubleFields();
         assertEquals("", fieldsStr);
@@ -410,6 +458,7 @@ public class FessConfigTest extends UnitFessTestCase {
         assertEquals(0, fields.length);
     }
 
+    @Test
     public void test_indexAdminRequiredFields() {
         String[] fields = fessConfig.getIndexAdminRequiredFields().split(",");
         assertEquals(4, fields.length);
@@ -420,39 +469,48 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test crawler configurations
+    @Test
     public void test_crawlerDataSerializer() {
         assertEquals("org.codelibs.fess.crawler.client.AccessTimeoutTarget", fessConfig.getCrawlerDataSerializer());
     }
 
+    @Test
     public void test_crawlerDataEnvParamKeyPattern() {
         assertEquals("^FESS_ENV_.*", fessConfig.getCrawlerDataEnvParamKeyPattern());
     }
 
+    @Test
     public void test_crawlerHotthreadIgnoreIdleThreads() {
         assertTrue(fessConfig.isCrawlerHotthreadIgnoreIdleThreads());
     }
 
+    @Test
     public void test_crawlerHotthreadInterval() {
         assertEquals("500ms", fessConfig.getCrawlerHotthreadInterval());
     }
 
+    @Test
     public void test_crawlerHotthreadSnapshots() {
         assertEquals(Integer.valueOf(10), fessConfig.getCrawlerHotthreadSnapshotsAsInteger());
     }
 
+    @Test
     public void test_crawlerHotthreadThreads() {
         assertEquals(Integer.valueOf(3), fessConfig.getCrawlerHotthreadThreadsAsInteger());
     }
 
+    @Test
     public void test_crawlerHotthreadTimeout() {
         assertEquals("30s", fessConfig.getCrawlerHotthreadTimeout());
     }
 
+    @Test
     public void test_crawlerHotthreadType() {
         assertEquals("cpu", fessConfig.getCrawlerHotthreadType());
     }
 
     // Test property not found exception
+    @Test
     public void test_propertyNotFound() {
         try {
             fessConfig.get("non.existent.property");
@@ -465,6 +523,7 @@ public class FessConfigTest extends UnitFessTestCase {
     // Test isExtensionAllowed method
     /*
     // Commented out - methods don't exist in FessConfig
+    @Test
     public void test_isExtensionAllowed() {
         assertTrue(fessConfig.isExtensionAllowed("jpg"));
         assertTrue(fessConfig.isExtensionAllowed("jpeg"));
@@ -475,6 +534,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test available extensions
+    @Test
     public void test_getAvailableExtensions() {
         String[] extensions = fessConfig.getAvailableExtensions();
         assertEquals(4, extensions.length);
@@ -486,16 +546,19 @@ public class FessConfigTest extends UnitFessTestCase {
     */
 
     // Test crawler process limit
+    @Test
     public void test_getCrawlerProcessLimit() {
         assertEquals(3, fessConfig.getJobMaxCrawlerProcessesAsInteger().intValue());
     }
 
     // Test log output length limit
+    @Test
     public void test_getMaxLogOutputLength() {
         assertEquals(4000, fessConfig.getMaxLogOutputLengthAsInteger().intValue());
     }
 
     // Test configuration with empty values
+    @Test
     public void test_emptyStringArrayFields() {
         String longFieldsStr = fessConfig.getIndexAdminLongFields();
         assertEquals("", longFieldsStr);
@@ -517,6 +580,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test configuration key constants
+    @Test
     public void test_configKeyConstants() {
         // Verify that constants are properly defined
         assertNotNull(FessConfig.DOMAIN_TITLE);
@@ -536,6 +600,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test the get method directly
+    @Test
     public void test_getMethod() {
         assertEquals("Fess", fessConfig.get(FessConfig.DOMAIN_TITLE));
         assertEquals("default", fessConfig.get(FessConfig.search_engine_TYPE));
@@ -543,6 +608,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test numeric conversions
+    @Test
     public void test_numericConversions() {
         // Test integer conversion
         Integer heartbeatInterval = fessConfig.getSearchEngineHeartbeatIntervalAsInteger();
@@ -561,6 +627,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test boolean conversions
+    @Test
     public void test_booleanConversions() {
         // Test boolean conversion for ignore idle threads
         boolean ignoreIdleThreads = fessConfig.isCrawlerHotthreadIgnoreIdleThreads();
@@ -568,6 +635,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test pattern matching
+    @Test
     public void test_patternMatching() {
         String pattern = fessConfig.getAppEncryptPropertyPattern();
         assertNotNull(pattern);
@@ -578,6 +646,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test array field parsing
+    @Test
     public void test_arrayFieldParsing() {
         // Test parsing of comma-separated values
         String[] arrayFields = fessConfig.getIndexAdminArrayFields().split(",");
@@ -594,6 +663,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test hotthread configuration
+    @Test
     public void test_hotthreadConfiguration() {
         // Test all hotthread settings
         assertTrue(fessConfig.isCrawlerHotthreadIgnoreIdleThreads());
@@ -605,6 +675,7 @@ public class FessConfigTest extends UnitFessTestCase {
     }
 
     // Test field name configurations
+    @Test
     public void test_fieldNameConfigurations() {
         // Test all field name configurations are properly returned
         assertNotNull(fessConfig.getIndexFieldFavoriteCount());

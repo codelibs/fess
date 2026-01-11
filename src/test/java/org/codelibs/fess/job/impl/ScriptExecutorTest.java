@@ -23,6 +23,10 @@ import org.codelibs.fess.script.ScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ScriptExecutorTest extends UnitFessTestCase {
 
@@ -30,9 +34,10 @@ public class ScriptExecutorTest extends UnitFessTestCase {
     private ScriptEngineFactory scriptEngineFactory;
     private TestScriptEngine testScriptEngine;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         scriptExecutor = new ScriptExecutor();
         scriptEngineFactory = new ScriptEngineFactory();
         testScriptEngine = new TestScriptEngine();
@@ -40,11 +45,13 @@ public class ScriptExecutorTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.register(null, "scriptEngineFactory");
         super.tearDown();
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor creates an instance
         ScriptExecutor executor = new ScriptExecutor();
@@ -52,6 +59,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertTrue(executor instanceof JobExecutor);
     }
 
+    @Test
     public void test_execute_withValidScriptType() {
         // Setup test script engine
         scriptEngineFactory.add("test", testScriptEngine);
@@ -70,6 +78,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertEquals(scriptExecutor, lastParams.get("executor"));
     }
 
+    @Test
     public void test_execute_withMultipleEngines() {
         // Setup multiple script engines
         TestScriptEngine engine1 = new TestScriptEngine("engine1");
@@ -90,6 +99,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertEquals("script for engine2", engine2.getLastScript());
     }
 
+    @Test
     public void test_execute_withInvalidScriptType() {
         // Try to execute with non-existent script type
         try {
@@ -100,6 +110,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_withNullScriptType() {
         // Try to execute with null script type
         try {
@@ -110,6 +121,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_withNullScript() {
         // Setup test script engine
         scriptEngineFactory.add("test", testScriptEngine);
@@ -122,6 +134,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertNull(testScriptEngine.getLastScript());
     }
 
+    @Test
     public void test_execute_withEmptyScript() {
         // Setup test script engine
         scriptEngineFactory.add("test", testScriptEngine);
@@ -134,6 +147,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertEquals("", testScriptEngine.getLastScript());
     }
 
+    @Test
     public void test_execute_scriptEngineReturnsNull() {
         // Setup engine that returns null
         scriptEngineFactory.add("nullEngine", new ScriptEngine() {
@@ -148,6 +162,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_execute_scriptEngineThrowsException() {
         // Setup engine that throws exception
         scriptEngineFactory.add("errorEngine", new ScriptEngine() {
@@ -166,6 +181,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_caseInsensitiveScriptType() {
         // Setup test script engine
         scriptEngineFactory.add("TestEngine", testScriptEngine);
@@ -181,6 +197,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertEquals("processed: script3", result3);
     }
 
+    @Test
     public void test_execute_verifyParamsNotModifiable() {
         // Setup engine that tries to modify params
         scriptEngineFactory.add("modifyEngine", new ScriptEngine() {
@@ -201,6 +218,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertEquals(2, result2); // Should still be 2, not accumulating
     }
 
+    @Test
     public void test_shutdown_withListener() {
         // Add shutdown listener
         TestShutdownListener listener = new TestShutdownListener();
@@ -216,6 +234,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertTrue(listener.wasShutdownCalled());
     }
 
+    @Test
     public void test_shutdown_withoutListener() {
         // Call shutdown without setting listener
         try {
@@ -226,6 +245,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addShutdownListener_replacesExisting() {
         // Add first listener
         TestShutdownListener listener1 = new TestShutdownListener();
@@ -243,6 +263,7 @@ public class ScriptExecutorTest extends UnitFessTestCase {
         assertTrue(listener2.wasShutdownCalled());
     }
 
+    @Test
     public void test_addShutdownListener_null() {
         // Add null listener
         scriptExecutor.addShutdownListener(null);

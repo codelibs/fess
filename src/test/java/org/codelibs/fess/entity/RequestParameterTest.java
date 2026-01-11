@@ -16,9 +16,12 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class RequestParameterTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withValidNameAndValues() {
         // Test with normal name and values
         String name = "paramName";
@@ -33,6 +36,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals("value3", param.getValues()[2]);
     }
 
+    @Test
     public void test_constructor_withNullName() {
         // Test with null name
         String[] values = { "value1" };
@@ -43,6 +47,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(1, param.getValues().length);
     }
 
+    @Test
     public void test_constructor_withEmptyName() {
         // Test with empty name
         String name = "";
@@ -54,6 +59,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(2, param.getValues().length);
     }
 
+    @Test
     public void test_constructor_withNullValues() {
         // Test with null values array
         String name = "paramName";
@@ -63,6 +69,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertNull(param.getValues());
     }
 
+    @Test
     public void test_constructor_withEmptyValues() {
         // Test with empty values array
         String name = "paramName";
@@ -74,6 +81,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(0, param.getValues().length);
     }
 
+    @Test
     public void test_constructor_withSingleValue() {
         // Test with single value
         String name = "singleParam";
@@ -86,6 +94,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals("onlyValue", param.getValues()[0]);
     }
 
+    @Test
     public void test_constructor_withNullAndNonNullValues() {
         // Test with mix of null and non-null values
         String name = "mixedParam";
@@ -101,6 +110,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertNull(param.getValues()[3]);
     }
 
+    @Test
     public void test_constructor_withSpecialCharacters() {
         // Test with special characters in name and values
         String name = "param-name_123!@#";
@@ -115,6 +125,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals("日本語", param.getValues()[2]);
     }
 
+    @Test
     public void test_toString_withValidData() {
         // Test toString with normal data
         String name = "testParam";
@@ -125,6 +136,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_toString_withNullName() {
         // Test toString with null name
         String[] values = { "value1" };
@@ -134,6 +146,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_toString_withNullValues() {
         // Test toString with null values
         String name = "testParam";
@@ -143,6 +156,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_toString_withEmptyValues() {
         // Test toString with empty values
         String name = "emptyParam";
@@ -153,6 +167,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_toString_withNullInValues() {
         // Test toString with null elements in values
         String name = "mixedParam";
@@ -163,6 +178,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_toString_withSpecialCharacters() {
         // Test toString with special characters
         String name = "special[]param";
@@ -173,6 +189,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(expected, param.toString());
     }
 
+    @Test
     public void test_immutability() {
         // Test that modifying the original values array doesn't affect the parameter
         String name = "immutableParam";
@@ -194,6 +211,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertSame(retrievedValues, param.getValues());
     }
 
+    @Test
     public void test_largeValueArray() {
         // Test with large array of values
         String name = "largeParam";
@@ -210,6 +228,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals("value999", param.getValues()[999]);
     }
 
+    @Test
     public void test_veryLongStrings() {
         // Test with very long strings
         StringBuilder longNameBuilder = new StringBuilder();
@@ -233,6 +252,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(longValue, param.getValues()[0]);
     }
 
+    @Test
     public void test_getName() {
         // Test getName method explicitly
         String name = "getName";
@@ -245,6 +265,7 @@ public class RequestParameterTest extends UnitFessTestCase {
         assertEquals(name, param.getName());
     }
 
+    @Test
     public void test_getValues() {
         // Test getValues method explicitly
         String name = "getValues";

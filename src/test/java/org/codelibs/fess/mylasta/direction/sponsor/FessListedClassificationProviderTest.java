@@ -21,17 +21,22 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.jdbc.ClassificationMeta;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessListedClassificationProviderTest extends UnitFessTestCase {
 
     private FessListedClassificationProvider provider;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         provider = new FessListedClassificationProvider();
     }
 
+    @Test
     public void test_provide_notFound() {
         // Test with various classification names that should not be found
         assertProvideThrowsException("TestClassification");
@@ -41,6 +46,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertProvideThrowsException("Project.TestClassification");
     }
 
+    @Test
     public void test_provide_nullClassificationName() {
         // Test with null classification name
         try {
@@ -54,6 +60,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_findOnMainSchema_alwaysReturnsNull() {
         // Since the implementation always returns null (no DBFlute classification used),
         // test that it consistently returns null for any input
@@ -63,6 +70,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertNull(invokeMethod(provider, "findOnMainSchema", "Project.TestClassification"));
     }
 
+    @Test
     public void test_determineAlias_returnsEmpty() {
         // Test with various locales
         OptionalThing<String> result = provider.determineAlias(Locale.ENGLISH);
@@ -78,6 +86,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_determineAlias_multipleLocales() {
         // Test with various locale configurations
         Locale[] testLocales = { Locale.US, Locale.UK, Locale.CANADA, Locale.FRANCE, Locale.CHINA, Locale.KOREA, new Locale("es", "ES"),
@@ -89,6 +98,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_provide_withSpecialCharacters() {
         // Test classification names with special characters
         assertProvideThrowsException("Test@Classification");
@@ -108,6 +118,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertProvideThrowsException("Test'Classification'");
     }
 
+    @Test
     public void test_provide_withWhitespace() {
         // Test classification names with whitespace
         assertProvideThrowsException(" ");
@@ -123,6 +134,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertProvideThrowsException("Test\nClassification");
     }
 
+    @Test
     public void test_provide_withNumericValues() {
         // Test classification names with numeric values
         assertProvideThrowsException("123");
@@ -133,6 +145,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertProvideThrowsException("Test123Classification");
     }
 
+    @Test
     public void test_provide_withLongClassificationName() {
         // Test with very long classification name
         StringBuilder longName = new StringBuilder();
@@ -142,6 +155,7 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
         assertProvideThrowsException(longName.toString());
     }
 
+    @Test
     public void test_provide_withUnicodeCharacters() {
         // Test classification names with Unicode characters
         assertProvideThrowsException("テスト分類");

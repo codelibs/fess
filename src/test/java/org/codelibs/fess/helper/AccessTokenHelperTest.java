@@ -22,6 +22,9 @@ import java.util.Random;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AccessTokenHelperTest extends UnitFessTestCase {
 
@@ -29,12 +32,14 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
 
     private AccessTokenHelper accessTokenHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         accessTokenHelper = new AccessTokenHelper();
     }
 
+    @Test
     public void test_generateAccessToken() {
         List<String> tokens = new ArrayList<String>();
         for (int i = 0; i < NUM; i++) {
@@ -48,6 +53,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_ok0() {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
@@ -55,6 +61,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_ok1() {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
@@ -62,11 +69,13 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_bad0() {
         MockletHttpServletRequest req = getMockRequest();
         assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_bad1() {
         final String token = "INVALID _TOKEN0";
         MockletHttpServletRequest req = getMockRequest();
@@ -79,6 +88,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_bad2() {
         final String token = "Bearer";
         MockletHttpServletRequest req = getMockRequest();
@@ -91,18 +101,21 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_emptyHeader() {
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", "");
         assertEquals("", accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_whitespaceHeader() {
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", "   ");
         assertEquals("", accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_multipleSpaces() {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
@@ -115,6 +128,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_threeElements() {
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", "Bearer token extra");
@@ -126,6 +140,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_bearerWithTrailingSpaces() {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
@@ -133,11 +148,13 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertEquals(token, accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_noHeaderNoParameter() {
         MockletHttpServletRequest req = getMockRequest();
         assertNull(accessTokenHelper.getAccessTokenFromRequest(req));
     }
 
+    @Test
     public void test_setRandom() {
         final Random customRandom = new Random(12345L);
         accessTokenHelper.setRandom(customRandom);
@@ -150,6 +167,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertEquals(token1, token2);
     }
 
+    @Test
     public void test_generateAccessToken_withCustomRandom() {
         final Random customRandom = new Random(0L);
         accessTokenHelper.setRandom(customRandom);
@@ -159,6 +177,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         assertFalse(token.isEmpty());
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_caseInsensitiveBearer() {
         final String token = accessTokenHelper.generateAccessToken();
         MockletHttpServletRequest req = getMockRequest();
@@ -171,6 +190,7 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAccessTokenFromRequest_invalidBearerFormat() {
         MockletHttpServletRequest req = getMockRequest();
         req.addHeader("Authorization", "InvalidBearer token");

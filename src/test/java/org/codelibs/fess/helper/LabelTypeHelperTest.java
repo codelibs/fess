@@ -28,14 +28,18 @@ import org.codelibs.fess.helper.LabelTypeHelper.LabelTypePattern;
 import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LabelTypeHelperTest extends UnitFessTestCase {
 
     private LabelTypeHelper labelTypeHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         labelTypeHelper = new LabelTypeHelper();
         ComponentUtil.register(new SystemHelper(), "systemHelper");
         ComponentUtil.register(new MockLabelTypeService(), LabelTypeService.class.getCanonicalName());
@@ -43,6 +47,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockRoleQueryHelper(), "roleQueryHelper");
     }
 
+    @Test
     public void test_init() {
         try {
             labelTypeHelper.init();
@@ -51,11 +56,13 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_load() {
         int result = labelTypeHelper.load();
         assertTrue(result >= 0);
     }
 
+    @Test
     public void test_refresh() {
         List<LabelType> labelTypeList = createTestLabelTypeList();
 
@@ -66,6 +73,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_matchLocale() {
         assertFalse(labelTypeHelper.matchLocale(Locale.ENGLISH, Locale.JAPANESE));
         assertFalse(labelTypeHelper.matchLocale(Locale.SIMPLIFIED_CHINESE, Locale.TRADITIONAL_CHINESE));
@@ -79,6 +87,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertTrue(labelTypeHelper.matchLocale(Locale.TRADITIONAL_CHINESE, Locale.CHINESE));
     }
 
+    @Test
     public void test_matchLocale_edgeCases() {
         // Test with null request locale
         assertTrue(labelTypeHelper.matchLocale(null, Locale.ROOT));
@@ -97,34 +106,40 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertTrue(labelTypeHelper.matchLocale(enUS, en));
     }
 
+    @Test
     public void test_getLabelTypeItemList_searchRequestType() {
         List<Map<String, String>> result = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
         assertNotNull(result);
     }
 
+    @Test
     public void test_getLabelTypeItemList_searchRequestTypeAndLocale() {
         List<Map<String, String>> result = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH, Locale.ENGLISH);
         assertNotNull(result);
     }
 
+    @Test
     public void test_getLabelTypeItemList_nullLabelTypeItemList() {
         // Test when labelTypeItemList is null (triggers init)
         List<Map<String, String>> result = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH, Locale.ROOT);
         assertNotNull(result);
     }
 
+    @Test
     public void test_getMatchedLabelValueSet() {
         String path = "/test/path";
         Set<String> result = labelTypeHelper.getMatchedLabelValueSet(path);
         assertNotNull(result);
     }
 
+    @Test
     public void test_getMatchedLabelValueSet_emptyPatternList() {
         // Test with empty pattern list
         Set<String> result = labelTypeHelper.getMatchedLabelValueSet("/nonexistent/path");
         assertNotNull(result);
     }
 
+    @Test
     public void test_getMatchedLabelValueSet_nullPath() {
         try {
             labelTypeHelper.getMatchedLabelValueSet(null);
@@ -135,6 +150,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildLabelTypeItems() {
         List<LabelType> labelTypeList = createTestLabelTypeList();
 
@@ -146,6 +162,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_buildLabelTypePatternList() {
         List<LabelType> labelTypeList = createTestLabelTypeList();
 
@@ -157,6 +174,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_labelTypePattern_constructor() {
         try {
             LabelTypePattern pattern = new LabelTypePattern("test", "/test.*", "/exclude.*");
@@ -167,6 +185,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_labelTypePattern_constructor_nullPaths() {
         try {
             LabelTypePattern pattern = new LabelTypePattern("test", null, null);
@@ -177,6 +196,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_labelTypePattern_constructor_emptyPaths() {
         try {
             LabelTypePattern pattern = new LabelTypePattern("test", "", "");
@@ -187,6 +207,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_labelTypePattern_match() {
         LabelTypePattern pattern = new LabelTypePattern("test", "/test.*", "/exclude.*");
 
@@ -200,6 +221,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertFalse(pattern.match("/other/path"));
     }
 
+    @Test
     public void test_labelTypePattern_match_onlyIncluded() {
         LabelTypePattern pattern = new LabelTypePattern("test", "/test.*", null);
 
@@ -210,6 +232,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertFalse(pattern.match("/other/path"));
     }
 
+    @Test
     public void test_labelTypePattern_match_onlyExcluded() {
         LabelTypePattern pattern = new LabelTypePattern("test", null, "/exclude.*");
 
@@ -220,6 +243,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertFalse(pattern.match("/exclude/path"));
     }
 
+    @Test
     public void test_labelTypePattern_match_noPatterns() {
         LabelTypePattern pattern = new LabelTypePattern("test", null, null);
 
@@ -228,6 +252,7 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertTrue(pattern.match("/test/path"));
     }
 
+    @Test
     public void test_labelTypePattern_match_multilinePaths() {
         LabelTypePattern pattern = new LabelTypePattern("test", "/test.*\n/another.*", "/exclude.*\n/deny.*");
 
@@ -244,15 +269,18 @@ public class LabelTypeHelperTest extends UnitFessTestCase {
         assertFalse(pattern.match("/deny/path"));
     }
 
+    @Test
     public void test_labelTypeHelper_inheritance() {
         assertTrue(labelTypeHelper instanceof AbstractConfigHelper);
     }
 
+    @Test
     public void test_load_returnValue() {
         int result = labelTypeHelper.load();
         assertEquals(2, result); // Based on mock data
     }
 
+    @Test
     public void test_getMatchedLabelValueSet_multipleMatches() {
         // Load some test data first
         labelTypeHelper.load();

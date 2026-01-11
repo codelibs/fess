@@ -42,6 +42,11 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
 
@@ -56,9 +61,10 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
     private TestIngestFactory ingestFactory;
     private FessConfig.SimpleImpl fessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Clear cached components in ComponentUtil using reflection
         try {
@@ -159,16 +165,19 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_init() {
         // Test initialization
         assertEquals(1048576L, indexUpdateCallback.maxDocumentRequestSize);
         assertEquals(10000, indexUpdateCallback.maxDocumentCacheSize);
     }
 
+    @Test
     public void test_store_withValidData() {
         // Prepare test data
         DataStoreParams paramMap = new DataStoreParams();
@@ -182,13 +191,14 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         // Verify
         assertEquals(1, indexUpdateCallback.getDocumentSize());
         // Check if fields were added (they should be added by the store method)
-        assertNotNull("ID should be set", dataMap.get("id"));
-        assertNotNull("Doc ID should be set", dataMap.get("doc_id"));
-        assertNotNull("Click count should be set", dataMap.get("click_count"));
-        assertNotNull("Favorite count should be set", dataMap.get("favorite_count"));
+        assertNotNull(dataMap.get("id"), "ID should be set");
+        assertNotNull(dataMap.get("doc_id"), "Doc ID should be set");
+        assertNotNull(dataMap.get("click_count"), "Click count should be set");
+        assertNotNull(dataMap.get("favorite_count"), "Favorite count should be set");
         assertEquals(1, indexUpdateCallback.docList.size());
     }
 
+    @Test
     public void test_store_withoutUrl_throwsException() {
         // Prepare test data without URL
         DataStoreParams paramMap = new DataStoreParams();
@@ -204,6 +214,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_store_withLabels() {
         // Setup label matching
         labelTypeHelper.matchedLabels.add("label1");
@@ -230,6 +241,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertTrue(labelSet.contains("label2"));
     }
 
+    @Test
     public void test_store_triggersIndexing_whenCacheSizeExceeded() {
         // Set small cache size
         indexUpdateCallback.maxDocumentCacheSize = 1;
@@ -249,6 +261,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(2, indexingHelper.sendDocumentsCalled);
     }
 
+    @Test
     public void test_store_triggersIndexing_whenRequestSizeExceeded() {
         // Set small request size
         indexUpdateCallback.maxDocumentRequestSize = 100;
@@ -265,6 +278,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(1, indexingHelper.sendDocumentsCalled);
     }
 
+    @Test
     public void test_commit() {
         // Add documents to cache
         DataStoreParams paramMap = new DataStoreParams();
@@ -283,6 +297,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(0, indexUpdateCallback.docList.size());
     }
 
+    @Test
     public void test_commit_withEmptyCache() {
         // Execute commit with no documents
         indexUpdateCallback.commit();
@@ -291,6 +306,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(0, indexingHelper.sendDocumentsCalled);
     }
 
+    @Test
     public void test_ingest_withNoFactory() {
         // No ingest factory set
         DataStoreParams paramMap = new DataStoreParams();
@@ -304,6 +320,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertSame(dataMap, result);
     }
 
+    @Test
     public void test_ingest_withFactory() {
         // Setup ingest factory
         TestIngester ingester = new TestIngester();
@@ -325,6 +342,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals("processed", result.get("status"));
     }
 
+    @Test
     public void test_ingest_withException() {
         // Setup ingester that throws exception
         TestIngester failingIngester = new TestIngester() {
@@ -350,6 +368,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertSame(dataMap, result);
     }
 
+    @Test
     public void test_addClickCountField() {
         searchLogHelper.clickCount = 42;
 
@@ -359,6 +378,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(42, doc.get("click_count"));
     }
 
+    @Test
     public void test_addFavoriteCountField() {
         searchLogHelper.favoriteCount = 99L;
 
@@ -368,6 +388,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(99L, doc.get("favorite_count"));
     }
 
+    @Test
     public void test_getDocumentSize() {
         assertEquals(0, indexUpdateCallback.getDocumentSize());
 
@@ -383,6 +404,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(2, indexUpdateCallback.getDocumentSize());
     }
 
+    @Test
     public void test_getExecuteTime() {
         assertEquals(0, indexUpdateCallback.getExecuteTime());
 
@@ -400,6 +422,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(200L, indexUpdateCallback.getExecuteTime());
     }
 
+    @Test
     public void test_store_withClickCountDisabled() {
         // Create new config with click/favorite count disabled
         fessConfig = new FessConfig.SimpleImpl() {
@@ -471,6 +494,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertFalse(dataMap.containsKey("favorite_count"));
     }
 
+    @Test
     public void test_store_withExistingDocId() {
         DataStoreParams paramMap = new DataStoreParams();
         Map<String, Object> dataMap = new HashMap<>();
@@ -483,6 +507,7 @@ public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals("existing-doc-id", dataMap.get("doc_id"));
     }
 
+    @Test
     public void test_concurrentStore() throws Exception {
         // Test thread safety
         final int threadCount = 10;

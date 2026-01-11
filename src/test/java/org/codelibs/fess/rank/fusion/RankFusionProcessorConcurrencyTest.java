@@ -35,6 +35,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
 
 /**
  * Concurrency and thread-safety tests for RankFusionProcessor.
@@ -48,6 +49,7 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
      * Test concurrent registration of searchers from multiple threads.
      * Verifies that CopyOnWriteArrayList handles concurrent modifications safely.
      */
+    @Test
     public void test_concurrentSearcherRegistration() throws Exception {
         final int numThreads = 10;
         final int searchersPerThread = 5;
@@ -95,6 +97,7 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
      * Test that search operations can be performed while searchers are being registered.
      * Verifies CopyOnWriteArrayList's snapshot iteration behavior.
      */
+    @Test
     public void test_searchWhileRegisteringSearchers() throws Exception {
         final CountDownLatch startLatch = new CountDownLatch(1);
         final AtomicInteger searchCount = new AtomicInteger(0);
@@ -153,6 +156,7 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
     /**
      * Test that setSearcher and register can be called concurrently.
      */
+    @Test
     public void test_concurrentSetAndRegister() throws Exception {
         final int numIterations = 100;
         final CountDownLatch startLatch = new CountDownLatch(1);
@@ -211,6 +215,7 @@ public class RankFusionProcessorConcurrencyTest extends UnitFessTestCase {
      * Test multiple concurrent search operations.
      * Verifies that parallel searches don't interfere with each other.
      */
+    @Test
     public void test_multipleConcurrentSearches() throws Exception {
         final int numSearchThreads = 5;
         final CountDownLatch startLatch = new CountDownLatch(1);

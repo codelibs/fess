@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -113,6 +114,7 @@ public class DocumentsTests extends CrudTestBase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() {
         // Custom teardown in tearDownAll
     }

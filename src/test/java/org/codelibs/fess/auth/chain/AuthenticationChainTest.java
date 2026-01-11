@@ -22,10 +22,13 @@ import java.util.Map;
 
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class AuthenticationChainTest extends UnitFessTestCase {
 
     // Test basic update operation
+    @Test
     public void test_update_normalUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User user = createTestUser("testuser", "Test User");
@@ -38,6 +41,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test update with null user
+    @Test
     public void test_update_nullUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.updateThrowsException = false;
@@ -49,6 +53,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test update with multiple calls
+    @Test
     public void test_update_multipleCalls() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User user1 = createTestUser("user1", "User One");
@@ -66,6 +71,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test update with exception handling
+    @Test
     public void test_update_withException() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.updateThrowsException = true;
@@ -82,6 +88,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test basic delete operation
+    @Test
     public void test_delete_normalUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User user = createTestUser("testuser", "Test User");
@@ -93,6 +100,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test delete with null user
+    @Test
     public void test_delete_nullUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
 
@@ -103,6 +111,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test delete with multiple users
+    @Test
     public void test_delete_multipleUsers() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         List<User> users = new ArrayList<>();
@@ -121,6 +130,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test delete with exception
+    @Test
     public void test_delete_withException() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.deleteThrowsException = true;
@@ -137,6 +147,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with valid credentials
+    @Test
     public void test_changePassword_success() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = true;
@@ -150,6 +161,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with failure
+    @Test
     public void test_changePassword_failure() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = false;
@@ -161,6 +173,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with null username
+    @Test
     public void test_changePassword_nullUsername() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = false;
@@ -174,6 +187,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with null password
+    @Test
     public void test_changePassword_nullPassword() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = true;
@@ -187,6 +201,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with empty strings
+    @Test
     public void test_changePassword_emptyStrings() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = false;
@@ -200,6 +215,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with special characters
+    @Test
     public void test_changePassword_specialCharacters() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordResult = true;
@@ -216,6 +232,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test changePassword with exception
+    @Test
     public void test_changePassword_withException() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.changePasswordThrowsException = true;
@@ -231,6 +248,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test load with existing user
+    @Test
     public void test_load_existingUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User inputUser = createTestUser("inputuser", "Input User");
@@ -246,6 +264,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test load with null user
+    @Test
     public void test_load_nullUser() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User loadedUser = createTestUser("loadeduser", "Loaded User");
@@ -259,6 +278,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test load returning null
+    @Test
     public void test_load_returnsNull() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.loadResult = null;
@@ -272,6 +292,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test load with multiple calls
+    @Test
     public void test_load_multipleCalls() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User user1 = createTestUser("user1", "User One");
@@ -293,6 +314,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test load with exception
+    @Test
     public void test_load_withException() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         chain.loadThrowsException = true;
@@ -309,6 +331,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test implementation state tracking
+    @Test
     public void test_implementation_stateTracking() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         User user1 = createTestUser("user1", "User One");
@@ -334,6 +357,7 @@ public class AuthenticationChainTest extends UnitFessTestCase {
     }
 
     // Test concurrent operations simulation
+    @Test
     public void test_implementation_sequentialOperations() {
         TestAuthenticationChain chain = new TestAuthenticationChain();
         List<User> users = new ArrayList<>();

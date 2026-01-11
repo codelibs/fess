@@ -28,9 +28,11 @@ import org.opensearch.core.xcontent.MediaType;
 import org.opensearch.core.xcontent.ToXContent;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.search.SearchHit;
+import org.junit.jupiter.api.Test;
 
 public class SearchEngineUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_getXContentBuilderOutputStream_success() {
         XContentBuilderCallback callback = (builder, params) -> {
             builder.startObject();
@@ -44,6 +46,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertTrue(outputStream instanceof ByteArrayOutputStream);
     }
 
+    @Test
     public void test_getXContentBuilderOutputStream_ioException() {
         XContentBuilderCallback callback = (builder, params) -> {
             // Simulate IOException by creating invalid state
@@ -55,6 +58,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertTrue(outputStream instanceof ByteArrayOutputStream);
     }
 
+    @Test
     public void test_getXContentBuilderOutputStream_withDifferentMediaTypes() {
         XContentBuilderCallback callback = (builder, params) -> {
             builder.startObject();
@@ -72,6 +76,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertNotNull(yamlOutput);
     }
 
+    @Test
     public void test_getXContentOutputStream_success() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -88,6 +93,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertTrue(outputStream instanceof ByteArrayOutputStream);
     }
 
+    @Test
     public void test_getXContentOutputStream_withException() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -101,6 +107,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertTrue(outputStream instanceof ByteArrayOutputStream);
     }
 
+    @Test
     public void test_getXContentString_success() {
         // Test that getXContentString method exists and handles exceptions properly
         ToXContent xContent = new ToXContent() {
@@ -125,6 +132,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getXContentString_withException() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -142,6 +150,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getXContentString_withEmptyContent() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -162,6 +171,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getXContentString_withComplexContent() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -197,6 +207,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getXContentString_withDifferentMediaTypes() {
         ToXContent xContent = new ToXContent() {
             @Override
@@ -228,6 +239,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_scroll_callbackHandling() {
         // This test verifies the scroll method exists and handles callbacks properly
         // Note: In a real test environment, this would require proper SearchEngineClient setup
@@ -255,6 +267,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_XContentBuilderCallback_interface() {
         // Test that the functional interface works correctly
         XContentBuilderCallback callback = (builder, params) -> {
@@ -271,6 +284,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertNotNull(result);
     }
 
+    @Test
     public void test_XContentBuilderCallback_withComplexLogic() {
         XContentBuilderCallback callback = (builder, params) -> {
             builder.startObject();
@@ -300,6 +314,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertTrue(result instanceof ByteArrayOutputStream);
     }
 
+    @Test
     public void test_XContentBuilderCallback_nullBuilder() {
         XContentBuilderCallback callback = (builder, params) -> {
             // Test behavior when builder operations might fail
@@ -317,6 +332,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         assertNotNull(result);
     }
 
+    @Test
     public void test_utility_class_instantiation() {
         // Verify that SearchEngineUtil is a utility class with private constructor
         try {
@@ -329,6 +345,7 @@ public class SearchEngineUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_constants_and_static_methods() {
         // Verify all public static methods exist
         try {

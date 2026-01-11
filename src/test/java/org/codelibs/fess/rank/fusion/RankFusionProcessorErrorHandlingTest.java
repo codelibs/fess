@@ -30,6 +30,7 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.rank.fusion.SearchResult.SearchResultBuilder;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
 
 /**
  * Error handling tests for RankFusionProcessor.
@@ -42,6 +43,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of searcher that throws RuntimeException.
      */
+    @Test
     public void test_searcherThrowsRuntimeException() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -57,6 +59,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of searcher that throws FessSystemException.
      */
+    @Test
     public void test_searcherThrowsFessSystemException() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -72,6 +75,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of searcher that returns null documents.
      */
+    @Test
     public void test_searcherReturnsNullDocuments() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -87,6 +91,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of documents with missing ID field.
      */
+    @Test
     public void test_documentsWithMissingIdField() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -102,6 +107,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of documents with null ID field.
      */
+    @Test
     public void test_documentsWithNullIdField() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -117,6 +123,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of documents with non-string ID field.
      */
+    @Test
     public void test_documentsWithNonStringIdField() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));
@@ -132,6 +139,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test that all searchers failing still returns empty result gracefully.
      */
+    @Test
     public void test_allSearchersFail() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new ExceptionThrowingSearcher(new RuntimeException("Main searcher failed")));
@@ -146,6 +154,7 @@ public class RankFusionProcessorErrorHandlingTest extends UnitFessTestCase {
     /**
      * Test handling of very slow searcher (simulates timeout scenario).
      */
+    @Test
     public void test_slowSearcher() throws Exception {
         try (RankFusionProcessor processor = new RankFusionProcessor()) {
             processor.setSearcher(new TestSearcher(100));

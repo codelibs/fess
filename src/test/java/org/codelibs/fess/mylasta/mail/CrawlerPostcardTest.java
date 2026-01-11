@@ -16,20 +16,27 @@
 package org.codelibs.fess.mylasta.mail;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlerPostcardTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Basic test to verify test framework is working
+    @Test
     public void test_basicAssertion() {
         assertTrue(true);
         assertFalse(false);
@@ -38,6 +45,7 @@ public class CrawlerPostcardTest extends UnitFessTestCase {
     }
 
     // Test placeholder for future implementation
+    @Test
     public void test_placeholder() {
         // This test verifies the test class can be instantiated and run
         String testValue = "test";

@@ -25,49 +25,61 @@ import org.codelibs.fess.exception.JobNotFoundException;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.JobProcess;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ProcessHelperTest extends UnitFessTestCase {
 
     public ProcessHelper processHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         processHelper = new ProcessHelper();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Clean up any running processes
         processHelper.destroy();
         super.tearDown();
     }
 
+    @Test
     public void test_isProcessRunning_empty() {
         assertFalse(processHelper.isProcessRunning());
     }
 
+    @Test
     public void test_isProcessRunning_withSessionId_notExists() {
         assertFalse(processHelper.isProcessRunning("nonexistent"));
     }
 
+    @Test
     public void test_getRunningSessionIdSet_empty() {
         Set<String> sessionIds = processHelper.getRunningSessionIdSet();
         assertNotNull(sessionIds);
         assertTrue(sessionIds.isEmpty());
     }
 
+    @Test
     public void test_destroyProcess_nonExistent() {
         int result = processHelper.destroyProcess("nonexistent");
         assertEquals(-1, result);
     }
 
+    @Test
     public void test_setProcessDestroyTimeout() {
         processHelper.setProcessDestroyTimeout(20);
         // We can't directly verify the timeout value, but we can ensure the method doesn't throw
         assertTrue(true);
     }
 
+    @Test
     public void test_sendCommand_jobNotFound() {
         try {
             processHelper.sendCommand("nonexistent", "test command");
@@ -77,6 +89,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_startProcess_basicCommand() {
         String sessionId = "test_session";
         List<String> cmdList = Arrays.asList("echo", "hello");
@@ -103,6 +116,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_startProcess_withBufferSizeAndCallback() {
         String sessionId = "test_session_buffer";
         List<String> cmdList = Arrays.asList("echo", "hello world");
@@ -132,6 +146,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_startProcess_invalidCommand() {
         String sessionId = "test_invalid";
         List<String> cmdList = Arrays.asList("nonexistent_command_12345");
@@ -147,6 +162,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_startProcess_replaceExistingProcess() {
         String sessionId = "test_replace";
         // Use sleep commands that run longer so we can verify they're running
@@ -184,6 +200,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleProcesses() {
         String sessionId1 = "test_multi1";
         String sessionId2 = "test_multi2";
@@ -217,6 +234,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_destroyProcess_withRunningProcess() {
         String sessionId = "test_destroy";
         // Use sleep command that runs longer so we can verify it's running
@@ -246,6 +264,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_destroy_allProcesses() {
         String sessionId1 = "test_destroy_all1";
         String sessionId2 = "test_destroy_all2";
@@ -276,6 +295,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_sendCommand_withRunningProcess() {
         String sessionId = "test_send_command";
         List<String> cmdList = Arrays.asList("cat"); // cat reads from stdin
@@ -304,6 +324,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processBuilder_configuration() {
         String sessionId = "test_pb_config";
         List<String> cmdList = Arrays.asList("echo", "hello");
@@ -330,6 +351,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isProcessRunning_afterProcessCompletes() {
         String sessionId = "test_completed";
         List<String> cmdList = Arrays.asList("echo", "hello");
@@ -355,6 +377,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getRunningSessionIdSet_afterDestroy() {
         String sessionId = "test_sessionid_destroy";
         List<String> cmdList = Arrays.asList("echo", "hello");
@@ -377,6 +400,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setProcessDestroyTimeout_differentValues() {
         processHelper.setProcessDestroyTimeout(5);
         processHelper.setProcessDestroyTimeout(15);
@@ -386,6 +410,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_processHelper_synchronization() {
         String sessionId = "test_sync";
         List<String> cmdList = Arrays.asList("echo", "hello");
@@ -415,6 +440,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_emptyCommandList() {
         String sessionId = "test_empty_cmd";
         List<String> cmdList = new ArrayList<>();
@@ -431,6 +457,7 @@ public class ProcessHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_nullCallback() {
         String sessionId = "test_null_callback";
         List<String> cmdList = Arrays.asList("echo", "hello");

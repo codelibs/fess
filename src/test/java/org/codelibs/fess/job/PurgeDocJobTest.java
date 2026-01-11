@@ -23,6 +23,10 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.RangeQueryBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PurgeDocJobTest extends UnitFessTestCase {
 
@@ -36,9 +40,10 @@ public class PurgeDocJobTest extends UnitFessTestCase {
     private String expiresFieldName;
     private String documentUpdateIndex;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         purgeDocJob = new PurgeDocJob();
 
         // Reset flags and variables
@@ -78,16 +83,19 @@ public class PurgeDocJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_constructor() {
         // Test that constructor creates instance without error
         PurgeDocJob job = new PurgeDocJob();
         assertNotNull(job);
     }
 
+    @Test
     public void test_execute_success() {
         // Execute the job
         String result = purgeDocJob.execute();
@@ -109,6 +117,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertEquals("", result);
     }
 
+    @Test
     public void test_execute_withException() {
         // Create mock SearchEngineClient that throws exception
         searchEngineClient = new SearchEngineClient() {
@@ -127,6 +136,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withCustomFieldName() {
         // Configure custom expires field name
         expiresFieldName = "custom_expires_field";
@@ -164,6 +174,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertEquals("", result);
     }
 
+    @Test
     public void test_execute_withCustomIndexName() {
         // Configure custom index name
         documentUpdateIndex = "custom.document.index";
@@ -198,6 +209,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertEquals("", result);
     }
 
+    @Test
     public void test_execute_withNullPointerException() {
         // Create mock SearchEngineClient that throws NullPointerException
         searchEngineClient = new SearchEngineClient() {
@@ -215,6 +227,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.contains("Null value encountered"));
     }
 
+    @Test
     public void test_execute_withIllegalArgumentException() {
         // Create mock SearchEngineClient that throws IllegalArgumentException
         searchEngineClient = new SearchEngineClient() {
@@ -232,6 +245,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.contains("Invalid argument provided"));
     }
 
+    @Test
     public void test_execute_queryBuilderCreation() {
         // Execute the job
         purgeDocJob.execute();
@@ -247,6 +261,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertNull(rangeQuery.from());
     }
 
+    @Test
     public void test_execute_multipleExecutions() {
         // Execute the job multiple times
         String result1 = purgeDocJob.execute();
@@ -262,6 +277,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(deleteByQueryCalled);
     }
 
+    @Test
     public void test_execute_withEmptyIndexName() {
         // Configure empty index name
         documentUpdateIndex = "";
@@ -289,6 +305,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertEquals("", result);
     }
 
+    @Test
     public void test_execute_withEmptyFieldName() {
         // Configure empty field name
         expiresFieldName = "";
@@ -325,6 +342,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertFalse(deleteByQueryCalled);
     }
 
+    @Test
     public void test_execute_withOutOfMemoryError() {
         // Create mock SearchEngineClient that throws OutOfMemoryError
         searchEngineClient = new SearchEngineClient() {
@@ -345,6 +363,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_execute_verifyQueryToString() {
         // Execute the job
         purgeDocJob.execute();
@@ -356,6 +375,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(queryString.contains("expires"));
     }
 
+    @Test
     public void test_execute_withIOException() {
         // Create mock SearchEngineClient that throws IOException wrapped in RuntimeException
         searchEngineClient = new SearchEngineClient() {
@@ -373,6 +393,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.contains("IO error occurred during delete operation"));
     }
 
+    @Test
     public void test_execute_withTimeoutException() {
         // Create mock SearchEngineClient that throws timeout exception
         searchEngineClient = new SearchEngineClient() {
@@ -390,6 +411,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.contains("Operation timed out after 30 seconds"));
     }
 
+    @Test
     public void test_execute_verifyComponentUtilCalls() {
         // Execute the job
         purgeDocJob.execute();
@@ -400,6 +422,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertNotNull(deleteQuery);
     }
 
+    @Test
     public void test_execute_withLongExceptionMessage() {
         // Create a very long exception message
         StringBuilder longMessage = new StringBuilder("Error: ");
@@ -425,6 +448,7 @@ public class PurgeDocJobTest extends UnitFessTestCase {
         assertTrue(result.endsWith("\n"));
     }
 
+    @Test
     public void test_execute_withSpecialCharactersInConfig() {
         // Configure field and index names with special characters
         expiresFieldName = "expires-field.with@special#chars";

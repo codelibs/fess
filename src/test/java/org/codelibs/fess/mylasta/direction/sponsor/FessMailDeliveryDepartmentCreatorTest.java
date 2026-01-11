@@ -18,15 +18,21 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
 
     private FessMailDeliveryDepartmentCreator creator;
     private FessConfig originalFessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         originalFessConfig = ComponentUtil.getFessConfig();
 
         // Set up test configuration
@@ -53,7 +59,8 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         if (originalFessConfig != null) {
             ComponentUtil.setFessConfig(originalFessConfig);
         }
@@ -61,11 +68,13 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test creator initialization
+    @Test
     public void test_creatorInitialization() {
         assertNotNull(creator);
     }
 
     // Test with different mail configurations
+    @Test
     public void test_mailConfiguration() {
         FessConfig config = ComponentUtil.getFessConfig();
 
@@ -75,6 +84,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test with different from names
+    @Test
     public void test_differentFromNames() {
         String[] fromNames = { "Administrator", "Support Team", "No Reply", "Test User" };
 
@@ -93,6 +103,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test with different from addresses
+    @Test
     public void test_differentFromAddresses() {
         String[] fromAddresses = { "noreply@example.com", "admin@test.org", "support@company.co.jp", "test.user@subdomain.example.com" };
 
@@ -111,6 +122,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test with different hostnames
+    @Test
     public void test_differentHostnames() {
         String[] hostnames = { "smtp.gmail.com", "mail.example.com", "localhost", "192.168.1.1" };
 
@@ -129,6 +141,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test with null values
+    @Test
     public void test_nullValues() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -156,6 +169,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test creator instance creation with valid config
+    @Test
     public void test_multipleCreatorInstances() {
         FessConfig config = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -170,6 +184,7 @@ public class FessMailDeliveryDepartmentCreatorTest extends UnitFessTestCase {
     }
 
     // Test with empty strings
+    @Test
     public void test_emptyStrings() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;

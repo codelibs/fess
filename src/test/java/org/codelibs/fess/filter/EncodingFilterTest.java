@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class EncodingFilterTest extends UnitFessTestCase {
+    @Test
     public void test_normal() throws IOException {
         final EncodingFilter filter = new EncodingFilter();
         Map<String, String[]> paramMap;
@@ -49,6 +51,7 @@ public class EncodingFilterTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_missing() throws IOException {
         final EncodingFilter filter = new EncodingFilter();
         Map<String, String[]> paramMap;
@@ -71,6 +74,7 @@ public class EncodingFilterTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_decode() throws IOException {
         final EncodingFilter filter = new EncodingFilter();
         Map<String, String[]> paramMap;

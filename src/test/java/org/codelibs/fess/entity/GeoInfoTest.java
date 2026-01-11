@@ -17,9 +17,11 @@ package org.codelibs.fess.entity;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.Test;
 
 public class GeoInfoTest extends UnitFessTestCase {
 
+    @Test
     public void test_34_150_10() {
         MockletHttpServletRequest request = getMockRequest();
         request.setParameter("geo.location.point", "34,150");
@@ -31,6 +33,7 @@ public class GeoInfoTest extends UnitFessTestCase {
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
+    @Test
     public void test_34_150_10_x() {
         MockletHttpServletRequest request = getMockRequest();
         request.setParameter("geo.location.x.point", "34,150");
@@ -42,6 +45,7 @@ public class GeoInfoTest extends UnitFessTestCase {
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
+    @Test
     public void test_34_150_10_2() {
         MockletHttpServletRequest request = getMockRequest();
         request.setParameter("geo.location.1.point", "34,150");

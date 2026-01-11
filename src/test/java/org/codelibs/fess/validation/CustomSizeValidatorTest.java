@@ -21,21 +21,27 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CustomSizeValidatorTest extends UnitFessTestCase {
 
     private CustomSizeValidator validator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         validator = new CustomSizeValidator();
     }
 
+    @Test
     public void test_constructor() {
         assertNotNull(validator);
     }
 
+    @Test
     public void test_isValid_nullValue() {
         final CustomSize annotation = createBasicAnnotation();
         validator.initialize(annotation);
@@ -44,12 +50,14 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
         assertTrue(validator.isValid(null, null));
     }
 
+    @Test
     public void test_initialize_withValidParameters() {
         final CustomSize annotation = createBasicAnnotation();
         validator.initialize(annotation);
         // Test that initialization completes without exception
     }
 
+    @Test
     public void test_classStructure() {
         // Test that the class exists and has the expected structure
         assertEquals("CustomSizeValidator should be in correct package", "org.codelibs.fess.validation.CustomSizeValidator",
@@ -60,6 +68,7 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
                 jakarta.validation.ConstraintValidator.class.isAssignableFrom(CustomSizeValidator.class));
     }
 
+    @Test
     public void test_methodsExist() {
         // Verify required methods exist
         try {
@@ -71,11 +80,13 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_inheritance() {
         assertTrue("Should implement ConstraintValidator interface",
                 jakarta.validation.ConstraintValidator.class.isAssignableFrom(CustomSizeValidator.class));
     }
 
+    @Test
     public void test_initializeWithBasicAnnotation() {
         final CustomSize annotation = createBasicAnnotation();
         try {
@@ -87,6 +98,7 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
     }
 
     // Test parameter validation without relying on complex configuration
+    @Test
     public void test_validateParameters_basic() {
         // Test that parameter validation can be performed
         final CustomSize validAnnotation = createBasicAnnotation();
@@ -99,6 +111,7 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isValid_basic() {
         final CustomSize annotation = createBasicAnnotation();
         validator.initialize(annotation);
@@ -106,10 +119,10 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
         // Test that the method can be called (even if context handling is complex)
         try {
             final boolean result = validator.isValid("test", null);
-            assertNotNull("isValid should return a boolean result", Boolean.valueOf(result));
+            assertNotNull(Boolean.valueOf(result), "isValid should return a boolean result");
         } catch (final NullPointerException e) {
             // This is expected if the implementation requires a non-null context
-            assertTrue("NPE is acceptable for null context in this implementation", true);
+            assertTrue(true, "NPE is acceptable for null context in this implementation");
         }
     }
 

@@ -20,13 +20,17 @@ import java.util.List;
 
 import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DuplicateHostHelperTest extends UnitFessTestCase {
     private DuplicateHostHelper duplicateHostHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         duplicateHostHelper = new DuplicateHostHelper();
         duplicateHostHelper.duplicateHostList = new ArrayList<DuplicateHost>();
 
@@ -44,6 +48,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         duplicateHostHelper.duplicateHostList.add(hoge);
     }
 
+    @Test
     public void test_convert() {
         String url;
         String result;
@@ -70,6 +75,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_convert_skip() {
         String url;
         String result;
@@ -95,6 +101,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertEquals(result, duplicateHostHelper.convert(url));
     }
 
+    @Test
     public void test_init() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
 
@@ -106,6 +113,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setDuplicateHostList() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
         List<DuplicateHost> testList = new ArrayList<>();
@@ -122,6 +130,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
     }
 
+    @Test
     public void test_add() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
 
@@ -136,6 +145,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
     }
 
+    @Test
     public void test_add_withNullList() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
         helper.duplicateHostList = null;
@@ -151,10 +161,12 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertEquals("www.test.com", helper.duplicateHostList.get(0).getRegularName());
     }
 
+    @Test
     public void test_convert_nullUrl() {
         assertNull(duplicateHostHelper.convert(null));
     }
 
+    @Test
     public void test_convert_withNullList() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
         helper.duplicateHostList = null;
@@ -166,6 +178,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertNotNull(helper.duplicateHostList);
     }
 
+    @Test
     public void test_convert_emptyList() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
         helper.duplicateHostList = new ArrayList<>();
@@ -176,6 +189,7 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         assertEquals(url, result);
     }
 
+    @Test
     public void test_convert_multipleTransformations() {
         DuplicateHostHelper helper = new DuplicateHostHelper();
         helper.duplicateHostList = new ArrayList<>();

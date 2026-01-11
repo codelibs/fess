@@ -16,21 +16,27 @@
 package org.codelibs.fess.helper;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlerLogHelperTest extends UnitFessTestCase {
 
     private CrawlerLogHelper crawlerLogHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         crawlerLogHelper = new CrawlerLogHelper();
     }
 
+    @Test
     public void test_instantiation() {
         assertNotNull(crawlerLogHelper);
     }
 
+    @Test
     public void test_log_method_exists() {
         // Test that the log method exists and can be called
         // We can't easily test the actual functionality without complex mocking

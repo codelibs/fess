@@ -26,9 +26,12 @@ import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalEntity;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class OptionalUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_ofNullable_withNonNullString() {
         String testValue = "test string";
         OptionalEntity<String> result = OptionalUtil.ofNullable(testValue);
@@ -38,6 +41,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(testValue, result.get());
     }
 
+    @Test
     public void test_ofNullable_withNullString() {
         String testValue = null;
         OptionalEntity<String> result = OptionalUtil.ofNullable(testValue);
@@ -46,6 +50,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withEmptyString() {
         String testValue = "";
         OptionalEntity<String> result = OptionalUtil.ofNullable(testValue);
@@ -55,6 +60,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals("", result.get());
     }
 
+    @Test
     public void test_ofNullable_withInteger() {
         Integer testValue = 42;
         OptionalEntity<Integer> result = OptionalUtil.ofNullable(testValue);
@@ -64,6 +70,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(Integer.valueOf(42), result.get());
     }
 
+    @Test
     public void test_ofNullable_withNullInteger() {
         Integer testValue = null;
         OptionalEntity<Integer> result = OptionalUtil.ofNullable(testValue);
@@ -72,6 +79,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withZeroInteger() {
         Integer testValue = 0;
         OptionalEntity<Integer> result = OptionalUtil.ofNullable(testValue);
@@ -81,6 +89,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(Integer.valueOf(0), result.get());
     }
 
+    @Test
     public void test_ofNullable_withBoolean() {
         Boolean testValue = true;
         OptionalEntity<Boolean> result = OptionalUtil.ofNullable(testValue);
@@ -90,6 +99,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(Boolean.TRUE, result.get());
     }
 
+    @Test
     public void test_ofNullable_withFalseBoolean() {
         Boolean testValue = false;
         OptionalEntity<Boolean> result = OptionalUtil.ofNullable(testValue);
@@ -99,6 +109,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(Boolean.FALSE, result.get());
     }
 
+    @Test
     public void test_ofNullable_withNullBoolean() {
         Boolean testValue = null;
         OptionalEntity<Boolean> result = OptionalUtil.ofNullable(testValue);
@@ -107,6 +118,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withDate() {
         Date testValue = new Date();
         OptionalEntity<Date> result = OptionalUtil.ofNullable(testValue);
@@ -116,6 +128,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(testValue, result.get());
     }
 
+    @Test
     public void test_ofNullable_withNullDate() {
         Date testValue = null;
         OptionalEntity<Date> result = OptionalUtil.ofNullable(testValue);
@@ -124,6 +137,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withLocalDateTime() {
         LocalDateTime testValue = LocalDateTime.now();
         OptionalEntity<LocalDateTime> result = OptionalUtil.ofNullable(testValue);
@@ -133,6 +147,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(testValue, result.get());
     }
 
+    @Test
     public void test_ofNullable_withBigDecimal() {
         BigDecimal testValue = new BigDecimal("123.456");
         OptionalEntity<BigDecimal> result = OptionalUtil.ofNullable(testValue);
@@ -142,6 +157,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(testValue, result.get());
     }
 
+    @Test
     public void test_ofNullable_withList() {
         List<String> testValue = Arrays.asList("item1", "item2", "item3");
         OptionalEntity<List<String>> result = OptionalUtil.ofNullable(testValue);
@@ -152,6 +168,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(3, result.get().size());
     }
 
+    @Test
     public void test_ofNullable_withEmptyList() {
         List<String> testValue = new ArrayList<>();
         OptionalEntity<List<String>> result = OptionalUtil.ofNullable(testValue);
@@ -162,6 +179,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(0, result.get().size());
     }
 
+    @Test
     public void test_ofNullable_withNullList() {
         List<String> testValue = null;
         OptionalEntity<List<String>> result = OptionalUtil.ofNullable(testValue);
@@ -170,6 +188,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withMap() {
         Map<String, Object> testValue = new HashMap<>();
         testValue.put("key1", "value1");
@@ -183,6 +202,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(2, result.get().size());
     }
 
+    @Test
     public void test_ofNullable_withEmptyMap() {
         Map<String, Object> testValue = new HashMap<>();
         OptionalEntity<Map<String, Object>> result = OptionalUtil.ofNullable(testValue);
@@ -193,6 +213,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(0, result.get().size());
     }
 
+    @Test
     public void test_ofNullable_withNullMap() {
         Map<String, Object> testValue = null;
         OptionalEntity<Map<String, Object>> result = OptionalUtil.ofNullable(testValue);
@@ -201,6 +222,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withArray() {
         String[] testValue = { "item1", "item2", "item3" };
         OptionalEntity<String[]> result = OptionalUtil.ofNullable(testValue);
@@ -211,6 +233,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(3, result.get().length);
     }
 
+    @Test
     public void test_ofNullable_withEmptyArray() {
         String[] testValue = new String[0];
         OptionalEntity<String[]> result = OptionalUtil.ofNullable(testValue);
@@ -221,6 +244,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(0, result.get().length);
     }
 
+    @Test
     public void test_ofNullable_withNullArray() {
         String[] testValue = null;
         OptionalEntity<String[]> result = OptionalUtil.ofNullable(testValue);
@@ -229,6 +253,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_withCustomObject() {
         CustomTestObject testValue = new CustomTestObject("test", 123);
         OptionalEntity<CustomTestObject> result = OptionalUtil.ofNullable(testValue);
@@ -240,6 +265,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals(123, result.get().getValue());
     }
 
+    @Test
     public void test_ofNullable_withNullCustomObject() {
         CustomTestObject testValue = null;
         OptionalEntity<CustomTestObject> result = OptionalUtil.ofNullable(testValue);
@@ -248,6 +274,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_ofNullable_optionalEntityBehavior() {
         // Test with present value
         String presentValue = "present";
@@ -268,6 +295,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertNull(emptyOptional.orElse(null));
     }
 
+    @Test
     public void test_ofNullable_multipleTypesInSequence() {
         // Test multiple different types in sequence to ensure type safety
         OptionalEntity<String> stringOpt = OptionalUtil.ofNullable("string");
@@ -286,6 +314,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertNotNull(dateOpt.get());
     }
 
+    @Test
     public void test_ofNullable_chainedOperations() {
         // Test chaining operations on the returned OptionalEntity
         String testValue = "HELLO WORLD";
@@ -307,6 +336,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         assertEquals("default", processedEmpty);
     }
 
+    @Test
     public void test_ofNullable_performanceAndMemory() {
         // Test creating many OptionalEntity instances
         for (int i = 0; i < 1000; i++) {
@@ -322,6 +352,7 @@ public class OptionalUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_ofNullable_edgeCaseValues() {
         // Test with special numeric values
         OptionalEntity<Double> nanOpt = OptionalUtil.ofNullable(Double.NaN);

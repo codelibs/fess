@@ -32,16 +32,21 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingInfo;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlingInfoHelperTest extends UnitFessTestCase {
     private CrawlingInfoHelper crawlingInfoHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         crawlingInfoHelper = new CrawlingInfoHelper();
     }
 
+    @Test
     public void test_generateId() {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://example.com/");
@@ -60,6 +65,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
                 crawlingInfoHelper.generateId(dataMap));
     }
 
+    @Test
     public void test_generateId_roleType() {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://example.com/");
@@ -85,6 +91,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
                 crawlingInfoHelper.generateId(dataMap));
     }
 
+    @Test
     public void test_generateId_virtualHost() {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://example.com/");
@@ -113,6 +120,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
                 crawlingInfoHelper.generateId(dataMap));
     }
 
+    @Test
     public void test_generateId_long() {
         for (int i = 0; i < 1000; i++) {
             final String value = RandomStringUtils.randomAlphabetic(550);
@@ -155,6 +163,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
                 crawlingInfoHelper.generateId(buf.substring(0, 520)));
     }
 
+    @Test
     public void test_generateId_multithread() throws Exception {
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("url", "http://example.com/");
@@ -181,6 +190,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals(1000, counter.get());
     }
 
+    @Test
     public void test_getCanonicalSessionId() {
         assertEquals("session123", crawlingInfoHelper.getCanonicalSessionId("session123"));
         assertEquals("session123", crawlingInfoHelper.getCanonicalSessionId("session123-456"));
@@ -190,6 +200,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals("multi", crawlingInfoHelper.getCanonicalSessionId("multi-part-session"));
     }
 
+    @Test
     public void test_putToInfoMap() {
         // Test initial null map
         crawlingInfoHelper.putToInfoMap("key1", "value1");
@@ -208,6 +219,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals("new_value1", crawlingInfoHelper.infoMap.get("key1"));
     }
 
+    @Test
     public void test_store_create() {
         final String sessionId = "test-session-123";
 
@@ -244,6 +256,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertNull(crawlingInfoHelper.infoMap);
     }
 
+    @Test
     public void test_store_existing() {
         final String sessionId = "existing-session";
         final CrawlingInfo existingInfo = new CrawlingInfo();
@@ -281,6 +294,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertNull(crawlingInfoHelper.infoMap);
     }
 
+    @Test
     public void test_store_exception() {
         final String sessionId = "error-session";
 
@@ -311,6 +325,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_updateParams() {
         final String sessionId = "update-session";
         final CrawlingInfo existingInfo = new CrawlingInfo();
@@ -351,6 +366,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertTrue("documentExpires should be set", crawlingInfoHelper.documentExpires > 0);
     }
 
+    @Test
     public void test_updateParams_defaultName() {
         final String sessionId = "default-name-session";
         final CrawlingInfo existingInfo = new CrawlingInfo();
@@ -380,6 +396,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         crawlingInfoHelper.updateParams(sessionId, null, -1);
     }
 
+    @Test
     public void test_updateParams_noSession() {
         final String sessionId = "non-existent-session";
 
@@ -404,6 +421,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         crawlingInfoHelper.updateParams(sessionId, "Test", 1);
     }
 
+    @Test
     public void test_updateParams_storeException() {
         final String sessionId = "store-error-session";
         final CrawlingInfo existingInfo = new CrawlingInfo();
@@ -442,6 +460,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getDocumentExpires() {
         // Test with null config
         assertNull(crawlingInfoHelper.getDocumentExpires(null));
@@ -470,6 +489,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals(currentTime + 5000, result.getTime());
     }
 
+    @Test
     public void test_getExpiredTime() {
         // Test via reflection since method is protected
         try {
@@ -505,6 +525,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getInfoMap() {
         final String sessionId = "info-map-session";
         final List<CrawlingInfoParam> paramList = new ArrayList<>();
@@ -545,6 +566,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals("3", result.get("error_count"));
     }
 
+    @Test
     public void test_setMaxSessionIdsInList() {
         crawlingInfoHelper.setMaxSessionIdsInList(500);
         assertEquals(500, crawlingInfoHelper.maxSessionIdsInList);
@@ -556,6 +578,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals(-1, crawlingInfoHelper.maxSessionIdsInList);
     }
 
+    @Test
     public void test_generateId_specialCharacters() {
         // Test characters that need special encoding
         String input1 = "http://example.com/文档"; // Unicode characters
@@ -579,6 +602,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertFalse(result1.equals(result3));
     }
 
+    @Test
     public void test_generateId_consistentResults() {
         String input = "http://example.com/test/path?param=value";
         String result1 = crawlingInfoHelper.generateId(input);
@@ -588,6 +612,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertEquals(128, result1.length());
     }
 
+    @Test
     public void test_generateId_emptyAndNull() {
         // Test with empty string
         String emptyResult = crawlingInfoHelper.generateId("");
@@ -605,6 +630,7 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_generateId_withDataMap_edgeCases() {
         // Test with empty data map
         Map<String, Object> emptyMap = new HashMap<>();

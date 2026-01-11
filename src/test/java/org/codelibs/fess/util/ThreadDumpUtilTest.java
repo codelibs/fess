@@ -33,9 +33,11 @@ import java.util.function.Consumer;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ThreadDumpUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_printThreadDump() {
         // This test verifies that printThreadDump() method exists and can be called without exceptions
         try {
@@ -45,6 +47,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_printThreadDumpAsWarn() {
         // This test verifies that printThreadDumpAsWarn() method exists and can be called without exceptions
         try {
@@ -54,6 +57,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_printThreadDumpAsError() {
         // This test verifies that printThreadDumpAsError() method exists and can be called without exceptions
         try {
@@ -63,6 +67,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_writeThreadDump() throws IOException {
         // Create a temporary file for testing
         Path tempFile = Files.createTempFile("test-thread-dump", ".txt");
@@ -85,6 +90,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_writeThreadDump_withInvalidPath() {
         // Test with invalid file path (directory that doesn't exist)
         String invalidPath = "/nonexistent/directory/thread-dump.txt";
@@ -97,6 +103,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_writeThreadDump_withNullPath() {
         try {
             ThreadDumpUtil.writeThreadDump(null);
@@ -106,6 +113,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_writeThreadDump_withEmptyPath() {
         try {
             ThreadDumpUtil.writeThreadDump("");
@@ -115,6 +123,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processThreadDump() {
         List<String> capturedOutput = new ArrayList<>();
         Consumer<String> testConsumer = capturedOutput::add;
@@ -133,6 +142,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         assertTrue("Should contain stack trace entries", hasStackTrace);
     }
 
+    @Test
     public void test_processThreadDump_withNullConsumer() {
         try {
             ThreadDumpUtil.processThreadDump(null);
@@ -142,6 +152,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processThreadDump_multipleThreads() {
         AtomicInteger threadCount = new AtomicInteger(0);
         AtomicInteger stackTraceCount = new AtomicInteger(0);
@@ -162,6 +173,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         assertTrue("Should have more stack traces than threads", stackTraceCount.get() > threadCount.get());
     }
 
+    @Test
     public void test_processThreadDump_withException() {
         Consumer<String> exceptionConsumer = line -> {
             throw new RuntimeException("Test exception");
@@ -175,6 +187,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processThreadDump_withCustomThread() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger customThreadFound = new AtomicInteger(0);
@@ -208,6 +221,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_writeThreadDump_fileContent() throws IOException {
         Path tempFile = Files.createTempFile("test-thread-dump-content", ".txt");
 
@@ -238,6 +252,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_constructor_isProtected() {
         // Verify that ThreadDumpUtil has a protected constructor (utility class pattern)
         try {
@@ -254,6 +269,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_static_method_signatures() {
         // Verify all public static methods exist with correct signatures
         try {
@@ -292,6 +308,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_utilityClass_pattern() {
         // Verify utility class design pattern compliance
 
@@ -310,6 +327,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_thread_safety() throws InterruptedException {
         // Test concurrent access to thread dump methods
         final AtomicInteger successCount = new AtomicInteger(0);
@@ -345,6 +363,7 @@ public class ThreadDumpUtilTest extends UnitFessTestCase {
         assertEquals("No threads should have errors", 0, errorCount.get());
     }
 
+    @Test
     public void test_writeThreadDump_withSpecialCharacters() throws IOException {
         // Test with file path containing special characters
         Path tempDir = Files.createTempDirectory("test-スレッドダンプ-dir");

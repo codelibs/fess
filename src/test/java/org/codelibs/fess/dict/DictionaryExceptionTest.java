@@ -16,9 +16,11 @@
 package org.codelibs.fess.dict;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DictionaryExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Dictionary error occurred";
@@ -29,6 +31,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Dictionary operation failed";
@@ -42,6 +45,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertEquals("Underlying error", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         DictionaryException exception = new DictionaryException(null);
@@ -51,6 +55,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message but valid cause
         Exception cause = new IllegalArgumentException("Invalid argument");
@@ -62,6 +67,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Dictionary not found";
@@ -72,6 +78,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -82,6 +89,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test constructor with long message
         StringBuilder sb = new StringBuilder();
@@ -96,6 +104,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNestedCause() {
         // Test constructor with nested exception causes
         Exception rootCause = new IllegalStateException("Root cause");
@@ -113,6 +122,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_instanceof_FessSystemException() {
         // Test that DictionaryException is instance of FessSystemException
         DictionaryException exception = new DictionaryException("Test");
@@ -123,6 +133,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly set
         DictionaryException exception = new DictionaryException("Stack trace test");
@@ -141,6 +152,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is defined (by checking serializability)
         DictionaryException exception = new DictionaryException("Serialization test");
@@ -148,6 +160,7 @@ public class DictionaryExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Dictionary parse error";

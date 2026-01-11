@@ -16,9 +16,13 @@
 package org.codelibs.fess.sso;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class SsoResponseTypeTest extends UnitFessTestCase {
 
+    @Test
     public void test_values() {
         // Test that values() returns all enum constants
         SsoResponseType[] values = SsoResponseType.values();
@@ -28,12 +32,14 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         assertEquals(SsoResponseType.LOGOUT, values[1]);
     }
 
+    @Test
     public void test_valueOf() {
         // Test valueOf for valid enum names
         assertEquals(SsoResponseType.METADATA, SsoResponseType.valueOf("METADATA"));
         assertEquals(SsoResponseType.LOGOUT, SsoResponseType.valueOf("LOGOUT"));
     }
 
+    @Test
     public void test_valueOf_invalidName() {
         // Test valueOf with invalid name throws exception
         try {
@@ -45,6 +51,7 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_valueOf_null() {
         // Test valueOf with null throws exception
         try {
@@ -55,24 +62,28 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_name() {
         // Test name() method returns correct string representation
         assertEquals("METADATA", SsoResponseType.METADATA.name());
         assertEquals("LOGOUT", SsoResponseType.LOGOUT.name());
     }
 
+    @Test
     public void test_ordinal() {
         // Test ordinal() method returns correct position
         assertEquals(0, SsoResponseType.METADATA.ordinal());
         assertEquals(1, SsoResponseType.LOGOUT.ordinal());
     }
 
+    @Test
     public void test_toString() {
         // Test toString() method (default implementation returns name)
         assertEquals("METADATA", SsoResponseType.METADATA.toString());
         assertEquals("LOGOUT", SsoResponseType.LOGOUT.toString());
     }
 
+    @Test
     public void test_equals() {
         // Test equals method for enum constants
         assertTrue(SsoResponseType.METADATA.equals(SsoResponseType.METADATA));
@@ -83,6 +94,7 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         assertFalse(SsoResponseType.METADATA.equals("METADATA"));
     }
 
+    @Test
     public void test_hashCode() {
         // Test hashCode consistency
         int metadataHashCode = SsoResponseType.METADATA.hashCode();
@@ -96,6 +108,7 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         assertNotSame(metadataHashCode, logoutHashCode);
     }
 
+    @Test
     public void test_compareTo() {
         // Test compareTo method for enum constants
         assertEquals(0, SsoResponseType.METADATA.compareTo(SsoResponseType.METADATA));
@@ -104,6 +117,7 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         assertTrue(SsoResponseType.LOGOUT.compareTo(SsoResponseType.METADATA) > 0);
     }
 
+    @Test
     public void test_compareTo_null() {
         // Test compareTo with null throws exception
         try {
@@ -114,12 +128,14 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getDeclaringClass() {
         // Test getDeclaringClass returns correct class
         assertEquals(SsoResponseType.class, SsoResponseType.METADATA.getDeclaringClass());
         assertEquals(SsoResponseType.class, SsoResponseType.LOGOUT.getDeclaringClass());
     }
 
+    @Test
     public void test_enumConstantReference() {
         // Test that enum constants are singleton instances
         SsoResponseType metadata1 = SsoResponseType.METADATA;
@@ -131,6 +147,7 @@ public class SsoResponseTypeTest extends UnitFessTestCase {
         assertSame(logout1, logout2);
     }
 
+    @Test
     public void test_switchStatement() {
         // Test enum usage in switch statement
         for (SsoResponseType type : SsoResponseType.values()) {

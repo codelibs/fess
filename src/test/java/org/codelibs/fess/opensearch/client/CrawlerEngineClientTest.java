@@ -16,36 +16,46 @@
 package org.codelibs.fess.opensearch.client;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlerEngineClientTest extends UnitFessTestCase {
 
     private CrawlerEngineClient crawlerEngineClient;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         crawlerEngineClient = new CrawlerEngineClient();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         crawlerEngineClient = null;
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         // Test that constructor creates a non-null instance
         assertNotNull(crawlerEngineClient);
     }
 
     // Test inheritance
+    @Test
     public void test_inheritance() {
         // Test that CrawlerEngineClient is properly inherited
         assertTrue(crawlerEngineClient instanceof org.codelibs.fess.crawler.client.FesenClient);
     }
 
     // Test multiple instances
+    @Test
     public void test_multipleInstances() {
         // Test that multiple instances can be created independently
         CrawlerEngineClient client1 = new CrawlerEngineClient();
@@ -57,6 +67,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test constructor with different thread context
+    @Test
     public void test_constructorInDifferentThread() throws Exception {
         // Test that constructor works in different thread
         final CrawlerEngineClient[] clientHolder = new CrawlerEngineClient[1];
@@ -78,6 +89,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test repeated instantiation
+    @Test
     public void test_repeatedInstantiation() {
         // Test that repeated instantiation works correctly
         for (int i = 0; i < 10; i++) {
@@ -87,6 +99,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test instance fields initialization
+    @Test
     public void test_instanceFieldsInitialization() {
         // Test that instance fields are properly initialized
         assertNotNull(crawlerEngineClient);
@@ -94,6 +107,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test that close method exists (inherited)
+    @Test
     public void test_closeMethodExists() {
         // Test that close method is available (inherited from parent)
         try {
@@ -106,6 +120,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test toString method
+    @Test
     public void test_toString() {
         // Test that toString returns a non-null value
         String result = crawlerEngineClient.toString();
@@ -113,6 +128,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test hashCode method
+    @Test
     public void test_hashCode() {
         // Test that hashCode returns consistent value
         int hashCode1 = crawlerEngineClient.hashCode();
@@ -121,6 +137,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test equals method
+    @Test
     public void test_equals() {
         // Test equals method basic functionality
         assertTrue(crawlerEngineClient.equals(crawlerEngineClient));
@@ -133,6 +150,7 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     // Test getClass method
+    @Test
     public void test_getClass() {
         // Test that getClass returns the correct class
         assertEquals(CrawlerEngineClient.class, crawlerEngineClient.getClass());

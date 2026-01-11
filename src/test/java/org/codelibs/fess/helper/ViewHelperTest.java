@@ -34,6 +34,12 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
 
@@ -43,9 +49,10 @@ public class ViewHelperTest extends UnitFessTestCase {
 
     private File propertiesFile;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         propertiesFile = File.createTempFile("test", ".properties");
         FileUtil.writeBytes(propertiesFile.getAbsolutePath(), new byte[0]);
         propertiesFile.deleteOnExit();
@@ -65,11 +72,13 @@ public class ViewHelperTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         propertiesFile.delete();
         super.tearDown();
     }
 
+    @Test
     public void test_facetQueries() {
         final List<FacetQueryView> list = viewHelper.getFacetQueryViewList();
         assertEquals(3, list.size());
@@ -84,6 +93,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals(10, view3.getQueryMap().size());
     }
 
+    @Test
     public void test_getUrlLink() throws IOException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -183,6 +193,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals(expected, viewHelper.getUrlLink(doc));
     }
 
+    @Test
     public void test_replaceHighlightQueries() {
         String text;
         String[] queries;
@@ -237,6 +248,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals("abc <strong>on</strong> exy", viewHelper.replaceHighlightQueries(text, queries));
     }
 
+    @Test
     public void test_escapeHighlight() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -271,6 +283,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals("111" + viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
     }
 
+    @Test
     public void test_getSitePath() {
         String urlLink;
         String sitePath;
@@ -330,6 +343,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
     }
 
+    @Test
     public void test_getContentTitle() {
         final Set<String> querySet = new HashSet<>();
         ViewHelper viewHelper = new ViewHelper() {
@@ -376,6 +390,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals("<strong>$</strong>test", viewHelper.getContentTitle(document));
     }
 
+    @Test
     public void test_getContentDescription() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -392,6 +407,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createHighlightInfo() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -403,6 +419,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_updateHighlightInfo() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -411,17 +428,18 @@ public class ViewHelperTest extends UnitFessTestCase {
         int originalSize = highlightInfo.getFragmentSize();
 
         viewHelper.updateHighlightInfo(highlightInfo, 500);
-        assertEquals((int) (originalSize * 0.65), highlightInfo.getFragmentSize(), 10);
+        Assertions.assertEquals((int) (originalSize * 0.65), highlightInfo.getFragmentSize(), 10);
 
         highlightInfo = new HighlightInfo();
         viewHelper.updateHighlightInfo(highlightInfo, 300);
-        assertEquals((int) (originalSize * 0.5), highlightInfo.getFragmentSize(), 10);
+        Assertions.assertEquals((int) (originalSize * 0.5), highlightInfo.getFragmentSize(), 10);
 
         highlightInfo = new HighlightInfo();
         viewHelper.updateHighlightInfo(highlightInfo, 1000);
         assertEquals(originalSize, highlightInfo.getFragmentSize());
     }
 
+    @Test
     public void test_updateFileProtocol() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -481,6 +499,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals("file://test.txt", viewHelper.updateFileProtocol("file:///test.txt"));
     }
 
+    @Test
     public void test_appendQueryParameter() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -517,6 +536,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertEquals(url, viewHelper.appendQueryParameter(document, url));
     }
 
+    @Test
     public void test_appendHTMLSearchWord() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -536,6 +556,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("text="));
     }
 
+    @Test
     public void test_appendPDFSearchWord() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -551,6 +572,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getPagePath() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -563,6 +585,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createCacheContent() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -580,6 +603,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getClientIp() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -591,6 +615,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertNotNull(viewHelper.getClientIp(getMockRequest()));
     }
 
+    @Test
     public void test_createHighlightText() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -602,6 +627,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createTextFragmentsByHighlight() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -616,6 +642,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createTextFragmentsByQuery() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -628,6 +655,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_settersAndGetters() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -665,6 +693,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         viewHelper.setFacetCacheDuration(600L);
     }
 
+    @Test
     public void test_TextFragment() {
         ViewHelper.TextFragment fragment = new ViewHelper.TextFragment("prefix", "start", "end", "suffix");
         String urlString = fragment.toURLString();
@@ -685,6 +714,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         assertTrue(urlString.contains("suffix"));
     }
 
+    @Test
     public void test_ActionHook() {
         ViewHelper.ActionHook actionHook = new ViewHelper.ActionHook();
 
@@ -700,6 +730,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getCachedFacetResponse() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -712,6 +743,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_asContentResponse() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();
@@ -728,6 +760,7 @@ public class ViewHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_removeHighlightTag() {
         ViewHelper viewHelper = new ViewHelper();
         viewHelper.init();

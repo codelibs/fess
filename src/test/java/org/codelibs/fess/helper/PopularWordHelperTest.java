@@ -21,14 +21,18 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 import com.google.common.cache.CacheBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PopularWordHelperTest extends UnitFessTestCase {
 
     public PopularWordHelper popularWordHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         popularWordHelper = new PopularWordHelper() {
             @Override
             public void init() {
@@ -87,6 +91,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         popularWordHelper.init();
     }
 
+    @Test
     public void test_getCacheKey_allParameters() {
         String seed = "test_seed";
         String[] tags = { "tag2", "tag1" };
@@ -108,6 +113,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertEquals(4, separatorCount);
     }
 
+    @Test
     public void test_getCacheKey_nullParameters() {
         String seed = "test_seed";
         String[] tags = null;
@@ -125,6 +131,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertEquals(4, separatorCount);
     }
 
+    @Test
     public void test_getCacheKey_emptyArrays() {
         String seed = "test_seed";
         String[] tags = new String[0];
@@ -142,6 +149,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertEquals(4, separatorCount);
     }
 
+    @Test
     public void test_getCacheKey_singleItems() {
         String seed = "test_seed";
         String[] tags = { "tag1" };
@@ -159,6 +167,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("exclude1"));
     }
 
+    @Test
     public void test_getCacheKey_sorting() {
         String seed = "test_seed";
         String[] tags = { "zzz", "aaa", "mmm" };
@@ -176,6 +185,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue("Result should contain sorted excludes", result.contains("exclude1exclude2exclude3"));
     }
 
+    @Test
     public void test_getCacheKey_consistency() {
         String seed = "test_seed";
         String[] tags = { "tag2", "tag1" };
@@ -189,6 +199,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertEquals(result1, result2);
     }
 
+    @Test
     public void test_getCacheKey_differentOrder() {
         String seed = "test_seed";
         String[] tags1 = { "tag1", "tag2" };
@@ -203,6 +214,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertEquals(result1, result2);
     }
 
+    @Test
     public void test_getCacheKey_nullSeed() {
         String seed = null;
         String[] tags = { "tag1" };
@@ -216,6 +228,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(result.startsWith("null"));
     }
 
+    @Test
     public void test_getCacheKey_specialCharacters() {
         String seed = "test@seed#with$special%chars";
         String[] tags = { "tag@1", "tag#2" };
@@ -229,6 +242,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("test@seed#with$special%chars"));
     }
 
+    @Test
     public void test_clearCache() {
         // Test that clearCache doesn't throw exception
         popularWordHelper.clearCache();
@@ -238,6 +252,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_init_configuration() {
         PopularWordHelper testHelper = new PopularWordHelper();
         testHelper.init();
@@ -246,10 +261,12 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertNotNull(testHelper.cache);
     }
 
+    @Test
     public void test_CACHE_KEY_SPLITTER() {
         assertEquals('\n', PopularWordHelper.CACHE_KEY_SPLITTER);
     }
 
+    @Test
     public void test_getCacheKey_longStrings() {
         String seed = "very_long_seed_" + "x".repeat(100);
         String[] tags = { "long_tag_" + "y".repeat(50), "another_long_tag_" + "z".repeat(50) };
@@ -264,6 +281,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(result.contains(seed));
     }
 
+    @Test
     public void test_getCacheKey_manyItems() {
         String seed = "test_seed";
         String[] tags = new String[20];
@@ -286,6 +304,7 @@ public class PopularWordHelperTest extends UnitFessTestCase {
         assertTrue(result.contains("tag19"));
     }
 
+    @Test
     public void test_getCacheKey_unicodeCharacters() {
         String seed = "テスト_シード";
         String[] tags = { "タグ１", "タグ２" };

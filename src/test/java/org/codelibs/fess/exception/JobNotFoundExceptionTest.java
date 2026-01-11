@@ -17,9 +17,11 @@ package org.codelibs.fess.exception;
 
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class JobNotFoundExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructorWithScheduledJob() {
         // Test with scheduled job that has a custom toString implementation
         ScheduledJob scheduledJob = new ScheduledJob() {
@@ -36,6 +38,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithScheduledJob_nullToString() {
         // Test with scheduled job that returns null from toString
         ScheduledJob scheduledJob = new ScheduledJob() {
@@ -52,6 +55,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithScheduledJob_emptyToString() {
         // Test with scheduled job that returns empty string from toString
         ScheduledJob scheduledJob = new ScheduledJob() {
@@ -68,6 +72,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithScheduledJob_defaultToString() {
         // Test with scheduled job using default toString implementation
         ScheduledJob scheduledJob = new ScheduledJob();
@@ -80,6 +85,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithString() {
         // Test with a simple message
         String message = "Job with ID 456 not found";
@@ -91,6 +97,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithString_null() {
         // Test with null message
         JobNotFoundException exception = new JobNotFoundException((String) null);
@@ -100,6 +107,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithString_empty() {
         // Test with empty message
         String message = "";
@@ -111,6 +119,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructorWithString_longMessage() {
         // Test with a long message
         String message = "This is a very long error message that describes in detail why the job was not found. "
@@ -124,6 +133,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_exceptionInheritance() {
         // Test that JobNotFoundException properly extends FessSystemException
         JobNotFoundException exception = new JobNotFoundException("test");
@@ -134,6 +144,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has serialVersionUID defined
         JobNotFoundException exception = new JobNotFoundException("test");
@@ -143,6 +154,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertNotNull(exception);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly captured
         JobNotFoundException exception = new JobNotFoundException("Stack trace test");
@@ -161,6 +173,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test that fillInStackTrace works properly
         JobNotFoundException exception = new JobNotFoundException("Fill stack trace test");
@@ -173,6 +186,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(filled.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_getMessage_consistency() {
         // Test that getMessage returns consistent results
         String message = "Consistent message";
@@ -183,6 +197,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getLocalizedMessage());
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Test exception message";
@@ -195,6 +210,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_constructorWithScheduledJob_specialCharacters() {
         // Test with scheduled job that has special characters in toString
         ScheduledJob scheduledJob = new ScheduledJob() {
@@ -210,6 +226,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals("Job[name=\"Test & Job\", id='<123>']", exception.getMessage());
     }
 
+    @Test
     public void test_constructorWithString_specialCharacters() {
         // Test with message containing special characters
         String message = "Job not found: \"My Job\" with params: {id=123, type='test'}";
@@ -220,6 +237,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_constructorWithString_unicodeCharacters() {
         // Test with message containing unicode characters
         String message = "ジョブが見つかりません: 日本語のテスト";
@@ -230,6 +248,7 @@ public class JobNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getMessage());
     }
 
+    @Test
     public void test_constructorWithScheduledJob_unicodeToString() {
         // Test with scheduled job that returns unicode in toString
         ScheduledJob scheduledJob = new ScheduledJob() {

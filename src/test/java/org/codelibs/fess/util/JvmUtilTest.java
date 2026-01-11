@@ -16,8 +16,11 @@
 package org.codelibs.fess.util;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 public class JvmUtilTest extends UnitFessTestCase {
+    @Test
     public void test_getJavaVersion() {
         System.setProperty("java.version", "1.4.2_19");
         assertEquals(4, JvmUtil.getJavaVersion());
@@ -37,6 +40,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals(11, JvmUtil.getJavaVersion());
     }
 
+    @Test
     public void test_filterJvmOptions() {
         final String[] args = new String[] { //
                 "-X111", //
@@ -67,6 +71,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-X999", values[5]);
     }
 
+    @Test
     public void test_getJavaVersion_edgeCases() {
         // Test with null java.version property
         System.clearProperty("java.version");
@@ -116,6 +121,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals(8, JvmUtil.getJavaVersion());
     }
 
+    @Test
     public void test_getJavaVersion_variousFormats() {
         // Test different separator combinations
         System.setProperty("java.version", "11.0.15.1");
@@ -136,12 +142,14 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals(11, JvmUtil.getJavaVersion());
     }
 
+    @Test
     public void test_filterJvmOptions_emptyArray() {
         System.setProperty("java.version", "11.0.1");
         String[] result = JvmUtil.filterJvmOptions(new String[0]);
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_filterJvmOptions_singleElement() {
         System.setProperty("java.version", "11.0.1");
 
@@ -157,6 +165,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_filterJvmOptions_versionRanges() {
         System.setProperty("java.version", "15.0.1");
 
@@ -172,6 +181,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-Xmx2g", result[1]);
     }
 
+    @Test
     public void test_filterJvmOptions_exactVersionMatching() {
         System.setProperty("java.version", "11.0.1");
 
@@ -187,6 +197,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-XX:+UseG1GC", result[1]);
     }
 
+    @Test
     public void test_filterJvmOptions_mixedPatterns() {
         System.setProperty("java.version", "17.0.2");
 
@@ -208,6 +219,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-XX:+UnlockExperimentalVMOptions", result[4]);
     }
 
+    @Test
     public void test_filterJvmOptions_specialCharacters() {
         System.setProperty("java.version", "11.0.1");
 
@@ -221,6 +233,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-Dfile.encoding=UTF-8", result[2]);
     }
 
+    @Test
     public void test_filterJvmOptions_borderlineVersions() {
         // Test with Java 8
         System.setProperty("java.version", "1.8.0_301");
@@ -236,6 +249,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals("-Xmx2g", result[1]);
     }
 
+    @Test
     public void test_filterJvmOptions_allFiltered() {
         System.setProperty("java.version", "8.0.1");
 
@@ -245,6 +259,7 @@ public class JvmUtilTest extends UnitFessTestCase {
         assertEquals(0, result.length);
     }
 
+    @Test
     public void test_filterJvmOptions_complexVersionPattern() {
         System.setProperty("java.version", "11.0.1");
 
@@ -262,7 +277,8 @@ public class JvmUtilTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Restore original java.version property if it exists
         String originalVersion = System.getProperty("java.version");
         if (originalVersion != null) {

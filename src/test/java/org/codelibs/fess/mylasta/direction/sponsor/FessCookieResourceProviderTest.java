@@ -20,15 +20,20 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.security.InvertibleCryptographer;
 import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessCookieResourceProviderTest extends UnitFessTestCase {
 
     private FessCookieResourceProvider cookieResourceProvider;
     private FessConfig originalFessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         originalFessConfig = ComponentUtil.getFessConfig();
 
@@ -74,7 +79,8 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         if (originalFessConfig != null) {
             ComponentUtil.setFessConfig(originalFessConfig);
         }
@@ -82,23 +88,27 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test provider initialization
+    @Test
     public void test_providerInitialization() {
         assertNotNull(cookieResourceProvider);
     }
 
     // Test default path
+    @Test
     public void test_provideDefaultPath() {
         String defaultPath = cookieResourceProvider.provideDefaultPath();
         assertEquals("/test/path", defaultPath);
     }
 
     // Test default expire
+    @Test
     public void test_provideDefaultExpire() {
         Integer defaultExpire = cookieResourceProvider.provideDefaultExpire();
         assertEquals(Integer.valueOf(3600), defaultExpire);
     }
 
     // Test cookie cipher
+    @Test
     public void test_provideCookieCipher() {
         // provideCookieCipher is not directly exposed anymore
         // Testing through cookie spec creation instead
@@ -107,6 +117,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with null configuration values
+    @Test
     public void test_withNullConfigValues() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -143,6 +154,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with different expire values
+    @Test
     public void test_differentExpireValues() {
         int[] testExpires = { 0, 1, 60, 3600, 86400, Integer.MAX_VALUE };
 
@@ -174,6 +186,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with different path values
+    @Test
     public void test_differentPathValues() {
         String[] testPaths = { "/", "/app", "/test/path", "/a/b/c/d", "" };
 
@@ -205,6 +218,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test cipher with special characters
+    @Test
     public void test_cipherWithSpecialCharacters() {
         // Create a mock cipher for testing purposes
         InvertibleCryptographer cipher = new InvertibleCryptographer("AES", "1234567890123456", null) {
@@ -229,6 +243,7 @@ public class FessCookieResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test provider as CookieResourceProvider interface
+    @Test
     public void test_asInterface() {
         CookieResourceProvider provider = cookieResourceProvider;
         assertNotNull(provider);

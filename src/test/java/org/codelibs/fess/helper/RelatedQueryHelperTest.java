@@ -26,6 +26,9 @@ import org.codelibs.fess.opensearch.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedQuery;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class RelatedQueryHelperTest extends UnitFessTestCase {
 
@@ -33,9 +36,10 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
     private MockRelatedQueryBhv mockBhv;
     private VirtualHostHelper virtualHostHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Setup system properties for DI container
         File file = File.createTempFile("test", ".properties");
@@ -62,6 +66,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         inject(virtualHostHelper);
     }
 
+    @Test
     public void test_init() {
         // Setup test data
         List<RelatedQuery> testData = new ArrayList<>();
@@ -77,6 +82,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("related2", results[1]);
     }
 
+    @Test
     public void test_getAvailableRelatedQueryList() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("term1", new String[] { "query1" }, ""));
@@ -89,6 +95,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("term2", result.get(1).getTerm());
     }
 
+    @Test
     public void test_load_emptyList() {
         mockBhv.setTestData(new ArrayList<>());
 
@@ -99,6 +106,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_load_singleTerm() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("java", new String[] { "programming", "tutorial", "language" }, ""));
@@ -114,6 +122,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("language", results[2]);
     }
 
+    @Test
     public void test_load_multipleTerms() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("java", new String[] { "programming", "tutorial" }, ""));
@@ -134,6 +143,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("data science", results[1]);
     }
 
+    @Test
     public void test_load_caseInsensitiveTerms() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("Java", new String[] { "Programming", "Tutorial" }, ""));
@@ -158,6 +168,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("Tutorial", results[1]);
     }
 
+    @Test
     public void test_load_virtualHosts() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("term1", new String[] { "query1" }, "host1"));
@@ -169,6 +180,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(3, count); // Three virtual host keys: "host1", "host2", ""
     }
 
+    @Test
     public void test_load_sameTermDifferentHosts() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("search", new String[] { "find", "lookup" }, "site1.com"));
@@ -192,6 +204,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("lookup", results[1]);
     }
 
+    @Test
     public void test_load_overwriteSameTerm() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] { "first", "set" }, ""));
@@ -207,24 +220,28 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("set", results[1]);
     }
 
+    @Test
     public void test_getHostKey_emptyVirtualHost() {
         RelatedQuery entity = createRelatedQuery("term", new String[] { "query" }, "");
         String key = relatedQueryHelper.getHostKey(entity);
         assertEquals("", key);
     }
 
+    @Test
     public void test_getHostKey_nullVirtualHost() {
         RelatedQuery entity = createRelatedQuery("term", new String[] { "query" }, null);
         String key = relatedQueryHelper.getHostKey(entity);
         assertEquals("", key);
     }
 
+    @Test
     public void test_getHostKey_withVirtualHost() {
         RelatedQuery entity = createRelatedQuery("term", new String[] { "query" }, "example.com");
         String key = relatedQueryHelper.getHostKey(entity);
         assertEquals("example.com", key);
     }
 
+    @Test
     public void test_getRelatedQueries_noMatch() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("java", new String[] { "programming" }, ""));
@@ -236,6 +253,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedQueries_nullQuery() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] { "related" }, ""));
@@ -247,6 +265,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedQueries_emptyQuery() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] { "related" }, ""));
@@ -258,6 +277,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedQueries_differentVirtualHost() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] { "related" }, "host1"));
@@ -278,6 +298,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedQueries_singleQuery() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("search", new String[] { "find" }, ""));
@@ -290,6 +311,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("find", results[0]);
     }
 
+    @Test
     public void test_getRelatedQueries_emptyQueriesArray() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] {}, ""));
@@ -301,6 +323,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedQueries_nullQueriesArray() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", null, ""));
@@ -312,6 +335,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_toLowerCase_nullInput() {
         // Test private method indirectly through public methods
         List<RelatedQuery> testData = new ArrayList<>();
@@ -325,6 +349,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_inheritance_setReloadInterval() {
         assertEquals(1000L, relatedQueryHelper.reloadInterval);
 
@@ -332,6 +357,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals(5000L, relatedQueryHelper.reloadInterval);
     }
 
+    @Test
     public void test_inheritance_update() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("test", new String[] { "initial" }, ""));
@@ -358,6 +384,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("updated", results[0]);
     }
 
+    @Test
     public void test_relatedQueryMap_volatile() {
         // Test that the map is properly replaced when load() is called
         List<RelatedQuery> testData1 = new ArrayList<>();
@@ -386,6 +413,7 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
         assertEquals("query2", results[0]);
     }
 
+    @Test
     public void test_multipleVirtualHostsWithSameTerm() {
         List<RelatedQuery> testData = new ArrayList<>();
         testData.add(createRelatedQuery("common", new String[] { "host1_query1", "host1_query2" }, "host1"));

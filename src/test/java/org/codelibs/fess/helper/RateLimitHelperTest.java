@@ -17,24 +17,30 @@ package org.codelibs.fess.helper;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class RateLimitHelperTest extends UnitFessTestCase {
 
     private RateLimitHelper rateLimitHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         rateLimitHelper = new RateLimitHelper();
         rateLimitHelper.init();
     }
 
+    @Test
     public void test_getClientIp_remoteAddr() {
         final MockletHttpServletRequest request = getMockRequest();
         request.setRemoteAddr("192.168.1.100");
         assertEquals("192.168.1.100", rateLimitHelper.getClientIp(request));
     }
 
+    @Test
     public void test_getClientIp_xForwardedFor_trustedProxy() {
         // 127.0.0.1 is configured as a trusted proxy by default
         final MockletHttpServletRequest request = getMockRequest();
@@ -43,6 +49,7 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals("203.0.113.50", rateLimitHelper.getClientIp(request));
     }
 
+    @Test
     public void test_getClientIp_xRealIp_trustedProxy() {
         // 127.0.0.1 is configured as a trusted proxy by default
         final MockletHttpServletRequest request = getMockRequest();
@@ -51,6 +58,7 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals("203.0.113.75", rateLimitHelper.getClientIp(request));
     }
 
+    @Test
     public void test_getClientIp_xForwardedForPriority_trustedProxy() {
         // 127.0.0.1 is configured as a trusted proxy by default
         final MockletHttpServletRequest request = getMockRequest();
@@ -60,6 +68,7 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals("203.0.113.50", rateLimitHelper.getClientIp(request));
     }
 
+    @Test
     public void test_getClientIp_untrustedProxy_headersIgnored() {
         // When remoteAddr is not a trusted proxy, headers should be ignored
         final MockletHttpServletRequest request = getMockRequest();
@@ -70,6 +79,7 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals("192.168.1.100", rateLimitHelper.getClientIp(request));
     }
 
+    @Test
     public void test_blockIp() {
         rateLimitHelper.blockIp("192.168.1.100", 1000L);
         assertEquals(1, rateLimitHelper.getBlockedIpCount());
@@ -78,6 +88,7 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals(0, rateLimitHelper.getBlockedIpCount());
     }
 
+    @Test
     public void test_cleanup() {
         rateLimitHelper.blockIp("192.168.1.100", 1L);
         assertEquals(1, rateLimitHelper.getBlockedIpCount());

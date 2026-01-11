@@ -30,14 +30,18 @@ import org.codelibs.fess.opensearch.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SuggestHelperTest extends UnitFessTestCase {
 
     private SuggestHelper suggestHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         suggestHelper = new SuggestHelper();
         setupMockComponents();
     }
@@ -52,6 +56,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         ComponentUtil.register(new MockPopularWordHelper(), "popularWordHelper");
     }
 
+    @Test
     public void test_init() {
         SuggestHelper helper = new SuggestHelper();
         try {
@@ -62,6 +67,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_suggester() {
         try {
             assertNull(suggestHelper.suggester());
@@ -70,12 +76,14 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_setSearchStoreInterval() {
         long interval = 5L;
         suggestHelper.setSearchStoreInterval(interval);
         assertEquals(interval, suggestHelper.searchStoreInterval);
     }
 
+    @Test
     public void test_storeSearchLog() {
         try {
             suggestHelper.storeSearchLog();
@@ -85,6 +93,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_indexFromSearchLog() {
         List<SearchLog> searchLogList = new ArrayList<>();
         SearchLog searchLog = new SearchLog();
@@ -103,6 +112,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_indexFromSearchLog_lowHitCount() {
         List<SearchLog> searchLogList = new ArrayList<>();
         SearchLog searchLog = new SearchLog();
@@ -117,6 +127,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_indexFromDocuments() {
         Consumer<Boolean> successCallback = (success) -> {
             assertTrue(success);
@@ -133,6 +144,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_purgeDocumentSuggest() {
         LocalDateTime time = LocalDateTime.now().minusDays(1);
         try {
@@ -143,6 +155,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_purgeSearchlogSuggest() {
         LocalDateTime time = LocalDateTime.now().minusDays(1);
         try {
@@ -153,6 +166,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getAllWordsNum() {
         try {
             assertEquals(0L, suggestHelper.getAllWordsNum());
@@ -161,6 +175,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getDocumentWordsNum() {
         try {
             assertEquals(0L, suggestHelper.getDocumentWordsNum());
@@ -169,6 +184,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getQueryWordsNum() {
         try {
             assertEquals(0L, suggestHelper.getQueryWordsNum());
@@ -177,6 +193,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteAllWords() {
         try {
             assertFalse(suggestHelper.deleteAllWords());
@@ -185,6 +202,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteDocumentWords() {
         try {
             assertFalse(suggestHelper.deleteDocumentWords());
@@ -193,6 +211,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteQueryWords() {
         try {
             assertFalse(suggestHelper.deleteQueryWords());
@@ -201,6 +220,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_storeAllElevateWords() {
         try {
             suggestHelper.storeAllElevateWords(true);
@@ -210,6 +230,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteAllElevateWord() {
         try {
             suggestHelper.deleteAllElevateWord(true);
@@ -219,6 +240,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteElevateWord() {
         try {
             suggestHelper.deleteElevateWord("test", true);
@@ -228,6 +250,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addElevateWord() {
         try {
             suggestHelper.addElevateWord("test", "reading", new String[] { "tag1" }, new String[] { "role1" }, 1.0f, true);
@@ -237,6 +260,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addElevateWord_noReading() {
         try {
             suggestHelper.addElevateWord("test word", null, new String[] { "tag1" }, new String[] { "role1" }, 1.0f, true);
@@ -246,6 +270,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_storeAllBadWords() {
         try {
             suggestHelper.storeAllBadWords(true);
@@ -255,6 +280,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addBadWord() {
         try {
             suggestHelper.addBadWord("badword", true);
@@ -264,6 +290,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteBadWord() {
         try {
             suggestHelper.deleteBadWord("badword");
@@ -273,6 +300,7 @@ public class SuggestHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_refresh() {
         try {
             suggestHelper.refresh();

@@ -22,14 +22,18 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.script.Script;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LanguageHelperTest extends UnitFessTestCase {
 
     private LanguageHelper languageHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         languageHelper = new LanguageHelper();
         languageHelper.langFields = new String[] { "title", "content" };
         languageHelper.supportedLanguages = new String[] { "ja", "en", "zh", "ko" };
@@ -39,6 +43,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(new MockFessConfig());
     }
 
+    @Test
     public void test_createScript() {
         Map<String, Object> doc = new HashMap<>();
         assertEquals("aaa", languageHelper.createScript(doc, "aaa").getIdOrCode());
@@ -48,12 +53,14 @@ public class LanguageHelperTest extends UnitFessTestCase {
                 languageHelper.createScript(doc, "aaa").getIdOrCode());
     }
 
+    @Test
     public void test_getReindexScriptSource() {
         assertEquals(
                 "if(ctx._source.lang!=null){ctx._source['title_'+ctx._source.lang]=ctx._source.title;ctx._source['content_'+ctx._source.lang]=ctx._source.content}",
                 languageHelper.getReindexScriptSource());
     }
 
+    @Test
     public void test_init() {
         try {
             languageHelper.init();
@@ -63,6 +70,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_updateDocument_withExistingLang() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "ja");
@@ -76,6 +84,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("コンテンツ", doc.get("content_ja"));
     }
 
+    @Test
     public void test_updateDocument_noLanguageDetected() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("title", "xyz");
@@ -90,6 +99,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_updateDocument_emptyDoc() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -100,6 +110,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals(0, doc.size());
     }
 
+    @Test
     public void test_updateDocument_skipExistingLangFields() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "ja");
@@ -114,12 +125,14 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("コンテンツ", doc.get("content_ja"));
     }
 
+    @Test
     public void test_detectLanguage_blank() {
         assertNull(languageHelper.detectLanguage(null));
         assertNull(languageHelper.detectLanguage(""));
         assertNull(languageHelper.detectLanguage("   "));
     }
 
+    @Test
     public void test_detectLanguage_withoutDetector() {
         // Without a real detector, this would cause NullPointerException
         try {
@@ -130,12 +143,14 @@ public class LanguageHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getDetectText_shortText() {
         String text = "Short text";
         String result = languageHelper.getDetectText(text);
         assertEquals("Short text", result);
     }
 
+    @Test
     public void test_getDetectText_longText() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 1100; i++) {
@@ -147,12 +162,14 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals(1000, result.length());
     }
 
+    @Test
     public void test_getDetectText_whitespaceNormalization() {
         String text = "Text   with\tmultiple\n\r  spaces";
         String result = languageHelper.getDetectText(text);
         assertEquals("Text with multiple spaces", result);
     }
 
+    @Test
     public void test_getSupportedLanguage_supported() {
         assertEquals("ja", languageHelper.getSupportedLanguage("ja"));
         assertEquals("en", languageHelper.getSupportedLanguage("en"));
@@ -160,24 +177,28 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("ko", languageHelper.getSupportedLanguage("ko"));
     }
 
+    @Test
     public void test_getSupportedLanguage_unsupported() {
         assertNull(languageHelper.getSupportedLanguage("fr"));
         assertNull(languageHelper.getSupportedLanguage("de"));
         assertNull(languageHelper.getSupportedLanguage("unknown"));
     }
 
+    @Test
     public void test_getSupportedLanguage_blank() {
         assertNull(languageHelper.getSupportedLanguage(null));
         assertNull(languageHelper.getSupportedLanguage(""));
         assertNull(languageHelper.getSupportedLanguage("   "));
     }
 
+    @Test
     public void test_setDetector() {
         // Test with null detector
         languageHelper.setDetector(null);
         assertNull(languageHelper.detector);
     }
 
+    @Test
     public void test_createScript_withBlankLanguage() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "");
@@ -186,6 +207,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("aaa", result.getIdOrCode());
     }
 
+    @Test
     public void test_createScript_withNullLanguage() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", null);
@@ -194,6 +216,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("aaa", result.getIdOrCode());
     }
 
+    @Test
     public void test_createScript_multipleFields() {
         languageHelper.langFields = new String[] { "title", "content", "description" };
 
@@ -206,6 +229,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
                 result.getIdOrCode());
     }
 
+    @Test
     public void test_getReindexScriptSource_singleField() {
         languageHelper.langFields = new String[] { "title" };
 
@@ -213,6 +237,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("if(ctx._source.lang!=null){ctx._source['title_'+ctx._source.lang]=ctx._source.title}", result);
     }
 
+    @Test
     public void test_getReindexScriptSource_multipleFields() {
         languageHelper.langFields = new String[] { "title", "content", "description" };
 
@@ -222,6 +247,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
                 result);
     }
 
+    @Test
     public void test_updateDocument_withDifferentFieldTypes() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "ja");
@@ -237,6 +263,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertNull(doc.get("url_ja")); // url is not in langFields
     }
 
+    @Test
     public void test_updateDocument_withNullLangFields() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "ja");
@@ -250,6 +277,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("コンテンツ", doc.get("content_ja"));
     }
 
+    @Test
     public void test_updateDocument_withoutLangFields() {
         languageHelper.langFields = new String[] { "description" }; // Different field
 
@@ -265,6 +293,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertNull(doc.get("content_ja")); // content is not in langFields
     }
 
+    @Test
     public void test_getSupportedLanguage_caseInsensitive() {
         // Test that method is case sensitive (as per implementation)
         assertNull(languageHelper.getSupportedLanguage("JA"));
@@ -273,6 +302,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("en", languageHelper.getSupportedLanguage("en"));
     }
 
+    @Test
     public void test_updateDocument_emptyLangFields() {
         languageHelper.langFields = new String[] {};
 
@@ -289,6 +319,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertNull(doc.get("content_ja"));
     }
 
+    @Test
     public void test_createScript_noLangFields() {
         languageHelper.langFields = new String[] {};
 
@@ -299,6 +330,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("test", result.getIdOrCode());
     }
 
+    @Test
     public void test_getReindexScriptSource_noLangFields() {
         languageHelper.langFields = new String[] {};
 
@@ -306,6 +338,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertEquals("if(ctx._source.lang!=null){}", result);
     }
 
+    @Test
     public void test_updateDocument_partialFieldsPresent() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("lang", "ja");
@@ -319,6 +352,7 @@ public class LanguageHelperTest extends UnitFessTestCase {
         assertNull(doc.get("content_ja")); // content field was not present
     }
 
+    @Test
     public void test_getSupportedLanguage_withWhitespace() {
         // Test that whitespace is not trimmed (as per implementation)
         assertNull(languageHelper.getSupportedLanguage(" ja "));

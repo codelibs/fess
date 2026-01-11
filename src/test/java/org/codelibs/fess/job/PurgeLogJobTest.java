@@ -23,18 +23,23 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PurgeLogJobTest extends UnitFessTestCase {
 
     private PurgeLogJob purgeLogJob;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         purgeLogJob = new PurgeLogJob();
     }
 
     // Test all services execute successfully
+    @Test
     public void test_execute_allSuccess() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -143,6 +148,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test with negative days to skip purging
+    @Test
     public void test_execute_negativeDays() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -236,6 +242,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test crawlingInfoService exception handling
+    @Test
     public void test_execute_crawlingInfoException() {
         // Setup tracking variables
         final boolean[] deleteSearchLogCalled = { false };
@@ -323,6 +330,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test with zero days (should still execute)
+    @Test
     public void test_execute_zeroDays() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -422,6 +430,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         // Test that constructor creates instance without error
         PurgeLogJob job = new PurgeLogJob();
@@ -429,6 +438,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test multiple exceptions occur
+    @Test
     public void test_execute_multipleExceptions() {
         // Create mock services with exceptions
         CrawlingInfoService crawlingInfoService = new CrawlingInfoService() {
@@ -507,6 +517,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test mixed success and skip
+    @Test
     public void test_execute_mixedSuccessAndSkip() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -606,6 +617,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test exception in searchLogService
+    @Test
     public void test_execute_searchLogException() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -693,6 +705,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test exception in jobLogService delete
+    @Test
     public void test_execute_jobLogException() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -780,6 +793,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test exception in userInfoService
+    @Test
     public void test_execute_userInfoException() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
@@ -867,6 +881,7 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     }
 
     // Test exception in jobLogService updateStatus
+    @Test
     public void test_execute_updateStatusException() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };

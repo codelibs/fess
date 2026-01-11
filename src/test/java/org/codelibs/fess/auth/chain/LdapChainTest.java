@@ -20,6 +20,11 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class LdapChainTest extends UnitFessTestCase {
 
@@ -27,9 +32,10 @@ public class LdapChainTest extends UnitFessTestCase {
     private TestLdapManager testLdapManager;
     private TestFessConfig testFessConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ldapChain = new LdapChain();
         testLdapManager = new TestLdapManager();
         testFessConfig = new TestFessConfig();
@@ -38,11 +44,13 @@ public class LdapChainTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
+    @Test
     public void test_update() {
         // Test update method
         User user = createTestUser("testuser", "password123");
@@ -53,6 +61,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.insertCalled);
     }
 
+    @Test
     public void test_update_withNullUser() {
         // Test update with null user
         ldapChain.update(null);
@@ -61,6 +70,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.insertCalled);
     }
 
+    @Test
     public void test_delete() {
         // Test delete method
         User user = createTestUser("testuser", "password123");
@@ -71,6 +81,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.deleteCalled);
     }
 
+    @Test
     public void test_delete_withNullUser() {
         // Test delete with null user
         ldapChain.delete(null);
@@ -79,6 +90,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.deleteCalled);
     }
 
+    @Test
     public void test_changePassword_success() {
         // Test successful password change when LDAP admin sync is disabled
         testLdapManager.changePasswordResult = true;
@@ -92,6 +104,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_success_withSync() {
         // Test successful password change when LDAP admin sync is enabled
         testLdapManager.changePasswordResult = true;
@@ -105,6 +118,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_failure() {
         // Test failed password change when LDAP admin sync is disabled
         testLdapManager.changePasswordResult = false;
@@ -118,6 +132,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_failure_withSync() {
         // Test failed password change when LDAP admin sync is enabled
         testLdapManager.changePasswordResult = false;
@@ -131,6 +146,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_withNullUsername() {
         // Test password change with null username
         testLdapManager.changePasswordResult = false;
@@ -144,6 +160,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_withNullPassword() {
         // Test password change with null password
         testLdapManager.changePasswordResult = false;
@@ -157,6 +174,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_changePassword_withBothNull() {
         // Test password change with both null
         testLdapManager.changePasswordResult = false;
@@ -170,6 +188,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.changePasswordCalled);
     }
 
+    @Test
     public void test_load() {
         // Test load method
         User user = createTestUser("testuser", "password123");
@@ -181,6 +200,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.applyCalled);
     }
 
+    @Test
     public void test_load_withNullUser() {
         // Test load with null user
         User result = ldapChain.load(null);
@@ -190,6 +210,7 @@ public class LdapChainTest extends UnitFessTestCase {
         assertTrue(testLdapManager.applyCalled);
     }
 
+    @Test
     public void test_load_modifiesUser() {
         // Test that load method modifies the user object through apply
         User user = createTestUser("testuser", "password123");

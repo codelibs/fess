@@ -20,15 +20,21 @@ import java.util.TimeZone;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessTimeResourceProviderTest extends UnitFessTestCase {
 
     private FessTimeResourceProvider provider;
     private FessConfig mockConfig;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create FessConfig mock
         mockConfig = new FessConfig.SimpleImpl() {
@@ -52,18 +58,21 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         FessTimeResourceProvider testProvider = new FessTimeResourceProvider(mockConfig);
         assertNotNull(testProvider);
     }
 
     // Test constructor with null config
+    @Test
     public void test_constructor_nullConfig() {
         try {
             new FessTimeResourceProvider(null);
@@ -76,6 +85,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with different time adjustments
+    @Test
     public void test_withDifferentTimeAdjustments() {
         // Test zero adjustment
         FessConfig zeroConfig = new FessConfig.SimpleImpl() {
@@ -130,6 +140,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test getTimeAdjustTimeMillis string values
+    @Test
     public void test_getTimeAdjustTimeMillis_stringValues() {
         // Test various string formats
         String[] testValues = { "0", "1000", "-1000", "999999999", "-999999999", "1", "-1" };
@@ -155,6 +166,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test getTimeAdjustTimeMillisAsLong values
+    @Test
     public void test_getTimeAdjustTimeMillisAsLong_values() {
         Long[] testValues = { 0L, 1L, -1L, 1000L, -1000L, 60000L, -60000L, 3600000L, -3600000L, Long.MAX_VALUE, Long.MIN_VALUE };
 
@@ -180,6 +192,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test centralTimeZone reference
+    @Test
     public void test_centralTimeZone() {
         // Test that centralTimeZone is accessible and not null
         TimeZone centralTz = FessUserTimeZoneProcessProvider.centralTimeZone;
@@ -188,6 +201,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test toString method
+    @Test
     public void test_toString() {
         String result = provider.toString();
         assertNotNull(result);
@@ -197,6 +211,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test multiple provider instances
+    @Test
     public void test_multipleInstances() {
         FessTimeResourceProvider provider1 = new FessTimeResourceProvider(mockConfig);
         FessTimeResourceProvider provider2 = new FessTimeResourceProvider(mockConfig);
@@ -207,6 +222,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with config returning null time adjustment
+    @Test
     public void test_nullTimeAdjustment() {
         FessConfig nullAdjustConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -227,6 +243,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with config returning empty string
+    @Test
     public void test_emptyStringTimeAdjustment() {
         FessConfig emptyConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -247,6 +264,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test thread safety of provider creation
+    @Test
     public void test_threadSafetyProviderCreation() throws InterruptedException {
         final int threadCount = 10;
         final Thread[] threads = new Thread[threadCount];
@@ -276,12 +294,13 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
 
         // Check all providers were created successfully
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
-            assertNotNull("Thread " + i + " failed to create provider", providers[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
+            assertNotNull(providers[i], "Thread " + i + " failed to create provider");
         }
     }
 
     // Test with very large time adjustment values
+    @Test
     public void test_largeTimeAdjustmentValues() {
         // Test with milliseconds in a year
         long yearInMillis = 365L * 24L * 60L * 60L * 1000L;
@@ -305,6 +324,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test timezone information
+    @Test
     public void test_timezoneInformation() {
         TimeZone defaultTz = TimeZone.getDefault();
         assertNotNull(defaultTz);
@@ -316,6 +336,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with decimal values in string (should be handled by config)
+    @Test
     public void test_decimalStringValues() {
         FessConfig decimalConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -337,6 +358,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test provider consistency
+    @Test
     public void test_providerConsistency() {
         // Create multiple providers with same config
         FessTimeResourceProvider provider1 = new FessTimeResourceProvider(mockConfig);
@@ -354,6 +376,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with special characters in time adjustment string
+    @Test
     public void test_specialCharactersInTimeAdjustment() {
         FessConfig specialConfig = new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -375,6 +398,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test memory efficiency with multiple providers
+    @Test
     public void test_memoryEfficiency() {
         // Create and discard multiple providers
         for (int i = 0; i < 100; i++) {
@@ -386,6 +410,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test equals and hashCode if implemented
+    @Test
     public void test_equalsAndHashCode() {
         FessTimeResourceProvider provider1 = new FessTimeResourceProvider(mockConfig);
         FessTimeResourceProvider provider2 = new FessTimeResourceProvider(mockConfig);
@@ -398,6 +423,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test with rapid config changes
+    @Test
     public void test_rapidConfigChanges() {
         for (int i = 0; i < 50; i++) {
             final int adjustment = i * 1000;
@@ -421,6 +447,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test boundary conditions for time adjustments
+    @Test
     public void test_boundaryTimeAdjustments() {
         // Test zero boundary
         testBoundaryValue(0L);
@@ -467,6 +494,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test config methods return consistent values
+    @Test
     public void test_configConsistency() {
         assertEquals("0", mockConfig.getTimeAdjustTimeMillis());
         assertEquals(Long.valueOf(0L), mockConfig.getTimeAdjustTimeMillisAsLong());
@@ -479,6 +507,7 @@ public class FessTimeResourceProviderTest extends UnitFessTestCase {
     }
 
     // Test provider creation with various configs
+    @Test
     public void test_providerCreationVariousConfigs() {
         // Test with multiple different configs
         FessConfig[] configs = new FessConfig[5];

@@ -28,13 +28,17 @@ import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.di.exception.IORuntimeException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PluginHelperTest extends UnitFessTestCase {
     private PluginHelper pluginHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         pluginHelper = new PluginHelper() {
             @Override
             protected String[] getRepositories() {
@@ -81,6 +85,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         };
     }
 
+    @Test
     public void test_processRepository1() {
         List<Artifact> list = pluginHelper.processRepository(ArtifactType.DATA_STORE, "plugin/repo1/");
         assertEquals(7, list.size());
@@ -89,6 +94,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("plugin/repo1/fess-ds-atlassian/12.2.0/fess-ds-atlassian-12.2.0.jar", list.get(0).getUrl());
     }
 
+    @Test
     public void test_processRepository2() {
         List<Artifact> list = pluginHelper.processRepository(ArtifactType.DATA_STORE, "plugin/repo2/");
         assertEquals(1, list.size());
@@ -98,6 +104,7 @@ public class PluginHelperTest extends UnitFessTestCase {
                 list.get(0).getUrl());
     }
 
+    @Test
     public void test_processRepository3() {
         List<Artifact> list = pluginHelper.processRepository(ArtifactType.CRAWLER, "plugin/repo3/");
         assertEquals(2, list.size());
@@ -109,35 +116,41 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("plugin/repo3/fess-crawler-smbj/14.15.0/fess-crawler-smbj-14.15.0.jar", list.get(1).getUrl());
     }
 
+    @Test
     public void test_getArtifactFromFileName1() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "fess-ds-atlassian-13.2.0.jar");
         assertEquals("fess-ds-atlassian", artifact.getName());
         assertEquals("13.2.0", artifact.getVersion());
     }
 
+    @Test
     public void test_getArtifactFromFileName2() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "fess-ds-atlassian-13.2.1-20190708.212247-1.jar");
         assertEquals("fess-ds-atlassian", artifact.getName());
         assertEquals("13.2.1-20190708.212247-1", artifact.getVersion());
     }
 
+    @Test
     public void test_getArtifactFromFileName3() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.UNKNOWN, "mysql-connector-java-8.0.17.jar");
         assertEquals("mysql-connector-java", artifact.getName());
         assertEquals("8.0.17", artifact.getVersion());
     }
 
+    @Test
     public void test_loadYaml() {
         List<Artifact> artifacts = pluginHelper.loadArtifactsFromRepository("plugin/repo.yaml");
         assertEquals(2, artifacts.size());
     }
 
+    @Test
     public void test_getAvailableArtifacts() {
         Artifact[] artifacts = pluginHelper.getAvailableArtifacts(ArtifactType.DATA_STORE);
         assertNotNull(artifacts);
         assertTrue(artifacts.length > 0);
     }
 
+    @Test
     public void test_getAvailableArtifacts_exception() {
         PluginHelper errorHelper = new PluginHelper() {
             @Override
@@ -159,16 +172,19 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getInstalledArtifacts_unknown() {
         Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.UNKNOWN);
         assertNotNull(artifacts);
     }
 
+    @Test
     public void test_getInstalledArtifacts_dataStore() {
         Artifact[] artifacts = pluginHelper.getInstalledArtifacts(ArtifactType.DATA_STORE);
         assertNotNull(artifacts);
     }
 
+    @Test
     public void test_getArtifact_found() {
         Artifact result = pluginHelper.getArtifact("fess-ds-atlassian", "12.2.0");
         assertNotNull(result);
@@ -176,11 +192,13 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("12.2.0", result.getVersion());
     }
 
+    @Test
     public void test_getArtifact_notFound() {
         Artifact result = pluginHelper.getArtifact("non-existent", "1.0.0");
         assertNull(result);
     }
 
+    @Test
     public void test_getArtifact_nullInputs() {
         assertNull(pluginHelper.getArtifact(null, "1.0.0"));
         assertNull(pluginHelper.getArtifact("test", null));
@@ -188,6 +206,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertNull(pluginHelper.getArtifact("test", ""));
     }
 
+    @Test
     public void test_isExcludedName_crawler() {
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler"));
         assertTrue(pluginHelper.isExcludedName(ArtifactType.CRAWLER, "fess-crawler-db"));
@@ -204,12 +223,14 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertFalse(pluginHelper.isExcludedName(ArtifactType.DATA_STORE, "fess-crawler"));
     }
 
+    @Test
     public void test_isExcludedName_nonCrawler() {
         assertFalse(pluginHelper.isExcludedName(ArtifactType.DATA_STORE, "fess-crawler"));
         assertFalse(pluginHelper.isExcludedName(ArtifactType.THEME, "fess-crawler"));
         assertFalse(pluginHelper.isExcludedName(ArtifactType.INGEST, "fess-crawler"));
     }
 
+    @Test
     public void test_loadArtifactsFromRepository_emptyResult() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -223,6 +244,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertTrue(result.isEmpty());
     }
 
+    @Test
     public void test_loadArtifactsFromRepository_nullResult() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -236,6 +258,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertTrue(result.isEmpty());
     }
 
+    @Test
     public void test_loadArtifactsFromRepository_invalidYaml() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -252,6 +275,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processRepository_noMatches() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -265,6 +289,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertTrue(result.isEmpty());
     }
 
+    @Test
     public void test_processRepository_metadataError() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -281,6 +306,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertTrue(result.isEmpty());
     }
 
+    @Test
     public void test_getSnapshotActualVersion_valid() {
         String snapshotXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<metadata>\n" + "  <snapshot>\n"
                 + "    <timestamp>20180814.210714</timestamp>\n" + "    <buildNumber>10</buildNumber>\n" + "  </snapshot>\n"
@@ -303,6 +329,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSnapshotActualVersion_noSnapshot() {
         String noSnapshotXml =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<metadata>\n" + "  <version>1.0.0</version>\n" + "</metadata>";
@@ -324,6 +351,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSnapshotActualVersion_partialData() {
         String partialXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<metadata>\n" + "  <snapshot>\n"
                 + "    <timestamp>20180814.210714</timestamp>\n" + "  </snapshot>\n" + "</metadata>";
@@ -345,6 +373,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_installArtifact_default() {
         PluginHelper testHelper = new PluginHelper() {
             @Override
@@ -364,6 +393,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_blankUrl() {
         PluginHelper testHelper = new PluginHelper();
         Artifact artifact = new Artifact("test", "1.0.0", "");
@@ -376,6 +406,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_nullUrl() {
         PluginHelper testHelper = new PluginHelper();
         Artifact artifact = new Artifact("test", "1.0.0", null);
@@ -388,6 +419,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_deleteInstalledArtifact_nonExistent() {
         PluginHelper testHelper = new PluginHelper();
         Artifact artifact = new Artifact("non-existent", "1.0.0");
@@ -400,6 +432,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getArtifactFromFileName_withUrl() {
         Artifact artifact =
                 pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "test-plugin-1.0.0.jar", "http://test.com/test.jar");
@@ -408,18 +441,21 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("http://test.com/test.jar", artifact.getUrl());
     }
 
+    @Test
     public void test_getArtifactFromFileName_complexName() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "fess-ds-web-crawler-1.2.3-beta.jar");
         assertEquals("fess-ds-web-crawler", artifact.getName());
         assertEquals("1.2.3-beta", artifact.getVersion());
     }
 
+    @Test
     public void test_getArtifactFromFileName_singleVersion() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "plugin-1.jar");
         assertEquals("plugin", artifact.getName());
         assertEquals("1", artifact.getVersion());
     }
 
+    @Test
     public void test_getArtifactFromFileName_noVersion() {
         Artifact artifact = pluginHelper.getArtifactFromFileName(ArtifactType.DATA_STORE, "plugin.jar");
         assertEquals("plugin", artifact.getName());
@@ -427,6 +463,7 @@ public class PluginHelperTest extends UnitFessTestCase {
     }
 
     // Test inner classes
+    @Test
     public void test_Artifact_constructor() {
         Artifact artifact = new Artifact("test", "1.0.0", "http://test.com/test.jar");
         assertEquals("test", artifact.getName());
@@ -436,6 +473,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals(ArtifactType.UNKNOWN, artifact.getType());
     }
 
+    @Test
     public void test_Artifact_constructorWithoutUrl() {
         Artifact artifact = new Artifact("test", "1.0.0");
         assertEquals("test", artifact.getName());
@@ -444,11 +482,13 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("test-1.0.0.jar", artifact.getFileName());
     }
 
+    @Test
     public void test_Artifact_toString() {
         Artifact artifact = new Artifact("test", "1.0.0");
         assertEquals("test:1.0.0", artifact.toString());
     }
 
+    @Test
     public void test_Artifact_getType() {
         Artifact dsArtifact = new Artifact("fess-ds-test", "1.0.0");
         assertEquals(ArtifactType.DATA_STORE, dsArtifact.getType());
@@ -475,6 +515,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals(ArtifactType.UNKNOWN, unknownArtifact.getType());
     }
 
+    @Test
     public void test_ArtifactType_getId() {
         assertEquals("fess-ds", ArtifactType.DATA_STORE.getId());
         assertEquals("fess-theme", ArtifactType.THEME.getId());
@@ -486,6 +527,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals("jar", ArtifactType.UNKNOWN.getId());
     }
 
+    @Test
     public void test_ArtifactType_getType() {
         assertEquals(ArtifactType.DATA_STORE, ArtifactType.getType("fess-ds-test"));
         assertEquals(ArtifactType.THEME, ArtifactType.getType("fess-theme-test"));
@@ -497,6 +539,7 @@ public class PluginHelperTest extends UnitFessTestCase {
         assertEquals(ArtifactType.UNKNOWN, ArtifactType.getType("unknown-test"));
     }
 
+    @Test
     public void test_processRepository_withVersionFiltering() {
         PluginHelper testHelper = new PluginHelper() {
             @Override

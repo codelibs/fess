@@ -23,15 +23,21 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class MonitorTargetTest extends UnitFessTestCase {
 
     private TestMonitorTarget monitorTarget;
     private SystemHelper systemHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         monitorTarget = new TestMonitorTarget();
 
         // Setup SystemHelper with a fixed timestamp for testing
@@ -45,11 +51,13 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test append method with null value
+    @Test
     public void test_append_nullValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> null;
@@ -59,6 +67,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with Integer value
+    @Test
     public void test_append_integerValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> Integer.valueOf(123);
@@ -68,6 +77,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with Long value
+    @Test
     public void test_append_longValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> Long.valueOf(9876543210L);
@@ -77,6 +87,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with Short value
+    @Test
     public void test_append_shortValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> Short.valueOf((short) 42);
@@ -86,6 +97,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with double array
+    @Test
     public void test_append_doubleArray() {
         StringBuilder buf = new StringBuilder();
         double[] values = { 1.5, 2.3, 3.7 };
@@ -96,6 +108,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with empty double array
+    @Test
     public void test_append_emptyDoubleArray() {
         StringBuilder buf = new StringBuilder();
         double[] values = {};
@@ -106,6 +119,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with String value
+    @Test
     public void test_append_stringValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "test string";
@@ -115,6 +129,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with String containing special characters
+    @Test
     public void test_append_stringWithSpecialChars() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "test \"quotes\" and \n newline";
@@ -124,6 +139,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with String containing backslash
+    @Test
     public void test_append_stringWithBackslash() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "path\\to\\file";
@@ -133,6 +149,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with exception in supplier
+    @Test
     public void test_append_exceptionInSupplier() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> {
@@ -144,6 +161,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with Boolean value (other object type)
+    @Test
     public void test_append_booleanValue() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> Boolean.TRUE;
@@ -153,6 +171,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append method with Date value (other object type)
+    @Test
     public void test_append_dateValue() {
         StringBuilder buf = new StringBuilder();
         Date date = new Date(1609459200000L);
@@ -166,6 +185,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendTimestamp method
+    @Test
     public void test_appendTimestamp() {
         StringBuilder buf = new StringBuilder();
 
@@ -179,6 +199,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendException method with simple exception
+    @Test
     public void test_appendException_simpleException() {
         StringBuilder buf = new StringBuilder();
         Exception exception = new RuntimeException("Test error message");
@@ -190,6 +211,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendException method with nested exception
+    @Test
     public void test_appendException_nestedException() {
         StringBuilder buf = new StringBuilder();
         Exception cause = new IllegalArgumentException("Root cause");
@@ -202,6 +224,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendException method with IOException during processing
+    @Test
     public void test_appendException_ioExceptionDuringProcessing() {
         StringBuilder buf = new StringBuilder();
         // Create an exception that might cause issues during processing
@@ -219,6 +242,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test multiple appends to the same buffer
+    @Test
     public void test_multipleAppends() {
         StringBuilder buf = new StringBuilder();
 
@@ -232,6 +256,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append with empty string
+    @Test
     public void test_append_emptyString() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "";
@@ -241,6 +266,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append with very long string
+    @Test
     public void test_append_veryLongString() {
         StringBuilder buf = new StringBuilder();
         String longString = "a".repeat(10000);
@@ -253,6 +279,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append with Unicode characters
+    @Test
     public void test_append_unicodeCharacters() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "テスト 测试 테스트 🎉";
@@ -263,6 +290,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test append returns the same buffer instance
+    @Test
     public void test_append_returnsSameBuffer() {
         StringBuilder buf = new StringBuilder();
         Supplier<Object> supplier = () -> "test";
@@ -272,6 +300,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendTimestamp returns the same buffer instance
+    @Test
     public void test_appendTimestamp_returnsSameBuffer() {
         StringBuilder buf = new StringBuilder();
 
@@ -280,6 +309,7 @@ public class MonitorTargetTest extends UnitFessTestCase {
     }
 
     // Test appendException returns the same buffer instance
+    @Test
     public void test_appendException_returnsSameBuffer() {
         StringBuilder buf = new StringBuilder();
         Exception exception = new RuntimeException("test");

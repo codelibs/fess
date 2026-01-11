@@ -34,6 +34,10 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class StopwordsFileTest extends UnitFessTestCase {
 
@@ -41,9 +45,10 @@ public class StopwordsFileTest extends UnitFessTestCase {
     private File testFile;
     private DictionaryManager dictionaryManager;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create a temporary test file
         testFile = File.createTempFile("test_stopwords", ".txt");
@@ -122,7 +127,8 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         if (testFile != null && testFile.exists()) {
             testFile.delete();
         }
@@ -143,19 +149,23 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test basic getters
+    @Test
     public void test_getType() {
         assertEquals("stopwords", stopwordsFile.getType());
     }
 
+    @Test
     public void test_getPath() {
         assertEquals(testFile.getAbsolutePath(), stopwordsFile.getPath());
     }
 
+    @Test
     public void test_getSimpleName() {
         assertEquals(testFile.getName(), stopwordsFile.getSimpleName());
     }
 
     // Test get method
+    @Test
     public void test_get_existingItem() {
         // Load test data
         loadTestData();
@@ -165,6 +175,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals("the", result.get().getInput());
     }
 
+    @Test
     public void test_get_nonExistingItem() {
         // Load test data
         loadTestData();
@@ -173,6 +184,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertFalse(result.isPresent());
     }
 
+    @Test
     public void test_get_withNullList() {
         // stopwordsItemList is null initially, should trigger reload
         OptionalEntity<StopwordsItem> result = stopwordsFile.get(1);
@@ -181,6 +193,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test selectList method
+    @Test
     public void test_selectList_normalCase() {
         loadTestData();
 
@@ -193,6 +206,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(1, result.getCurrentPageNumber());
     }
 
+    @Test
     public void test_selectList_offsetOutOfBounds() {
         loadTestData();
 
@@ -204,6 +218,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(5, result.getAllRecordCount());
     }
 
+    @Test
     public void test_selectList_negativeOffset() {
         loadTestData();
 
@@ -215,6 +230,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(5, result.getAllRecordCount());
     }
 
+    @Test
     public void test_selectList_sizeExceedsAvailable() {
         loadTestData();
 
@@ -226,6 +242,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(5, result.getAllRecordCount());
     }
 
+    @Test
     public void test_selectList_withNullList() {
         // stopwordsItemList is null initially, should trigger reload
         DictionaryFile.PagingList<StopwordsItem> result = stopwordsFile.selectList(0, 2);
@@ -234,6 +251,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test insert method
+    @Test
     public void test_insert() {
         loadTestData();
 
@@ -252,6 +270,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test update method
+    @Test
     public void test_update() {
         loadTestData();
 
@@ -266,6 +285,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test delete method
+    @Test
     public void test_delete() {
         loadTestData();
 
@@ -279,6 +299,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test reload with InputStream
+    @Test
     public void test_reload_withComments() {
         String content = "# This is a comment\n" + "word1\n" + "\n" + // empty line
                 "word2\n" + "# Another comment\n" + "word3\n";
@@ -292,6 +313,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals("word3", stopwordsFile.stopwordsItemList.get(2).getInput());
     }
 
+    @Test
     public void test_reload_withEscapedCharacters() {
         String content = "word\\\\1\n" + // word\1
                 "word\\\\\\\\2\n" + // word\\2
@@ -306,6 +328,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals("word3", stopwordsFile.stopwordsItemList.get(2).getInput());
     }
 
+    @Test
     public void test_reload_withIOException() {
         InputStream failingStream = new InputStream() {
             @Override
@@ -323,6 +346,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test update with InputStream
+    @Test
     public void test_update_withInputStream() throws IOException {
         String content = "new1\n" + "new2\n" + "new3\n";
 
@@ -336,6 +360,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test toString method
+    @Test
     public void test_toString() {
         loadTestData();
         String result = stopwordsFile.toString();
@@ -345,6 +370,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test unescape private method through reload
+    @Test
     public void test_unescape_noBackslash() {
         String content = "word1\n";
         InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
@@ -354,6 +380,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals("word1", stopwordsFile.stopwordsItemList.get(0).getInput());
     }
 
+    @Test
     public void test_unescape_withBackslash() {
         String content = "word\\n1\n" + // word + n + 1
                 "word\\\n"; // word + (nothing after backslash)
@@ -367,6 +394,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test StopwordsUpdater inner class
+    @Test
     public void test_updater_writeOldItem() {
         loadTestData();
 
@@ -380,6 +408,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_updater_updateItem() {
         loadTestData();
 
@@ -396,6 +425,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_updater_deleteItem() {
         loadTestData();
 
@@ -411,6 +441,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_updater_mismatchedItem() {
         loadTestData();
 
@@ -430,6 +461,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_updater_commit() {
         StopwordsItem newItem = new StopwordsItem(0, "committed");
         StopwordsFile.StopwordsUpdater updater = stopwordsFile.new StopwordsUpdater(newItem);
@@ -441,6 +473,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_updater_commitWithoutUpdate() {
         StopwordsFile.StopwordsUpdater updater = stopwordsFile.new StopwordsUpdater(null);
 
@@ -450,6 +483,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         updater.close();
     }
 
+    @Test
     public void test_updater_writeLine() {
         StopwordsFile.StopwordsUpdater updater = stopwordsFile.new StopwordsUpdater(null);
 
@@ -460,6 +494,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
     }
 
     // Test edge cases
+    @Test
     public void test_emptyFile() {
         String content = "";
         InputStream is = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
@@ -468,6 +503,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(0, stopwordsFile.stopwordsItemList.size());
     }
 
+    @Test
     public void test_onlyCommentsAndEmptyLines() {
         String content = "# Comment 1\n" + "\n" + "# Comment 2\n" + "\n";
 
@@ -477,6 +513,7 @@ public class StopwordsFileTest extends UnitFessTestCase {
         assertEquals(0, stopwordsFile.stopwordsItemList.size());
     }
 
+    @Test
     public void test_reload_withUpdater() {
         String content = "word1\n" + "word2\n" + "word3\n";
 

@@ -21,6 +21,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.lastaflute.police.NonActionExtendsActionPolice;
 import org.dbflute.utflute.lastaflute.police.NonWebHasWebReferencePolice;
 import org.dbflute.utflute.lastaflute.police.WebPackageNinjaReferencePolice;
+import org.junit.jupiter.api.Test;
 
 public class FessActionDefTest extends UnitFessTestCase {
 
@@ -33,16 +34,19 @@ public class FessActionDefTest extends UnitFessTestCase {
     //        policeStoryOfJavaClassChase(new HotDeployDestroyerPolice(tp -> getComponent(tp)));
     //    }
 
+    @Test
     public void test_nonActionExtendsAction() throws Exception {
         policeStoryOfJavaClassChase(new NonActionExtendsActionPolice());
         assertTrue(true);
     }
 
+    @Test
     public void test_nonWebHasWebReference() throws Exception {
         policeStoryOfJavaClassChase(new NonWebHasWebReferencePolice());
         assertTrue(true);
     }
 
+    @Test
     public void test_webPackageNinjaReferencePolice() throws Exception {
         policeStoryOfJavaClassChase(new WebPackageNinjaReferencePolice() {
             public void handle(File srcFile, Class<?> clazz) {

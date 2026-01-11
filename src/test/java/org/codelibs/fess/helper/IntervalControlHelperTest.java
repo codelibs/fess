@@ -23,21 +23,27 @@ import java.util.Date;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.IntervalControlHelper.IntervalRule;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class IntervalControlHelperTest extends UnitFessTestCase {
 
     private IntervalControlHelper intervalControlHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         intervalControlHelper = new IntervalControlHelper();
     }
 
+    @Test
     public void test_noRule() {
         assertEquals(0, intervalControlHelper.getDelay());
     }
 
+    @Test
     public void test_0000() throws ParseException {
         final IntervalControlHelper intervalControlHelper = createHelper("00:00", 1);
         intervalControlHelper.addIntervalRule("01:30", "15:15", "*", 1000);
@@ -55,6 +61,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertEquals(4000, intervalControlHelper.getDelay());
     }
 
+    @Test
     public void test_1215() throws ParseException {
         final IntervalControlHelper intervalControlHelper = createHelper("12:15", 1);
         intervalControlHelper.addIntervalRule("01:30", "12:05", "*", 1000);
@@ -81,6 +88,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_2250() throws ParseException {
         final IntervalControlHelper intervalControlHelper = createHelper("22:50", 1);
         intervalControlHelper.addIntervalRule("01:30", "15:15", "*", 1000);
@@ -111,6 +119,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         };
     }
 
+    @Test
     public void test_checkCrawlerStatus() throws InterruptedException {
         IntervalControlHelper helper = new IntervalControlHelper();
         helper.setCrawlerWaitMillis(50);
@@ -144,6 +153,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         thread.join();
     }
 
+    @Test
     public void test_delayByRules() throws ParseException {
         IntervalControlHelper helper = createHelper("12:15", 1);
 
@@ -169,6 +179,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertTrue(end - start >= 10); // Should wait for delay
     }
 
+    @Test
     public void test_setCrawlerRunning() {
         IntervalControlHelper helper = new IntervalControlHelper();
 
@@ -184,6 +195,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertTrue(helper.isCrawlerRunning());
     }
 
+    @Test
     public void test_setCrawlerWaitMillis() {
         IntervalControlHelper helper = new IntervalControlHelper();
 
@@ -198,6 +210,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertEquals(0, helper.crawlerWaitMillis);
     }
 
+    @Test
     public void test_parseTime_validFormat() {
         int[] result = IntervalControlHelper.parseTime("12:30");
         assertEquals(12, result[0]);
@@ -212,6 +225,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertEquals(59, result[1]);
     }
 
+    @Test
     public void test_parseTime_invalidFormat() {
         try {
             IntervalControlHelper.parseTime("12");
@@ -249,6 +263,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_intervalRule_getDelay() {
         IntervalRule rule = new IntervalRule("10:00", "18:00", "*", 5000);
         assertEquals(5000, rule.getDelay());
@@ -257,6 +272,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertEquals(0, rule.getDelay());
     }
 
+    @Test
     public void test_intervalRule_isTarget_sameDay() {
         IntervalRule rule = new IntervalRule("10:00", "18:00", "*", 1000);
 
@@ -270,6 +286,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertFalse(rule.isTarget(18, 1, 1)); // 18:01 on Sunday
     }
 
+    @Test
     public void test_intervalRule_isTarget_crossMidnight() {
         IntervalRule rule = new IntervalRule("22:00", "02:00", "*", 1000);
 
@@ -286,6 +303,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertFalse(rule.isTarget(2, 1, 1)); // 2:01 on Sunday (actually Monday morning)
     }
 
+    @Test
     public void test_intervalRule_isTarget_specificDays() {
         IntervalRule rule = new IntervalRule("10:00", "18:00", "1,3,5", 1000); // Sunday, Tuesday, Thursday
 
@@ -301,6 +319,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertFalse(rule.isTarget(12, 30, 7)); // 12:30 on Saturday
     }
 
+    @Test
     public void test_intervalRule_isTarget_invalidDays() {
         IntervalRule rule = new IntervalRule("10:00", "18:00", "1,invalid,3", 1000);
 
@@ -310,6 +329,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertFalse(rule.isTarget(12, 30, 2)); // 12:30 on Monday
     }
 
+    @Test
     public void test_intervalRule_isTarget_dayOverflow() {
         IntervalRule rule = new IntervalRule("10:00", "18:00", "1", 1000); // Sunday only
 
@@ -324,6 +344,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertFalse(crossRule.isTarget(1, 30, 8)); // Should be treated as day 1 (Sunday), checking day+1=2 (Monday)
     }
 
+    @Test
     public void test_addIntervalRule_multipleDays() {
         IntervalControlHelper helper = new IntervalControlHelper();
         helper.addIntervalRule("10:00", "18:00", "1,2,3,4,5", 1000);
@@ -333,6 +354,7 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
         assertEquals(1000, rule.getDelay());
     }
 
+    @Test
     public void test_addIntervalRule_emptyDays() {
         IntervalControlHelper helper = new IntervalControlHelper();
         helper.addIntervalRule("10:00", "18:00", "", 1000);

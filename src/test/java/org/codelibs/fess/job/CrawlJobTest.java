@@ -42,6 +42,11 @@ import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.cbean.result.PagingResultBean;
 
 import jakarta.servlet.ServletContext;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlJobTest extends UnitFessTestCase {
 
@@ -61,18 +66,21 @@ public class CrawlJobTest extends UnitFessTestCase {
         }
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         crawlJob = new CrawlJob();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test constructor and field initialization
+    @Test
     public void test_constructor() {
         assertNotNull(crawlJob);
         assertEquals(Constants.CRAWLING_INFO_SYSTEM_NAME, crawlJob.namespace);
@@ -84,6 +92,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test namespace setter
+    @Test
     public void test_namespace() {
         String testNamespace = "test_namespace";
         CrawlJob result = crawlJob.namespace(testNamespace);
@@ -92,6 +101,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test documentExpires setter
+    @Test
     public void test_documentExpires() {
         int testExpires = 30;
         CrawlJob result = crawlJob.documentExpires(testExpires);
@@ -105,6 +115,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test webConfigIds setter
+    @Test
     public void test_webConfigIds() {
         String[] testIds = { "web1", "web2", "web3" };
         CrawlJob result = crawlJob.webConfigIds(testIds);
@@ -123,6 +134,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test fileConfigIds setter
+    @Test
     public void test_fileConfigIds() {
         String[] testIds = { "file1", "file2" };
         CrawlJob result = crawlJob.fileConfigIds(testIds);
@@ -136,6 +148,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test dataConfigIds setter
+    @Test
     public void test_dataConfigIds() {
         String[] testIds = { "data1", "data2", "data3", "data4" };
         CrawlJob result = crawlJob.dataConfigIds(testIds);
@@ -149,6 +162,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test hotThread setter
+    @Test
     public void test_hotThread() {
         int testInterval = 60;
         CrawlJob result = crawlJob.hotThread(testInterval);
@@ -162,11 +176,13 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test getExecuteType method
+    @Test
     public void test_getExecuteType() {
         assertEquals(Constants.EXECUTE_TYPE_CRAWLER, crawlJob.getExecuteType());
     }
 
     // Test execute method with runAll scenario
+    @Test
     public void test_execute_runAll() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -206,6 +222,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with specific config IDs
+    @Test
     public void test_execute_withConfigIds() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -247,6 +264,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with sessionId already set
+    @Test
     public void test_execute_withExistingSessionId() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -285,6 +303,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with max processes exceeded
+    @Test
     public void test_execute_maxProcessesExceeded() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -311,6 +330,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with no max process limit
+    @Test
     public void test_execute_noMaxProcessLimit() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -345,6 +365,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute method with mixed null and non-null config IDs
+    @Test
     public void test_execute_mixedConfigIds() {
         // Setup test
         crawlJob = new CrawlJob() {
@@ -386,6 +407,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test getRunningJobCount method
+    @Test
     public void test_getRunningJobCount() {
         // Skip this test - requires complex DB setup
         if (true)
@@ -471,6 +493,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test getRunningJobCount with no running jobs
+    @Test
     public void test_getRunningJobCount_noRunningJobs() {
         // Skip this test - requires complex DB setup
         if (true)
@@ -517,6 +540,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test getRunningJobCount with wrong target
+    @Test
     public void test_getRunningJobCount_wrongTarget() {
         // Skip this test - requires complex DB setup
         if (true)
@@ -563,6 +587,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute with exception in executeCrawler
+    @Test
     public void test_execute_executeCrawlerThrowsException() {
         crawlJob = new CrawlJob() {
             @Override
@@ -594,6 +619,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test execute with JobProcessingException in executeCrawler
+    @Test
     public void test_execute_executeCrawlerThrowsJobProcessingException() {
         crawlJob = new CrawlJob() {
             @Override
@@ -623,6 +649,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test method chaining
+    @Test
     public void test_methodChaining() {
         CrawlJob result = crawlJob.namespace("test")
                 .documentExpires(10)
@@ -641,6 +668,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test with all config IDs empty arrays
+    @Test
     public void test_execute_emptyConfigIds() {
         crawlJob = new CrawlJob() {
             @Override
@@ -682,6 +710,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test session ID generation
+    @Test
     public void test_sessionIdGeneration() {
         crawlJob = new CrawlJob() {
             @Override
@@ -720,6 +749,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test with negative max crawler processes
+    @Test
     public void test_execute_negativeMaxProcesses() {
         crawlJob = new CrawlJob() {
             @Override
@@ -753,6 +783,7 @@ public class CrawlJobTest extends UnitFessTestCase {
     }
 
     // Test with jobExecutor set
+    @Test
     public void test_execute_withJobExecutor() {
         final List<JobExecutor.ShutdownListener> shutdownListeners = new ArrayList<>();
 

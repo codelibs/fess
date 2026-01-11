@@ -21,17 +21,22 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 import org.lastaflute.web.response.next.HtmlNext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class VirtualHostHelperTest extends UnitFessTestCase {
 
     private VirtualHostHelper virtualHostHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         virtualHostHelper = new VirtualHostHelper();
     }
 
+    @Test
     public void test_getVirtualHostPath() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -61,6 +66,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("/site1/search", result.getRoutingPath()); // Still site1 due to header precedence
     }
 
+    @Test
     public void test_getVirtualHostBasePath() {
         String basePath = virtualHostHelper.getVirtualHostBasePath("site1", new HtmlNext("/test"));
         assertEquals("/site1", basePath);
@@ -75,6 +81,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("", basePath); // StringUtil.isBlank considers whitespace as blank
     }
 
+    @Test
     public void test_getVirtualHostKey() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -101,6 +108,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("", key); // Still cached value
     }
 
+    @Test
     public void test_getVirtualHostKey_withCaching() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -118,6 +126,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("cached_value", key);
     }
 
+    @Test
     public void test_processVirtualHost() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -152,6 +161,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("processed_site1", result); // Still site1 due to header precedence
     }
 
+    @Test
     public void test_processVirtualHost_withEmptyVirtualHosts() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -169,6 +179,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("default", result);
     }
 
+    @Test
     public void test_processVirtualHost_withNullHeaderValue() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -186,6 +197,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("default", result);
     }
 
+    @Test
     public void test_getVirtualHostPaths() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -205,6 +217,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("/site3", paths[2]);
     }
 
+    @Test
     public void test_getVirtualHostPaths_withEmptyVirtualHosts() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -220,6 +233,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals(0, paths.length);
     }
 
+    @Test
     public void test_getVirtualHostPath_withNullPage() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -240,6 +254,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getVirtualHostPath_withComplexPath() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -258,6 +273,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("/site1/subpath/search/advanced", result.getRoutingPath());
     }
 
+    @Test
     public void test_multipleHeaderMatching() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -275,6 +291,7 @@ public class VirtualHostHelperTest extends UnitFessTestCase {
         assertEquals("site2", key);
     }
 
+    @Test
     public void test_caseInsensitiveHeaderValueMatching() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;

@@ -16,9 +16,13 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test with normal message
         String message = "Search operation not supported";
@@ -28,6 +32,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test with empty message
         String message = "";
@@ -37,6 +42,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test with null message
         UnsupportedSearchException exception = new UnsupportedSearchException(null);
@@ -45,6 +51,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test with long message
         StringBuilder sb = new StringBuilder();
@@ -58,6 +65,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withSpecialCharacters() {
         // Test with special characters in message
         String message = "Search not supported: \n\t!@#$%^&*(){}[]|\\:;\"'<>,.?/~`";
@@ -67,6 +75,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withUnicodeCharacters() {
         // Test with Unicode characters
         String message = "検索操作はサポートされていません 🔍";
@@ -76,6 +85,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOf() {
         // Test inheritance hierarchy
         UnsupportedSearchException exception = new UnsupportedSearchException("test");
@@ -87,6 +97,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is populated
         UnsupportedSearchException exception = new UnsupportedSearchException("test message");
@@ -105,6 +116,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has serialVersionUID
         // This test verifies the exception is serializable
@@ -119,6 +131,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Test exception message";
@@ -130,6 +143,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_getMessage_consistency() {
         // Test that getMessage returns the same value consistently
         String message = "Consistent message";
@@ -144,6 +158,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertEquals(message, firstCall);
     }
 
+    @Test
     public void test_getLocalizedMessage() {
         // Test getLocalizedMessage (should be same as getMessage for this exception)
         String message = "Localized message test";
@@ -152,6 +167,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertEquals(exception.getMessage(), exception.getLocalizedMessage());
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test fillInStackTrace method
         UnsupportedSearchException exception = new UnsupportedSearchException("Stack trace test");
@@ -166,6 +182,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNotNull(newStackTrace);
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test that multiple instances are independent
         String message1 = "First exception";
@@ -182,6 +199,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         assertNotSame(exception1.getStackTrace(), exception2.getStackTrace());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Thrown exception";
@@ -195,6 +213,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent exception type
         String expectedMessage = "Parent catch test";
@@ -208,6 +227,7 @@ public class UnsupportedSearchExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsRuntimeException() {
         // Test catching as RuntimeException
         String expectedMessage = "Runtime catch test";

@@ -32,9 +32,11 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.sai.internal.ir.debug.ObjectSizeCalculator;
 
 import com.google.common.collect.Lists;
+import org.junit.jupiter.api.Test;
 
 public class MemoryUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_byteCountToDisplaySize() {
         assertEquals("0bytes", MemoryUtil.byteCountToDisplaySize(0L));
         assertEquals("999bytes", MemoryUtil.byteCountToDisplaySize(999L));
@@ -57,10 +59,12 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals("1.024EB", MemoryUtil.byteCountToDisplaySize(FileUtils.ONE_EB));
     }
 
+    @Test
     public void test_getUsedMemory() {
         assertTrue(MemoryUtil.getUsedMemory() >= 0);
     }
 
+    @Test
     public void test_sizeOf() throws Exception {
         // System.out.println("size: " + getObjectSize(""));
         assertEquals(24L, MemoryUtil.sizeOf(Integer.MAX_VALUE));
@@ -81,6 +85,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(132L, MemoryUtil.sizeOf(Maps.map("1234567890", "1234567890").$()));
     }
 
+    @Test
     public void test_getMemoryUsageLog() {
         String log = MemoryUtil.getMemoryUsageLog();
 
@@ -94,6 +99,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertTrue(log.matches(".*used [0-9.]+[a-zA-Z]+, heap [0-9.]+[a-zA-Z]+, max [0-9.]+[a-zA-Z]+.*"));
     }
 
+    @Test
     public void test_byteCountToDisplaySize_edgeCases() {
         // Test negative values - should throw NullPointerException in private method via BigInteger.valueOf
         try {
@@ -116,10 +122,12 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals("1.024GB", MemoryUtil.byteCountToDisplaySize(1024L * 1024L * 1024L));
     }
 
+    @Test
     public void test_sizeOf_nullObject() {
         assertEquals(0L, MemoryUtil.sizeOf(null));
     }
 
+    @Test
     public void test_sizeOf_stringVariations() {
         // Empty string
         assertEquals(56L, MemoryUtil.sizeOf(""));
@@ -138,6 +146,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(1056L, MemoryUtil.sizeOf(longString.toString()));
     }
 
+    @Test
     public void test_sizeOf_numberTypes() {
         // Test various Number subclasses
         assertEquals(24L, MemoryUtil.sizeOf(new BigInteger("123456789")));
@@ -150,6 +159,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(24L, MemoryUtil.sizeOf(1.0d));
     }
 
+    @Test
     public void test_sizeOf_dateTimeTypes() {
         // Test different date/time types
         assertEquals(32L, MemoryUtil.sizeOf(new Date(0)));
@@ -157,6 +167,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(2128L, MemoryUtil.sizeOf(ZonedDateTime.now()));
     }
 
+    @Test
     public void test_sizeOf_arrayVariations() {
         // Empty array
         assertEquals(0L, MemoryUtil.sizeOf(new String[0]));
@@ -172,6 +183,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(120L, MemoryUtil.sizeOf(new Object[] { new String[] { "test" }, new String[] { "test" } }));
     }
 
+    @Test
     public void test_sizeOf_collectionVariations() {
         // Empty collection
         assertEquals(0L, MemoryUtil.sizeOf(new ArrayList<>()));
@@ -196,6 +208,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(120L, MemoryUtil.sizeOf(nestedList));
     }
 
+    @Test
     public void test_sizeOf_mapVariations() {
         // Empty map
         assertEquals(0L, MemoryUtil.sizeOf(new HashMap<>()));
@@ -218,6 +231,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(183L, MemoryUtil.sizeOf(nestedMap));
     }
 
+    @Test
     public void test_sizeOf_customObjects() {
         // Test fallback case for custom objects (should return 16L)
         assertEquals(16L, MemoryUtil.sizeOf(new Object()));
@@ -226,6 +240,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(16L, MemoryUtil.sizeOf(Boolean.FALSE));
     }
 
+    @Test
     public void test_sizeOf_complexNestedStructures() {
         // Complex nested structure
         Map<String, Object> complexMap = new HashMap<>();
@@ -239,6 +254,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         assertEquals(689L, actualSize);
     }
 
+    @Test
     public void test_getUsedMemory_variations() {
         // Test multiple calls to ensure consistency
         long memory1 = MemoryUtil.getUsedMemory();
@@ -256,6 +272,7 @@ public class MemoryUtilTest extends UnitFessTestCase {
         // Memory usage should have changed (though we can't guarantee direction due to GC)
     }
 
+    @Test
     public void test_integrationScenarios() {
         // Test realistic scenarios combining multiple methods
         String memoryLog1 = MemoryUtil.getMemoryUsageLog();

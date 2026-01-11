@@ -17,18 +17,24 @@ package org.codelibs.fess.mylasta.action;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.core.message.UserMessage;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessMessagesTest extends UnitFessTestCase {
 
     private FessMessages messages;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         messages = new FessMessages();
     }
 
     // Test constant fields
+    @Test
     public void test_constantFields() {
         // Test error message constants
         assertEquals("{errors.front_header}", FessMessages.ERRORS_front_header);
@@ -94,6 +100,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test serialization
+    @Test
     public void test_serialVersionUID() {
         assertEquals(1L, getSerialVersionUID());
     }
@@ -110,6 +117,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test error message methods without parameters
+    @Test
     public void test_addErrorsFrontHeader() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsFrontHeader(property);
@@ -118,6 +126,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsFrontFooter() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsFrontFooter(property);
@@ -126,6 +135,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsFrontPrefix() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsFrontPrefix(property);
@@ -134,6 +144,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsFrontSuffix() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsFrontSuffix(property);
@@ -142,6 +153,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsHeader() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsHeader(property);
@@ -150,6 +162,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsFooter() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsFooter(property);
@@ -158,6 +171,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsPrefix() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsPrefix(property);
@@ -166,6 +180,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsSuffix() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsSuffix(property);
@@ -175,6 +190,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test constraint message methods without parameters
+    @Test
     public void test_addConstraintsAssertFalseMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsAssertFalseMessage(property);
@@ -183,6 +199,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsAssertTrueMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsAssertTrueMessage(property);
@@ -191,6 +208,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsDigitsMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsDigitsMessage(property);
@@ -199,6 +217,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsFutureMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsFutureMessage(property);
@@ -207,6 +226,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsNotNullMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsNotNullMessage(property);
@@ -215,6 +235,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsNullMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsNullMessage(property);
@@ -223,6 +244,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsPastMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsPastMessage(property);
@@ -232,6 +254,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test constraint message methods with single parameter
+    @Test
     public void test_addConstraintsDecimalMaxMessage() {
         String property = "testProperty";
         String value = "100";
@@ -241,6 +264,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsDecimalMinMessage() {
         String property = "testProperty";
         String value = "0";
@@ -250,6 +274,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsMaxMessage() {
         String property = "testProperty";
         String value = "100";
@@ -259,6 +284,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsMinMessage() {
         String property = "testProperty";
         String value = "0";
@@ -268,6 +294,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsPatternMessage() {
         String property = "testProperty";
         String regexp = "[0-9]+";
@@ -278,6 +305,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test constraint message methods with multiple parameters
+    @Test
     public void test_addConstraintsSizeMessage() {
         String property = "testProperty";
         String min = "1";
@@ -288,6 +316,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsLengthMessage() {
         String property = "testProperty";
         String min = "5";
@@ -298,6 +327,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsRangeMessage() {
         String property = "testProperty";
         String min = "10";
@@ -308,6 +338,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsModCheckMessage() {
         String property = "testProperty";
         String modType = "Modulo10";
@@ -319,6 +350,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test error message methods
+    @Test
     public void test_addErrorsLoginFailure() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsLoginFailure(property);
@@ -327,6 +359,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsAppIllegalTransition() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsAppIllegalTransition(property);
@@ -335,6 +368,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsAppDbAlreadyDeleted() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsAppDbAlreadyDeleted(property);
@@ -343,6 +377,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsAppDbAlreadyUpdated() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsAppDbAlreadyUpdated(property);
@@ -351,6 +386,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsAppDbAlreadyExists() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsAppDbAlreadyExists(property);
@@ -359,6 +395,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsAppDoubleSubmitRequest() {
         String property = "testProperty";
         FessMessages result = messages.addErrorsAppDoubleSubmitRequest(property);
@@ -368,6 +405,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test error message methods with parameters
+    @Test
     public void test_addErrorsCouldNotFindLogFile() {
         String property = "testProperty";
         String arg0 = "test.log";
@@ -377,6 +415,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsNotFoundOnFileSystem() {
         String property = "testProperty";
         String arg0 = "file.txt";
@@ -386,6 +425,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsCouldNotOpenOnSystem() {
         String property = "testProperty";
         String arg0 = "document.pdf";
@@ -395,6 +435,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsTargetFileDoesNotExist() {
         String property = "testProperty";
         String arg0 = "target.txt";
@@ -404,6 +445,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsFailedToDeleteFile() {
         String property = "testProperty";
         String arg0 = "delete.txt";
@@ -413,6 +455,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsInvalidKuromojiSegmentation() {
         String property = "testProperty";
         String arg0 = "token1";
@@ -423,6 +466,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addErrorsInvalidStrIsIncluded() {
         String property = "testProperty";
         String arg0 = "field";
@@ -434,6 +478,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test success message methods
+    @Test
     public void test_addSuccessUpdateCrawlerParams() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessUpdateCrawlerParams(property);
@@ -442,6 +487,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessDeleteDocFromIndex() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessDeleteDocFromIndex(property);
@@ -450,6 +496,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessCrawlingInfoDeleteAll() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessCrawlingInfoDeleteAll(property);
@@ -458,6 +505,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessStartCrawlProcess() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessStartCrawlProcess(property);
@@ -467,6 +515,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test success message methods with parameters
+    @Test
     public void test_addSuccessUploadDesignFile() {
         String property = "testProperty";
         String arg0 = "design.css";
@@ -476,6 +525,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessUpdateDesignJspFile() {
         String property = "testProperty";
         String arg0 = "index.jsp";
@@ -485,6 +535,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessJobStarted() {
         String property = "testProperty";
         String arg0 = "crawler";
@@ -494,6 +545,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessJobStopped() {
         String property = "testProperty";
         String arg0 = "crawler";
@@ -503,6 +555,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessInstallPlugin() {
         String property = "testProperty";
         String arg0 = "plugin-name";
@@ -512,6 +565,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessDeletePlugin() {
         String property = "testProperty";
         String arg0 = "plugin-name";
@@ -522,6 +576,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test null property handling
+    @Test
     public void test_addErrorsFrontHeader_nullProperty() {
         try {
             messages.addErrorsFrontHeader(null);
@@ -531,6 +586,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addConstraintsDecimalMaxMessage_nullProperty() {
         try {
             messages.addConstraintsDecimalMaxMessage(null, "100");
@@ -540,6 +596,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_addConstraintsSizeMessage_nullProperty() {
         try {
             messages.addConstraintsSizeMessage(null, "1", "10");
@@ -550,12 +607,14 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test inheritance
+    @Test
     public void test_inheritance() {
         assertTrue(messages instanceof FessLabels);
         assertTrue(messages instanceof org.lastaflute.core.message.UserMessages);
     }
 
     // Test method chaining
+    @Test
     public void test_methodChaining() {
         String property1 = "prop1";
         String property2 = "prop2";
@@ -572,6 +631,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test CRUD success messages
+    @Test
     public void test_addSuccessCrudCreateCrudTable() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessCrudCreateCrudTable(property);
@@ -580,6 +640,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessCrudUpdateCrudTable() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessCrudUpdateCrudTable(property);
@@ -588,6 +649,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addSuccessCrudDeleteCrudTable() {
         String property = "testProperty";
         FessMessages result = messages.addSuccessCrudDeleteCrudTable(property);
@@ -597,6 +659,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test special message types
+    @Test
     public void test_addConstraintsCreditCardNumberMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsCreditCardNumberMessage(property);
@@ -605,6 +668,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsEmailMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsEmailMessage(property);
@@ -613,6 +677,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsUrlMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsUrlMessage(property);
@@ -621,6 +686,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsCronExpressionMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsCronExpressionMessage(property);
@@ -630,6 +696,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test type validation messages
+    @Test
     public void test_addConstraintsTypeIntegerMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsTypeIntegerMessage(property);
@@ -638,6 +705,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsTypeLongMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsTypeLongMessage(property);
@@ -646,6 +714,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsTypeFloatMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsTypeFloatMessage(property);
@@ -654,6 +723,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsTypeDoubleMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsTypeDoubleMessage(property);
@@ -662,6 +732,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsTypeAnyMessage() {
         String property = "testProperty";
         String propertyType = "Date";
@@ -672,6 +743,7 @@ public class FessMessagesTest extends UnitFessTestCase {
     }
 
     // Test required/not empty messages
+    @Test
     public void test_addConstraintsRequiredMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsRequiredMessage(property);
@@ -680,6 +752,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsNotBlankMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsNotBlankMessage(property);
@@ -688,6 +761,7 @@ public class FessMessagesTest extends UnitFessTestCase {
         assertTrue(messages.hasMessageOf(property));
     }
 
+    @Test
     public void test_addConstraintsNotEmptyMessage() {
         String property = "testProperty";
         FessMessages result = messages.addConstraintsNotEmptyMessage(property);

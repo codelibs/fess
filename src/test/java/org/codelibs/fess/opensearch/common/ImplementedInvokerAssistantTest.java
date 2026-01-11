@@ -36,131 +36,157 @@ import org.dbflute.outsidesql.factory.OutsideSqlExecutorFactory;
 import org.dbflute.s2dao.jdbc.TnResultSetHandlerFactory;
 import org.dbflute.s2dao.metadata.TnBeanMetaDataFactory;
 import org.dbflute.twowaysql.factory.SqlAnalyzerFactory;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
 
     private ImplementedInvokerAssistant invokerAssistant;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         invokerAssistant = new ImplementedInvokerAssistant();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         assertNotNull(new ImplementedInvokerAssistant());
     }
 
     // Test assistCurrentDBDef
+    @Test
     public void test_assistCurrentDBDef() {
         DBDef result = invokerAssistant.assistCurrentDBDef();
         assertNull(result);
     }
 
     // Test assistDataSource
+    @Test
     public void test_assistDataSource() {
         DataSource result = invokerAssistant.assistDataSource();
         assertNull(result);
     }
 
     // Test assistDBMetaProvider
+    @Test
     public void test_assistDBMetaProvider() {
         DBMetaProvider result = invokerAssistant.assistDBMetaProvider();
         assertNull(result);
     }
 
     // Test assistSqlClauseCreator
+    @Test
     public void test_assistSqlClauseCreator() {
         SqlClauseCreator result = invokerAssistant.assistSqlClauseCreator();
         assertNull(result);
     }
 
     // Test assistStatementFactory
+    @Test
     public void test_assistStatementFactory() {
         StatementFactory result = invokerAssistant.assistStatementFactory();
         assertNull(result);
     }
 
     // Test assistBeanMetaDataFactory
+    @Test
     public void test_assistBeanMetaDataFactory() {
         TnBeanMetaDataFactory result = invokerAssistant.assistBeanMetaDataFactory();
         assertNull(result);
     }
 
     // Test assistResultSetHandlerFactory
+    @Test
     public void test_assistResultSetHandlerFactory() {
         TnResultSetHandlerFactory result = invokerAssistant.assistResultSetHandlerFactory();
         assertNull(result);
     }
 
     // Test assistRelationOptionalFactory
+    @Test
     public void test_assistRelationOptionalFactory() {
         RelationOptionalFactory result = invokerAssistant.assistRelationOptionalFactory();
         assertNull(result);
     }
 
     // Test assistSqlAnalyzerFactory
+    @Test
     public void test_assistSqlAnalyzerFactory() {
         SqlAnalyzerFactory result = invokerAssistant.assistSqlAnalyzerFactory();
         assertNull(result);
     }
 
     // Test assistFirstOutsideSqlOption with null table name
+    @Test
     public void test_assistFirstOutsideSqlOption_nullTableName() {
         OutsideSqlOption result = invokerAssistant.assistFirstOutsideSqlOption(null);
         assertNull(result);
     }
 
     // Test assistFirstOutsideSqlOption with empty table name
+    @Test
     public void test_assistFirstOutsideSqlOption_emptyTableName() {
         OutsideSqlOption result = invokerAssistant.assistFirstOutsideSqlOption("");
         assertNull(result);
     }
 
     // Test assistFirstOutsideSqlOption with valid table name
+    @Test
     public void test_assistFirstOutsideSqlOption_validTableName() {
         OutsideSqlOption result = invokerAssistant.assistFirstOutsideSqlOption("test_table");
         assertNull(result);
     }
 
     // Test assistOutsideSqlExecutorFactory
+    @Test
     public void test_assistOutsideSqlExecutorFactory() {
         OutsideSqlExecutorFactory result = invokerAssistant.assistOutsideSqlExecutorFactory();
         assertNull(result);
     }
 
     // Test assistSQLExceptionDigger
+    @Test
     public void test_assistSQLExceptionDigger() {
         SQLExceptionDigger result = invokerAssistant.assistSQLExceptionDigger();
         assertNull(result);
     }
 
     // Test assistSQLExceptionHandlerFactory
+    @Test
     public void test_assistSQLExceptionHandlerFactory() {
         SQLExceptionHandlerFactory result = invokerAssistant.assistSQLExceptionHandlerFactory();
         assertNull(result);
     }
 
     // Test assistSequenceCacheHandler
+    @Test
     public void test_assistSequenceCacheHandler() {
         SequenceCacheHandler result = invokerAssistant.assistSequenceCacheHandler();
         assertNull(result);
     }
 
     // Test assistSqlFileEncoding
+    @Test
     public void test_assistSqlFileEncoding() {
         String result = invokerAssistant.assistSqlFileEncoding();
         assertNull(result);
     }
 
     // Test assistDefaultStatementConfig
+    @Test
     public void test_assistDefaultStatementConfig() {
         StatementConfig result = invokerAssistant.assistDefaultStatementConfig();
         assertNull(result);
     }
 
     // Test assistBehaviorExceptionThrower
+    @Test
     public void test_assistBehaviorExceptionThrower() {
         BehaviorExceptionThrower result = invokerAssistant.assistBehaviorExceptionThrower();
         assertNotNull(result);
@@ -168,18 +194,21 @@ public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
     }
 
     // Test assistGearedCipherManager
+    @Test
     public void test_assistGearedCipherManager() {
         GearedCipherManager result = invokerAssistant.assistGearedCipherManager();
         assertNull(result);
     }
 
     // Test assistResourceParameter
+    @Test
     public void test_assistResourceParameter() {
         ResourceParameter result = invokerAssistant.assistResourceParameter();
         assertNull(result);
     }
 
     // Test assistClientInvokeNames
+    @Test
     public void test_assistClientInvokeNames() {
         String[] result = invokerAssistant.assistClientInvokeNames();
         assertNotNull(result);
@@ -193,6 +222,7 @@ public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
     }
 
     // Test assistByPassInvokeNames
+    @Test
     public void test_assistByPassInvokeNames() {
         String[] result = invokerAssistant.assistByPassInvokeNames();
         assertNotNull(result);
@@ -206,12 +236,14 @@ public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
     }
 
     // Test toBeDisposable with null process
+    @Test
     public void test_toBeDisposable_nullProcess() {
         // Should not throw exception
         invokerAssistant.toBeDisposable(null);
     }
 
     // Test toBeDisposable with valid process
+    @Test
     public void test_toBeDisposable_validProcess() {
         InvokerAssistant.DisposableProcess process = new InvokerAssistant.DisposableProcess() {
             @Override
@@ -224,6 +256,7 @@ public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
     }
 
     // Test static constants are properly initialized
+    @Test
     public void test_staticConstants() {
         // Test DEFAULT_CLIENT_INVOKE_NAMES
         String[] clientNames = ImplementedInvokerAssistant.DEFAULT_CLIENT_INVOKE_NAMES;
@@ -249,11 +282,13 @@ public class ImplementedInvokerAssistantTest extends UnitFessTestCase {
     }
 
     // Test that the class implements InvokerAssistant interface
+    @Test
     public void test_implementsInterface() {
         assertTrue(invokerAssistant instanceof InvokerAssistant);
     }
 
     // Test multiple calls to the same method return consistent results
+    @Test
     public void test_methodConsistency() {
         // Test assistClientInvokeNames consistency
         String[] names1 = invokerAssistant.assistClientInvokeNames();

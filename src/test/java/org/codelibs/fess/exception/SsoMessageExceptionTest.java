@@ -19,9 +19,12 @@ import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.validation.VaMessenger;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.Test;
 
 public class SsoMessageExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessageCodeMessageAndCause() {
         // Setup
         final String message = "Test SSO error message";
@@ -38,6 +41,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withMessageCodeAndMessage() {
         // Setup
         final String message = "Test SSO error without cause";
@@ -53,6 +57,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullMessageCode() {
         // Setup
         final String message = "Test error with null message code";
@@ -68,6 +73,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Setup
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsSsoLoginError(UserMessages.GLOBAL_PROPERTY_KEY);
@@ -83,6 +89,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Setup
         final String message = "Test error with null cause";
@@ -98,6 +105,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_withAllNullParameters() {
         // Execute
         final SsoMessageException exception = new SsoMessageException(null, null, null);
@@ -109,6 +117,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithNullMessageCode() {
         // Setup
         final String message = "Test message";
@@ -123,6 +132,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithNullMessage() {
         // Setup
         final VaMessenger<FessMessages> messageCode = messages -> messages.addErrorsSsoLoginError(UserMessages.GLOBAL_PROPERTY_KEY);
@@ -137,6 +147,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_constructor_twoParametersWithBothNull() {
         // Execute
         final SsoMessageException exception = new SsoMessageException(null, null);
@@ -148,6 +159,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessageCode());
     }
 
+    @Test
     public void test_inheritanceFromFessSystemException() {
         // Setup
         final String message = "Test inheritance";
@@ -161,6 +173,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_stackTracePresence() {
         // Setup
         final String message = "Test stack trace";
@@ -175,6 +188,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getStackTrace().length > 0);
     }
 
+    @Test
     public void test_differentMessageCodes() {
         // Setup - test with different message codes
         final String message = "Test message";
@@ -191,6 +205,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertNotSame(loginException.getMessageCode(), logoutException.getMessageCode());
     }
 
+    @Test
     public void test_complexMessageCode() {
         // Setup - test with a complex message code that has parameters
         final String errorDetail = "Authentication failed";
@@ -207,6 +222,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(complexMessageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_causeChainPropagation() {
         // Setup - create a chain of exceptions
         final Exception rootCause = new IllegalArgumentException("Root cause");
@@ -222,6 +238,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_emptyMessage() {
         // Setup
         final String message = "";
@@ -236,6 +253,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_messageWithSpecialCharacters() {
         // Setup
         final String message = "Error: Failed to authenticate user <test@example.com> with special chars: #$%&*()!@";
@@ -251,6 +269,7 @@ public class SsoMessageExceptionTest extends UnitFessTestCase {
         assertEquals(messageCode, exception.getMessageCode());
     }
 
+    @Test
     public void test_verifySerialVersionUID() {
         // Setup
         final String message = "Test serial version UID";

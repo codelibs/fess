@@ -25,6 +25,10 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for FessTransformer interface.
@@ -47,13 +51,15 @@ public class FessTransformerTest extends UnitFessTestCase {
         }
     }
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
@@ -61,6 +67,7 @@ public class FessTransformerTest extends UnitFessTestCase {
      * Test putResultDataBody with Object[] arrays
      * This tests the improved array handling using java.lang.reflect.Array
      */
+    @Test
     public void test_putResultDataBody_withObjectArray() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -86,6 +93,7 @@ public class FessTransformerTest extends UnitFessTestCase {
      * Test putResultDataBody with primitive int array
      * This tests that primitive arrays are handled correctly
      */
+    @Test
     public void test_putResultDataBody_withPrimitiveArray() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -111,6 +119,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with Collection as existing value
      */
+    @Test
     public void test_putResultDataBody_withCollectionExistingValue() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -136,6 +145,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with multiple array additions
      */
+    @Test
     public void test_putResultDataBody_multipleArrayAdditions() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -165,6 +175,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with single value after array
      */
+    @Test
     public void test_putResultDataBody_singleValueAfterArray() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -189,6 +200,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with empty array
      */
+    @Test
     public void test_putResultDataBody_withEmptyArray() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -208,6 +220,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with different data types in array
      */
+    @Test
     public void test_putResultDataBody_mixedTypes() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -228,6 +241,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody replaces value when key doesn't exist
      */
+    @Test
     public void test_putResultDataBody_newKey() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -241,6 +255,7 @@ public class FessTransformerTest extends UnitFessTestCase {
     /**
      * Test putResultDataBody with null handling
      */
+    @Test
     public void test_putResultDataBody_withNullValues() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();
@@ -265,6 +280,7 @@ public class FessTransformerTest extends UnitFessTestCase {
      * This verifies the fix for the original bug where values[values.length - 1 + i]
      * would cause ArrayIndexOutOfBoundsException
      */
+    @Test
     public void test_arrayIndexCalculation() {
         TestFessTransformer transformer = new TestFessTransformer();
         Map<String, Object> dataMap = new HashMap<>();

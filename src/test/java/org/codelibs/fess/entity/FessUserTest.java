@@ -16,9 +16,11 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class FessUserTest extends UnitFessTestCase {
 
+    @Test
     public void test_getName() {
         // Test with normal user name
         FessUser user = new TestFessUser("testuser", new String[] { "role1" }, new String[] { "group1" }, new String[] { "perm1" });
@@ -41,6 +43,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertEquals("ユーザー名", user.getName());
     }
 
+    @Test
     public void test_getRoleNames() {
         // Test with multiple roles
         String[] roles = { "admin", "user", "manager" };
@@ -67,6 +70,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertArrayEquals(roles, user.getRoleNames());
     }
 
+    @Test
     public void test_getGroupNames() {
         // Test with multiple groups
         String[] groups = { "developers", "testers", "managers" };
@@ -93,6 +97,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertArrayEquals(groups, user.getGroupNames());
     }
 
+    @Test
     public void test_getPermissions() {
         // Test with multiple permissions
         String[] permissions = { "read", "write", "delete", "execute" };
@@ -119,6 +124,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertArrayEquals(permissions, user.getPermissions());
     }
 
+    @Test
     public void test_isEditable_default() {
         // Test default implementation returns false
         FessUser user = new TestFessUser("testuser", new String[] {}, new String[] {}, new String[] {});
@@ -132,6 +138,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertFalse(user.isEditable());
     }
 
+    @Test
     public void test_isEditable_custom() {
         // Test custom implementation that returns true
         FessUser user = new TestEditableFessUser("testuser", true);
@@ -142,6 +149,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertFalse(user.isEditable());
     }
 
+    @Test
     public void test_refresh_default() {
         // Test default implementation returns false
         FessUser user = new TestFessUser("testuser", new String[] {}, new String[] {}, new String[] {});
@@ -155,6 +163,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertFalse(user.refresh());
     }
 
+    @Test
     public void test_refresh_custom() {
         // Test custom implementation that returns true
         TestRefreshableFessUser user = new TestRefreshableFessUser("testuser", true);
@@ -172,6 +181,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertEquals(1, user.getRefreshCount());
     }
 
+    @Test
     public void test_serialization() {
         // Test that implementations can be serialized
         FessUser user = new TestFessUser("testuser", new String[] { "role1", "role2" }, new String[] { "group1", "group2" },
@@ -181,6 +191,7 @@ public class FessUserTest extends UnitFessTestCase {
         assertTrue(user instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_allFieldsCombination() {
         // Test with all fields populated
         String name = "complexUser";
@@ -203,8 +214,8 @@ public class FessUserTest extends UnitFessTestCase {
         if (expected == null && actual == null) {
             return;
         }
-        assertNotNull("Expected array is null but actual is not", expected);
-        assertNotNull("Actual array is null but expected is not", actual);
+        assertNotNull(expected, "Expected array is null but actual is not");
+        assertNotNull(actual, "Actual array is null but expected is not");
         assertEquals("Array lengths differ", expected.length, actual.length);
         for (int i = 0; i < expected.length; i++) {
             assertEquals("Arrays differ at index " + i, expected[i], actual[i]);

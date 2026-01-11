@@ -28,17 +28,23 @@ import org.codelibs.fesen.client.node.NodeManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CurlHelperTest extends UnitFessTestCase {
 
     private CurlHelper curlHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         curlHelper = new CurlHelper();
     }
 
+    @Test
     public void test_get() {
         // Mock FessConfig and ResourceUtil
         setupMockConfig("localhost:9200", "", "");
@@ -50,6 +56,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // The request should be properly created - we can't easily verify headers without mocking framework
     }
 
+    @Test
     public void test_post() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -60,6 +67,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // The request should be properly created
     }
 
+    @Test
     public void test_put() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -70,6 +78,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // The request should be properly created
     }
 
+    @Test
     public void test_delete() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -80,6 +89,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // The request should be properly created
     }
 
+    @Test
     public void test_request_withMethodAndPath() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -89,6 +99,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNotNull(request);
     }
 
+    @Test
     public void test_init_withoutSSL() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -103,6 +114,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNull(sslSocketFactory);
     }
 
+    @Test
     public void test_init_withInvalidSSLCertificate() {
         // Create a temporary invalid certificate file
         File invalidCertFile = null;
@@ -129,6 +141,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_init_withNonExistentSSLCertificate() {
         setupMockConfig("localhost:9200", "", "", "/non/existent/cert.crt");
 
@@ -139,6 +152,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNull(sslSocketFactory);
     }
 
+    @Test
     public void test_request_withBasicAuth() {
         setupMockConfig("localhost:9200", "testuser", "testpass");
 
@@ -152,6 +166,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // We verify that the method completed without errors
     }
 
+    @Test
     public void test_request_withoutAuth() {
         setupMockConfig("localhost:9200", "", "");
 
@@ -164,6 +179,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // The protected request method should process the request without authentication
     }
 
+    @Test
     public void test_request_withBlankAuth() {
         setupMockConfig("localhost:9200", "   ", "   ");
 
@@ -176,6 +192,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // Blank credentials should be treated as no authentication
     }
 
+    @Test
     public void test_request_withUsernameOnly() {
         setupMockConfig("localhost:9200", "testuser", "");
 
@@ -188,6 +205,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // Username without password should not add authentication
     }
 
+    @Test
     public void test_request_withPasswordOnly() {
         setupMockConfig("localhost:9200", "", "testpass");
 
@@ -200,6 +218,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         // Password without username should not add authentication
     }
 
+    @Test
     public void test_init_multipleHosts() {
         setupMockConfig("localhost:9200,localhost:9201,localhost:9202", "", "");
 
@@ -209,6 +228,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNotNull(nodeManager);
     }
 
+    @Test
     public void test_init_hostsWithSpaces() {
         setupMockConfig(" localhost:9200 , localhost:9201 , localhost:9202 ", "", "");
 
@@ -218,6 +238,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNotNull(nodeManager);
     }
 
+    @Test
     public void test_init_emptyHosts() {
         setupMockConfig("", "", "");
 
@@ -227,6 +248,7 @@ public class CurlHelperTest extends UnitFessTestCase {
         assertNotNull(nodeManager);
     }
 
+    @Test
     public void test_init_hostsWithEmptyEntries() {
         setupMockConfig("localhost:9200,,localhost:9201,", "", "");
 
@@ -313,7 +335,8 @@ public class CurlHelperTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Clean up system properties
         System.clearProperty("fess.search_engine.http_address");
         System.clearProperty("fesen.http.url");

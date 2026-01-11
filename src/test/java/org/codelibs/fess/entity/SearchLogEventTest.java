@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class SearchLogEventTest extends UnitFessTestCase {
 
@@ -120,6 +122,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test getId method
+    @Test
     public void test_getId() {
         // Test normal ID
         TestSearchLogEvent event = new TestSearchLogEvent("test-id-123", 1L, "search");
@@ -139,6 +142,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test getVersionNo method
+    @Test
     public void test_getVersionNo() {
         // Test normal version
         TestSearchLogEvent event = new TestSearchLogEvent("id", 5L, "search");
@@ -166,6 +170,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test toSource method
+    @Test
     public void test_toSource() {
         // Test with data
         TestSearchLogEvent event = new TestSearchLogEvent("id", 1L, "search");
@@ -194,6 +199,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test getEventType method
+    @Test
     public void test_getEventType() {
         // Test search event type
         TestSearchLogEvent searchEvent = new TestSearchLogEvent("id", 1L, "search");
@@ -225,6 +231,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test multiple implementations
+    @Test
     public void test_multipleImplementations() {
         // Create different implementations
         SearchLogEvent event1 = new TestSearchLogEvent("id1", 1L, "type1");
@@ -247,6 +254,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test with complex source map
+    @Test
     public void test_complexSourceMap() {
         TestSearchLogEvent event = new TestSearchLogEvent("complex-id", 1L, "complex");
 
@@ -277,6 +285,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test interface contract consistency
+    @Test
     public void test_interfaceContract() {
         TestSearchLogEvent event = new TestSearchLogEvent("contract-id", 5L, "contract-type");
 
@@ -299,6 +308,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test edge cases for version numbers
+    @Test
     public void test_versionNumberEdgeCases() {
         TestSearchLogEvent event = new TestSearchLogEvent("id", 0L, "type");
 
@@ -316,6 +326,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test special characters in strings
+    @Test
     public void test_specialCharactersInStrings() {
         // Test special characters in ID
         TestSearchLogEvent event1 = new TestSearchLogEvent("id-with-special-!@#$%^&*()", 1L, "type");
@@ -332,6 +343,7 @@ public class SearchLogEventTest extends UnitFessTestCase {
     }
 
     // Test source map modifications
+    @Test
     public void test_sourceMapModifications() {
         TestSearchLogEvent event = new TestSearchLogEvent("id", 1L, "type");
 

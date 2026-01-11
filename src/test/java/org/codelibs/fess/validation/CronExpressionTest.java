@@ -27,19 +27,24 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.groups.Default;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CronExpressionTest extends UnitFessTestCase {
 
     private Validator validator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
     // Test annotation attributes and defaults
+    @Test
     public void test_annotationAttributes() throws Exception {
         Field field = TestBean.class.getDeclaredField("cronExpression");
         CronExpression annotation = field.getAnnotation(CronExpression.class);
@@ -51,6 +56,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation target elements
+    @Test
     public void test_annotationTargetElements() {
         CronExpression.class.isAnnotation();
         assertTrue(CronExpression.class.isAnnotation());
@@ -64,6 +70,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation retention policy
+    @Test
     public void test_annotationRetention() {
         java.lang.annotation.Retention retention = CronExpression.class.getAnnotation(java.lang.annotation.Retention.class);
         assertNotNull(retention);
@@ -71,12 +78,14 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation is documented
+    @Test
     public void test_annotationDocumented() {
         java.lang.annotation.Documented documented = CronExpression.class.getAnnotation(java.lang.annotation.Documented.class);
         assertNotNull(documented);
     }
 
     // Test annotation has Constraint meta-annotation
+    @Test
     public void test_annotationConstraint() {
         jakarta.validation.Constraint constraint = CronExpression.class.getAnnotation(jakarta.validation.Constraint.class);
         assertNotNull(constraint);
@@ -86,6 +95,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test validation with valid cron expressions
+    @Test
     public void test_validCronExpressions() {
         TestBean bean = new TestBean();
 
@@ -106,6 +116,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test validation with invalid cron expressions
+    @Test
     public void test_invalidCronExpressions() {
         TestBean bean = new TestBean();
 
@@ -127,6 +138,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test validation with groups
+    @Test
     public void test_validationGroups() {
         GroupTestBean bean = new GroupTestBean();
         bean.setDefaultCron("invalid");
@@ -148,6 +160,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test custom message
+    @Test
     public void test_customMessage() {
         CustomMessageBean bean = new CustomMessageBean();
         bean.setCronWithCustomMessage("invalid");
@@ -161,6 +174,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation on method parameter
+    @Test
     public void test_annotationOnMethod() throws Exception {
         Method method = TestService.class.getDeclaredMethod("scheduledTask", String.class);
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
@@ -177,6 +191,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation on constructor parameter
+    @Test
     public void test_annotationOnConstructor() throws Exception {
         java.lang.reflect.Constructor<?> constructor = TestConstructor.class.getDeclaredConstructor(String.class);
         Annotation[][] paramAnnotations = constructor.getParameterAnnotations();
@@ -193,6 +208,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test class hierarchy validation
+    @Test
     public void test_inheritanceValidation() {
         ExtendedTestBean bean = new ExtendedTestBean();
         bean.setCronExpression("invalid");
@@ -203,6 +219,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test multiple annotations on same field
+    @Test
     public void test_multipleValidations() {
         MultiValidationBean bean = new MultiValidationBean();
         bean.setRequiredCron(null); // Violates NotNull
@@ -220,6 +237,7 @@ public class CronExpressionTest extends UnitFessTestCase {
     }
 
     // Test annotation composition
+    @Test
     public void test_composedAnnotation() {
         ComposedBean bean = new ComposedBean();
         bean.setComposedCron("invalid");

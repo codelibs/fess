@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class SsoProcessExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "SSO authentication failed";
@@ -28,6 +30,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and Exception cause
         String message = "SSO token validation error";
@@ -38,6 +41,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(cause, exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         SsoProcessException exception = new SsoProcessException((String) null);
@@ -46,6 +50,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Test constructor with null cause
         String message = "SSO provider communication failure";
@@ -55,6 +60,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with both null message and cause
         SsoProcessException exception = new SsoProcessException(null, null);
@@ -63,6 +69,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_exceptionChaining() {
         // Test exception chaining with multiple levels
         Exception rootCause = new Exception("Network timeout");
@@ -74,6 +81,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, topException.getCause().getCause());
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is properly defined
         SsoProcessException exception1 = new SsoProcessException("Test");
@@ -83,6 +91,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(exception1.getClass(), exception2.getClass());
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "SSO configuration error";
@@ -94,6 +103,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         String expectedMessage = "SAML assertion validation failed";
@@ -107,6 +117,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_inheritanceFromFessSystemException() {
         // Test that SsoProcessException is properly inherited from FessSystemException
         SsoProcessException ssoException = new SsoProcessException("Test SSO error");
@@ -117,6 +128,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertTrue(ssoException instanceof Throwable);
     }
 
+    @Test
     public void test_constructor_withVariousExceptionTypes() {
         // Test constructor with different exception types as cause
         String message = "SSO process failed";
@@ -137,6 +149,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(nullPointerException, exception3.getCause());
     }
 
+    @Test
     public void test_getMessage_withEmptyString() {
         // Test constructor with empty string message
         String emptyMessage = "";
@@ -146,6 +159,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_getMessage_withWhitespaceMessage() {
         // Test constructor with whitespace-only message
         String whitespaceMessage = "   ";
@@ -155,6 +169,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_getMessage_withLongMessage() {
         // Test constructor with a long message
         StringBuilder longMessageBuilder = new StringBuilder();
@@ -168,6 +183,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_getCause_withNestedExceptions() {
         // Test deeply nested exception causes
         Exception level3 = new Exception("Level 3: Database connection failed");
@@ -185,6 +201,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals("Level 3: Database connection failed", topLevel.getCause().getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_stackTrace_isPresent() {
         // Test that stack trace is properly captured
         SsoProcessException exception = new SsoProcessException("Test stack trace");
@@ -203,6 +220,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_toString_containsClassNameAndMessage() {
         // Test toString() method output
         String message = "SSO authentication timeout";
@@ -213,6 +231,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains(message));
     }
 
+    @Test
     public void test_toString_withNullMessage() {
         // Test toString() with null message
         SsoProcessException exception = new SsoProcessException(null);
@@ -221,6 +240,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertTrue(toStringResult.contains("SsoProcessException"));
     }
 
+    @Test
     public void test_constructorWithThrowableCause_Error() {
         // Test that constructor accepts Error as cause (verifies Throwable parameter change)
         String message = "SSO process failed due to OutOfMemoryError";
@@ -234,6 +254,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals("Insufficient memory for SSO processing", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_StackOverflowError() {
         // Test with StackOverflowError as cause
         String message = "SSO recursive call exceeded stack limit";
@@ -245,6 +266,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_AssertionError() {
         // Test with AssertionError as cause
         String message = "SSO assertion failed";
@@ -256,6 +278,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_VirtualMachineError() {
         // Test with VirtualMachineError subclass
         String message = "SSO failed due to VM error";
@@ -268,6 +291,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(error, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_BackwardCompatibilityWithException() {
         // Test backward compatibility - verify RuntimeException still works
         String message = "SSO runtime error";
@@ -279,6 +303,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(runtimeException, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_CheckedException() {
         // Test with checked exception
         String message = "SSO I/O error";
@@ -290,6 +315,7 @@ public class SsoProcessExceptionTest extends UnitFessTestCase {
         assertEquals(ioException, exception.getCause());
     }
 
+    @Test
     public void test_constructorWithThrowableCause_MixedErrorAndException() {
         // Test with mixed Error and Exception in cause chain
         String message = "SSO complex failure";

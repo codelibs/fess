@@ -21,17 +21,22 @@ import java.util.regex.Pattern;
 
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     public FileListIndexUpdateCallbackImpl indexUpdateCallback;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         indexUpdateCallback = new FileListIndexUpdateCallbackImpl(null, null, 1);
     }
 
     /** Case 1: Normal merge (no duplicates) */
+    @Test
     public void test_mergeResponseData_noOverwrite() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("a", "A0");
@@ -46,6 +51,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     }
 
     /** Case 2: Key conflict (without .overwrite) → Overwrite with value from responseDataMap */
+    @Test
     public void test_mergeResponseData_keyConflict() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("x", "X0");
@@ -59,6 +65,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     }
 
     /** Case 3: Only overwrite key (baseKey not set) → generate baseKey, remove overwrite key */
+    @Test
     public void test_mergeResponseData_overwriteOnly() {
         Map<String, Object> dataMap = new HashMap<>();
         Map<String, Object> responseDataMap = new HashMap<>();
@@ -72,6 +79,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     }
 
     /** Case 4: Both baseKey and baseKey.overwrite exist → Overwrite with the value of .overwrite */
+    @Test
     public void test_mergeResponseData_baseAndOverwrite() {
         Map<String, Object> dataMap = new HashMap<>();
         Map<String, Object> responseDataMap = new HashMap<>();
@@ -86,6 +94,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     }
 
     /** Case 5: Overwrite processing for multiple fields, existing overwrite keys are also properly removed */
+    @Test
     public void test_mergeResponseData_multipleOverwrite() {
         Map<String, Object> dataMap = new HashMap<>();
         // Case where the initial dataMap also contains overwrite keys
@@ -110,6 +119,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertEquals(3, dataMap.size());
     }
 
+    @Test
     public void test_isUrlCrawlable_noExcludePattern() {
         DataStoreParams paramMap = new DataStoreParams();
         String url = "http://example.com/test.html";
@@ -119,6 +129,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertTrue(result);
     }
 
+    @Test
     public void test_isUrlCrawlable_excludePatternAsString() {
         DataStoreParams paramMap = new DataStoreParams();
         paramMap.put("url_exclude_pattern", ".*\\.pdf$");
@@ -131,6 +142,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertTrue(paramMap.get("url_exclude_pattern") instanceof Pattern);
     }
 
+    @Test
     public void test_isUrlCrawlable_excludePatternAsPattern() {
         DataStoreParams paramMap = new DataStoreParams();
         Pattern pattern = Pattern.compile(".*\\.jpg$");
@@ -143,6 +155,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertTrue(result2);
     }
 
+    @Test
     public void test_isUrlCrawlable_complexExcludePattern() {
         DataStoreParams paramMap = new DataStoreParams();
         paramMap.put("url_exclude_pattern", ".*(admin|private|temp).*");
@@ -158,6 +171,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertTrue(result4);
     }
 
+    @Test
     public void test_isUrlCrawlable_emptyUrl() {
         DataStoreParams paramMap = new DataStoreParams();
         paramMap.put("url_exclude_pattern", ".*");
@@ -167,6 +181,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         assertFalse(result);
     }
 
+    @Test
     public void test_isUrlCrawlable_nullUrl() {
         DataStoreParams paramMap = new DataStoreParams();
         paramMap.put("url_exclude_pattern", ".*");
@@ -179,6 +194,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_isUrlCrawlable_nullUrlWithoutPattern() {
         DataStoreParams paramMap = new DataStoreParams();
 
@@ -194,6 +210,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
      * This test verifies the ArrayList implementation works correctly when
      * all access is properly synchronized via indexUpdateCallback lock.
      */
+    @Test
     public void test_deleteUrlList_synchronizedAccess() throws Exception {
         // Create a mock IndexUpdateCallback for synchronization
         IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
@@ -256,7 +273,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
         }
 
         // Verify all URLs were added
@@ -269,6 +286,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
      * Test concurrent reads from deleteUrlList while synchronized.
      * Verifies that ArrayList can be safely read when properly synchronized.
      */
+    @Test
     public void test_deleteUrlList_concurrentReads() throws Exception {
         IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
             @Override
@@ -334,7 +352,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
             assertEquals("Thread " + i + " should see correct size", 100, sizes[i]);
             for (int j = 0; j < 10; j++) {
                 assertTrue("Thread " + i + " should find doc" + j, containsResults[i][j]);
@@ -345,6 +363,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     /**
      * Test that clear operation on deleteUrlList is thread-safe.
      */
+    @Test
     public void test_deleteUrlList_clearOperation() throws Exception {
         IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
             @Override
@@ -408,14 +427,15 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
         threads[1].join();
 
         // Verify no exceptions occurred (the main goal is no ConcurrentModificationException)
-        assertNull("Add thread threw exception", exceptions[0]);
-        assertNull("Clear thread threw exception", exceptions[1]);
+        assertNull(exceptions[0], "Add thread threw exception");
+        assertNull(exceptions[1], "Clear thread threw exception");
     }
 
     /**
      * Test iteration over deleteUrlList while synchronized.
      * This simulates what happens in deleteDocuments() method.
      */
+    @Test
     public void test_deleteUrlList_iteration() throws Exception {
         IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
             @Override
@@ -481,7 +501,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
             assertEquals("Thread " + i + " should iterate over all URLs", 50, counts[i][0]);
         }
     }
@@ -490,6 +510,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
      * Test isEmpty() check on deleteUrlList with concurrent access.
      * This simulates the check in commit() method.
      */
+    @Test
     public void test_deleteUrlList_isEmptyCheck() throws Exception {
         IndexUpdateCallback mockCallback = new IndexUpdateCallback() {
             @Override
@@ -553,7 +574,7 @@ public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
         }
     }
 }

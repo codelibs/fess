@@ -27,6 +27,7 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.WildcardQueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class WildcardQueryCommandTest extends QueryTestBase {
     private WildcardQueryCommand queryCommand;
@@ -38,6 +39,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         queryCommand.register();
     }
 
+    @Test
     public void test_convertWildcardQuery_defaultField() throws Exception {
         // Test with default field
         QueryContext queryContext = new QueryContext("test*", false);
@@ -50,6 +52,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertWildcardQuery_defaultField_dismax() throws Exception {
         // Test with default field
         QueryContext queryContext = new QueryContext("*test", false);
@@ -62,6 +65,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertWildcardQuery_searchField() throws Exception {
         // Test with search field (title)
         QueryContext queryContext = new QueryContext("title:test*", false);
@@ -78,6 +82,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertEquals("title", wqb.fieldName());
     }
 
+    @Test
     public void test_convertWildcardQuery_nonSearchField() throws Exception {
         // Test with DEFAULT_FIELD when field is not a search field
         QueryContext queryContext = new QueryContext("test", false);
@@ -92,6 +97,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertWildcardQuery_withBothWildcards() throws Exception {
         // Test with both wildcards already present
         QueryContext queryContext = new QueryContext("*test*", false);
@@ -103,6 +109,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertWildcardQuery_emptyHighlight() throws Exception {
         // Test with only wildcards (no highlight text)
         QueryContext queryContext = new QueryContext("***", false);
@@ -115,6 +122,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertTrue(queryContext.getHighlightedQuerySet().isEmpty());
     }
 
+    @Test
     public void test_execute_withWildcardQuery() throws Exception {
         QueryContext queryContext = new QueryContext("test*", false);
         WildcardQuery wildcardQuery = new WildcardQuery(new Term("title", "test*"));
@@ -123,6 +131,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertNotNull(queryBuilder);
     }
 
+    @Test
     public void test_execute_withNonWildcardQuery() {
         QueryContext queryContext = new QueryContext("test", false);
         TermQuery termQuery = new TermQuery(new Term("title", "test"));
@@ -136,6 +145,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_toLowercaseWildcard_enabled() {
         queryCommand.setLowercaseWildcard(true);
 
@@ -147,6 +157,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertEquals("", queryCommand.toLowercaseWildcard(""));
     }
 
+    @Test
     public void test_toLowercaseWildcard_disabled() {
         queryCommand.setLowercaseWildcard(false);
 
@@ -158,6 +169,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertEquals("", queryCommand.toLowercaseWildcard(""));
     }
 
+    @Test
     public void test_toLowercaseWildcard_mixedCase() {
         queryCommand.setLowercaseWildcard(true);
 
@@ -166,6 +178,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertEquals("test-case", queryCommand.toLowercaseWildcard("Test-Case"));
     }
 
+    @Test
     public void test_toLowercaseWildcard_internationalCharacters() {
         queryCommand.setLowercaseWildcard(true);
 
@@ -175,10 +188,12 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertEquals("test日本語", queryCommand.toLowercaseWildcard("TEST日本語"));
     }
 
+    @Test
     public void test_getQueryClassName() {
         assertEquals("WildcardQuery", queryCommand.getQueryClassName());
     }
 
+    @Test
     public void test_setLowercaseWildcard() {
         // Test default value
         assertTrue(queryCommand.lowercaseWildcard);
@@ -192,6 +207,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertTrue(queryCommand.lowercaseWildcard);
     }
 
+    @Test
     public void test_convertWildcardQuery_withBoost() throws Exception {
         // Test with different boost values
         QueryContext queryContext = new QueryContext("test*", false);
@@ -210,6 +226,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         assertNotNull(queryBuilder3);
     }
 
+    @Test
     public void test_convertWildcardQuery_withSpecialCharacters() throws Exception {
         // Test with special wildcard characters
         QueryContext queryContext1 = new QueryContext("te?t*", false);
@@ -230,6 +247,7 @@ public class WildcardQueryCommandTest extends QueryTestBase {
         // Query was processed successfully
     }
 
+    @Test
     public void test_convertWildcardQuery_caseInsensitive() throws Exception {
         // Test lowercase conversion with wildcard enabled (default)
         QueryContext queryContext1 = new QueryContext("TEST*", false);

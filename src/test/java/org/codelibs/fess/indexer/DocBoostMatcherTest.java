@@ -29,12 +29,16 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DocBoostMatcherTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ScriptEngineFactory scriptEngineFactory = new ScriptEngineFactory();
         ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
         new AbstractScriptEngine() {
@@ -63,6 +67,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         }.register();
     }
 
+    @Test
     public void test_integer() {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
         docBoostMatcher.setBoostExpression("10");
@@ -85,6 +90,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         assertFalse(docBoostMatcher.match(map));
     }
 
+    @Test
     public void test_string() {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
         docBoostMatcher.setBoostExpression("10");
@@ -112,6 +118,7 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         assertTrue(docBoostMatcher.match(map));
     }
 
+    @Test
     public void test_boost_params() {
         final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
         docBoostMatcher.setBoostExpression("10 * boost1 + boost2");

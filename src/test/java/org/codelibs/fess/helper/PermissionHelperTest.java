@@ -18,18 +18,23 @@ package org.codelibs.fess.helper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PermissionHelperTest extends UnitFessTestCase {
 
     public PermissionHelper permissionHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         permissionHelper = new PermissionHelper();
         permissionHelper.systemHelper = new SystemHelper();
     }
 
+    @Test
     public void test_encode() {
         assertNull(permissionHelper.encode(null));
         assertNull(permissionHelper.encode(""));
@@ -99,6 +104,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_decode() {
         assertNull(permissionHelper.decode(null));
         assertNull(permissionHelper.decode(""));
@@ -144,6 +150,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_encode_withComplexValues() {
         assertEquals("1user@domain.com", permissionHelper.encode("{user}user@domain.com"));
         assertEquals("2group/subgroup", permissionHelper.encode("{group}group/subgroup"));
@@ -153,6 +160,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("D2group123", permissionHelper.encode("(deny){group}group123"));
     }
 
+    @Test
     public void test_encode_withMixedCasePrefixes() {
         assertEquals("1guest", permissionHelper.encode("(Allow){User}guest"));
         assertEquals("Rguest", permissionHelper.encode("(ALLOW){ROLE}guest"));
@@ -162,6 +170,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("D2guest", permissionHelper.encode("(deny){GROUP}guest"));
     }
 
+    @Test
     public void test_encode_withSpecialCharacters() {
         assertEquals("1user@domain.com", permissionHelper.encode("{user}user@domain.com"));
         assertEquals("2group-name", permissionHelper.encode("{group}group-name"));
@@ -170,6 +179,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("2group$special", permissionHelper.encode("{group}group$special"));
     }
 
+    @Test
     public void test_decode_withComplexValues() {
         assertEquals("{user}user@domain.com", permissionHelper.decode("1user@domain.com"));
         assertEquals("{group}group/subgroup", permissionHelper.decode("2group/subgroup"));
@@ -179,6 +189,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("(deny){group}group123", permissionHelper.decode("D2group123"));
     }
 
+    @Test
     public void test_decode_withInvalidPrefixes() {
         assertEquals("invalid", permissionHelper.decode("invalid"));
         assertEquals("3guest", permissionHelper.decode("3guest"));
@@ -186,6 +197,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("guest", permissionHelper.decode("guest"));
     }
 
+    @Test
     public void test_encode_withWhitespaceValues() {
         assertNull(permissionHelper.encode("{user}   "));
         assertNull(permissionHelper.encode("{group}\t"));
@@ -194,6 +206,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.encode("(deny){group}\t\n"));
     }
 
+    @Test
     public void test_encode_decode_symmetry() {
         String[] testValues =
                 { "guest", "{user}guest", "{group}guest", "{role}guest", "(deny){user}guest", "(deny){group}guest", "(deny){role}guest" };
@@ -208,6 +221,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_encode_withLongValues() {
         String longUser = "user" + "x".repeat(1000);
         String longGroup = "group" + "y".repeat(1000);
@@ -222,6 +236,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("R" + longRole, encodedRole);
     }
 
+    @Test
     public void test_decode_withLongValues() {
         String longUser = "user" + "x".repeat(1000);
         String longGroup = "group" + "y".repeat(1000);
@@ -236,6 +251,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("{role}" + longRole, decodedRole);
     }
 
+    @Test
     public void test_nullSafetyChecks() {
         assertNull(permissionHelper.encode(null));
         assertNull(permissionHelper.decode(null));
@@ -247,6 +263,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.decode("  "));
     }
 
+    @Test
     public void test_allowPrefixBehavior() {
         assertEquals("1guest", permissionHelper.encode("(allow){user}guest"));
         assertEquals("2guest", permissionHelper.encode("(allow){group}guest"));
@@ -257,6 +274,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("Rguest", permissionHelper.encode("{role}guest"));
     }
 
+    @Test
     public void test_denyPrefixBehavior() {
         assertEquals("D1guest", permissionHelper.encode("(deny){user}guest"));
         assertEquals("D2guest", permissionHelper.encode("(deny){group}guest"));
@@ -267,6 +285,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("(deny){role}guest", permissionHelper.decode("DRguest"));
     }
 
+    @Test
     public void test_caseInsensitivePrefixes() {
         assertEquals("1guest", permissionHelper.encode("{USER}guest"));
         assertEquals("2guest", permissionHelper.encode("{GROUP}guest"));
@@ -280,6 +299,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertEquals("DRguest", permissionHelper.encode("(deny){ROLE}guest"));
     }
 
+    @Test
     public void test_invalidInputs() {
         assertNull(permissionHelper.encode("{user}"));
         assertNull(permissionHelper.encode("{group}"));
@@ -295,6 +315,7 @@ public class PermissionHelperTest extends UnitFessTestCase {
         assertNull(permissionHelper.encode("(deny){group}"));
     }
 
+    @Test
     public void test_passthroughValues() {
         assertEquals("plaintext", permissionHelper.encode("plaintext"));
         assertEquals("plaintext", permissionHelper.decode("plaintext"));

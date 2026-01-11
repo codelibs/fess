@@ -34,6 +34,7 @@ import org.codelibs.nekohtml.parsers.DOMParser;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.junit.jupiter.api.Test;
 
 public class FessPropTest extends UnitFessTestCase {
 
@@ -42,6 +43,7 @@ public class FessPropTest extends UnitFessTestCase {
         return true;
     }
 
+    @Test
     public void test_maxUsernameLength() throws IOException {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -66,6 +68,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("12345678901@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal("12345678901"));
     }
 
+    @Test
     public void test_maxUsernameLength10() throws IOException {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -91,6 +94,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("1234567890@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal("12345678901"));
     }
 
+    @Test
     public void test_validateIndexRequiredFields() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -121,6 +125,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertTrue(fessConfig.validateIndexRequiredFields(source));
     }
 
+    @Test
     public void test_getCrawlerDocumentSpaceCharsAsArray() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -136,6 +141,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(12288, chars[1]);
     }
 
+    @Test
     public void test_getCrawlerDocumentFullstopCharsAsArray() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -151,6 +157,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(12288, chars[1]);
     }
 
+    @Test
     public void test_getCrawlerDocumentHtmlPrunedTagsAsArray() throws Exception {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -178,6 +185,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(matchesTag(tags[4], "<div x-y=\"a 0\"></div>"));
     }
 
+    @Test
     public void test_getAvailableSmbSidType() throws Exception {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -204,6 +212,7 @@ public class FessPropTest extends UnitFessTestCase {
         return tag.matches(node);
     }
 
+    @Test
     public void test_normalizeQueryLanguages() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -226,6 +235,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertArrays(new String[] { "zh-tw" }, fessConfig.normalizeQueryLanguages(new String[] { "zh_TW" }));
     }
 
+    @Test
     public void test_getQueryLocaleFromName() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -244,6 +254,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(Locale.TRADITIONAL_CHINESE, fessConfig.getQueryLocaleFromName("test_zh_TW"));
     }
 
+    @Test
     public void test_isValidUserCode() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -272,6 +283,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(fessConfig.isValidUserCode("123456789?"));
     }
 
+    @Test
     public void test_getUserAgentName() throws IOException {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -302,6 +314,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(String.join(",", expected), String.join(",", actual));
     }
 
+    @Test
     public void test_getEntraIdPermissionFields_withNewKey() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -325,6 +338,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("userPrincipalName", fields[1]);
     }
 
+    @Test
     public void test_getEntraIdPermissionFields_withLegacyFallback() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -348,6 +362,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("displayName", fields[1]);
     }
 
+    @Test
     public void test_getEntraIdPermissionFields_withDefault() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -369,6 +384,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("mail", fields[0]);
     }
 
+    @Test
     public void test_getEntraIdPermissionFields_newKeyTakesPrecedence() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -392,6 +408,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("newField", fields[0]);
     }
 
+    @Test
     public void test_isEntraIdUseDomainServices_withNewKey() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -416,6 +433,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertTrue(fessConfig.isEntraIdUseDomainServices());
     }
 
+    @Test
     public void test_isEntraIdUseDomainServices_withLegacyFallback() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -436,6 +454,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(fessConfig.isEntraIdUseDomainServices());
     }
 
+    @Test
     public void test_isEntraIdUseDomainServices_withDefault() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -455,6 +474,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertTrue(fessConfig.isEntraIdUseDomainServices());
     }
 
+    @Test
     public void test_isEntraIdUseDomainServices_newKeyTakesPrecedence() {
         final Map<String, String> systemPropMap = new HashMap<>();
         FessProp.propMap.clear();
@@ -476,6 +496,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertFalse(fessConfig.isEntraIdUseDomainServices());
     }
 
+    @Test
     public void test_getLdapSecurityPrincipal_escapesSpecialChars() throws IOException {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -501,6 +522,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("cn=admin\\5ctest,dc=example,dc=com", fessConfig.getLdapSecurityPrincipal("admin\\test"));
     }
 
+    @Test
     public void test_getLdapAdminUserFilter_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -520,6 +542,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("(uid=\\2a\\29\\28|\\28uid=\\2a)", fessConfig.getLdapAdminUserFilter("*)(|(uid=*"));
     }
 
+    @Test
     public void test_getLdapAdminUserSecurityPrincipal_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -541,6 +564,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("uid=test\\2a,ou=users,dc=example,dc=com", fessConfig.getLdapAdminUserSecurityPrincipal("test*"));
     }
 
+    @Test
     public void test_getLdapAdminRoleFilter_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -560,6 +584,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("(cn=\\29\\28cn=\\2a\\29\\29\\28|\\28cn=admin)", fessConfig.getLdapAdminRoleFilter(")(cn=*))(|(cn=admin"));
     }
 
+    @Test
     public void test_getLdapAdminRoleSecurityPrincipal_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -581,6 +606,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("cn=admin\\2a,ou=roles,dc=example,dc=com", fessConfig.getLdapAdminRoleSecurityPrincipal("admin*"));
     }
 
+    @Test
     public void test_getLdapAdminGroupFilter_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
@@ -600,6 +626,7 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("(cn=\\2a\\29\\28|\\28cn=\\2a)", fessConfig.getLdapAdminGroupFilter("*)(|(cn=*"));
     }
 
+    @Test
     public void test_getLdapAdminGroupSecurityPrincipal_escapesSpecialChars() {
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {

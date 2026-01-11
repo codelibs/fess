@@ -32,28 +32,36 @@ import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ThumbnailGeneratorTest extends UnitFessTestCase {
 
     private ThumbnailGenerator thumbnailGenerator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         thumbnailGenerator = new ThumbnailGenerator();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_constructor() {
         // Test default constructor
         ThumbnailGenerator generator = new ThumbnailGenerator();
         assertNotNull(generator);
     }
 
+    @Test
     public void test_Options_defaultValues() {
         // Test Options class default values
         ThumbnailGenerator.Options options = new ThumbnailGenerator.Options();
@@ -64,6 +72,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertFalse(options.cleanup);
     }
 
+    @Test
     public void test_Options_toString() {
         // Test Options toString method
         ThumbnailGenerator.Options options = new ThumbnailGenerator.Options();
@@ -76,6 +85,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         assertEquals(expected, options.toString());
     }
 
+    @Test
     public void test_initializeProbes() {
         // Test that initializeProbes doesn't throw exception
         try {
@@ -87,6 +97,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_main_withHelp() {
         // Test main method with help option
         PrintStream originalErr = System.err;
@@ -104,6 +115,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_withPropertiesPath() throws Exception {
         // Test process method with properties path
         File tempPropFile = File.createTempFile("test_thumbnail_", ".properties");
@@ -132,6 +144,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_withoutPropertiesPath() throws Exception {
         // Test process method without properties path
         ThumbnailGenerator.Options options = new ThumbnailGenerator.Options();
@@ -154,6 +167,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_process_multipleThreads() throws Exception {
         // Test process method with multiple threads
         ThumbnailGenerator.Options options = new ThumbnailGenerator.Options();
@@ -178,12 +192,14 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_destroyContainer() throws Exception {
         // Test destroyContainer method - skip this test as it conflicts with container management
         // The test framework manages the container lifecycle
         assertTrue(true);
     }
 
+    @Test
     public void test_process_cleanupMode() throws Exception {
         // Test process method in cleanup mode
         ThumbnailGenerator.Options options = new ThumbnailGenerator.Options();
@@ -205,6 +221,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_searchEngineClient_injection() {
         // Test SearchEngineClient field injection
         ThumbnailGenerator generator = new ThumbnailGenerator();

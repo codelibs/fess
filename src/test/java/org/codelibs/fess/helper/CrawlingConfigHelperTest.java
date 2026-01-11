@@ -46,13 +46,17 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.optional.OptionalEntity;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.search.sort.FieldSortBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CrawlingConfigHelperTest extends UnitFessTestCase {
     private CrawlingConfigHelper crawlingConfigHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         final File propFile = File.createTempFile("system", ".properties");
         propFile.deleteOnExit();
         FileUtil.writeBytes(propFile.getAbsolutePath(), "".getBytes());
@@ -119,6 +123,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         }, DataConfigService.class.getCanonicalName());
     }
 
+    @Test
     public void test_getConfigType() {
         assertNull(crawlingConfigHelper.getConfigType(null));
         assertNull(crawlingConfigHelper.getConfigType(""));
@@ -131,6 +136,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(ConfigType.DATA, crawlingConfigHelper.getConfigType("DX"));
     }
 
+    @Test
     public void test_getCrawlingConfig() {
         crawlingConfigHelper.refresh();
         assertNull(crawlingConfigHelper.getCrawlingConfig(null));
@@ -147,6 +153,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertTrue(dataConfig instanceof DataConfig);
     }
 
+    @Test
     public void test_getPipeline() {
         crawlingConfigHelper.refresh();
         assertTrue(crawlingConfigHelper.getPipeline(null).isEmpty());
@@ -160,6 +167,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("dp", crawlingConfigHelper.getPipeline("D1P").get());
     }
 
+    @Test
     public void test_sessionCountId() {
         final String sessionId = "12345";
         final String sessionCountId = sessionId + "-1";
@@ -170,6 +178,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertNull(crawlingConfigHelper.get(sessionCountId));
     }
 
+    @Test
     public void test_getAllWebConfigList() {
         final WebConfigCB cb = new WebConfigCB();
         ComponentUtil.register(new WebConfigBhv() {
@@ -195,6 +204,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getWebConfigListByIds_null() {
         final WebConfigCB cb = new WebConfigCB();
         ComponentUtil.register(new WebConfigBhv() {
@@ -220,6 +230,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getWebConfigListByIds() {
         final WebConfigCB cb = new WebConfigCB();
         ComponentUtil.register(new WebConfigBhv() {
@@ -245,6 +256,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getAllFileConfigList() {
         final FileConfigCB cb = new FileConfigCB();
         ComponentUtil.register(new FileConfigBhv() {
@@ -270,6 +282,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getFileConfigListByIds_null() {
         final FileConfigCB cb = new FileConfigCB();
         ComponentUtil.register(new FileConfigBhv() {
@@ -295,6 +308,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getFileConfigListByIds() {
         final FileConfigCB cb = new FileConfigCB();
         ComponentUtil.register(new FileConfigBhv() {
@@ -320,6 +334,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getAllDataConfigList() {
         final DataConfigCB cb = new DataConfigCB();
         ComponentUtil.register(new DataConfigBhv() {
@@ -345,6 +360,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getDataConfigListByIds_null() {
         final DataConfigCB cb = new DataConfigCB();
         ComponentUtil.register(new DataConfigBhv() {
@@ -370,6 +386,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getDataConfigListByIds() {
         final DataConfigCB cb = new DataConfigCB();
         ComponentUtil.register(new DataConfigBhv() {
@@ -395,6 +412,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("name", fieldSortBuilderList.get(1).getFieldName());
     }
 
+    @Test
     public void test_getExcludedUrlList() {
         final AtomicInteger errorCount = new AtomicInteger(0);
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -425,6 +443,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(4, crawlingConfigHelper.getExcludedUrlList("123").size());
     }
 
+    @Test
     public void test_getDefaultConfig() {
         assertTrue(crawlingConfigHelper.getDefaultConfig(null).isEmpty());
         assertEquals("01T", crawlingConfigHelper.getDefaultConfig(ConfigType.WEB).get().getId());
@@ -432,6 +451,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("21T", crawlingConfigHelper.getDefaultConfig(ConfigType.DATA).get().getId());
     }
 
+    @Test
     public void test_getId() {
         // Test getId method through reflection since it's protected
         try {
@@ -449,6 +469,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getCrawlingConfig_cacheExceptionHandling() {
         // Register a service that throws exception
         ComponentUtil.register(new WebConfigService() {
@@ -467,6 +488,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertNull(crawlingConfigHelper.getCrawlingConfig("W123"));
     }
 
+    @Test
     public void test_store_counterIncrement() {
         final String sessionId = "testSession";
 
@@ -486,6 +508,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("3", crawlingConfigHelper.get(sessionCountId3).getId());
     }
 
+    @Test
     public void test_getAllWebConfigList_withDifferentFlags() {
         final WebConfigCB cb = new WebConfigCB();
         ComponentUtil.register(new WebConfigBhv() {
@@ -508,6 +531,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(1, configList.size());
     }
 
+    @Test
     public void test_getAllFileConfigList_withDifferentFlags() {
         final FileConfigCB cb = new FileConfigCB();
         ComponentUtil.register(new FileConfigBhv() {
@@ -530,6 +554,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(1, configList.size());
     }
 
+    @Test
     public void test_getAllDataConfigList_withDifferentFlags() {
         final DataConfigCB cb = new DataConfigCB();
         ComponentUtil.register(new DataConfigBhv() {
@@ -552,6 +577,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(1, configList.size());
     }
 
+    @Test
     public void test_getExcludedUrlList_withNegativeFailureCount() {
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         systemProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, "-1");
@@ -560,6 +586,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(0, excludedUrls.size());
     }
 
+    @Test
     public void test_getExcludedUrlList_withIgnoreFailureTypePattern() {
         final AtomicInteger errorCount = new AtomicInteger(3);
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
@@ -600,6 +627,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertFalse(excludedUrls.contains("http://test.com/0.html"));
     }
 
+    @Test
     public void test_getExcludedUrlList_emptyList() {
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         final FailureUrlCB cb = new FailureUrlCB();
@@ -618,6 +646,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals(0, excludedUrls.size());
     }
 
+    @Test
     public void test_refresh_clearsCache() {
         // First get a config to cache it
         CrawlingConfig config1 = crawlingConfigHelper.getCrawlingConfig("W01");
@@ -648,6 +677,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertEquals("01_refreshed", config3.getId());
     }
 
+    @Test
     public void test_init_cacheConfiguration() {
         // Test that init properly configures the cache
         CrawlingConfigHelper newHelper = new CrawlingConfigHelper();
@@ -657,6 +687,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertNull(newHelper.getCrawlingConfig("invalid"));
     }
 
+    @Test
     public void test_getPipeline_withBlankPipeline() {
         // Register service that returns blank pipeline
         ComponentUtil.register(new WebConfigService() {
@@ -677,6 +708,7 @@ public class CrawlingConfigHelperTest extends UnitFessTestCase {
         assertTrue(crawlingConfigHelper.getPipeline("W1").isEmpty());
     }
 
+    @Test
     public void test_getPipeline_withEmptyStringPipeline() {
         // Register service that returns empty string pipeline
         ComponentUtil.register(new WebConfigService() {

@@ -37,6 +37,11 @@ import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.job.subsidiary.CronConsumer;
 
 import jakarta.servlet.ServletContext;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PythonJobTest extends UnitFessTestCase {
 
@@ -45,9 +50,10 @@ public class PythonJobTest extends UnitFessTestCase {
     private TestFessConfig testFessConfig;
     private TestServletContext testServletContext;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         pythonJob = new PythonJob();
 
         // Setup test components
@@ -67,12 +73,14 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test filename setter
+    @Test
     public void test_filename() {
         assertNull(pythonJob.filename);
 
@@ -83,6 +91,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test single argument addition
+    @Test
     public void test_arg() {
         assertTrue(pythonJob.argList.isEmpty());
 
@@ -98,6 +107,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test multiple arguments addition
+    @Test
     public void test_args() {
         assertTrue(pythonJob.argList.isEmpty());
 
@@ -111,6 +121,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test args with empty array
+    @Test
     public void test_args_empty() {
         PythonJob result = pythonJob.args();
 
@@ -119,6 +130,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test combining arg and args methods
+    @Test
     public void test_arg_and_args_combination() {
         pythonJob.arg("single1").args("multi1", "multi2").arg("single2").args("multi3");
 
@@ -131,6 +143,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test getPyFilePath method
+    @Test
     public void test_getPyFilePath() {
         pythonJob.filename("test_script.py");
 
@@ -140,6 +153,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test getPyFilePath with directory traversal attempt
+    @Test
     public void test_getPyFilePath_withDirectoryTraversal() {
         pythonJob.filename("../../malicious.py");
 
@@ -149,6 +163,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test getPyFilePath with complex directory traversal
+    @Test
     public void test_getPyFilePath_withComplexDirectoryTraversal() {
         pythonJob.filename("../test/../../../etc/passwd");
 
@@ -158,11 +173,13 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test getExecuteType method
+    @Test
     public void test_getExecuteType() {
         assertEquals(Constants.EXECUTE_TYPE_PYTHON, pythonJob.getExecuteType());
     }
 
     // Test execute method with successful execution
+    @Test
     public void test_execute_success() {
         pythonJob.filename("test.py");
         pythonJob.args("arg1", "arg2");
@@ -183,6 +200,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test execute with custom session ID
+    @Test
     public void test_execute_withCustomSessionId() {
         pythonJob.filename("test.py");
         pythonJob.sessionId = "custom-session-123";
@@ -196,6 +214,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test execute with process failure
+    @Test
     public void test_execute_processFailure() {
         pythonJob.filename("failing.py");
 
@@ -210,6 +229,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test execute with timeout
+    @Test
     public void test_execute_withTimeout() {
         pythonJob.filename("timeout.py");
         pythonJob.timeout = 60; // Set timeout
@@ -226,6 +246,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test executePython with blank filename
+    @Test
     public void test_executePython_blankFilename() {
         pythonJob.filename("");
 
@@ -238,6 +259,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test executePython with null filename
+    @Test
     public void test_executePython_nullFilename() {
         pythonJob.filename = null;
 
@@ -250,6 +272,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test executePython with process exception
+    @Test
     public void test_executePython_processException() {
         pythonJob.filename("error.py");
 
@@ -269,6 +292,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test execute with exception handling
+    @Test
     public void test_execute_withException() {
         pythonJob.filename("test.py");
 
@@ -281,6 +305,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test execute with job executor
+    @Test
     public void test_execute_withJobExecutor() {
         pythonJob.filename("test.py");
 
@@ -295,6 +320,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test environment variables setup
+    @Test
     public void test_executePython_environmentVariables() {
         pythonJob.filename("test.py");
         pythonJob.sessionId = "test-session";
@@ -316,6 +342,7 @@ public class PythonJobTest extends UnitFessTestCase {
     }
 
     // Test working directory setup
+    @Test
     public void test_executePython_workingDirectory() {
         pythonJob.filename("test.py");
 

@@ -16,8 +16,10 @@
 package org.codelibs.fess.dict.kuromoji;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class KuromojiItemTest extends UnitFessTestCase {
+    @Test
     public void test_new1() {
         final KuromojiItem kuromojiItem = new KuromojiItem(1, "t1", "s1", "r1", "p1");
         assertEquals(1, kuromojiItem.getId());
@@ -44,6 +46,7 @@ public class KuromojiItemTest extends UnitFessTestCase {
         assertTrue(kuromojiItem.isDeleted());
     }
 
+    @Test
     public void test_equals1() {
         final KuromojiItem kuromojiItem1 = new KuromojiItem(1, "t1", "s1", "r1", "p1");
 
@@ -56,6 +59,7 @@ public class KuromojiItemTest extends UnitFessTestCase {
         assertFalse(kuromojiItem1.equals(new KuromojiItem(1, "t1", "s1", "r1", "P1")));
     }
 
+    @Test
     public void test_toLineString() {
         assertEquals("t1,s1,r1,p1", new KuromojiItem(1, "t1", "s1", "r1", "p1").toLineString());
         assertEquals("t\"\"1,s\"\"1,r\"\"1,p\"\"1", new KuromojiItem(1, "t\"1", "s\"1", "r\"1", "p\"1").toLineString());

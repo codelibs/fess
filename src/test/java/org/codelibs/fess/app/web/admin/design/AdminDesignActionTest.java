@@ -25,21 +25,27 @@ import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AdminDesignActionTest extends UnitFessTestCase {
 
     private AdminDesignAction action;
     private Path tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         action = new AdminDesignAction();
         tempDir = Files.createTempDirectory("fess_test");
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Clean up temp directory
         if (tempDir != null) {
             deleteRecursively(tempDir.toFile());
@@ -62,6 +68,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
     // ===================================================================================
     //                                                                           JSP Codec
     //                                                                           =========
+    @Test
     public void test_decodeJsp() {
         assertEquals("&lt;% a %&gt;", AdminDesignAction.decodeJsp("<% a %>"));
         assertEquals("&lt;%= a %&gt;", AdminDesignAction.decodeJsp("<%= a %>"));
@@ -78,6 +85,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertEquals("%> &lt;% a %&gt;", AdminDesignAction.decodeJsp("%> <% a %>"));
     }
 
+    @Test
     public void test_encodeJsp() {
         assertEquals("<!--TRY-->", AdminDesignAction.encodeJsp("<% try{ %>"));
         assertEquals("<!--CACHE_AND_SESSION_INVALIDATE-->",
@@ -88,6 +96,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
     //                                                                Path Traversal Tests
     //                                                                ====================
 
+    @Test
     public void test_isValidUploadPath_validPath() throws Exception {
         // Create test directory structure
         File baseDir = new File(tempDir.toFile(), "images");
@@ -98,6 +107,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Valid path within base directory should be allowed", result);
     }
 
+    @Test
     public void test_isValidUploadPath_validSubdirectory() throws Exception {
         // Create test directory structure with subdirectory
         File baseDir = new File(tempDir.toFile(), "images");
@@ -109,6 +119,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Valid path in subdirectory should be allowed", result);
     }
 
+    @Test
     public void test_isValidUploadPath_pathTraversal_simple() throws Exception {
         // Test simple path traversal attack
         File baseDir = new File(tempDir.toFile(), "images");
@@ -119,6 +130,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Path traversal with ../ should be blocked", result);
     }
 
+    @Test
     public void test_isValidUploadPath_pathTraversal_encoded() throws Exception {
         // Test path traversal that would be decoded
         File baseDir = new File(tempDir.toFile(), "images");
@@ -129,6 +141,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Encoded path traversal should be blocked", result);
     }
 
+    @Test
     public void test_isValidUploadPath_pathTraversal_outsideBase() throws Exception {
         // Test file outside base directory
         File baseDir = new File(tempDir.toFile(), "images");
@@ -139,6 +152,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("File outside base directory should be blocked", result);
     }
 
+    @Test
     public void test_isValidUploadPath_pathTraversal_absolutePath() throws Exception {
         // Test absolute path outside base
         File baseDir = new File(tempDir.toFile(), "images");
@@ -149,6 +163,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Absolute path outside base should be blocked", result);
     }
 
+    @Test
     public void test_isValidUploadPath_pathTraversal_multipleTraversals() throws Exception {
         // Test multiple path traversal sequences
         File baseDir = new File(tempDir.toFile(), "images");
@@ -159,6 +174,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Multiple path traversals should be blocked", result);
     }
 
+    @Test
     public void test_isValidUploadPath_edgeCase_sameDirectory() throws Exception {
         // Test file directly in base directory
         File baseDir = new File(tempDir.toFile(), "images");
@@ -169,6 +185,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("File directly in base directory should be allowed", result);
     }
 
+    @Test
     public void test_isValidUploadPath_edgeCase_similarPrefix() throws Exception {
         // Test directory with similar prefix (images vs images2)
         File baseDir = new File(tempDir.toFile(), "images");
@@ -185,6 +202,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
     //                                                          Virtual Host Path Tests
     //                                                          ========================
 
+    @Test
     public void test_isValidVirtualHostPath_emptyPath() throws Exception {
         setupVirtualHostHelper();
 
@@ -192,6 +210,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Empty path should be valid (default host)", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_nullPath() throws Exception {
         setupVirtualHostHelper();
 
@@ -199,6 +218,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Null path should be valid (default host)", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_blankPath() throws Exception {
         setupVirtualHostHelper();
 
@@ -206,6 +226,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Blank path should be valid (default host)", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_slashPath() throws Exception {
         setupVirtualHostHelper();
 
@@ -213,6 +234,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Root path '/' should be valid", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_validConfiguredPath() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -220,6 +242,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Configured virtual host path should be valid", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_anotherValidConfiguredPath() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -227,6 +250,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertTrue("Another configured virtual host path should be valid", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_pathTraversal() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -234,6 +258,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Path traversal should be blocked", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_pathTraversal_encoded() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -241,6 +266,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Encoded path traversal should be blocked", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_unconfiguredPath() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -248,6 +274,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Unconfigured path should be blocked", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_randomMaliciousPath() throws Exception {
         setupVirtualHostHelper("/site1", "/site2");
 
@@ -255,6 +282,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Malicious encoded path should be blocked", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_emptyVirtualHosts() throws Exception {
         // No virtual hosts configured
         setupVirtualHostHelper();
@@ -263,6 +291,7 @@ public class AdminDesignActionTest extends UnitFessTestCase {
         assertFalse("Any non-empty/non-root path should be blocked when no virtual hosts configured", result);
     }
 
+    @Test
     public void test_isValidVirtualHostPath_caseInsensitive() throws Exception {
         setupVirtualHostHelper("/Site1", "/SITE2");
 

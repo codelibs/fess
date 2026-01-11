@@ -33,29 +33,37 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.external.GenericExternalContext;
 import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SuggestCreatorTest extends UnitFessTestCase {
 
     private SuggestCreator suggestCreator;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         suggestCreator = new SuggestCreator();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         SuggestCreator creator = new SuggestCreator();
         assertNotNull(creator);
     }
 
     // Test Options class default values
+    @Test
     public void test_Options_defaultValues() {
         SuggestCreator.Options options = new SuggestCreator.Options();
         assertNull(options.sessionId);
@@ -64,6 +72,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test Options class with null values
+    @Test
     public void test_Options_nullValues() {
         SuggestCreator.Options options = new SuggestCreator.Options();
         options.sessionId = null;
@@ -75,6 +84,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test Options toString method
+    @Test
     public void test_Options_toString() {
         SuggestCreator.Options options = new SuggestCreator.Options();
         options.sessionId = "test-session";
@@ -86,6 +96,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test initializeProbes
+    @Test
     public void test_initializeProbes() {
         try {
             SuggestCreator.initializeProbes();
@@ -97,6 +108,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test process with properties path
+    @Test
     public void test_process_withPropertiesPath() {
         try {
             // Create temporary properties file
@@ -129,6 +141,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test process without properties path
+    @Test
     public void test_process_withoutPropertiesPath() {
         try {
             SuggestCreator.Options options = new SuggestCreator.Options();
@@ -155,6 +168,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test main method with invalid arguments
+    @Test
     public void test_main_invalidArguments() {
         // Cannot directly test main as it calls System.exit
         // Test argument parsing instead
@@ -163,6 +177,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test main method with valid arguments
+    @Test
     public void test_main_validArguments() {
         // Cannot directly test main as it calls System.exit
         // Test options parsing instead
@@ -174,6 +189,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with search log enabled
+    @Test
     public void test_create_searchLogEnabled() {
         // Test configuration for search log creation
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -181,6 +197,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with documents enabled
+    @Test
     public void test_create_documentsEnabled() {
         // Test configuration for document creation
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -188,6 +205,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with both disabled
+    @Test
     public void test_create_bothDisabled() {
         // Test configuration when both are disabled
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -195,6 +213,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with error
+    @Test
     public void test_create_withError() {
         // Test error handling during creation
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -202,6 +221,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with search log exception
+    @Test
     public void test_create_searchLogException() {
         // Test exception handling for search log
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -209,6 +229,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create with interruption
+    @Test
     public void test_create_withInterruption() {
         // Test interruption handling
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -216,6 +237,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test purge success
+    @Test
     public void test_purge_success() {
         // Test successful purge operation
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -223,6 +245,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test purge with exception
+    @Test
     public void test_purge_withException() {
         // Test exception during purge
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -230,6 +253,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test purge with no purge search log
+    @Test
     public void test_purge_noPurgeSearchLog() {
         // Test when purge search log is disabled
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -237,6 +261,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test create and purge full flow
+    @Test
     public void test_createAndPurge_fullFlow() {
         // Test full flow of create and purge
         SuggestCreator.Options options = new SuggestCreator.Options();
@@ -244,6 +269,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test system property setting
+    @Test
     public void test_systemPropertySetting() {
         // Test system property configuration
         String originalValue = System.getProperty(FesenClient.HTTP_ADDRESS);
@@ -260,6 +286,7 @@ public class SuggestCreatorTest extends UnitFessTestCase {
     }
 
     // Test destroy container
+    @Test
     public void test_destroyContainer() {
         // Test destroyContainer method - skip this test as it conflicts with container management
         // The test framework manages the container lifecycle

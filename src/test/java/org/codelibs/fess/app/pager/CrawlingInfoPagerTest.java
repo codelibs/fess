@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class CrawlingInfoPagerTest extends UnitFessTestCase {
 
+    @Test
     public void test_CrawlingInfoPage() {
         CrawlingInfoPager crawlinginfopage = new CrawlingInfoPager();
 

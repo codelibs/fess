@@ -21,12 +21,17 @@ import java.util.List;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ComponentUtilTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         ComponentUtil.setFessConfig(null);
     }
 
@@ -35,16 +40,19 @@ public class ComponentUtilTest extends UnitFessTestCase {
         return true;
     }
 
+    @Test
     public void test_setFessConfig_null() {
         assertTrue(FessProp.propMap.isEmpty());
     }
 
+    @Test
     public void test_setFessConfig_notNull() {
         FessConfig mockConfig = new FessConfig.SimpleImpl();
         ComponentUtil.setFessConfig(mockConfig);
         assertSame(mockConfig, ComponentUtil.getFessConfig());
     }
 
+    @Test
     public void test_getFessConfig_cached() {
         FessConfig mockConfig = new FessConfig.SimpleImpl();
         ComponentUtil.setFessConfig(mockConfig);
@@ -56,6 +64,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertSame(mockConfig, result1);
     }
 
+    @Test
     public void test_register_and_getComponent() {
         String testInstance = "test_instance";
         String componentName = "testComponent";
@@ -66,6 +75,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertSame(testInstance, retrieved);
     }
 
+    @Test
     public void test_processAfterContainerInit_available() {
         List<String> results = new ArrayList<>();
         Runnable process = () -> results.add("executed");
@@ -75,6 +85,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertEquals(0, results.size());
     }
 
+    @Test
     public void test_processAfterContainerInit_notAvailable() {
         List<String> results = new ArrayList<>();
         Runnable process = () -> results.add("executed");
@@ -84,6 +95,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertEquals(0, results.size());
     }
 
+    @Test
     public void test_doInitProcesses() {
         List<String> executionOrder = new ArrayList<>();
 
@@ -102,16 +114,19 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertEquals(2, executionOrder.size());
     }
 
+    @Test
     public void test_available_withSystemHelper() {
         ComponentUtil.register(new Object(), "systemHelper");
 
         assertFalse(ComponentUtil.available());
     }
 
+    @Test
     public void test_available_withoutSystemHelper() {
         assertFalse(ComponentUtil.available());
     }
 
+    @Test
     public void test_hasComponent_existsInMap() {
         String testInstance = "test_instance";
         String componentName = "testComponent";
@@ -121,10 +136,12 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasComponent(componentName));
     }
 
+    @Test
     public void test_hasComponent_notExists() {
         assertFalse(ComponentUtil.hasComponent("nonExistentComponent"));
     }
 
+    @Test
     public void test_hasQueryParser() {
         assertFalse(ComponentUtil.hasQueryParser());
 
@@ -132,6 +149,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasQueryParser());
     }
 
+    @Test
     public void test_hasViewHelper() {
         assertFalse(ComponentUtil.hasViewHelper());
 
@@ -139,6 +157,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasViewHelper());
     }
 
+    @Test
     public void test_hasQueryHelper() {
         assertFalse(ComponentUtil.hasQueryHelper());
 
@@ -146,6 +165,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasQueryHelper());
     }
 
+    @Test
     public void test_hasPopularWordHelper() {
         assertFalse(ComponentUtil.hasPopularWordHelper());
 
@@ -153,6 +173,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasPopularWordHelper());
     }
 
+    @Test
     public void test_hasRelatedQueryHelper() {
         assertFalse(ComponentUtil.hasRelatedQueryHelper());
 
@@ -160,6 +181,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasRelatedQueryHelper());
     }
 
+    @Test
     public void test_hasIngestFactory() {
         assertFalse(ComponentUtil.hasIngestFactory());
 
@@ -167,6 +189,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertTrue(ComponentUtil.hasIngestFactory());
     }
 
+    @Test
     public void test_getJobExecutor_withSuffix() {
         try {
             ComponentUtil.getJobExecutor("testJobExecutor");
@@ -176,6 +199,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getJobExecutor_withoutSuffix() {
         try {
             ComponentUtil.getJobExecutor("test");
@@ -185,6 +209,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getComponent_byClass_fromMap() {
         String testInstance = "test_instance";
         ComponentUtil.register(testInstance, String.class.getCanonicalName());
@@ -193,6 +218,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertSame(testInstance, retrieved);
     }
 
+    @Test
     public void test_getComponent_byName_fromMap() {
         Integer testInstance = 42;
         String componentName = "testInteger";
@@ -202,6 +228,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertSame(testInstance, retrieved);
     }
 
+    @Test
     public void test_register_overwrite() {
         String first = "first";
         String second = "second";
@@ -216,6 +243,7 @@ public class ComponentUtilTest extends UnitFessTestCase {
         assertSame(second, retrieved2);
     }
 
+    @Test
     public void test_multiple_components() {
         String comp1 = "component1";
         String comp2 = "component2";

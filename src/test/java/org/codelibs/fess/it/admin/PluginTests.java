@@ -16,8 +16,8 @@
 package org.codelibs.fess.it.admin;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -154,11 +154,11 @@ public class PluginTests extends CrudTestBase {
                     ThreadUtil.sleep(100);
                     continue;
                 }
-                assertTrue("plugin(" + target + ") is included in " + installed, exists);
+                assertTrue(exists, "plugin(" + target + ") is included in " + installed);
                 done = true;
                 break;
             }
-            assertTrue("plugin(" + target + ") is installed.", done);
+            assertTrue(done, "plugin(" + target + ") is installed.");
         }
         // Delete
         {
@@ -177,11 +177,11 @@ public class PluginTests extends CrudTestBase {
                     ThreadUtil.sleep(100);
                     continue;
                 }
-                assertFalse("plugin(" + target + ") is not included in " + installed, exists);
+                assertFalse(exists, "plugin(" + target + ") is not included in " + installed);
                 done = true;
                 break;
             }
-            assertTrue("plugin(" + target + ") is uninstalled.", done);
+            assertTrue(done, "plugin(" + target + ") is uninstalled.");
         }
     }
 

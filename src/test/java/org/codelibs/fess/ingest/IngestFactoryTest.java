@@ -16,9 +16,11 @@
 package org.codelibs.fess.ingest;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class IngestFactoryTest extends UnitFessTestCase {
 
+    @Test
     public void test_add_1() {
         IngestFactory factory = new IngestFactory();
         factory.add(new TestIngester(1));
@@ -30,6 +32,7 @@ public class IngestFactoryTest extends UnitFessTestCase {
         assertEquals(3, ingesters[2].getPriority());
     }
 
+    @Test
     public void test_add_2() {
         IngestFactory factory = new IngestFactory();
         factory.add(new TestIngester(3));

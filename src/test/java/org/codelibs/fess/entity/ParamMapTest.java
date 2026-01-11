@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ParamMapTest extends UnitFessTestCase {
 
@@ -40,6 +41,7 @@ public class ParamMapTest extends UnitFessTestCase {
         return new ParamMap<>(map);
     }
 
+    @Test
     public void test_snake_get() {
         Map<Object, Object> paramMap = createSnakeMap();
 
@@ -58,6 +60,7 @@ public class ParamMapTest extends UnitFessTestCase {
         assertNull(paramMap.get("DccDdd"));
     }
 
+    @Test
     public void test_snake_containsKey() {
         Map<Object, Object> paramMap = createSnakeMap();
 
@@ -76,6 +79,7 @@ public class ParamMapTest extends UnitFessTestCase {
         assertFalse(paramMap.containsKey("DccDdd"));
     }
 
+    @Test
     public void test_camel_get() {
         Map<Object, Object> paramMap = createCamelMap();
 
@@ -94,6 +98,7 @@ public class ParamMapTest extends UnitFessTestCase {
         assertNull(paramMap.get("DccDdd"));
     }
 
+    @Test
     public void test_camel_containsKey() {
         Map<Object, Object> paramMap = createCamelMap();
 

@@ -31,6 +31,13 @@ import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DataStoreFactoryTest extends UnitFessTestCase {
 
@@ -38,9 +45,10 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     private SystemHelper systemHelper;
     private File tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         dataStoreFactory = new DataStoreFactory();
         systemHelper = new SystemHelper() {
             @Override
@@ -56,7 +64,8 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Clean up temporary files
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
@@ -79,6 +88,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with valid parameters
+    @Test
     public void test_add_validParameters() {
         TestDataStore dataStore = new TestDataStore("TestStore");
         dataStoreFactory.add("testName", dataStore);
@@ -93,6 +103,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with null name
+    @Test
     public void test_add_nullName() {
         TestDataStore dataStore = new TestDataStore("TestStore");
         try {
@@ -105,6 +116,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with null dataStore
+    @Test
     public void test_add_nullDataStore() {
         try {
             dataStoreFactory.add("testName", null);
@@ -116,6 +128,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test add method with both null parameters
+    @Test
     public void test_add_bothNull() {
         try {
             dataStoreFactory.add(null, null);
@@ -126,6 +139,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test getDataStore with existing name
+    @Test
     public void test_getDataStore_existingName() {
         TestDataStore dataStore = new TestDataStore("TestStore");
         dataStoreFactory.add("myStore", dataStore);
@@ -136,18 +150,21 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test getDataStore with non-existing name
+    @Test
     public void test_getDataStore_nonExistingName() {
         DataStore retrieved = dataStoreFactory.getDataStore("nonExisting");
         assertNull(retrieved);
     }
 
     // Test getDataStore with null name
+    @Test
     public void test_getDataStore_nullName() {
         DataStore retrieved = dataStoreFactory.getDataStore(null);
         assertNull(retrieved);
     }
 
     // Test getDataStore with case insensitive lookup
+    @Test
     public void test_getDataStore_caseInsensitive() {
         TestDataStore dataStore = new TestDataStore("TestStore");
         dataStoreFactory.add("MyStore", dataStore);
@@ -159,6 +176,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test multiple data store registration
+    @Test
     public void test_multipleDataStores() {
         TestDataStore dataStore1 = new TestDataStore("Store1");
         TestDataStore2 dataStore2 = new TestDataStore2("Store2");
@@ -173,6 +191,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test overwriting existing data store
+    @Test
     public void test_overwriteExistingDataStore() {
         TestDataStore dataStore1 = new TestDataStore("Store1");
         TestDataStore dataStore2 = new TestDataStore("Store2");
@@ -185,6 +204,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test getDataStoreNames with caching
+    @Test
     public void test_getDataStoreNames_caching() {
         // Mock the loadDataStoreNameList to control behavior
         final int[] loadCount = { 0 };
@@ -218,6 +238,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test loadDataStoreNameList with valid XML
+    @Test
     public void test_loadDataStoreNameList_validXml() throws Exception {
         // Create test JAR with valid XML
         final File jarFile = new File(tempDir, "test-datastore.jar");
@@ -245,6 +266,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test loadDataStoreNameList with malformed XML
+    @Test
     public void test_loadDataStoreNameList_malformedXml() throws Exception {
         File jarFile = new File(tempDir, "malformed-datastore.jar");
         createTestJarWithXml(jarFile, "This is not valid XML");
@@ -263,6 +285,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test loadDataStoreNameList with empty component class
+    @Test
     public void test_loadDataStoreNameList_emptyClass() throws Exception {
         File jarFile = new File(tempDir, "empty-class-datastore.jar");
         createTestJarWithXml(jarFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<components>\n" + "  <component class=\"\"/>\n"
@@ -274,6 +297,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     // Test loadDataStoreNameList sorts results
+    @Test
     public void test_loadDataStoreNameList_sorted() {
         DataStoreFactory testFactory = new DataStoreFactory() {
             @Override
@@ -346,6 +370,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
      * Test concurrent getDataStoreNames calls to verify synchronized method works correctly.
      * Multiple threads call getDataStoreNames() simultaneously.
      */
+    @Test
     public void test_getDataStoreNames_concurrentAccess() throws Exception {
         final int threadCount = 10;
         final Thread[] threads = new Thread[threadCount];
@@ -382,9 +407,9 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
 
         // Verify no exceptions occurred
         for (int i = 0; i < threadCount; i++) {
-            assertNull("Thread " + i + " threw exception", exceptions[i]);
-            assertNotNull("Thread " + i + " got null result", results[i]);
-            assertEquals("Thread " + i + " got wrong array length", 3, results[i].length);
+            assertNull(exceptions[i], "Thread " + i + " threw exception");
+            assertNotNull(results[i], "Thread " + i + " got null result");
+            Assertions.assertEquals(3, results[i].length, "Thread " + i + " got wrong array length");
         }
     }
 
@@ -392,6 +417,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
      * Test that volatile fields ensure visibility across threads.
      * Verify that changes to lastLoadedTime are visible to all threads.
      */
+    @Test
     public void test_volatileFields_visibility() throws Exception {
         final DataStoreFactory testFactory = new DataStoreFactory() {
             @Override
@@ -435,9 +461,9 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
 
         // All threads should see the updated time (not 0 or the old value)
         long firstTime = observedTimes[0];
-        assertTrue("Time should be updated", firstTime > 0);
+        assertTrue(firstTime > 0, "Time should be updated");
         for (int i = 1; i < 10; i++) {
-            assertEquals("All threads should see same time due to volatile", firstTime, observedTimes[i]);
+            Assertions.assertEquals(firstTime, observedTimes[i], "All threads should see same time due to volatile");
         }
     }
 
@@ -445,6 +471,7 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
      * Test cache refresh mechanism with concurrent access.
      * Verifies that cache is refreshed correctly even with concurrent readers.
      */
+    @Test
     public void test_cacheRefresh_withConcurrentReads() throws Exception {
         final int[] loadCount = { 0 };
         final DataStoreFactory testFactory = new DataStoreFactory() {
@@ -484,6 +511,6 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
 
         // Due to synchronized method, only one thread should reload
         // The count might be 2 (one initial + one reload) or slightly higher due to timing
-        assertTrue("Load count should be small due to synchronization", loadCount[0] <= 3);
+        assertTrue(loadCount[0] <= 3, "Load count should be small due to synchronization");
     }
 }

@@ -22,9 +22,11 @@ import java.util.Set;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.web.response.next.HtmlNext;
+import org.junit.jupiter.api.Test;
 
 public class FessHtmlPathTest extends UnitFessTestCase {
 
+    @Test
     public void test_allPathsInitialized() throws Exception {
         // Get all public static final fields of HtmlNext type
         Field[] fields = FessHtmlPath.class.getDeclaredFields();
@@ -33,13 +35,14 @@ public class FessHtmlPathTest extends UnitFessTestCase {
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
                 if (field.getType().equals(HtmlNext.class)) {
                     Object value = field.get(null);
-                    assertNotNull("Field " + field.getName() + " should not be null", value);
-                    assertTrue("Field " + field.getName() + " should be HtmlNext instance", value instanceof HtmlNext);
+                    assertNotNull(value, "Field " + field.getName() + " should not be null");
+                    assertTrue(value instanceof HtmlNext, "Field " + field.getName() + " should be HtmlNext instance");
                 }
             }
         }
     }
 
+    @Test
     public void test_pathValues() throws Exception {
         // Test specific path values to ensure correct JSP paths
         assertEquals("/admin/accesstoken/admin_accesstoken.jsp", FessHtmlPath.path_AdminAccesstoken_AdminAccesstokenJsp.getRoutingPath());
@@ -59,6 +62,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/profile/index.jsp", FessHtmlPath.path_Profile_IndexJsp.getRoutingPath());
     }
 
+    @Test
     public void test_uniquePaths() throws Exception {
         // Verify all paths are unique
         Set<String> paths = new HashSet<>();
@@ -77,6 +81,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertTrue("Should have unique paths", paths.size() > 0);
     }
 
+    @Test
     public void test_pathNamingConvention() throws Exception {
         // Test field naming follows convention
         Field[] fields = FessHtmlPath.class.getDeclaredFields();
@@ -95,6 +100,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_adminPaths() throws Exception {
         // Test admin paths structure
         Set<String> adminPaths = new HashSet<>();
@@ -116,6 +122,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertTrue("Should have admin paths", adminPaths.size() > 0);
     }
 
+    @Test
     public void test_errorPaths() throws Exception {
         // Test error paths
         assertEquals("/error/badRequest.jsp", FessHtmlPath.path_Error_BadRequestJsp.getRoutingPath());
@@ -125,6 +132,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/error/system.jsp", FessHtmlPath.path_Error_SystemJsp.getRoutingPath());
     }
 
+    @Test
     public void test_dictPaths() throws Exception {
         // Test dictionary paths structure
         assertEquals("/admin/dict/admin_dict.jsp", FessHtmlPath.path_AdminDict_AdminDictJsp.getRoutingPath());
@@ -140,6 +148,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
                 FessHtmlPath.path_AdminDictStemmeroverride_AdminDictStemmeroverrideJsp.getRoutingPath());
     }
 
+    @Test
     public void test_searchRelatedPaths() throws Exception {
         // Test search-related paths
         assertEquals("/search.jsp", FessHtmlPath.path_SearchJsp.getRoutingPath());
@@ -149,6 +158,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/advance.jsp", FessHtmlPath.path_AdvanceJsp.getRoutingPath());
     }
 
+    @Test
     public void test_commonPaths() throws Exception {
         // Test common paths
         assertEquals("/index.jsp", FessHtmlPath.path_IndexJsp.getRoutingPath());
@@ -157,12 +167,14 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/help.jsp", FessHtmlPath.path_HelpJsp.getRoutingPath());
     }
 
+    @Test
     public void test_loginPaths() throws Exception {
         // Test login-related paths
         assertEquals("/login/index.jsp", FessHtmlPath.path_Login_IndexJsp.getRoutingPath());
         assertEquals("/login/newpassword.jsp", FessHtmlPath.path_Login_NewpasswordJsp.getRoutingPath());
     }
 
+    @Test
     public void test_configPaths() throws Exception {
         // Test configuration paths
         assertEquals("/admin/webconfig/admin_webconfig.jsp", FessHtmlPath.path_AdminWebconfig_AdminWebconfigJsp.getRoutingPath());
@@ -170,6 +182,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertEquals("/admin/dataconfig/admin_dataconfig.jsp", FessHtmlPath.path_AdminDataconfig_AdminDataconfigJsp.getRoutingPath());
     }
 
+    @Test
     public void test_pathCount() throws Exception {
         // Count total number of paths
         int pathCount = 0;
@@ -186,6 +199,7 @@ public class FessHtmlPathTest extends UnitFessTestCase {
         assertTrue("Should have at least 100 paths, found: " + pathCount, pathCount >= 100);
     }
 
+    @Test
     public void test_detailsEditPattern() throws Exception {
         // Test common pattern: base, details, edit JSPs
         verifyPathPattern("AdminAccesstoken", "/admin/accesstoken/");

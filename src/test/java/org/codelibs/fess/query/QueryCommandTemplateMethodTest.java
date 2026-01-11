@@ -22,6 +22,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for QueryCommand template methods and Set-based field lookups.
@@ -45,6 +46,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test isSearchField() with Set-based lookup.
      */
+    @Test
     public void test_isSearchField_withSetBasedLookup() {
         // Test valid search fields
         assertTrue(queryCommand.isSearchField("title"));
@@ -62,6 +64,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test isSearchField() with null field.
      */
+    @Test
     public void test_isSearchField_withNull() {
         assertFalse(queryCommand.isSearchField(null));
     }
@@ -69,6 +72,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test isSearchField() with empty search field set.
      */
+    @Test
     public void test_isSearchField_withEmptySet() {
         queryFieldConfig.setSearchFields(new String[] {});
 
@@ -80,6 +84,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test isSearchField() performance with large field set.
      */
+    @Test
     public void test_isSearchField_performance() {
         // Create a large set of search fields
         int fieldCount = 1000;
@@ -112,6 +117,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() with DEFAULT_FIELD.
      */
+    @Test
     public void test_convertWithFieldCheck_withDefaultField() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -128,6 +134,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() with search field.
      */
+    @Test
     public void test_convertWithFieldCheck_withSearchField() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -143,6 +150,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() with non-search field (fallback to default).
      */
+    @Test
     public void test_convertWithFieldCheck_withNonSearchField() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -159,6 +167,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() adds query text to context.
      */
+    @Test
     public void test_convertWithFieldCheck_addsToContext() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -177,6 +186,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() with different boost values.
      */
+    @Test
     public void test_convertWithFieldCheck_withDifferentBoosts() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -189,13 +199,14 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
                     (field, b) -> QueryBuilders.matchQuery(field, "test").boost(b),
                     (field, text, b) -> QueryBuilders.matchQuery(field, text).boost(b));
 
-            assertNotNull("Result should not be null for boost " + boost, result);
+            assertNotNull(result, "Result should not be null for boost " + boost);
         }
     }
 
     /**
      * Test convertWithFieldCheck() with empty text.
      */
+    @Test
     public void test_convertWithFieldCheck_withEmptyText() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -210,6 +221,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test convertWithFieldCheck() with null field (should use DEFAULT_FIELD).
      */
+    @Test
     public void test_convertWithFieldCheck_withNullField() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context = new QueryContext("test", true);
@@ -225,6 +237,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test FieldQueryBuilder functional interface.
      */
+    @Test
     public void test_fieldQueryBuilder_interface() {
         QueryCommand.FieldQueryBuilder builder = (field, text, boost) -> QueryBuilders.termQuery(field, text).boost(boost);
 
@@ -235,6 +248,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
     /**
      * Test DefaultQueryBuilderFunction functional interface.
      */
+    @Test
     public void test_defaultQueryBuilderFunction_interface() {
         QueryCommand.DefaultQueryBuilderFunction builder = (field, boost) -> QueryBuilders.matchQuery(field, "test").boost(boost);
 
@@ -247,6 +261,7 @@ public class QueryCommandTemplateMethodTest extends QueryTestBase {
      * This test demonstrates how the template method can be used to replace
      * repetitive field checking logic.
      */
+    @Test
     public void test_convertWithFieldCheck_reducesCodeDuplication() {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         QueryContext context1 = new QueryContext("test", true);

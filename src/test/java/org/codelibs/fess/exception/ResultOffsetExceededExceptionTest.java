@@ -16,9 +16,13 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test with normal message
         String message = "Offset exceeded the limit";
@@ -30,6 +34,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test with null message
         ResultOffsetExceededException exception = new ResultOffsetExceededException(null);
@@ -40,6 +45,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test with empty message
         String message = "";
@@ -51,6 +57,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test with long message
         StringBuilder sb = new StringBuilder();
@@ -66,6 +73,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_inheritance() {
         // Test that ResultOffsetExceededException is a subclass of FessSystemException
         ResultOffsetExceededException exception = new ResultOffsetExceededException("Test message");
@@ -76,6 +84,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_serialization() {
         // Test serialVersionUID exists
         ResultOffsetExceededException exception = new ResultOffsetExceededException("Test serialization");
@@ -84,6 +93,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_stackTrace() {
         // Test stack trace is properly set
         ResultOffsetExceededException exception = new ResultOffsetExceededException("Stack trace test");
@@ -103,6 +113,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertTrue(foundTestMethod);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String expectedMessage = "Offset limit exceeded: 10000";
@@ -117,6 +128,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsFessSystemException() {
         // Test catching as parent class FessSystemException
         String expectedMessage = "Caught as FessSystemException";
@@ -131,6 +143,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchAsRuntimeException() {
         // Test catching as RuntimeException
         String expectedMessage = "Caught as RuntimeException";
@@ -145,6 +158,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Test toString method";
@@ -156,6 +170,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertTrue(result.contains(message));
     }
 
+    @Test
     public void test_multipleInstances() {
         // Test creating multiple instances
         ResultOffsetExceededException exception1 = new ResultOffsetExceededException("First instance");
@@ -171,6 +186,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertEquals("Third instance", exception3.getMessage());
     }
 
+    @Test
     public void test_specialCharactersInMessage() {
         // Test with special characters in message
         String messageWithSpecialChars = "Error: offset > 1000 && offset < 2000 | \"quotes\" 'single' \n\t tab";
@@ -179,6 +195,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertEquals(messageWithSpecialChars, exception.getMessage());
     }
 
+    @Test
     public void test_unicodeInMessage() {
         // Test with Unicode characters in message
         String unicodeMessage = "オフセットが制限を超えました: 結果 範囲外 😱 ⚠️";
@@ -187,6 +204,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertEquals(unicodeMessage, exception.getMessage());
     }
 
+    @Test
     public void test_getMessage() {
         // Test getMessage method explicitly
         String testMessage = "Testing getMessage method";
@@ -200,6 +218,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertEquals(retrievedMessage, exception.getMessage());
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test fillInStackTrace method
         ResultOffsetExceededException exception = new ResultOffsetExceededException("Stack trace test");
@@ -213,6 +232,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertTrue(newStackTrace.length > 0);
     }
 
+    @Test
     public void test_getLocalizedMessage() {
         // Test getLocalizedMessage method
         String message = "Localized message test";
@@ -223,6 +243,7 @@ public class ResultOffsetExceededExceptionTest extends UnitFessTestCase {
         assertEquals(exception.getMessage(), exception.getLocalizedMessage());
     }
 
+    @Test
     public void test_suppressedExceptions() {
         // Test suppressed exceptions functionality
         ResultOffsetExceededException mainException = new ResultOffsetExceededException("Main exception");

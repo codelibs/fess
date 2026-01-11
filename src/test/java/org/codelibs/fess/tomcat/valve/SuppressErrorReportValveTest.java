@@ -16,35 +16,44 @@
 package org.codelibs.fess.tomcat.valve;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SuppressErrorReportValveTest extends UnitFessTestCase {
 
     private SuppressErrorReportValve valve;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         valve = new SuppressErrorReportValve();
     }
 
+    @Test
     public void test_constructor() {
         assertNotNull(valve);
     }
 
+    @Test
     public void test_showReportDisabled() {
         assertFalse(valve.isShowReport());
     }
 
+    @Test
     public void test_showServerInfoDisabled() {
         assertFalse(valve.isShowServerInfo());
     }
 
+    @Test
     public void test_defaultSettings() {
         final SuppressErrorReportValve newValve = new SuppressErrorReportValve();
         assertFalse(newValve.isShowReport());
         assertFalse(newValve.isShowServerInfo());
     }
 
+    @Test
     public void test_setShowReport() {
         valve.setShowReport(true);
         assertTrue(valve.isShowReport());
@@ -53,6 +62,7 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertFalse(valve.isShowReport());
     }
 
+    @Test
     public void test_setShowServerInfo() {
         valve.setShowServerInfo(true);
         assertTrue(valve.isShowServerInfo());
@@ -61,10 +71,12 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertFalse(valve.isShowServerInfo());
     }
 
+    @Test
     public void test_inheritance() {
         assertTrue(valve instanceof org.apache.catalina.valves.ErrorReportValve);
     }
 
+    @Test
     public void test_constructorInitializesCorrectDefaultValues() {
         final SuppressErrorReportValve newValve = new SuppressErrorReportValve();
 
@@ -73,6 +85,7 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertFalse("ShowServerInfo should be disabled by default", newValve.isShowServerInfo());
     }
 
+    @Test
     public void test_multipleInstancesHaveIndependentSettings() {
         final SuppressErrorReportValve valve1 = new SuppressErrorReportValve();
         final SuppressErrorReportValve valve2 = new SuppressErrorReportValve();
@@ -85,6 +98,7 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertFalse("valve2 should have independent ShowServerInfo setting", valve2.isShowServerInfo());
     }
 
+    @Test
     public void test_toggleSettingsMultipleTimes() {
         // Test toggling ShowReport multiple times
         assertFalse(valve.isShowReport());
@@ -111,6 +125,7 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
         assertTrue(valve.isShowServerInfo());
     }
 
+    @Test
     public void test_settingsBothTrueAndFalse() {
         // Test all combinations of settings
         valve.setShowReport(true);

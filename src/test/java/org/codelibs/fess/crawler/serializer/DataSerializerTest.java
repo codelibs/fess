@@ -28,6 +28,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for DataSerializer.
@@ -37,14 +41,16 @@ public class DataSerializerTest extends UnitFessTestCase {
 
     private DataSerializer serializer;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         serializer = new DataSerializer();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
         serializer = null;
     }
@@ -52,43 +58,47 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test DataSerializer can be instantiated
      */
+    @Test
     public void test_constructor() {
         DataSerializer ds = new DataSerializer();
-        assertNotNull("DataSerializer should be instantiable", ds);
+        assertNotNull(ds, "DataSerializer should be instantiable");
     }
 
     /**
      * Test serialization and deserialization of simple String
      */
+    @Test
     public void test_serializeDeserialize_string() {
         String original = "Hello, World!";
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
         assertTrue("Serialized data should not be empty", serialized.length > 0);
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Deserialized string should match original", original, deserialized);
     }
 
     /**
      * Test serialization and deserialization of Integer
      */
+    @Test
     public void test_serializeDeserialize_integer() {
         Integer original = 12345;
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Deserialized integer should match original", original, deserialized);
     }
 
     /**
      * Test serialization and deserialization of List
      */
+    @Test
     public void test_serializeDeserialize_list() {
         List<String> original = new ArrayList<>();
         original.add("item1");
@@ -96,10 +106,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.add("item3");
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a List", deserialized instanceof List);
 
         @SuppressWarnings("unchecked")
@@ -111,6 +121,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization and deserialization of Map
      */
+    @Test
     public void test_serializeDeserialize_map() {
         Map<String, Object> original = new HashMap<>();
         original.put("key1", "value1");
@@ -118,10 +129,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.put("key3", true);
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
 
         @SuppressWarnings("unchecked")
@@ -133,6 +144,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization and deserialization of complex nested object
      */
+    @Test
     public void test_serializeDeserialize_complexObject() {
         Map<String, Object> original = new HashMap<>();
         original.put("string", "test");
@@ -148,10 +160,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.put("map", nestedMap);
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
 
         @SuppressWarnings("unchecked")
@@ -162,14 +174,15 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization and deserialization of array
      */
+    @Test
     public void test_serializeDeserialize_array() {
         String[] original = new String[] { "a", "b", "c", "d" };
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be an array", deserialized.getClass().isArray());
 
         String[] deserializedArray = (String[]) deserialized;
@@ -182,39 +195,42 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of null value
      */
+    @Test
     public void test_serializeDeserialize_null() {
         byte[] serialized = serializer.fromObjectToBinary(null);
-        assertNotNull("Serialized data should not be null even for null input", serialized);
+        assertNotNull(serialized, "Serialized data should not be null even for null input");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNull("Deserialized object should be null", deserialized);
+        assertNull(deserialized, "Deserialized object should be null");
     }
 
     /**
      * Test serialization of empty string
      */
+    @Test
     public void test_serializeDeserialize_emptyString() {
         String original = "";
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Deserialized empty string should match", original, deserialized);
     }
 
     /**
      * Test serialization of empty collection
      */
+    @Test
     public void test_serializeDeserialize_emptyList() {
         List<String> original = new ArrayList<>();
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a List", deserialized instanceof List);
 
         @SuppressWarnings("unchecked")
@@ -225,6 +241,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test that multiple serializations produce consistent results
      */
+    @Test
     public void test_serializationConsistency() {
         String original = "Consistency Test";
 
@@ -243,6 +260,7 @@ public class DataSerializerTest extends UnitFessTestCase {
      * Test that ThreadLocal Kryo instances work correctly
      * This verifies that the ThreadLocal implementation doesn't cause issues
      */
+    @Test
     public void test_threadLocalKryo() {
         // Perform multiple serializations to ensure ThreadLocal works
         for (int i = 0; i < 10; i++) {
@@ -256,6 +274,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization with large data
      */
+    @Test
     public void test_serializeDeserialize_largeData() {
         List<String> original = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -263,11 +282,11 @@ public class DataSerializerTest extends UnitFessTestCase {
         }
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
         assertTrue("Serialized data should have reasonable size", serialized.length > 0);
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
 
         @SuppressWarnings("unchecked")
         List<String> deserializedList = (List<String>) deserialized;
@@ -277,42 +296,45 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test that serializer handles special characters correctly
      */
+    @Test
     public void test_serializeDeserialize_specialCharacters() {
         String original = "Special: !@#$%^&*(){}[]<>?/\\|~`±§";
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Special characters should be preserved", original, deserialized);
     }
 
     /**
      * Test that serializer handles Unicode correctly
      */
+    @Test
     public void test_serializeDeserialize_unicode() {
         String original = "Unicode: 日本語 中文 한국어 العربية";
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Unicode characters should be preserved", original, deserialized);
     }
 
     /**
      * Test serialization of Date objects
      */
+    @Test
     public void test_serializeDeserialize_date() {
         Date original = new Date();
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Date", deserialized instanceof Date);
         assertEquals("Date should match", original, deserialized);
     }
@@ -320,6 +342,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of LinkedHashMap (preserves order)
      */
+    @Test
     public void test_serializeDeserialize_linkedHashMap() {
         LinkedHashMap<String, Object> original = new LinkedHashMap<>();
         original.put("first", 1);
@@ -327,10 +350,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.put("third", 3);
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
         assertEquals("Map contents should match", original, deserialized);
     }
@@ -338,6 +361,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of LinkedList
      */
+    @Test
     public void test_serializeDeserialize_linkedList() {
         LinkedList<String> original = new LinkedList<>();
         original.add("first");
@@ -345,10 +369,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.add("third");
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a List", deserialized instanceof List);
         assertEquals("List contents should match", original, deserialized);
     }
@@ -356,6 +380,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of HashSet
      */
+    @Test
     public void test_serializeDeserialize_hashSet() {
         HashSet<String> original = new HashSet<>();
         original.add("one");
@@ -363,10 +388,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.add("three");
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Set", deserialized instanceof Set);
         assertEquals("Set contents should match", original, deserialized);
     }
@@ -374,6 +399,7 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of TreeMap
      */
+    @Test
     public void test_serializeDeserialize_treeMap() {
         TreeMap<String, Integer> original = new TreeMap<>();
         original.put("alpha", 1);
@@ -381,10 +407,10 @@ public class DataSerializerTest extends UnitFessTestCase {
         original.put("gamma", 3);
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertTrue("Deserialized object should be a Map", deserialized instanceof Map);
         assertEquals("Map contents should match", original, deserialized);
     }
@@ -392,42 +418,45 @@ public class DataSerializerTest extends UnitFessTestCase {
     /**
      * Test serialization of Long values
      */
+    @Test
     public void test_serializeDeserialize_long() {
         Long original = 9876543210L;
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Long value should match", original, deserialized);
     }
 
     /**
      * Test serialization of Double values
      */
+    @Test
     public void test_serializeDeserialize_double() {
         Double original = 3.14159265359;
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Double value should match", original, deserialized);
     }
 
     /**
      * Test serialization of Boolean values
      */
+    @Test
     public void test_serializeDeserialize_boolean() {
         Boolean original = Boolean.TRUE;
 
         byte[] serialized = serializer.fromObjectToBinary(original);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         Object deserialized = serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized object should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized object should not be null");
         assertEquals("Boolean value should match", original, deserialized);
     }
 
@@ -438,6 +467,7 @@ public class DataSerializerTest extends UnitFessTestCase {
      * This test ensures that the Kryo registration requirement is working correctly.
      * Unregistered classes should throw an exception to prevent potential RCE attacks.
      */
+    @Test
     public void test_security_unregisteredClassRejected() {
         // File class is intentionally not registered to test security
         File unregisteredObject = new File("/tmp/test");
@@ -463,6 +493,7 @@ public class DataSerializerTest extends UnitFessTestCase {
      * This test verifies that arbitrary user-defined classes cannot be serialized,
      * which is important for preventing gadget chain attacks.
      */
+    @Test
     public void test_security_customClassRejected() {
         // Create a simple custom object that is not registered
         CustomTestClass customObject = new CustomTestClass("test");
@@ -487,6 +518,7 @@ public class DataSerializerTest extends UnitFessTestCase {
      * Test that all registered types work correctly.
      * This ensures our registration covers the common use cases.
      */
+    @Test
     public void test_allRegisteredTypesWork() {
         // Test various registered types
         Map<String, Object> testData = new HashMap<>();
@@ -507,19 +539,19 @@ public class DataSerializerTest extends UnitFessTestCase {
         testData.put("nestedMap", nestedMap);
 
         byte[] serialized = serializer.fromObjectToBinary(testData);
-        assertNotNull("Serialized data should not be null", serialized);
+        assertNotNull(serialized, "Serialized data should not be null");
 
         @SuppressWarnings("unchecked")
         Map<String, Object> deserialized = (Map<String, Object>) serializer.fromBinaryToObject(serialized);
-        assertNotNull("Deserialized data should not be null", deserialized);
+        assertNotNull(deserialized, "Deserialized data should not be null");
         assertEquals("String should match", "test", deserialized.get("string"));
         assertEquals("Integer should match", 42, deserialized.get("integer"));
         assertEquals("Long should match", 123456789L, deserialized.get("long"));
         assertEquals("Double should match", 3.14, deserialized.get("double"));
         assertEquals("Boolean should match", true, deserialized.get("boolean"));
-        assertNotNull("Date should not be null", deserialized.get("date"));
-        assertNotNull("List should not be null", deserialized.get("list"));
-        assertNotNull("Nested map should not be null", deserialized.get("nestedMap"));
+        assertNotNull(deserialized.get("date"), "Date should not be null");
+        assertNotNull(deserialized.get("list"), "List should not be null");
+        assertNotNull(deserialized.get("nestedMap"), "Nested map should not be null");
     }
 
     /**

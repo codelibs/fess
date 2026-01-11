@@ -25,21 +25,30 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import groovy.lang.GroovyClassLoader;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
 public class GroovyEngineTest extends UnitFessTestCase {
     public GroovyEngine groovyEngine;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         groovyEngine = new GroovyEngine();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
+    @Test
     public void test_evaluate() {
         final Map<String, Object> params = new HashMap<>();
         assertNull(groovyEngine.evaluate("", params));
@@ -50,6 +59,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
         assertEquals("123", groovyEngine.evaluate("return test", params));
     }
 
+    @Test
     public void test_getName() {
         assertEquals("groovy", groovyEngine.getName());
     }
@@ -59,6 +69,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate returns null for null template
      */
+    @Test
     public void test_evaluate_nullTemplate() {
         final Map<String, Object> params = new HashMap<>();
         params.put("test", "value");
@@ -68,6 +79,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate returns null for empty string template
      */
+    @Test
     public void test_evaluate_emptyTemplate() {
         final Map<String, Object> params = new HashMap<>();
         params.put("test", "value");
@@ -77,6 +89,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate returns null for whitespace-only template
      */
+    @Test
     public void test_evaluate_whitespaceTemplate() {
         final Map<String, Object> params = new HashMap<>();
         params.put("test", "value");
@@ -89,6 +102,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate handles null paramMap safely
      */
+    @Test
     public void test_evaluate_nullParamMap() {
         assertEquals("test", groovyEngine.evaluate("return 'test'", null));
         assertEquals(123, groovyEngine.evaluate("return 123", null));
@@ -97,6 +111,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate handles empty paramMap
      */
+    @Test
     public void test_evaluate_emptyParamMap() {
         final Map<String, Object> emptyMap = Collections.emptyMap();
         assertEquals("result", groovyEngine.evaluate("return 'result'", emptyMap));
@@ -105,6 +120,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate handles paramMap with null values
      */
+    @Test
     public void test_evaluate_paramMapWithNullValues() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key1", null);
@@ -118,6 +134,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that parameters are correctly bound to the script
      */
+    @Test
     public void test_evaluate_parameterBinding() {
         final Map<String, Object> params = new HashMap<>();
         params.put("x", 10);
@@ -128,6 +145,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that multiple parameters of different types are bound correctly
      */
+    @Test
     public void test_evaluate_multipleParameterTypes() {
         final Map<String, Object> params = new HashMap<>();
         params.put("str", "hello");
@@ -144,6 +162,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that complex objects can be passed as parameters
      */
+    @Test
     public void test_evaluate_complexObjectParameters() {
         final Map<String, Object> params = new HashMap<>();
         final Map<String, String> nestedMap = new HashMap<>();
@@ -158,6 +177,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that arrays can be passed and manipulated
      */
+    @Test
     public void test_evaluate_arrayParameters() {
         final Map<String, Object> params = new HashMap<>();
         final String[] items = { "apple", "banana", "cherry" };
@@ -172,6 +192,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that DI container is available in the script
      */
+    @Test
     public void test_evaluate_containerAvailable() {
         final Map<String, Object> params = new HashMap<>();
         assertNotNull(groovyEngine.evaluate("return container", params));
@@ -180,6 +201,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that container is accessible even with null paramMap
      */
+    @Test
     public void test_evaluate_containerAvailableWithNullParams() {
         assertNotNull(groovyEngine.evaluate("return container", null));
     }
@@ -189,6 +211,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that JobProcessingException is propagated
      */
+    @Test
     public void test_evaluate_jobProcessingExceptionPropagates() {
         final Map<String, Object> params = new HashMap<>();
         try {
@@ -202,6 +225,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that generic exceptions are caught and null is returned
      */
+    @Test
     public void test_evaluate_genericExceptionReturnsNull() {
         final Map<String, Object> params = new HashMap<>();
         // Invalid script that will cause an exception
@@ -211,6 +235,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that syntax errors return null
      */
+    @Test
     public void test_evaluate_syntaxErrorReturnsNull() {
         final Map<String, Object> params = new HashMap<>();
         assertNull(groovyEngine.evaluate("this is not valid groovy code {{{", params));
@@ -219,6 +244,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that runtime exceptions in scripts return null
      */
+    @Test
     public void test_evaluate_runtimeExceptionReturnsNull() {
         final Map<String, Object> params = new HashMap<>();
         // Division by zero
@@ -230,6 +256,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that simple arithmetic works
      */
+    @Test
     public void test_evaluate_arithmetic() {
         final Map<String, Object> params = new HashMap<>();
         params.put("a", 5);
@@ -243,6 +270,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that string operations work
      */
+    @Test
     public void test_evaluate_stringOperations() {
         final Map<String, Object> params = new HashMap<>();
         params.put("first", "Hello");
@@ -256,6 +284,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that conditional logic works
      */
+    @Test
     public void test_evaluate_conditionalLogic() {
         final Map<String, Object> params = new HashMap<>();
         params.put("score", 85);
@@ -269,6 +298,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that loops work
      */
+    @Test
     public void test_evaluate_loops() {
         final Map<String, Object> params = new HashMap<>();
         params.put("n", 5);
@@ -280,6 +310,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that closures work
      */
+    @Test
     public void test_evaluate_closures() {
         final Map<String, Object> params = new HashMap<>();
         final String script = "def multiply = { x, y -> x * y }; return multiply(6, 7)";
@@ -289,6 +320,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that list operations work
      */
+    @Test
     public void test_evaluate_listOperations() {
         final Map<String, Object> params = new HashMap<>();
         final String script = "def list = [1, 2, 3, 4, 5]; return list.sum()";
@@ -298,6 +330,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that map operations work
      */
+    @Test
     public void test_evaluate_mapOperations() {
         final Map<String, Object> params = new HashMap<>();
         final String script = "def map = [name: 'Alice', age: 30]; return map.name + ' is ' + map.age";
@@ -309,6 +342,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that multi-line scripts work
      */
+    @Test
     public void test_evaluate_multilineScript() {
         final Map<String, Object> params = new HashMap<>();
         params.put("x", 10);
@@ -321,6 +355,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that complex multi-line logic works
      */
+    @Test
     public void test_evaluate_complexMultilineLogic() {
         final Map<String, Object> params = new HashMap<>();
         params.put("items", new int[] { 1, 2, 3, 4, 5 });
@@ -336,6 +371,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that various return types work correctly
      */
+    @Test
     public void test_evaluate_variousReturnTypes() {
         final Map<String, Object> params = new HashMap<>();
 
@@ -351,7 +387,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
         // Double
         final Object doubleResult = groovyEngine.evaluate("return 3.14159", params);
         assertTrue(doubleResult instanceof Number);
-        assertEquals(3.14159, ((Number) doubleResult).doubleValue(), 0.00001);
+        Assertions.assertEquals(3.14159, ((Number) doubleResult).doubleValue(), 0.00001);
 
         // Boolean
         assertEquals(true, groovyEngine.evaluate("return true", params));
@@ -364,6 +400,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that collections can be returned
      */
+    @Test
     public void test_evaluate_returnCollections() {
         final Map<String, Object> params = new HashMap<>();
 
@@ -383,6 +420,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test very long scripts
      */
+    @Test
     public void test_evaluate_longScript() {
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sb = new StringBuilder();
@@ -398,6 +436,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test script with special characters
      */
+    @Test
     public void test_evaluate_specialCharacters() {
         final Map<String, Object> params = new HashMap<>();
         params.put("text", "Hello \"World\" with 'quotes'");
@@ -407,6 +446,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test script with unicode characters
      */
+    @Test
     public void test_evaluate_unicodeCharacters() {
         final Map<String, Object> params = new HashMap<>();
         params.put("japanese", "こんにちは");
@@ -419,6 +459,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that empty return statement returns null
      */
+    @Test
     public void test_evaluate_emptyReturnStatement() {
         final Map<String, Object> params = new HashMap<>();
         assertNull(groovyEngine.evaluate("def x = 1; return", params));
@@ -427,6 +468,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test script without explicit return (implicit return)
      */
+    @Test
     public void test_evaluate_implicitReturn() {
         final Map<String, Object> params = new HashMap<>();
         params.put("x", 5);
@@ -439,6 +481,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that getCurrentScheduledJob returns null when no job runtime is available
      */
+    @Test
     public void test_getCurrentScheduledJob_noJobRuntime() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         assertNull(testEngine.testGetCurrentScheduledJob());
@@ -447,6 +490,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that logScriptExecution handles null job gracefully
      */
+    @Test
     public void test_logScriptExecution_noJob() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         // Should not throw exception
@@ -459,6 +503,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that logScriptExecution records success result
      */
+    @Test
     public void test_logScriptExecution_success() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         testEngine.testLogScriptExecution("return container.getComponent('test')", "success");
@@ -469,6 +514,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that logScriptExecution records failure result
      */
+    @Test
     public void test_logScriptExecution_failure() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         testEngine.testLogScriptExecution("invalid script", "failure:GroovyRuntimeException");
@@ -479,6 +525,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate calls logScriptExecution on success
      */
+    @Test
     public void test_evaluate_callsLogScriptExecutionOnSuccess() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         final Map<String, Object> params = new HashMap<>();
@@ -490,6 +537,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate calls logScriptExecution on generic exception
      */
+    @Test
     public void test_evaluate_callsLogScriptExecutionOnException() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         final Map<String, Object> params = new HashMap<>();
@@ -501,6 +549,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that evaluate calls logScriptExecution on JobProcessingException
      */
+    @Test
     public void test_evaluate_callsLogScriptExecutionOnJobProcessingException() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         final Map<String, Object> params = new HashMap<>();
@@ -516,6 +565,7 @@ public class GroovyEngineTest extends UnitFessTestCase {
     /**
      * Test that getName returns correct value
      */
+    @Test
     public void test_getName_returnsGroovy() {
         final TestableGroovyEngine testEngine = new TestableGroovyEngine();
         assertEquals("groovy", testEngine.testGetName());

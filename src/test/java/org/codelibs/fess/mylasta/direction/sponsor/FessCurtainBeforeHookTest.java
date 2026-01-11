@@ -22,6 +22,11 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.system.provider.DfFinalTimeZoneProvider;
 import org.lastaflute.core.direction.FwAssistantDirector;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessCurtainBeforeHookTest extends UnitFessTestCase {
 
@@ -29,9 +34,10 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
     private TimeZone originalTimeZone;
     private DfFinalTimeZoneProvider originalProvider;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         curtainBeforeHook = new FessCurtainBeforeHook();
         // Store original timezone settings
         originalTimeZone = TimeZone.getDefault();
@@ -39,7 +45,8 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Restore original timezone settings
         TimeZone.setDefault(originalTimeZone);
         if (originalProvider != null) {
@@ -50,6 +57,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         super.tearDown();
     }
 
+    @Test
     public void test_hook_setsTimeZoneProvider() {
         // Given
         FwAssistantDirector assistantDirector = null; // Not used in the implementation
@@ -68,6 +76,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processDBFluteSystem_setsTimeZoneProvider() {
         // When
         curtainBeforeHook.processDBFluteSystem();
@@ -83,6 +92,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createFinalTimeZoneProvider_returnsValidProvider() {
         // When
         DfFinalTimeZoneProvider provider = curtainBeforeHook.createFinalTimeZoneProvider();
@@ -93,6 +103,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         assertEquals(FessUserTimeZoneProcessProvider.centralTimeZone, providedTimeZone);
     }
 
+    @Test
     public void test_createFinalTimeZoneProvider_provideReturnsSameInstance() {
         // When
         DfFinalTimeZoneProvider provider = curtainBeforeHook.createFinalTimeZoneProvider();
@@ -100,9 +111,10 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         // Then
         TimeZone first = provider.provide();
         TimeZone second = provider.provide();
-        assertSame("Provider should return the same TimeZone instance", first, second);
+        assertSame(first, second, "Provider should return the same TimeZone instance");
     }
 
+    @Test
     public void test_createFinalTimeZoneProvider_toStringContainsTimeZoneId() {
         // When
         DfFinalTimeZoneProvider provider = curtainBeforeHook.createFinalTimeZoneProvider();
@@ -116,6 +128,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         assertTrue("toString should not be empty", toString.length() > 0);
     }
 
+    @Test
     public void test_hook_withNullAssistantDirector() {
         // When & Then - Should not throw exception
         try {
@@ -125,6 +138,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleHookCalls_maintainsSameTimeZone() {
         // Given
         FwAssistantDirector assistantDirector = null;
@@ -147,6 +161,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_createFinalTimeZoneProvider_withDifferentDefaultTimeZone() {
         // Given
         TimeZone testTimeZone = TimeZone.getTimeZone("America/New_York");
@@ -172,6 +187,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_processDBFluteSystem_unlocksAndLocks() {
         // This test verifies that the DBFluteSystem is properly unlocked and locked
         // during the process, though we can't directly test the lock state

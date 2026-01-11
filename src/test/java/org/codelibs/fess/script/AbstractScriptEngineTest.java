@@ -20,32 +20,41 @@ import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class AbstractScriptEngineTest extends UnitFessTestCase {
 
     private TestScriptEngine testScriptEngine;
     private ScriptEngineFactory scriptEngineFactory;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         scriptEngineFactory = new ScriptEngineFactory();
         ComponentUtil.register(scriptEngineFactory, "scriptEngineFactory");
         testScriptEngine = new TestScriptEngine();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
 
     // Test default constructor
+    @Test
     public void test_constructor() {
         assertNotNull(testScriptEngine);
     }
 
     // Test register method
+    @Test
     public void test_register() {
         testScriptEngine.register();
 
@@ -61,6 +70,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test register method with multiple engines
+    @Test
     public void test_register_multipleEngines() {
         TestScriptEngine engine1 = new TestScriptEngine("engine1");
         TestScriptEngine engine2 = new TestScriptEngine("engine2");
@@ -80,6 +90,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test register method with case insensitive name
+    @Test
     public void test_register_caseInsensitive() {
         testScriptEngine.register();
 
@@ -97,11 +108,13 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test getName abstract method implementation
+    @Test
     public void test_getName() {
         assertEquals("testEngine", testScriptEngine.getName());
     }
 
     // Test evaluate method implementation
+    @Test
     public void test_evaluate() {
         Map<String, Object> params = new HashMap<>();
         params.put("key", "value");
@@ -111,6 +124,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test register with null factory throws exception
+    @Test
     public void test_register_nullFactory() {
         ComponentUtil.register(null, "scriptEngineFactory");
 
@@ -123,6 +137,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test concrete implementation with different name
+    @Test
     public void test_differentNameImplementation() {
         TestScriptEngine customEngine = new TestScriptEngine("customName");
         assertEquals("customName", customEngine.getName());
@@ -134,6 +149,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test multiple registrations of the same engine
+    @Test
     public void test_multipleRegistrations() {
         testScriptEngine.register();
         testScriptEngine.register(); // Register again
@@ -145,12 +161,14 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate with null parameters
+    @Test
     public void test_evaluate_nullParams() {
         Object result = testScriptEngine.evaluate("template", null);
         assertEquals("processed: template with params", result);
     }
 
     // Test evaluate with empty parameters
+    @Test
     public void test_evaluate_emptyParams() {
         Map<String, Object> emptyParams = new HashMap<>();
         Object result = testScriptEngine.evaluate("template", emptyParams);
@@ -158,6 +176,7 @@ public class AbstractScriptEngineTest extends UnitFessTestCase {
     }
 
     // Test evaluate with null template
+    @Test
     public void test_evaluate_nullTemplate() {
         Map<String, Object> params = new HashMap<>();
         Object result = testScriptEngine.evaluate(null, params);

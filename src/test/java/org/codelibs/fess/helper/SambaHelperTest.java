@@ -25,14 +25,18 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import org.codelibs.jcifs.smb.SID;
 import org.codelibs.jcifs.smb.impl.SmbException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class SambaHelperTest extends UnitFessTestCase {
 
     public SambaHelper sambaHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Setup system properties for DI container
         File file = File.createTempFile("test", ".properties");
@@ -44,6 +48,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         sambaHelper = new SambaHelper();
     }
 
+    @Test
     public void test_smb_account() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -67,6 +72,7 @@ public class SambaHelperTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_smb_account_lowercase() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -133,6 +139,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         }
     };
 
+    @Test
     public void test_constants() {
         assertEquals(4, SambaHelper.SID_TYPE_ALIAS);
         assertEquals(6, SambaHelper.SID_TYPE_DELETED);
@@ -145,12 +152,14 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals(5, SambaHelper.SID_TYPE_WKN_GRP);
     }
 
+    @Test
     public void test_init() {
         ComponentUtil.setFessConfig(new MockFessConfig());
         sambaHelper.init();
         assertNotNull(sambaHelper.fessConfig);
     }
 
+    @Test
     public void test_getAccountId_differentSidTypes() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -183,6 +192,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1Everyone", sambaHelper.getAccountId(createMockSID(5, "Everyone")));
     }
 
+    @Test
     public void test_getAccountId_unavailableSidType() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -212,6 +222,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertNull(sambaHelper.getAccountId(createMockSID(7, "Invalid Account")));
     }
 
+    @Test
     public void test_getAccountId_smb1_basic() throws SmbException {
         // Note: SMB1 SID testing is limited due to interface constraints
         // This test verifies the method exists and handles the SMB1 SID parameter type
@@ -237,6 +248,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertNotNull(sambaHelper);
     }
 
+    @Test
     public void test_createSearchRole_lowercase() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -255,6 +267,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1testuser", result);
     }
 
+    @Test
     public void test_createSearchRole_keepCase() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -273,6 +286,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1TestUser", result);
     }
 
+    @Test
     public void test_createSearchRole_canonicalName() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -291,6 +305,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("2DOMAIN\\Group", result);
     }
 
+    @Test
     public void test_createSearchRole_specialCharacters() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -309,6 +324,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1User@Domain.com", result);
     }
 
+    @Test
     public void test_createSearchRole_emptyName() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -327,6 +343,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1", result);
     }
 
+    @Test
     public void test_getAccountId_withNetbiosIgnore() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -354,6 +371,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1TestUser", sambaHelper.getAccountId(createMockSID(1, "DOMAIN\\TestUser")));
     }
 
+    @Test
     public void test_getAccountId_localeHandling() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -382,6 +400,7 @@ public class SambaHelperTest extends UnitFessTestCase {
         assertEquals("1üser", sambaHelper.getAccountId(createMockSID(1, "Üser")));
     }
 
+    @Test
     public void test_getAccountId_exception_handling() throws SmbException {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override

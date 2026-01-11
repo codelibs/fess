@@ -19,23 +19,31 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.search.aggregations.BucketOrder;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FacetInfoTest extends UnitFessTestCase {
 
     private FacetInfo facetInfo;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         facetInfo = new FacetInfo();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test default constructor
+    @Test
     public void test_constructor() {
         FacetInfo info = new FacetInfo();
         assertNull(info.field);
@@ -47,6 +55,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test init method with various configurations
+    @Test
     public void test_init_withAllFields() {
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -95,6 +104,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test init with empty fields
+    @Test
     public void test_init_withEmptyFields() {
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -134,6 +144,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test init with duplicate and empty field names
+    @Test
     public void test_init_withDuplicateAndEmptyFieldNames() {
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -173,6 +184,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with count.desc
+    @Test
     public void test_getBucketOrder_countDesc() {
         facetInfo.sort = "count.desc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -181,6 +193,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with count.asc
+    @Test
     public void test_getBucketOrder_countAsc() {
         facetInfo.sort = "count.asc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -189,6 +202,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with term.desc
+    @Test
     public void test_getBucketOrder_termDesc() {
         facetInfo.sort = "term.desc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -197,6 +211,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with term.asc
+    @Test
     public void test_getBucketOrder_termAsc() {
         facetInfo.sort = "term.asc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -205,6 +220,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with key.desc
+    @Test
     public void test_getBucketOrder_keyDesc() {
         facetInfo.sort = "key.desc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -213,6 +229,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with key.asc
+    @Test
     public void test_getBucketOrder_keyAsc() {
         facetInfo.sort = "key.asc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -221,6 +238,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with only sort type (no order)
+    @Test
     public void test_getBucketOrder_onlySortType() {
         facetInfo.sort = "count";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -229,6 +247,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with only term type (no order)
+    @Test
     public void test_getBucketOrder_onlyTermType() {
         facetInfo.sort = "term";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -237,6 +256,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with only key type (no order)
+    @Test
     public void test_getBucketOrder_onlyKeyType() {
         facetInfo.sort = "key";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -245,6 +265,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with invalid sort value
+    @Test
     public void test_getBucketOrder_invalidSort() {
         facetInfo.sort = "invalid.desc";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -253,6 +274,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with null sort
+    @Test
     public void test_getBucketOrder_nullSort() {
         facetInfo.sort = null;
         BucketOrder order = facetInfo.getBucketOrder();
@@ -261,6 +283,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with empty sort
+    @Test
     public void test_getBucketOrder_emptySort() {
         facetInfo.sort = "";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -269,6 +292,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test getBucketOrder with case variations
+    @Test
     public void test_getBucketOrder_caseVariations() {
         facetInfo.sort = "COUNT.DESC";
         BucketOrder order = facetInfo.getBucketOrder();
@@ -287,6 +311,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test addQuery with null query array
+    @Test
     public void test_addQuery_nullArray() {
         assertNull(facetInfo.query);
         facetInfo.addQuery("query1");
@@ -296,6 +321,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test addQuery with existing queries
+    @Test
     public void test_addQuery_existingQueries() {
         facetInfo.query = new String[] { "query1", "query2" };
         facetInfo.addQuery("query3");
@@ -307,6 +333,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test addQuery multiple times
+    @Test
     public void test_addQuery_multiple() {
         facetInfo.addQuery("query1");
         facetInfo.addQuery("query2");
@@ -319,6 +346,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test addQuery with empty string
+    @Test
     public void test_addQuery_emptyString() {
         facetInfo.addQuery("");
         assertNotNull(facetInfo.query);
@@ -327,6 +355,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test addQuery with null string
+    @Test
     public void test_addQuery_nullString() {
         facetInfo.addQuery(null);
         assertNotNull(facetInfo.query);
@@ -335,6 +364,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test toString method with all fields populated
+    @Test
     public void test_toString_allFieldsPopulated() {
         facetInfo.field = new String[] { "field1", "field2" };
         facetInfo.query = new String[] { "query1", "query2" };
@@ -349,12 +379,14 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test toString method with null fields
+    @Test
     public void test_toString_nullFields() {
         String result = facetInfo.toString();
         assertEquals("FacetInfo [field=null, query=null, size=null, minDocCount=null, sort=null, missing=null]", result);
     }
 
     // Test toString method with empty arrays
+    @Test
     public void test_toString_emptyArrays() {
         facetInfo.field = new String[0];
         facetInfo.query = new String[0];
@@ -364,6 +396,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test toString method with partially populated fields
+    @Test
     public void test_toString_partiallyPopulated() {
         facetInfo.field = new String[] { "field1" };
         facetInfo.size = 20;
@@ -374,6 +407,7 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test field assignment
+    @Test
     public void test_fieldAssignment() {
         String[] fields = new String[] { "field1", "field2", "field3" };
         facetInfo.field = fields;
@@ -383,18 +417,21 @@ public class FacetInfoTest extends UnitFessTestCase {
     }
 
     // Test size assignment
+    @Test
     public void test_sizeAssignment() {
         facetInfo.size = 100;
         assertEquals(Integer.valueOf(100), facetInfo.size);
     }
 
     // Test minDocCount assignment
+    @Test
     public void test_minDocCountAssignment() {
         facetInfo.minDocCount = 10L;
         assertEquals(Long.valueOf(10), facetInfo.minDocCount);
     }
 
     // Test missing assignment
+    @Test
     public void test_missingAssignment() {
         facetInfo.missing = "N/A";
         assertEquals("N/A", facetInfo.missing);

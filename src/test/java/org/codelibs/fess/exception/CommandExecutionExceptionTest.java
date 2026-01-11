@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class CommandExecutionExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test constructor with message only
         String message = "Command execution failed";
@@ -31,6 +33,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test constructor with message and cause
         String message = "Command execution failed with error";
@@ -45,6 +48,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test constructor with null message
         CommandExecutionException exception = new CommandExecutionException(null);
@@ -54,6 +58,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test constructor with null message and null cause
         CommandExecutionException exception = new CommandExecutionException(null, null);
@@ -63,6 +68,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test constructor with empty message
         String message = "";
@@ -73,6 +79,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withMessageAndNullCause() {
         // Test constructor with message and null cause
         String message = "Command failed";
@@ -83,6 +90,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndValidCause() {
         // Test constructor with null message and valid cause
         Throwable cause = new RuntimeException("Runtime error");
@@ -94,6 +102,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertEquals("Runtime error", exception.getCause().getMessage());
     }
 
+    @Test
     public void test_constructor_withLongMessage() {
         // Test constructor with long message
         StringBuilder sb = new StringBuilder();
@@ -109,6 +118,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNestedCause() {
         // Test constructor with nested exception causes
         Throwable rootCause = new IllegalArgumentException("Root cause");
@@ -125,6 +135,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertEquals("Root cause", exception.getCause().getCause().getMessage());
     }
 
+    @Test
     public void test_serialVersionUID() {
         // Test that serialVersionUID is properly set
         CommandExecutionException exception1 = new CommandExecutionException("Test");
@@ -137,6 +148,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertEquals("org.codelibs.fess.exception.CommandExecutionException", exception1.getClass().getName());
     }
 
+    @Test
     public void test_exceptionThrown() {
         // Test that the exception can be thrown and caught properly
         String expectedMessage = "Command execution error occurred";
@@ -151,6 +163,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_exceptionThrownWithCause() {
         // Test that the exception with cause can be thrown and caught properly
         String expectedMessage = "Command failed to execute";
@@ -166,6 +179,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_exceptionInheritance() {
         // Test exception inheritance hierarchy
         CommandExecutionException exception = new CommandExecutionException("Test");
@@ -182,6 +196,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_stackTracePresent() {
         // Test that stack trace is properly captured
         CommandExecutionException exception = new CommandExecutionException("Stack trace test");
@@ -196,6 +211,7 @@ public class CommandExecutionExceptionTest extends UnitFessTestCase {
         assertEquals("test_stackTracePresent", firstElement.getMethodName());
     }
 
+    @Test
     public void test_multipleExceptionScenarios() {
         // Test multiple realistic exception scenarios
 

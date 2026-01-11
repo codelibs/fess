@@ -20,9 +20,13 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor() {
         String[] loggerNames = { "test.logger", "another.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -30,6 +34,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertNotNull(policy);
     }
 
+    @Test
     public void test_rewrite_with_null_logger_name() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -41,6 +46,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertSame(event, result);
     }
 
+    @Test
     public void test_rewrite_error_to_warn_matching_logger() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -59,6 +65,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals("test error message", result.getMessage().getFormattedMessage());
     }
 
+    @Test
     public void test_rewrite_error_to_warn_exact_logger_match() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -76,6 +83,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals("test.logger", result.getLoggerName());
     }
 
+    @Test
     public void test_rewrite_non_matching_logger() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -92,6 +100,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.ERROR, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_non_error_level() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -108,6 +117,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_info_level() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -124,6 +134,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.INFO, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_debug_level() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -140,6 +151,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.DEBUG, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_multiple_logger_names() {
         String[] loggerNames = { "test.logger", "another.logger", "third.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -171,6 +183,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result3.getLevel());
     }
 
+    @Test
     public void test_rewrite_partial_match_should_not_rewrite() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -187,6 +200,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.ERROR, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_empty_logger_names() {
         String[] loggerNames = {};
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);
@@ -203,6 +217,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.ERROR, result.getLevel());
     }
 
+    @Test
     public void test_createPolicy_with_null_logger_name_prefix() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy(null);
 
@@ -220,6 +235,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.ERROR, result.getLevel());
     }
 
+    @Test
     public void test_createPolicy_with_empty_logger_name_prefix() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy("");
 
@@ -236,6 +252,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertSame(event, result);
     }
 
+    @Test
     public void test_createPolicy_with_single_logger_name() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy("test.logger");
 
@@ -252,6 +269,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result.getLevel());
     }
 
+    @Test
     public void test_createPolicy_with_multiple_logger_names() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy("test.logger,another.logger,third.logger");
 
@@ -276,6 +294,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result2.getLevel());
     }
 
+    @Test
     public void test_createPolicy_with_spaces_in_logger_names() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy("  test.logger  ,  another.logger  ,  third.logger  ");
 
@@ -292,6 +311,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result.getLevel());
     }
 
+    @Test
     public void test_createPolicy_with_empty_entries() {
         ErrorToWarnRewritePolicy policy = ErrorToWarnRewritePolicy.createPolicy("test.logger,,another.logger,  ,third.logger");
 
@@ -308,6 +328,7 @@ public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {
         assertEquals(Level.WARN, result.getLevel());
     }
 
+    @Test
     public void test_rewrite_preserves_other_event_properties() {
         String[] loggerNames = { "test.logger" };
         ErrorToWarnRewritePolicy policy = new ErrorToWarnRewritePolicy(loggerNames);

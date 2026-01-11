@@ -21,8 +21,10 @@ import java.nio.file.Path;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.Test;
 
 public class ResourceUtilTest extends UnitFessTestCase {
+    @Test
     public void test_resolve() {
         String value;
 
@@ -85,6 +87,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
 
     }
 
+    @Test
     public void test_getAppType() {
         // Test default empty when no env var is set
         String originalAppType = System.getenv("FESS_APP_TYPE");
@@ -97,6 +100,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertTrue(appType.isEmpty() || appType.length() > 0);
     }
 
+    @Test
     public void test_getOverrideConfPath() {
         // Test when app type is not docker
         OptionalEntity<String> confPath = ResourceUtil.getOverrideConfPath();
@@ -107,6 +111,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getFesenHttpUrl() {
         String url = ResourceUtil.getFesenHttpUrl();
         assertNotNull(url);
@@ -114,6 +119,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertTrue(url.length() > 0);
     }
 
+    @Test
     public void test_getConfPath() {
         Path confPath = ResourceUtil.getConfPath("test.conf");
         assertNotNull(confPath);
@@ -130,6 +136,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertTrue(confPath.toString().contains("file.conf"));
     }
 
+    @Test
     public void test_getConfOrClassesPath() {
         // Test behavior when resource is not found
         try {
@@ -150,6 +157,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getClassesPath() {
         Path classesPath = ResourceUtil.getClassesPath("test.class");
         assertNotNull(classesPath);
@@ -162,72 +170,84 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertTrue(classesPath.toString().contains("Test.class"));
     }
 
+    @Test
     public void test_getOrigPath() {
         Path origPath = ResourceUtil.getOrigPath("original.file");
         assertNotNull(origPath);
         assertTrue(origPath.toString().contains("orig"));
     }
 
+    @Test
     public void test_getMailTemplatePath() {
         Path mailPath = ResourceUtil.getMailTemplatePath("template.vm");
         assertNotNull(mailPath);
         assertTrue(mailPath.toString().contains("mail"));
     }
 
+    @Test
     public void test_getViewTemplatePath() {
         Path viewPath = ResourceUtil.getViewTemplatePath("view.html");
         assertNotNull(viewPath);
         assertTrue(viewPath.toString().contains("view"));
     }
 
+    @Test
     public void test_getDictionaryPath() {
         Path dictPath = ResourceUtil.getDictionaryPath("dict.txt");
         assertNotNull(dictPath);
         assertTrue(dictPath.toString().contains("dict"));
     }
 
+    @Test
     public void test_getThumbnailPath() {
         Path thumbPath = ResourceUtil.getThumbnailPath("thumb.png");
         assertNotNull(thumbPath);
         assertTrue(thumbPath.toString().contains("thumbnails"));
     }
 
+    @Test
     public void test_getSitePath() {
         Path sitePath = ResourceUtil.getSitePath("site.xml");
         assertNotNull(sitePath);
         assertTrue(sitePath.toString().contains("site"));
     }
 
+    @Test
     public void test_getPluginPath() {
         Path pluginPath = ResourceUtil.getPluginPath("plugin.jar");
         assertNotNull(pluginPath);
         assertTrue(pluginPath.toString().contains("plugin"));
     }
 
+    @Test
     public void test_getProjectPropertiesFile() {
         Path propFile = ResourceUtil.getProjectPropertiesFile();
         assertNotNull(propFile);
         assertTrue(propFile.toString().contains("project.properties"));
     }
 
+    @Test
     public void test_getImagePath() {
         Path imagePath = ResourceUtil.getImagePath("logo.png");
         assertNotNull(imagePath);
         assertTrue(imagePath.toString().contains("images"));
     }
 
+    @Test
     public void test_getCssPath() {
         Path cssPath = ResourceUtil.getCssPath("style.css");
         assertNotNull(cssPath);
         assertTrue(cssPath.toString().contains("css"));
     }
 
+    @Test
     public void test_getJavaScriptPath() {
         Path jsPath = ResourceUtil.getJavaScriptPath("script.js");
         assertNotNull(jsPath);
         assertTrue(jsPath.toString().contains("js"));
     }
 
+    @Test
     public void test_getEnvPath() {
         Path envPath = ResourceUtil.getEnvPath("test", "config.properties");
         assertNotNull(envPath);
@@ -235,6 +255,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertTrue(envPath.toString().contains("test"));
     }
 
+    @Test
     public void test_getJarFiles() {
         File[] jarFiles = ResourceUtil.getJarFiles("fess");
         assertNotNull(jarFiles);
@@ -247,6 +268,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertEquals(0, jarFiles.length);
     }
 
+    @Test
     public void test_getPluginJarFiles_withPrefix() {
         File[] pluginFiles = ResourceUtil.getPluginJarFiles("plugin");
         assertNotNull(pluginFiles);
@@ -254,6 +276,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertEquals(0, pluginFiles.length);
     }
 
+    @Test
     public void test_getPluginJarFiles_withFilter() {
         FilenameFilter filter = (dir, name) -> name.endsWith(".jar");
         File[] pluginFiles = ResourceUtil.getPluginJarFiles(filter);
@@ -262,6 +285,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         assertEquals(0, pluginFiles.length);
     }
 
+    @Test
     public void test_resolve_additionalCases() {
         // Test multiple replacements in same string
         System.setProperty("var1", "value1");
@@ -297,6 +321,7 @@ public class ResourceUtilTest extends UnitFessTestCase {
         System.clearProperty("test_var");
     }
 
+    @Test
     public void test_resolve_edgeCases() {
         // Test empty property replacement
         System.setProperty("empty", "");

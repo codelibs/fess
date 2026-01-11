@@ -25,6 +25,9 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.core.direction.FwAssistantDirector;
 import org.lastaflute.core.direction.FwCoreDirection;
 import org.lastaflute.web.direction.FwWebDirection;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessCurtainFinallyHookTest extends UnitFessTestCase {
 
@@ -34,13 +37,15 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
 
     private FessCurtainFinallyHook curtainFinallyHook;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         curtainFinallyHook = new FessCurtainFinallyHook();
     }
 
     // Test normal execution of hook method
+    @Test
     public void test_hook_normalExecution() {
         // Create a mock FwAssistantDirector
         FwAssistantDirector assistantDirector = createMockAssistantDirector();
@@ -53,6 +58,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test hook method when MultiThreadedHttpConnectionManager class is not available
+    @Test
     public void test_hook_classNotFound() {
         // Create a custom hook that simulates class not found scenario
         FessCurtainFinallyHook customHook = new FessCurtainFinallyHook() {
@@ -79,6 +85,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test shutdownCommonsHttpClient private method with reflection
+    @Test
     public void test_shutdownCommonsHttpClient_reflection() throws Exception {
         // Access the private method using reflection
         Method shutdownMethod = FessCurtainFinallyHook.class.getDeclaredMethod("shutdownCommonsHttpClient");
@@ -92,6 +99,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test behavior when an exception occurs during reflection
+    @Test
     public void test_shutdownCommonsHttpClient_withException() throws Exception {
         // Create a hook that simulates an exception scenario
         AtomicBoolean exceptionHandled = new AtomicBoolean(false);
@@ -119,6 +127,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test with a custom ClassLoader to simulate class availability
+    @Test
     public void test_hook_withCustomClassLoader() throws Exception {
         // Create a custom ClassLoader that can control class loading behavior
         ClassLoader customClassLoader = new URLClassLoader(new URL[0], null) {
@@ -153,6 +162,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test multiple invocations of hook method
+    @Test
     public void test_hook_multipleInvocations() {
         FwAssistantDirector assistantDirector = createMockAssistantDirector();
 
@@ -170,6 +180,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test with null assistant director (edge case)
+    @Test
     public void test_hook_withNullAssistantDirector() {
         // Hook should handle null parameter gracefully
         curtainFinallyHook.hook(null);
@@ -186,6 +197,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test to verify the logger field is properly initialized
+    @Test
     public void test_loggerFieldInitialization() throws Exception {
         // Use reflection to access the private logger field
         Field loggerField = FessCurtainFinallyHook.class.getDeclaredField("logger");
@@ -201,6 +213,7 @@ public class FessCurtainFinallyHookTest extends UnitFessTestCase {
     }
 
     // Test concurrent execution of hook method
+    @Test
     public void test_hook_concurrentExecution() throws Exception {
         final FwAssistantDirector assistantDirector = createMockAssistantDirector();
         final int threadCount = 10;

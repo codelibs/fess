@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.admin.log;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for AdminLogAction.
@@ -27,6 +28,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
     //                                                                 isLogFilename Tests
     //                                                                 ===================
 
+    @Test
     public void test_isLogFilename_withLogExtension() {
         assertTrue(AdminLogAction.isLogFilename("fess.log"));
         assertTrue(AdminLogAction.isLogFilename("crawler.log"));
@@ -34,12 +36,14 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertTrue(AdminLogAction.isLogFilename("application-2024-01-01.log"));
     }
 
+    @Test
     public void test_isLogFilename_withLogGzExtension() {
         assertTrue(AdminLogAction.isLogFilename("fess.log.gz"));
         assertTrue(AdminLogAction.isLogFilename("crawler.log.gz"));
         assertTrue(AdminLogAction.isLogFilename("application-2024-01-01.log.gz"));
     }
 
+    @Test
     public void test_isLogFilename_withInvalidExtension() {
         assertFalse(AdminLogAction.isLogFilename("fess.txt"));
         assertFalse(AdminLogAction.isLogFilename("fess.log.bak"));
@@ -50,16 +54,19 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertFalse(AdminLogAction.isLogFilename("data.json"));
     }
 
+    @Test
     public void test_isLogFilename_withNoExtension() {
         assertFalse(AdminLogAction.isLogFilename("fess"));
         assertFalse(AdminLogAction.isLogFilename("log"));
     }
 
+    @Test
     public void test_isLogFilename_withOnlyExtension() {
         assertTrue(AdminLogAction.isLogFilename(".log"));
         assertTrue(AdminLogAction.isLogFilename(".log.gz"));
     }
 
+    @Test
     public void test_isLogFilename_caseSensitive() {
         assertFalse(AdminLogAction.isLogFilename("fess.LOG"));
         assertFalse(AdminLogAction.isLogFilename("fess.Log"));
@@ -67,10 +74,12 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertFalse(AdminLogAction.isLogFilename("fess.LOG.gz"));
     }
 
+    @Test
     public void test_isLogFilename_withEmptyString() {
         assertFalse(AdminLogAction.isLogFilename(""));
     }
 
+    @Test
     public void test_isLogFilename_withPathSeparators() {
         // isLogFilename only checks the file extension, not path components
         assertTrue(AdminLogAction.isLogFilename("subdir/fess.log"));
@@ -81,12 +90,14 @@ public class AdminLogActionTest extends UnitFessTestCase {
     //                                                              sanitizeFilename Tests
     //                                                              ======================
 
+    @Test
     public void test_sanitizeFilename_normalFilename() {
         assertEquals("fess.log", AdminLogAction.sanitizeFilename("fess.log"));
         assertEquals("crawler.log.gz", AdminLogAction.sanitizeFilename("crawler.log.gz"));
         assertEquals("app-2024-01-01.log", AdminLogAction.sanitizeFilename("app-2024-01-01.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_removesDoubleDots() {
         assertEquals("", AdminLogAction.sanitizeFilename(".."));
         assertEquals("/etc/passwd", AdminLogAction.sanitizeFilename("../etc/passwd"));
@@ -95,6 +106,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("testlog", AdminLogAction.sanitizeFilename("test..log"));
     }
 
+    @Test
     public void test_sanitizeFilename_removesMultipleDoubleDots() {
         // "...." becomes "" (two ".." are removed)
         assertEquals("", AdminLogAction.sanitizeFilename("...."));
@@ -102,6 +114,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("/test.log", AdminLogAction.sanitizeFilename("....//....//test.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_removesWhitespace() {
         assertEquals("fess.log", AdminLogAction.sanitizeFilename("fess .log"));
         assertEquals("fess.log", AdminLogAction.sanitizeFilename(" fess.log"));
@@ -112,6 +125,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("fess.log", AdminLogAction.sanitizeFilename("fess\r.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_removesDoubleDotsAndWhitespace() {
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(".. /test.log"));
         assertEquals("/test.log", AdminLogAction.sanitizeFilename(" ../test.log"));
@@ -123,6 +137,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename(". ./. ./etc/passwd.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_pathTraversalPatterns() {
         // Common path traversal attack patterns - multiple slashes are normalized to single
         assertEquals("/etc/passwd.log", AdminLogAction.sanitizeFilename("../etc/passwd.log"));
@@ -137,22 +152,26 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("/var/log/other.log", AdminLogAction.sanitizeFilename("../var/log/other.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_preservesSingleDot() {
         assertEquals(".", AdminLogAction.sanitizeFilename("."));
         assertEquals("./test.log", AdminLogAction.sanitizeFilename("./test.log"));
         assertEquals(".hidden.log", AdminLogAction.sanitizeFilename(".hidden.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_preservesTripleDots() {
         // "..." has one ".." removed, leaving "."
         assertEquals(".", AdminLogAction.sanitizeFilename("..."));
         assertEquals("./test.log", AdminLogAction.sanitizeFilename(".../test.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_emptyString() {
         assertEquals("", AdminLogAction.sanitizeFilename(""));
     }
 
+    @Test
     public void test_sanitizeFilename_normalizesMultipleSlashes() {
         assertEquals("/test.log", AdminLogAction.sanitizeFilename("//test.log"));
         assertEquals("/test.log", AdminLogAction.sanitizeFilename("///test.log"));
@@ -160,6 +179,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("a/b/c.log", AdminLogAction.sanitizeFilename("a//b///c.log"));
     }
 
+    @Test
     public void test_sanitizeFilename_windowsPathSeparators() {
         // Windows path separators are normalized to forward slashes
         assertEquals("test/file.log", AdminLogAction.sanitizeFilename("test\\file.log"));
@@ -175,6 +195,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
     //                                                         Combined Security Tests
     //                                                         =========================
 
+    @Test
     public void test_security_pathTraversalWithLogExtension() {
         // These patterns attempt to access files outside the log directory
         // but must end with .log to pass isLogFilename check
@@ -188,6 +209,7 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertTrue(AdminLogAction.isLogFilename(sanitized2));
     }
 
+    @Test
     public void test_security_encodedPathTraversal() {
         // These are literal strings (not URL encoded at this point)
         // URL encoding would be handled before Base64 decoding
@@ -195,11 +217,13 @@ public class AdminLogActionTest extends UnitFessTestCase {
         assertEquals("%2e%2e/test.log", AdminLogAction.sanitizeFilename("%2e%2e/test.log"));
     }
 
+    @Test
     public void test_security_nullBytes() {
         // Null byte injection (the string contains literal null byte)
         assertEquals("fess.log\0.txt", AdminLogAction.sanitizeFilename("fess.log\0.txt"));
     }
 
+    @Test
     public void test_security_unicodeCharacters() {
         // Full-width dots and other Unicode characters
         assertEquals("\uff0e\uff0e/test.log", AdminLogAction.sanitizeFilename("\uff0e\uff0e/test.log"));

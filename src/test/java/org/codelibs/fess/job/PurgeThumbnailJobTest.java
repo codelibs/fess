@@ -19,15 +19,21 @@ import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class PurgeThumbnailJobTest extends UnitFessTestCase {
 
     private PurgeThumbnailJob purgeThumbnailJob;
     private MockThumbnailManager thumbnailManager;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         purgeThumbnailJob = new PurgeThumbnailJob();
 
         // Create a mock ThumbnailManager
@@ -37,11 +43,13 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     // Test default constructor
+    @Test
     public void test_constructor() {
         PurgeThumbnailJob job = new PurgeThumbnailJob();
         assertNotNull(job);
@@ -49,11 +57,13 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test getExpiry with default value
+    @Test
     public void test_getExpiry_default() {
         assertEquals(30L * 24 * 60 * 60 * 1000L, purgeThumbnailJob.getExpiry());
     }
 
     // Test expiry setter with valid value
+    @Test
     public void test_expiry_validValue() {
         long newExpiry = 60L * 24 * 60 * 60 * 1000L; // 60 days
         PurgeThumbnailJob result = purgeThumbnailJob.expiry(newExpiry);
@@ -65,6 +75,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test expiry setter with zero value (should not change)
+    @Test
     public void test_expiry_zeroValue() {
         long originalExpiry = purgeThumbnailJob.getExpiry();
         PurgeThumbnailJob result = purgeThumbnailJob.expiry(0);
@@ -76,6 +87,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test expiry setter with negative value (should not change)
+    @Test
     public void test_expiry_negativeValue() {
         long originalExpiry = purgeThumbnailJob.getExpiry();
         PurgeThumbnailJob result = purgeThumbnailJob.expiry(-1000L);
@@ -87,6 +99,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test expiry setter with small positive value
+    @Test
     public void test_expiry_smallPositiveValue() {
         PurgeThumbnailJob result = purgeThumbnailJob.expiry(1L);
 
@@ -97,6 +110,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with successful purge (no files deleted)
+    @Test
     public void test_execute_noFilesDeleted() {
         thumbnailManager.setPurgeCallCount(0);
 
@@ -107,6 +121,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with successful purge (single file deleted)
+    @Test
     public void test_execute_singleFileDeleted() {
         thumbnailManager.setPurgeCallCount(1);
 
@@ -116,6 +131,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with successful purge (multiple files deleted)
+    @Test
     public void test_execute_multipleFilesDeleted() {
         thumbnailManager.setPurgeCallCount(100);
 
@@ -125,6 +141,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with custom expiry
+    @Test
     public void test_execute_customExpiry() {
         long customExpiry = 10L * 24 * 60 * 60 * 1000L; // 10 days
         purgeThumbnailJob.expiry(customExpiry);
@@ -137,6 +154,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with exception thrown
+    @Test
     public void test_execute_exceptionThrown() {
         thumbnailManager.setThrowException(true);
         thumbnailManager.setExceptionMessage("Purge failed");
@@ -147,6 +165,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with exception thrown (no message)
+    @Test
     public void test_execute_exceptionThrownNoMessage() {
         thumbnailManager.setThrowException(true);
         thumbnailManager.setExceptionMessage(null);
@@ -157,6 +176,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test execute with large number of deleted files
+    @Test
     public void test_execute_largeNumberOfFiles() {
         thumbnailManager.setPurgeCallCount(Long.MAX_VALUE);
 
@@ -166,6 +186,7 @@ public class PurgeThumbnailJobTest extends UnitFessTestCase {
     }
 
     // Test method chaining with multiple expiry calls
+    @Test
     public void test_expiryChaining() {
         PurgeThumbnailJob result = purgeThumbnailJob.expiry(1000L)
                 .expiry(2000L)

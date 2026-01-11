@@ -30,29 +30,38 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class WebApiFilterTest extends UnitFessTestCase {
 
     private WebApiFilter webApiFilter;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         webApiFilter = new WebApiFilter();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         // Clear WebApiManagerFactory
         super.tearDown();
     }
 
     // Test constructor
+    @Test
     public void test_constructor() {
         assertNotNull(new WebApiFilter());
     }
 
     // Test init method
+    @Test
     public void test_init() throws ServletException {
         FilterConfig filterConfig = new FilterConfig() {
             @Override
@@ -82,6 +91,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test destroy method
+    @Test
     public void test_destroy() {
         // Should not throw any exception
         webApiFilter.destroy();
@@ -89,6 +99,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when WebApiManagerFactory returns null WebApiManager
+    @Test
     public void test_doFilter_withNullWebApiManager() throws IOException, ServletException {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();
@@ -122,6 +133,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when WebApiManagerFactory returns a WebApiManager
+    @Test
     public void test_doFilter_withWebApiManager() throws IOException, ServletException {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();
@@ -171,6 +183,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter with ServletRequest and ServletResponse (not HTTP variants)
+    @Test
     public void test_doFilter_withServletRequestResponse() throws IOException, ServletException {
         // Setup mock objects
         ServletRequest request = createMockHttpServletRequest();
@@ -204,6 +217,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when WebApiManager.process throws IOException
+    @Test
     public void test_doFilter_withIOException() {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();
@@ -250,6 +264,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when WebApiManager.process throws ServletException
+    @Test
     public void test_doFilter_withServletException() {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();
@@ -296,6 +311,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when chain.doFilter throws IOException
+    @Test
     public void test_doFilter_chainThrowsIOException() {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();
@@ -329,6 +345,7 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     // Test doFilter when chain.doFilter throws ServletException
+    @Test
     public void test_doFilter_chainThrowsServletException() {
         // Setup mock objects
         HttpServletRequest request = createMockHttpServletRequest();

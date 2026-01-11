@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.it.CrudTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +115,7 @@ public class StatsTests extends CrudTestBase {
     }
 
     @Override
+    @AfterEach
     protected void tearDown() {
         // do nothing
     }

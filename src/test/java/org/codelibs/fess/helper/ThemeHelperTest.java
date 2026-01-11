@@ -25,15 +25,20 @@ import java.util.zip.ZipOutputStream;
 import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ThemeHelperTest extends UnitFessTestCase {
 
     private ThemeHelper themeHelper;
     private Path tempDir;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         themeHelper = new ThemeHelper();
         tempDir = Files.createTempDirectory("theme-test");
         Files.createDirectories(Paths.get("target", "fess", "WEB-INF", "view"));
@@ -44,7 +49,8 @@ public class ThemeHelperTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         if (tempDir != null && Files.exists(tempDir)) {
             deleteDirectory(tempDir);
         }
@@ -61,18 +67,21 @@ public class ThemeHelperTest extends UnitFessTestCase {
         });
     }
 
+    @Test
     public void test_getThemeName() {
         Artifact artifact = new Artifact("fess-theme-simple", "1.0.0");
         String themeName = themeHelper.getThemeName(artifact);
         assertEquals("simple", themeName);
     }
 
+    @Test
     public void test_getThemeName_multiPart() {
         Artifact artifact = new Artifact("fess-theme-elegant-modern", "1.0.0");
         String themeName = themeHelper.getThemeName(artifact);
         assertEquals("elegant-modern", themeName);
     }
 
+    @Test
     public void test_getThemeName_emptyName() {
         try {
             Artifact artifact = new Artifact("fess-theme", "1.0.0");
@@ -84,6 +93,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getThemeName_invalidPrefix() {
         try {
             Artifact artifact = new Artifact("invalid-prefix-simple", "1.0.0");
@@ -95,6 +105,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getJarFile_exists() throws IOException {
         // Create a mock jar file
         Path jarPath = tempDir.resolve("test-theme.jar");
@@ -112,6 +123,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         assertEquals(jarPath, result);
     }
 
+    @Test
     public void test_getJarFile_notExists() {
         try {
             Artifact artifact = new Artifact("fess-theme-test", "1.0.0");
@@ -123,6 +135,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_closeQuietly_nonExistentDirectory() {
         Path nonExistentDir = tempDir.resolve("non-existent");
         themeHelper.closeQuietly(nonExistentDir);
@@ -130,6 +143,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         assertTrue(true);
     }
 
+    @Test
     public void test_closeQuietly_existingDirectory() throws IOException {
         Path existingDir = tempDir.resolve("existing");
         Files.createDirectory(existingDir);
@@ -141,6 +155,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         assertFalse(Files.exists(existingDir));
     }
 
+    @Test
     public void test_closeQuietly_nestedDirectory() throws IOException {
         Path nestedDir = tempDir.resolve("parent").resolve("child");
         Files.createDirectories(nestedDir);
@@ -152,6 +167,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         assertFalse(Files.exists(tempDir.resolve("parent")));
     }
 
+    @Test
     public void test_install_withValidZip() throws IOException {
         // Create a mock zip file with theme content
         Path jarPath = tempDir.resolve("test-theme.jar");
@@ -174,6 +190,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_withInvalidZip() throws IOException {
         // Create an invalid zip file
         Path jarPath = tempDir.resolve("invalid.jar");
@@ -198,6 +215,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_zipWithSkippedEntries() throws IOException {
         // Create a zip with entries that should be skipped
         Path jarPath = tempDir.resolve("skip-entries.jar");
@@ -220,6 +238,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_uninstall() throws IOException {
         ThemeHelper mockThemeHelper = new ThemeHelper() {
             @Override
@@ -238,6 +257,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_allResourceTypes() throws IOException {
         // Create a zip with all resource types (view, css, js, images)
         Path jarPath = tempDir.resolve("all-resources.jar");
@@ -260,6 +280,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_pathTraversalPrevention() throws IOException {
         // Create a zip with potentially dangerous paths
         Path jarPath = tempDir.resolve("malicious.jar");
@@ -282,6 +303,7 @@ public class ThemeHelperTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_install_directoryEntries() throws IOException {
         // Create a zip with directory entries
         Path jarPath = tempDir.resolve("with-directories.jar");

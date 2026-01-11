@@ -20,9 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class SystemUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_getSearchEngineHttpAddress_null() {
         // Clear the system property to test null case
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -39,6 +41,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withValue() {
         String testAddress = "http://localhost:9200";
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -57,6 +60,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withEmptyString() {
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
 
@@ -74,6 +78,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withSpecialCharacters() {
         String testAddress = "https://search-engine.example.com:9200/path?param=value&other=test";
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -92,6 +97,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withWhitespace() {
         String testAddress = "  http://localhost:9200  ";
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -110,6 +116,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_multipleChanges() {
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
 
@@ -133,6 +140,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withUnicodeCharacters() {
         String testAddress = "http://テスト.example.com:9200";
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -151,6 +159,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_constructor_isPrivate() {
         // Verify that SystemUtil has a private constructor (utility class pattern)
         try {
@@ -167,17 +176,20 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_inheritance() {
         // Verify that SystemUtil extends org.codelibs.core.lang.SystemUtil
         Class<?> superClass = SystemUtil.class.getSuperclass();
         assertEquals("Should extend org.codelibs.core.lang.SystemUtil", "org.codelibs.core.lang.SystemUtil", superClass.getName());
     }
 
+    @Test
     public void test_constants_reference() {
         // Test that the constant used is accessible and has expected value
         assertEquals("fess.search_engine.http_address", Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
     }
 
+    @Test
     public void test_static_method_signature() {
         // Verify method signature is correct
         try {
@@ -200,6 +212,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_systemProperty_independence() {
         // Test that method correctly reads from system properties each time
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -227,6 +240,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_thread_safety() {
         // Test concurrent access to the method
         String originalValue = System.getProperty(Constants.FESS_SEARCH_ENGINE_HTTP_ADDRESS);
@@ -274,6 +288,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_getSearchEngineHttpAddress_withLongValue() {
         // Test with a very long URL
         StringBuilder longUrl = new StringBuilder("http://");
@@ -298,6 +313,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_utilityClass_pattern() {
         // Verify utility class design pattern compliance
 
@@ -315,6 +331,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_maskSensitiveValue_withPassword() {
         assertEquals("********", SystemUtil.maskSensitiveValue("DB_PASSWORD", "secret123"));
         assertEquals("********", SystemUtil.maskSensitiveValue("password", "secret123"));
@@ -322,40 +339,47 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertEquals("********", SystemUtil.maskSensitiveValue("SMTP_PASSWORD", "secret123"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withSecret() {
         assertEquals("********", SystemUtil.maskSensitiveValue("AWS_SECRET_ACCESS_KEY", "AKIAIOSFODNN7EXAMPLE"));
         assertEquals("********", SystemUtil.maskSensitiveValue("secret", "mySecret"));
         assertEquals("********", SystemUtil.maskSensitiveValue("CLIENT_SECRET", "abc123"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withKey() {
         assertEquals("********", SystemUtil.maskSensitiveValue("API_KEY", "abc123"));
         assertEquals("********", SystemUtil.maskSensitiveValue("apikey", "abc123"));
         assertEquals("********", SystemUtil.maskSensitiveValue("PRIVATE_KEY", "-----BEGIN RSA PRIVATE KEY-----"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withToken() {
         assertEquals("********", SystemUtil.maskSensitiveValue("AUTH_TOKEN", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"));
         assertEquals("********", SystemUtil.maskSensitiveValue("access_token", "ya29.a0ARrdaM8"));
         assertEquals("********", SystemUtil.maskSensitiveValue("REFRESH_TOKEN", "1//0eXyz"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withCredential() {
         assertEquals("********", SystemUtil.maskSensitiveValue("GOOGLE_CREDENTIALS", "{}"));
         assertEquals("********", SystemUtil.maskSensitiveValue("credential", "user:pass"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withAuth() {
         assertEquals("********", SystemUtil.maskSensitiveValue("BASIC_AUTH", "dXNlcjpwYXNz"));
         assertEquals("********", SystemUtil.maskSensitiveValue("auth_header", "Bearer xyz"));
         assertEquals("********", SystemUtil.maskSensitiveValue("OAUTH_CLIENT_ID", "123456"));
     }
 
+    @Test
     public void test_maskSensitiveValue_withPrivate() {
         assertEquals("********", SystemUtil.maskSensitiveValue("PRIVATE_DATA", "sensitive"));
         assertEquals("********", SystemUtil.maskSensitiveValue("private_config", "internal"));
     }
 
+    @Test
     public void test_maskSensitiveValue_safeValues() {
         // These should NOT be masked
         assertEquals("localhost:9200", SystemUtil.maskSensitiveValue("HOST", "localhost:9200"));
@@ -366,6 +390,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertEquals("true", SystemUtil.maskSensitiveValue("DEBUG_MODE", "true"));
     }
 
+    @Test
     public void test_maskSensitiveValue_nullHandling() {
         // When key is null, cannot determine if sensitive, so return value as-is
         assertEquals("value", SystemUtil.maskSensitiveValue(null, "value"));
@@ -374,6 +399,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertNull(SystemUtil.maskSensitiveValue(null, null));
     }
 
+    @Test
     public void test_maskSensitiveValue_caseInsensitive() {
         // Should work regardless of case
         assertEquals("********", SystemUtil.maskSensitiveValue("password", "secret"));
@@ -382,6 +408,7 @@ public class SystemUtilTest extends UnitFessTestCase {
         assertEquals("********", SystemUtil.maskSensitiveValue("PaSsWoRd", "secret"));
     }
 
+    @Test
     public void test_maskSensitiveValue_emptyValue() {
         assertEquals("********", SystemUtil.maskSensitiveValue("PASSWORD", ""));
         assertEquals("", SystemUtil.maskSensitiveValue("HOST", ""));

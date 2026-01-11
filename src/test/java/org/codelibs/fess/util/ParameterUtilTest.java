@@ -22,12 +22,16 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class ParameterUtilTest extends UnitFessTestCase {
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
@@ -38,6 +42,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         ComponentUtil.setFessConfig(fessConfig);
     }
 
+    @Test
     public void test_convertParameterMap() {
         String parameters;
         Map<String, String> parameterMap;
@@ -95,6 +100,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("WORKSTATION", parameterMap.get("workstation"));
     }
 
+    @Test
     public void test_parseParameter() {
         String value;
         Map<String, String> paramMap;
@@ -138,6 +144,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(0, paramMap.size());
     }
 
+    @Test
     public void test_parseScript() {
         String value;
         Map<String, String> scriptMap;
@@ -181,6 +188,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(0, scriptMap.size());
     }
 
+    @Test
     public void test_encryptParameter() {
         String value;
         String expect;
@@ -218,6 +226,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals(expect, ParameterUtil.encrypt(value));
     }
 
+    @Test
     public void test_parse_advancedScenarios() {
         String value;
         Map<String, String> paramMap;
@@ -268,6 +277,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("value@#$%", paramMap.get("key-with-dashes"));
     }
 
+    @Test
     public void test_encrypt_advancedScenarios() {
         String value;
         String result;
@@ -301,6 +311,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertTrue(result.contains("password={cipher}"));
     }
 
+    @Test
     public void test_loadConfigParams() {
         Map<String, Object> paramMap;
         String configParam;
@@ -355,6 +366,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("newValue", paramMap.get("key1"));
     }
 
+    @Test
     public void test_createConfigParameterMap() {
         String configParameters;
         Map<ConfigName, Map<String, String>> result;
@@ -459,6 +471,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("", result.get(ConfigName.XPATH).get("empty"));
     }
 
+    @Test
     public void test_createConfigParameterMap_edgeCases() {
         String configParameters;
         Map<ConfigName, Map<String, String>> result;
@@ -488,6 +501,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("value@#$%", result.get(ConfigName.FIELD).get("key_with_underscores"));
     }
 
+    @Test
     public void test_integrationScenarios() {
         // Test complete workflow: parse -> encrypt -> createConfigParameterMap
         String originalParams = "config.timeout=30\npassword=secret\nclient.host=localhost";
@@ -518,6 +532,7 @@ public class ParameterUtilTest extends UnitFessTestCase {
         assertEquals("true", targetMap.get("config.setting"));
     }
 
+    @Test
     public void test_performanceAndBoundary() {
         // Test with large input
         StringBuilder largeInput = new StringBuilder();

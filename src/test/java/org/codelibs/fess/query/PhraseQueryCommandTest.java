@@ -25,6 +25,7 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
+import org.junit.jupiter.api.Test;
 
 public class PhraseQueryCommandTest extends QueryTestBase {
     private PhraseQueryCommand queryCommand;
@@ -36,10 +37,12 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         queryCommand.register();
     }
 
+    @Test
     public void test_getQueryClassName() {
         assertEquals("PhraseQuery", queryCommand.getQueryClassName());
     }
 
+    @Test
     public void test_execute_withNonPhraseQuery() {
         // Test with non-phrase query - should throw InvalidQueryException
         Query termQuery = new TermQuery(new Term("field", "value"));
@@ -53,6 +56,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_convertPhraseQuery_emptyTerms() {
         // Test with empty phrase query - should throw InvalidQueryException
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -67,6 +71,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         }
     }
 
+    @Test
     public void test_convertPhraseQuery_singleTerm_defaultField_bool() {
         // Test with single term in default field
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -83,6 +88,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_singleTerm_defaultField_dismax() {
         // Test with single term in default field with boost > 1
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -99,6 +105,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_multipleTerms_defaultField() {
         // Test with multiple terms in default field
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -116,6 +123,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_searchField_title() {
         // Test with search field (title)
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -132,6 +140,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_searchField_content() {
         // Test with search field (content)
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -149,6 +158,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         assertTrue(result instanceof MatchPhraseQueryBuilder);
     }
 
+    @Test
     public void test_convertPhraseQuery_unknownField() {
         // Test with unknown field (not a search field)
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -165,6 +175,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_withSpecialCharacters() {
         // Test with special characters in query
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -181,6 +192,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_execute_withValidPhraseQuery() {
         // Test execute method with valid phrase query
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -197,6 +209,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_longPhrase() {
         // Test with long phrase (many terms)
         PhraseQuery.Builder builder = new PhraseQuery.Builder();
@@ -216,6 +229,7 @@ public class PhraseQueryCommandTest extends QueryTestBase {
         // Note: Field logging behavior depends on implementation
     }
 
+    @Test
     public void test_convertPhraseQuery_emptyString() {
         // Test with empty string term (edge case)
         PhraseQuery.Builder builder = new PhraseQuery.Builder();

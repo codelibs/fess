@@ -25,15 +25,18 @@ import java.util.Set;
 import org.codelibs.fess.opensearch.user.bsentity.BsUser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.lastaflute.web.response.render.RenderData;
+import org.junit.jupiter.api.Test;
 
 public class RenderDataUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_register_null() {
         RenderData data = new RenderData();
         RenderDataUtil.register(data, "key1", null);
         assertNull(data.getDataMap().get("key1"));
     }
 
+    @Test
     public void test_register_string() {
         RenderData data = new RenderData();
         RenderDataUtil.register(data, "key1", "test value");
@@ -43,6 +46,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals("", data.getDataMap().get("key2"));
     }
 
+    @Test
     public void test_register_primitives() {
         RenderData data = new RenderData();
 
@@ -59,6 +63,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(3.14, data.getDataMap().get("double"));
     }
 
+    @Test
     public void test_register_entity() {
         RenderData data = new RenderData();
         BsUser entity = new BsUser();
@@ -74,6 +79,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals("test name", resultMap.get("name"));
     }
 
+    @Test
     public void test_register_entityList() {
         RenderData data = new RenderData();
 
@@ -101,6 +107,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals("name2", map2.get("name"));
     }
 
+    @Test
     public void test_register_entitySet() {
         RenderData data = new RenderData();
 
@@ -124,6 +131,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(2, resultList.size());
     }
 
+    @Test
     public void test_register_emptyEntityList() {
         RenderData data = new RenderData();
         List<BsUser> emptyList = new ArrayList<>();
@@ -134,6 +142,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(emptyList, result); // Empty collections are registered as-is
     }
 
+    @Test
     public void test_register_nonEntityList() {
         RenderData data = new RenderData();
         List<String> stringList = Arrays.asList("item1", "item2", "item3");
@@ -144,6 +153,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(stringList, result); // Non-entity collections are registered as-is
     }
 
+    @Test
     public void test_register_nonEntitySet() {
         RenderData data = new RenderData();
         Set<Integer> intSet = new HashSet<>(Arrays.asList(1, 2, 3));
@@ -154,6 +164,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(intSet, result); // Non-entity collections are registered as-is
     }
 
+    @Test
     public void test_register_mixedList() {
         RenderData data = new RenderData();
 
@@ -182,6 +193,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertTrue(resultList.get(2) instanceof Map);
     }
 
+    @Test
     public void test_register_listWithNonEntityFirst() {
         RenderData data = new RenderData();
 
@@ -199,6 +211,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(mixedList, result); // Should be registered as-is since first element is not Entity
     }
 
+    @Test
     public void test_register_complexObject() {
         RenderData data = new RenderData();
 
@@ -211,6 +224,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals(obj, result); // Non-entity objects are registered as-is
     }
 
+    @Test
     public void test_register_arrayList() {
         RenderData data = new RenderData();
 
@@ -232,6 +246,7 @@ public class RenderDataUtilTest extends UnitFessTestCase {
         assertEquals("user1", resultList.get(0).get("name"));
     }
 
+    @Test
     public void test_register_collectionPerformanceOptimization() {
         RenderData data = new RenderData();
 

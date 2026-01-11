@@ -26,6 +26,9 @@ import org.codelibs.fess.opensearch.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class RelatedContentHelperTest extends UnitFessTestCase {
 
@@ -33,9 +36,10 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
     private MockRelatedContentBhv mockBhv;
     private VirtualHostHelper virtualHostHelper;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Setup system properties for DI container
         File file = File.createTempFile("test", ".properties");
@@ -62,6 +66,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         inject(virtualHostHelper);
     }
 
+    @Test
     public void test_init() {
         // Setup test data
         List<RelatedContent> testData = new ArrayList<>();
@@ -76,6 +81,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Test Content", results[0]);
     }
 
+    @Test
     public void test_getAvailableRelatedContentList() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("term1", "content1", ""));
@@ -88,6 +94,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("term2", result.get(1).getTerm());
     }
 
+    @Test
     public void test_load_emptyList() {
         mockBhv.setTestData(new ArrayList<>());
 
@@ -98,6 +105,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_load_simpleTerms() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("java", "Java Programming", ""));
@@ -116,6 +124,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Python Programming", results[0]);
     }
 
+    @Test
     public void test_load_caseInsensitiveTerms() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("Java", "Java Programming", ""));
@@ -137,6 +146,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Java Programming", results[0]);
     }
 
+    @Test
     public void test_load_regexTerms() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("regex:test.*", "Test Content for __QUERY__", ""));
@@ -157,6 +167,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_load_invalidRegex() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("regex:", "Invalid Regex", ""));
@@ -169,6 +180,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_load_mixedTermTypes() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("exact", "Exact Match", ""));
@@ -188,6 +200,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Regex Match: testing", results[0]);
     }
 
+    @Test
     public void test_load_virtualHosts() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("term1", "Content for host1", "host1"));
@@ -199,24 +212,28 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(3, count); // Three virtual host keys: "host1", "host2", ""
     }
 
+    @Test
     public void test_getHostKey_emptyVirtualHost() {
         RelatedContent entity = createRelatedContent("term", "content", "");
         String key = relatedContentHelper.getHostKey(entity);
         assertEquals("", key);
     }
 
+    @Test
     public void test_getHostKey_nullVirtualHost() {
         RelatedContent entity = createRelatedContent("term", "content", null);
         String key = relatedContentHelper.getHostKey(entity);
         assertEquals("", key);
     }
 
+    @Test
     public void test_getHostKey_withVirtualHost() {
         RelatedContent entity = createRelatedContent("term", "content", "example.com");
         String key = relatedContentHelper.getHostKey(entity);
         assertEquals("example.com", key);
     }
 
+    @Test
     public void test_getRelatedContents_noMatch() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("java", "Java Content", ""));
@@ -228,6 +245,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedContents_multipleMatches() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("test", "Exact Match", ""));
@@ -242,6 +260,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Regex Match: test", results[1]);
     }
 
+    @Test
     public void test_getRelatedContents_differentVirtualHost() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("test", "Content for host1", "host1"));
@@ -262,6 +281,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedContents_nullQuery() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("test", "Test Content", ""));
@@ -273,6 +293,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(0, results.length);
     }
 
+    @Test
     public void test_getRelatedContents_emptyQuery() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("emptytest", "Empty Term Content", ""));
@@ -289,6 +310,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Empty Term Content", results[0]);
     }
 
+    @Test
     public void test_setRegexPrefix() {
         assertEquals("regex:", relatedContentHelper.regexPrefix);
 
@@ -307,6 +329,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Pattern Match: testing", results[0]);
     }
 
+    @Test
     public void test_setQueryPlaceHolder() {
         assertEquals("__QUERY__", relatedContentHelper.queryPlaceHolder);
 
@@ -325,6 +348,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals("Content for testing", results[0]);
     }
 
+    @Test
     public void test_inheritance_setReloadInterval() {
         assertEquals(1000L, relatedContentHelper.reloadInterval);
 
@@ -332,6 +356,7 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
         assertEquals(5000L, relatedContentHelper.reloadInterval);
     }
 
+    @Test
     public void test_inheritance_update() {
         List<RelatedContent> testData = new ArrayList<>();
         testData.add(createRelatedContent("test", "Initial Content", ""));

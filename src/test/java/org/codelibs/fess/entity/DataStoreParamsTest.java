@@ -19,18 +19,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class DataStoreParamsTest extends UnitFessTestCase {
 
     private DataStoreParams dataStoreParams;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         dataStoreParams = new DataStoreParams();
     }
 
     // Test default constructor
+    @Test
     public void test_defaultConstructor() {
         DataStoreParams params = new DataStoreParams();
         assertNotNull(params);
@@ -38,6 +45,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test put and get operations
+    @Test
     public void test_putAndGet() {
         dataStoreParams.put("key1", "value1");
         assertEquals("value1", dataStoreParams.get("key1"));
@@ -50,17 +58,20 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test get for non-existent key
+    @Test
     public void test_getNonExistentKey() {
         assertNull(dataStoreParams.get("nonexistent"));
     }
 
     // Test getAsString with String value
+    @Test
     public void test_getAsStringWithStringValue() {
         dataStoreParams.put("stringKey", "stringValue");
         assertEquals("stringValue", dataStoreParams.getAsString("stringKey"));
     }
 
     // Test getAsString with non-String value
+    @Test
     public void test_getAsStringWithNonStringValue() {
         dataStoreParams.put("intKey", 123);
         assertEquals("123", dataStoreParams.getAsString("intKey"));
@@ -73,17 +84,20 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test getAsString with null value
+    @Test
     public void test_getAsStringWithNullValue() {
         dataStoreParams.put("nullKey", null);
         assertNull(dataStoreParams.getAsString("nullKey"));
     }
 
     // Test getAsString for non-existent key
+    @Test
     public void test_getAsStringNonExistentKey() {
         assertNull(dataStoreParams.getAsString("nonexistent"));
     }
 
     // Test getAsString with default value
+    @Test
     public void test_getAsStringWithDefaultValue() {
         dataStoreParams.put("existingKey", "existingValue");
         assertEquals("existingValue", dataStoreParams.getAsString("existingKey", "defaultValue"));
@@ -96,12 +110,14 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test getAsString with default value and non-String value
+    @Test
     public void test_getAsStringWithDefaultValueAndNonStringValue() {
         dataStoreParams.put("intKey", 999);
         assertEquals("999", dataStoreParams.getAsString("intKey", "defaultValue"));
     }
 
     // Test containsKey
+    @Test
     public void test_containsKey() {
         assertFalse(dataStoreParams.containsKey("key1"));
 
@@ -113,6 +129,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test putAll
+    @Test
     public void test_putAll() {
         Map<String, String> map = new HashMap<>();
         map.put("key1", "value1");
@@ -127,6 +144,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test putAll with empty map
+    @Test
     public void test_putAllEmptyMap() {
         dataStoreParams.put("existingKey", "existingValue");
 
@@ -137,6 +155,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test newInstance
+    @Test
     public void test_newInstance() {
         dataStoreParams.put("key1", "value1");
         dataStoreParams.put("key2", 123);
@@ -160,6 +179,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test asMap
+    @Test
     public void test_asMap() {
         dataStoreParams.put("key1", "value1");
         dataStoreParams.put("key2", 123);
@@ -179,6 +199,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test asMap with empty params
+    @Test
     public void test_asMapEmpty() {
         Map<String, Object> map = dataStoreParams.asMap();
         assertNotNull(map);
@@ -186,6 +207,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test getDataMap with ParamMap
+    @Test
     public void test_getDataMapWithParamMap() {
         Map<String, Object> innerMap = new HashMap<>();
         innerMap.put("key1", "value1");
@@ -196,6 +218,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test getDataMap with regular Map
+    @Test
     public void test_getDataMapWithRegularMap() {
         Map<String, Object> regularMap = new HashMap<>();
         regularMap.put("key1", "value1");
@@ -205,6 +228,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test protected constructor with Map parameter
+    @Test
     public void test_protectedConstructor() {
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("key1", "value1");
@@ -221,6 +245,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test protected constructor with ParamMap
+    @Test
     public void test_protectedConstructorWithParamMap() {
         Map<String, Object> innerMap = new HashMap<>();
         innerMap.put("key1", "value1");
@@ -232,6 +257,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test case conversion through ParamMap (camelCase to snake_case)
+    @Test
     public void test_caseConversion() {
         dataStoreParams.put("camelCaseKey", "value1");
         // ParamMap should handle case conversion
@@ -242,6 +268,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test with complex object values
+    @Test
     public void test_complexObjectValues() {
         Map<String, String> complexObject = new HashMap<>();
         complexObject.put("nested", "value");
@@ -255,6 +282,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test overwriting existing values
+    @Test
     public void test_overwriteValues() {
         dataStoreParams.put("key1", "originalValue");
         assertEquals("originalValue", dataStoreParams.get("key1"));
@@ -267,6 +295,7 @@ public class DataStoreParamsTest extends UnitFessTestCase {
     }
 
     // Test multiple operations in sequence
+    @Test
     public void test_multipleOperations() {
         // Add initial values
         dataStoreParams.put("key1", "value1");

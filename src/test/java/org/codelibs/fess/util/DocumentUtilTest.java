@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.util;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DocumentUtilTest extends UnitFessTestCase {
 
+    @Test
     public void test_string() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -42,6 +44,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertNull(DocumentUtil.getValue(doc, "key2", String.class));
     }
 
+    @Test
     public void test_strings() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key1", new String[] { "aaa", "bbb" });
@@ -49,6 +52,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Arrays.asList("aaa", "bbb"), (List<String>) DocumentUtil.getValue(doc, "key1", List.class));
     }
 
+    @Test
     public void test_list() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key1", Arrays.asList("aaa", "bbb"));
@@ -56,6 +60,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Arrays.asList("aaa", "bbb"), (List<String>) DocumentUtil.getValue(doc, "key1", List.class));
     }
 
+    @Test
     public void test_integer() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -67,6 +72,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(777, DocumentUtil.getValue(doc, "key9", Integer.class));
     }
 
+    @Test
     public void test_date() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -75,6 +81,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(expected4, DocumentUtil.getValue(doc, "key4", Date.class));
     }
 
+    @Test
     public void test_long() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -83,6 +90,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(expected5, DocumentUtil.getValue(doc, "key5", Long.class).longValue());
     }
 
+    @Test
     public void test_double() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -91,6 +99,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(expected6, DocumentUtil.getValue(doc, "key6", Double.class));
     }
 
+    @Test
     public void test_float() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -99,6 +108,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(expected7, DocumentUtil.getValue(doc, "key7", Float.class));
     }
 
+    @Test
     public void test_boolean() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -107,11 +117,13 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(expected8, DocumentUtil.getValue(doc, "key8", Boolean.class).booleanValue());
     }
 
+    @Test
     public void test_getValue_with_null_map() {
         assertNull(DocumentUtil.getValue(null, "key", String.class));
         assertNull(DocumentUtil.getValue(null, "key", Integer.class));
     }
 
+    @Test
     public void test_getValue_with_null_key() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key", "value");
@@ -119,6 +131,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertNull(DocumentUtil.getValue(doc, null, Integer.class));
     }
 
+    @Test
     public void test_getValue_with_null_value() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key", null);
@@ -126,6 +139,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertNull(DocumentUtil.getValue(doc, "key", Integer.class));
     }
 
+    @Test
     public void test_getValue_with_default_value() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -140,6 +154,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals("default", DocumentUtil.getValue(doc, "key", String.class, "default"));
     }
 
+    @Test
     public void test_list_with_null_elements() {
         Map<String, Object> doc = new HashMap<>();
         List<String> listWithNulls = Arrays.asList("a", null, "b", null, "c");
@@ -149,6 +164,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertArrayEquals(new String[] { "a", "b", "c" }, result);
     }
 
+    @Test
     public void test_empty_list() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key", new ArrayList<>());
@@ -160,6 +176,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(new ArrayList<>(), result);
     }
 
+    @Test
     public void test_empty_string_array() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key", new String[0]);
@@ -171,6 +188,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertArrayEquals(new String[0], result);
     }
 
+    @Test
     public void test_type_conversion_from_string() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -193,6 +211,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Boolean.FALSE, DocumentUtil.getValue(doc, "boolStr2", Boolean.class));
     }
 
+    @Test
     public void test_boolean_conversion() {
         Map<String, Object> doc = new HashMap<>();
 
@@ -206,6 +225,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Boolean.FALSE, DocumentUtil.getValue(doc, "boolStr", Boolean.class));
     }
 
+    @Test
     public void test_unsupported_type_conversion() {
         Map<String, Object> doc = new HashMap<>();
         doc.put("key", "value");
@@ -215,6 +235,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals("value", DocumentUtil.getValue(doc, "key", String.class));
     }
 
+    @Test
     public void test_list_to_string_array_conversion() {
         Map<String, Object> doc = new HashMap<>();
         List<Object> mixedList = Arrays.asList("string", 123, true, null, 45.67);
@@ -224,6 +245,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertArrayEquals(new String[] { "string", "123", "true", "45.67" }, result);
     }
 
+    @Test
     public void test_string_array_to_list_conversion() {
         Map<String, Object> doc = new HashMap<>();
         String[] array = { "a", "b", "c" };
@@ -233,6 +255,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Arrays.asList("a", "b", "c"), result);
     }
 
+    @Test
     public void test_first_element_from_list() {
         Map<String, Object> doc = new HashMap<>();
         List<String> list = Arrays.asList("first", "second", "third");
@@ -245,6 +268,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals(Integer.valueOf(123), DocumentUtil.getValue(doc, "numKey", Integer.class));
     }
 
+    @Test
     public void test_first_element_from_string_array() {
         Map<String, Object> doc = new HashMap<>();
         String[] array = { "first", "second", "third" };
@@ -253,12 +277,14 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals("first", DocumentUtil.getValue(doc, "key", String.class));
     }
 
+    @Test
     public void test_encodeUrl_basic() {
         assertEquals("hello", DocumentUtil.encodeUrl("hello"));
         assertEquals("hello+world", DocumentUtil.encodeUrl("hello world"));
         assertEquals("test+value", DocumentUtil.encodeUrl("test+value"));
     }
 
+    @Test
     public void test_encodeUrl_special_characters() {
         assertEquals("test&value", DocumentUtil.encodeUrl("test&value"));
         assertEquals("test=value", DocumentUtil.encodeUrl("test=value"));
@@ -266,6 +292,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals("test#value", DocumentUtil.encodeUrl("test#value"));
     }
 
+    @Test
     public void test_encodeUrl_already_encoded() {
         assertEquals("hello", DocumentUtil.encodeUrl("hello"));
         assertEquals("hello-world", DocumentUtil.encodeUrl("hello-world"));
@@ -273,6 +300,7 @@ public class DocumentUtilTest extends UnitFessTestCase {
         assertEquals("hello.world", DocumentUtil.encodeUrl("hello.world"));
     }
 
+    @Test
     public void test_encodeUrl_empty_and_null() {
         assertEquals("", DocumentUtil.encodeUrl(""));
         try {
@@ -283,11 +311,13 @@ public class DocumentUtilTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_encodeUrl_unicode() {
         assertEquals("%3F", DocumentUtil.encodeUrl("あ"));
         assertEquals("%3F%3F%3F", DocumentUtil.encodeUrl("あいう"));
     }
 
+    @Test
     public void test_complex_document_structure() {
         Map<String, Object> doc = new HashMap<>();
 

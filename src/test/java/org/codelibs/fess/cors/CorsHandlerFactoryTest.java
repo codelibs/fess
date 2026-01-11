@@ -18,17 +18,22 @@ package org.codelibs.fess.cors;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CorsHandlerFactoryTest extends UnitFessTestCase {
 
     private CorsHandlerFactory corsHandlerFactory;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         corsHandlerFactory = new CorsHandlerFactory();
     }
 
+    @Test
     public void test_add_and_get_specificOrigin() {
         // Setup
         String origin = "https://example.com";
@@ -44,6 +49,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals("example-handler", ((TestCorsHandler) result).getName());
     }
 
+    @Test
     public void test_add_and_get_multipleOrigins() {
         // Setup
         String origin1 = "https://example1.com";
@@ -64,6 +70,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(handler3, corsHandlerFactory.get(origin3));
     }
 
+    @Test
     public void test_get_wildcardOrigin() {
         // Setup
         TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
@@ -77,6 +84,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(wildcardHandler, result);
     }
 
+    @Test
     public void test_get_specificOriginWithWildcardFallback() {
         // Setup
         String specificOrigin = "https://specific.com";
@@ -93,6 +101,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(wildcardHandler, corsHandlerFactory.get("https://unknown.com"));
     }
 
+    @Test
     public void test_get_nonExistentOriginWithoutWildcard() {
         // Setup
         String origin = "https://example.com";
@@ -106,6 +115,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_add_overwriteExistingOrigin() {
         // Setup
         String origin = "https://example.com";
@@ -122,6 +132,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals("handler2", ((TestCorsHandler) result).getName());
     }
 
+    @Test
     public void test_add_nullOrigin() {
         // Setup
         TestCorsHandler handler = new TestCorsHandler("null-origin-handler");
@@ -135,6 +146,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(handler, result);
     }
 
+    @Test
     public void test_get_nullOrigin() {
         // Setup
         TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
@@ -147,6 +159,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(wildcardHandler, result);
     }
 
+    @Test
     public void test_add_emptyOrigin() {
         // Setup
         String emptyOrigin = "";
@@ -161,6 +174,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(handler, result);
     }
 
+    @Test
     public void test_get_emptyOriginWithWildcard() {
         // Setup
         TestCorsHandler wildcardHandler = new TestCorsHandler("wildcard-handler");
@@ -173,6 +187,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(wildcardHandler, result);
     }
 
+    @Test
     public void test_add_nullHandler() {
         // Setup
         String origin = "https://example.com";
@@ -185,6 +200,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertNull(result);
     }
 
+    @Test
     public void test_add_caseInsensitiveOrigins() {
         // Setup
         String lowerCaseOrigin = "https://example.com";
@@ -202,6 +218,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertNull(corsHandlerFactory.get("https://Example.Com"));
     }
 
+    @Test
     public void test_add_originsWithDifferentPorts() {
         // Setup
         String origin8080 = "https://example.com:8080";
@@ -219,6 +236,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertNull(corsHandlerFactory.get("https://example.com"));
     }
 
+    @Test
     public void test_add_originsWithTrailingSlash() {
         // Setup
         String originWithSlash = "https://example.com/";
@@ -235,6 +253,7 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
         assertEquals(handlerWithoutSlash, corsHandlerFactory.get(originWithoutSlash));
     }
 
+    @Test
     public void test_constructor() {
         // Execute
         CorsHandlerFactory factory = new CorsHandlerFactory();

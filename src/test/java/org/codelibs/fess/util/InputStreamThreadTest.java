@@ -26,9 +26,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class InputStreamThreadTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor() {
         String input = "test line";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -39,6 +41,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertNotNull(thread);
     }
 
+    @Test
     public void test_run_withBuffering() throws InterruptedException {
         String input = "line1\nline2\nline3";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -53,6 +56,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue(output.contains("line3"));
     }
 
+    @Test
     public void test_run_withoutBuffering() throws InterruptedException {
         String input = "line1\nline2";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -65,6 +69,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("", output);
     }
 
+    @Test
     public void test_run_withCallback() throws InterruptedException {
         String input = "callback1\ncallback2";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -81,6 +86,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("callback2", callbackResults.get(1));
     }
 
+    @Test
     public void test_run_bufferSizeLimit() throws InterruptedException {
         StringBuilder inputBuilder = new StringBuilder();
         for (int i = 1; i <= 15; i++) {
@@ -100,10 +106,12 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue("Last lines should be kept", output.contains("line15"));
     }
 
+    @Test
     public void test_run_maxBufferSizeConstant() {
         assertEquals(1000, InputStreamThread.MAX_BUFFER_SIZE);
     }
 
+    @Test
     public void test_run_withMaxBufferSize() throws InterruptedException {
         StringBuilder inputBuilder = new StringBuilder();
         for (int i = 1; i <= 1005; i++) {
@@ -122,6 +130,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue("Buffer should respect max size", lines.length <= InputStreamThread.MAX_BUFFER_SIZE + 1);
     }
 
+    @Test
     public void test_getOutput_emptyStream() throws InterruptedException {
         InputStream is = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
 
@@ -133,6 +142,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("", output);
     }
 
+    @Test
     public void test_getOutput_multipleLines() throws InterruptedException {
         String input = "first\nsecond\nthird";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -145,6 +155,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("first\nsecond\nthird\n", output);
     }
 
+    @Test
     public void test_contains_exactMatch() throws InterruptedException {
         String input = "exact line\nanother line";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -158,6 +169,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertFalse(thread.contains("nonexistent"));
     }
 
+    @Test
     public void test_contains_withTrimming() throws InterruptedException {
         String input = "  trimmed line  \n\tanother\t";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -171,6 +183,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertFalse(thread.contains("  trimmed line  "));
     }
 
+    @Test
     public void test_contains_emptyBuffer() throws InterruptedException {
         String input = "test";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -182,6 +195,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertFalse(thread.contains("test"));
     }
 
+    @Test
     public void test_run_withDifferentCharsets() throws InterruptedException {
         String input = "UTF-16 test";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_16));
@@ -194,6 +208,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue(output.contains("UTF-16 test"));
     }
 
+    @Test
     public void test_run_withIOException() throws InterruptedException {
         InputStream faultyStream = new InputStream() {
             @Override
@@ -210,6 +225,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("", output);
     }
 
+    @Test
     public void test_run_callbackWithException() throws InterruptedException {
         String input = "test line";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -226,6 +242,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue("Buffer should contain line before callback exception", output.contains("test line"));
     }
 
+    @Test
     public void test_run_nullCallback() throws InterruptedException {
         String input = "test line";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -238,6 +255,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue(output.contains("test line"));
     }
 
+    @Test
     public void test_run_largeInput() throws InterruptedException {
         StringBuilder largeInput = new StringBuilder();
         for (int i = 0; i < 5000; i++) {
@@ -267,6 +285,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertEquals("Last line", "Line number 4999", receivedLines.get(4999));
     }
 
+    @Test
     public void test_run_concurrentAccess() throws InterruptedException {
         String input = "concurrent1\nconcurrent2\nconcurrent3";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -289,6 +308,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue(contains2);
     }
 
+    @Test
     public void test_getOutput_specialCharacters() throws InterruptedException {
         String input = "Special: !@#$%^&*()\nUnicode: \u3042\u3044\u3046";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -302,6 +322,7 @@ public class InputStreamThreadTest extends UnitFessTestCase {
         assertTrue(output.contains("Unicode: \u3042\u3044\u3046"));
     }
 
+    @Test
     public void test_contains_emptyString() throws InterruptedException {
         String input = "\nempty\n";
         InputStream is = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));

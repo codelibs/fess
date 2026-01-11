@@ -16,8 +16,10 @@
 package org.codelibs.fess.validation;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class UriTypeValidatorTest extends UnitFessTestCase {
+    @Test
     public void test_check_ok() {
         String[] protocols;
         String values;
@@ -59,6 +61,7 @@ public class UriTypeValidatorTest extends UnitFessTestCase {
         assertTrue(UriTypeValidator.check(protocols, values));
     }
 
+    @Test
     public void test_check_ng() {
         String[] protocols;
         String values;

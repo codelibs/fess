@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class ContentNotFoundExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withValidUrls() {
         // Test with normal URLs
         String parentUrl = "http://example.com/parent";
@@ -30,6 +32,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullParentUrl() {
         // Test with null parent URL
         String parentUrl = null;
@@ -41,6 +44,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullUrl() {
         // Test with null URL
         String parentUrl = "http://example.com/parent";
@@ -52,6 +56,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withBothNullUrls() {
         // Test with both URLs as null
         String parentUrl = null;
@@ -63,6 +68,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyUrls() {
         // Test with empty strings
         String parentUrl = "";
@@ -74,6 +80,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withSpecialCharacters() {
         // Test with URLs containing special characters
         String parentUrl = "http://example.com/parent?query=test&id=123";
@@ -86,6 +93,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withLongUrls() {
         // Test with very long URLs
         StringBuilder longParentUrl = new StringBuilder("http://example.com/");
@@ -103,6 +111,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withUnicodeCharacters() {
         // Test with Unicode characters in URLs
         String parentUrl = "http://example.com/親/ディレクトリ";
@@ -114,6 +123,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOfFessSystemException() {
         // Verify that ContentNotFoundException is an instance of FessSystemException
         String parentUrl = "http://example.com/parent";
@@ -124,6 +134,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_suppressionAndStackTrace() {
         // Test that suppression and stack trace are disabled (as per constructor)
         String parentUrl = "http://example.com/parent";
@@ -145,6 +156,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertEquals(0, stackTrace.length);
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has correct serialVersionUID
         String parentUrl = "http://example.com/parent";
@@ -155,6 +167,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof java.io.Serializable);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         String parentUrl = "http://example.com/parent";
@@ -170,6 +183,7 @@ public class ContentNotFoundExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_catchAsFessSystemException() {
         // Test catching as parent exception type
         String parentUrl = "http://example.com/parent";

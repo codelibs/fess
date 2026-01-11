@@ -36,6 +36,10 @@ import org.codelibs.curl.CurlResponse;
 import java.io.FileInputStream;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalEntity;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class CharMappingFileTest extends UnitFessTestCase {
 
@@ -43,9 +47,10 @@ public class CharMappingFileTest extends UnitFessTestCase {
     private File testFile;
     private DictionaryManager dictionaryManager;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
 
         // Create a temporary test file
         testFile = File.createTempFile("test_mapping", ".txt");
@@ -125,7 +130,8 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         if (testFile != null && testFile.exists()) {
             testFile.delete();
         }
@@ -133,21 +139,25 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test getType method
+    @Test
     public void test_getType() {
         assertEquals("mapping", charMappingFile.getType());
     }
 
     // Test getPath method
+    @Test
     public void test_getPath() {
         assertEquals(testFile.getAbsolutePath(), charMappingFile.getPath());
     }
 
     // Test getSimpleName method
+    @Test
     public void test_getSimpleName() {
         assertEquals(testFile.getName(), charMappingFile.getSimpleName());
     }
 
     // Test toString method
+    @Test
     public void test_toString() {
         String result = charMappingFile.toString();
         assertTrue(result.contains("MappingFile"));
@@ -156,6 +166,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test get method with empty file
+    @Test
     public void test_get_emptyFile() throws Exception {
         writeTestFile("");
 
@@ -164,6 +175,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test get method with valid data
+    @Test
     public void test_get_validData() throws Exception {
         writeTestFile("a,b => c\nd,e => f\n");
 
@@ -186,6 +198,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test selectList method with empty file
+    @Test
     public void test_selectList_emptyFile() throws Exception {
         // Write completely empty file
         try (java.io.FileWriter fw = new java.io.FileWriter(testFile)) {
@@ -212,6 +225,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test selectList method with valid data
+    @Test
     public void test_selectList_validData() throws Exception {
         writeTestFile("a,b => c\nd,e => f\ng,h => i\n");
 
@@ -244,6 +258,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test insert method
+    @Test
     public void test_insert() throws Exception {
         writeTestFile("a,b => c\n");
 
@@ -266,6 +281,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test update method
+    @Test
     public void test_update() throws Exception {
         writeTestFile("a,b => c\nd,e => f\n");
 
@@ -288,6 +304,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test delete method
+    @Test
     public void test_delete() throws Exception {
         writeTestFile("a,b => c\nd,e => f\n");
 
@@ -305,6 +322,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with comments and empty lines
+    @Test
     public void test_reload_withCommentsAndEmptyLines() throws Exception {
         writeTestFile("# This is a comment\n\na,b => c\n\n# Another comment\nd,e => f\n");
 
@@ -313,6 +331,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with invalid format
+    @Test
     public void test_reload_invalidFormat() throws Exception {
         writeTestFile("a,b => c\ninvalid_line\nd,e => f\n");
 
@@ -322,6 +341,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with missing arrow
+    @Test
     public void test_reload_missingArrow() throws Exception {
         writeTestFile("a,b c\n");
 
@@ -330,6 +350,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with empty inputs
+    @Test
     public void test_reload_emptyInputs() throws Exception {
         writeTestFile(" => output\n");
 
@@ -343,6 +364,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with multiple inputs
+    @Test
     public void test_reload_multipleInputs() throws Exception {
         writeTestFile("a,b,c,d,e => output\n");
 
@@ -354,6 +376,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with whitespace handling
+    @Test
     public void test_reload_whitespaceHandling() throws Exception {
         writeTestFile("  a , b  =>  c  \n");
 
@@ -366,6 +389,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test update method with InputStream
+    @Test
     public void test_update_withInputStream() throws Exception {
         writeTestFile("a,b => c\n");
 
@@ -382,6 +406,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test concurrent modification
+    @Test
     public void test_concurrentModification() throws Exception {
         writeTestFile("a,b => c\nd,e => f\n");
 
@@ -412,6 +437,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test reload with IOException
+    @Test
     public void test_reload_ioException() throws Exception {
         // This test verifies error handling during reload
         // Since we can't easily mock the IOException, we'll test with invalid data
@@ -428,6 +454,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test MappingUpdater close method with error in writer
+    @Test
     public void test_mappingUpdater_closeWithError() throws Exception {
         writeTestFile("a,b => c\n");
 
@@ -443,6 +470,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test with special characters in mapping
+    @Test
     public void test_specialCharacters() throws Exception {
         writeTestFile("α,β => γ\n中,文 => 字\n");
 
@@ -459,6 +487,7 @@ public class CharMappingFileTest extends UnitFessTestCase {
     }
 
     // Test with very long input line
+    @Test
     public void test_veryLongLine() throws Exception {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {

@@ -16,9 +16,11 @@
 package org.codelibs.fess.exception;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 public class DataStoreExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor_withMessage() {
         // Test with message only
         String message = "Data store error occurred";
@@ -31,6 +33,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof RuntimeException);
     }
 
+    @Test
     public void test_constructor_withCause() {
         // Test with cause only
         Exception cause = new IllegalStateException("Underlying error");
@@ -42,6 +45,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructor_withMessageAndCause() {
         // Test with both message and cause
         String message = "Data store connection failed";
@@ -54,6 +58,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof FessSystemException);
     }
 
+    @Test
     public void test_constructor_withNullMessage() {
         // Test with null message
         DataStoreException exception = new DataStoreException((String) null);
@@ -63,6 +68,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNullCause() {
         // Test with null cause
         DataStoreException exception = new DataStoreException((Throwable) null);
@@ -72,6 +78,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertNull(exception.getMessage());
     }
 
+    @Test
     public void test_constructor_withNullMessageAndCause() {
         // Test with both null message and cause
         DataStoreException exception = new DataStoreException(null, null);
@@ -81,6 +88,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withEmptyMessage() {
         // Test with empty string message
         String message = "";
@@ -91,6 +99,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_constructor_withNestedCause() {
         // Test with nested exception causes
         Exception rootCause = new IllegalArgumentException("Root cause");
@@ -103,6 +112,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly set
         DataStoreException exception = new DataStoreException("Test error");
@@ -114,6 +124,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertEquals("test_stackTrace", stackTrace[0].getMethodName());
     }
 
+    @Test
     public void test_serialization() {
         // Test that the exception has proper serialVersionUID
         DataStoreException exception = new DataStoreException("Serialization test");
@@ -128,6 +139,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_inheritance() {
         // Test inheritance hierarchy
         DataStoreException exception = new DataStoreException("Test");
@@ -139,6 +151,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         final String errorMessage = "Data store operation failed";
@@ -153,6 +166,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAndCatchWithCause() {
         // Test throwing and catching the exception with cause
         final String errorMessage = "Data store write error";
@@ -169,6 +183,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_multipleExceptionTypes() {
         // Test with different types of causes
         DataStoreException withIOException = new DataStoreException("IO Error", new java.io.IOException("File not found"));
@@ -180,6 +195,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(withCustom.getCause() instanceof FessSystemException);
     }
 
+    @Test
     public void test_getLongMessage() {
         // Test with very long message
         StringBuilder longMessage = new StringBuilder();
@@ -193,6 +209,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(exception.getMessage().length() > 5000);
     }
 
+    @Test
     public void test_getLocalizedMessage() {
         // Test getLocalizedMessage method (inherited from Throwable)
         String message = "Localized error message";
@@ -202,6 +219,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertEquals(message, exception.getLocalizedMessage());
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         String message = "Test exception";
@@ -213,6 +231,7 @@ public class DataStoreExceptionTest extends UnitFessTestCase {
         assertTrue(toString.contains(message));
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test fillInStackTrace method
         DataStoreException exception = new DataStoreException("Stack trace test");

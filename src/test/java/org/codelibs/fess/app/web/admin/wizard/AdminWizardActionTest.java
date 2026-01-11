@@ -19,6 +19,10 @@ import org.codelibs.fess.helper.ProtocolHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * Test class for AdminWizardAction.
@@ -28,9 +32,10 @@ public class AdminWizardActionTest extends UnitFessTestCase {
 
     private TestableAdminWizardAction wizardAction;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         // Setup protocolHelper with test configuration
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
             @Override
@@ -51,7 +56,8 @@ public class AdminWizardActionTest extends UnitFessTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    @AfterEach
+    protected void tearDown() throws Exception {
         ComponentUtil.setFessConfig(null);
         super.tearDown();
     }
@@ -68,37 +74,44 @@ public class AdminWizardActionTest extends UnitFessTestCase {
     //                                                            convertCrawlingPath Tests
     //                                                            =========================
 
+    @Test
     public void test_convertCrawlingPath_http_protocol() {
         assertEquals("http://example.com", wizardAction.convertCrawlingPath("http://example.com"));
         assertEquals("http://example.com/path", wizardAction.convertCrawlingPath("http://example.com/path"));
         assertEquals("http://localhost:8080/app", wizardAction.convertCrawlingPath("http://localhost:8080/app"));
     }
 
+    @Test
     public void test_convertCrawlingPath_https_protocol() {
         assertEquals("https://example.com", wizardAction.convertCrawlingPath("https://example.com"));
         assertEquals("https://secure.example.com/path", wizardAction.convertCrawlingPath("https://secure.example.com/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_smb_protocol() {
         assertEquals("smb://server/share", wizardAction.convertCrawlingPath("smb://server/share"));
         assertEquals("smb://192.168.1.1/path", wizardAction.convertCrawlingPath("smb://192.168.1.1/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_smb1_protocol() {
         assertEquals("smb1://server/share", wizardAction.convertCrawlingPath("smb1://server/share"));
         assertEquals("smb1://192.168.1.1/path", wizardAction.convertCrawlingPath("smb1://192.168.1.1/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_ftp_protocol() {
         assertEquals("ftp://ftp.example.com/path", wizardAction.convertCrawlingPath("ftp://ftp.example.com/path"));
         assertEquals("ftp://192.168.1.1/files", wizardAction.convertCrawlingPath("ftp://192.168.1.1/files"));
     }
 
+    @Test
     public void test_convertCrawlingPath_storage_protocol() {
         assertEquals("storage://container/path", wizardAction.convertCrawlingPath("storage://container/path"));
         assertEquals("storage://bucket/folder/file.txt", wizardAction.convertCrawlingPath("storage://bucket/folder/file.txt"));
     }
 
+    @Test
     public void test_convertCrawlingPath_s3_protocol() {
         assertEquals("s3://bucket/path", wizardAction.convertCrawlingPath("s3://bucket/path"));
         assertEquals("s3://my-bucket/folder/file.txt", wizardAction.convertCrawlingPath("s3://my-bucket/folder/file.txt"));
@@ -107,6 +120,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
                 wizardAction.convertCrawlingPath("s3://my-bucket-name/deep/nested/path/file.txt"));
     }
 
+    @Test
     public void test_convertCrawlingPath_gcs_protocol() {
         assertEquals("gcs://bucket/path", wizardAction.convertCrawlingPath("gcs://bucket/path"));
         assertEquals("gcs://my-bucket/folder/file.txt", wizardAction.convertCrawlingPath("gcs://my-bucket/folder/file.txt"));
@@ -115,31 +129,37 @@ public class AdminWizardActionTest extends UnitFessTestCase {
                 wizardAction.convertCrawlingPath("gcs://my-bucket-name/deep/nested/path/file.txt"));
     }
 
+    @Test
     public void test_convertCrawlingPath_www_prefix() {
         assertEquals("http://www.example.com", wizardAction.convertCrawlingPath("www.example.com"));
         assertEquals("http://www.example.com/path", wizardAction.convertCrawlingPath("www.example.com/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_double_slash_prefix() {
         assertEquals("file:////server/share", wizardAction.convertCrawlingPath("//server/share"));
         assertEquals("file:////192.168.1.1/path", wizardAction.convertCrawlingPath("//192.168.1.1/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_single_slash_prefix() {
         assertEquals("file:/home/user", wizardAction.convertCrawlingPath("/home/user"));
         assertEquals("file:/var/log/app.log", wizardAction.convertCrawlingPath("/var/log/app.log"));
     }
 
+    @Test
     public void test_convertCrawlingPath_windows_path() {
         assertEquals("file:/C:/Users/test", wizardAction.convertCrawlingPath("C:\\Users\\test"));
         assertEquals("file:/D:/Data/files", wizardAction.convertCrawlingPath("D:\\Data\\files"));
     }
 
+    @Test
     public void test_convertCrawlingPath_file_protocol() {
         assertEquals("file:/path/to/file", wizardAction.convertCrawlingPath("file:/path/to/file"));
         assertEquals("file:///home/user", wizardAction.convertCrawlingPath("file:///home/user"));
     }
 
+    @Test
     public void test_convertCrawlingPath_s3_not_converted() {
         // S3 paths should be returned as-is, not converted
         String s3Path = "s3://my-bucket/path/to/object";
@@ -149,6 +169,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
         assertFalse(wizardAction.convertCrawlingPath(s3Path).startsWith("file:"));
     }
 
+    @Test
     public void test_convertCrawlingPath_gcs_not_converted() {
         // GCS paths should be returned as-is, not converted
         String gcsPath = "gcs://my-bucket/path/to/object";
@@ -158,6 +179,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
         assertFalse(wizardAction.convertCrawlingPath(gcsPath).startsWith("file:"));
     }
 
+    @Test
     public void test_convertCrawlingPath_s3_various_formats() {
         // Various S3 bucket and path formats
         assertEquals("s3://bucket/", wizardAction.convertCrawlingPath("s3://bucket/"));
@@ -167,6 +189,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
         assertEquals("s3://123bucket/path", wizardAction.convertCrawlingPath("s3://123bucket/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_gcs_various_formats() {
         // Various GCS bucket and path formats
         assertEquals("gcs://bucket/", wizardAction.convertCrawlingPath("gcs://bucket/"));
@@ -176,6 +199,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
         assertEquals("gcs://bucket_with_underscores/path", wizardAction.convertCrawlingPath("gcs://bucket_with_underscores/path"));
     }
 
+    @Test
     public void test_convertCrawlingPath_s3_with_special_characters() {
         // S3 paths with special characters in object keys
         assertEquals("s3://bucket/path/file%20with%20spaces.txt",
@@ -183,6 +207,7 @@ public class AdminWizardActionTest extends UnitFessTestCase {
         assertEquals("s3://bucket/path/ファイル.txt", wizardAction.convertCrawlingPath("s3://bucket/path/ファイル.txt"));
     }
 
+    @Test
     public void test_convertCrawlingPath_gcs_with_special_characters() {
         // GCS paths with special characters in object keys
         assertEquals("gcs://bucket/path/file%20with%20spaces.txt",

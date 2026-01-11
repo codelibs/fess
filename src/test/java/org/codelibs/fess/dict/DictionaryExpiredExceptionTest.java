@@ -21,9 +21,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
 
+    @Test
     public void test_constructor() {
         // Test default constructor
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -32,6 +36,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertNull(exception.getCause());
     }
 
+    @Test
     public void test_instanceOf() {
         // Test that exception is instance of RuntimeException
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -40,6 +45,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertTrue(exception instanceof Throwable);
     }
 
+    @Test
     public void test_throwAndCatch() {
         // Test throwing and catching the exception
         try {
@@ -52,6 +58,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_throwAsRuntimeException() {
         // Test that it can be caught as RuntimeException
         try {
@@ -64,6 +71,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
     public void test_serialization() throws Exception {
         // Test that the exception is serializable
         DictionaryExpiredException original = new DictionaryExpiredException();
@@ -86,6 +94,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertNull(deserialized.getCause());
     }
 
+    @Test
     public void test_stackTrace() {
         // Test that stack trace is properly maintained
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -99,6 +108,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertEquals(this.getClass().getName(), stackTrace[0].getClassName());
     }
 
+    @Test
     public void test_multipleCatches() {
         // Test with multiple catch blocks
         boolean caughtSpecific = false;
@@ -116,6 +126,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertFalse("Should not have caught as RuntimeException", caughtRuntime);
     }
 
+    @Test
     public void test_rethrow() {
         // Test rethrowing the exception
         DictionaryExpiredException originalException = null;
@@ -137,6 +148,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertSame(originalException, rethrownException);
     }
 
+    @Test
     public void test_equals() {
         // Test that different instances are not equal
         DictionaryExpiredException exception1 = new DictionaryExpiredException();
@@ -147,6 +159,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertTrue(exception1.equals(exception1));
     }
 
+    @Test
     public void test_hashCode() {
         // Test hashCode consistency
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -156,6 +169,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertEquals(hashCode1, hashCode2);
     }
 
+    @Test
     public void test_toString() {
         // Test toString method
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -165,6 +179,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertTrue(str.contains("DictionaryExpiredException"));
     }
 
+    @Test
     public void test_getLocalizedMessage() {
         // Test getLocalizedMessage method
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -173,6 +188,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertNull(localizedMessage);
     }
 
+    @Test
     public void test_fillInStackTrace() {
         // Test fillInStackTrace method
         DictionaryExpiredException exception = new DictionaryExpiredException();
@@ -186,6 +202,7 @@ public class DictionaryExpiredExceptionTest extends UnitFessTestCase {
         assertTrue(stackTrace.length > 0);
     }
 
+    @Test
     public void test_printStackTrace() {
         // Test printStackTrace doesn't throw exception
         DictionaryExpiredException exception = new DictionaryExpiredException();
