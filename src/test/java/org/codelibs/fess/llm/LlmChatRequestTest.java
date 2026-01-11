@@ -152,8 +152,7 @@ public class LlmChatRequestTest extends UnitFessTestCase {
 
     @Test
     public void test_fluentBuilding() {
-        final LlmChatRequest request = new LlmChatRequest()
-                .addSystemMessage("You are a helpful assistant")
+        final LlmChatRequest request = new LlmChatRequest().addSystemMessage("You are a helpful assistant")
                 .addUserMessage("Hello!")
                 .addAssistantMessage("Hi there!")
                 .addUserMessage("How are you?")

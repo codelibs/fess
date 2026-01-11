@@ -84,4 +84,14 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     protected void assertEquals(String message, int expected, int actual) {
         Assertions.assertEquals(expected, actual, message);
     }
+
+    // assertSame - JUnit 5 style (no message)
+    protected void assertSame(Object expected, Object actual) {
+        Assertions.assertSame(expected, actual);
+    }
+
+    // assertSame - JUnit 5 style (with message)
+    protected void assertSame(Object expected, Object actual, String message) {
+        Assertions.assertSame(expected, actual, message);
+    }
 }
