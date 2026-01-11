@@ -403,6 +403,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /advance.jsp */
     HtmlNext path_AdvanceJsp = new HtmlNext("/advance.jsp");
 
+    /** The path of the HTML: /chat/chat.jsp */
+    HtmlNext path_Chat_ChatJsp = new HtmlNext("/chat/chat.jsp");
+
     /** The path of the HTML: /error/badRequest.jsp */
     HtmlNext path_Error_BadRequestJsp = new HtmlNext("/error/badRequest.jsp");
 

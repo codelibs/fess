@@ -27,6 +27,8 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.auth.AuthenticationManager;
+import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.chat.ChatSessionManager;
 import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.crawler.client.CrawlerClientCreator;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -226,6 +228,10 @@ public final class ComponentUtil {
     private static final String RANK_FUSION_PROCESSOR = "rankFusionProcessor";
 
     private static final String PROTOCOL_HELPER = "protocolHelper";
+
+    private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
+
+    private static final String CHAT_CLIENT = "chatClient";
 
     private static IndexingHelper indexingHelper;
 
@@ -822,6 +828,14 @@ public final class ComponentUtil {
         return getComponent(PROTOCOL_HELPER);
     }
 
+    public static ChatSessionManager getChatSessionManager() {
+        return getComponent(CHAT_SESSION_MANAGER);
+    }
+
+    public static ChatClient getChatClient() {
+        return getComponent(CHAT_CLIENT);
+    }
+
     /**
      * Gets a component by its class type.
      * @param <T> The type of the component.
@@ -963,4 +977,5 @@ public final class ComponentUtil {
     public static void register(final Object instance, final String name) {
         componentMap.put(name, instance);
     }
+
 }

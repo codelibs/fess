@@ -3423,6 +3423,33 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Update */
     public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
 
+    /** The key of the message: AI Chat - Fess */
+    public static final String LABELS_chat_title = "{labels.chat_title}";
+
+    /** The key of the message: AI Chat */
+    public static final String LABELS_chat_welcome_title = "{labels.chat_welcome_title}";
+
+    /** The key of the message: Ask me anything about your documents! */
+    public static final String LABELS_chat_welcome_message = "{labels.chat_welcome_message}";
+
+    /** The key of the message: New Chat */
+    public static final String LABELS_chat_new_chat = "{labels.chat_new_chat}";
+
+    /** The key of the message: Clear */
+    public static final String LABELS_chat_clear = "{labels.chat_clear}";
+
+    /** The key of the message: Ask a question... */
+    public static final String LABELS_chat_input_placeholder = "{labels.chat_input_placeholder}";
+
+    /** The key of the message: Thinking... */
+    public static final String LABELS_chat_thinking = "{labels.chat_thinking}";
+
+    /** The key of the message: An error occurred. Please try again. */
+    public static final String LABELS_chat_error = "{labels.chat_error}";
+
+    /** The key of the message: Sources */
+    public static final String LABELS_chat_sources = "{labels.chat_sources}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
