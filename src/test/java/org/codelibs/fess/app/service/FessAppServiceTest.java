@@ -16,49 +16,62 @@
 package org.codelibs.fess.app.service;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 public class FessAppServiceTest extends UnitFessTestCase {
 
     private TestFessAppService service;
 
+    @BeforeEach
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         service = new TestFessAppService();
     }
 
+    @Test
     public void test_wrapQuery_withoutWildcards() {
         assertEquals("*test*", service.callWrapQuery("test"));
     }
 
+    @Test
     public void test_wrapQuery_withLeadingWildcard() {
         assertEquals("*test*", service.callWrapQuery("*test"));
     }
 
+    @Test
     public void test_wrapQuery_withTrailingWildcard() {
         assertEquals("*test*", service.callWrapQuery("test*"));
     }
 
+    @Test
     public void test_wrapQuery_withBothWildcards() {
         assertEquals("*test*", service.callWrapQuery("*test*"));
     }
 
+    @Test
     public void test_wrapQuery_emptyString() {
         assertEquals("**", service.callWrapQuery(""));
     }
 
+    @Test
     public void test_wrapQuery_singleWildcard() {
         assertEquals("*", service.callWrapQuery("*"));
     }
 
+    @Test
     public void test_wrapQuery_withSpaces() {
         assertEquals("*test query*", service.callWrapQuery("test query"));
     }
 
+    @Test
     public void test_wrapQuery_withSpecialCharacters() {
         assertEquals("*test@example.com*", service.callWrapQuery("test@example.com"));
     }
 
+    @Test
     public void test_wrapQuery_multipleInternalWildcards() {
         assertEquals("*test*query*search*", service.callWrapQuery("test*query*search"));
     }
