@@ -148,6 +148,10 @@ var FessChat = (function() {
             var data = JSON.parse(e.data);
             if (data.status === 'start' && data.phase) {
                 var phaseMessage = config.labels.phases[data.phase] || data.message || 'Processing...';
+                // Replace {keywords} placeholder with actual keywords
+                if (data.keywords) {
+                    phaseMessage = phaseMessage.replace('{keywords}', data.keywords);
+                }
                 showStatus('thinking', phaseMessage);
             }
         });

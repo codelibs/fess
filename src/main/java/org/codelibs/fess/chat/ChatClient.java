@@ -273,8 +273,9 @@ public class ChatClient {
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
             } else {
                 // Phase 2: Search with keywords
-                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...");
                 final List<String> keywords = intentResult.getKeywords().isEmpty() ? List.of(userMessage) : intentResult.getKeywords();
+                final String keywordsStr = String.join(" ", keywords);
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", keywordsStr);
                 final List<Map<String, Object>> searchResults = searchWithKeywords(keywords);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
