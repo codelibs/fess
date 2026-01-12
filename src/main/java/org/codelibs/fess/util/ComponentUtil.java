@@ -828,10 +828,18 @@ public final class ComponentUtil {
         return getComponent(PROTOCOL_HELPER);
     }
 
+    /**
+     * Gets the chat session manager component.
+     * @return The chat session manager.
+     */
     public static ChatSessionManager getChatSessionManager() {
         return getComponent(CHAT_SESSION_MANAGER);
     }
 
+    /**
+     * Gets the chat client component.
+     * @return The chat client.
+     */
     public static ChatClient getChatClient() {
         return getComponent(CHAT_CLIENT);
     }
