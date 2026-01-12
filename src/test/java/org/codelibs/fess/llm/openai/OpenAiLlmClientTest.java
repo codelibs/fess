@@ -105,7 +105,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_defaultValues() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -113,7 +113,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         final Map<String, Object> body = client.buildRequestBody(request, false);
 
-        assertEquals("gpt-4o", body.get("model"));
+        assertEquals("gpt-5-mini", body.get("model"));
         assertEquals(false, body.get("stream"));
         assertEquals(0.7, body.get("temperature"));
         assertEquals(4096, body.get("max_tokens"));
@@ -127,7 +127,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_withRequestModel() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -140,7 +140,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_withRequestTemperature() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -153,7 +153,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_withRequestMaxTokens() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -166,7 +166,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_streaming() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -179,7 +179,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_multipleMessages() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -207,7 +207,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_blankModelUsesDefault() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -215,12 +215,12 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         final Map<String, Object> body = client.buildRequestBody(request, false);
 
-        assertEquals("gpt-4o", body.get("model"));
+        assertEquals("gpt-5-mini", body.get("model"));
     }
 
     @Test
     public void test_buildRequestBody_nullModelUsesDefault() {
-        client.setTestModel("gpt-4o");
+        client.setTestModel("gpt-5-mini");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -228,7 +228,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         final Map<String, Object> body = client.buildRequestBody(request, false);
 
-        assertEquals("gpt-4o", body.get("model"));
+        assertEquals("gpt-5-mini", body.get("model"));
     }
 
     @Test
@@ -254,7 +254,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
     private static class TestableOpenAiLlmClient extends OpenAiLlmClient {
         private String testApiKey = "";
         private String testApiUrl = "https://api.openai.com/v1";
-        private String testModel = "gpt-4o";
+        private String testModel = "gpt-5-mini";
         private int testTimeout = 60000;
         private double testTemperature = 0.7;
         private int testMaxTokens = 4096;
