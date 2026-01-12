@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<!-- Chat session manager and client -->
+	<component name="chatSessionManager" class="org.codelibs.fess.chat.ChatSessionManager">
+	</component>
+
+	<component name="chatClient" class="org.codelibs.fess.chat.ChatClient">
+	</component>
+
+	<!-- Markdown renderer -->
+	<component name="markdownRenderer" class="org.codelibs.fess.helper.MarkdownRenderer">
+		<postConstruct name="init"/>
+	</component>
+
+	<!-- LLM client manager -->
+	<component name="llmClientManager" class="org.codelibs.fess.llm.LlmClientManager">
+	</component>
+
+	<!-- LLM clients -->
+	<component name="ollamaLlmClient" class="org.codelibs.fess.llm.ollama.OllamaLlmClient">
+		<postConstruct name="init"/>
+	</component>
+
+	<component name="openaiLlmClient" class="org.codelibs.fess.llm.openai.OpenAiLlmClient">
+		<postConstruct name="init"/>
+	</component>
+
+	<component name="geminiLlmClient" class="org.codelibs.fess.llm.gemini.GeminiLlmClient">
+		<postConstruct name="init"/>
+	</component>
+</components>

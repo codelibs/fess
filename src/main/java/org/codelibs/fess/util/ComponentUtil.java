@@ -27,6 +27,8 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.auth.AuthenticationManager;
+import org.codelibs.fess.chat.ChatClient;
+import org.codelibs.fess.chat.ChatSessionManager;
 import org.codelibs.fess.cors.CorsHandlerFactory;
 import org.codelibs.fess.crawler.client.CrawlerClientCreator;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
@@ -51,6 +53,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LanguageHelper;
+import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -226,6 +229,12 @@ public final class ComponentUtil {
     private static final String RANK_FUSION_PROCESSOR = "rankFusionProcessor";
 
     private static final String PROTOCOL_HELPER = "protocolHelper";
+
+    private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
+
+    private static final String CHAT_CLIENT = "chatClient";
+
+    private static final String MARKDOWN_RENDERER = "markdownRenderer";
 
     private static IndexingHelper indexingHelper;
 
@@ -823,6 +832,30 @@ public final class ComponentUtil {
     }
 
     /**
+     * Gets the chat session manager component.
+     * @return The chat session manager.
+     */
+    public static ChatSessionManager getChatSessionManager() {
+        return getComponent(CHAT_SESSION_MANAGER);
+    }
+
+    /**
+     * Gets the chat client component.
+     * @return The chat client.
+     */
+    public static ChatClient getChatClient() {
+        return getComponent(CHAT_CLIENT);
+    }
+
+    /**
+     * Gets the markdown renderer component.
+     * @return The markdown renderer.
+     */
+    public static MarkdownRenderer getMarkdownRenderer() {
+        return getComponent(MARKDOWN_RENDERER);
+    }
+
+    /**
      * Gets a component by its class type.
      * @param <T> The type of the component.
      * @param clazz The class of the component to retrieve.
@@ -963,4 +996,5 @@ public final class ComponentUtil {
     public static void register(final Object instance, final String name) {
         componentMap.put(name, instance);
     }
+
 }
