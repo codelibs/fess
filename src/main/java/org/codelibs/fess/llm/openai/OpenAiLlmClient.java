@@ -15,6 +15,16 @@
  */
 package org.codelibs.fess.llm.openai;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -22,11 +32,25 @@ import org.codelibs.fess.llm.LlmChatRequest;
 import org.codelibs.fess.llm.LlmChatResponse;
 import org.codelibs.fess.llm.LlmClient;
 import org.codelibs.fess.llm.LlmException;
+import org.codelibs.fess.llm.LlmMessage;
 import org.codelibs.fess.llm.LlmStreamCallback;
 import org.codelibs.fess.util.ComponentUtil;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 /**
  * LLM client implementation for OpenAI API.
+ *
+ * OpenAI provides cloud-based LLM services including GPT-4 and other models.
+ * This client supports both synchronous and streaming chat completions.
  *
  * @author FessProject
  * @see <a href="https://platform.openai.com/docs/api-reference">OpenAI API Reference</a>
@@ -34,7 +58,13 @@ import org.codelibs.fess.util.ComponentUtil;
 public class OpenAiLlmClient implements LlmClient {
 
     private static final Logger logger = LogManager.getLogger(OpenAiLlmClient.class);
+    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
     private static final String NAME = "openai";
+    private static final String SSE_DATA_PREFIX = "data: ";
+    private static final String SSE_DONE_MARKER = "[DONE]";
+
+    private OkHttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Default constructor.
@@ -44,11 +74,14 @@ public class OpenAiLlmClient implements LlmClient {
     }
 
     /**
-     * Initializes the client.
+     * Initializes the HTTP client.
      */
     public void init() {
+        final int timeout = getTimeout();
+        httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
+                .readTimeout(timeout, TimeUnit.MILLISECONDS).writeTimeout(timeout, TimeUnit.MILLISECONDS).build();
         if (logger.isDebugEnabled()) {
-            logger.debug("Initialized OpenAiLlmClient");
+            logger.debug("Initialized OpenAiLlmClient with timeout: {}ms", timeout);
         }
     }
 
@@ -59,20 +92,259 @@ public class OpenAiLlmClient implements LlmClient {
 
     @Override
     public boolean isAvailable() {
-        // Not yet implemented - return false until chat methods are properly implemented
-        return false;
+        final String apiKey = getApiKey();
+        if (StringUtil.isBlank(apiKey)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("OpenAI is not available. apiKey is blank");
+            }
+            return false;
+        }
+        final String apiUrl = getApiUrl();
+        if (StringUtil.isBlank(apiUrl)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("OpenAI is not available. apiUrl is blank");
+            }
+            return false;
+        }
+        try {
+            final Request request = new Request.Builder().url(apiUrl + "/models").get()
+                    .addHeader("Authorization", "Bearer " + apiKey).build();
+            try (Response response = getHttpClient().newCall(request).execute()) {
+                final boolean available = response.isSuccessful();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("OpenAI availability check. url={}, statusCode={}, available={}", apiUrl, response.code(), available);
+                }
+                return available;
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("OpenAI is not available. url={}, error={}", apiUrl, e.getMessage());
+            }
+            return false;
+        }
     }
 
     @Override
     public LlmChatResponse chat(final LlmChatRequest request) {
-        // TODO: Implement OpenAI chat
-        throw new LlmException("OpenAI client not yet implemented");
+        final String url = getApiUrl() + "/chat/completions";
+        final Map<String, Object> requestBody = buildRequestBody(request, false);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+                    request.getMessages().size());
+        }
+
+        try {
+            final String json = objectMapper.writeValueAsString(requestBody);
+            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Authorization", "Bearer " + getApiKey()).addHeader("Content-Type", "application/json").build();
+
+            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    logger.warn("OpenAI API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
+                }
+
+                final String responseBody = response.body() != null ? response.body().string() : "";
+                final JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+                final LlmChatResponse chatResponse = new LlmChatResponse();
+                // Parse choices[0].message.content
+                if (jsonNode.has("choices") && jsonNode.get("choices").isArray() && jsonNode.get("choices").size() > 0) {
+                    final JsonNode firstChoice = jsonNode.get("choices").get(0);
+                    if (firstChoice.has("message") && firstChoice.get("message").has("content")) {
+                        chatResponse.setContent(firstChoice.get("message").get("content").asText());
+                    }
+                    if (firstChoice.has("finish_reason") && !firstChoice.get("finish_reason").isNull()) {
+                        chatResponse.setFinishReason(firstChoice.get("finish_reason").asText());
+                    }
+                }
+                // Parse model
+                if (jsonNode.has("model")) {
+                    chatResponse.setModel(jsonNode.get("model").asText());
+                }
+                // Parse usage
+                if (jsonNode.has("usage")) {
+                    final JsonNode usage = jsonNode.get("usage");
+                    if (usage.has("prompt_tokens")) {
+                        chatResponse.setPromptTokens(usage.get("prompt_tokens").asInt());
+                    }
+                    if (usage.has("completion_tokens")) {
+                        chatResponse.setCompletionTokens(usage.get("completion_tokens").asInt());
+                    }
+                    if (usage.has("total_tokens")) {
+                        chatResponse.setTotalTokens(usage.get("total_tokens").asInt());
+                    }
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Received chat response from OpenAI. model={}, promptTokens={}, completionTokens={}, totalTokens={}, contentLength={}",
+                            chatResponse.getModel(), chatResponse.getPromptTokens(), chatResponse.getCompletionTokens(),
+                            chatResponse.getTotalTokens(), chatResponse.getContent() != null ? chatResponse.getContent().length() : 0);
+                }
+
+                return chatResponse;
+            }
+        } catch (final LlmException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("Failed to call OpenAI API. url={}, error={}", url, e.getMessage(), e);
+            throw new LlmException("Failed to call OpenAI API", e);
+        }
     }
 
     @Override
     public void streamChat(final LlmChatRequest request, final LlmStreamCallback callback) {
-        // TODO: Implement OpenAI streaming chat
-        throw new LlmException("OpenAI streaming not yet implemented");
+        final String url = getApiUrl() + "/chat/completions";
+        final Map<String, Object> requestBody = buildRequestBody(request, true);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting streaming chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+                    request.getMessages().size());
+        }
+
+        try {
+            final String json = objectMapper.writeValueAsString(requestBody);
+            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Authorization", "Bearer " + getApiKey()).addHeader("Content-Type", "application/json").build();
+
+            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    logger.warn("OpenAI streaming API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
+                }
+
+                if (response.body() == null) {
+                    logger.warn("Empty response from OpenAI streaming API. url={}", url);
+                    throw new LlmException("Empty response from OpenAI");
+                }
+
+                int chunkCount = 0;
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (StringUtil.isBlank(line)) {
+                            continue;
+                        }
+
+                        // OpenAI SSE format: "data: {json}" or "data: [DONE]"
+                        if (!line.startsWith(SSE_DATA_PREFIX)) {
+                            continue;
+                        }
+
+                        final String data = line.substring(SSE_DATA_PREFIX.length()).trim();
+                        if (SSE_DONE_MARKER.equals(data)) {
+                            callback.onChunk("", true);
+                            break;
+                        }
+
+                        try {
+                            final JsonNode jsonNode = objectMapper.readTree(data);
+                            // Parse choices[0].delta.content
+                            if (jsonNode.has("choices") && jsonNode.get("choices").isArray() && jsonNode.get("choices").size() > 0) {
+                                final JsonNode firstChoice = jsonNode.get("choices").get(0);
+                                final boolean done = firstChoice.has("finish_reason") && !firstChoice.get("finish_reason").isNull()
+                                        && !"null".equals(firstChoice.get("finish_reason").asText());
+
+                                if (firstChoice.has("delta") && firstChoice.get("delta").has("content")) {
+                                    final String content = firstChoice.get("delta").get("content").asText();
+                                    callback.onChunk(content, done);
+                                    chunkCount++;
+                                } else if (done) {
+                                    callback.onChunk("", true);
+                                }
+
+                                if (done) {
+                                    break;
+                                }
+                            }
+                        } catch (final JsonProcessingException e) {
+                            logger.warn("Failed to parse OpenAI streaming response. line={}", line, e);
+                        }
+                    }
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Completed streaming chat from OpenAI. url={}, chunkCount={}", url, chunkCount);
+                }
+            }
+        } catch (final LlmException e) {
+            callback.onError(e);
+            throw e;
+        } catch (final IOException e) {
+            logger.warn("Failed to stream from OpenAI API. url={}, error={}", url, e.getMessage(), e);
+            final LlmException llmException = new LlmException("Failed to stream from OpenAI API", e);
+            callback.onError(llmException);
+            throw llmException;
+        }
+    }
+
+    /**
+     * Builds the request body for the OpenAI API.
+     *
+     * @param request the chat request
+     * @param stream whether to enable streaming
+     * @return the request body as a map
+     */
+    protected Map<String, Object> buildRequestBody(final LlmChatRequest request, final boolean stream) {
+        final Map<String, Object> body = new HashMap<>();
+
+        // Model
+        String model = request.getModel();
+        if (StringUtil.isBlank(model)) {
+            model = getModel();
+        }
+        body.put("model", model);
+
+        // Messages
+        final List<Map<String, String>> messages = request.getMessages().stream().map(this::convertMessage).collect(Collectors.toList());
+        body.put("messages", messages);
+
+        // Stream
+        body.put("stream", stream);
+
+        // Temperature (top-level for OpenAI)
+        if (request.getTemperature() != null) {
+            body.put("temperature", request.getTemperature());
+        } else {
+            body.put("temperature", getTemperature());
+        }
+
+        // Max tokens (top-level for OpenAI)
+        if (request.getMaxTokens() != null) {
+            body.put("max_tokens", request.getMaxTokens());
+        } else {
+            body.put("max_tokens", getMaxTokens());
+        }
+
+        return body;
+    }
+
+    /**
+     * Converts an LlmMessage to a map for the API request.
+     *
+     * @param message the message to convert
+     * @return the message as a map
+     */
+    protected Map<String, String> convertMessage(final LlmMessage message) {
+        final Map<String, String> map = new HashMap<>();
+        map.put("role", message.getRole());
+        map.put("content", message.getContent());
+        return map;
+    }
+
+    /**
+     * Gets the HTTP client, initializing it if necessary.
+     *
+     * @return the HTTP client
+     */
+    protected OkHttpClient getHttpClient() {
+        if (httpClient == null) {
+            init();
+        }
+        return httpClient;
     }
 
     /**
@@ -109,5 +381,23 @@ public class OpenAiLlmClient implements LlmClient {
      */
     protected int getTimeout() {
         return ComponentUtil.getFessConfig().getRagLlmOpenaiTimeoutAsInteger();
+    }
+
+    /**
+     * Gets the temperature parameter.
+     *
+     * @return the temperature
+     */
+    protected double getTemperature() {
+        return ComponentUtil.getFessConfig().getRagChatTemperatureAsDecimal().doubleValue();
+    }
+
+    /**
+     * Gets the maximum tokens for the response.
+     *
+     * @return the maximum tokens
+     */
+    protected int getMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
     }
 }
