@@ -10,6 +10,7 @@
 						alt="<la:message key="labels.header_brand_name" />"
 						class="align-items-center" />
 				</la:link>
+			<c:if test="${!chatPage}">
 				<div
 					class="d-flex col-md-6 col-sm-8 col-7 me-auto p-0"
 					role="search">
@@ -28,6 +29,7 @@
 						</button>
 					</div>
 				</div>
+			</c:if>
 				<ul class="nav navbar-nav d-none d-md-flex">
 					<c:if test="${eoled}">
 						<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
@@ -77,13 +79,22 @@
 								</la:link></li>
 						</c:when>
 					</c:choose>
-					<c:if test="${chatEnabled}">
-						<li class="nav-item"><la:link href="/chat" styleClass="nav-link" role="button" aria-haspopup="true"
-								aria-expanded="false">
-								<i class="fa fa-fw fa-robot" aria-hidden="true"></i>
-								<span><la:message key="labels.chat_ai_mode" /></span>
-							</la:link></li>
-					</c:if>
+					<c:choose>
+						<c:when test="${chatPage}">
+							<li class="nav-item"><la:link href="/" styleClass="nav-link" role="button" aria-haspopup="true"
+									aria-expanded="false">
+									<i class="fa fa-fw fa-search" aria-hidden="true"></i>
+									<span><la:message key="labels.search" /></span>
+								</la:link></li>
+						</c:when>
+						<c:when test="${chatEnabled}">
+							<li class="nav-item"><la:link href="/chat" styleClass="nav-link" role="button" aria-haspopup="true"
+									aria-expanded="false">
+									<i class="fa fa-fw fa-robot" aria-hidden="true"></i>
+									<span><la:message key="labels.chat_ai_mode" /></span>
+								</la:link></li>
+						</c:when>
+					</c:choose>
 					<li class="nav-item"><la:link href="/help" styleClass="nav-link" role="help" aria-haspopup="true"
 							aria-expanded="false">
 							<i class="fa fa-fw fa-question-circle" aria-hidden="true"></i>
@@ -93,6 +104,7 @@
 			</div>
 		</nav>
 	</header>
+	<c:if test="${!chatPage}">
 	<div id="searchOptions" class="collapse">
 		<div class="container">
 			<jsp:include page="/WEB-INF/view/searchOptions.jsp" />
@@ -111,4 +123,5 @@
 			</div>
 		</div>
 	</div>
+	</c:if>
 </la:form>

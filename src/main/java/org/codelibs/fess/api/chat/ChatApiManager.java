@@ -78,12 +78,21 @@ public class ChatApiManager extends BaseApiManager {
     @Override
     public boolean matches(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (!fessConfig.isRagChatEnabled()) {
+        final boolean ragChatEnabled = fessConfig.isRagChatEnabled();
+        if (!ragChatEnabled) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("ChatApiManager.matches() returning false. ragChatEnabled={}", ragChatEnabled);
+            }
             return false;
         }
 
         final String servletPath = request.getServletPath();
-        return servletPath.startsWith(CHAT_API_PATH);
+        final boolean matches = servletPath.startsWith(CHAT_API_PATH);
+        if (logger.isDebugEnabled()) {
+            logger.debug("ChatApiManager.matches() checking path. servletPath={}, expectedPrefix={}, matches={}", servletPath,
+                    CHAT_API_PATH, matches);
+        }
+        return matches;
     }
 
     @Override
@@ -91,11 +100,18 @@ public class ChatApiManager extends BaseApiManager {
             throws IOException, ServletException {
         final String servletPath = request.getServletPath();
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Processing chat API request. path={}, method={}", servletPath, request.getMethod());
+        }
+
         if (servletPath.equals(STREAM_API_PATH) || servletPath.equals(STREAM_API_PATH + "/")) {
             processStreamRequest(request, response);
         } else if (servletPath.equals(CHAT_API_PATH) || servletPath.equals(CHAT_API_PATH + "/")) {
             processChatRequest(request, response);
         } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Unknown chat API path. path={}", servletPath);
+            }
             writeJsonResponse(response, HttpServletResponse.SC_NOT_FOUND, createErrorResponse("Not found"));
         }
     }
@@ -235,9 +251,13 @@ public class ChatApiManager extends BaseApiManager {
             }
 
         } catch (final Exception e) {
-            logger.warn("Failed to process stream request. message={}", e.getMessage(), e);
-            try (final PrintWriter writer = response.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", "Internal server error"));
+            logger.warn("Failed to process stream request. sessionId={}, message={}", sessionId, e.getMessage(), e);
+            if (!response.isCommitted()) {
+                try (final PrintWriter writer = response.getWriter()) {
+                    sendSseEvent(writer, "error", Map.of("message", "Internal server error"));
+                } catch (final IOException ioe) {
+                    logger.warn("Failed to send error response. error={}", ioe.getMessage());
+                }
             }
         }
     }

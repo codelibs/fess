@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.chat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.search.SearchAction;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatSessionManager;
@@ -58,9 +59,13 @@ public class ChatAction extends FessSearchAction {
      */
     @Execute
     public HtmlResponse index() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Chat page requested. Checking availability...");
+        }
+
         if (!chatClient.isAvailable()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RAG chat is not available. LLM client is not configured or not responding.");
+            if (logger.isInfoEnabled()) {
+                logger.info("Redirecting to search page. RAG chat is not available.");
             }
             return redirect(SearchAction.class);
         }
@@ -69,8 +74,9 @@ public class ChatAction extends FessSearchAction {
             logger.debug("Displaying chat page. chatEnabled=true");
         }
 
-        return asHtml(virtualHost(path_Chat_ChatJsp)).renderWith(data -> {
+        return asHtml(virtualHost(path_Chat_ChatJsp)).useForm(SearchForm.class).renderWith(data -> {
             RenderDataUtil.register(data, "chatEnabled", true);
+            RenderDataUtil.register(data, "chatPage", true);
         });
     }
 
@@ -83,6 +89,9 @@ public class ChatAction extends FessSearchAction {
     @Execute
     public HtmlResponse clear(final ChatForm form) {
         if (form.sessionId != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Clearing chat session. sessionId={}", form.sessionId);
+            }
             chatSessionManager.clearSession(form.sessionId);
         }
         return redirect(getClass());

@@ -73,7 +73,11 @@ public class ChatClient {
      * @return true if RAG chat is available
      */
     public boolean isAvailable() {
-        return llmClientManager.available();
+        final boolean available = llmClientManager.available();
+        if (logger.isDebugEnabled()) {
+            logger.debug("ChatClient availability check. available={}", available);
+        }
+        return available;
     }
 
     /**
@@ -112,7 +116,13 @@ public class ChatClient {
         }
 
         // Call LLM
-        final LlmChatResponse llmResponse = llmClientManager.chat(request);
+        final LlmChatResponse llmResponse;
+        try {
+            llmResponse = llmClientManager.chat(request);
+        } catch (final Exception e) {
+            logger.warn("Failed to get response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            throw e;
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("LLM response received. responseLength={}",
                     llmResponse.getContent() != null ? llmResponse.getContent().length() : 0);
@@ -178,10 +188,15 @@ public class ChatClient {
 
         // Stream the response and collect content
         final StringBuilder responseContent = new StringBuilder();
-        llmClientManager.streamChat(request, (chunk, done) -> {
-            responseContent.append(chunk);
-            callback.onChunk(chunk, done);
-        });
+        try {
+            llmClientManager.streamChat(request, (chunk, done) -> {
+                responseContent.append(chunk);
+                callback.onChunk(chunk, done);
+            });
+        } catch (final Exception e) {
+            logger.warn("Failed to stream response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            throw e;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("LLM streaming completed. responseLength={}", responseContent.length());

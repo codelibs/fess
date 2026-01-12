@@ -11,7 +11,7 @@ ${fe:html(true)}
 <link href="${fe:url('/css/chat.css')}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<jsp:include page="chatHeader.jsp" />
+	<jsp:include page="../header.jsp" />
 	<main class="container">
 		<div class="row">
 			<div class="col-12 col-lg-10 offset-lg-1">
@@ -56,6 +56,7 @@ ${fe:html(true)}
 				streamUrl: '${fe:url('/api/v1/chat/stream')}',
 				labels: {
 					thinking: '<la:message key="labels.chat_thinking" />',
+					waiting: '<la:message key="labels.chat_waiting" />',
 					error: '<la:message key="labels.chat_error" />',
 					sources: '<la:message key="labels.chat_sources" />',
 					statusReady: '<la:message key="labels.chat_status_ready" />'

@@ -7,11 +7,13 @@
 	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
 	</component>
 
+	<!-- ChatApiManager must be registered before SearchApiManager -->
+	<!-- because SearchApiManager matches /api/v1/* which would intercept /api/v1/chat/* -->
+	<component name="chatApiManager" class="org.codelibs.fess.api.chat.ChatApiManager">
+	</component>
+
 	<component name="searchApiManager" class="org.codelibs.fess.api.json.SearchApiManager">
 	</component>
 	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">
-	</component>
-
-	<component name="chatApiManager" class="org.codelibs.fess.api.chat.ChatApiManager">
 	</component>
 </components>

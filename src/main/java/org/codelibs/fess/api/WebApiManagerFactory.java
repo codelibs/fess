@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -27,6 +30,8 @@ import jakarta.servlet.http.HttpServletRequest;
  * functionality to find the appropriate manager for incoming requests.
  */
 public class WebApiManagerFactory {
+
+    private static final Logger logger = LogManager.getLogger(WebApiManagerFactory.class);
 
     /**
      * Default constructor.
@@ -46,10 +51,16 @@ public class WebApiManagerFactory {
      * @param webApiManager The web API manager to add
      */
     public void add(final WebApiManager webApiManager) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding WebApiManager. class={}", webApiManager.getClass().getSimpleName());
+        }
         final List<WebApiManager> list = new ArrayList<>();
         Collections.addAll(list, webApiManagers);
         list.add(webApiManager);
         webApiManagers = list.toArray(new WebApiManager[list.size()]);
+        if (logger.isDebugEnabled()) {
+            logger.debug("WebApiManager added. totalManagers={}", webApiManagers.length);
+        }
     }
 
     /**
@@ -59,10 +70,21 @@ public class WebApiManagerFactory {
      * @return The matching web API manager, or null if no match found
      */
     public WebApiManager get(final HttpServletRequest request) {
+        final String servletPath = request.getServletPath();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for WebApiManager. servletPath={}, registeredManagers={}", servletPath, webApiManagers.length);
+        }
         for (final WebApiManager webApiManager : webApiManagers) {
             if (webApiManager.matches(request)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("WebApiManager matched. servletPath={}, manager={}", servletPath,
+                            webApiManager.getClass().getSimpleName());
+                }
                 return webApiManager;
             }
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("No WebApiManager matched. servletPath={}", servletPath);
         }
         return null;
     }

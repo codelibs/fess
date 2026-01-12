@@ -9,6 +9,7 @@ var FessChat = (function() {
         streamUrl: '/api/v1/chat/stream',
         labels: {
             thinking: 'Thinking...',
+            waiting: '...',
             error: 'An error occurred. Please try again.',
             sources: 'Sources'
         }
@@ -124,9 +125,9 @@ var FessChat = (function() {
         var messageElement = null;
 
         eventSource.onopen = function() {
-            // Remove thinking indicator and create message element
+            // Remove thinking indicator and create message element with waiting text
             $('#' + thinkingId).remove();
-            messageElement = addMessage('assistant', '', true);
+            messageElement = addMessage('assistant', config.labels.waiting, true);
         };
 
         eventSource.addEventListener('session', function(e) {

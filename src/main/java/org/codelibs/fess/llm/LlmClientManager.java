@@ -133,10 +133,27 @@ public class LlmClientManager {
      * @throws LlmException if LLM is not available or an error occurs
      */
     public LlmChatResponse chat(final LlmChatRequest request) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting LLM chat request. messageCount={}", request.getMessages().size());
+        }
         if (!available()) {
+            logger.warn("LLM chat request failed. LLM client is not available. llmType={}", getLlmType());
             throw new LlmException("LLM client is not available");
         }
-        return getClient().chat(request);
+        try {
+            final LlmChatResponse response = getClient().chat(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("LLM chat request completed. contentLength={}",
+                        response.getContent() != null ? response.getContent().length() : 0);
+            }
+            return response;
+        } catch (final LlmException e) {
+            logger.warn("LLM chat request failed. error={}", e.getMessage());
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("LLM chat request failed with unexpected error. error={}", e.getMessage(), e);
+            throw new LlmException("LLM chat request failed", e);
+        }
     }
 
     /**
@@ -147,9 +164,24 @@ public class LlmClientManager {
      * @throws LlmException if LLM is not available or an error occurs
      */
     public void streamChat(final LlmChatRequest request, final LlmStreamCallback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting LLM streaming chat request. messageCount={}", request.getMessages().size());
+        }
         if (!available()) {
+            logger.warn("LLM streaming chat request failed. LLM client is not available. llmType={}", getLlmType());
             throw new LlmException("LLM client is not available");
         }
-        getClient().streamChat(request, callback);
+        try {
+            getClient().streamChat(request, callback);
+            if (logger.isDebugEnabled()) {
+                logger.debug("LLM streaming chat request completed.");
+            }
+        } catch (final LlmException e) {
+            logger.warn("LLM streaming chat request failed. error={}", e.getMessage());
+            throw e;
+        } catch (final Exception e) {
+            logger.warn("LLM streaming chat request failed with unexpected error. error={}", e.getMessage(), e);
+            throw new LlmException("LLM streaming chat request failed", e);
+        }
     }
 }

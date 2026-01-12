@@ -23,13 +23,29 @@
     50% { opacity: 0.6; }
 }
 
+/* Chat card container - use flexbox for proper height distribution */
+.card.shadow-sm {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
+}
+
+.card-body.p-0 {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
 /* Chat messages area */
 .chat-messages {
-    height: 400px;
-    max-height: 60vh;
+    flex: 1;
     overflow-y: auto;
     padding: 1rem;
     scroll-behavior: smooth;
+    min-height: 200px;
 }
 
 /* Message styles */
@@ -191,9 +207,13 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .card.shadow-sm {
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
+    }
+
     .chat-messages {
-        height: 300px;
-        max-height: 50vh;
+        min-height: 150px;
     }
 
     .message-content {
