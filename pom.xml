@@ -70,7 +70,7 @@
 			</activation>
 			<properties>
 				<test.include.path>**/*Test.java</test.include.path>
-				<test.command.args>--illegal-access=permit</test.command.args>
+				<test.command.args>--illegal-access=permit -Djava.awt.headless=true</test.command.args>
 			</properties>
 		</profile>
 		<profile>
