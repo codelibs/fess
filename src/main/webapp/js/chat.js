@@ -11,7 +11,14 @@ var FessChat = (function() {
             thinking: 'Thinking...',
             waiting: '...',
             error: 'An error occurred. Please try again.',
-            sources: 'Sources'
+            sources: 'Sources',
+            phases: {
+                intent: 'Analyzing question...',
+                search: 'Searching documents...',
+                evaluate: 'Evaluating results...',
+                fetch: 'Retrieving content...',
+                answer: 'Generating answer...'
+            }
         }
     };
 
@@ -137,6 +144,14 @@ var FessChat = (function() {
             }
         });
 
+        eventSource.addEventListener('phase', function(e) {
+            var data = JSON.parse(e.data);
+            if (data.status === 'start' && data.phase) {
+                var phaseMessage = config.labels.phases[data.phase] || data.message || 'Processing...';
+                showStatus('thinking', phaseMessage);
+            }
+        });
+
         eventSource.addEventListener('chunk', function(e) {
             var data = JSON.parse(e.data);
             if (data.content) {
@@ -158,6 +173,12 @@ var FessChat = (function() {
         eventSource.addEventListener('done', function(e) {
             var data = JSON.parse(e.data);
             state.sessionId = data.sessionId;
+
+            // Replace streaming text with rendered HTML content if available
+            if (data.htmlContent && messageElement) {
+                messageElement.find('.message-text').html(data.htmlContent);
+            }
+
             state.isProcessing = false;
             updateUI();
             showStatus('ready');
@@ -299,8 +320,10 @@ var FessChat = (function() {
 
     /**
      * Show status message
+     * @param {string} status - Status type (thinking, error, ready)
+     * @param {string} customMessage - Optional custom message to display
      */
-    function showStatus(status) {
+    function showStatus(status, customMessage) {
         if (!elements.statusArea) return;
 
         var text = '';
@@ -308,16 +331,16 @@ var FessChat = (function() {
 
         switch (status) {
             case 'thinking':
-                text = config.labels.thinking || 'Thinking...';
+                text = customMessage || config.labels.thinking || 'Thinking...';
                 cssClass = 'status-thinking';
                 break;
             case 'error':
-                text = config.labels.error || 'Error occurred';
+                text = customMessage || config.labels.error || 'Error occurred';
                 cssClass = 'status-error';
                 break;
             case 'ready':
             default:
-                text = config.labels.statusReady || 'AI Assistant';
+                text = customMessage || config.labels.statusReady || 'AI Assistant';
                 cssClass = 'status-ready';
                 break;
         }

@@ -1941,7 +1941,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String PASSWORD_REQUIRE_SPECIAL_CHAR = "password.require.special.char";
 
-    /** The key of the configuration. e.g. false */
+    /** The key of the configuration. e.g. true */
     String RAG_CHAT_ENABLED = "rag.chat.enabled";
 
     /** The key of the configuration. e.g. ollama */
@@ -1950,7 +1950,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http://localhost:11434 */
     String RAG_LLM_OLLAMA_API_URL = "rag.llm.ollama.api.url";
 
-    /** The key of the configuration. e.g. llama3 */
+    /** The key of the configuration. e.g. gemma3:4b */
     String RAG_LLM_OLLAMA_MODEL = "rag.llm.ollama.model";
 
     /** The key of the configuration. e.g. 60000 */
@@ -2009,6 +2009,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 10 */
     String RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE = "rag.chat.rate.limit.requests.per.minute";
+
+    /** The key of the configuration. e.g. title,url,content,doc_id,content_title,content_description */
+    String RAG_CHAT_CONTENT_FIELDS = "rag.chat.content.fields";
+
+    /** The key of the configuration. e.g. 3 */
+    String RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS = "rag.chat.evaluation.max.relevant.docs";
 
     /**
      * Get the value of property as {@link String}.
@@ -9173,7 +9179,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.chat.enabled'. <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * comment: Whether RAG chat feature is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -9181,7 +9187,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Is the property for the key 'rag.chat.enabled' true? <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * comment: Whether RAG chat feature is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
@@ -9205,7 +9211,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.llm.ollama.model'. <br>
-     * The value is, e.g. llama3 <br>
+     * The value is, e.g. gemma3:4b <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagLlmOllamaModel();
@@ -9463,6 +9469,33 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getRagChatRateLimitRequestsPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.content.fields'. <br>
+     * The value is, e.g. title,url,content,doc_id,content_title,content_description <br>
+     * comment: <br>
+     * Enhanced RAG flow settings.<br>
+     * Fields to retrieve for full document content.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatContentFields();
+
+    /**
+     * Get the value for the key 'rag.chat.evaluation.max.relevant.docs'. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Maximum number of relevant documents to select in evaluation phase.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatEvaluationMaxRelevantDocs();
+
+    /**
+     * Get the value for the key 'rag.chat.evaluation.max.relevant.docs' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Maximum number of relevant documents to select in evaluation phase.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatEvaluationMaxRelevantDocsAsInteger();
 
     /**
      * The simple implementation for configuration.
@@ -12977,6 +13010,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE);
         }
 
+        public String getRagChatContentFields() {
+            return get(FessConfig.RAG_CHAT_CONTENT_FIELDS);
+        }
+
+        public String getRagChatEvaluationMaxRelevantDocs() {
+            return get(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS);
+        }
+
+        public Integer getRagChatEvaluationMaxRelevantDocsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -13563,10 +13608,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
-            defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
+            defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_LLM_TYPE, "ollama");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_API_URL, "http://localhost:11434");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "llama3");
+            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "gemma3:4b");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_TIMEOUT, "60000");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_KEY, "");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_MODEL, "gpt-4o");
@@ -13587,6 +13632,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "20");
             defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE, "10");
+            defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
+            defaultMap.put(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS, "3");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

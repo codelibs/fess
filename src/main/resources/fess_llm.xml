@@ -9,6 +9,11 @@
 	<component name="chatClient" class="org.codelibs.fess.chat.ChatClient">
 	</component>
 
+	<!-- Markdown renderer -->
+	<component name="markdownRenderer" class="org.codelibs.fess.helper.MarkdownRenderer">
+		<postConstruct name="init"/>
+	</component>
+
 	<!-- LLM client manager -->
 	<component name="llmClientManager" class="org.codelibs.fess.llm.LlmClientManager">
 	</component>

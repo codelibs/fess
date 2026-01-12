@@ -53,6 +53,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LanguageHelper;
+import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -232,6 +233,8 @@ public final class ComponentUtil {
     private static final String CHAT_SESSION_MANAGER = "chatSessionManager";
 
     private static final String CHAT_CLIENT = "chatClient";
+
+    private static final String MARKDOWN_RENDERER = "markdownRenderer";
 
     private static IndexingHelper indexingHelper;
 
@@ -842,6 +845,14 @@ public final class ComponentUtil {
      */
     public static ChatClient getChatClient() {
         return getComponent(CHAT_CLIENT);
+    }
+
+    /**
+     * Gets the markdown renderer component.
+     * @return The markdown renderer.
+     */
+    public static MarkdownRenderer getMarkdownRenderer() {
+        return getComponent(MARKDOWN_RENDERER);
     }
 
     /**

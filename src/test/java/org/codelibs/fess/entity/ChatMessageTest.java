@@ -211,4 +211,75 @@ public class ChatMessageTest extends UnitFessTestCase {
         assertEquals("id-456", source.getDocId());
         assertEquals("A short snippet", source.getSnippet());
     }
+
+    @Test
+    public void test_htmlContent_defaultValue() {
+        final ChatMessage message = new ChatMessage();
+        assertNull(message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_setAndGet() {
+        final ChatMessage message = new ChatMessage();
+        final String htmlContent = "<p>This is <strong>HTML</strong> content</p>";
+
+        message.setHtmlContent(htmlContent);
+
+        assertEquals(htmlContent, message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_withUserMessage() {
+        final ChatMessage message = ChatMessage.userMessage("Hello");
+        message.setHtmlContent("<p>Hello</p>");
+
+        assertEquals("Hello", message.getContent());
+        assertEquals("<p>Hello</p>", message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_withAssistantMessage() {
+        final ChatMessage message = ChatMessage.assistantMessage("# Title\n\nParagraph");
+        message.setHtmlContent("<h1>Title</h1><p>Paragraph</p>");
+
+        assertEquals("# Title\n\nParagraph", message.getContent());
+        assertEquals("<h1>Title</h1><p>Paragraph</p>", message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_setNull() {
+        final ChatMessage message = new ChatMessage();
+        message.setHtmlContent("<p>content</p>");
+        message.setHtmlContent(null);
+
+        assertNull(message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_empty() {
+        final ChatMessage message = new ChatMessage();
+        message.setHtmlContent("");
+
+        assertEquals("", message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_withSpecialCharacters() {
+        final ChatMessage message = new ChatMessage();
+        final String htmlContent = "<p>Special chars: &amp; &lt; &gt; &quot;</p>";
+
+        message.setHtmlContent(htmlContent);
+
+        assertEquals(htmlContent, message.getHtmlContent());
+    }
+
+    @Test
+    public void test_htmlContent_withUnicode() {
+        final ChatMessage message = new ChatMessage();
+        final String htmlContent = "<p>日本語テキスト</p>";
+
+        message.setHtmlContent(htmlContent);
+
+        assertEquals(htmlContent, message.getHtmlContent());
+    }
 }

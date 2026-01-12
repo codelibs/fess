@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
+import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -177,6 +178,7 @@ public class ChatApiManager extends BaseApiManager {
 
     /**
      * Processes a streaming chat request using Server-Sent Events (SSE).
+     * Uses the enhanced multi-phase RAG flow with intent detection and result evaluation.
      *
      * @param request the HTTP request
      * @param response the HTTP response
@@ -222,18 +224,66 @@ public class ChatApiManager extends BaseApiManager {
                 logger.debug("SSE session event sent. sessionId={}", sessionId);
             }
 
-            // Stream the response
-            final ChatResult result = ComponentUtil.getChatClient().streamChat(sessionId, message, userId, (chunk, done) -> {
-                try {
-                    if (!done && StringUtil.isNotBlank(chunk)) {
-                        sendSseEvent(writer, "chunk", Map.of("content", chunk));
-                    }
-                } catch (final Exception e) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed to send SSE chunk. error={}", e.getMessage());
+            // Create phase callback for SSE events
+            final ChatPhaseCallback phaseCallback = new ChatPhaseCallback() {
+                @Override
+                public void onPhaseStart(final String phase, final String phaseMessage) {
+                    try {
+                        sendSseEvent(writer, "phase", Map.of("phase", phase, "status", "start", "message", phaseMessage));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE phase start event sent. phase={}, message={}", phase, phaseMessage);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send phase start event. phase={}, error={}", phase, e.getMessage());
+                        }
                     }
                 }
-            });
+
+                @Override
+                public void onPhaseComplete(final String phase) {
+                    try {
+                        sendSseEvent(writer, "phase", Map.of("phase", phase, "status", "complete"));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE phase complete event sent. phase={}", phase);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send phase complete event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onChunk(final String content, final boolean done) {
+                    try {
+                        if (!done && StringUtil.isNotBlank(content)) {
+                            sendSseEvent(writer, "chunk", Map.of("content", content));
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send SSE chunk. error={}", e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(final String phase, final String errorMessage) {
+                    try {
+                        sendSseEvent(writer, "error", Map.of("phase", phase, "message", errorMessage));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE error event sent. phase={}, error={}", phase, errorMessage);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send error event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+            };
+
+            // Stream the response using enhanced flow
+            final ChatResult result = ComponentUtil.getChatClient().streamChatEnhanced(sessionId, message, userId, phaseCallback);
 
             // Send sources
             final List<ChatSource> sources = result.getMessage().getSources();
@@ -244,10 +294,16 @@ public class ChatApiManager extends BaseApiManager {
                 }
             }
 
-            // Send completion event
-            sendSseEvent(writer, "done", Map.of("sessionId", result.getSessionId()));
+            // Send completion event with HTML content
+            final Map<String, Object> doneData = new HashMap<>();
+            doneData.put("sessionId", result.getSessionId());
+            final String htmlContent = result.getMessage().getHtmlContent();
+            if (htmlContent != null) {
+                doneData.put("htmlContent", htmlContent);
+            }
+            sendSseEvent(writer, "done", doneData);
             if (logger.isDebugEnabled()) {
-                logger.debug("SSE stream completed. sessionId={}", result.getSessionId());
+                logger.debug("SSE stream completed. sessionId={}, hasHtmlContent={}", result.getSessionId(), htmlContent != null);
             }
 
         } catch (final Exception e) {

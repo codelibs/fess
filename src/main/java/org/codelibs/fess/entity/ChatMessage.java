@@ -51,6 +51,9 @@ public class ChatMessage implements Serializable {
     /** The list of sources referenced in this message. */
     private List<ChatSource> sources;
 
+    /** The HTML-rendered content for display. */
+    private String htmlContent;
+
     /**
      * Default constructor.
      */
@@ -209,6 +212,24 @@ public class ChatMessage implements Serializable {
      */
     public boolean isAssistant() {
         return ROLE_ASSISTANT.equals(role);
+    }
+
+    /**
+     * Gets the HTML-rendered content.
+     *
+     * @return the HTML content, or null if not rendered
+     */
+    public String getHtmlContent() {
+        return htmlContent;
+    }
+
+    /**
+     * Sets the HTML-rendered content.
+     *
+     * @param htmlContent the HTML content
+     */
+    public void setHtmlContent(final String htmlContent) {
+        this.htmlContent = htmlContent;
     }
 
     /**
