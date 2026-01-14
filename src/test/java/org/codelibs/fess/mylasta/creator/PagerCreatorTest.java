@@ -21,7 +21,6 @@ import org.lastaflute.di.core.customizer.ComponentCustomizer;
 import org.lastaflute.di.core.meta.impl.InstanceDefFactory;
 import org.lastaflute.di.naming.NamingConvention;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 // NamingConventionImpl removed - using mock instead
@@ -31,7 +30,6 @@ public class PagerCreatorTest extends UnitFessTestCase {
     private PagerCreator pagerCreator;
     private NamingConvention namingConvention;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

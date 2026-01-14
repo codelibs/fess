@@ -28,7 +28,6 @@ import org.lastaflute.web.response.JsonResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -36,7 +35,6 @@ public class SsoAuthenticatorTest extends UnitFessTestCase {
 
     private TestSsoAuthenticator authenticator;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

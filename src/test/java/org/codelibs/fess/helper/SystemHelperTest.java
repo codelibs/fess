@@ -42,7 +42,6 @@ import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -52,7 +51,6 @@ public class SystemHelperTest extends UnitFessTestCase {
 
     private final Map<String, String> envMap = new HashMap<>();
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -26,13 +26,11 @@ import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class SecuredTest extends UnitFessTestCase {
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

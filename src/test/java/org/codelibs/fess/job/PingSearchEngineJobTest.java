@@ -26,7 +26,6 @@ import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.lastaflute.core.mail.Postbox;
 import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.opensearch.cluster.health.ClusterHealthStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,7 +33,6 @@ public class PingSearchEngineJobTest extends UnitFessTestCase {
 
     private PingSearchEngineJob pingSearchEngineJob;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

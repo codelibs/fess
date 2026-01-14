@@ -17,8 +17,8 @@ package org.codelibs.fess.unit;
 
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.lastaflute.WebContainerTestCase;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.TestInfo;
 
 public abstract class UnitFessTestCase extends WebContainerTestCase {
     @Override
@@ -27,10 +27,9 @@ public abstract class UnitFessTestCase extends WebContainerTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         ComponentUtil.setFessConfig(null);
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     @Override

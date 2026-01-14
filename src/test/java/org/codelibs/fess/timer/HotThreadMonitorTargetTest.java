@@ -18,7 +18,6 @@ package org.codelibs.fess.timer;
 import org.codelibs.core.timer.TimeoutTarget;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -29,7 +28,6 @@ public class HotThreadMonitorTargetTest extends UnitFessTestCase {
 
     private HotThreadMonitorTarget target;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

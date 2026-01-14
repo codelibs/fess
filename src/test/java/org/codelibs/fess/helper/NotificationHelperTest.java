@@ -20,7 +20,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
 import org.dbflute.optional.OptionalThing;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -28,7 +27,6 @@ public class NotificationHelperTest extends UnitFessTestCase {
 
     private NotificationHelper notificationHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -32,14 +32,12 @@ import org.codelibs.fess.opensearch.config.exentity.CrawlingInfo;
 import org.codelibs.fess.opensearch.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class CrawlingInfoHelperTest extends UnitFessTestCase {
     private CrawlingInfoHelper crawlingInfoHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

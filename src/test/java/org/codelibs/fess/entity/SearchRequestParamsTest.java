@@ -28,7 +28,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -37,7 +36,6 @@ public class SearchRequestParamsTest extends UnitFessTestCase {
     private SearchRequestParams searchRequestParams;
     private TestSearchRequestParams testParams;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

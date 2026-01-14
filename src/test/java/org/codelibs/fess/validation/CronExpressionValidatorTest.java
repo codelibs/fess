@@ -18,7 +18,6 @@ package org.codelibs.fess.validation;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.ConstraintValidatorContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -26,7 +25,6 @@ public class CronExpressionValidatorTest extends UnitFessTestCase {
 
     public CronExpressionValidator validator;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

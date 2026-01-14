@@ -25,8 +25,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.opensearch.index.query.MatchAllQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -238,7 +236,6 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
         });
     }
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -267,9 +264,8 @@ public class MatchAllQueryCommandTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    protected void tearDown(TestInfo testInfo) throws Exception {
+        super.tearDown(testInfo);
     }
 
     @Test

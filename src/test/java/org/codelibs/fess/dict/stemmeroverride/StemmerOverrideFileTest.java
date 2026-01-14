@@ -21,14 +21,12 @@ import java.util.List;
 
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class StemmerOverrideFileTest extends UnitFessTestCase {
     private StemmerOverrideFile stemmerOverrideFile;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

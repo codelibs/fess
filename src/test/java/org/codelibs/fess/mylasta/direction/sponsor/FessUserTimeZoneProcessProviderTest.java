@@ -24,8 +24,6 @@ import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,7 +32,6 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     private FessUserTimeZoneProcessProvider provider;
     private RequestManager requestManager;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -43,11 +40,10 @@ public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         provider = null;
         requestManager = null;
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test isUseTimeZoneHandling() method

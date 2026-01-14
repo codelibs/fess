@@ -68,14 +68,12 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(FessXpathTransformerTest.class);
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

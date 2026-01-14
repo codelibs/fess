@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.PathMapping;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -32,7 +31,6 @@ public class PathMappingHelperTest extends UnitFessTestCase {
 
     public PathMappingHelper pathMappingHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

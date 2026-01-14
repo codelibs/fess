@@ -21,8 +21,6 @@ import java.util.Map;
 import org.codelibs.fess.llm.LlmChatRequest;
 import org.codelibs.fess.llm.LlmMessage;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -30,7 +28,6 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     private TestableOpenAiLlmClient client;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -38,9 +35,8 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    protected void tearDown(TestInfo testInfo) throws Exception {
+        super.tearDown(testInfo);
     }
 
     @Test
@@ -184,7 +180,9 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         client.setTestMaxTokens(4096);
 
         final LlmChatRequest request = new LlmChatRequest().addSystemMessage("You are a helpful assistant.")
-                .addUserMessage("What is the weather?").addAssistantMessage("I cannot access weather information.").addUserMessage("OK");
+                .addUserMessage("What is the weather?")
+                .addAssistantMessage("I cannot access weather information.")
+                .addUserMessage("OK");
 
         final Map<String, Object> body = client.buildRequestBody(request, false);
 

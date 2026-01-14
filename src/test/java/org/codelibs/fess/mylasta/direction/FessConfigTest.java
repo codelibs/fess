@@ -22,7 +22,6 @@ import java.util.Map;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -30,7 +29,6 @@ public class FessConfigTest extends UnitFessTestCase {
 
     private FessConfig fessConfig;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

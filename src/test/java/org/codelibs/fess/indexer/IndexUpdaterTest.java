@@ -59,8 +59,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.opensearch.action.search.SearchRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -81,7 +79,6 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     private FavoriteLogBhv favoriteLogBhv;
     private IngestFactory ingestFactory;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -125,14 +122,13 @@ public class IndexUpdaterTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         if (indexUpdater != null && indexUpdater.isAlive()) {
             indexUpdater.setFinishCrawling(true);
             indexUpdater.interrupt();
             indexUpdater.join(1000);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test initialization

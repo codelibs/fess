@@ -34,8 +34,6 @@ import org.codelibs.fess.opensearch.config.cbean.ThumbnailQueueCB;
 import org.codelibs.fess.opensearch.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.opensearch.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -44,7 +42,6 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     private ThumbnailManager thumbnailManager;
     private File tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -91,8 +88,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         if (thumbnailManager != null) {
             try {
                 thumbnailManager.destroy();
@@ -103,7 +99,7 @@ public class ThumbnailManagerTest extends UnitFessTestCase {
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     private void deleteDirectory(File dir) {

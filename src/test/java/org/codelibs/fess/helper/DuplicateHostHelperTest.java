@@ -20,14 +20,12 @@ import java.util.List;
 
 import org.codelibs.fess.opensearch.config.exentity.DuplicateHost;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class DuplicateHostHelperTest extends UnitFessTestCase {
     private DuplicateHostHelper duplicateHostHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

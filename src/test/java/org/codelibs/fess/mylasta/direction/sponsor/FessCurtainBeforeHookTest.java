@@ -23,8 +23,6 @@ import org.dbflute.system.DBFluteSystem;
 import org.dbflute.system.provider.DfFinalTimeZoneProvider;
 import org.lastaflute.core.direction.FwAssistantDirector;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,7 +32,6 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
     private TimeZone originalTimeZone;
     private DfFinalTimeZoneProvider originalProvider;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -45,8 +42,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Restore original timezone settings
         TimeZone.setDefault(originalTimeZone);
         if (originalProvider != null) {
@@ -54,7 +50,7 @@ public class FessCurtainBeforeHookTest extends UnitFessTestCase {
             DBFluteSystem.setFinalTimeZoneProvider(originalProvider);
             DBFluteSystem.lock();
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     @Test

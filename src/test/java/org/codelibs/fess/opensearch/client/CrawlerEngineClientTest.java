@@ -17,8 +17,6 @@ package org.codelibs.fess.opensearch.client;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -26,7 +24,6 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
 
     private CrawlerEngineClient crawlerEngineClient;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -34,10 +31,9 @@ public class CrawlerEngineClientTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         crawlerEngineClient = null;
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test constructor

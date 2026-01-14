@@ -22,7 +22,6 @@ import java.util.Random;
 import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -32,7 +31,6 @@ public class AccessTokenHelperTest extends UnitFessTestCase {
 
     private AccessTokenHelper accessTokenHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

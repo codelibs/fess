@@ -26,7 +26,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.FacetResponse;
 import org.opensearch.search.aggregations.Aggregation;
 import org.opensearch.search.aggregations.Aggregations;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,7 +33,6 @@ public class SearchRenderDataTest extends UnitFessTestCase {
 
     private SearchRenderData searchRenderData;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

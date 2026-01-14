@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import org.codelibs.core.timer.TimeoutTarget;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -31,7 +30,6 @@ public class SystemMonitorTargetTest extends UnitFessTestCase {
 
     private SystemMonitorTarget target;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

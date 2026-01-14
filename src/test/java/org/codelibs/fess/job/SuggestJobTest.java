@@ -35,8 +35,6 @@ import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 
 import jakarta.servlet.ServletContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -50,7 +48,6 @@ public class SuggestJobTest extends UnitFessTestCase {
     private MockPopularWordHelper mockPopularWordHelper;
     private File tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -81,13 +78,12 @@ public class SuggestJobTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Clean up temp directory
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     private void createRequiredDirectories() {

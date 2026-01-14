@@ -21,7 +21,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.jdbc.ClassificationMeta;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -29,7 +28,6 @@ public class FessListedClassificationProviderTest extends UnitFessTestCase {
 
     private FessListedClassificationProvider provider;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

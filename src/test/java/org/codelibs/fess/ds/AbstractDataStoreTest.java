@@ -34,14 +34,12 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class AbstractDataStoreTest extends UnitFessTestCase {
     public AbstractDataStore dataStore;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

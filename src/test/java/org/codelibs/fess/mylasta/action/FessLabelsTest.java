@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -30,7 +29,6 @@ public class FessLabelsTest extends UnitFessTestCase {
 
     private FessLabels fessLabels;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
