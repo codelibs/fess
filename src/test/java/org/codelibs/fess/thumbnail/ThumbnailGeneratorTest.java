@@ -24,8 +24,6 @@ import java.util.Map;
 
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -35,7 +33,6 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
     private File tempOutputFile;
     private Path tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -47,8 +44,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Clean up temp files
         if (tempOutputFile != null && tempOutputFile.exists()) {
             tempOutputFile.delete();
@@ -62,7 +58,7 @@ public class ThumbnailGeneratorTest extends UnitFessTestCase {
                 }
             });
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     @Test

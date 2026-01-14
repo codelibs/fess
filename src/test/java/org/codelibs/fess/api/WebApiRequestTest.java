@@ -41,8 +41,6 @@ import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -51,7 +49,6 @@ public class WebApiRequestTest extends UnitFessTestCase {
     private WebApiRequest webApiRequest;
     private MockHttpServletRequest mockRequest;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -59,11 +56,10 @@ public class WebApiRequestTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         webApiRequest = null;
         mockRequest = null;
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test constructor with various servlet path values

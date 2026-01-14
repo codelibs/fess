@@ -23,7 +23,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.opensearch.index.query.MatchAllQueryBuilder;
 import org.opensearch.search.rescore.QueryRescorerBuilder;
 import org.opensearch.search.rescore.RescorerBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -31,7 +30,6 @@ public class QueryRescorerTest extends UnitFessTestCase {
 
     private QueryRescorer queryRescorer;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

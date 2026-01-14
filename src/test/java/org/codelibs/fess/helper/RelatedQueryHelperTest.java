@@ -26,7 +26,6 @@ import org.codelibs.fess.opensearch.config.exbhv.RelatedQueryBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedQuery;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -36,7 +35,6 @@ public class RelatedQueryHelperTest extends UnitFessTestCase {
     private MockRelatedQueryBhv mockBhv;
     private VirtualHostHelper virtualHostHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

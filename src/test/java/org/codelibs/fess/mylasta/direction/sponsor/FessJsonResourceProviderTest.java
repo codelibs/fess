@@ -20,7 +20,6 @@ import org.lastaflute.core.json.JsonMappingOption;
 import org.lastaflute.core.json.JsonMappingOption.JsonFieldNaming;
 import org.dbflute.optional.OptionalThing;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -28,7 +27,6 @@ public class FessJsonResourceProviderTest extends UnitFessTestCase {
 
     private FessJsonResourceProvider provider;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

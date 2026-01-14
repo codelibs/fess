@@ -39,7 +39,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -83,7 +82,6 @@ public class CustomSizeTest extends UnitFessTestCase {
     private static class TestPayload implements Payload {
     }
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

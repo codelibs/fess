@@ -25,7 +25,6 @@ import org.codelibs.fess.util.ComponentUtil;
 
 import org.codelibs.jcifs.smb.SID;
 import org.codelibs.jcifs.smb.impl.SmbException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -33,7 +32,6 @@ public class SambaHelperTest extends UnitFessTestCase {
 
     public SambaHelper sambaHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

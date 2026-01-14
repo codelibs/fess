@@ -21,14 +21,12 @@ import java.util.regex.Pattern;
 
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class FileListIndexUpdateCallbackImplTest extends UnitFessTestCase {
     public FileListIndexUpdateCallbackImpl indexUpdateCallback;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -18,7 +18,6 @@ package org.codelibs.fess.cors;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -26,7 +25,6 @@ public class CorsHandlerFactoryTest extends UnitFessTestCase {
 
     private CorsHandlerFactory corsHandlerFactory;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

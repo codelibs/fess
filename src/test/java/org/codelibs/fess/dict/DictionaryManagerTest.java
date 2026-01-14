@@ -22,8 +22,6 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.mapping.CharMappingCreator;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -32,7 +30,6 @@ public class DictionaryManagerTest extends UnitFessTestCase {
 
     private File file1;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -44,9 +41,8 @@ public class DictionaryManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    protected void tearDown(TestInfo testInfo) throws Exception {
+        super.tearDown(testInfo);
         FileUtils.deleteDirectory(testDir);
     }
 

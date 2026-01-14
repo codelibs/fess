@@ -81,7 +81,9 @@ public class GeminiLlmClient implements LlmClient {
     public void init() {
         final int timeout = getTimeout();
         httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
-                .readTimeout(timeout, TimeUnit.MILLISECONDS).writeTimeout(timeout, TimeUnit.MILLISECONDS).build();
+                .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+                .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized GeminiLlmClient with timeout: {}ms", timeout);
         }
@@ -134,14 +136,15 @@ public class GeminiLlmClient implements LlmClient {
         final Map<String, Object> requestBody = buildRequestBody(request);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending chat request to Gemini. url={}, model={}, messageCount={}", url, model,
-                    request.getMessages().size());
+            logger.debug("Sending chat request to Gemini. url={}, model={}, messageCount={}", url, model, request.getMessages().size());
         }
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Content-Type", "application/json").build();
+            final Request httpRequest = new Request.Builder().url(url)
+                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Content-Type", "application/json")
+                    .build();
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
@@ -216,8 +219,10 @@ public class GeminiLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Content-Type", "application/json").build();
+            final Request httpRequest = new Request.Builder().url(url)
+                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Content-Type", "application/json")
+                    .build();
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {

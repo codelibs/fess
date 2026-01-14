@@ -16,23 +16,19 @@
 package org.codelibs.fess.auth.chain;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class CommandChainTest extends UnitFessTestCase {
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    protected void tearDown(TestInfo testInfo) throws Exception {
+        super.tearDown(testInfo);
     }
 
     // Basic test to verify test framework is working

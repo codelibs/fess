@@ -39,7 +39,6 @@ import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -98,7 +97,6 @@ public class UriTypeTest extends UnitFessTestCase {
     private static class AnotherTestPayload implements Payload {
     }
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

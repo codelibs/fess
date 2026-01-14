@@ -26,7 +26,6 @@ import org.codelibs.fess.opensearch.config.exbhv.RelatedContentBhv;
 import org.codelibs.fess.opensearch.config.exentity.RelatedContent;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -36,7 +35,6 @@ public class RelatedContentHelperTest extends UnitFessTestCase {
     private MockRelatedContentBhv mockBhv;
     private VirtualHostHelper virtualHostHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -33,9 +33,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -45,7 +43,6 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     private SystemHelper systemHelper;
     private File tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -64,13 +61,12 @@ public class DataStoreFactoryTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Clean up temporary files
         if (tempDir != null && tempDir.exists()) {
             deleteDirectory(tempDir);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     private void deleteDirectory(File dir) {

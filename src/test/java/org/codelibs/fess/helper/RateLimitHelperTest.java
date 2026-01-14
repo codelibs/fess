@@ -17,7 +17,6 @@ package org.codelibs.fess.helper;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -25,7 +24,6 @@ public class RateLimitHelperTest extends UnitFessTestCase {
 
     private RateLimitHelper rateLimitHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

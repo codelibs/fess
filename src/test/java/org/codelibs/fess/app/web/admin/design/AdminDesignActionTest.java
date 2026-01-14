@@ -25,8 +25,6 @@ import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -35,7 +33,6 @@ public class AdminDesignActionTest extends UnitFessTestCase {
     private AdminDesignAction action;
     private Path tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -44,13 +41,12 @@ public class AdminDesignActionTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Clean up temp directory
         if (tempDir != null) {
             deleteRecursively(tempDir.toFile());
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     private void deleteRecursively(File file) {

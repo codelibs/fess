@@ -24,7 +24,6 @@ import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.job.LaCron;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -32,7 +31,6 @@ public class JobHelperTest extends UnitFessTestCase {
 
     private JobHelper jobHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

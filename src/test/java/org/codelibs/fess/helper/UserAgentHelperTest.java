@@ -17,7 +17,6 @@ package org.codelibs.fess.helper;
 
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -25,7 +24,6 @@ public class UserAgentHelperTest extends UnitFessTestCase {
 
     public UserAgentHelper userAgentHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -16,7 +16,6 @@
 package org.codelibs.fess.tomcat.valve;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -24,7 +23,6 @@ public class SuppressErrorReportValveTest extends UnitFessTestCase {
 
     private SuppressErrorReportValve valve;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -21,7 +21,6 @@ import java.util.List;
 import org.codelibs.fess.auth.chain.AuthenticationChain;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -29,7 +28,6 @@ public class AuthenticationManagerTest extends UnitFessTestCase {
 
     private AuthenticationManager authenticationManager;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

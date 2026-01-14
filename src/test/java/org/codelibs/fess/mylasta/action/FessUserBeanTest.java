@@ -19,7 +19,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -28,7 +27,6 @@ public class FessUserBeanTest extends UnitFessTestCase {
     private FessUserBean fessUserBean;
     private TestFessUser testUser;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

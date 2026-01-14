@@ -25,8 +25,6 @@ import java.util.zip.ZipOutputStream;
 import org.codelibs.fess.exception.ThemeException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -35,7 +33,6 @@ public class ThemeHelperTest extends UnitFessTestCase {
     private ThemeHelper themeHelper;
     private Path tempDir;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -49,12 +46,11 @@ public class ThemeHelperTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         if (tempDir != null && Files.exists(tempDir)) {
             deleteDirectory(tempDir);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     private void deleteDirectory(Path dir) throws IOException {

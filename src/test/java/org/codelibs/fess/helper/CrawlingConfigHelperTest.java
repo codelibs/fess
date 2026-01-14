@@ -46,14 +46,12 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.optional.OptionalEntity;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.search.sort.FieldSortBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 public class CrawlingConfigHelperTest extends UnitFessTestCase {
     private CrawlingConfigHelper crawlingConfigHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -23,7 +23,6 @@ import java.util.Date;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.IntervalControlHelper.IntervalRule;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -31,7 +30,6 @@ public class IntervalControlHelperTest extends UnitFessTestCase {
 
     private IntervalControlHelper intervalControlHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

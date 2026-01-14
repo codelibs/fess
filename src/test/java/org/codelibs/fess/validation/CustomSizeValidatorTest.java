@@ -21,7 +21,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -29,7 +28,6 @@ public class CustomSizeValidatorTest extends UnitFessTestCase {
 
     private CustomSizeValidator validator;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

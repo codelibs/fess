@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.service;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -24,7 +23,6 @@ public class FessAppServiceTest extends UnitFessTestCase {
 
     private TestFessAppService service;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

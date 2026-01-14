@@ -79,7 +79,9 @@ public class OpenAiLlmClient implements LlmClient {
     public void init() {
         final int timeout = getTimeout();
         httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
-                .readTimeout(timeout, TimeUnit.MILLISECONDS).writeTimeout(timeout, TimeUnit.MILLISECONDS).build();
+                .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+                .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized OpenAiLlmClient with timeout: {}ms", timeout);
         }
@@ -107,8 +109,8 @@ public class OpenAiLlmClient implements LlmClient {
             return false;
         }
         try {
-            final Request request = new Request.Builder().url(apiUrl + "/models").get()
-                    .addHeader("Authorization", "Bearer " + apiKey).build();
+            final Request request =
+                    new Request.Builder().url(apiUrl + "/models").get().addHeader("Authorization", "Bearer " + apiKey).build();
             try (Response response = getHttpClient().newCall(request).execute()) {
                 final boolean available = response.isSuccessful();
                 if (logger.isDebugEnabled()) {
@@ -136,8 +138,11 @@ public class OpenAiLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Authorization", "Bearer " + getApiKey()).addHeader("Content-Type", "application/json").build();
+            final Request httpRequest = new Request.Builder().url(url)
+                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Authorization", "Bearer " + getApiKey())
+                    .addHeader("Content-Type", "application/json")
+                    .build();
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
@@ -206,8 +211,11 @@ public class OpenAiLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Authorization", "Bearer " + getApiKey()).addHeader("Content-Type", "application/json").build();
+            final Request httpRequest = new Request.Builder().url(url)
+                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                    .addHeader("Authorization", "Bearer " + getApiKey())
+                    .addHeader("Content-Type", "application/json")
+                    .build();
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {

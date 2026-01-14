@@ -29,8 +29,6 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -39,7 +37,6 @@ public class LdapUserTest extends UnitFessTestCase {
     private LdapUser ldapUser;
     private Hashtable<String, String> testEnv;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -56,9 +53,8 @@ public class LdapUserTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    protected void tearDown(TestInfo testInfo) throws Exception {
+        super.tearDown(testInfo);
     }
 
     @Test

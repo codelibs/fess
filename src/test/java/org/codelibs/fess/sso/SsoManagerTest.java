@@ -24,8 +24,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -35,7 +33,6 @@ public class SsoManagerTest extends UnitFessTestCase {
     private TestSsoAuthenticator testAuthenticator;
     private String currentSsoType = Constants.NONE;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -49,10 +46,9 @@ public class SsoManagerTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         currentSsoType = Constants.NONE;
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test available() method

@@ -18,7 +18,6 @@ package org.codelibs.fess.job;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -26,7 +25,6 @@ public class AggregateLogJobTest extends UnitFessTestCase {
 
     private AggregateLogJob aggregateLogJob;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

@@ -21,8 +21,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -31,7 +29,6 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     private FessApiFailureHook apiFailureHook;
     private FessConfig originalFessConfig;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -41,12 +38,11 @@ public class FessApiFailureHookTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         if (originalFessConfig != null) {
             ComponentUtil.setFessConfig(originalFessConfig);
         }
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test basic initialization

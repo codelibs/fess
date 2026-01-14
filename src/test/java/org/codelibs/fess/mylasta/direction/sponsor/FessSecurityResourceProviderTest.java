@@ -20,7 +20,6 @@ import org.lastaflute.core.security.InvertibleCryptographer;
 import org.lastaflute.core.security.OneWayCryptographer;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -30,7 +29,6 @@ public class FessSecurityResourceProviderTest extends UnitFessTestCase {
     private InvertibleCryptographer invertibleCryptographer;
     private OneWayCryptographer oneWayCryptographer;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

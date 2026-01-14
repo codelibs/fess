@@ -23,8 +23,6 @@ import org.codelibs.fess.script.ScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -34,7 +32,6 @@ public class ScriptExecutorTest extends UnitFessTestCase {
     private ScriptEngineFactory scriptEngineFactory;
     private TestScriptEngine testScriptEngine;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -45,10 +42,9 @@ public class ScriptExecutorTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         ComponentUtil.register(null, "scriptEngineFactory");
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     @Test

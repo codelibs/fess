@@ -31,7 +31,6 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.script.Script;
 import org.opensearch.script.ScriptType;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -39,7 +38,6 @@ public class UpdateLabelJobTest extends UnitFessTestCase {
 
     private UpdateLabelJob updateLabelJob;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

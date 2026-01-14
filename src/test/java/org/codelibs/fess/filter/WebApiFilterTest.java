@@ -31,8 +31,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -40,7 +38,6 @@ public class WebApiFilterTest extends UnitFessTestCase {
 
     private WebApiFilter webApiFilter;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -48,10 +45,9 @@ public class WebApiFilterTest extends UnitFessTestCase {
     }
 
     @Override
-    @AfterEach
-    protected void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         // Clear WebApiManagerFactory
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     // Test constructor

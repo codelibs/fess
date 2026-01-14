@@ -28,7 +28,6 @@ import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -36,7 +35,6 @@ public class GsaConfigParserTest extends UnitFessTestCase {
 
     private static final Logger logger = LogManager.getLogger(GsaConfigParserTest.class);
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);

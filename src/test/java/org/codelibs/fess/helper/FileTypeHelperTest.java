@@ -18,7 +18,6 @@ package org.codelibs.fess.helper;
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -26,7 +25,6 @@ public class FileTypeHelperTest extends UnitFessTestCase {
 
     private FileTypeHelper fileTypeHelper;
 
-    @BeforeEach
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
