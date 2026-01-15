@@ -140,6 +140,13 @@
 					</includes>
 					<argLine>@{argLine} ${test.command.args}</argLine>
 					<useSystemClassLoader>false</useSystemClassLoader>
+					<!-- Test execution optimization -->
+					<parallel>classes</parallel>
+					<threadCount>4</threadCount>
+					<perCoreThreadCount>true</perCoreThreadCount>
+					<forkCount>1C</forkCount>
+					<reuseForks>true</reuseForks>
+					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 			</plugin>
 			<plugin>
