@@ -228,10 +228,22 @@ public class ChatApiManager extends BaseApiManager {
             final ChatPhaseCallback phaseCallback = new ChatPhaseCallback() {
                 @Override
                 public void onPhaseStart(final String phase, final String phaseMessage) {
+                    onPhaseStart(phase, phaseMessage, null);
+                }
+
+                @Override
+                public void onPhaseStart(final String phase, final String phaseMessage, final String keywords) {
                     try {
-                        sendSseEvent(writer, "phase", Map.of("phase", phase, "status", "start", "message", phaseMessage));
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("status", "start");
+                        data.put("message", phaseMessage);
+                        if (keywords != null) {
+                            data.put("keywords", keywords);
+                        }
+                        sendSseEvent(writer, "phase", data);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("SSE phase start event sent. phase={}, message={}", phase, phaseMessage);
+                            logger.debug("SSE phase start event sent. phase={}, message={}, keywords={}", phase, phaseMessage, keywords);
                         }
                     } catch (final Exception e) {
                         if (logger.isDebugEnabled()) {

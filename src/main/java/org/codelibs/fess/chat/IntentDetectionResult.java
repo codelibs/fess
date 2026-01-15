@@ -25,13 +25,13 @@ public class IntentDetectionResult {
 
     private final ChatIntent intent;
     private final List<String> keywords;
-    private final String documentId;
+    private final String documentUrl;
     private final String reasoning;
 
-    private IntentDetectionResult(final ChatIntent intent, final List<String> keywords, final String documentId, final String reasoning) {
+    private IntentDetectionResult(final ChatIntent intent, final List<String> keywords, final String documentUrl, final String reasoning) {
         this.intent = intent;
         this.keywords = keywords != null ? Collections.unmodifiableList(keywords) : Collections.emptyList();
-        this.documentId = documentId;
+        this.documentUrl = documentUrl;
         this.reasoning = reasoning;
     }
 
@@ -54,12 +54,12 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Returns the document ID for summary intent.
+     * Returns the document URL for summary intent.
      *
-     * @return the document ID
+     * @return the document URL
      */
-    public String getDocumentId() {
-        return documentId;
+    public String getDocumentUrl() {
+        return documentUrl;
     }
 
     /**
@@ -85,12 +85,12 @@ public class IntentDetectionResult {
     /**
      * Creates a summary intent result for a specific document.
      *
-     * @param documentId the document ID to summarize
+     * @param documentUrl the document URL to summarize
      * @param reasoning the detection reasoning
      * @return the summary intent result
      */
-    public static IntentDetectionResult summary(final String documentId, final String reasoning) {
-        return new IntentDetectionResult(ChatIntent.SUMMARY, null, documentId, reasoning);
+    public static IntentDetectionResult summary(final String documentUrl, final String reasoning) {
+        return new IntentDetectionResult(ChatIntent.SUMMARY, null, documentUrl, reasoning);
     }
 
     /**
@@ -105,13 +105,13 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Creates a general chat intent result.
+     * Creates an unclear intent result when intent cannot be determined.
      *
      * @param reasoning the detection reasoning
-     * @return the chat intent result
+     * @return the unclear intent result
      */
-    public static IntentDetectionResult chat(final String reasoning) {
-        return new IntentDetectionResult(ChatIntent.CHAT, null, null, reasoning);
+    public static IntentDetectionResult unclear(final String reasoning) {
+        return new IntentDetectionResult(ChatIntent.UNCLEAR, null, null, reasoning);
     }
 
     /**
@@ -126,7 +126,7 @@ public class IntentDetectionResult {
 
     @Override
     public String toString() {
-        return "IntentDetectionResult{intent=" + intent + ", keywords=" + keywords + ", documentId=" + documentId + ", reasoning="
+        return "IntentDetectionResult{intent=" + intent + ", keywords=" + keywords + ", documentUrl=" + documentUrl + ", reasoning="
                 + reasoning + "}";
     }
 }

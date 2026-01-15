@@ -31,7 +31,7 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
         assertEquals(keywords, result.getKeywords());
-        assertNull(result.getDocumentId());
+        assertNull(result.getDocumentUrl());
         assertEquals("test reasoning", result.getReasoning());
     }
 
@@ -73,22 +73,22 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_summary_withDocumentId() {
-        String documentId = "doc123";
-        IntentDetectionResult result = IntentDetectionResult.summary(documentId, "summary request");
+    public void test_summary_withDocumentUrl() {
+        String documentUrl = "https://example.com/doc.pdf";
+        IntentDetectionResult result = IntentDetectionResult.summary(documentUrl, "summary request");
 
         assertEquals(ChatIntent.SUMMARY, result.getIntent());
-        assertEquals(documentId, result.getDocumentId());
+        assertEquals(documentUrl, result.getDocumentUrl());
         assertTrue(result.getKeywords().isEmpty());
         assertEquals("summary request", result.getReasoning());
     }
 
     @Test
-    public void test_summary_withNullDocumentId() {
-        IntentDetectionResult result = IntentDetectionResult.summary(null, "no doc id");
+    public void test_summary_withNullDocumentUrl() {
+        IntentDetectionResult result = IntentDetectionResult.summary(null, "no doc url");
 
         assertEquals(ChatIntent.SUMMARY, result.getIntent());
-        assertNull(result.getDocumentId());
+        assertNull(result.getDocumentUrl());
     }
 
     @Test
@@ -98,7 +98,7 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
 
         assertEquals(ChatIntent.FAQ, result.getIntent());
         assertEquals(keywords, result.getKeywords());
-        assertNull(result.getDocumentId());
+        assertNull(result.getDocumentUrl());
         assertEquals("faq intent", result.getReasoning());
     }
 
@@ -111,20 +111,20 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_chat() {
-        IntentDetectionResult result = IntentDetectionResult.chat("general conversation");
+    public void test_unclear() {
+        IntentDetectionResult result = IntentDetectionResult.unclear("unclear intent");
 
-        assertEquals(ChatIntent.CHAT, result.getIntent());
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
         assertTrue(result.getKeywords().isEmpty());
-        assertNull(result.getDocumentId());
-        assertEquals("general conversation", result.getReasoning());
+        assertNull(result.getDocumentUrl());
+        assertEquals("unclear intent", result.getReasoning());
     }
 
     @Test
-    public void test_chat_withNullReasoning() {
-        IntentDetectionResult result = IntentDetectionResult.chat(null);
+    public void test_unclear_withNullReasoning() {
+        IntentDetectionResult result = IntentDetectionResult.unclear(null);
 
-        assertEquals(ChatIntent.CHAT, result.getIntent());
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
         assertNull(result.getReasoning());
     }
 
@@ -184,10 +184,10 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_documentId_preserved() {
-        String docId = "doc-123-456";
-        IntentDetectionResult result = IntentDetectionResult.summary(docId, "summary");
+    public void test_documentUrl_preserved() {
+        String docUrl = "https://example.com/doc-123-456.pdf";
+        IntentDetectionResult result = IntentDetectionResult.summary(docUrl, "summary");
 
-        assertEquals(docId, result.getDocumentId());
+        assertEquals(docUrl, result.getDocumentUrl());
     }
 }

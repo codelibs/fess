@@ -45,6 +45,17 @@ public interface ChatPhaseCallback {
     void onPhaseStart(String phase, String message);
 
     /**
+     * Called when a processing phase starts with additional context data.
+     *
+     * @param phase the phase name (e.g., "intent", "search", "evaluate", "fetch", "answer")
+     * @param message a human-readable message describing what's happening
+     * @param keywords the search keywords (for search phase)
+     */
+    default void onPhaseStart(final String phase, final String message, final String keywords) {
+        onPhaseStart(phase, message);
+    }
+
+    /**
      * Called when a processing phase completes.
      *
      * @param phase the phase name that completed

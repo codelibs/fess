@@ -59,7 +59,14 @@ ${fe:html(true)}
 					waiting: '<la:message key="labels.chat_waiting" />',
 					error: '<la:message key="labels.chat_error" />',
 					sources: '<la:message key="labels.chat_sources" />',
-					statusReady: '<la:message key="labels.chat_status_ready" />'
+					statusReady: '<la:message key="labels.chat_status_ready" />',
+					phases: {
+						intent: '<la:message key="labels.chat_phase_intent" />',
+						search: '<la:message key="labels.chat_phase_search" />',
+						evaluate: '<la:message key="labels.chat_phase_evaluate" />',
+						fetch: '<la:message key="labels.chat_phase_fetch" />',
+						answer: '<la:message key="labels.chat_phase_answer" />'
+					}
 				}
 			});
 		});

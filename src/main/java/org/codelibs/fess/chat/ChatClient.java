@@ -263,18 +263,52 @@ public class ChatClient {
                 logger.debug("Intent detected. intent={}, keywords={}", intentResult.getIntent(), intentResult.getKeywords());
             }
 
-            if (intentResult.getIntent() == ChatIntent.CHAT) {
-                // No search needed - direct LLM response
+            if (intentResult.getIntent() == ChatIntent.UNCLEAR) {
+                // Intent is unclear - ask user for clarification
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
-                generateDirectAnswer(userMessage, session, (chunk, done) -> {
+                generateUnclearIntentResponse(userMessage, session, (chunk, done) -> {
                     fullResponse.append(chunk);
                     callback.onChunk(chunk, done);
                 });
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+            } else if (intentResult.getIntent() == ChatIntent.SUMMARY) {
+                // Summary intent - search by URL and generate summary
+                final String documentUrl = intentResult.getDocumentUrl();
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching for document...", documentUrl);
+                final List<Map<String, Object>> urlResults = searchByUrl(documentUrl);
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+
+                if (urlResults.isEmpty()) {
+                    // URL not found - inform user
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
+                    generateDocumentNotFoundResponse(userMessage, documentUrl, session, (chunk, done) -> {
+                        fullResponse.append(chunk);
+                        callback.onChunk(chunk, done);
+                    });
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                } else {
+                    // Fetch full content and generate summary
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
+                    final List<String> docIds = urlResults.stream()
+                            .map(doc -> (String) doc.get("doc_id"))
+                            .filter(id -> id != null)
+                            .collect(Collectors.toList());
+                    final List<Map<String, Object>> fullDocs = fetchFullContent(docIds);
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
+                    sources = fullDocs;
+
+                    callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating summary...");
+                    generateSummaryResponse(userMessage, fullDocs, session, (chunk, done) -> {
+                        fullResponse.append(chunk);
+                        callback.onChunk(chunk, done);
+                    });
+                    callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                }
             } else {
                 // Phase 2: Search with keywords
-                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...");
                 final List<String> keywords = intentResult.getKeywords().isEmpty() ? List.of(userMessage) : intentResult.getKeywords();
+                final String keywordsStr = String.join(" ", keywords);
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", keywordsStr);
                 final List<Map<String, Object>> searchResults = searchWithKeywords(keywords);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
@@ -392,10 +426,22 @@ public class ChatClient {
      * @return the intent detection prompt
      */
     protected String buildIntentDetectionPrompt(final String userMessage, final FessConfig fessConfig) {
-        return "Analyze the following user question and determine the intent.\n" + "Return a JSON object with:\n"
-                + "- \"intent\": one of \"search\" (needs document search), \"summary\" (document summary), \"faq\" (FAQ), \"chat\" (general conversation)\n"
-                + "- \"keywords\": array of search keywords (if intent is \"search\")\n"
-                + "- \"reasoning\": brief explanation of your decision\n\n" + "Question: " + userMessage + "\n\n" + "Response (JSON only):";
+        return "Analyze the following user question and determine the intent.\n" //
+                + "Return a JSON object with:\n" //
+                + "- \"intent\": one of:\n" //
+                + "  - \"search\": user wants to search for documents (extract keywords)\n" //
+                + "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n" //
+                + "  - \"faq\": user is asking a FAQ-type question (extract keywords for search)\n" //
+                + "  - \"unclear\": cannot determine what documents to search (question is too vague)\n" //
+                + "- \"keywords\": array of search keywords (required for search/faq intents)\n" //
+                + "- \"url\": the document URL to summarize (required for summary intent)\n" //
+                + "- \"reasoning\": brief explanation of your decision\n\n" //
+                + "IMPORTANT RULES:\n" //
+                + "1. ALWAYS try to extract search keywords. Use \"unclear\" only if the question is truly ambiguous.\n" //
+                + "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n" //
+                + "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n" //
+                + "Question: " + userMessage + "\n\n" //
+                + "Response (JSON only):";
     }
 
     /**
@@ -415,14 +461,14 @@ public class ChatClient {
             if (intent == ChatIntent.SEARCH || intent == ChatIntent.FAQ) {
                 return IntentDetectionResult.search(keywords, reasoning);
             } else if (intent == ChatIntent.SUMMARY) {
-                final String docId = extractJsonString(response, "document_id");
-                return IntentDetectionResult.summary(docId, reasoning);
+                final String docUrl = extractJsonString(response, "url");
+                return IntentDetectionResult.summary(docUrl, reasoning);
             } else {
-                return IntentDetectionResult.chat(reasoning);
+                return IntentDetectionResult.unclear(reasoning);
             }
         } catch (final Exception e) {
             logger.warn("Failed to parse intent response. response={}", response, e);
-            return IntentDetectionResult.chat("Parse error: " + e.getMessage());
+            return IntentDetectionResult.unclear("Parse error: " + e.getMessage());
         }
     }
 
@@ -656,6 +702,164 @@ public class ChatClient {
     }
 
     /**
+     * Generates a response asking user for clarification when intent is unclear.
+     *
+     * @param userMessage the user's message
+     * @param session the chat session
+     * @param callback the streaming callback
+     */
+    protected void generateUnclearIntentResponse(final String userMessage, final ChatSession session, final LlmStreamCallback callback) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final LlmChatRequest request = new LlmChatRequest();
+
+        final String systemPrompt = "You are a helpful assistant for a document search system. "
+                + "The user's question is too vague to determine what documents to search for. "
+                + "Generate a polite message asking for clarification. Ask them:\n"
+                + "- What specific topic or document are they looking for?\n" + "- Can they provide more details or keywords?\n"
+                + "- What kind of information would be helpful?\n\n" + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
+                + "Only ask for clarification to help with document search.";
+        request.addSystemMessage(systemPrompt);
+
+        for (final ChatMessage msg : session.getMessages()) {
+            if (msg.isUser()) {
+                request.addMessage(LlmMessage.user(msg.getContent()));
+            } else if (msg.isAssistant()) {
+                request.addMessage(LlmMessage.assistant(msg.getContent()));
+            }
+        }
+
+        request.addUserMessage(userMessage);
+        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
+        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setStream(true);
+
+        llmClientManager.streamChat(request, callback);
+    }
+
+    /**
+     * Searches for documents by URL.
+     *
+     * @param url the URL to search for
+     * @return list of documents matching the URL
+     */
+    protected List<Map<String, Object>> searchByUrl(final String url) {
+        if (StringUtil.isBlank(url)) {
+            return Collections.emptyList();
+        }
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
+
+        try {
+            // Search using url field
+            final SearchRenderData data = new SearchRenderData();
+            final ChatSearchRequestParams params = new ChatSearchRequestParams("url:\"" + url + "\"", maxDocs, fessConfig);
+
+            ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
+
+            @SuppressWarnings("unchecked")
+            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
+            if (docs != null) {
+                return docs;
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to search documents by URL: url={}", url, e);
+        }
+
+        return Collections.emptyList();
+    }
+
+    /**
+     * Generates a response when the specified document URL is not found.
+     *
+     * @param userMessage the user's message
+     * @param documentUrl the URL that was not found
+     * @param session the chat session
+     * @param callback the streaming callback
+     */
+    protected void generateDocumentNotFoundResponse(final String userMessage, final String documentUrl, final ChatSession session,
+            final LlmStreamCallback callback) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final LlmChatRequest request = new LlmChatRequest();
+
+        final String systemPrompt = "You are a helpful assistant for a document search system. "
+                + "The user requested a summary of a document, but the specified URL was not found in the system. " + "URL searched: "
+                + documentUrl + "\n\n" + "Generate a polite message informing the user that:\n"
+                + "- The specified document could not be found\n" + "- The URL might be incorrect or the document may not be indexed\n"
+                + "- They can try searching with keywords instead\n\n"
+                + "IMPORTANT: Do NOT provide any information from your own knowledge. " + "Only inform them about the search result.";
+        request.addSystemMessage(systemPrompt);
+
+        for (final ChatMessage msg : session.getMessages()) {
+            if (msg.isUser()) {
+                request.addMessage(LlmMessage.user(msg.getContent()));
+            } else if (msg.isAssistant()) {
+                request.addMessage(LlmMessage.assistant(msg.getContent()));
+            }
+        }
+
+        request.addUserMessage(userMessage);
+        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
+        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setStream(true);
+
+        llmClientManager.streamChat(request, callback);
+    }
+
+    /**
+     * Generates a summary of the specified documents.
+     *
+     * @param userMessage the user's message
+     * @param documents the documents to summarize
+     * @param session the chat session
+     * @param callback the streaming callback
+     */
+    protected void generateSummaryResponse(final String userMessage, final List<Map<String, Object>> documents, final ChatSession session,
+            final LlmStreamCallback callback) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final LlmChatRequest request = new LlmChatRequest();
+
+        // Build context from documents
+        final StringBuilder context = new StringBuilder();
+        for (final Map<String, Object> doc : documents) {
+            final String title = (String) doc.get("title");
+            final String content = (String) doc.get("content");
+            final String url = (String) doc.get("url");
+
+            context.append("=== Document ===\n");
+            if (title != null) {
+                context.append("Title: ").append(title).append("\n");
+            }
+            if (url != null) {
+                context.append("URL: ").append(url).append("\n");
+            }
+            if (content != null) {
+                context.append("Content:\n").append(content).append("\n\n");
+            }
+        }
+
+        final String systemPrompt = fessConfig.getRagChatSystemPrompt() + "\n\nYou are summarizing specific documents for the user. "
+                + "Base your summary ONLY on the provided document content. " + "Do NOT add information from your own knowledge.\n\n"
+                + "Document content:\n" + context.toString();
+        request.addSystemMessage(systemPrompt);
+
+        for (final ChatMessage msg : session.getMessages()) {
+            if (msg.isUser()) {
+                request.addMessage(LlmMessage.user(msg.getContent()));
+            } else if (msg.isAssistant()) {
+                request.addMessage(LlmMessage.assistant(msg.getContent()));
+            }
+        }
+
+        request.addUserMessage(userMessage);
+        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
+        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setStream(true);
+
+        llmClientManager.streamChat(request, callback);
+    }
+
+    /**
      * Generates a response when no relevant documents are found.
      *
      * @param userMessage the user's message
@@ -666,9 +870,13 @@ public class ChatClient {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String systemPrompt = fessConfig.getRagChatSystemPrompt() + "\n\nNote: No relevant documents were found in the search. "
-                + "Please provide a helpful response based on your general knowledge, "
-                + "and let the user know that no specific documents were found.";
+        final String systemPrompt = "You are a helpful assistant for a document search system. "
+                + "The search for relevant documents returned no results matching the user's query. "
+                + "Generate a polite message informing the user that no documents matching their query were found. "
+                + "Suggest ways they could refine their search, such as:\n" + "- Using different keywords\n"
+                + "- Being more specific or more general\n" + "- Checking for spelling errors\n" + "- Trying related terms\n\n"
+                + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
+                + "Only inform them about the search results and offer suggestions for refining their search.";
         request.addSystemMessage(systemPrompt);
 
         for (final ChatMessage msg : session.getMessages()) {

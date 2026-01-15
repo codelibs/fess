@@ -29,8 +29,8 @@ public enum ChatIntent {
     /** User is asking a FAQ-type question */
     FAQ("faq"),
 
-    /** General conversation that doesn't require document search */
-    CHAT("chat");
+    /** Intent is unclear - need to ask user for clarification */
+    UNCLEAR("unclear");
 
     private final String value;
 
@@ -51,17 +51,17 @@ public enum ChatIntent {
      * Parses a string value to ChatIntent enum.
      *
      * @param value the string value to parse
-     * @return the corresponding ChatIntent, defaults to CHAT if not found
+     * @return the corresponding ChatIntent, defaults to UNCLEAR if not found
      */
     public static ChatIntent fromValue(final String value) {
         if (value == null) {
-            return CHAT;
+            return UNCLEAR;
         }
         for (final ChatIntent intent : values()) {
             if (intent.value.equalsIgnoreCase(value.trim())) {
                 return intent;
             }
         }
-        return CHAT;
+        return UNCLEAR;
     }
 }
