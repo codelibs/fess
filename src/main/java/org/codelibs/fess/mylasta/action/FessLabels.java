@@ -3450,6 +3450,21 @@ public class FessLabels extends UserMessages {
     /** The key of the message: ... */
     public static final String LABELS_chat_waiting = "{labels.chat_waiting}";
 
+    /** The key of the message: Thinking... */
+    public static final String LABELS_chat_phase_intent = "{labels.chat_phase_intent}";
+
+    /** The key of the message: Searching for {keywords}... */
+    public static final String LABELS_chat_phase_search = "{labels.chat_phase_search}";
+
+    /** The key of the message: Reviewing search results... */
+    public static final String LABELS_chat_phase_evaluate = "{labels.chat_phase_evaluate}";
+
+    /** The key of the message: Retrieving documents... */
+    public static final String LABELS_chat_phase_fetch = "{labels.chat_phase_fetch}";
+
+    /** The key of the message: Generating answer... */
+    public static final String LABELS_chat_phase_answer = "{labels.chat_phase_answer}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

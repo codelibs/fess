@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.llm.LlmChatRequest;
 import org.codelibs.fess.llm.LlmChatResponse;
 import org.codelibs.fess.llm.LlmClient;
@@ -58,10 +60,13 @@ public class OllamaLlmClient implements LlmClient {
 
     private static final Logger logger = LogManager.getLogger(OllamaLlmClient.class);
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-    private static final String NAME = "ollama";
+    /** The name identifier for the Ollama LLM client. */
+    protected static final String NAME = "ollama";
 
     private OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private volatile Boolean cachedAvailability = null;
+    private TimeoutTask availabilityCheckTask;
 
     /**
      * Default constructor.
@@ -71,9 +76,17 @@ public class OllamaLlmClient implements LlmClient {
     }
 
     /**
-     * Initializes the HTTP client.
+     * Initializes the HTTP client and starts availability checking.
      */
     public void init() {
+        // Skip if rag.llm.type does not match this client's NAME
+        if (!NAME.equals(getLlmType())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipping availability check. llmType={}, name={}", getLlmType(), NAME);
+            }
+            return;
+        }
+
         final int timeout = getTimeout();
         httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
                 .readTimeout(timeout, TimeUnit.MILLISECONDS)
@@ -81,6 +94,66 @@ public class OllamaLlmClient implements LlmClient {
                 .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized OllamaLlmClient with timeout: {}ms", timeout);
+        }
+
+        // Start periodic availability checking
+        startAvailabilityCheck();
+    }
+
+    /**
+     * Cleans up resources.
+     */
+    public void destroy() {
+        if (availabilityCheckTask != null && !availabilityCheckTask.isCanceled()) {
+            availabilityCheckTask.cancel();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cancelled Ollama availability check task");
+            }
+        }
+    }
+
+    /**
+     * Starts periodic availability checking if RAG chat is enabled.
+     */
+    protected void startAvailabilityCheck() {
+        if (!isRagChatEnabled()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RAG chat is disabled. Skipping availability check.");
+            }
+            return;
+        }
+
+        final int checkInterval = getAvailabilityCheckInterval();
+        if (checkInterval <= 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Availability check is disabled for Ollama");
+            }
+            return;
+        }
+
+        // Perform initial check
+        updateAvailability();
+
+        // Register periodic check
+        availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::updateAvailability, checkInterval, true);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Started Ollama availability check with interval: {}s", checkInterval);
+        }
+    }
+
+    /**
+     * Updates the cached availability state.
+     */
+    protected void updateAvailability() {
+        final boolean previousState = cachedAvailability != null ? cachedAvailability : false;
+        final boolean currentState = checkAvailabilityNow();
+        cachedAvailability = currentState;
+
+        if (previousState != currentState) {
+            logger.info("Ollama availability changed: {} -> {}", previousState, currentState);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Ollama availability check completed. available={}", currentState);
         }
     }
 
@@ -91,6 +164,19 @@ public class OllamaLlmClient implements LlmClient {
 
     @Override
     public boolean isAvailable() {
+        if (cachedAvailability != null) {
+            return cachedAvailability;
+        }
+        // Fallback to direct check if cache not initialized
+        return checkAvailabilityNow();
+    }
+
+    /**
+     * Performs the actual availability check against Ollama server.
+     *
+     * @return true if Ollama is available and the configured model exists
+     */
+    protected boolean checkAvailabilityNow() {
         final String apiUrl = getApiUrl();
         if (StringUtil.isBlank(apiUrl)) {
             if (logger.isDebugEnabled()) {
@@ -101,17 +187,63 @@ public class OllamaLlmClient implements LlmClient {
         try {
             final Request request = new Request.Builder().url(apiUrl + "/api/tags").get().build();
             try (Response response = getHttpClient().newCall(request).execute()) {
-                final boolean available = response.isSuccessful();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Ollama availability check. url={}, statusCode={}, available={}", apiUrl, response.code(), available);
+                if (!response.isSuccessful()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Ollama availability check failed. url={}, statusCode={}", apiUrl, response.code());
+                    }
+                    return false;
                 }
-                return available;
+
+                // Check if configured model is available
+                final String responseBody = response.body() != null ? response.body().string() : "";
+                return isModelAvailable(responseBody);
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Ollama is not available. url={}, error={}", apiUrl, e.getMessage());
             }
             return false;
+        }
+    }
+
+    /**
+     * Checks if the configured model is available in Ollama.
+     *
+     * @param responseBody the response body from /api/tags endpoint
+     * @return true if the configured model is available
+     */
+    protected boolean isModelAvailable(final String responseBody) {
+        final String configuredModel = getModel();
+        if (StringUtil.isBlank(configuredModel)) {
+            // No model configured, just check if Ollama is running
+            return true;
+        }
+
+        try {
+            final JsonNode jsonNode = objectMapper.readTree(responseBody);
+            if (jsonNode.has("models")) {
+                final JsonNode models = jsonNode.get("models");
+                for (final JsonNode model : models) {
+                    if (model.has("name")) {
+                        final String modelName = model.get("name").asText();
+                        // Exact match only
+                        if (configuredModel.equals(modelName)) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Model found. configured={}, found={}", configuredModel, modelName);
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+            logger.warn("Configured model not found in Ollama. model={}", configuredModel);
+            return false;
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse Ollama models response. error={}", e.getMessage());
+            }
+            // If we can't parse, assume available if Ollama responded
+            return true;
         }
     }
 
@@ -351,5 +483,32 @@ public class OllamaLlmClient implements LlmClient {
      */
     protected int getMaxTokens() {
         return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
+    }
+
+    /**
+     * Gets the availability check interval in seconds.
+     *
+     * @return the interval in seconds
+     */
+    protected int getAvailabilityCheckInterval() {
+        return ComponentUtil.getFessConfig().getRagLlmAvailabilityCheckIntervalAsInteger();
+    }
+
+    /**
+     * Checks if RAG chat feature is enabled.
+     *
+     * @return true if RAG chat is enabled
+     */
+    protected boolean isRagChatEnabled() {
+        return ComponentUtil.getFessConfig().isRagChatEnabled();
+    }
+
+    /**
+     * Gets the configured LLM type.
+     *
+     * @return the LLM type from configuration
+     */
+    protected String getLlmType() {
+        return ComponentUtil.getFessConfig().getRagLlmType();
     }
 }
