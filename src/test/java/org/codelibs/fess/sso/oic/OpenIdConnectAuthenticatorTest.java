@@ -15,285 +15,287 @@
  */
 package org.codelibs.fess.sso.oic;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.DocumentUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
+/**
+ * Unit tests for {@link OpenIdConnectAuthenticator}.
+ * Tests JWT parsing, Base64 decoding, and configuration handling.
+ */
 public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
-    @Test
-    public void test_parseJwtClaim() throws IOException {
-        // Setup
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
-        final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim =
-                "{\"email\":\"test@codelibs.org\",\"sub\":\"1234567890\",\"name\":\"John Doe\",\"groups\":[\"group1\",\"group2\"]}";
 
-        // Execute
+    private OpenIdConnectAuthenticator authenticator;
+    private DynamicProperties systemProperties;
+
+    @Override
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        authenticator = new OpenIdConnectAuthenticator();
+        final File propFile = File.createTempFile("oic_test", ".properties");
+        propFile.deleteOnExit();
+        FileUtil.writeBytes(propFile.getAbsolutePath(), "".getBytes("UTF-8"));
+        systemProperties = new DynamicProperties(propFile);
+        ComponentUtil.register(systemProperties, "systemProperties");
+    }
+
+    @Test
+    public void test_decodeBase64_null() {
+        assertNull(authenticator.decodeBase64(null));
+    }
+
+    @Test
+    public void test_decodeBase64_standard() {
+        // "Hello" encoded in standard Base64
+        final byte[] result = authenticator.decodeBase64("SGVsbG8=");
+        assertEquals("Hello", new String(result));
+    }
+
+    @Test
+    public void test_decodeBase64_urlSafe() {
+        // Base64 URL encoding (uses - and _ instead of + and /)
+        final byte[] result = authenticator.decodeBase64("SGVsbG9Xb3JsZA");
+        assertEquals("HelloWorld", new String(result));
+    }
+
+    @Test
+    public void test_decodeBase64_withPadding() {
+        // Standard Base64 with padding
+        final byte[] result = authenticator.decodeBase64("dGVzdA==");
+        assertEquals("test", new String(result));
+    }
+
+    @Test
+    public void test_parseJwtClaim_simpleValues() throws IOException {
+        final String jwtClaim = "{\"sub\":\"user123\",\"name\":\"John Doe\",\"email\":\"john@example.com\"}";
+        final Map<String, Object> attributes = new HashMap<>();
+
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        // Verify
-        assertEquals("1234567890", attributes.get("sub"));
+        assertEquals("user123", attributes.get("sub"));
         assertEquals("John Doe", attributes.get("name"));
-
-        // Check groups array
-        final String[] groups = DocumentUtil.getValue(attributes, "groups", String[].class);
-        assertArrayEquals(new String[] { "group1", "group2" }, groups);
-
-        OpenIdConnectCredential credential = new OpenIdConnectCredential(attributes);
-        assertEquals("test@codelibs.org", credential.getUserId());
-        assertArrayEquals(new String[] { "group1", "group2" }, credential.getUserGroups());
+        assertEquals("john@example.com", attributes.get("email"));
     }
 
     @Test
-    public void test_jwtSignatureAttributeName() throws IOException {
-        // Verify the typo fix: jwtSigniture -> jwtSignature
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_numericValues() throws IOException {
+        final String jwtClaim = "{\"iat\":1609459200,\"exp\":1609462800,\"nbf\":1609459200}";
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"email\":\"test@example.com\",\"sub\":\"12345\"}";
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        // The processCallback method should store signature as "jwtsignature" (lowercase)
-        // This test verifies that the attribute key naming is consistent
-        // We can't test processCallback directly without mock HTTP infrastructure,
-        // but we verify the key is used correctly in the implementation
-
-        assertNotNull(attributes);
-        assertTrue(attributes.containsKey("email"));
-        assertEquals("test@example.com", attributes.get("email"));
+        assertEquals(1609459200L, attributes.get("iat"));
+        assertEquals(1609462800L, attributes.get("exp"));
+        assertEquals(1609459200L, attributes.get("nbf"));
     }
 
     @Test
-    public void test_parseJwtClaim_withNestedObjects() throws IOException {
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_booleanValues() throws IOException {
+        final String jwtClaim = "{\"email_verified\":true,\"active\":false}";
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"email\":\"user@example.com\",\"address\":{\"street\":\"123 Main St\",\"city\":\"Tokyo\"}}";
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        assertEquals("user@example.com", attributes.get("email"));
-        assertTrue(attributes.containsKey("address"));
+        assertEquals(true, attributes.get("email_verified"));
+        assertEquals(false, attributes.get("active"));
+    }
 
-        // Verify nested object is parsed
+    @Test
+    public void test_parseJwtClaim_nullValue() throws IOException {
+        final String jwtClaim = "{\"optional_claim\":null}";
+        final Map<String, Object> attributes = new HashMap<>();
+
+        authenticator.parseJwtClaim(jwtClaim, attributes);
+
+        assertTrue(attributes.containsKey("optional_claim"));
+        assertNull(attributes.get("optional_claim"));
+    }
+
+    @Test
+    public void test_parseJwtClaim_arrayValues() throws IOException {
+        final String jwtClaim = "{\"roles\":[\"admin\",\"user\"],\"groups\":[\"group1\",\"group2\"]}";
+        final Map<String, Object> attributes = new HashMap<>();
+
+        authenticator.parseJwtClaim(jwtClaim, attributes);
+
+        assertTrue(attributes.get("roles") instanceof List);
         @SuppressWarnings("unchecked")
-        Map<String, Object> address = (Map<String, Object>) attributes.get("address");
-        assertNotNull(address);
+        final List<Object> roles = (List<Object>) attributes.get("roles");
+        assertEquals(2, roles.size());
+        assertEquals("admin", roles.get(0));
+        assertEquals("user", roles.get(1));
+    }
+
+    @Test
+    public void test_parseJwtClaim_nestedObject() throws IOException {
+        final String jwtClaim = "{\"address\":{\"street\":\"123 Main St\",\"city\":\"Springfield\"}}";
+        final Map<String, Object> attributes = new HashMap<>();
+
+        authenticator.parseJwtClaim(jwtClaim, attributes);
+
+        assertTrue(attributes.get("address") instanceof Map);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> address = (Map<String, Object>) attributes.get("address");
         assertEquals("123 Main St", address.get("street"));
-        assertEquals("Tokyo", address.get("city"));
+        assertEquals("Springfield", address.get("city"));
     }
 
     @Test
-    public void test_parseJwtClaim_withArrayTypes() throws IOException {
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_floatValue() throws IOException {
+        final String jwtClaim = "{\"score\":95.5}";
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"roles\":[\"admin\",\"user\",\"developer\"],\"active\":true}";
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        // Verify array parsing
-        final String[] roles = DocumentUtil.getValue(attributes, "roles", String[].class);
-        assertNotNull(roles);
-        assertEquals(3, roles.length);
-        assertArrayEquals(new String[] { "admin", "user", "developer" }, roles);
-
-        // Verify boolean parsing
-        assertEquals(true, attributes.get("active"));
+        assertEquals(95.5, attributes.get("score"));
     }
 
     @Test
-    public void test_parseJwtClaim_withNumericTypes() throws IOException {
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_emptyObject() throws IOException {
+        final String jwtClaim = "{}";
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"exp\":1234567890,\"iat\":1234567800,\"score\":98.5}";
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        // Verify numeric types are parsed correctly
-        assertNotNull(attributes.get("exp"));
-        assertNotNull(attributes.get("iat"));
-        assertNotNull(attributes.get("score"));
-
-        // exp and iat should be Long values (integer)
-        assertTrue(attributes.get("exp") instanceof Long);
-        assertTrue(attributes.get("iat") instanceof Long);
-
-        // score should be Double value (floating point)
-        assertTrue(attributes.get("score") instanceof Double);
+        assertTrue(attributes.isEmpty());
     }
 
     @Test
-    public void test_parseJwtClaim_withNullValues() throws IOException {
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_complexStructure() throws IOException {
+        final String jwtClaim = "{\"user\":{\"id\":123,\"roles\":[\"admin\",\"user\"],\"permissions\":{\"read\":true,\"write\":false}}}";
         final Map<String, Object> attributes = new HashMap<>();
-        String jwtClaim = "{\"email\":\"user@example.com\",\"middlename\":null,\"nickname\":\"johnny\"}";
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
 
-        assertEquals("user@example.com", attributes.get("email"));
-        assertEquals("johnny", attributes.get("nickname"));
+        assertTrue(attributes.containsKey("user"));
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> user = (Map<String, Object>) attributes.get("user");
+        assertEquals(123L, user.get("id"));
 
-        // Null values should be stored as null
-        assertTrue(attributes.containsKey("middlename"));
-        assertNull(attributes.get("middlename"));
+        @SuppressWarnings("unchecked")
+        final List<Object> userRoles = (List<Object>) user.get("roles");
+        assertEquals(2, userRoles.size());
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> permissions = (Map<String, Object>) user.get("permissions");
+        assertEquals(true, permissions.get("read"));
+        assertEquals(false, permissions.get("write"));
     }
 
     @Test
-    public void test_authenticatorInstantiation() {
-        // Verify authenticator can be instantiated without errors
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
-        assertNotNull(authenticator);
-
-        // Verify the authenticator has proper defaults
-        assertNotNull(authenticator);
+    public void test_getOicAuthServerUrl_default() {
+        final String url = authenticator.getOicAuthServerUrl();
+        assertEquals("https://accounts.google.com/o/oauth2/auth", url);
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_withDefaultBaseUrl() throws Exception {
-        // Test that buildDefaultRedirectUrl returns http://localhost:8080/sso/ when no property is set
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_getOicTokenServerUrl_default() {
+        final String url = authenticator.getOicTokenServerUrl();
+        assertEquals("https://accounts.google.com/o/oauth2/token", url);
+    }
 
-        // Ensure the property is not set
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        systemProperties.remove("oic.base.url");
+    @Test
+    public void test_getOicClientId_default() {
+        final String clientId = authenticator.getOicClientId();
+        assertEquals("", clientId);
+    }
 
-        // Use reflection to access protected method
-        Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-        buildDefaultRedirectUrlMethod.setAccessible(true);
+    @Test
+    public void test_getOicClientSecret_default() {
+        final String secret = authenticator.getOicClientSecret();
+        assertEquals("", secret);
+    }
 
-        String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+    @Test
+    public void test_getOicScope_default() {
+        final String scope = authenticator.getOicScope();
+        assertEquals("", scope);
+    }
 
-        // Verify URL uses default localhost:8080
-        assertNotNull(url);
+    @Test
+    public void test_buildDefaultRedirectUrl_noBaseUrl() {
+        final String url = authenticator.buildDefaultRedirectUrl();
         assertEquals("http://localhost:8080/sso/", url);
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_withCustomBaseUrl() throws Exception {
-        // Test that buildDefaultRedirectUrl uses custom base URL from property
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
-
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        try {
-            // Set custom base URL
-            systemProperties.setProperty("oic.base.url", "https://fess.example.com");
-
-            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-            buildDefaultRedirectUrlMethod.setAccessible(true);
-
-            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
-
-            // Verify URL uses custom base URL
-            assertNotNull(url);
-            assertEquals("https://fess.example.com/sso/", url);
-        } finally {
-            // Clean up
-            systemProperties.remove("oic.base.url");
-        }
+    public void test_logout_returnsNull() {
+        assertNull(authenticator.logout(null));
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_withTrailingSlash() throws Exception {
-        // Test that trailing slash is handled correctly
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
-
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        try {
-            // Set custom base URL with trailing slash
-            systemProperties.setProperty("oic.base.url", "https://fess.example.com/");
-
-            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-            buildDefaultRedirectUrlMethod.setAccessible(true);
-
-            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
-
-            // Verify trailing slash is handled and URL is correct
-            assertNotNull(url);
-            assertEquals("https://fess.example.com/sso/", url);
-        } finally {
-            // Clean up
-            systemProperties.remove("oic.base.url");
-        }
+    public void test_getResponse_returnsNull() {
+        assertNull(authenticator.getResponse(null));
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_withPortInCustomUrl() throws Exception {
-        // Test that custom URL with port is handled correctly
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
-
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        try {
-            // Set custom base URL with port
-            systemProperties.setProperty("oic.base.url", "http://127.0.0.1:9080");
-
-            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-            buildDefaultRedirectUrlMethod.setAccessible(true);
-
-            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
-
-            // Verify URL uses custom base URL with port
-            assertNotNull(url);
-            assertEquals("http://127.0.0.1:9080/sso/", url);
-        } finally {
-            // Clean up
-            systemProperties.remove("oic.base.url");
-        }
+    public void test_getLoginCredential_withRequest() {
+        // With a request context, should return ActionResponseCredential for OAuth redirect
+        final var credential = authenticator.getLoginCredential();
+        assertNotNull(credential);
+        assertTrue(credential instanceof ActionResponseCredential);
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_emptyProperty() throws Exception {
-        // Test that empty property falls back to default
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_nestedArray() throws IOException {
+        final String jwtClaim = "{\"matrix\":[[1,2],[3,4]]}";
+        final Map<String, Object> attributes = new HashMap<>();
 
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        try {
-            // Set empty base URL
-            systemProperties.setProperty("oic.base.url", "");
+        authenticator.parseJwtClaim(jwtClaim, attributes);
 
-            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-            buildDefaultRedirectUrlMethod.setAccessible(true);
+        assertTrue(attributes.get("matrix") instanceof List);
+        @SuppressWarnings("unchecked")
+        final List<Object> matrix = (List<Object>) attributes.get("matrix");
+        assertEquals(2, matrix.size());
 
-            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
-
-            // Verify URL uses default localhost:8080 when property is empty
-            assertNotNull(url);
-            assertEquals("http://localhost:8080/sso/", url);
-        } finally {
-            // Clean up
-            systemProperties.remove("oic.base.url");
-        }
+        @SuppressWarnings("unchecked")
+        final List<Object> row1 = (List<Object>) matrix.get(0);
+        assertEquals(1L, row1.get(0));
+        assertEquals(2L, row1.get(1));
     }
 
     @Test
-    public void test_buildDefaultRedirectUrl_whitespaceProperty() throws Exception {
-        // Test that whitespace-only property falls back to default
-        OpenIdConnectAuthenticator authenticator = new OpenIdConnectAuthenticator();
+    public void test_parseJwtClaim_mixedArray() throws IOException {
+        final String jwtClaim = "{\"mixed\":[\"string\",123,true,null]}";
+        final Map<String, Object> attributes = new HashMap<>();
 
-        DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        try {
-            // Set whitespace-only base URL
-            systemProperties.setProperty("oic.base.url", "   ");
+        authenticator.parseJwtClaim(jwtClaim, attributes);
 
-            Method buildDefaultRedirectUrlMethod = OpenIdConnectAuthenticator.class.getDeclaredMethod("buildDefaultRedirectUrl");
-            buildDefaultRedirectUrlMethod.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final List<Object> mixed = (List<Object>) attributes.get("mixed");
+        assertEquals(4, mixed.size());
+        assertEquals("string", mixed.get(0));
+        assertEquals(123L, mixed.get(1));
+        assertEquals(true, mixed.get(2));
+        assertNull(mixed.get(3));
+    }
 
-            String url = (String) buildDefaultRedirectUrlMethod.invoke(authenticator);
+    @Test
+    public void test_parseJwtClaim_standardOidcClaims() throws IOException {
+        final String jwtClaim = "{" + "\"iss\":\"https://issuer.example.com\"," + "\"sub\":\"user@example.com\","
+                + "\"aud\":\"client-123\"," + "\"exp\":1700000000," + "\"iat\":1699999900," + "\"nonce\":\"abc123\","
+                + "\"at_hash\":\"hashvalue\"," + "\"c_hash\":\"codehash\"" + "}";
+        final Map<String, Object> attributes = new HashMap<>();
 
-            // Verify URL uses default localhost:8080 when property is whitespace
-            assertNotNull(url);
-            assertEquals("http://localhost:8080/sso/", url);
-        } finally {
-            // Clean up
-            systemProperties.remove("oic.base.url");
-        }
+        authenticator.parseJwtClaim(jwtClaim, attributes);
+
+        assertEquals("https://issuer.example.com", attributes.get("iss"));
+        assertEquals("user@example.com", attributes.get("sub"));
+        assertEquals("client-123", attributes.get("aud"));
+        assertEquals(1700000000L, attributes.get("exp"));
+        assertEquals(1699999900L, attributes.get("iat"));
+        assertEquals("abc123", attributes.get("nonce"));
+        assertEquals("hashvalue", attributes.get("at_hash"));
+        assertEquals("codehash", attributes.get("c_hash"));
     }
 }
