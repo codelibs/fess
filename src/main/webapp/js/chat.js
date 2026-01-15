@@ -153,6 +153,11 @@ var FessChat = (function() {
                     phaseMessage = phaseMessage.replace('{keywords}', data.keywords);
                 }
                 showStatus('thinking', phaseMessage);
+                // Update message-text element with phase progress
+                if (messageElement) {
+                    messageElement.find('.message-text').text(phaseMessage);
+                    scrollToBottom();
+                }
             }
         });
 
