@@ -15,10 +15,12 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
-import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
@@ -118,9 +120,9 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
         final ResponseData responseData = new ResponseData();
 
         assertNull(responseData.getLastModified());
-        final long now = System.currentTimeMillis();
+        final Date now = new Date();
         responseData.setLastModified(now);
-        assertEquals(Long.valueOf(now), responseData.getLastModified());
+        assertEquals(now, responseData.getLastModified());
     }
 
     @Test
@@ -154,11 +156,10 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
     @Test
     public void test_responseData_metaDataMap() {
         final ResponseData responseData = new ResponseData();
-        final Map<String, Object> metaDataMap = new HashMap<>();
+        final Map<String, Object> metaDataMap = responseData.getMetaDataMap();
         metaDataMap.put("author", "John Doe");
         metaDataMap.put("keywords", new String[] { "java", "search" });
 
-        responseData.setMetaDataMap(metaDataMap);
         assertNotNull(responseData.getMetaDataMap());
         assertEquals(2, responseData.getMetaDataMap().size());
         assertEquals("John Doe", responseData.getMetaDataMap().get("author"));
@@ -213,9 +214,22 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
      * Testable implementation of AbstractFessFileTransformer for unit testing.
      */
     private static class TestableAbstractFessFileTransformer extends AbstractFessFileTransformer {
+
+        private static final Logger logger = LogManager.getLogger(TestableAbstractFessFileTransformer.class);
+
         @Override
         protected Extractor getExtractor(final ResponseData responseData) {
             return null; // Return null for testing
+        }
+
+        @Override
+        public Logger getLogger() {
+            return logger;
+        }
+
+        @Override
+        public FessConfig getFessConfig() {
+            return fessConfig;
         }
     }
 }

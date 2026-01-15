@@ -54,10 +54,9 @@ public class UserServiceTest extends UnitFessTestCase {
         user.setName("testuser");
         assertNull(user.getSurname());
 
-        // When surname is blank, it should be set to name during store
-        // This is verified through the service logic
+        // When surname is blank, convertEmptyToNull converts it to null
         user.setSurname("");
-        assertEquals("", user.getSurname());
+        assertNull(user.getSurname());
 
         user.setSurname(user.getName());
         assertEquals("testuser", user.getSurname());
@@ -181,21 +180,21 @@ public class UserServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_user_email() {
+    public void test_user_mail() {
         final User user = new User();
-        assertNull(user.getEmail());
+        assertNull(user.getMail());
 
-        user.setEmail("test@example.com");
-        assertEquals("test@example.com", user.getEmail());
+        user.setMail("test@example.com");
+        assertEquals("test@example.com", user.getMail());
     }
 
     @Test
-    public void test_user_telephone() {
+    public void test_user_telephoneNumber() {
         final User user = new User();
-        assertNull(user.getTelephone());
+        assertNull(user.getTelephoneNumber());
 
-        user.setTelephone("123-456-7890");
-        assertEquals("123-456-7890", user.getTelephone());
+        user.setTelephoneNumber("123-456-7890");
+        assertEquals("123-456-7890", user.getTelephoneNumber());
     }
 
     @Test
@@ -268,15 +267,6 @@ public class UserServiceTest extends UnitFessTestCase {
 
         user.setDisplayName("John Doe");
         assertEquals("John Doe", user.getDisplayName());
-    }
-
-    @Test
-    public void test_user_mail() {
-        final User user = new User();
-        assertNull(user.getMail());
-
-        user.setMail("john.doe@example.com");
-        assertEquals("john.doe@example.com", user.getMail());
     }
 
     @Test
@@ -442,12 +432,12 @@ public class UserServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_user_internationalISDNNumber() {
+    public void test_user_internationaliSDNNumber() {
         final User user = new User();
-        assertNull(user.getInternationalISDNNumber());
+        assertNull(user.getInternationaliSDNNumber());
 
-        user.setInternationalISDNNumber("+1-555-1234");
-        assertEquals("+1-555-1234", user.getInternationalISDNNumber());
+        user.setInternationaliSDNNumber("+1-555-1234");
+        assertEquals("+1-555-1234", user.getInternationaliSDNNumber());
     }
 
     @Test

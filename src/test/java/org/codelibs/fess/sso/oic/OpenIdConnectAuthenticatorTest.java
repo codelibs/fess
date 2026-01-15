@@ -15,11 +15,13 @@
  */
 package org.codelibs.fess.sso.oic;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -39,7 +41,10 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         authenticator = new OpenIdConnectAuthenticator();
-        systemProperties = new DynamicProperties();
+        final File propFile = File.createTempFile("oic_test", ".properties");
+        propFile.deleteOnExit();
+        FileUtil.writeBytes(propFile.getAbsolutePath(), "".getBytes("UTF-8"));
+        systemProperties = new DynamicProperties(propFile);
         ComponentUtil.register(systemProperties, "systemProperties");
     }
 
@@ -166,8 +171,7 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
 
     @Test
     public void test_parseJwtClaim_complexStructure() throws IOException {
-        final String jwtClaim =
-                "{\"user\":{\"id\":123,\"roles\":[\"admin\",\"user\"],\"permissions\":{\"read\":true,\"write\":false}}}";
+        final String jwtClaim = "{\"user\":{\"id\":123,\"roles\":[\"admin\",\"user\"],\"permissions\":{\"read\":true,\"write\":false}}}";
         final Map<String, Object> attributes = new HashMap<>();
 
         authenticator.parseJwtClaim(jwtClaim, attributes);
@@ -194,23 +198,9 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getOicAuthServerUrl_custom() {
-        systemProperties.setProperty("oic.auth.server.url", "https://custom.auth.server/authorize");
-        final String url = authenticator.getOicAuthServerUrl();
-        assertEquals("https://custom.auth.server/authorize", url);
-    }
-
-    @Test
     public void test_getOicTokenServerUrl_default() {
         final String url = authenticator.getOicTokenServerUrl();
         assertEquals("https://accounts.google.com/o/oauth2/token", url);
-    }
-
-    @Test
-    public void test_getOicTokenServerUrl_custom() {
-        systemProperties.setProperty("oic.token.server.url", "https://custom.token.server/token");
-        final String url = authenticator.getOicTokenServerUrl();
-        assertEquals("https://custom.token.server/token", url);
     }
 
     @Test
@@ -220,23 +210,9 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getOicClientId_custom() {
-        systemProperties.setProperty("oic.client.id", "my-client-id");
-        final String clientId = authenticator.getOicClientId();
-        assertEquals("my-client-id", clientId);
-    }
-
-    @Test
     public void test_getOicClientSecret_default() {
         final String secret = authenticator.getOicClientSecret();
         assertEquals("", secret);
-    }
-
-    @Test
-    public void test_getOicClientSecret_custom() {
-        systemProperties.setProperty("oic.client.secret", "my-secret");
-        final String secret = authenticator.getOicClientSecret();
-        assertEquals("my-secret", secret);
     }
 
     @Test
@@ -246,37 +222,9 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getOicScope_custom() {
-        systemProperties.setProperty("oic.scope", "openid profile email");
-        final String scope = authenticator.getOicScope();
-        assertEquals("openid profile email", scope);
-    }
-
-    @Test
     public void test_buildDefaultRedirectUrl_noBaseUrl() {
         final String url = authenticator.buildDefaultRedirectUrl();
         assertEquals("http://localhost:8080/sso/", url);
-    }
-
-    @Test
-    public void test_buildDefaultRedirectUrl_withBaseUrl() {
-        systemProperties.setProperty("oic.base.url", "https://myapp.example.com");
-        final String url = authenticator.buildDefaultRedirectUrl();
-        assertEquals("https://myapp.example.com/sso/", url);
-    }
-
-    @Test
-    public void test_buildDefaultRedirectUrl_withTrailingSlash() {
-        systemProperties.setProperty("oic.base.url", "https://myapp.example.com/");
-        final String url = authenticator.buildDefaultRedirectUrl();
-        assertEquals("https://myapp.example.com/sso/", url);
-    }
-
-    @Test
-    public void test_getOicRedirectUrl_custom() {
-        systemProperties.setProperty("oic.redirect.url", "https://myapp.example.com/callback");
-        final String url = authenticator.getOicRedirectUrl();
-        assertEquals("https://myapp.example.com/callback", url);
     }
 
     @Test

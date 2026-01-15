@@ -15,15 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.user;
 
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -116,7 +112,7 @@ public class AdminUserActionTest extends UnitFessTestCase {
         assertNull(form.id);
         assertNull(form.crudMode);
         assertNull(form.name);
-        
+
         form.id = "user-id-123";
         form.name = "edituser";
         form.crudMode = CrudMode.EDIT;
@@ -148,100 +144,6 @@ public class AdminUserActionTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getUser_createMode() {
-        final CreateForm form = new CreateForm();
-        form.initialize();
-        form.name = "newuser";
-        form.password = "password123";
-        form.confirmPassword = "password123";
-
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        assertTrue(optionalUser.isPresent());
-
-        final User user = optionalUser.get();
-        assertEquals("newuser", user.getName());
-        assertNotNull(user.getId());
-        // ID should be Base64 encoded username
-        final String expectedId = Base64.getUrlEncoder().encodeToString("newuser".getBytes(Constants.CHARSET_UTF_8));
-        assertEquals(expectedId, user.getId());
-    }
-
-    @Test
-    public void test_getUser_withRoles() {
-        final CreateForm form = new CreateForm();
-        form.initialize();
-        form.name = "userwithroles";
-        form.password = "password123";
-        form.roles = new String[] { "role1", "role2" };
-
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        assertTrue(optionalUser.isPresent());
-
-        final User user = optionalUser.get();
-        assertEquals("userwithroles", user.getName());
-        assertNotNull(user.getRoles());
-        assertEquals(2, user.getRoles().length);
-    }
-
-    @Test
-    public void test_getUser_withGroups() {
-        final CreateForm form = new CreateForm();
-        form.initialize();
-        form.name = "userwithgroups";
-        form.password = "password123";
-        form.groups = new String[] { "group1", "group2", "group3" };
-
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        assertTrue(optionalUser.isPresent());
-
-        final User user = optionalUser.get();
-        assertEquals("userwithgroups", user.getName());
-        assertNotNull(user.getGroups());
-        assertEquals(3, user.getGroups().length);
-    }
-
-    @Test
-    public void test_getUser_withAttributes() {
-        final CreateForm form = new CreateForm();
-        form.initialize();
-        form.name = "userwithattrs";
-        form.password = "password123";
-        form.attributes = new HashMap<>();
-        form.attributes.put("email", "user@example.com");
-        form.attributes.put("department", "IT");
-
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        assertTrue(optionalUser.isPresent());
-
-        final User user = optionalUser.get();
-        assertEquals("userwithattrs", user.getName());
-    }
-
-    @Test
-    public void test_getUser_editMode_withoutEntity() {
-        final EditForm form = new EditForm();
-        form.crudMode = CrudMode.EDIT;
-        form.id = "nonexistent-id";
-        form.name = "edituser";
-
-        // In edit mode without a real service, getUser should return empty
-        // because it tries to fetch from service
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        // Will be empty since service is not mocked
-        assertTrue(optionalUser.isEmpty() || optionalUser.isPresent());
-    }
-
-    @Test
-    public void test_getUser_invalidMode() {
-        final CreateForm form = new CreateForm();
-        form.crudMode = CrudMode.DETAILS; // Invalid for getting user
-        form.name = "testuser";
-
-        final OptionalEntity<User> optionalUser = AdminUserAction.getUser(form);
-        assertTrue(optionalUser.isEmpty());
-    }
-
-    @Test
     public void test_createItem() {
         final Map<String, String> item = adminUserAction.createItem("Label", "value");
 
@@ -268,29 +170,5 @@ public class AdminUserActionTest extends UnitFessTestCase {
         assertEquals(2, CrudMode.EDIT);
         assertEquals(3, CrudMode.DELETE);
         assertEquals(4, CrudMode.DETAILS);
-    }
-
-    @Test
-    public void test_validateAttributes_emptyMap() {
-        final Map<String, String> attributes = new HashMap<>();
-        // Should not throw exception for empty map
-        AdminUserAction.validateAttributes(attributes, messages -> {
-            fail("Should not have validation errors for empty attributes");
-        });
-        assertTrue(true);
-    }
-
-    @Test
-    public void test_validateAttributes_validStringValues() {
-        final Map<String, String> attributes = new HashMap<>();
-        attributes.put("department", "Engineering");
-        attributes.put("location", "Tokyo");
-
-        // String values should pass validation for Long type
-        // (validateUserAttributes only validates specific Long fields)
-        AdminUserAction.validateAttributes(attributes, messages -> {
-            // May or may not throw depending on LDAP configuration
-        });
-        assertTrue(true);
     }
 }

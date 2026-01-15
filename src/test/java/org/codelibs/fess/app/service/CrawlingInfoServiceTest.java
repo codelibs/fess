@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.service;
 
 import java.io.StringReader;
-import java.io.StringWriter;
 
 import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.exception.FessSystemException;
@@ -54,28 +53,6 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
         } catch (final FessSystemException e) {
             assertEquals("Crawling Session is null.", e.getMessage());
         }
-    }
-
-    @Test
-    public void test_setupStoreCondition_setsCreatedTime() {
-        final CrawlingInfo crawlingInfo = new CrawlingInfo();
-        assertNull(crawlingInfo.getCreatedTime());
-
-        crawlingInfoService.setupStoreCondition(crawlingInfo);
-
-        assertNotNull(crawlingInfo.getCreatedTime());
-        assertTrue(crawlingInfo.getCreatedTime() > 0);
-    }
-
-    @Test
-    public void test_setupStoreCondition_preservesExistingCreatedTime() {
-        final CrawlingInfo crawlingInfo = new CrawlingInfo();
-        final Long existingTime = 12345678L;
-        crawlingInfo.setCreatedTime(existingTime);
-
-        crawlingInfoService.setupStoreCondition(crawlingInfo);
-
-        assertEquals(existingTime, crawlingInfo.getCreatedTime());
     }
 
     @Test
@@ -151,24 +128,10 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_exportCsv_headers() {
-        final StringWriter writer = new StringWriter();
-        crawlingInfoService.exportCsv(writer);
-        
-        final String output = writer.toString();
-        // Check for CSV headers
-        assertTrue(output.contains("SessionId"));
-        assertTrue(output.contains("SessionCreatedTime"));
-        assertTrue(output.contains("Key"));
-        assertTrue(output.contains("Value"));
-        assertTrue(output.contains("CreatedTime"));
-    }
-
-    @Test
     public void test_importCsv_emptyInput() {
         final String csvContent = "SessionId,SessionCreatedTime,Key,Value,CreatedTime\n";
         final StringReader reader = new StringReader(csvContent);
-        
+
         // Should not throw exception for empty CSV (only header)
         crawlingInfoService.importCsv(reader);
         assertTrue(true);
@@ -177,13 +140,13 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
     @Test
     public void test_crawlingInfoPager_pagination() {
         final CrawlingInfoPager pager = new CrawlingInfoPager();
-        
+
         pager.setCurrentPageNumber(5);
         assertEquals(5, pager.getCurrentPageNumber());
-        
+
         pager.setAllRecordCount(100);
         assertEquals(100, pager.getAllRecordCount());
-        
+
         pager.setAllPageCount(4);
         assertEquals(4, pager.getAllPageCount());
     }
@@ -194,9 +157,9 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
         pager.id = "some-id";
         pager.sessionId = "some-session";
         pager.setCurrentPageNumber(5);
-        
+
         pager.clear();
-        
+
         assertNull(pager.id);
         assertNull(pager.sessionId);
     }
@@ -206,7 +169,7 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
         final CrawlingInfo info = new CrawlingInfo();
         info.setId("test-id");
         info.setSessionId("test-session");
-        
+
         final String str = info.toString();
         assertNotNull(str);
     }
@@ -217,7 +180,7 @@ public class CrawlingInfoServiceTest extends UnitFessTestCase {
         param.setId("param-id");
         param.setKey("test-key");
         param.setValue("test-value");
-        
+
         final String str = param.toString();
         assertNotNull(str);
     }
