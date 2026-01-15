@@ -176,9 +176,8 @@ public class AbstractFessFileTransformerTest extends UnitFessTestCase {
     @Test
     public void test_fessConfig_ignoreEmptyContent() {
         final FessConfig config = ComponentUtil.getFessConfig();
-        // Just verify the config method exists and returns a boolean
-        final boolean ignoreEmpty = config.isCrawlerDocumentFileIgnoreEmptyContent();
-        assertTrue(ignoreEmpty || !ignoreEmpty); // Either value is valid
+        // Verify the config returns the expected default value (false)
+        assertFalse(config.isCrawlerDocumentFileIgnoreEmptyContent());
     }
 
     @Test

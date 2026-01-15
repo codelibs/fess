@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
@@ -238,12 +239,11 @@ public class OpenIdConnectAuthenticatorTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getLoginCredential_noRequest() {
-        // Without a request context, should return null
+    public void test_getLoginCredential_withRequest() {
+        // With a request context, should return ActionResponseCredential for OAuth redirect
         final var credential = authenticator.getLoginCredential();
-        // This may return null or ActionResponseCredential depending on request context
-        // In test environment without request, typically returns null
-        assertTrue(credential == null || credential != null);
+        assertNotNull(credential);
+        assertTrue(credential instanceof ActionResponseCredential);
     }
 
     @Test
