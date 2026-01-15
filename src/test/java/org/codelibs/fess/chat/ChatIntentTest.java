@@ -28,7 +28,7 @@ public class ChatIntentTest extends UnitFessTestCase {
         assertEquals(ChatIntent.SEARCH, values[0]);
         assertEquals(ChatIntent.SUMMARY, values[1]);
         assertEquals(ChatIntent.FAQ, values[2]);
-        assertEquals(ChatIntent.CHAT, values[3]);
+        assertEquals(ChatIntent.UNCLEAR, values[3]);
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ChatIntentTest extends UnitFessTestCase {
         assertEquals("search", ChatIntent.SEARCH.getValue());
         assertEquals("summary", ChatIntent.SUMMARY.getValue());
         assertEquals("faq", ChatIntent.FAQ.getValue());
-        assertEquals("chat", ChatIntent.CHAT.getValue());
+        assertEquals("unclear", ChatIntent.UNCLEAR.getValue());
     }
 
     @Test
@@ -61,31 +61,31 @@ public class ChatIntentTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_fromValue_chat() {
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("chat"));
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("CHAT"));
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("Chat"));
+    public void test_fromValue_unclear() {
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("unclear"));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("UNCLEAR"));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("Unclear"));
     }
 
     @Test
     public void test_fromValue_null() {
-        // Defaults to CHAT when value is null
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue(null));
+        // Defaults to UNCLEAR when value is null
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue(null));
     }
 
     @Test
     public void test_fromValue_empty() {
-        // Defaults to CHAT when value is empty or whitespace
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue(""));
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("   "));
+        // Defaults to UNCLEAR when value is empty or whitespace
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue(""));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("   "));
     }
 
     @Test
     public void test_fromValue_unknown() {
-        // Defaults to CHAT for unknown values
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("unknown"));
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("invalid"));
-        assertEquals(ChatIntent.CHAT, ChatIntent.fromValue("xyz"));
+        // Defaults to UNCLEAR for unknown values
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("unknown"));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("invalid"));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.fromValue("xyz"));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class ChatIntentTest extends UnitFessTestCase {
         assertEquals(ChatIntent.SEARCH, ChatIntent.valueOf("SEARCH"));
         assertEquals(ChatIntent.SUMMARY, ChatIntent.valueOf("SUMMARY"));
         assertEquals(ChatIntent.FAQ, ChatIntent.valueOf("FAQ"));
-        assertEquals(ChatIntent.CHAT, ChatIntent.valueOf("CHAT"));
+        assertEquals(ChatIntent.UNCLEAR, ChatIntent.valueOf("UNCLEAR"));
     }
 
     @Test
@@ -101,6 +101,6 @@ public class ChatIntentTest extends UnitFessTestCase {
         assertNotNull(ChatIntent.SEARCH.toString());
         assertNotNull(ChatIntent.SUMMARY.toString());
         assertNotNull(ChatIntent.FAQ.toString());
-        assertNotNull(ChatIntent.CHAT.toString());
+        assertNotNull(ChatIntent.UNCLEAR.toString());
     }
 }
