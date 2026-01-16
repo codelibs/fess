@@ -417,5 +417,10 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
         protected int getMaxTokens() {
             return testMaxTokens;
         }
+
+        @Override
+        protected String getLlmType() {
+            return NAME;
+        }
     }
 }

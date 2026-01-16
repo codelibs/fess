@@ -21,13 +21,16 @@
 	<!-- LLM clients -->
 	<component name="ollamaLlmClient" class="org.codelibs.fess.llm.ollama.OllamaLlmClient">
 		<postConstruct name="init"/>
+		<preDestroy name="destroy"/>
 	</component>
 
 	<component name="openaiLlmClient" class="org.codelibs.fess.llm.openai.OpenAiLlmClient">
 		<postConstruct name="init"/>
+		<preDestroy name="destroy"/>
 	</component>
 
 	<component name="geminiLlmClient" class="org.codelibs.fess.llm.gemini.GeminiLlmClient">
 		<postConstruct name="init"/>
+		<preDestroy name="destroy"/>
 	</component>
 </components>

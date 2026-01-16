@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.llm.LlmChatRequest;
 import org.codelibs.fess.llm.LlmChatResponse;
 import org.codelibs.fess.llm.LlmClient;
@@ -60,13 +62,16 @@ public class GeminiLlmClient implements LlmClient {
 
     private static final Logger logger = LogManager.getLogger(GeminiLlmClient.class);
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-    private static final String NAME = "gemini";
+    /** The name identifier for the Gemini LLM client. */
+    protected static final String NAME = "gemini";
 
     /** Gemini role for model responses (equivalent to "assistant" in OpenAI). */
     protected static final String ROLE_MODEL = "model";
 
     private OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private volatile Boolean cachedAvailability = null;
+    private TimeoutTask availabilityCheckTask;
 
     /**
      * Default constructor.
@@ -76,9 +81,17 @@ public class GeminiLlmClient implements LlmClient {
     }
 
     /**
-     * Initializes the HTTP client.
+     * Initializes the HTTP client and starts availability checking.
      */
     public void init() {
+        // Skip if rag.llm.type does not match this client's NAME
+        if (!NAME.equals(getLlmType())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Skipping availability check. llmType={}, name={}", getLlmType(), NAME);
+            }
+            return;
+        }
+
         final int timeout = getTimeout();
         httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
                 .readTimeout(timeout, TimeUnit.MILLISECONDS)
@@ -86,6 +99,66 @@ public class GeminiLlmClient implements LlmClient {
                 .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized GeminiLlmClient with timeout: {}ms", timeout);
+        }
+
+        // Start periodic availability checking
+        startAvailabilityCheck();
+    }
+
+    /**
+     * Cleans up resources.
+     */
+    public void destroy() {
+        if (availabilityCheckTask != null && !availabilityCheckTask.isCanceled()) {
+            availabilityCheckTask.cancel();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cancelled Gemini availability check task");
+            }
+        }
+    }
+
+    /**
+     * Starts periodic availability checking if RAG chat is enabled.
+     */
+    protected void startAvailabilityCheck() {
+        if (!isRagChatEnabled()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RAG chat is disabled. Skipping availability check.");
+            }
+            return;
+        }
+
+        final int checkInterval = getAvailabilityCheckInterval();
+        if (checkInterval <= 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Availability check is disabled for Gemini");
+            }
+            return;
+        }
+
+        // Perform initial check
+        updateAvailability();
+
+        // Register periodic check
+        availabilityCheckTask = TimeoutManager.getInstance().addTimeoutTarget(this::updateAvailability, checkInterval, true);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Started Gemini availability check with interval: {}s", checkInterval);
+        }
+    }
+
+    /**
+     * Updates the cached availability state.
+     */
+    protected void updateAvailability() {
+        final boolean previousState = cachedAvailability != null ? cachedAvailability : false;
+        final boolean currentState = checkAvailabilityNow();
+        cachedAvailability = currentState;
+
+        if (previousState != currentState) {
+            logger.info("Gemini availability changed: {} -> {}", previousState, currentState);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Gemini availability check completed. available={}", currentState);
         }
     }
 
@@ -96,6 +169,19 @@ public class GeminiLlmClient implements LlmClient {
 
     @Override
     public boolean isAvailable() {
+        if (cachedAvailability != null) {
+            return cachedAvailability;
+        }
+        // Fallback to direct check if cache not initialized
+        return checkAvailabilityNow();
+    }
+
+    /**
+     * Performs the actual availability check against Gemini API.
+     *
+     * @return true if Gemini is available
+     */
+    protected boolean checkAvailabilityNow() {
         final String apiKey = getApiKey();
         if (StringUtil.isBlank(apiKey)) {
             if (logger.isDebugEnabled()) {
@@ -485,5 +571,32 @@ public class GeminiLlmClient implements LlmClient {
      */
     protected int getMaxTokens() {
         return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
+    }
+
+    /**
+     * Gets the availability check interval in seconds.
+     *
+     * @return the interval in seconds
+     */
+    protected int getAvailabilityCheckInterval() {
+        return ComponentUtil.getFessConfig().getRagLlmAvailabilityCheckIntervalAsInteger();
+    }
+
+    /**
+     * Checks if RAG chat feature is enabled.
+     *
+     * @return true if RAG chat is enabled
+     */
+    protected boolean isRagChatEnabled() {
+        return ComponentUtil.getFessConfig().isRagChatEnabled();
+    }
+
+    /**
+     * Gets the configured LLM type.
+     *
+     * @return the LLM type from configuration
+     */
+    protected String getLlmType() {
+        return ComponentUtil.getFessConfig().getRagLlmType();
     }
 }

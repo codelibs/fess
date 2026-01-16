@@ -1959,7 +1959,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String RAG_LLM_OPENAI_API_KEY = "rag.llm.openai.api.key";
 
-    /** The key of the configuration. e.g. gpt-4o */
+    /** The key of the configuration. e.g. gpt-5-mini */
     String RAG_LLM_OPENAI_MODEL = "rag.llm.openai.model";
 
     /** The key of the configuration. e.g. https://api.openai.com/v1 */
@@ -1971,7 +1971,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String RAG_LLM_GEMINI_API_KEY = "rag.llm.gemini.api.key";
 
-    /** The key of the configuration. e.g. gemini-1.5-pro */
+    /** The key of the configuration. e.g. gemini-2.5-flash */
     String RAG_LLM_GEMINI_MODEL = "rag.llm.gemini.model";
 
     /** The key of the configuration. e.g. https://generativelanguage.googleapis.com/v1beta */
@@ -1979,6 +1979,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 60000 */
     String RAG_LLM_GEMINI_TIMEOUT = "rag.llm.gemini.timeout";
+
+    /** The key of the configuration. e.g. 60 */
+    String RAG_LLM_AVAILABILITY_CHECK_INTERVAL = "rag.llm.availability.check.interval";
 
     /** The key of the configuration. e.g. 4096 */
     String RAG_CHAT_MAX_TOKENS = "rag.chat.max.tokens";
@@ -9250,7 +9253,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.llm.openai.model'. <br>
-     * The value is, e.g. gpt-4o <br>
+     * The value is, e.g. gpt-5-mini <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagLlmOpenaiModel();
@@ -9296,7 +9299,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.llm.gemini.model'. <br>
-     * The value is, e.g. gemini-1.5-pro <br>
+     * The value is, e.g. gemini-2.5-flash <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagLlmGeminiModel();
@@ -9322,6 +9325,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getRagLlmGeminiTimeoutAsInteger();
+
+    /**
+     * Get the value for the key 'rag.llm.availability.check.interval'. <br>
+     * The value is, e.g. 60 <br>
+     * comment: LLM availability check interval in seconds. Set to 0 to disable periodic checks.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmAvailabilityCheckInterval();
+
+    /**
+     * Get the value for the key 'rag.llm.availability.check.interval' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * comment: LLM availability check interval in seconds. Set to 0 to disable periodic checks.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmAvailabilityCheckIntervalAsInteger();
 
     /**
      * Get the value for the key 'rag.chat.max.tokens'. <br>
@@ -12934,6 +12954,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_LLM_GEMINI_TIMEOUT);
         }
 
+        public String getRagLlmAvailabilityCheckInterval() {
+            return get(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL);
+        }
+
+        public Integer getRagLlmAvailabilityCheckIntervalAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL);
+        }
+
         public String getRagChatMaxTokens() {
             return get(FessConfig.RAG_CHAT_MAX_TOKENS);
         }
@@ -13614,13 +13642,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "gemma3:4b");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_TIMEOUT, "60000");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_KEY, "");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_MODEL, "gpt-4o");
+            defaultMap.put(FessConfig.RAG_LLM_OPENAI_MODEL, "gpt-5-mini");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_URL, "https://api.openai.com/v1");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_TIMEOUT, "60000");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_KEY, "");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-1.5-pro");
+            defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-2.5-flash");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_URL, "https://generativelanguage.googleapis.com/v1beta");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_TIMEOUT, "60000");
+            defaultMap.put(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL, "60");
             defaultMap.put(FessConfig.RAG_CHAT_MAX_TOKENS, "4096");
             defaultMap.put(FessConfig.RAG_CHAT_TEMPERATURE, "0.7");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");
