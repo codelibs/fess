@@ -34,20 +34,6 @@ ${fe:html(true)}
 								</div>
 								<h5 class="empty-state-title"><la:message key="labels.chat_welcome_title" /></h5>
 								<p class="empty-state-description"><la:message key="labels.chat_welcome_description" /></p>
-								<div class="empty-state-suggestions">
-									<p class="suggestions-label"><la:message key="labels.chat_suggestions_label" /></p>
-									<div class="suggestion-chips">
-										<button type="button" class="suggestion-chip" data-suggestion="<la:message key="labels.chat_suggestion_1" />">
-											<la:message key="labels.chat_suggestion_1" />
-										</button>
-										<button type="button" class="suggestion-chip" data-suggestion="<la:message key="labels.chat_suggestion_2" />">
-											<la:message key="labels.chat_suggestion_2" />
-										</button>
-										<button type="button" class="suggestion-chip" data-suggestion="<la:message key="labels.chat_suggestion_3" />">
-											<la:message key="labels.chat_suggestion_3" />
-										</button>
-									</div>
-								</div>
 							</div>
 						</div>
 						<div id="progressIndicator" class="progress-indicator d-none" role="status" aria-live="polite">
