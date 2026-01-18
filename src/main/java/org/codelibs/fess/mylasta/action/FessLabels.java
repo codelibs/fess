@@ -593,7 +593,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Menu */
     public static final String LABELS_SIDEBAR_MENU = "{labels.sidebar.menu}";
 
-    /** The key of the message: &amp;copy;2024 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. */
+    /** The key of the message: &amp;copy;2026 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 
     /** The key of the message: Search */
