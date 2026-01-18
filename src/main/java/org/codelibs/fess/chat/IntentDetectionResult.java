@@ -15,22 +15,20 @@
  */
 package org.codelibs.fess.chat;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
- * Result of intent detection from a user's chat message.
+ * Represents the result of intent detection from user input.
+ * Contains the detected intent type, Lucene query, and other metadata.
  */
 public class IntentDetectionResult {
 
     private final ChatIntent intent;
-    private final List<String> keywords;
+    private final String query;
     private final String documentUrl;
     private final String reasoning;
 
-    private IntentDetectionResult(final ChatIntent intent, final List<String> keywords, final String documentUrl, final String reasoning) {
+    private IntentDetectionResult(final ChatIntent intent, final String query, final String documentUrl, final String reasoning) {
         this.intent = intent;
-        this.keywords = keywords != null ? Collections.unmodifiableList(keywords) : Collections.emptyList();
+        this.query = query;
         this.documentUrl = documentUrl;
         this.reasoning = reasoning;
     }
@@ -45,12 +43,12 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Returns the extracted keywords for search.
+     * Returns the Lucene query string for search.
      *
-     * @return the keywords list
+     * @return the Lucene query string, or null if not available
      */
-    public List<String> getKeywords() {
-        return keywords;
+    public String getQuery() {
+        return query;
     }
 
     /**
@@ -72,14 +70,14 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Creates a search intent result with extracted keywords.
+     * Creates a search intent result with a Lucene query.
      *
-     * @param keywords the search keywords
+     * @param query the Lucene query string
      * @param reasoning the detection reasoning
      * @return the search intent result
      */
-    public static IntentDetectionResult search(final List<String> keywords, final String reasoning) {
-        return new IntentDetectionResult(ChatIntent.SEARCH, keywords, null, reasoning);
+    public static IntentDetectionResult search(final String query, final String reasoning) {
+        return new IntentDetectionResult(ChatIntent.SEARCH, query, null, reasoning);
     }
 
     /**
@@ -94,14 +92,14 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Creates a FAQ intent result with potential keywords.
+     * Creates a FAQ intent result with a Lucene query.
      *
-     * @param keywords the search keywords
+     * @param query the Lucene query string
      * @param reasoning the detection reasoning
      * @return the FAQ intent result
      */
-    public static IntentDetectionResult faq(final List<String> keywords, final String reasoning) {
-        return new IntentDetectionResult(ChatIntent.FAQ, keywords, null, reasoning);
+    public static IntentDetectionResult faq(final String query, final String reasoning) {
+        return new IntentDetectionResult(ChatIntent.FAQ, query, null, reasoning);
     }
 
     /**
@@ -121,12 +119,12 @@ public class IntentDetectionResult {
      * @return the fallback search intent result
      */
     public static IntentDetectionResult fallbackSearch(final String originalMessage) {
-        return new IntentDetectionResult(ChatIntent.SEARCH, List.of(originalMessage), null, "Fallback: using original message as keyword");
+        return new IntentDetectionResult(ChatIntent.SEARCH, originalMessage, null, "Fallback: using original message as query");
     }
 
     @Override
     public String toString() {
-        return "IntentDetectionResult{intent=" + intent + ", keywords=" + keywords + ", documentUrl=" + documentUrl + ", reasoning="
-                + reasoning + "}";
+        return "IntentDetectionResult{intent=" + intent + ", query=" + query + ", documentUrl=" + documentUrl + ", reasoning=" + reasoning
+                + "}";
     }
 }

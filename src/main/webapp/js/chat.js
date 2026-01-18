@@ -512,14 +512,26 @@ var FessChat = (function() {
             return '#';
         }
         var trimmedUrl = url.trim().toLowerCase();
-        // Only allow http, https, and relative URLs
+        // Allow http, https, and absolute path URLs
         if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('/')) {
             return url;
         }
-        // Block javascript:, data:, vbscript:, and other potentially dangerous protocols
-        if (trimmedUrl.indexOf(':') !== -1) {
+        // Allow relative URLs starting with ./ or ../
+        if (trimmedUrl.startsWith('./') || trimmedUrl.startsWith('../')) {
+            return url;
+        }
+        // Block known dangerous protocols
+        var dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'about:', 'blob:'];
+        for (var i = 0; i < dangerousProtocols.length; i++) {
+            if (trimmedUrl.startsWith(dangerousProtocols[i])) {
+                return '#';
+            }
+        }
+        // Block URLs that look like protocol:// (unknown protocols)
+        if (/^[a-z][a-z0-9+.-]*:/i.test(trimmedUrl)) {
             return '#';
         }
+        // Allow other relative URLs (may contain colons in path/query)
         return url;
     }
 
@@ -630,6 +642,15 @@ var FessChat = (function() {
      * Start a new chat
      */
     function newChat() {
+        // Close any active EventSource connection
+        if (state.eventSource) {
+            state.eventSource.close();
+            state.eventSource = null;
+        }
+
+        // Reset processing state
+        state.isProcessing = false;
+
         if (state.sessionId) {
             // Clear session on server
             $.post(config.apiUrl, {
@@ -640,11 +661,14 @@ var FessChat = (function() {
         state.sessionId = null;
         state.lastMessage = null;
         state.lastError = null;
+        state.currentPhase = null;
+        state.completedPhases = [];
         elements.chatMessages.find('.chat-message').remove();
         showEmptyState();
         hideErrorBanner();
         hideProgressIndicator();
         showStatus('ready');
+        updateUI();  // Re-enable buttons and input
     }
 
     /**

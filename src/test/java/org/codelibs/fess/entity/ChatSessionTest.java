@@ -73,7 +73,8 @@ public class ChatSessionTest extends UnitFessTestCase {
         assertEquals("user-789", session.getUserId());
         assertEquals(createdAt, session.getCreatedAt());
         assertEquals(lastAccessedAt, session.getLastAccessedAt());
-        assertSame(messages, session.getMessages());
+        // getMessages() returns a defensive copy for thread-safety
+        assertEquals(messages, session.getMessages());
     }
 
     @Test
