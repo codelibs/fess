@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +46,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.annotation.Resource;
 
 /**
@@ -55,6 +59,9 @@ import jakarta.annotation.Resource;
 public class ChatClient {
 
     private static final Logger logger = LogManager.getLogger(ChatClient.class);
+
+    /** ObjectMapper for JSON parsing. */
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /** The session manager for managing chat sessions. */
     @Resource
@@ -260,7 +267,7 @@ public class ChatClient {
             callback.onPhaseComplete(ChatPhaseCallback.PHASE_INTENT);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Intent detected. intent={}, keywords={}", intentResult.getIntent(), intentResult.getKeywords());
+                logger.debug("Intent detected. intent={}, query={}", intentResult.getIntent(), intentResult.getQuery());
             }
 
             if (intentResult.getIntent() == ChatIntent.UNCLEAR) {
@@ -305,11 +312,10 @@ public class ChatClient {
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                 }
             } else {
-                // Phase 2: Search with keywords
-                final List<String> keywords = intentResult.getKeywords().isEmpty() ? List.of(userMessage) : intentResult.getKeywords();
-                final String keywordsStr = String.join(" ", keywords);
-                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", keywordsStr);
-                final List<Map<String, Object>> searchResults = searchWithKeywords(keywords);
+                // Phase 2: Search with query
+                final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
+                final List<Map<String, Object>> searchResults = searchWithQuery(query);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
                 if (logger.isDebugEnabled()) {
@@ -327,7 +333,7 @@ public class ChatClient {
                 } else {
                     // Phase 3: Evaluate results
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
-                    final RelevanceEvaluationResult evalResult = evaluateResults(userMessage, keywords, searchResults);
+                    final RelevanceEvaluationResult evalResult = evaluateResults(userMessage, query, searchResults);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
 
                     if (logger.isDebugEnabled()) {
@@ -419,47 +425,51 @@ public class ChatClient {
     }
 
     /**
-     * Builds the intent detection prompt.
+     * Builds a prompt for intent detection from user message.
      *
-     * @param userMessage the user's message
+     * @param userMessage the user's input message
      * @param fessConfig the Fess configuration
-     * @return the intent detection prompt
+     * @return the constructed prompt string for intent detection
      */
     protected String buildIntentDetectionPrompt(final String userMessage, final FessConfig fessConfig) {
-        return "Analyze the following user question and determine the intent.\n" //
-                + "Return a JSON object with:\n" //
-                + "- \"intent\": one of:\n" //
-                + "  - \"search\": user wants to search for documents (extract keywords)\n" //
-                + "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n" //
-                + "  - \"faq\": user is asking a FAQ-type question (extract keywords for search)\n" //
-                + "  - \"unclear\": cannot determine what documents to search (question is too vague)\n" //
-                + "- \"keywords\": array of search keywords (required for search/faq intents)\n" //
-                + "- \"url\": the document URL to summarize (required for summary intent)\n" //
-                + "- \"reasoning\": brief explanation of your decision\n\n" //
-                + "IMPORTANT RULES:\n" //
-                + "1. ALWAYS try to extract search keywords. Use \"unclear\" only if the question is truly ambiguous.\n" //
-                + "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n" //
-                + "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n" //
-                + "Question: " + userMessage + "\n\n" //
-                + "Response (JSON only):";
+        return "Analyze the following user question and determine the intent.\n" + "Return a JSON object with:\n"
+                + "- \"intent\": one of:\n" + "  - \"search\": user wants to search for documents\n"
+                + "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n"
+                + "  - \"faq\": user is asking a FAQ-type question\n"
+                + "  - \"unclear\": cannot determine what documents to search (question is too vague)\n"
+                + "- \"query\": Lucene query string for search (required for search/faq intents)\n"
+                + "- \"url\": the document URL to summarize (required for summary intent)\n"
+                + "- \"reasoning\": brief explanation of your decision\n\n" + "LUCENE QUERY GUIDELINES:\n"
+                + "- Proper nouns/product names: use quotation marks (e.g., \"Fess\")\n"
+                + "- Title boosting: for important terms, use title:\"term\"^2\n" + "- Required terms: use + prefix (e.g., +Fess +Docker)\n"
+                + "- Optional/synonym terms: use OR grouping (e.g., (tutorial OR guide OR howto))\n"
+                + "- Multi-word phrases: use quotation marks\n\n" + "IMPORTANT RULES:\n"
+                + "1. ALWAYS generate a Lucene query for search/faq intents. Use \"unclear\" only if truly ambiguous.\n"
+                + "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n"
+                + "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n" + "EXAMPLES:\n" + "Input: \"Fess\"\n"
+                + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
+                + "Input: \"FessのDockerの使い方\"\n"
+                + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (使い方 OR 方法 OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
+                + "Question: " + userMessage + "\n\n" + "Response (JSON only):";
     }
 
     /**
-     * Parses the intent detection response from LLM.
+     * Parses the LLM response and extracts intent detection result.
      *
-     * @param response the LLM response
+     * @param response the JSON response from LLM
      * @return the parsed intent detection result
      */
     protected IntentDetectionResult parseIntentResponse(final String response) {
         try {
-            // Simple JSON parsing - look for intent and keywords
             final String intentStr = extractJsonString(response, "intent");
             final ChatIntent intent = ChatIntent.fromValue(intentStr);
-            final List<String> keywords = extractJsonArray(response, "keywords");
+            final String query = extractJsonString(response, "query");
             final String reasoning = extractJsonString(response, "reasoning");
 
-            if (intent == ChatIntent.SEARCH || intent == ChatIntent.FAQ) {
-                return IntentDetectionResult.search(keywords, reasoning);
+            if (intent == ChatIntent.SEARCH) {
+                return IntentDetectionResult.search(query, reasoning);
+            } else if (intent == ChatIntent.FAQ) {
+                return IntentDetectionResult.faq(query, reasoning);
             } else if (intent == ChatIntent.SUMMARY) {
                 final String docUrl = extractJsonString(response, "url");
                 return IntentDetectionResult.summary(docUrl, reasoning);
@@ -473,13 +483,15 @@ public class ChatClient {
     }
 
     /**
-     * Searches for documents using extracted keywords.
+     * Searches documents using a Lucene query.
      *
-     * @param keywords the search keywords
-     * @return list of search results
+     * @param query the Lucene query string
+     * @return the list of search result documents
      */
-    protected List<Map<String, Object>> searchWithKeywords(final List<String> keywords) {
-        final String query = String.join(" ", keywords);
+    protected List<Map<String, Object>> searchWithQuery(final String query) {
+        if (StringUtil.isBlank(query)) {
+            return Collections.emptyList();
+        }
         return searchDocuments(query);
     }
 
@@ -487,16 +499,16 @@ public class ChatClient {
      * Evaluates search results to identify the most relevant documents.
      *
      * @param userMessage the original user message
-     * @param keywords the search keywords
+     * @param query the search query
      * @param searchResults the search results to evaluate
      * @return evaluation result with relevant document IDs
      */
-    protected RelevanceEvaluationResult evaluateResults(final String userMessage, final List<String> keywords,
+    protected RelevanceEvaluationResult evaluateResults(final String userMessage, final String query,
             final List<Map<String, Object>> searchResults) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         try {
-            final String prompt = buildEvaluationPrompt(userMessage, keywords, searchResults, fessConfig);
+            final String prompt = buildEvaluationPrompt(userMessage, query, searchResults, fessConfig);
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
             request.setMaxTokens(500);
@@ -518,13 +530,13 @@ public class ChatClient {
      * Builds the evaluation prompt for LLM.
      *
      * @param userMessage the user's message
-     * @param keywords the search keywords
+     * @param query the search query
      * @param searchResults the search results to evaluate
      * @param fessConfig the Fess configuration
      * @return the evaluation prompt
      */
-    protected String buildEvaluationPrompt(final String userMessage, final List<String> keywords,
-            final List<Map<String, Object>> searchResults, final FessConfig fessConfig) {
+    protected String buildEvaluationPrompt(final String userMessage, final String query, final List<Map<String, Object>> searchResults,
+            final FessConfig fessConfig) {
         final StringBuilder sb = new StringBuilder();
         sb.append("Given the user question and search results, identify the most relevant documents.\n");
         sb.append("Return a JSON object with:\n");
@@ -533,7 +545,7 @@ public class ChatClient {
         sb.append(")\n");
         sb.append("- \"has_relevant\": boolean indicating if any results are relevant\n\n");
         sb.append("Question: ").append(userMessage).append("\n");
-        sb.append("Keywords: ").append(String.join(", ", keywords)).append("\n\n");
+        sb.append("Query: ").append(query).append("\n\n");
         sb.append("Search Results:\n");
 
         for (int i = 0; i < searchResults.size(); i++) {
@@ -925,72 +937,169 @@ public class ChatClient {
     // JSON parsing helper methods
 
     /**
-     * Extracts a string value from JSON response.
+     * Strips code fence markers from JSON response.
+     *
+     * @param response the response that may contain code fences
+     * @return the response with code fences removed
+     */
+    protected String stripCodeFences(final String response) {
+        if (response == null) {
+            return "";
+        }
+        String stripped = response.trim();
+        if (stripped.startsWith("```json")) {
+            stripped = stripped.substring(7);
+        } else if (stripped.startsWith("```")) {
+            stripped = stripped.substring(3);
+        }
+        if (stripped.endsWith("```")) {
+            stripped = stripped.substring(0, stripped.length() - 3);
+        }
+        return stripped.trim();
+    }
+
+    /**
+     * Extracts a string value from JSON response using Jackson parser.
      *
      * @param json the JSON response
      * @param key the key to extract
      * @return the extracted string value
      */
     protected String extractJsonString(final String json, final String key) {
-        final String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]*)\"";
-        final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        final java.util.regex.Matcher m = p.matcher(json);
-        return m.find() ? m.group(1) : "";
+        try {
+            final String cleanJson = stripCodeFences(json);
+            final JsonNode root = objectMapper.readTree(cleanJson);
+            final JsonNode node = root.get(key);
+            if (node != null && node.isTextual()) {
+                return node.asText();
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse JSON for key={}. error={}", key, e.getMessage());
+            }
+            // Fallback to improved regex
+            return extractJsonStringFallback(json, key);
+        }
+        return "";
     }
 
     /**
-     * Extracts a boolean value from JSON response.
+     * Fallback regex-based extraction for string values.
+     *
+     * @param json the JSON response
+     * @param key the key to extract
+     * @return the extracted string value
+     */
+    protected String extractJsonStringFallback(final String json, final String key) {
+        final String pattern = "\"" + key + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"";
+        final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+        final java.util.regex.Matcher m = p.matcher(stripCodeFences(json));
+        if (m.find()) {
+            return m.group(1).replace("\\\"", "\"").replace("\\\\", "\\");
+        }
+        return "";
+    }
+
+    /**
+     * Extracts a boolean value from JSON response using Jackson parser.
      *
      * @param json the JSON response
      * @param key the key to extract
      * @return the extracted boolean value
      */
     protected boolean extractJsonBoolean(final String json, final String key) {
-        final String pattern = "\"" + key + "\"\\s*:\\s*(true|false)";
-        final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
-        final java.util.regex.Matcher m = p.matcher(json);
-        return m.find() && "true".equalsIgnoreCase(m.group(1));
+        try {
+            final String cleanJson = stripCodeFences(json);
+            final JsonNode root = objectMapper.readTree(cleanJson);
+            final JsonNode node = root.get(key);
+            if (node != null && node.isBoolean()) {
+                return node.asBoolean();
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse JSON for key={}. error={}", key, e.getMessage());
+            }
+            // Fallback to regex
+            final String pattern = "\"" + key + "\"\\s*:\\s*(true|false)";
+            final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
+            final java.util.regex.Matcher m = p.matcher(stripCodeFences(json));
+            return m.find() && "true".equalsIgnoreCase(m.group(1));
+        }
+        return false;
     }
 
     /**
-     * Extracts a string array from JSON response.
+     * Extracts a string array from JSON response using Jackson parser.
      *
      * @param json the JSON response
      * @param key the key to extract
      * @return the extracted string array
      */
     protected List<String> extractJsonArray(final String json, final String key) {
-        final String pattern = "\"" + key + "\"\\s*:\\s*\\[([^\\]]*)\\]";
-        final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        final java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            final String arrayContent = m.group(1);
-            return Arrays.stream(arrayContent.split(","))
-                    .map(s -> s.trim().replaceAll("^\"|\"$", ""))
-                    .filter(StringUtil::isNotBlank)
-                    .collect(Collectors.toList());
+        try {
+            final String cleanJson = stripCodeFences(json);
+            final JsonNode root = objectMapper.readTree(cleanJson);
+            final JsonNode node = root.get(key);
+            if (node != null && node.isArray()) {
+                return StreamSupport.stream(node.spliterator(), false)
+                        .filter(JsonNode::isTextual)
+                        .map(JsonNode::asText)
+                        .filter(StringUtil::isNotBlank)
+                        .collect(Collectors.toList());
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse JSON for key={}. error={}", key, e.getMessage());
+            }
+            // Fallback to regex
+            final String pattern = "\"" + key + "\"\\s*:\\s*\\[([^\\]]*)\\]";
+            final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            final java.util.regex.Matcher m = p.matcher(stripCodeFences(json));
+            if (m.find()) {
+                final String arrayContent = m.group(1);
+                return Arrays.stream(arrayContent.split(","))
+                        .map(s -> s.trim().replaceAll("^\"|\"$", ""))
+                        .filter(StringUtil::isNotBlank)
+                        .collect(Collectors.toList());
+            }
         }
         return Collections.emptyList();
     }
 
     /**
-     * Extracts an integer array from JSON response.
+     * Extracts an integer array from JSON response using Jackson parser.
      *
      * @param json the JSON response
      * @param key the key to extract
      * @return the extracted integer array
      */
     protected List<Integer> extractJsonIntArray(final String json, final String key) {
-        final String pattern = "\"" + key + "\"\\s*:\\s*\\[([^\\]]*)\\]";
-        final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        final java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            final String arrayContent = m.group(1);
-            return Arrays.stream(arrayContent.split(","))
-                    .map(String::trim)
-                    .filter(s -> s.matches("\\d+"))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
+        try {
+            final String cleanJson = stripCodeFences(json);
+            final JsonNode root = objectMapper.readTree(cleanJson);
+            final JsonNode node = root.get(key);
+            if (node != null && node.isArray()) {
+                return StreamSupport.stream(node.spliterator(), false)
+                        .filter(JsonNode::isInt)
+                        .map(JsonNode::asInt)
+                        .collect(Collectors.toList());
+            }
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to parse JSON for key={}. error={}", key, e.getMessage());
+            }
+            // Fallback to regex
+            final String pattern = "\"" + key + "\"\\s*:\\s*\\[([^\\]]*)\\]";
+            final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            final java.util.regex.Matcher m = p.matcher(stripCodeFences(json));
+            if (m.find()) {
+                final String arrayContent = m.group(1);
+                return Arrays.stream(arrayContent.split(","))
+                        .map(String::trim)
+                        .filter(s -> s.matches("\\d+"))
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+            }
         }
         return Collections.emptyList();
     }

@@ -19,12 +19,11 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.entity.ChatMessage;
 import org.codelibs.fess.entity.ChatSession;
 import org.codelibs.fess.util.ComponentUtil;
@@ -43,7 +42,7 @@ public class ChatSessionManager {
     private static final Logger logger = LogManager.getLogger(ChatSessionManager.class);
 
     private final Map<String, ChatSession> sessionCache = new ConcurrentHashMap<>();
-    private ScheduledExecutorService cleanupExecutor;
+    private TimeoutTask cleanupTask;
 
     /**
      * Default constructor.
@@ -57,12 +56,8 @@ public class ChatSessionManager {
      */
     @PostConstruct
     public void init() {
-        cleanupExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            final Thread thread = new Thread(r, "ChatSessionCleanup");
-            thread.setDaemon(true);
-            return thread;
-        });
-        cleanupExecutor.scheduleAtFixedRate(this::cleanupExpiredSessions, 5, 5, TimeUnit.MINUTES);
+        // 5 minutes = 300 seconds
+        cleanupTask = TimeoutManager.getInstance().addTimeoutTarget(this::cleanupExpiredSessions, 300, true);
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized ChatSessionManager");
         }
@@ -73,8 +68,8 @@ public class ChatSessionManager {
      */
     @PreDestroy
     public void destroy() {
-        if (cleanupExecutor != null) {
-            cleanupExecutor.shutdown();
+        if (cleanupTask != null && !cleanupTask.isCanceled()) {
+            cleanupTask.cancel();
         }
     }
 

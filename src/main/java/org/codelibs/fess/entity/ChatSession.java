@@ -15,20 +15,18 @@
  */
 package org.codelibs.fess.entity;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents a chat session containing conversation history.
  *
  * @author FessProject
  */
-public class ChatSession implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ChatSession {
 
     /** The unique session identifier. */
     private String sessionId;
@@ -45,6 +43,9 @@ public class ChatSession implements Serializable {
     /** The list of messages in this session. */
     private List<ChatMessage> messages;
 
+    /** Lock object for thread-safe message operations. */
+    private final Object messagesLock = new Object();
+
     /**
      * Default constructor.
      */
@@ -52,7 +53,7 @@ public class ChatSession implements Serializable {
         this.sessionId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
         this.lastAccessedAt = this.createdAt;
-        this.messages = new ArrayList<>();
+        this.messages = new CopyOnWriteArrayList<>();
     }
 
     /**
@@ -138,33 +139,48 @@ public class ChatSession implements Serializable {
     }
 
     /**
-     * Gets the list of messages in this session.
+     * Returns a copy of the message list in this session.
      *
-     * @return the list of messages
+     * @return a new list containing all messages
      */
     public List<ChatMessage> getMessages() {
-        return messages;
+        synchronized (messagesLock) {
+            if (messages == null) {
+                return new ArrayList<>();
+            }
+            return new ArrayList<>(messages);
+        }
     }
 
     /**
-     * Sets the list of messages in this session.
+     * Sets the message list for this session.
      *
-     * @param messages the list of messages
+     * @param messages the messages to set
      */
     public void setMessages(final List<ChatMessage> messages) {
-        this.messages = messages;
+        synchronized (messagesLock) {
+            if (messages == null) {
+                this.messages = null;
+            } else if (messages instanceof CopyOnWriteArrayList) {
+                this.messages = messages;
+            } else {
+                this.messages = new CopyOnWriteArrayList<>(messages);
+            }
+        }
     }
 
     /**
-     * Adds a message to this session.
+     * Adds a message to this session and updates the last accessed timestamp.
      *
      * @param message the message to add
      */
     public void addMessage(final ChatMessage message) {
-        if (messages == null) {
-            messages = new ArrayList<>();
+        synchronized (messagesLock) {
+            if (messages == null) {
+                messages = new CopyOnWriteArrayList<>();
+            }
+            messages.add(message);
         }
-        messages.add(message);
         this.lastAccessedAt = LocalDateTime.now();
     }
 
@@ -194,20 +210,24 @@ public class ChatSession implements Serializable {
     }
 
     /**
-     * Gets the number of messages in this session.
+     * Returns the number of messages in this session.
      *
      * @return the message count
      */
     public int getMessageCount() {
-        return messages != null ? messages.size() : 0;
+        synchronized (messagesLock) {
+            return messages != null ? messages.size() : 0;
+        }
     }
 
     /**
-     * Clears all messages from this session.
+     * Clears all messages in this session and updates the last accessed timestamp.
      */
     public void clearMessages() {
-        if (messages != null) {
-            messages.clear();
+        synchronized (messagesLock) {
+            if (messages != null) {
+                messages.clear();
+            }
         }
         this.lastAccessedAt = LocalDateTime.now();
     }
@@ -215,12 +235,15 @@ public class ChatSession implements Serializable {
     /**
      * Trims the message history to keep only the most recent messages.
      *
-     * @param maxMessages the maximum number of messages to keep
+     * @param maxMessages the maximum number of messages to retain
      */
     public void trimHistory(final int maxMessages) {
-        if (messages != null && messages.size() > maxMessages) {
-            final int toRemove = messages.size() - maxMessages;
-            messages.subList(0, toRemove).clear();
+        synchronized (messagesLock) {
+            if (messages != null && messages.size() > maxMessages) {
+                final List<ChatMessage> trimmed = new ArrayList<>(messages.subList(messages.size() - maxMessages, messages.size()));
+                messages.clear();
+                messages.addAll(trimmed);
+            }
         }
     }
 }

@@ -15,114 +15,107 @@
  */
 package org.codelibs.fess.chat;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class IntentDetectionResultTest extends UnitFessTestCase {
 
     @Test
-    public void test_search_withKeywords() {
-        List<String> keywords = Arrays.asList("keyword1", "keyword2");
-        IntentDetectionResult result = IntentDetectionResult.search(keywords, "test reasoning");
+    public void test_search_withQuery() {
+        final String query = "title:\"Fess\"^2 OR \"Fess\"";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "test reasoning");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertEquals(keywords, result.getKeywords());
+        assertEquals(query, result.getQuery());
         assertNull(result.getDocumentUrl());
         assertEquals("test reasoning", result.getReasoning());
     }
 
     @Test
-    public void test_search_withEmptyKeywords() {
-        List<String> keywords = Collections.emptyList();
-        IntentDetectionResult result = IntentDetectionResult.search(keywords, null);
+    public void test_search_withEmptyQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.search("", "test");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertTrue(result.getKeywords().isEmpty());
+        assertEquals("", result.getQuery());
     }
 
     @Test
-    public void test_search_withNullKeywords() {
-        IntentDetectionResult result = IntentDetectionResult.search(null, "test");
+    public void test_search_withNullQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.search(null, "test");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertNotNull(result.getKeywords());
-        assertTrue(result.getKeywords().isEmpty());
+        assertNull(result.getQuery());
     }
 
     @Test
-    public void test_search_withSingleKeyword() {
-        List<String> keywords = Arrays.asList("singleKeyword");
-        IntentDetectionResult result = IntentDetectionResult.search(keywords, "single keyword search");
+    public void test_search_withSimpleQuery() {
+        final String query = "singleKeyword";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "single keyword search");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertEquals(1, result.getKeywords().size());
-        assertEquals("singleKeyword", result.getKeywords().get(0));
+        assertEquals("singleKeyword", result.getQuery());
     }
 
     @Test
-    public void test_search_withManyKeywords() {
-        List<String> keywords = Arrays.asList("k1", "k2", "k3", "k4", "k5");
-        IntentDetectionResult result = IntentDetectionResult.search(keywords, "multiple keywords");
+    public void test_search_withLuceneQuery() {
+        final String query = "+Fess +Docker (tutorial OR guide)";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "Lucene query");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertEquals(5, result.getKeywords().size());
+        assertEquals(query, result.getQuery());
     }
 
     @Test
     public void test_summary_withDocumentUrl() {
-        String documentUrl = "https://example.com/doc.pdf";
-        IntentDetectionResult result = IntentDetectionResult.summary(documentUrl, "summary request");
+        final String documentUrl = "https://example.com/doc.pdf";
+        final IntentDetectionResult result = IntentDetectionResult.summary(documentUrl, "summary request");
 
         assertEquals(ChatIntent.SUMMARY, result.getIntent());
         assertEquals(documentUrl, result.getDocumentUrl());
-        assertTrue(result.getKeywords().isEmpty());
+        assertNull(result.getQuery());
         assertEquals("summary request", result.getReasoning());
     }
 
     @Test
     public void test_summary_withNullDocumentUrl() {
-        IntentDetectionResult result = IntentDetectionResult.summary(null, "no doc url");
+        final IntentDetectionResult result = IntentDetectionResult.summary(null, "no doc url");
 
         assertEquals(ChatIntent.SUMMARY, result.getIntent());
         assertNull(result.getDocumentUrl());
     }
 
     @Test
-    public void test_faq_withKeywords() {
-        List<String> keywords = Arrays.asList("faq", "question");
-        IntentDetectionResult result = IntentDetectionResult.faq(keywords, "faq intent");
+    public void test_faq_withQuery() {
+        final String query = "+Docker (install OR setup)";
+        final IntentDetectionResult result = IntentDetectionResult.faq(query, "faq intent");
 
         assertEquals(ChatIntent.FAQ, result.getIntent());
-        assertEquals(keywords, result.getKeywords());
+        assertEquals(query, result.getQuery());
         assertNull(result.getDocumentUrl());
         assertEquals("faq intent", result.getReasoning());
     }
 
     @Test
-    public void test_faq_withEmptyKeywords() {
-        IntentDetectionResult result = IntentDetectionResult.faq(Collections.emptyList(), null);
+    public void test_faq_withEmptyQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.faq("", null);
 
         assertEquals(ChatIntent.FAQ, result.getIntent());
-        assertTrue(result.getKeywords().isEmpty());
+        assertEquals("", result.getQuery());
     }
 
     @Test
     public void test_unclear() {
-        IntentDetectionResult result = IntentDetectionResult.unclear("unclear intent");
+        final IntentDetectionResult result = IntentDetectionResult.unclear("unclear intent");
 
         assertEquals(ChatIntent.UNCLEAR, result.getIntent());
-        assertTrue(result.getKeywords().isEmpty());
+        assertNull(result.getQuery());
         assertNull(result.getDocumentUrl());
         assertEquals("unclear intent", result.getReasoning());
     }
 
     @Test
     public void test_unclear_withNullReasoning() {
-        IntentDetectionResult result = IntentDetectionResult.unclear(null);
+        final IntentDetectionResult result = IntentDetectionResult.unclear(null);
 
         assertEquals(ChatIntent.UNCLEAR, result.getIntent());
         assertNull(result.getReasoning());
@@ -130,64 +123,109 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
 
     @Test
     public void test_fallbackSearch() {
-        String originalQuery = "original query text";
-        IntentDetectionResult result = IntentDetectionResult.fallbackSearch(originalQuery);
+        final String originalQuery = "original query text";
+        final IntentDetectionResult result = IntentDetectionResult.fallbackSearch(originalQuery);
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertNotNull(result.getKeywords());
-        assertEquals(1, result.getKeywords().size());
-        assertEquals(originalQuery, result.getKeywords().get(0));
+        assertEquals(originalQuery, result.getQuery());
         assertNotNull(result.getReasoning());
         assertTrue(result.getReasoning().contains("Fallback"));
     }
 
     @Test
     public void test_fallbackSearch_withEmptyQuery() {
-        IntentDetectionResult result = IntentDetectionResult.fallbackSearch("");
+        final IntentDetectionResult result = IntentDetectionResult.fallbackSearch("");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
-        assertNotNull(result.getKeywords());
-        assertEquals(1, result.getKeywords().size());
-        assertEquals("", result.getKeywords().get(0));
-    }
-
-    @Test
-    public void test_keywordsAreImmutable() {
-        List<String> keywords = Arrays.asList("test");
-        IntentDetectionResult result = IntentDetectionResult.search(keywords, null);
-
-        try {
-            result.getKeywords().add("newKeyword");
-            fail("Keywords list should be immutable");
-        } catch (UnsupportedOperationException e) {
-            // Expected
-        }
+        assertEquals("", result.getQuery());
     }
 
     @Test
     public void test_toString() {
-        IntentDetectionResult result = IntentDetectionResult.search(Arrays.asList("test"), "reasoning");
+        final IntentDetectionResult result = IntentDetectionResult.search("test query", "reasoning");
 
-        String str = result.toString();
+        final String str = result.toString();
         assertNotNull(str);
         assertTrue(str.contains("IntentDetectionResult"));
         assertTrue(str.contains("SEARCH"));
-        assertTrue(str.contains("test"));
+        assertTrue(str.contains("test query"));
     }
 
     @Test
     public void test_reasoning_preserved() {
-        String reasoning = "This is a search query because it contains question words";
-        IntentDetectionResult result = IntentDetectionResult.search(Arrays.asList("test"), reasoning);
+        final String reasoning = "This is a search query because it contains question words";
+        final IntentDetectionResult result = IntentDetectionResult.search("test", reasoning);
 
         assertEquals(reasoning, result.getReasoning());
     }
 
     @Test
     public void test_documentUrl_preserved() {
-        String docUrl = "https://example.com/doc-123-456.pdf";
-        IntentDetectionResult result = IntentDetectionResult.summary(docUrl, "summary");
+        final String docUrl = "https://example.com/doc-123-456.pdf";
+        final IntentDetectionResult result = IntentDetectionResult.summary(docUrl, "summary");
 
         assertEquals(docUrl, result.getDocumentUrl());
+    }
+
+    @Test
+    public void test_search_withComplexLuceneQuery() {
+        final String query = "title:\"Fess\"^2 OR \"Fess\"";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "Lucene query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals(query, result.getQuery());
+        assertEquals("Lucene query", result.getReasoning());
+    }
+
+    @Test
+    public void test_summary_hasNoQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.summary("https://example.com", "summary");
+
+        assertEquals(ChatIntent.SUMMARY, result.getIntent());
+        assertNull(result.getQuery());
+    }
+
+    @Test
+    public void test_unclear_hasNoQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.unclear("unclear");
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+        assertNull(result.getQuery());
+    }
+
+    @Test
+    public void test_fallbackSearch_usesOriginalMessageAsQuery() {
+        final IntentDetectionResult result = IntentDetectionResult.fallbackSearch("original query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("original query", result.getQuery());
+    }
+
+    @Test
+    public void test_toString_includesQuery() {
+        final String query = "+Fess +Docker";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "test");
+
+        final String str = result.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("query"));
+        assertTrue(str.contains(query));
+    }
+
+    @Test
+    public void test_query_complexLuceneSyntax() {
+        final String query = "title:\"security policy\"^2 OR (+security +policy (guide OR document))";
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "complex query");
+
+        assertEquals(query, result.getQuery());
+    }
+
+    @Test
+    public void test_faq_complexLuceneSyntax() {
+        final String query = "+\"OpenSearch\" (configuration OR settings OR config)";
+        final IntentDetectionResult result = IntentDetectionResult.faq(query, "FAQ with Lucene");
+
+        assertEquals(ChatIntent.FAQ, result.getIntent());
+        assertEquals(query, result.getQuery());
     }
 }
