@@ -119,13 +119,13 @@ public abstract class FessAdminAction extends FessBaseAction {
      */
     protected void validateFilePath(final String path) {
         if (StringUtil.isBlank(path)) {
-            throw new IllegalArgumentException("File path cannot be empty");
+            throw new IllegalArgumentException("File path cannot be blank.");
         }
         try {
             final Path filePath = Paths.get(path).normalize();
             final String normalizedPath = filePath.toString();
             if (normalizedPath.contains("..")) {
-                throw new IllegalArgumentException("Invalid file path");
+                throw new IllegalArgumentException("Invalid file path: path=" + path);
             }
             final File file = filePath.toFile();
             final String canonicalPath = file.getCanonicalPath();
@@ -133,11 +133,12 @@ public abstract class FessAdminAction extends FessBaseAction {
             if (varPath != null) {
                 final String baseCanonicalPath = new File(varPath).getCanonicalPath();
                 if (!canonicalPath.startsWith(baseCanonicalPath)) {
-                    throw new IllegalArgumentException("File path is outside allowed directory");
+                    throw new IllegalArgumentException(
+                            "File path is outside allowed directory: path=" + canonicalPath + ", allowed=" + baseCanonicalPath);
                 }
             }
         } catch (final IOException e) {
-            throw new IllegalArgumentException("Invalid file path", e);
+            throw new IllegalArgumentException("Invalid file path: path=" + path, e);
         }
     }
 

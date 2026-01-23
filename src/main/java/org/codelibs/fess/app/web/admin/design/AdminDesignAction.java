@@ -293,7 +293,7 @@ public class AdminDesignAction extends FessAdminAction {
         try {
             form.content = encodeJsp(new String(FileUtil.readBytes(jspFile), Constants.UTF_8));
         } catch (final UnsupportedEncodingException e) {
-            throw new FessSystemException("Invalid encoding", e);
+            throw new FessSystemException("Invalid encoding: fileName=" + form.fileName, e);
         }
         saveToken();
         return asEditHtml(form);
@@ -312,7 +312,7 @@ public class AdminDesignAction extends FessAdminAction {
         try {
             form.content = encodeJsp(new String(FileUtil.readBytes(jspFile), Constants.UTF_8));
         } catch (final UnsupportedEncodingException e) {
-            throw new FessSystemException("Invalid encoding", e);
+            throw new FessSystemException("Invalid encoding: fileName=" + form.fileName, e);
         }
         saveToken();
         return asEditHtml(form);
