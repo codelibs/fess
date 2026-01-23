@@ -402,7 +402,7 @@ public class AdminBadwordAction extends FessAdminAction {
                 badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords(false);
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to import data.", e);
+                throw new FessSystemException("Failed to import bad word data: fileName=" + form.badWordFile.getFileName(), e);
             }
         });
         saveInfo(messages -> messages.addSuccessUploadBadWord(GLOBAL));

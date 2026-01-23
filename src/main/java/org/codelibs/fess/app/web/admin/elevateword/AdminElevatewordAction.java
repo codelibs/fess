@@ -435,7 +435,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                 suggestHelper.deleteAllElevateWord(false);
                 suggestHelper.storeAllElevateWords(false);
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to import data.", e);
+                throw new FessSystemException("Failed to import elevate word data: fileName=" + form.elevateWordFile.getFileName(), e);
             }
         });
         saveInfo(messages -> messages.addSuccessUploadElevateWord(GLOBAL));

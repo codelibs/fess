@@ -137,7 +137,7 @@ public class AdminLogAction extends FessAdminAction {
                     logFileItems.add(map);
                 });
             } catch (final Exception e) {
-                throw new FessSystemException("Failed to access log files.", e);
+                throw new FessSystemException("Failed to access log files: logFilePath=" + logFilePath, e);
             }
         }
         return logFileItems;
