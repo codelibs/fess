@@ -20,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -376,6 +378,44 @@ public class AdminDesignAction extends FessAdminAction {
         } catch (final IOException e) {
             logger.warn("Failed to validate upload path: file={}", file.getAbsolutePath(), e);
             return false;
+        }
+    }
+
+    @Override
+    protected void validateFilePath(final String path) {
+        if (StringUtil.isBlank(path)) {
+            throw new IllegalArgumentException("File path cannot be empty");
+        }
+        try {
+            final Path filePath = Paths.get(path).normalize();
+            final String normalizedPath = filePath.toString();
+            if (normalizedPath.contains("..")) {
+                throw new IllegalArgumentException("Invalid file path");
+            }
+            final File file = filePath.toFile();
+            final String canonicalPath = file.getCanonicalPath();
+
+            // Check fess.var.path
+            final String varPath = System.getProperty("fess.var.path");
+            if (varPath != null) {
+                final String baseCanonicalPath = new File(varPath).getCanonicalPath();
+                if (canonicalPath.startsWith(baseCanonicalPath)) {
+                    return;
+                }
+            }
+
+            // Check webapp directory (for design file uploads)
+            final String webappPath = getServletContext().getRealPath("/");
+            if (webappPath != null) {
+                final String webappCanonicalPath = new File(webappPath).getCanonicalPath();
+                if (canonicalPath.startsWith(webappCanonicalPath)) {
+                    return;
+                }
+            }
+
+            throw new IllegalArgumentException("File path is outside allowed directory");
+        } catch (final IOException e) {
+            throw new IllegalArgumentException("Invalid file path", e);
         }
     }
 
