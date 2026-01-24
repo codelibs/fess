@@ -523,6 +523,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. text/html */
     String CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES = "crawler.document.cache.html.mimetypes";
 
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES = "crawler.document.mimetype.extension.overrides";
+
     /** The key of the configuration. e.g. true */
     String INDEXER_THREAD_DUMP_ENABLED = "indexer.thread.dump.enabled";
 
@@ -3829,6 +3832,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheHtmlMimetypes();
+
+    /**
+     * Get the value for the key 'crawler.document.mimetype.extension.overrides'. <br>
+     * The value is, e.g.  <br>
+     * comment: Extension-to-MIME-type override mappings for MIME type detection (one per line: .ext=mime/type).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentMimetypeExtensionOverrides();
+
+    /**
+     * Get the value for the key 'crawler.document.mimetype.extension.overrides' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: Extension-to-MIME-type override mappings for MIME type detection (one per line: .ext=mime/type).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentMimetypeExtensionOverridesAsInteger();
 
     /**
      * Get the value for the key 'indexer.thread.dump.enabled'. <br>
@@ -10377,6 +10397,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES);
         }
 
+        public String getCrawlerDocumentMimetypeExtensionOverrides() {
+            return get(FessConfig.CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES);
+        }
+
+        public Integer getCrawlerDocumentMimetypeExtensionOverridesAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES);
+        }
+
         public String getIndexerThreadDumpEnabled() {
             return get(FessConfig.INDEXER_THREAD_DUMP_ENABLED);
         }
@@ -13248,6 +13276,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_MAX_SIZE, "2621440");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES, "text/html");
             defaultMap.put(FessConfig.CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES, "text/html");
+            defaultMap.put(FessConfig.CRAWLER_DOCUMENT_MIMETYPE_EXTENSION_OVERRIDES, "");
             defaultMap.put(FessConfig.INDEXER_THREAD_DUMP_ENABLED, "true");
             defaultMap.put(FessConfig.INDEXER_UNPROCESSED_DOCUMENT_SIZE, "1000");
             defaultMap.put(FessConfig.INDEXER_CLICK_COUNT_ENABLED, "true");
