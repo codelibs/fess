@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
@@ -129,13 +131,23 @@ public abstract class FessAdminAction extends FessBaseAction {
             }
             final File file = filePath.toFile();
             final String canonicalPath = file.getCanonicalPath();
-            final String varPath = System.getProperty("fess.var.path");
-            if (varPath != null) {
-                final String baseCanonicalPath = new File(varPath).getCanonicalPath();
-                if (!canonicalPath.startsWith(baseCanonicalPath)) {
-                    throw new IllegalArgumentException(
-                            "File path is outside allowed directory: path=" + canonicalPath + ", allowed=" + baseCanonicalPath);
+            final String[] allowedPathProperties = { "fess.var.path", "fess.webapp.path", "fess.conf.path" };
+            boolean isAllowed = false;
+            final List<String> allowedPaths = new ArrayList<>();
+            for (final String prop : allowedPathProperties) {
+                final String basePath = System.getProperty(prop);
+                if (basePath != null) {
+                    final String baseCanonicalPath = new File(basePath).getCanonicalPath();
+                    allowedPaths.add(baseCanonicalPath);
+                    if (canonicalPath.startsWith(baseCanonicalPath)) {
+                        isAllowed = true;
+                        break;
+                    }
                 }
+            }
+            if (!allowedPaths.isEmpty() && !isAllowed) {
+                throw new IllegalArgumentException(
+                        "File path is outside allowed directory: path=" + canonicalPath + ", allowed=" + allowedPaths);
             }
         } catch (final IOException e) {
             throw new IllegalArgumentException("Invalid file path: path=" + path, e);
