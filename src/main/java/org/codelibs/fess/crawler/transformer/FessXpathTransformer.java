@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -994,11 +995,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             logger.warn("Could not parse anchor tags.", e);
         }
 
-        final List<String> urlList = new ArrayList<>(anchorList.size());
+        final Set<String> urlSet = new LinkedHashSet<>(anchorList.size());
         for (final RequestData requestData : anchorList) {
-            urlList.add(requestData.getUrl());
+            urlSet.add(requestData.getUrl());
         }
-        return urlList;
+        return new ArrayList<>(urlSet);
     }
 
     /**
