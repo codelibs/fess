@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -87,17 +88,32 @@ public class IndexExportJob {
 
         final QueryBuilder query = queryBuilder != null ? queryBuilder : QueryBuilders.matchAllQuery();
 
+        if (logger.isInfoEnabled()) {
+            logger.info("[EXPORT] Starting index export: path={}, scrollSize={}, excludeFields={}, query={}", exportPath, scrollSize,
+                    excludeFields, query);
+        }
+
+        final long startTime = System.currentTimeMillis();
+
         try {
+            final AtomicLong processedCount = new AtomicLong(0);
             final long count = searchEngineClient.scrollSearch(fessConfig.getIndexDocumentSearchIndex(), requestBuilder -> {
                 requestBuilder.setQuery(query).setSize(scrollSize);
                 return true;
             }, source -> {
                 exportDocument(source, exportPath, excludeFields);
+                final long currentCount = processedCount.incrementAndGet();
+                if (logger.isDebugEnabled() && currentCount % scrollSize == 0) {
+                    logger.debug("[EXPORT] Processing: count={}", currentCount);
+                }
                 return true;
             });
             resultBuf.append("Exported ").append(count).append(" documents.");
+            if (logger.isInfoEnabled()) {
+                logger.info("[EXPORT] Completed: exportedCount={}, elapsedTime={}ms", count, System.currentTimeMillis() - startTime);
+            }
         } catch (final Exception e) {
-            logger.error("Failed to export documents.", e);
+            logger.warn("Failed to export documents.", e);
             resultBuf.append(e.getMessage()).append("\n");
         }
 
@@ -120,6 +136,9 @@ public class IndexExportJob {
 
         final String url = urlObj.toString();
         final Path filePath = buildFilePath(exportPath, url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[EXPORT] Exporting document: url={}, path={}", url, filePath);
+        }
         final String html = buildHtml(source, excludeFields);
 
         try {

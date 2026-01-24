@@ -2019,7 +2019,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 3 */
     String RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS = "rag.chat.evaluation.max.relevant.docs";
 
-    /** The key of the configuration. e.g. /var/fess/export */
+    /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
 
     /** The key of the configuration. e.g. cache */
@@ -9528,7 +9528,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.export.path'. <br>
-     * The value is, e.g. /var/fess/export <br>
+     * The value is, e.g. /var/lib/fess/export <br>
      * comment: Index Export
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -13718,7 +13718,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE, "10");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
             defaultMap.put(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS, "3");
-            defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/fess/export");
+            defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
