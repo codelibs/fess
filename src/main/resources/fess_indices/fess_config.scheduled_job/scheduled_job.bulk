@@ -20,3 +20,5 @@
 {"name":"Score Updater","target":"all","cronExpression":"0 * * * *","scriptType":"groovy","scriptData":"return container.getComponent(\"scoreUpdater\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":10,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":"fess_config.scheduled_job","_id":"label_updater"}}
 {"name":"Label Updater","target":"all","cronExpression":"","scriptType":"groovy","scriptData":"return container.getComponent(\"updateLabelJob\").execute();","jobLogging":false,"crawler":false,"available":true,"sortOrder":11,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"index":{"_index":"fess_config.scheduled_job","_id":"index_exporter"}}
+{"name":"Index Exporter","target":"all","cronExpression":"","scriptType":"groovy","scriptData":"return new org.codelibs.fess.job.IndexExportJob().query(org.opensearch.index.query.QueryBuilders.matchAllQuery()).execute()","jobLogging":true,"crawler":false,"available":false,"sortOrder":12,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
