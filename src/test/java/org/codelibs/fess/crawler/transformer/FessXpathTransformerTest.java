@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -984,5 +985,172 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertEquals("bbb", ((String[]) resultMap.get("foo"))[1]);
         assertEquals("ddd", resultMap.get("bar"));
         assertEquals("fff", resultMap.get("baz"));
+    }
+
+    @Test
+    public void test_getAnchorList_noDuplicates() throws Exception {
+        final String data = "<html><body>" + "<a href=\"http://example.com/page1\">link1</a>"
+                + "<a href=\"http://example.com/page2\">link2</a>" + "<a href=\"http://example.com/page3\">link3</a>" + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(3, result.size());
+        assertEquals("http://example.com/page1", result.get(0));
+        assertEquals("http://example.com/page2", result.get(1));
+        assertEquals("http://example.com/page3", result.get(2));
+    }
+
+    @Test
+    public void test_getAnchorList_duplicatesFromSameTagType() throws Exception {
+        final String data =
+                "<html><body>" + "<a href=\"http://example.com/page1\">link1</a>" + "<a href=\"http://example.com/page2\">link2</a>"
+                        + "<a href=\"http://example.com/page1\">link1 again</a>" + "<a href=\"http://example.com/page3\">link3</a>"
+                        + "<a href=\"http://example.com/page2\">link2 again</a>" + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(3, result.size());
+        assertEquals("http://example.com/page1", result.get(0));
+        assertEquals("http://example.com/page2", result.get(1));
+        assertEquals("http://example.com/page3", result.get(2));
+    }
+
+    @Test
+    public void test_getAnchorList_duplicatesFromDifferentTags() throws Exception {
+        final String data = "<html><body>" + "<a href=\"http://example.com/page1\">link1</a>" + "<img src=\"http://example.com/page1\">"
+                + "<a href=\"http://example.com/page2\">link2</a>" + "<img src=\"http://example.com/image1.jpg\">"
+                + "<img src=\"http://example.com/page2\">" + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        rules.put("//IMG", "src");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(3, result.size());
+        assertEquals("http://example.com/page1", result.get(0));
+        assertEquals("http://example.com/page2", result.get(1));
+        assertEquals("http://example.com/image1.jpg", result.get(2));
+    }
+
+    @Test
+    public void test_getAnchorList_preservesOrder() throws Exception {
+        final String data = "<html><body>" + "<a href=\"http://example.com/ccc\">link3</a>" + "<a href=\"http://example.com/aaa\">link1</a>"
+                + "<a href=\"http://example.com/bbb\">link2</a>" + "<a href=\"http://example.com/aaa\">link1 dup</a>"
+                + "<a href=\"http://example.com/ccc\">link3 dup</a>" + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(3, result.size());
+        assertEquals("http://example.com/ccc", result.get(0));
+        assertEquals("http://example.com/aaa", result.get(1));
+        assertEquals("http://example.com/bbb", result.get(2));
+    }
+
+    @Test
+    public void test_getAnchorList_emptyDocument() throws Exception {
+        final String data = "<html><body><p>no links here</p></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void test_getAnchorList_allDuplicates() throws Exception {
+        final String data = "<html><body>" + "<a href=\"http://example.com/same\">link1</a>"
+                + "<a href=\"http://example.com/same\">link2</a>" + "<a href=\"http://example.com/same\">link3</a>" + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/same", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_duplicatesWithLinkTag() throws Exception {
+        final String data = "<html><head>" + "<link rel=\"stylesheet\" href=\"http://example.com/style.css\">"
+                + "<link rel=\"icon\" href=\"http://example.com/icon.png\">" + "</head><body>"
+                + "<a href=\"http://example.com/style.css\">css link</a>" + "<a href=\"http://example.com/page1\">page1</a>"
+                + "</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        rules.put("//LINK", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(3, result.size());
+        assertTrue(result.contains("http://example.com/style.css"));
+        assertTrue(result.contains("http://example.com/icon.png"));
+        assertTrue(result.contains("http://example.com/page1"));
+    }
+
+    private FessXpathTransformer createAnchorListTransformer() {
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            @Override
+            protected PathMappingHelper getPathMappingHelper() {
+                return new PathMappingHelper();
+            }
+        };
+        transformer.init();
+        return transformer;
     }
 }
