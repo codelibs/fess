@@ -116,6 +116,10 @@
 			<arg>"profile"</arg>
 			<arg>"profile/index.jsp"</arg>
 		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"chat"</arg>
+			<arg>"chat/chat.jsp"</arg>
+		</postConstruct>
 	</component>
 	<component name="crawlingInfoHelper" class="org.codelibs.fess.helper.CrawlingInfoHelper">
 	</component>

@@ -1944,7 +1944,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String PASSWORD_REQUIRE_SPECIAL_CHAR = "password.require.special.char";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. false */
     String RAG_CHAT_ENABLED = "rag.chat.enabled";
 
     /** The key of the configuration. e.g. ollama */
@@ -9211,7 +9211,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.chat.enabled'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * comment: Whether RAG chat feature is enabled.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -9219,7 +9219,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Is the property for the key 'rag.chat.enabled' true? <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * comment: Whether RAG chat feature is enabled.
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
@@ -13720,7 +13720,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_LOWERCASE, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
-            defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "true");
+            defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
             defaultMap.put(FessConfig.RAG_LLM_TYPE, "ollama");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_API_URL, "http://localhost:11434");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "gemma3:4b");
