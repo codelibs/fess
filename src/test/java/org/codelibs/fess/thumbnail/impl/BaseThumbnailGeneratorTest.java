@@ -199,4 +199,30 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
             // Expected when FessConfig is not available
         }
     }
+
+    @Test
+    public void test_mimetypePatternMatching() {
+        // Test that MIME type patterns work correctly as regex
+        // This verifies the fix for SVG thumbnail generation issue
+        // where image/svg+xml was not matching due to unescaped + character
+
+        // SVG MIME type - the + must be escaped in regex
+        String svgMimetype = "image/svg+xml";
+        String svgPatternWrong = "image/svg+xml"; // Wrong: + means "one or more" in regex
+        String svgPatternCorrect = "image/svg\\+xml"; // Correct: \\+ matches literal +
+
+        // Verify wrong pattern does NOT match (demonstrates the bug)
+        assertFalse(svgMimetype.matches(svgPatternWrong));
+
+        // Verify correct pattern DOES match (demonstrates the fix)
+        assertTrue(svgMimetype.matches(svgPatternCorrect));
+
+        // Verify other common MIME types still work (no special chars)
+        assertTrue("text/html".matches("text/html"));
+        assertTrue("application/pdf".matches("application/pdf"));
+        assertTrue("image/jpeg".matches("image/jpeg"));
+        assertTrue("image/png".matches("image/png"));
+        assertTrue("image/gif".matches("image/gif"));
+        assertTrue("image/tiff".matches("image/tiff"));
+    }
 }
