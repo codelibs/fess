@@ -234,7 +234,16 @@ public class GeminiLlmClient implements LlmClient {
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warn("Gemini API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    String errorBody = "";
+                    if (response.body() != null) {
+                        try {
+                            errorBody = response.body().string();
+                        } catch (final IOException e) {
+                            // ignore
+                        }
+                    }
+                    logger.warn("Gemini API error. url={}, statusCode={}, message={}, body={}", url, response.code(), response.message(),
+                            errorBody);
                     throw new LlmException("Gemini API error: " + response.code() + " " + response.message());
                 }
 
@@ -312,7 +321,16 @@ public class GeminiLlmClient implements LlmClient {
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warn("Gemini streaming API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    String errorBody = "";
+                    if (response.body() != null) {
+                        try {
+                            errorBody = response.body().string();
+                        } catch (final IOException e) {
+                            // ignore
+                        }
+                    }
+                    logger.warn("Gemini streaming API error. url={}, statusCode={}, message={}, body={}", url, response.code(),
+                            response.message(), errorBody);
                     throw new LlmException("Gemini API error: " + response.code() + " " + response.message());
                 }
 

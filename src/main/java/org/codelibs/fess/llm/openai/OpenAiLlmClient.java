@@ -232,7 +232,16 @@ public class OpenAiLlmClient implements LlmClient {
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warn("OpenAI API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    String errorBody = "";
+                    if (response.body() != null) {
+                        try {
+                            errorBody = response.body().string();
+                        } catch (final IOException e) {
+                            // ignore
+                        }
+                    }
+                    logger.warn("OpenAI API error. url={}, statusCode={}, message={}, body={}", url, response.code(), response.message(),
+                            errorBody);
                     throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
                 }
 
@@ -305,7 +314,16 @@ public class OpenAiLlmClient implements LlmClient {
 
             try (Response response = getHttpClient().newCall(httpRequest).execute()) {
                 if (!response.isSuccessful()) {
-                    logger.warn("OpenAI streaming API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
+                    String errorBody = "";
+                    if (response.body() != null) {
+                        try {
+                            errorBody = response.body().string();
+                        } catch (final IOException e) {
+                            // ignore
+                        }
+                    }
+                    logger.warn("OpenAI streaming API error. url={}, statusCode={}, message={}, body={}", url, response.code(),
+                            response.message(), errorBody);
                     throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
                 }
 
