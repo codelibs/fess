@@ -15,28 +15,44 @@
  */
 package org.codelibs.fess.llm.gemini;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.llm.LlmChatRequest;
+import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.llm.LlmMessage;
+import org.codelibs.fess.llm.LlmStreamCallback;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+
 public class GeminiLlmClientTest extends UnitFessTestCase {
 
     private TestableGeminiLlmClient client;
+    private MockWebServer mockServer;
 
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         client = new TestableGeminiLlmClient();
+        mockServer = new MockWebServer();
+        mockServer.start();
     }
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
         super.tearDown(testInfo);
+        if (mockServer != null) {
+            mockServer.shutdown();
+        }
     }
 
     @Test
@@ -70,6 +86,14 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
         client.setTestApiKey("test-api-key");
         client.setTestApiUrl(null);
         assertFalse(client.isAvailable());
+    }
+
+    @Test
+    public void test_isAvailable_valid() throws IOException {
+        // Mock the models endpoint for availability check
+        mockServer.enqueue(new MockResponse().setBody("{\"models\":[]}").addHeader("Content-Type", "application/json"));
+        setupClientForMockServer();
+        assertTrue(client.isAvailable());
     }
 
     @Test
@@ -352,6 +376,678 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
         assertEquals("model", result.get("role"));
     }
 
+    // ========== chat() method tests ==========
+
+    @Test
+    public void test_chat_success() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Hello! How can I help you today?"
+                            }],
+                            "role": "model"
+                        },
+                        "finishReason": "STOP"
+                    }],
+                    "usageMetadata": {
+                        "promptTokenCount": 10,
+                        "candidatesTokenCount": 20,
+                        "totalTokenCount": 30
+                    },
+                    "modelVersion": "gemini-2.0-flash"
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertEquals("Hello! How can I help you today?", response.getContent());
+        assertEquals("STOP", response.getFinishReason());
+        assertEquals("gemini-2.0-flash", response.getModel());
+        assertEquals(10, response.getPromptTokens());
+        assertEquals(20, response.getCompletionTokens());
+        assertEquals(30, response.getTotalTokens());
+    }
+
+    @Test
+    public void test_chat_successWithMinimalResponse() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Response text"
+                            }]
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertEquals("Response text", response.getContent());
+    }
+
+    @Test
+    public void test_chat_successWithoutModelVersion() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Response text"
+                            }]
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        // Should use the configured model name when modelVersion is not in response
+        assertEquals("gemini-2.0-flash", response.getModel());
+    }
+
+    @Test
+    public void test_chat_errorResponse_withBody() throws IOException {
+        final String errorJson = """
+                {
+                    "error": {
+                        "code": 401,
+                        "message": "API key not valid. Please pass a valid API key.",
+                        "status": "UNAUTHENTICATED"
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setResponseCode(401).setBody(errorJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("401"));
+        }
+    }
+
+    @Test
+    public void test_chat_errorResponse_quotaExceeded() throws IOException {
+        final String errorJson = """
+                {
+                    "error": {
+                        "code": 429,
+                        "message": "Resource has been exhausted",
+                        "status": "RESOURCE_EXHAUSTED"
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setResponseCode(429).setBody(errorJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("429"));
+        }
+    }
+
+    @Test
+    public void test_chat_errorResponse_serverError() throws IOException {
+        final String errorJson = """
+                {
+                    "error": {
+                        "code": 500,
+                        "message": "Internal error encountered",
+                        "status": "INTERNAL"
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody(errorJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("500"));
+        }
+    }
+
+    @Test
+    public void test_chat_errorResponse_emptyBody() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(503).setBody("").addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("503"));
+        }
+    }
+
+    @Test
+    public void test_chat_emptyCandidates() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": []
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertNull(response.getContent());
+    }
+
+    @Test
+    public void test_chat_nullFinishReason() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Test"
+                            }]
+                        },
+                        "finishReason": null
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertEquals("Test", response.getContent());
+        assertNull(response.getFinishReason());
+    }
+
+    @Test
+    public void test_chat_partialUsageMetadata() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Test"
+                            }]
+                        }
+                    }],
+                    "usageMetadata": {
+                        "promptTokenCount": 5
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertEquals(5, response.getPromptTokens());
+        assertNull(response.getCompletionTokens());
+        assertNull(response.getTotalTokens());
+    }
+
+    @Test
+    public void test_chat_emptyParts() throws IOException {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": []
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        assertNull(response.getContent());
+    }
+
+    // ========== streamChat() method tests ==========
+
+    @Test
+    public void test_streamChat_success() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Hello"}],"role":"model"}}]},
+                {"candidates":[{"content":{"parts":[{"text":" World"}],"role":"model"}}]},
+                {"candidates":[{"content":{"parts":[{"text":"!"}],"role":"model"},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals(3, chunks.size());
+        assertEquals("Hello", chunks.get(0));
+        assertEquals(" World", chunks.get(1));
+        assertEquals("!", chunks.get(2));
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_streamChat_multipleChunks() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"A"}]}}]},
+                {"candidates":[{"content":{"parts":[{"text":"B"}]}}]},
+                {"candidates":[{"content":{"parts":[{"text":"C"}]}}]},
+                {"candidates":[{"content":{"parts":[{"text":"D"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final StringBuilder content = new StringBuilder();
+        final AtomicInteger chunkCount = new AtomicInteger(0);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String chunk, final boolean done) {
+                content.append(chunk);
+                chunkCount.incrementAndGet();
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals("ABCD", content.toString());
+        assertEquals(4, chunkCount.get());
+    }
+
+    @Test
+    public void test_streamChat_errorResponse_withBody() throws IOException {
+        final String errorJson = """
+                {
+                    "error": {
+                        "code": 429,
+                        "message": "Resource has been exhausted",
+                        "status": "RESOURCE_EXHAUSTED"
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setResponseCode(429).setBody(errorJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean errorReceived = new AtomicBoolean(false);
+
+        try {
+            client.streamChat(request, new LlmStreamCallback() {
+                @Override
+                public void onChunk(final String content, final boolean done) {
+                    fail("Should not receive chunks on error");
+                }
+
+                @Override
+                public void onError(final Throwable error) {
+                    errorReceived.set(true);
+                }
+            });
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("429"));
+            assertTrue(errorReceived.get());
+        }
+    }
+
+    @Test
+    public void test_streamChat_errorResponse_serverError() throws IOException {
+        final String errorJson = """
+                {
+                    "error": {
+                        "code": 500,
+                        "message": "Internal error encountered"
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody(errorJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean errorReceived = new AtomicBoolean(false);
+
+        try {
+            client.streamChat(request, new LlmStreamCallback() {
+                @Override
+                public void onChunk(final String content, final boolean done) {
+                    fail("Should not receive chunks on error");
+                }
+
+                @Override
+                public void onError(final Throwable error) {
+                    errorReceived.set(true);
+                }
+            });
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("500"));
+            assertTrue(errorReceived.get());
+        }
+    }
+
+    @Test
+    public void test_streamChat_emptyBody() throws IOException {
+        // Empty body with MockWebServer doesn't result in null body
+        // Just verify that no chunks are received
+        mockServer.enqueue(new MockResponse().setResponseCode(200).setBody("").addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        // No chunks should be received for empty body
+        assertEquals(0, chunks.size());
+    }
+
+    @Test
+    public void test_streamChat_finishReasonStop() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Test"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+        final List<String> chunks = new ArrayList<>();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals(1, chunks.size());
+        assertEquals("Test", chunks.get(0));
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_streamChat_finishReasonMaxTokens() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Truncated"}]},"finishReason":"MAX_TOKENS"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_streamChat_malformedJson() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]},
+                {invalid json},
+                {"candidates":[{"content":{"parts":[{"text":" World"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                if (!content.isEmpty()) {
+                    chunks.add(content);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                // Malformed JSON is logged but doesn't stop streaming
+            }
+        });
+
+        // Should still receive valid chunks
+        assertTrue(chunks.size() >= 2);
+        assertTrue(chunks.contains("Hello"));
+        assertTrue(chunks.contains(" World"));
+    }
+
+    @Test
+    public void test_streamChat_ignoresArrayBrackets() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Test"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals(1, chunks.size());
+        assertEquals("Test", chunks.get(0));
+    }
+
+    @Test
+    public void test_streamChat_handlesCommasInStreamFormat() throws IOException {
+        // Gemini streaming format often has commas between JSON objects
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"A"}]}}]}
+                ,
+                {"candidates":[{"content":{"parts":[{"text":"B"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final StringBuilder content = new StringBuilder();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String chunk, final boolean done) {
+                content.append(chunk);
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals("AB", content.toString());
+    }
+
+    @Test
+    public void test_streamChat_emptyCandidates() throws IOException {
+        final String streamResponse = """
+                [
+                {"candidates":[]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        // No chunks should be added for empty candidates
+        assertEquals(0, chunks.size());
+    }
+
+    // ========== Helper methods ==========
+
+    private void setupClientForMockServer() {
+        final String baseUrl = mockServer.url("").toString();
+        // Remove trailing slash
+        final String apiUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        client.setTestApiUrl(apiUrl);
+        client.setTestApiKey("test-key");
+        client.setTestModel("gemini-2.0-flash");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+        client.setTestTimeout(30000);
+        client.init();
+    }
+
     /**
      * Testable subclass of GeminiLlmClient that allows setting configuration values
      * directly without depending on FessConfig.
@@ -364,27 +1060,27 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
         private double testTemperature = 0.7;
         private int testMaxTokens = 4096;
 
-        void setTestApiKey(String apiKey) {
+        void setTestApiKey(final String apiKey) {
             this.testApiKey = apiKey;
         }
 
-        void setTestApiUrl(String apiUrl) {
+        void setTestApiUrl(final String apiUrl) {
             this.testApiUrl = apiUrl;
         }
 
-        void setTestModel(String model) {
+        void setTestModel(final String model) {
             this.testModel = model;
         }
 
-        void setTestTimeout(int timeout) {
+        void setTestTimeout(final int timeout) {
             this.testTimeout = timeout;
         }
 
-        void setTestTemperature(double temperature) {
+        void setTestTemperature(final double temperature) {
             this.testTemperature = temperature;
         }
 
-        void setTestMaxTokens(int maxTokens) {
+        void setTestMaxTokens(final int maxTokens) {
             this.testMaxTokens = maxTokens;
         }
 
