@@ -220,6 +220,7 @@ public class GeminiLlmClient implements LlmClient {
         final String model = getModelName(request);
         final String url = buildApiUrl(model, false);
         final Map<String, Object> requestBody = buildRequestBody(request);
+        final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Sending chat request to Gemini. url={}, model={}, messageCount={}", url, model, request.getMessages().size());
@@ -286,9 +287,10 @@ public class GeminiLlmClient implements LlmClient {
 
                 if (logger.isDebugEnabled()) {
                     logger.debug(
-                            "Received chat response from Gemini. model={}, promptTokens={}, completionTokens={}, totalTokens={}, contentLength={}",
+                            "Received chat response from Gemini. model={}, promptTokens={}, completionTokens={}, totalTokens={}, contentLength={}, elapsedTime={}ms",
                             chatResponse.getModel(), chatResponse.getPromptTokens(), chatResponse.getCompletionTokens(),
-                            chatResponse.getTotalTokens(), chatResponse.getContent() != null ? chatResponse.getContent().length() : 0);
+                            chatResponse.getTotalTokens(), chatResponse.getContent() != null ? chatResponse.getContent().length() : 0,
+                            System.currentTimeMillis() - startTime);
                 }
 
                 return chatResponse;
@@ -306,6 +308,7 @@ public class GeminiLlmClient implements LlmClient {
         final String model = getModelName(request);
         final String url = buildApiUrl(model, true);
         final Map<String, Object> requestBody = buildRequestBody(request);
+        final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Starting streaming chat request to Gemini. url={}, model={}, messageCount={}", url, model,
@@ -397,7 +400,8 @@ public class GeminiLlmClient implements LlmClient {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Completed streaming chat from Gemini. url={}, chunkCount={}", url, chunkCount);
+                    logger.debug("Completed streaming chat from Gemini. url={}, chunkCount={}, elapsedTime={}ms", url, chunkCount,
+                            System.currentTimeMillis() - startTime);
                 }
             }
         } catch (final LlmException e) {

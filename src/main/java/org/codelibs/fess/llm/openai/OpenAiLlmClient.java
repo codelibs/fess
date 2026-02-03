@@ -216,6 +216,7 @@ public class OpenAiLlmClient implements LlmClient {
     public LlmChatResponse chat(final LlmChatRequest request) {
         final String url = getApiUrl() + "/chat/completions";
         final Map<String, Object> requestBody = buildRequestBody(request, false);
+        final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Sending chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
@@ -279,9 +280,10 @@ public class OpenAiLlmClient implements LlmClient {
 
                 if (logger.isDebugEnabled()) {
                     logger.debug(
-                            "Received chat response from OpenAI. model={}, promptTokens={}, completionTokens={}, totalTokens={}, contentLength={}",
+                            "Received chat response from OpenAI. model={}, promptTokens={}, completionTokens={}, totalTokens={}, contentLength={}, elapsedTime={}ms",
                             chatResponse.getModel(), chatResponse.getPromptTokens(), chatResponse.getCompletionTokens(),
-                            chatResponse.getTotalTokens(), chatResponse.getContent() != null ? chatResponse.getContent().length() : 0);
+                            chatResponse.getTotalTokens(), chatResponse.getContent() != null ? chatResponse.getContent().length() : 0,
+                            System.currentTimeMillis() - startTime);
                 }
 
                 return chatResponse;
@@ -298,6 +300,7 @@ public class OpenAiLlmClient implements LlmClient {
     public void streamChat(final LlmChatRequest request, final LlmStreamCallback callback) {
         final String url = getApiUrl() + "/chat/completions";
         final Map<String, Object> requestBody = buildRequestBody(request, true);
+        final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Starting streaming chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
@@ -379,7 +382,8 @@ public class OpenAiLlmClient implements LlmClient {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Completed streaming chat from OpenAI. url={}, chunkCount={}", url, chunkCount);
+                    logger.debug("Completed streaming chat from OpenAI. url={}, chunkCount={}, elapsedTime={}ms", url, chunkCount,
+                            System.currentTimeMillis() - startTime);
                 }
             }
         } catch (final LlmException e) {
