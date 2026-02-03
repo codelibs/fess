@@ -80,7 +80,12 @@ public class LlmClientManager {
         final String llmType = getLlmType();
         final String name = llmType + "LlmClient";
         if (ComponentUtil.hasComponent(name)) {
-            return ComponentUtil.getComponent(name);
+            final LlmClient client = ComponentUtil.getComponent(name);
+            if (logger.isDebugEnabled()) {
+                logger.debug("LlmClient found. componentName={}, clientName={}, available={}", name, client.getName(),
+                        client.isAvailable());
+            }
+            return client;
         }
         logger.warn("LlmClient not found: {}", name);
         return null;
@@ -133,25 +138,33 @@ public class LlmClientManager {
      * @throws LlmException if LLM is not available or an error occurs
      */
     public LlmChatResponse chat(final LlmChatRequest request) {
+        final long startTime = System.currentTimeMillis();
+        final String llmType = getLlmType();
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting LLM chat request. messageCount={}", request.getMessages().size());
+            logger.debug("Starting LLM chat request. llmType={}, messageCount={}", llmType, request.getMessages().size());
         }
         if (!available()) {
-            logger.warn("LLM chat request failed. LLM client is not available. llmType={}", getLlmType());
+            logger.warn("LLM chat request failed. LLM client is not available. llmType={}", llmType);
             throw new LlmException("LLM client is not available");
         }
         try {
-            final LlmChatResponse response = getClient().chat(request);
+            final LlmClient client = getClient();
             if (logger.isDebugEnabled()) {
-                logger.debug("LLM chat request completed. contentLength={}",
-                        response.getContent() != null ? response.getContent().length() : 0);
+                logger.debug("Using LLM client. clientName={}", client != null ? client.getName() : "null");
+            }
+            final LlmChatResponse response = client.chat(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("LLM chat request completed. llmType={}, contentLength={}, elapsedTime={}ms", llmType,
+                        response.getContent() != null ? response.getContent().length() : 0, System.currentTimeMillis() - startTime);
             }
             return response;
         } catch (final LlmException e) {
-            logger.warn("LLM chat request failed. error={}", e.getMessage());
+            logger.warn("LLM chat request failed. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
+                    System.currentTimeMillis() - startTime);
             throw e;
         } catch (final Exception e) {
-            logger.warn("LLM chat request failed with unexpected error. error={}", e.getMessage(), e);
+            logger.warn("LLM chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
+                    System.currentTimeMillis() - startTime, e);
             throw new LlmException("LLM chat request failed", e);
         }
     }
@@ -164,23 +177,32 @@ public class LlmClientManager {
      * @throws LlmException if LLM is not available or an error occurs
      */
     public void streamChat(final LlmChatRequest request, final LlmStreamCallback callback) {
+        final long startTime = System.currentTimeMillis();
+        final String llmType = getLlmType();
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting LLM streaming chat request. messageCount={}", request.getMessages().size());
+            logger.debug("Starting LLM streaming chat request. llmType={}, messageCount={}", llmType, request.getMessages().size());
         }
         if (!available()) {
-            logger.warn("LLM streaming chat request failed. LLM client is not available. llmType={}", getLlmType());
+            logger.warn("LLM streaming chat request failed. LLM client is not available. llmType={}", llmType);
             throw new LlmException("LLM client is not available");
         }
         try {
-            getClient().streamChat(request, callback);
+            final LlmClient client = getClient();
             if (logger.isDebugEnabled()) {
-                logger.debug("LLM streaming chat request completed.");
+                logger.debug("Using LLM client for streaming. clientName={}", client != null ? client.getName() : "null");
+            }
+            client.streamChat(request, callback);
+            if (logger.isDebugEnabled()) {
+                logger.debug("LLM streaming chat request completed. llmType={}, elapsedTime={}ms", llmType,
+                        System.currentTimeMillis() - startTime);
             }
         } catch (final LlmException e) {
-            logger.warn("LLM streaming chat request failed. error={}", e.getMessage());
+            logger.warn("LLM streaming chat request failed. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
+                    System.currentTimeMillis() - startTime);
             throw e;
         } catch (final Exception e) {
-            logger.warn("LLM streaming chat request failed with unexpected error. error={}", e.getMessage(), e);
+            logger.warn("LLM streaming chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType,
+                    e.getMessage(), System.currentTimeMillis() - startTime, e);
             throw new LlmException("LLM streaming chat request failed", e);
         }
     }

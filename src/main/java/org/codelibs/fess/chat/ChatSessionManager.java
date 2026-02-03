@@ -238,9 +238,8 @@ public class ChatSessionManager {
         }
 
         final int toRemove = sessionCache.size() - maxSize;
-        if (logger.isDebugEnabled()) {
-            logger.debug("Enforcing max session size. currentSize={}, maxSize={}, toRemove={}", sessionCache.size(), maxSize, toRemove);
-        }
+        logger.warn("Session cache reached maximum size. Removing oldest sessions. currentSize={}, maxSize={}, removing={}",
+                sessionCache.size(), maxSize, toRemove);
 
         // Remove oldest sessions
         sessionCache.entrySet()

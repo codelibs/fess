@@ -104,6 +104,7 @@ public class ChatClient {
      * @return the chat response including session info and sources
      */
     public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
+        final long startTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting chat request. sessionId={}, userId={}, messageLength={}", sessionId, userId,
                     userMessage != null ? userMessage.length() : 0);
@@ -139,8 +140,9 @@ public class ChatClient {
             throw e;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("LLM response received. responseLength={}",
-                    llmResponse.getContent() != null ? llmResponse.getContent().length() : 0);
+            logger.debug("LLM response received. responseLength={}, promptTokens={}, completionTokens={}",
+                    llmResponse.getContent() != null ? llmResponse.getContent().length() : 0, llmResponse.getPromptTokens(),
+                    llmResponse.getCompletionTokens());
         }
 
         // Create chat messages
@@ -158,7 +160,8 @@ public class ChatClient {
         session.trimHistory(getMaxHistoryMessages());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Chat request completed. sessionId={}, sourcesCount={}", session.getSessionId(), searchResults.size());
+            logger.debug("Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
         }
 
         return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
@@ -174,6 +177,7 @@ public class ChatClient {
      * @return the chat result with session info and sources
      */
     public ChatResult streamChat(final String sessionId, final String userMessage, final String userId, final LlmStreamCallback callback) {
+        final long startTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting streaming chat request. sessionId={}, userId={}, messageLength={}", sessionId, userId,
                     userMessage != null ? userMessage.length() : 0);
@@ -232,7 +236,8 @@ public class ChatClient {
         session.trimHistory(getMaxHistoryMessages());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Streaming chat request completed. sessionId={}, sourcesCount={}", session.getSessionId(), searchResults.size());
+            logger.debug("Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
         }
 
         return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
@@ -251,6 +256,7 @@ public class ChatClient {
      */
     public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
             final ChatPhaseCallback callback) {
+        final long startTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Starting enhanced streaming chat request. sessionId={}, userId={}, messageLength={}", sessionId, userId,
                     userMessage != null ? userMessage.length() : 0);
@@ -262,39 +268,58 @@ public class ChatClient {
 
         try {
             // Phase 1: Intent Detection
+            long phaseStartTime = System.currentTimeMillis();
             callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "Analyzing your question...");
             final IntentDetectionResult intentResult = detectIntent(userMessage);
             callback.onPhaseComplete(ChatPhaseCallback.PHASE_INTENT);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Intent detected. intent={}, query={}", intentResult.getIntent(), intentResult.getQuery());
+                logger.debug("Phase {} completed. intent={}, query={}, reasoning={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_INTENT,
+                        intentResult.getIntent(), intentResult.getQuery(), intentResult.getReasoning(),
+                        System.currentTimeMillis() - phaseStartTime);
             }
 
             if (intentResult.getIntent() == ChatIntent.UNCLEAR) {
                 // Intent is unclear - ask user for clarification
+                phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                 generateUnclearIntentResponse(userMessage, session, (chunk, done) -> {
                     fullResponse.append(chunk);
                     callback.onChunk(chunk, done);
                 });
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                            fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                }
             } else if (intentResult.getIntent() == ChatIntent.SUMMARY) {
                 // Summary intent - search by URL and generate summary
                 final String documentUrl = intentResult.getDocumentUrl();
+                phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching for document...", documentUrl);
                 final List<Map<String, Object>> urlResults = searchByUrl(documentUrl);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Phase {} completed. documentUrl={}, resultCount={}, phaseElapsedTime={}ms",
+                            ChatPhaseCallback.PHASE_SEARCH, documentUrl, urlResults.size(), System.currentTimeMillis() - phaseStartTime);
+                }
 
                 if (urlResults.isEmpty()) {
                     // URL not found - inform user
+                    phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                     generateDocumentNotFoundResponse(userMessage, documentUrl, session, (chunk, done) -> {
                         fullResponse.append(chunk);
                         callback.onChunk(chunk, done);
                     });
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                                fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                    }
                 } else {
                     // Fetch full content and generate summary
+                    phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
                     final List<String> docIds = urlResults.stream()
                             .map(doc -> (String) doc.get("doc_id"))
@@ -303,76 +328,113 @@ public class ChatClient {
                     final List<Map<String, Object>> fullDocs = fetchFullContent(docIds);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
                     sources = fullDocs;
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_FETCH,
+                                docIds, fullDocs.size(), System.currentTimeMillis() - phaseStartTime);
+                    }
 
+                    phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating summary...");
                     generateSummaryResponse(userMessage, fullDocs, session, (chunk, done) -> {
                         fullResponse.append(chunk);
                         callback.onChunk(chunk, done);
                     });
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                                fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                    }
                 }
             } else {
                 // Phase 2: Search with query
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
                 final List<Map<String, Object>> searchResults = searchWithQuery(query);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Search completed. resultCount={}", searchResults.size());
+                    logger.debug("Phase {} completed. query={}, resultCount={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_SEARCH,
+                            query, searchResults.size(), System.currentTimeMillis() - phaseStartTime);
                 }
 
                 if (searchResults.isEmpty()) {
                     // No results - generate fallback response
+                    phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                     generateNoResultsResponse(userMessage, session, (chunk, done) -> {
                         fullResponse.append(chunk);
                         callback.onChunk(chunk, done);
                     });
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                                fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                    }
                 } else {
                     // Phase 3: Evaluate results
+                    phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
                     final RelevanceEvaluationResult evalResult = evaluateResults(userMessage, query, searchResults);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Evaluation completed. hasRelevant={}, relevantCount={}", evalResult.isHasRelevantResults(),
-                                evalResult.getRelevantDocIds().size());
+                        logger.debug("Phase {} completed. hasRelevant={}, relevantDocIds={}, phaseElapsedTime={}ms",
+                                ChatPhaseCallback.PHASE_EVALUATE, evalResult.isHasRelevantResults(), evalResult.getRelevantDocIds(),
+                                System.currentTimeMillis() - phaseStartTime);
                     }
 
                     if (!evalResult.isHasRelevantResults()) {
                         // No relevant results - generate fallback response
+                        phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                         generateNoResultsResponse(userMessage, session, (chunk, done) -> {
                             fullResponse.append(chunk);
                             callback.onChunk(chunk, done);
                         });
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
+                                    fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                        }
                     } else {
                         // Phase 4: Fetch full content
+                        phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
                         final List<Map<String, Object>> fullDocs = fetchFullContent(evalResult.getRelevantDocIds());
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_FETCH);
                         sources = fullDocs;
 
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Full content fetched. docCount={}", fullDocs.size());
+                            logger.debug("Phase {} completed. docIds={}, fetchedCount={}, phaseElapsedTime={}ms",
+                                    ChatPhaseCallback.PHASE_FETCH, evalResult.getRelevantDocIds(), fullDocs.size(),
+                                    System.currentTimeMillis() - phaseStartTime);
                         }
 
                         // Phase 5: Generate answer
+                        phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                         generateAnswerWithContent(userMessage, fullDocs, session, (chunk, done) -> {
                             fullResponse.append(chunk);
                             callback.onChunk(chunk, done);
                         });
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Phase {} completed. responseLength={}, sourceCount={}, phaseElapsedTime={}ms",
+                                    ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), fullDocs.size(),
+                                    System.currentTimeMillis() - phaseStartTime);
+                        }
                     }
                 }
             }
 
             // Phase 6: Render markdown to safe HTML
+            final long renderStartTime = System.currentTimeMillis();
             final String htmlContent = renderMarkdownToHtml(fullResponse.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Markdown rendering completed. markdownLength={}, htmlLength={}, renderElapsedTime={}ms",
+                        fullResponse.length(), htmlContent.length(), System.currentTimeMillis() - renderStartTime);
+            }
 
             // Create and save messages
             final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
@@ -388,13 +450,15 @@ public class ChatClient {
             session.trimHistory(getMaxHistoryMessages());
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Enhanced chat request completed. sessionId={}, sourcesCount={}", session.getSessionId(), sources.size());
+                logger.debug("Enhanced chat request completed. sessionId={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
+                        session.getSessionId(), sources.size(), fullResponse.length(), System.currentTimeMillis() - startTime);
             }
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);
 
         } catch (final Exception e) {
-            logger.warn("Error during enhanced chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            logger.warn("Error during enhanced chat. sessionId={}, error={}, elapsedTime={}ms", session.getSessionId(), e.getMessage(),
+                    System.currentTimeMillis() - startTime, e);
             callback.onError("unknown", e.getMessage());
             throw e;
         }
@@ -407,7 +471,12 @@ public class ChatClient {
      * @return the detected intent with extracted keywords
      */
     protected IntentDetectionResult detectIntent(final String userMessage) {
+        final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting intent detection. messageLength={}", userMessage != null ? userMessage.length() : 0);
+        }
 
         try {
             final String prompt = buildIntentDetectionPrompt(userMessage, fessConfig);
@@ -416,10 +485,23 @@ public class ChatClient {
             request.setMaxTokens(500);
             request.setTemperature(0.3);
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("Intent detection LLM request. promptLength={}, maxTokens={}, temperature={}", prompt.length(),
+                        request.getMaxTokens(), request.getTemperature());
+            }
+
             final LlmChatResponse response = llmClientManager.chat(request);
-            return parseIntentResponse(response.getContent());
+            final IntentDetectionResult result = parseIntentResponse(response.getContent());
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Intent detection completed. intent={}, query={}, elapsedTime={}ms", result.getIntent(), result.getQuery(),
+                        System.currentTimeMillis() - startTime);
+            }
+
+            return result;
         } catch (final Exception e) {
-            logger.warn("Failed to detect intent, falling back to search. error={}", e.getMessage());
+            logger.warn("Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
+                    System.currentTimeMillis() - startTime);
             return IntentDetectionResult.fallbackSearch(userMessage);
         }
     }
@@ -460,11 +542,20 @@ public class ChatClient {
      * @return the parsed intent detection result
      */
     protected IntentDetectionResult parseIntentResponse(final String response) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Parsing intent response. responseLength={}", response != null ? response.length() : 0);
+        }
+
         try {
             final String intentStr = extractJsonString(response, "intent");
             final ChatIntent intent = ChatIntent.fromValue(intentStr);
             final String query = extractJsonString(response, "query");
             final String reasoning = extractJsonString(response, "reasoning");
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Intent response parsed. intentStr={}, intent={}, queryLength={}, reasoningLength={}", intentStr, intent,
+                        query != null ? query.length() : 0, reasoning != null ? reasoning.length() : 0);
+            }
 
             if (intent == ChatIntent.SEARCH) {
                 return IntentDetectionResult.search(query, reasoning);
@@ -472,6 +563,9 @@ public class ChatClient {
                 return IntentDetectionResult.faq(query, reasoning);
             } else if (intent == ChatIntent.SUMMARY) {
                 final String docUrl = extractJsonString(response, "url");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Summary intent detected. documentUrl={}", docUrl);
+                }
                 return IntentDetectionResult.summary(docUrl, reasoning);
             } else {
                 return IntentDetectionResult.unclear(reasoning);
@@ -505,7 +599,13 @@ public class ChatClient {
      */
     protected RelevanceEvaluationResult evaluateResults(final String userMessage, final String query,
             final List<Map<String, Object>> searchResults) {
+        final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting result evaluation. userMessageLength={}, query={}, resultCount={}",
+                    userMessage != null ? userMessage.length() : 0, query, searchResults.size());
+        }
 
         try {
             final String prompt = buildEvaluationPrompt(userMessage, query, searchResults, fessConfig);
@@ -514,10 +614,23 @@ public class ChatClient {
             request.setMaxTokens(500);
             request.setTemperature(0.3);
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("Evaluation LLM request. promptLength={}, maxTokens={}, temperature={}", prompt.length(),
+                        request.getMaxTokens(), request.getTemperature());
+            }
+
             final LlmChatResponse response = llmClientManager.chat(request);
-            return parseEvaluationResponse(response.getContent(), searchResults);
+            final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Result evaluation completed. hasRelevant={}, relevantDocIds={}, elapsedTime={}ms",
+                        result.isHasRelevantResults(), result.getRelevantDocIds(), System.currentTimeMillis() - startTime);
+            }
+
+            return result;
         } catch (final Exception e) {
-            logger.warn("Failed to evaluate results, using all results. error={}", e.getMessage());
+            logger.warn("Failed to evaluate results, using all results. error={}, elapsedTime={}ms", e.getMessage(),
+                    System.currentTimeMillis() - startTime);
             final List<String> allDocIds = searchResults.stream()
                     .map(doc -> getStringValue(doc, "doc_id"))
                     .filter(StringUtil::isNotBlank)
@@ -567,9 +680,17 @@ public class ChatClient {
      * @return the parsed evaluation result
      */
     protected RelevanceEvaluationResult parseEvaluationResponse(final String response, final List<Map<String, Object>> searchResults) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Parsing evaluation response. responseLength={}, searchResultCount={}", response != null ? response.length() : 0,
+                    searchResults.size());
+        }
+
         try {
             final boolean hasRelevant = extractJsonBoolean(response, "has_relevant");
             if (!hasRelevant) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("No relevant results found in evaluation.");
+                }
                 return RelevanceEvaluationResult.noRelevantResults();
             }
 
@@ -579,6 +700,10 @@ public class ChatClient {
                     .map(i -> getStringValue(searchResults.get(i - 1), "doc_id"))
                     .filter(StringUtil::isNotBlank)
                     .collect(Collectors.toList());
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Evaluation response parsed. hasRelevant={}, relevantIndexes={}, docIds={}", hasRelevant, indexes, docIds);
+            }
 
             return RelevanceEvaluationResult.withRelevantDocs(docIds, indexes);
         } catch (final Exception e) {
@@ -595,18 +720,32 @@ public class ChatClient {
      */
     protected List<Map<String, Object>> fetchFullContent(final List<String> docIds) {
         if (docIds.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fetch full content called with empty docIds.");
+            }
             return Collections.emptyList();
         }
 
+        final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String[] fields = fessConfig.getRagChatContentFields().split(",");
         final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Fetching full content. docIds={}, fields={}", docIds, String.join(",", fields));
+        }
+
         try {
-            return searchHelper.getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
-                    SearchRequestParams.SearchRequestType.JSON);
+            final List<Map<String, Object>> results = searchHelper.getDocumentListByDocIds(docIds.toArray(new String[0]), fields,
+                    OptionalThing.empty(), SearchRequestParams.SearchRequestType.JSON);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(), results.size(),
+                        System.currentTimeMillis() - startTime);
+            }
+            return results;
         } catch (final Exception e) {
-            logger.warn("Failed to fetch full content for docIds={}. error={}", docIds, e.getMessage());
+            logger.warn("Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
+                    System.currentTimeMillis() - startTime);
             return Collections.emptyList();
         }
     }
@@ -1120,8 +1259,13 @@ public class ChatClient {
      * @return a list of documents matching the query
      */
     protected List<Map<String, Object>> searchDocuments(final String query) {
+        final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting document search. query={}, maxDocs={}", query, maxDocs);
+        }
 
         try {
             final SearchRenderData data = new SearchRenderData();
@@ -1132,12 +1276,19 @@ public class ChatClient {
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
             if (docs != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Document search completed. query={}, resultCount={}, elapsedTime={}ms", query, docs.size(),
+                            System.currentTimeMillis() - startTime);
+                }
                 return docs;
             }
         } catch (final Exception e) {
-            logger.warn("Failed to search documents for RAG: query={}", query, e);
+            logger.warn("Failed to search documents for RAG: query={}, elapsedTime={}ms", query, System.currentTimeMillis() - startTime, e);
         }
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Document search returned no results. query={}, elapsedTime={}ms", query, System.currentTimeMillis() - startTime);
+        }
         return new ArrayList<>();
     }
 
@@ -1149,17 +1300,26 @@ public class ChatClient {
      */
     protected String buildContext(final List<Map<String, Object>> searchResults) {
         if (searchResults.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Building context with empty search results.");
+            }
             return "";
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxChars = fessConfig.getRagChatContextMaxCharsAsInteger();
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Building context. searchResultCount={}, maxChars={}", searchResults.size(), maxChars);
+        }
+
         final StringBuilder context = new StringBuilder();
         context.append("The following are search results that may help answer the question:\n\n");
 
         int totalChars = context.length();
         int index = 1;
+        int includedDocs = 0;
+        boolean truncated = false;
 
         for (final Map<String, Object> doc : searchResults) {
             final String title = getStringValue(doc, "title");
@@ -1180,12 +1340,19 @@ public class ChatClient {
             docContext.append("\n");
 
             if (totalChars + docContext.length() > maxChars) {
+                truncated = true;
                 break;
             }
 
             context.append(docContext);
             totalChars += docContext.length();
+            includedDocs++;
             index++;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Context built. includedDocs={}, totalDocs={}, contextLength={}, maxChars={}, truncated={}", includedDocs,
+                    searchResults.size(), context.length(), maxChars, truncated);
         }
 
         return context.toString();
