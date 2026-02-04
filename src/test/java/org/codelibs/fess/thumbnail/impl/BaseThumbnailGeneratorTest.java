@@ -19,7 +19,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
@@ -224,5 +226,225 @@ public class BaseThumbnailGeneratorTest extends UnitFessTestCase {
         assertTrue("image/png".matches("image/png"));
         assertTrue("image/gif".matches("image/gif"));
         assertTrue("image/tiff".matches("image/tiff"));
+    }
+
+    @Test
+    public void test_addConditionWithSvgMimetype() {
+        // Test that addCondition works correctly with SVG MIME type pattern
+        // This simulates what happens when the condition is loaded from fess_thumbnail.xml
+        generator = new TestThumbnailGenerator();
+
+        // The pattern as it would be loaded from XML: "image/svg\+xml"
+        // In XML, a single backslash is passed directly (no Java string escaping)
+        // So we use a literal backslash here to simulate XML-loaded value
+        String xmlLoadedPattern = "image/svg" + "\\" + "+xml"; // Simulates XML value: image/svg\+xml
+
+        generator.addCondition("mimetype", xmlLoadedPattern);
+
+        // The condition map should store the pattern with a single backslash
+        // which is correct for matching literal + in regex
+        String svgMimetype = "image/svg+xml";
+        assertTrue(svgMimetype.matches(xmlLoadedPattern));
+    }
+
+    @Test
+    public void test_svgMimetypePatternVariants() {
+        // Test different representations of the SVG pattern to understand escaping
+        String svgMimetype = "image/svg+xml";
+
+        // Pattern with single backslash (14 chars): should match
+        String singleBackslash = "image/svg" + "\\" + "+xml";
+        assertEquals("Single backslash pattern should be 14 chars", 14, singleBackslash.length());
+        assertTrue(svgMimetype.matches(singleBackslash));
+
+        // Pattern with double backslash (15 chars): should NOT match
+        String doubleBackslash = "image/svg" + "\\\\" + "+xml";
+        assertEquals("Double backslash pattern should be 15 chars", 15, doubleBackslash.length());
+        assertFalse(svgMimetype.matches(doubleBackslash));
+
+        // Pattern with no backslash (13 chars): should NOT match
+        String noBackslash = "image/svg+xml";
+        assertEquals("No backslash pattern should be 13 chars", 13, noBackslash.length());
+        assertFalse(svgMimetype.matches(noBackslash));
+    }
+
+    @Test
+    public void test_isTarget_withSvgMimetype() {
+        // Test isTarget method through actual execution path with SVG MIME type
+        // This tests the full flow: addCondition -> isTarget -> conditionMap -> matches
+        generator = new TestThumbnailGenerator();
+
+        // Setup mock FessConfig
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        try {
+            // Add condition with properly escaped SVG pattern (as loaded from XML)
+            // In XML: image/svg\+xml -> Java string: "image/svg\\+xml" -> actual: image/svg\+xml
+            String svgPattern = "image/svg" + "\\" + "+xml";
+            generator.addCondition("mimetype", svgPattern);
+
+            // Test case 1: SVG MIME type should match
+            Map<String, Object> svgDocMap = new HashMap<>();
+            svgDocMap.put("thumbnail", "http://example.com/image.svg");
+            svgDocMap.put("mimetype", "image/svg+xml");
+            assertTrue("SVG MIME type should be target", generator.isTarget(svgDocMap));
+
+            // Test case 2: Different MIME type should not match
+            Map<String, Object> pngDocMap = new HashMap<>();
+            pngDocMap.put("thumbnail", "http://example.com/image.png");
+            pngDocMap.put("mimetype", "image/png");
+            assertFalse("PNG MIME type should not be target", generator.isTarget(pngDocMap));
+
+            // Test case 3: Missing thumbnail field should not match
+            Map<String, Object> noThumbDocMap = new HashMap<>();
+            noThumbDocMap.put("mimetype", "image/svg+xml");
+            assertFalse("Doc without thumbnail field should not be target", generator.isTarget(noThumbDocMap));
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_isTarget_withXhtmlMimetype() {
+        // Test isTarget with XHTML MIME type (application/xhtml+xml)
+        // This tests the pattern used in rule.xml
+        generator = new TestThumbnailGenerator();
+
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        try {
+            // Add condition with properly escaped XHTML pattern
+            String xhtmlPattern = "application/xhtml" + "\\" + "+xml";
+            generator.addCondition("mimetype", xhtmlPattern);
+
+            // Test: XHTML MIME type should match
+            Map<String, Object> xhtmlDocMap = new HashMap<>();
+            xhtmlDocMap.put("thumbnail", "http://example.com/page.xhtml");
+            xhtmlDocMap.put("mimetype", "application/xhtml+xml");
+            assertTrue("XHTML MIME type should be target", generator.isTarget(xhtmlDocMap));
+
+            // Test: Plain HTML should not match
+            Map<String, Object> htmlDocMap = new HashMap<>();
+            htmlDocMap.put("thumbnail", "http://example.com/page.html");
+            htmlDocMap.put("mimetype", "text/html");
+            assertFalse("HTML MIME type should not be target for XHTML pattern", generator.isTarget(htmlDocMap));
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_isTarget_withRdfMimetype() {
+        // Test isTarget with RDF MIME type (application/rdf+xml)
+        generator = new TestThumbnailGenerator();
+
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        try {
+            // Add condition with properly escaped RDF pattern
+            String rdfPattern = "application/rdf" + "\\" + "+xml";
+            generator.addCondition("mimetype", rdfPattern);
+
+            // Test: RDF MIME type should match
+            Map<String, Object> rdfDocMap = new HashMap<>();
+            rdfDocMap.put("thumbnail", "http://example.com/data.rdf");
+            rdfDocMap.put("mimetype", "application/rdf+xml");
+            assertTrue("RDF MIME type should be target", generator.isTarget(rdfDocMap));
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_isTarget_withMultipleConditions() {
+        // Test isTarget with multiple MIME type patterns (simulating real config)
+        generator = new TestThumbnailGenerator();
+
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        try {
+            // Add multiple conditions for same field (like in fess_thumbnail.xml)
+            // When same key is added multiple times, patterns are combined with |
+            generator.addCondition("mimetype", "image/jpeg");
+            generator.addCondition("mimetype", "image/png");
+            generator.addCondition("mimetype", "image/svg" + "\\" + "+xml");
+
+            // Test: All configured MIME types should match
+            Map<String, Object> jpegDocMap = new HashMap<>();
+            jpegDocMap.put("thumbnail", "http://example.com/image.jpg");
+            jpegDocMap.put("mimetype", "image/jpeg");
+            assertTrue("JPEG should be target", generator.isTarget(jpegDocMap));
+
+            Map<String, Object> pngDocMap = new HashMap<>();
+            pngDocMap.put("thumbnail", "http://example.com/image.png");
+            pngDocMap.put("mimetype", "image/png");
+            assertTrue("PNG should be target", generator.isTarget(pngDocMap));
+
+            Map<String, Object> svgDocMap = new HashMap<>();
+            svgDocMap.put("thumbnail", "http://example.com/image.svg");
+            svgDocMap.put("mimetype", "image/svg+xml");
+            assertTrue("SVG should be target", generator.isTarget(svgDocMap));
+
+            // Test: Non-configured MIME type should not match
+            Map<String, Object> gifDocMap = new HashMap<>();
+            gifDocMap.put("thumbnail", "http://example.com/image.gif");
+            gifDocMap.put("mimetype", "image/gif");
+            assertFalse("GIF should not be target (not configured)", generator.isTarget(gifDocMap));
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
+    }
+
+    @Test
+    public void test_isTarget_unescapedPlusDoesNotMatch() {
+        // Demonstrate the bug: unescaped + in pattern does NOT match literal +
+        generator = new TestThumbnailGenerator();
+
+        FessConfig mockConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexFieldThumbnail() {
+                return "thumbnail";
+            }
+        };
+        ComponentUtil.setFessConfig(mockConfig);
+
+        try {
+            // Add condition with WRONG pattern (unescaped +)
+            // This simulates the bug before the fix
+            String wrongPattern = "image/svg+xml"; // + is not escaped
+            generator.addCondition("mimetype", wrongPattern);
+
+            // Test: SVG MIME type should NOT match with wrong pattern
+            Map<String, Object> svgDocMap = new HashMap<>();
+            svgDocMap.put("thumbnail", "http://example.com/image.svg");
+            svgDocMap.put("mimetype", "image/svg+xml");
+            assertFalse("SVG should NOT match with unescaped + pattern", generator.isTarget(svgDocMap));
+        } finally {
+            ComponentUtil.setFessConfig(null);
+        }
     }
 }
