@@ -75,8 +75,8 @@
 			<!-- Supported MIME type -->
 			<arg>
   "(application/xml"
-+ "|application/xhtml+xml"
-+ "|application/rdf+xml"
++ "|application/xhtml\+xml"
++ "|application/rdf\+xml"
 + "|application/pdf"
 + "|application/x-freemind"
 + "|text/xml"
@@ -104,8 +104,8 @@
 			<!-- Supported MIME type -->
 			<arg>
   "(application/xml"
-+ "|application/xhtml+xml"
-+ "|application/rdf+xml"
++ "|application/xhtml\+xml"
++ "|application/rdf\+xml"
 + "|application/pdf"
 + "|application/x-freemind"
 + "|application/lha"
