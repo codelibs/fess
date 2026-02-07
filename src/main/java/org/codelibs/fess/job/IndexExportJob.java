@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,8 +38,8 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 
 /**
- * Job for exporting indexed search documents as HTML files to the filesystem.
- * Each document is exported as a single HTML file with URL structure mapped to directory structure.
+ * Job for exporting indexed search documents to the filesystem.
+ * Each document is exported as a single file with URL structure mapped to directory structure.
  */
 public class IndexExportJob {
 
@@ -49,6 +48,8 @@ public class IndexExportJob {
     private static final int MAX_PATH_COMPONENT_LENGTH = 200;
 
     private QueryBuilder queryBuilder;
+
+    private IndexExportFormatter formatter;
 
     /**
      * Creates a new IndexExportJob instance.
@@ -69,7 +70,39 @@ public class IndexExportJob {
     }
 
     /**
-     * Executes the export job, writing each matching document as an HTML file.
+     * Sets the export format.
+     *
+     * @param format the format name (e.g. "html", "json")
+     * @return this instance for method chaining
+     */
+    public IndexExportJob format(final String format) {
+        this.formatter = createFormatter(format);
+        return this;
+    }
+
+    /**
+     * Creates a formatter for the given format name.
+     *
+     * @param format the format name
+     * @return the formatter instance
+     * @throws IllegalArgumentException if the format is null, empty, or not supported
+     */
+    protected IndexExportFormatter createFormatter(final String format) {
+        if (format == null || format.trim().isEmpty()) {
+            throw new IllegalArgumentException("Export format must not be null or empty");
+        }
+        switch (format.trim().toLowerCase()) {
+        case "html":
+            return new HtmlIndexExportFormatter();
+        case "json":
+            return new JsonIndexExportFormatter();
+        default:
+            throw new IllegalArgumentException("Unsupported export format: " + format);
+        }
+    }
+
+    /**
+     * Executes the export job, writing each matching document as a file.
      *
      * @return a string containing the execution result or error messages
      */
@@ -86,6 +119,9 @@ public class IndexExportJob {
                 .collect(Collectors.toSet());
         final int scrollSize = fessConfig.getIndexExportScrollSizeAsInteger();
 
+        final IndexExportFormatter resolvedFormatter =
+                this.formatter != null ? this.formatter : createFormatter(fessConfig.getIndexExportFormat());
+
         final QueryBuilder query = queryBuilder != null ? queryBuilder : QueryBuilders.matchAllQuery();
 
         if (logger.isInfoEnabled()) {
@@ -101,7 +137,7 @@ public class IndexExportJob {
                 requestBuilder.setQuery(query).setSize(scrollSize);
                 return true;
             }, source -> {
-                exportDocument(source, exportPath, excludeFields);
+                exportDocument(source, exportPath, excludeFields, resolvedFormatter);
                 final long currentCount = processedCount.incrementAndGet();
                 if (logger.isDebugEnabled() && currentCount % scrollSize == 0) {
                     logger.debug("[EXPORT] Processing: count={}", currentCount);
@@ -121,13 +157,15 @@ public class IndexExportJob {
     }
 
     /**
-     * Exports a single document as an HTML file.
+     * Exports a single document as a file.
      *
      * @param source the document source map
      * @param exportPath the base export directory path
      * @param excludeFields the set of field names to exclude from output
+     * @param formatter the formatter to use for output
      */
-    protected void exportDocument(final Map<String, Object> source, final String exportPath, final Set<String> excludeFields) {
+    protected void exportDocument(final Map<String, Object> source, final String exportPath, final Set<String> excludeFields,
+            final IndexExportFormatter formatter) {
         final Object urlObj = source.get("url");
         if (urlObj == null) {
             logger.debug("Skipping document without url field.");
@@ -135,15 +173,15 @@ public class IndexExportJob {
         }
 
         final String url = urlObj.toString();
-        final Path filePath = buildFilePath(exportPath, url);
+        final Path filePath = buildFilePath(exportPath, url, formatter);
         if (logger.isDebugEnabled()) {
             logger.debug("[EXPORT] Exporting document: url={}, path={}", url, filePath);
         }
-        final String html = buildHtml(source, excludeFields);
+        final String content = formatter.format(source, excludeFields);
 
         try {
             Files.createDirectories(filePath.getParent());
-            Files.writeString(filePath, html, StandardCharsets.UTF_8);
+            Files.writeString(filePath, content, StandardCharsets.UTF_8);
         } catch (final IOException e) {
             logger.warn("Failed to export document: url={}", url, e);
         }
@@ -154,9 +192,10 @@ public class IndexExportJob {
      *
      * @param exportPath the base export directory path
      * @param url the document URL
+     * @param formatter the formatter to determine file extensions
      * @return the target file path
      */
-    protected Path buildFilePath(final String exportPath, final String url) {
+    protected Path buildFilePath(final String exportPath, final String url, final IndexExportFormatter formatter) {
         try {
             final URI uri = new URI(url);
             String host = uri.getHost();
@@ -167,11 +206,11 @@ public class IndexExportJob {
             }
 
             if (path == null || path.isEmpty()) {
-                path = "/index.html";
+                path = "/" + formatter.getIndexFileName();
             } else if (path.endsWith("/")) {
-                path = path + "index.html";
+                path = path + formatter.getIndexFileName();
             } else if (!path.contains(".") || path.lastIndexOf('.') < path.lastIndexOf('/')) {
-                path = path + ".html";
+                path = path + formatter.getFileExtension();
             }
 
             if (path.startsWith("/")) {
@@ -194,75 +233,8 @@ public class IndexExportJob {
             return Paths.get(exportPath, sanitized.toString());
         } catch (final Exception e) {
             logger.debug("Failed to parse URL: {}", url, e);
-            return Paths.get(exportPath, "_invalid", hashString(url) + ".html");
+            return Paths.get(exportPath, "_invalid", hashString(url) + formatter.getFileExtension());
         }
-    }
-
-    /**
-     * Builds an HTML string from a document source map.
-     *
-     * @param source the document source map
-     * @param excludeFields the set of field names to exclude from meta tags
-     * @return the generated HTML string
-     */
-    protected String buildHtml(final Map<String, Object> source, final Set<String> excludeFields) {
-        final String title = escapeHtml(getStringValue(source, "title"));
-        final String content = escapeHtml(getStringValue(source, "content"));
-        final String lang = escapeHtml(getStringValue(source, "lang"));
-
-        final StringBuilder html = new StringBuilder();
-        html.append("<!DOCTYPE html>\n");
-        html.append("<html lang=\"").append(lang).append("\">\n");
-        html.append("<head>\n");
-        html.append("<meta charset=\"UTF-8\">\n");
-        html.append("<title>").append(title).append("</title>\n");
-
-        for (final Map.Entry<String, Object> entry : source.entrySet()) {
-            final String field = entry.getKey();
-            if ("title".equals(field) || "content".equals(field) || "lang".equals(field)) {
-                continue;
-            }
-            if (excludeFields.contains(field)) {
-                continue;
-            }
-
-            final Object value = entry.getValue();
-            if (value instanceof Collection) {
-                for (final Object item : (Collection<?>) value) {
-                    html.append("<meta name=\"fess:")
-                            .append(escapeHtml(field))
-                            .append("\" content=\"")
-                            .append(escapeHtml(String.valueOf(item)))
-                            .append("\">\n");
-                }
-            } else if (value != null) {
-                html.append("<meta name=\"fess:")
-                        .append(escapeHtml(field))
-                        .append("\" content=\"")
-                        .append(escapeHtml(String.valueOf(value)))
-                        .append("\">\n");
-            }
-        }
-
-        html.append("</head>\n");
-        html.append("<body>\n");
-        html.append(content).append("\n");
-        html.append("</body>\n");
-        html.append("</html>\n");
-
-        return html.toString();
-    }
-
-    private String getStringValue(final Map<String, Object> source, final String key) {
-        final Object value = source.get(key);
-        return value != null ? value.toString() : "";
-    }
-
-    private String escapeHtml(final String text) {
-        if (text == null || text.isEmpty()) {
-            return "";
-        }
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private String hashString(final String input) {
