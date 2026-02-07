@@ -2031,6 +2031,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String INDEX_EXPORT_SCROLL_SIZE = "index.export.scroll.size";
 
+    /** The key of the configuration. e.g. html */
+    String INDEX_EXPORT_FORMAT = "index.export.format";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9577,6 +9580,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getIndexExportScrollSizeAsInteger();
 
     /**
+     * Get the value for the key 'index.export.format'. <br>
+     * The value is, e.g. html <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexExportFormat();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -13133,6 +13143,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEX_EXPORT_SCROLL_SIZE);
         }
 
+        public String getIndexExportFormat() {
+            return get(FessConfig.INDEX_EXPORT_FORMAT);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -13750,6 +13764,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");
+            defaultMap.put(FessConfig.INDEX_EXPORT_FORMAT, "html");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
