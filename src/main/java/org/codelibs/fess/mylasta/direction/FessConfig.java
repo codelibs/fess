@@ -226,6 +226,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 50 */
     String ADAPTIVE_LOAD_CONTROL = "adaptive.load.control";
 
+    /** The key of the configuration. e.g. 100 */
+    String WEB_LOAD_CONTROL = "web.load.control";
+
+    /** The key of the configuration. e.g. 100 */
+    String API_LOAD_CONTROL = "api.load.control";
+
+    /** The key of the configuration. e.g. 1 */
+    String LOAD_CONTROL_MONITOR_INTERVAL = "load.control.monitor.interval";
+
     /** The key of the configuration. e.g. js */
     String SUPPORTED_UPLOADED_JS_EXTENTIONS = "supported.uploaded.js.extentions";
 
@@ -2534,6 +2543,57 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getAdaptiveLoadControlAsInteger();
+
+    /**
+     * Get the value for the key 'web.load.control'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: CPU threshold (%) for web request load control. Returns 429 when CPU &gt;= this value. (100: disabled)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getWebLoadControl();
+
+    /**
+     * Get the value for the key 'web.load.control' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: CPU threshold (%) for web request load control. Returns 429 when CPU &gt;= this value. (100: disabled)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getWebLoadControlAsInteger();
+
+    /**
+     * Get the value for the key 'api.load.control'. <br>
+     * The value is, e.g. 100 <br>
+     * comment: CPU threshold (%) for API request load control. Returns 429 when CPU &gt;= this value. (100: disabled)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiLoadControl();
+
+    /**
+     * Get the value for the key 'api.load.control' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * comment: CPU threshold (%) for API request load control. Returns 429 when CPU &gt;= this value. (100: disabled)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiLoadControlAsInteger();
+
+    /**
+     * Get the value for the key 'load.control.monitor.interval'. <br>
+     * The value is, e.g. 1 <br>
+     * comment: Interval (seconds) for monitoring OpenSearch CPU load.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLoadControlMonitorInterval();
+
+    /**
+     * Get the value for the key 'load.control.monitor.interval' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * comment: Interval (seconds) for monitoring OpenSearch CPU load.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLoadControlMonitorIntervalAsInteger();
 
     /**
      * Get the value for the key 'supported.uploaded.js.extentions'. <br>
@@ -9779,6 +9839,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.ADAPTIVE_LOAD_CONTROL);
         }
 
+        public String getWebLoadControl() {
+            return get(FessConfig.WEB_LOAD_CONTROL);
+        }
+
+        public Integer getWebLoadControlAsInteger() {
+            return getAsInteger(FessConfig.WEB_LOAD_CONTROL);
+        }
+
+        public String getApiLoadControl() {
+            return get(FessConfig.API_LOAD_CONTROL);
+        }
+
+        public Integer getApiLoadControlAsInteger() {
+            return getAsInteger(FessConfig.API_LOAD_CONTROL);
+        }
+
+        public String getLoadControlMonitorInterval() {
+            return get(FessConfig.LOAD_CONTROL_MONITOR_INTERVAL);
+        }
+
+        public Integer getLoadControlMonitorIntervalAsInteger() {
+            return getAsInteger(FessConfig.LOAD_CONTROL_MONITOR_INTERVAL);
+        }
+
         public String getSupportedUploadedJsExtentions() {
             return get(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS);
         }
@@ -13188,6 +13272,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.USE_OWN_TMP_DIR, "true");
             defaultMap.put(FessConfig.MAX_LOG_OUTPUT_LENGTH, "4000");
             defaultMap.put(FessConfig.ADAPTIVE_LOAD_CONTROL, "50");
+            defaultMap.put(FessConfig.WEB_LOAD_CONTROL, "100");
+            defaultMap.put(FessConfig.API_LOAD_CONTROL, "100");
+            defaultMap.put(FessConfig.LOAD_CONTROL_MONITOR_INTERVAL, "1");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS, "js");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS, "css");
             defaultMap.put(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS, "jpg,jpeg,gif,png,swf");

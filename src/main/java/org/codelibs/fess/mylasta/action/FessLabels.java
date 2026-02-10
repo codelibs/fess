@@ -1022,6 +1022,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Please check the URL. */
     public static final String LABELS_check_url = "{labels.check_url}";
 
+    /** The key of the message: Service Temporarily Unavailable */
+    public static final String LABELS_busy_title = "{labels.busy_title}";
+
+    /** The key of the message: The server is currently experiencing high load. Please try again later. */
+    public static final String LABELS_busy_message = "{labels.busy_message}";
+
     /** The key of the message: Username */
     public static final String LABELS_user_name = "{labels.user_name}";
 

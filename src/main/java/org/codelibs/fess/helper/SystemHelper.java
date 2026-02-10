@@ -63,12 +63,15 @@ import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.lang.ThreadUtil;
 import org.codelibs.core.misc.Pair;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.timer.LoadControlMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
 import org.codelibs.fess.util.IpAddressUtil;
@@ -149,6 +152,10 @@ public class SystemHelper {
     private long systemCpuCheckTime;
 
     private long systemCpuCheckInterval = 1000L;
+
+    private volatile short searchEngineCpuPercent;
+
+    private volatile TimeoutTask loadControlMonitorTask;
 
     /** A map of listeners for configuration updates. */
     protected Map<String, Supplier<String>> updateConfigListenerMap = new HashMap<>();
@@ -999,6 +1006,49 @@ public class SystemHelper {
             }
         }
         return systemCpuPercent;
+    }
+
+    /**
+     * Gets the current system CPU usage percentage.
+     *
+     * @return The system CPU usage percentage.
+     */
+    public short currentSystemCpuPercent() {
+        return getSystemCpuPercent();
+    }
+
+    /**
+     * Gets the search engine CPU usage percentage.
+     *
+     * @return The search engine CPU usage percentage.
+     */
+    public short getSearchEngineCpuPercent() {
+        ensureLoadControlMonitorStarted();
+        return searchEngineCpuPercent;
+    }
+
+    /**
+     * Sets the search engine CPU usage percentage.
+     *
+     * @param percent The search engine CPU usage percentage.
+     */
+    public void setSearchEngineCpuPercent(final short percent) {
+        searchEngineCpuPercent = percent;
+    }
+
+    private void ensureLoadControlMonitorStarted() {
+        if (loadControlMonitorTask == null) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            if (fessConfig.getWebLoadControlAsInteger() < 100 || fessConfig.getApiLoadControlAsInteger() < 100) {
+                synchronized (this) {
+                    if (loadControlMonitorTask == null) {
+                        final int interval = fessConfig.getLoadControlMonitorIntervalAsInteger();
+                        loadControlMonitorTask =
+                                TimeoutManager.getInstance().addTimeoutTarget(new LoadControlMonitorTarget(this), interval, true);
+                    }
+                }
+            }
+        }
     }
 
     /**
