@@ -42,6 +42,11 @@
   </filter>
 
   <filter>
+    <filter-name>loadControlFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.LoadControlFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>corsFilter</filter-name>
     <filter-class>org.codelibs.fess.filter.CorsFilter</filter-class>
   </filter>
@@ -117,6 +122,12 @@
 
   <filter-mapping>
     <filter-name>rateLimitFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>loadControlFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
@@ -212,6 +223,10 @@
   <error-page>
     <error-code>408</error-code>
     <location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+  </error-page>
+  <error-page>
+    <error-code>429</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=busy</location>
   </error-page>
   <error-page>
     <error-code>500</error-code>
