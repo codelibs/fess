@@ -6,7 +6,7 @@
 	<property name="suggest.dir" value="${basedir}/src/main/webapp/WEB-INF/env/suggest" />
 	<property name="thumbnail.dir" value="${basedir}/src/main/webapp/WEB-INF/env/thumbnail" />
 	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
-	<!-- property name="kopf.version" value="15.4.0" / -->
+	<!-- property name="kopf.version" value="15.5.0" / -->
 	<!-- property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/tags/v${kopf.version}.zip" / -->
 	<property name="kopf.version" value="main" />
 	<property name="kopf.url" value="https://github.com/codelibs/fess-kopf/archive/refs/heads/${kopf.version}.zip" />
