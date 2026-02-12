@@ -87,7 +87,6 @@
 		<delete>
 			<fileset dir="${modules.dir}">
 				<include name="lang-expression/asm-*" />
-				<include name="transport-netty4/netty-*" />
 				<include name="lang-painless/asm-*" />
 			</fileset>
 		</delete>
