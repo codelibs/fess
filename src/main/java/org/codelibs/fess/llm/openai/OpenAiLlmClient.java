@@ -22,9 +22,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -42,12 +53,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 /**
  * LLM client implementation for OpenAI API.
  *
@@ -60,13 +65,12 @@ import okhttp3.Response;
 public class OpenAiLlmClient implements LlmClient {
 
     private static final Logger logger = LogManager.getLogger(OpenAiLlmClient.class);
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
     /** The name identifier for the OpenAI LLM client. */
     protected static final String NAME = "openai";
     private static final String SSE_DATA_PREFIX = "data: ";
     private static final String SSE_DONE_MARKER = "[DONE]";
 
-    private OkHttpClient httpClient;
+    private CloseableHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private volatile Boolean cachedAvailability = null;
     private TimeoutTask availabilityCheckTask;
@@ -91,9 +95,16 @@ public class OpenAiLlmClient implements LlmClient {
         }
 
         final int timeout = getTimeout();
-        httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
-                .readTimeout(timeout, TimeUnit.MILLISECONDS)
-                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+        final RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
+                .setResponseTimeout(Timeout.ofMilliseconds(timeout))
+                .build();
+        httpClient = HttpClients.custom()
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setDefaultConnectionConfig(ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(timeout)).build())
+                        .build())
+                .setDefaultRequestConfig(requestConfig)
+                .disableAutomaticRetries()
                 .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized OpenAiLlmClient with timeout: {}ms", timeout);
@@ -112,6 +123,14 @@ public class OpenAiLlmClient implements LlmClient {
             if (logger.isDebugEnabled()) {
                 logger.debug("Cancelled OpenAI availability check task");
             }
+        }
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (final IOException e) {
+                logger.warn("Failed to close HTTP client", e);
+            }
+            httpClient = null;
         }
     }
 
@@ -195,12 +214,13 @@ public class OpenAiLlmClient implements LlmClient {
             return false;
         }
         try {
-            final Request request =
-                    new Request.Builder().url(apiUrl + "/models").get().addHeader("Authorization", "Bearer " + apiKey).build();
-            try (Response response = getHttpClient().newCall(request).execute()) {
-                final boolean available = response.isSuccessful();
+            final HttpGet request = new HttpGet(apiUrl + "/models");
+            request.addHeader("Authorization", "Bearer " + apiKey);
+            try (var response = getHttpClient().execute(request)) {
+                final int statusCode = response.getCode();
+                final boolean available = statusCode >= 200 && statusCode < 300;
                 if (logger.isDebugEnabled()) {
-                    logger.debug("OpenAI availability check. url={}, statusCode={}, available={}", apiUrl, response.code(), available);
+                    logger.debug("OpenAI availability check. url={}, statusCode={}, available={}", apiUrl, statusCode, available);
                 }
                 return available;
             }
@@ -225,28 +245,27 @@ public class OpenAiLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url)
-                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Authorization", "Bearer " + getApiKey())
-                    .addHeader("Content-Type", "application/json")
-                    .build();
+            final HttpPost httpRequest = new HttpPost(url);
+            httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            httpRequest.addHeader("Authorization", "Bearer " + getApiKey());
 
-            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
+            try (var response = getHttpClient().execute(httpRequest)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
                     String errorBody = "";
-                    if (response.body() != null) {
+                    if (response.getEntity() != null) {
                         try {
-                            errorBody = response.body().string();
+                            errorBody = EntityUtils.toString(response.getEntity());
                         } catch (final IOException e) {
                             // ignore
                         }
                     }
-                    logger.warn("OpenAI API error. url={}, statusCode={}, message={}, body={}", url, response.code(), response.message(),
+                    logger.warn("OpenAI API error. url={}, statusCode={}, message={}, body={}", url, statusCode, response.getReasonPhrase(),
                             errorBody);
-                    throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
+                    throw new LlmException("OpenAI API error: " + statusCode + " " + response.getReasonPhrase());
                 }
 
-                final String responseBody = response.body() != null ? response.body().string() : "";
+                final String responseBody = response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "";
                 final JsonNode jsonNode = objectMapper.readTree(responseBody);
 
                 final LlmChatResponse chatResponse = new LlmChatResponse();
@@ -309,35 +328,34 @@ public class OpenAiLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url)
-                    .post(RequestBody.create(json, JSON_MEDIA_TYPE))
-                    .addHeader("Authorization", "Bearer " + getApiKey())
-                    .addHeader("Content-Type", "application/json")
-                    .build();
+            final HttpPost httpRequest = new HttpPost(url);
+            httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            httpRequest.addHeader("Authorization", "Bearer " + getApiKey());
 
-            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
+            try (var response = getHttpClient().execute(httpRequest)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
                     String errorBody = "";
-                    if (response.body() != null) {
+                    if (response.getEntity() != null) {
                         try {
-                            errorBody = response.body().string();
-                        } catch (final IOException e) {
+                            errorBody = EntityUtils.toString(response.getEntity());
+                        } catch (final IOException | ParseException e) {
                             // ignore
                         }
                     }
-                    logger.warn("OpenAI streaming API error. url={}, statusCode={}, message={}, body={}", url, response.code(),
-                            response.message(), errorBody);
-                    throw new LlmException("OpenAI API error: " + response.code() + " " + response.message());
+                    logger.warn("OpenAI streaming API error. url={}, statusCode={}, message={}, body={}", url, statusCode,
+                            response.getReasonPhrase(), errorBody);
+                    throw new LlmException("OpenAI API error: " + statusCode + " " + response.getReasonPhrase());
                 }
 
-                if (response.body() == null) {
+                if (response.getEntity() == null) {
                     logger.warn("Empty response from OpenAI streaming API. url={}", url);
                     throw new LlmException("Empty response from OpenAI");
                 }
 
                 int chunkCount = 0;
                 try (BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))) {
+                        new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (StringUtil.isBlank(line)) {
@@ -456,7 +474,7 @@ public class OpenAiLlmClient implements LlmClient {
      *
      * @return the HTTP client
      */
-    protected OkHttpClient getHttpClient() {
+    protected CloseableHttpClient getHttpClient() {
         if (httpClient == null) {
             init();
         }

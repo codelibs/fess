@@ -33,6 +33,7 @@ import org.junit.jupiter.api.TestInfo;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class GeminiLlmClientTest extends UnitFessTestCase {
 
@@ -1031,6 +1032,167 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
 
         // No chunks should be added for empty candidates
         assertEquals(0, chunks.size());
+    }
+
+    // ========== destroy() tests ==========
+
+    @Test
+    public void test_destroy_closesHttpClient() {
+        client.setTestTimeout(30000);
+        client.init();
+        assertNotNull(client.getHttpClient());
+        client.destroy();
+        // After destroy, calling getHttpClient() triggers re-init
+        // Verify no exception is thrown during destroy
+    }
+
+    @Test
+    public void test_destroy_beforeInit() {
+        // destroy before init should not throw
+        client.destroy();
+    }
+
+    // ========== Request format verification tests ==========
+
+    @Test
+    public void test_chat_verifyRequestFormat() throws Exception {
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{
+                                "text": "Response"
+                            }]
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        client.chat(request);
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("POST", recorded.getMethod());
+        assertTrue(recorded.getPath().contains("/models/gemini-2.0-flash:generateContent"));
+        assertTrue(recorded.getPath().contains("key=test-key"));
+        assertEquals("application/json; charset=UTF-8", recorded.getHeader("Content-Type"));
+
+        // Verify body contains expected structure
+        final String body = recorded.getBody().readUtf8();
+        assertTrue(body.contains("\"contents\""));
+        assertTrue(body.contains("\"generationConfig\""));
+        assertTrue(body.contains("Hello"));
+    }
+
+    @Test
+    public void test_streamChat_verifyRequestFormat() throws Exception {
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"text":"Test"}]},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+            }
+        });
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("POST", recorded.getMethod());
+        assertTrue(recorded.getPath().contains("/models/gemini-2.0-flash:streamGenerateContent"));
+        assertTrue(recorded.getPath().contains("key=test-key"));
+    }
+
+    // ========== checkAvailabilityNow() tests ==========
+
+    @Test
+    public void test_checkAvailabilityNow_success() throws Exception {
+        mockServer.enqueue(new MockResponse().setBody("{\"models\":[]}").addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        assertTrue(client.checkAvailabilityNow());
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("GET", recorded.getMethod());
+        assertTrue(recorded.getPath().contains("/models"));
+        assertTrue(recorded.getPath().contains("key=test-key"));
+    }
+
+    @Test
+    public void test_checkAvailabilityNow_serverError() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Server Error"));
+
+        setupClientForMockServer();
+
+        assertFalse(client.checkAvailabilityNow());
+    }
+
+    @Test
+    public void test_isAvailable_serverError() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(401).setBody("Unauthorized"));
+
+        setupClientForMockServer();
+
+        assertFalse(client.isAvailable());
+    }
+
+    @Test
+    public void test_streamChat_serviceUnavailable() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(503).setBody("Service Unavailable"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean errorReceived = new AtomicBoolean(false);
+
+        try {
+            client.streamChat(request, new LlmStreamCallback() {
+                @Override
+                public void onChunk(final String content, final boolean done) {
+                    fail("Should not receive chunks on error");
+                }
+
+                @Override
+                public void onError(final Throwable error) {
+                    errorReceived.set(true);
+                }
+            });
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("503"));
+            assertTrue(errorReceived.get());
+        }
+    }
+
+    @Test
+    public void test_chat_serviceUnavailable() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(503).setBody("Service Unavailable"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("503"));
+        }
     }
 
     // ========== Helper methods ==========
