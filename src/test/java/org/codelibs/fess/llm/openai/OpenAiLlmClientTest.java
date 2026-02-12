@@ -33,6 +33,7 @@ import org.junit.jupiter.api.TestInfo;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class OpenAiLlmClientTest extends UnitFessTestCase {
 
@@ -856,6 +857,203 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         assertEquals(2, chunks.size());
         assertEquals("Test", chunks.get(0));
+    }
+
+    // ========== destroy() tests ==========
+
+    @Test
+    public void test_destroy_closesHttpClient() {
+        client.setTestTimeout(30000);
+        client.init();
+        assertNotNull(client.getHttpClient());
+        client.destroy();
+        // After destroy, calling getHttpClient() triggers re-init
+        // Verify no exception is thrown during destroy
+    }
+
+    @Test
+    public void test_destroy_beforeInit() {
+        // destroy before init should not throw
+        client.destroy();
+    }
+
+    // ========== Request format & Authorization header verification tests ==========
+
+    @Test
+    public void test_chat_verifyRequestFormat() throws Exception {
+        final String responseJson = """
+                {
+                    "choices": [{
+                        "message": {
+                            "content": "Response"
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        client.chat(request);
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("POST", recorded.getMethod());
+        assertEquals("/chat/completions", recorded.getPath());
+        assertEquals("application/json; charset=UTF-8", recorded.getHeader("Content-Type"));
+
+        // Verify Authorization header
+        assertEquals("Bearer sk-test-key", recorded.getHeader("Authorization"));
+
+        // Verify body contains expected structure
+        final String body = recorded.getBody().readUtf8();
+        assertTrue(body.contains("\"model\""));
+        assertTrue(body.contains("\"messages\""));
+        assertTrue(body.contains("\"stream\":false"));
+        assertTrue(body.contains("Hello"));
+    }
+
+    @Test
+    public void test_chat_verifyAuthorizationHeader() throws Exception {
+        final String responseJson = """
+                {
+                    "choices": [{
+                        "message": {
+                            "content": "Test"
+                        }
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        client.chat(request);
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        final String authHeader = recorded.getHeader("Authorization");
+        assertNotNull(authHeader);
+        assertTrue(authHeader.startsWith("Bearer "));
+        assertEquals("Bearer sk-test-key", authHeader);
+    }
+
+    @Test
+    public void test_streamChat_verifyRequestFormat() throws Exception {
+        final String sseResponse = """
+                data: {"choices":[{"delta":{"content":"Test"}}]}
+
+                data: [DONE]
+
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(sseResponse).addHeader("Content-Type", "text/event-stream"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+            }
+        });
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("POST", recorded.getMethod());
+        assertEquals("/chat/completions", recorded.getPath());
+
+        // Verify Authorization header is present for streaming requests
+        assertEquals("Bearer sk-test-key", recorded.getHeader("Authorization"));
+
+        // Verify body has stream=true
+        final String body = recorded.getBody().readUtf8();
+        assertTrue(body.contains("\"stream\":true"));
+    }
+
+    // ========== checkAvailabilityNow() tests ==========
+
+    @Test
+    public void test_checkAvailabilityNow_success() throws Exception {
+        mockServer.enqueue(new MockResponse().setBody("{\"data\":[]}").addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        assertTrue(client.checkAvailabilityNow());
+
+        final RecordedRequest recorded = mockServer.takeRequest();
+        assertEquals("GET", recorded.getMethod());
+        assertEquals("/models", recorded.getPath());
+
+        // Verify Authorization header is present for availability check
+        assertEquals("Bearer sk-test-key", recorded.getHeader("Authorization"));
+    }
+
+    @Test
+    public void test_checkAvailabilityNow_serverError() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Server Error"));
+
+        setupClientForMockServer();
+
+        assertFalse(client.checkAvailabilityNow());
+    }
+
+    @Test
+    public void test_isAvailable_serverError() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(401).setBody("Unauthorized"));
+
+        setupClientForMockServer();
+
+        assertFalse(client.isAvailable());
+    }
+
+    @Test
+    public void test_streamChat_serviceUnavailable() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(503).setBody("Service Unavailable"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final AtomicBoolean errorReceived = new AtomicBoolean(false);
+
+        try {
+            client.streamChat(request, new LlmStreamCallback() {
+                @Override
+                public void onChunk(final String content, final boolean done) {
+                    fail("Should not receive chunks on error");
+                }
+
+                @Override
+                public void onError(final Throwable error) {
+                    errorReceived.set(true);
+                }
+            });
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("503"));
+            assertTrue(errorReceived.get());
+        }
+    }
+
+    @Test
+    public void test_chat_serviceUnavailable() throws IOException {
+        mockServer.enqueue(new MockResponse().setResponseCode(503).setBody("Service Unavailable"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        try {
+            client.chat(request);
+            fail("Expected LlmException to be thrown");
+        } catch (final LlmException error) {
+            assertTrue(error.getMessage().contains("503"));
+        }
     }
 
     // ========== Helper methods ==========

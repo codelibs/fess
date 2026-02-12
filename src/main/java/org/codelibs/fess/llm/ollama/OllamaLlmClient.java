@@ -22,9 +22,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
@@ -42,12 +52,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 /**
  * LLM client implementation for Ollama.
  *
@@ -59,11 +63,10 @@ import okhttp3.Response;
 public class OllamaLlmClient implements LlmClient {
 
     private static final Logger logger = LogManager.getLogger(OllamaLlmClient.class);
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
     /** The name identifier for the Ollama LLM client. */
     protected static final String NAME = "ollama";
 
-    private OkHttpClient httpClient;
+    private CloseableHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private volatile Boolean cachedAvailability = null;
     private TimeoutTask availabilityCheckTask;
@@ -88,9 +91,16 @@ public class OllamaLlmClient implements LlmClient {
         }
 
         final int timeout = getTimeout();
-        httpClient = new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.MILLISECONDS)
-                .readTimeout(timeout, TimeUnit.MILLISECONDS)
-                .writeTimeout(timeout, TimeUnit.MILLISECONDS)
+        final RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
+                .setResponseTimeout(Timeout.ofMilliseconds(timeout))
+                .build();
+        httpClient = HttpClients.custom()
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setDefaultConnectionConfig(ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(timeout)).build())
+                        .build())
+                .setDefaultRequestConfig(requestConfig)
+                .disableAutomaticRetries()
                 .build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized OllamaLlmClient with timeout: {}ms", timeout);
@@ -109,6 +119,14 @@ public class OllamaLlmClient implements LlmClient {
             if (logger.isDebugEnabled()) {
                 logger.debug("Cancelled Ollama availability check task");
             }
+        }
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (final IOException e) {
+                logger.warn("Failed to close HTTP client", e);
+            }
+            httpClient = null;
         }
     }
 
@@ -185,17 +203,18 @@ public class OllamaLlmClient implements LlmClient {
             return false;
         }
         try {
-            final Request request = new Request.Builder().url(apiUrl + "/api/tags").get().build();
-            try (Response response = getHttpClient().newCall(request).execute()) {
-                if (!response.isSuccessful()) {
+            final HttpGet request = new HttpGet(apiUrl + "/api/tags");
+            try (var response = getHttpClient().execute(request)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Ollama availability check failed. url={}, statusCode={}", apiUrl, response.code());
+                        logger.debug("Ollama availability check failed. url={}, statusCode={}", apiUrl, statusCode);
                     }
                     return false;
                 }
 
                 // Check if configured model is available
-                final String responseBody = response.body() != null ? response.body().string() : "";
+                final String responseBody = response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "";
                 return isModelAvailable(responseBody);
             }
         } catch (final Exception e) {
@@ -260,15 +279,17 @@ public class OllamaLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE)).build();
+            final HttpPost httpRequest = new HttpPost(url);
+            httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    logger.warn("Ollama API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
-                    throw new LlmException("Ollama API error: " + response.code() + " " + response.message());
+            try (var response = getHttpClient().execute(httpRequest)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    logger.warn("Ollama API error. url={}, statusCode={}, message={}", url, statusCode, response.getReasonPhrase());
+                    throw new LlmException("Ollama API error: " + statusCode + " " + response.getReasonPhrase());
                 }
 
-                final String responseBody = response.body() != null ? response.body().string() : "";
+                final String responseBody = response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "";
                 final JsonNode jsonNode = objectMapper.readTree(responseBody);
 
                 final LlmChatResponse chatResponse = new LlmChatResponse();
@@ -319,22 +340,25 @@ public class OllamaLlmClient implements LlmClient {
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
-            final Request httpRequest = new Request.Builder().url(url).post(RequestBody.create(json, JSON_MEDIA_TYPE)).build();
+            final HttpPost httpRequest = new HttpPost(url);
+            httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-            try (Response response = getHttpClient().newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    logger.warn("Ollama streaming API error. url={}, statusCode={}, message={}", url, response.code(), response.message());
-                    throw new LlmException("Ollama API error: " + response.code() + " " + response.message());
+            try (var response = getHttpClient().execute(httpRequest)) {
+                final int statusCode = response.getCode();
+                if (statusCode < 200 || statusCode >= 300) {
+                    logger.warn("Ollama streaming API error. url={}, statusCode={}, message={}", url, statusCode,
+                            response.getReasonPhrase());
+                    throw new LlmException("Ollama API error: " + statusCode + " " + response.getReasonPhrase());
                 }
 
-                if (response.body() == null) {
+                if (response.getEntity() == null) {
                     logger.warn("Empty response from Ollama streaming API. url={}", url);
                     throw new LlmException("Empty response from Ollama");
                 }
 
                 int chunkCount = 0;
                 try (BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))) {
+                        new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (StringUtil.isBlank(line)) {
@@ -438,7 +462,7 @@ public class OllamaLlmClient implements LlmClient {
      *
      * @return the HTTP client
      */
-    protected OkHttpClient getHttpClient() {
+    protected CloseableHttpClient getHttpClient() {
         if (httpClient == null) {
             init();
         }
