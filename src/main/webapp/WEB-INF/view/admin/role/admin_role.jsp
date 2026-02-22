@@ -6,56 +6,56 @@ ${fe:html(true)}
             key="labels.role_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="user"/>
         <jsp:param name="menuType" value="role"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.role_configuration"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
                             <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
                             <%-- List --%>
                             <c:if test="${rolePager.allRecordCount == 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
+                                <div class="fads-row top10">
+                                    <div class="fads-col-sm-12">
                                         <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
                             </c:if>
                             <c:if test="${rolePager.allRecordCount > 0}">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.role_list" />">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.role_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.role_list_name"/></th>

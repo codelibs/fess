@@ -16,24 +16,24 @@
 }
 
 .status-lozenge.status-ready {
-    background-color: #dfe1e6;
-    color: #42526e;
+    background-color: var(--ds-border);
+    color: var(--ds-text-subtle);
 }
 
 .status-lozenge.status-thinking {
-    background-color: #deebff;
-    color: #0052cc;
+    background-color: var(--ds-background-information);
+    color: var(--ds-background-brand-bold);
     animation: lozenge-pulse 2s ease-in-out infinite;
 }
 
 .status-lozenge.status-error {
-    background-color: #ffebe6;
-    color: #de350b;
+    background-color: var(--ds-background-danger);
+    color: var(--ds-background-danger-bold);
 }
 
 .status-lozenge.status-success {
-    background-color: #e3fcef;
-    color: #00875a;
+    background-color: var(--ds-background-success);
+    color: var(--ds-background-success-bold);
 }
 
 @keyframes lozenge-pulse {
@@ -50,12 +50,12 @@
     height: calc(100vh - 150px);
     max-height: calc(100vh - 150px);
     border-radius: 8px;
-    border: 1px solid #dfe1e6;
+    border: 1px solid var(--ds-border);
 }
 
 .card-header {
-    background-color: #fafbfc;
-    border-bottom: 1px solid #dfe1e6;
+    background-color: var(--ds-surface-sunken);
+    border-bottom: 1px solid var(--ds-border);
 }
 
 .card-body.p-0 {
@@ -78,14 +78,14 @@
     padding: 3rem 2rem;
     text-align: center;
     height: 100%;
-    background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+    background: linear-gradient(180deg, var(--ds-surface-sunken) 0%, #ffffff 100%);
 }
 
 .empty-state-icon {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold) 0%, var(--ds-border-focused) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,13 +101,13 @@
 .empty-state-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #172b4d;
+    color: var(--ds-text);
     margin-bottom: 0.5rem;
 }
 
 .empty-state-description {
     font-size: 0.9375rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     max-width: 400px;
     margin-bottom: 1.5rem;
     line-height: 1.6;
@@ -120,7 +120,7 @@
 
 .suggestions-label {
     font-size: 0.8125rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     margin-bottom: 0.75rem;
     font-weight: 500;
 }
@@ -134,19 +134,19 @@
 
 .suggestion-chip {
     padding: 0.5rem 1rem;
-    border: 1px solid #dfe1e6;
+    border: 1px solid var(--ds-border);
     border-radius: 20px;
     background-color: white;
-    color: #42526e;
+    color: var(--ds-text-subtle);
     font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .suggestion-chip:hover {
-    background-color: #f4f5f7;
-    border-color: #0052cc;
-    color: #0052cc;
+    background-color: var(--ds-background-neutral);
+    border-color: var(--ds-background-brand-bold);
+    color: var(--ds-background-brand-bold);
     transform: translateY(-1px);
 }
 
@@ -196,7 +196,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: #dfe1e6;
+    background-color: var(--ds-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,11 +206,11 @@
 
 .progress-step .step-icon i {
     font-size: 0.875rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
 }
 
 .progress-step.active .step-icon {
-    background-color: #0052cc;
+    background-color: var(--ds-background-brand-bold);
     animation: step-pulse 1.5s ease-in-out infinite;
 }
 
@@ -219,7 +219,7 @@
 }
 
 .progress-step.completed .step-icon {
-    background-color: #00875a;
+    background-color: var(--ds-background-success-bold);
 }
 
 .progress-step.completed .step-icon i {
@@ -228,18 +228,18 @@
 
 .progress-step .step-label {
     font-size: 0.6875rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     text-align: center;
     white-space: nowrap;
 }
 
 .progress-step.active .step-label {
-    color: #0052cc;
+    color: var(--ds-background-brand-bold);
     font-weight: 600;
 }
 
 .progress-step.completed .step-label {
-    color: #00875a;
+    color: var(--ds-background-success-bold);
 }
 
 @keyframes step-pulse {
@@ -250,7 +250,7 @@
 .progress-message {
     text-align: center;
     font-size: 0.8125rem;
-    color: #0052cc;
+    color: var(--ds-background-brand-bold);
     font-weight: 500;
 }
 
@@ -308,14 +308,14 @@
 }
 
 .chat-message.user .message-avatar {
-    background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold) 0%, var(--ds-border-focused) 100%);
     color: white;
     margin-left: 0.5rem;
     order: 2;
 }
 
 .chat-message.assistant .message-avatar {
-    background: linear-gradient(135deg, #6b778c 0%, #8993a4 100%);
+    background: linear-gradient(135deg, var(--ds-text-subtle) 0%, var(--ds-text-subtlest) 100%);
     color: white;
     margin-right: 0.5rem;
 }
@@ -334,22 +334,22 @@
 }
 
 .chat-message.user .message-content {
-    background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold) 0%, var(--ds-background-brand-bold-hovered) 100%);
     color: white;
     border-bottom-right-radius: 0.25rem;
 }
 
 .chat-message.assistant .message-content {
-    background-color: #f4f5f7;
-    color: #172b4d;
-    border: 1px solid #dfe1e6;
+    background-color: var(--ds-background-neutral);
+    color: var(--ds-text);
+    border: 1px solid var(--ds-border);
     border-bottom-left-radius: 0.25rem;
 }
 
 /* Message timestamp */
 .message-timestamp {
     font-size: 0.6875rem;
-    color: #8993a4;
+    color: var(--ds-text-subtlest);
     margin-top: 0.25rem;
     padding: 0 0.5rem;
 }
@@ -377,10 +377,10 @@
 
 .message-action-btn {
     padding: 0.25rem 0.5rem;
-    border: 1px solid #dfe1e6;
+    border: 1px solid var(--ds-border);
     border-radius: 4px;
     background-color: white;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     font-size: 0.75rem;
     cursor: pointer;
     display: flex;
@@ -390,15 +390,15 @@
 }
 
 .message-action-btn:hover {
-    background-color: #f4f5f7;
-    border-color: #0052cc;
-    color: #0052cc;
+    background-color: var(--ds-background-neutral);
+    border-color: var(--ds-background-brand-bold);
+    color: var(--ds-background-brand-bold);
 }
 
 .message-action-btn.copied {
-    background-color: #e3fcef;
-    border-color: #00875a;
-    color: #00875a;
+    background-color: var(--ds-background-success);
+    border-color: var(--ds-background-success-bold);
+    color: var(--ds-background-success-bold);
 }
 
 /* ============================================
@@ -407,12 +407,12 @@
 .message-sources {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #ebecf0;
+    border-top: 1px solid var(--ds-border);
 }
 
 .message-sources h6 {
     font-size: 0.75rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -437,14 +437,14 @@
     align-items: flex-start;
     padding: 0.625rem 0.75rem;
     background-color: white;
-    border: 1px solid #dfe1e6;
+    border: 1px solid var(--ds-border);
     border-radius: 6px;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .source-card:hover {
-    border-color: #0052cc;
+    border-color: var(--ds-background-brand-bold);
     box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
     transform: translateY(-1px);
 }
@@ -452,7 +452,7 @@
 .source-index {
     min-width: 20px;
     height: 20px;
-    background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold) 0%, var(--ds-border-focused) 100%);
     color: white;
     border-radius: 4px;
     font-size: 0.6875rem;
@@ -472,7 +472,7 @@
 .source-title {
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #0052cc;
+    color: var(--ds-background-brand-bold);
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -488,7 +488,7 @@
 
 .source-type {
     font-size: 0.6875rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -501,7 +501,7 @@
 /* Fallback for simple source links */
 .source-link {
     font-size: 0.8125rem;
-    color: #0052cc;
+    color: var(--ds-background-brand-bold);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -527,10 +527,10 @@
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
-    background-color: #f4f5f7;
-    border: 1px solid #dfe1e6;
+    background-color: var(--ds-background-neutral);
+    border: 1px solid var(--ds-border);
     border-radius: 1rem;
-    color: #6b778c;
+    color: var(--ds-text-subtle);
 }
 
 .thinking-dots {
@@ -541,7 +541,7 @@
 .thinking-dots span {
     width: 6px;
     height: 6px;
-    background-color: #0052cc;
+    background-color: var(--ds-background-brand-bold);
     border-radius: 50%;
     margin: 0 2px;
     animation: thinking-bounce 1.4s ease-in-out infinite both;
@@ -568,7 +568,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    background-color: #de350b;
+    background-color: var(--ds-background-danger-bold);
     color: white;
     border-radius: 6px;
     margin-bottom: 0.75rem;
@@ -613,12 +613,12 @@
     max-height: 150px;
     overflow-y: auto;
     border-radius: 8px 0 0 8px;
-    border: 1px solid #dfe1e6;
+    border: 1px solid var(--ds-border);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-footer #chatInput:focus {
-    border-color: #0052cc;
+    border-color: var(--ds-background-brand-bold);
     box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
 }
 
@@ -628,18 +628,18 @@
     justify-content: center;
     border-radius: 0 8px 8px 0;
     min-width: 48px;
-    background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold) 0%, var(--ds-background-brand-bold-hovered) 100%);
     border: none;
     transition: all 0.2s ease;
 }
 
 .card-footer #sendBtn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #0747a6 0%, #003d99 100%);
+    background: linear-gradient(135deg, var(--ds-background-brand-bold-hovered) 0%, #003d99 100%);
     transform: translateY(-1px);
 }
 
 .card-footer #sendBtn:disabled {
-    background: #dfe1e6;
+    background: var(--ds-border);
     cursor: not-allowed;
 }
 
@@ -653,21 +653,21 @@
 
 .input-hint {
     font-size: 0.6875rem;
-    color: #8993a4;
+    color: var(--ds-text-subtlest);
 }
 
 .char-counter {
     font-size: 0.6875rem;
-    color: #8993a4;
+    color: var(--ds-text-subtlest);
     font-variant-numeric: tabular-nums;
 }
 
 .char-counter.warning {
-    color: #ff991f;
+    color: var(--ds-background-warning-bold);
 }
 
 .char-counter.danger {
-    color: #de350b;
+    color: var(--ds-background-danger-bold);
 }
 
 /* ============================================
@@ -831,7 +831,7 @@
 .suggestion-chip:focus-visible,
 .source-card:focus-visible,
 .message-action-btn:focus-visible {
-    outline: 2px solid #0052cc;
+    outline: 2px solid var(--ds-background-brand-bold);
     outline-offset: 2px;
 }
 

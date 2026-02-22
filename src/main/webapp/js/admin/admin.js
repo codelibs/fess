@@ -1,13 +1,13 @@
 $(function() {
-  $('input[type="text"],select,textarea', ".login-box,section.content")
+  $('input[type="text"],select,textarea', ".fads-auth-card,section.content,.fads-card-body")
     .first()
     .focus();
-  $(".form-group .has-error")
+  $(".has-error")
     .first()
     .next("input,select,textarea")
     .focus();
 
-  $("section.content input").keypress(function(e) {
+  $("section.content input,.fads-card-body input").keypress(function(e) {
     if (e.which === 13) {
       var $submitButton = $("input#submit, button#submit");
       if ($submitButton.size() > 0) {
@@ -18,7 +18,7 @@ $(function() {
     }
   });
 
-  $(".table tr[data-href]").each(function() {
+  $(".fads-table tr[data-href]").each(function() {
     $(this)
       .css("cursor", "pointer")
       .hover(
@@ -34,23 +34,6 @@ $(function() {
       });
   });
 
-  $("#confirmToDelete").on("show.bs.modal", function(event) {
-    var button = $(event.relatedTarget);
-    var docId = button.data("docid");
-    var title = button.data("title");
-    var url = button.data("url");
-
-    $(this)
-      .find(".modal-body #delete-doc-title")
-      .text(title);
-    $(this)
-      .find(".modal-body #delete-doc-url")
-      .text(url);
-    $(this)
-      .find(".modal-footer input#docId")
-      .val(docId);
-  });
-
   // Date range picker
   var lang = (
     window.navigator.userLanguage ||
@@ -58,7 +41,7 @@ $(function() {
     window.navigator.browserLanguage
   ).substr(0, 2);
   moment.locale(lang);
-  $("input.form-control.date")
+  $("input.fads-textfield.date")
     .daterangepicker({
       autoUpdateInput: false,
       timePicker: false,
@@ -70,7 +53,7 @@ $(function() {
     .on("apply.daterangepicker", function(ev, picker) {
       $(this).val(picker.startDate.format("YYYY-MM-DD"));
     });
-  $("input.form-control.daterange")
+  $("input.fads-textfield.daterange")
     .daterangepicker({
       autoUpdateInput: false,
       timePicker: false,
@@ -86,7 +69,7 @@ $(function() {
           picker.endDate.format("YYYY-MM-DD")
       );
     });
-  $("input.form-control.datetime")
+  $("input.fads-textfield.datetime")
     .daterangepicker({
       autoUpdateInput: false,
       timePicker: true,
@@ -99,7 +82,7 @@ $(function() {
     .on("apply.daterangepicker", function(ev, picker) {
       $(this).val(picker.startDate.format("YYYY-MM-DD HH:mm"));
     });
-  $("input.form-control.datetimerange")
+  $("input.fads-textfield.datetimerange")
     .daterangepicker({
       autoUpdateInput: false,
       timePicker: true,
@@ -118,12 +101,7 @@ $(function() {
     });
 
   // Time picker
-  $("input.form-control.time").timepicker({
+  $("input.fads-textfield.time").timepicker({
     showInputs: false
-  });
-
-  // tooltips
-  $(function() {
-    $('[data-toggle="tooltip"]').tooltip();
   });
 });

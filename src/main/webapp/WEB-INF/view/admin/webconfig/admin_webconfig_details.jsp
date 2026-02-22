@@ -6,23 +6,23 @@ ${fe:html(true)}
             key="labels.web_crawling_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="crawl"/>
         <jsp:param name="menuType" value="webConfig"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.web_crawling_title_details"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
@@ -38,18 +38,18 @@ ${fe:html(true)}
                 <la:hidden property="createdBy"/>
                 <la:hidden property="createdTime"/>
                 <la:hidden property="sortOrder"/>
-                <div class="row">
-                    <div class="col-md-12">
+                <div class="fads-row">
+                    <div class="fads-col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
-                            <div class="card-header">
+                                class="fads-card <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
+                            <div class="fads-card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
-                            <div class="card-body">
+                            <div class="fads-card-body">
                                     <%-- Message --%>
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
+                                        <div class="fads-banner fads-banner-info">${msg}</div>
                                     </la:info>
                                     <la:errors/>
                                 </div>
@@ -163,9 +163,9 @@ ${fe:html(true)}
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="card-footer">
+                            <div class="fads-card-footer">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
-                                <c:if test="${editable}"><la:link styleClass="btn btn-success"
+                                <c:if test="${editable}"><la:link styleClass="fads-btn fads-btn-success"
                                                                   href="/admin/scheduler/createnewjob/web_crawling/${f:u(id)}/${fe:base64(name)}">
                                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                                     <la:message key="labels.web_crawling_button_create_job"/>

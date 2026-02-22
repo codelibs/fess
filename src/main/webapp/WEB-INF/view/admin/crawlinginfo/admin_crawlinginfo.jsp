@@ -6,23 +6,23 @@ ${fe:html(true)}
             key="labels.crawling_info_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="crawlingInfo"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.crawling_info_configuration"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item active"><la:link href="/admin/crawlinginfo">
                                 <la:message key="labels.crawling_info_title"/>
@@ -33,24 +33,24 @@ ${fe:html(true)}
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="fads-row">
+                <div class="fads-col-sm-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.crawling_info_title"/>
                             </h3>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-12">
+                            <div class="fads-row">
+                                <div class="fads-col-sm-12">
                                     <la:form styleClass="form-inline"
                                              action="/admin/crawlinginfo/">
                                         <div class="form-group">
@@ -58,10 +58,10 @@ ${fe:html(true)}
                                                 <la:message key="labels.crawling_info_session_id_search"/>
                                             </c:set>
                                             <la:text styleId="sessionIdSearchBtn" property="sessionId"
-                                                     styleClass="form-control" placeholder="${ph_session_id}"></la:text>
+                                                     styleClass="fads-textfield" placeholder="${ph_session_id}"></la:text>
                                         </div>
                                         <div class="form-group ml-sm-2">
-                                            <button type="submit" class="btn btn-primary" id="submit"
+                                            <button type="submit" class="fads-btn fads-btn-primary" id="submit"
                                                     name="search"
                                                     value="<la:message key="labels.crawling_info_search" />">
                                                 <i class="fa fa-search" aria-hidden="true"></i>
@@ -69,7 +69,7 @@ ${fe:html(true)}
                                             </button>
                                         </div>
                                         <div class="form-group ml-sm-2">
-                                            <button type="submit" class="btn btn-default" name="reset"
+                                            <button type="submit" class="fads-btn fads-btn-default" name="reset"
                                                     value="<la:message key="labels.crawling_info_reset" />">
                                                 <la:message key="labels.crawling_info_reset"/>
                                             </button>
@@ -80,16 +80,16 @@ ${fe:html(true)}
                             <%-- List --%>
                             <c:if test="${crawlingInfoPager.allRecordCount == 0}">
                                 <div class="row top20">
-                                    <div class="col-sm-12">
+                                    <div class="fads-col-sm-12">
                                         <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
                             </c:if>
                             <c:if test="${crawlingInfoPager.allRecordCount > 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.crawling_info_list" />">
+                                <div class="fads-row top10">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.crawling_info_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message
@@ -119,43 +119,43 @@ ${fe:html(true)}
                                 <c:if test="${pager.currentPageNumber > pager.allPageCount}">
                                     <script>location.href = "${contextPath}/admin/crawlinginfo/list/${pager.allPageCount}";</script>
                                 </c:if>
-                                <div class="row">
+                                <div class="fads-row">
                                     <c:if test="${editable}">
                                         <la:form action="/admin/crawlinginfo/">
                                             <div class="col-sm-12 center">
-                                                <button type="button" class="btn btn-danger"
-                                                        data-toggle="modal" data-target="#confirmToDeleteAll">
+                                                <button type="button" class="fads-btn fads-btn-danger"
+                                                        data-fads-dialog="confirmToDeleteAll">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                     <la:message key="labels.crawling_info_delete_all_link"/>
                                                 </button>
                                             </div>
-                                            <div class="modal fade" id="confirmToDeleteAll"
+                                            <div class="fads-dialog-overlay" id="confirmToDeleteAll"
                                                  tabindex="-1" role="dialog">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content bg-danger">
-                                                        <div class="modal-header">
-                                                            <h4 class="modal-title">
+                                                <div class="fads-dialog">
+                                                    <div class="fads-dialog-danger">
+                                                        <div class="fads-dialog-header">
+                                                            <h4 class="">
                                                                 <la:message
                                                                         key="labels.crawling_info_delete_all_link"/>
                                                             </h4>
-                                                            <button type="button" class="close" data-dismiss="modal"
+                                                            <button type="button" class="close" data-fads-dialog-close
                                                                     aria-label="Close">
                                                                 <span aria-hidden="true">×</span>
                                                             </button>
                                                         </div>
-                                                        <div class="modal-body">
+                                                        <div class="fads-dialog-body">
                                                             <p>
                                                                 <la:message
                                                                         key="labels.crawling_info_delete_all_confirmation"/>
                                                             </p>
                                                         </div>
-                                                        <div class="modal-footer justify-content-between">
-                                                            <button type="button" class="btn btn-outline-light"
-                                                                    data-dismiss="modal">
+                                                        <div class="fads-dialog-footer">
+                                                            <button type="button" class="fads-btn fads-btn-outline-light"
+                                                                    data-fads-dialog-close>
                                                                 <la:message
                                                                         key="labels.crawling_info_delete_all_cancel"/>
                                                             </button>
-                                                            <button type="submit" class="btn btn-outline-light"
+                                                            <button type="submit" class="fads-btn fads-btn-outline-light"
                                                                     name="deleteall"
                                                                     value="<la:message key="labels.crawling_info_delete_all_link" />">
                                                                 <i class="fa fa-trash" aria-hidden="true"></i>

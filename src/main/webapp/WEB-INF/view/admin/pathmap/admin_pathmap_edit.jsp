@@ -6,23 +6,23 @@ ${fe:html(true)}
             key="labels.pathmap_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="crawl"/>
         <jsp:param name="menuType" value="pathMapping"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.pathmap_title_details"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
@@ -37,44 +37,44 @@ ${fe:html(true)}
                 </c:if>
                 <la:hidden property="createdBy"/>
                 <la:hidden property="createdTime"/>
-                <div class="row">
-                    <div class="col-md-12">
+                <div class="fads-row">
+                    <div class="fads-col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
-                            <div class="card-header">
+                                class="fads-card <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if>">
+                            <div class="fads-card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
-                            <div class="card-body">
+                            <div class="fads-card-body">
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
+                                        <div class="fads-banner fads-banner-info">${msg}</div>
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="regex" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="regex" class="fads-label"><la:message
                                             key="labels.regex"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="regex"/>
-                                        <la:text styleId="regex" property="regex" styleClass="form-control"/>
+                                        <la:text styleId="regex" property="regex" styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="replacement" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="replacement" class="fads-label"><la:message
                                             key="labels.replacement"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="replacement"/>
                                         <la:text styleId="replacement" property="replacement"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="processType" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="processType" class="fads-label"><la:message
                                             key="labels.processType"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="processType"/>
                                         <la:select styleId="processType" property="processType"
-                                                   styleClass="form-control">
+                                                   styleClass="fads-textfield">
                                             <la:option value="C">
                                                 <la:message key="labels.pathmap_pt_crawling"/>
                                             </la:option>
@@ -90,26 +90,26 @@ ${fe:html(true)}
                                         </la:select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="sortOrder" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="sortOrder" class="fads-label"><la:message
                                             key="labels.sortOrder"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="sortOrder"/>
                                         <input type="number" name="sortOrder" id="sortOrder"
-                                               value="${f:h(sortOrder)}" class="form-control"
+                                               value="${f:h(sortOrder)}" class="fads-textfield"
                                                min="0" max="100000">
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="userAgent" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="userAgent" class="fads-label"><la:message
                                             key="labels.userAgent"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="userAgent"/>
-                                        <la:text styleId="userAgent" property="userAgent" styleClass="form-control"/>
+                                        <la:text styleId="userAgent" property="userAgent" styleClass="fads-textfield"/>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
+                            <div class="fads-card-footer">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
                             </div>
                         </div>

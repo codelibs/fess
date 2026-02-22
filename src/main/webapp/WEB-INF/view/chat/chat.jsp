@@ -5,28 +5,28 @@ ${fe:html(true)}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.chat_title" /></title>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/chat.css')}" rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<jsp:include page="../header.jsp" />
 	<main class="container">
-		<div class="row">
-			<div class="col-12 col-lg-10 offset-lg-1">
-				<div class="card shadow-sm">
-					<div class="card-header d-flex justify-content-between align-items-center">
+		<div class="fads-row">
+			<div class="fads-col-12 fads-col-lg-10 fads-offset-lg-1">
+				<div class="fads-card fads-shadow-sm">
+					<div class="fads-card-header fads-d-flex fads-justify-content-between fads-align-items-center">
 						<div id="statusArea" class="status-lozenge status-ready" role="status" aria-live="polite">
-							<i class="fa fa-robot me-1" aria-hidden="true"></i>
+							<i class="fa fa-robot fads-me-1" aria-hidden="true"></i>
 							<span class="status-text"><la:message key="labels.chat_status_ready" /></span>
 						</div>
-						<button type="button" id="newChatBtn" class="btn btn-outline-secondary btn-sm" aria-label="<la:message key="labels.chat_new_chat" />">
+						<button type="button" id="newChatBtn" class="fads-btn fads-btn-subtle fads-btn-sm" aria-label="<la:message key="labels.chat_new_chat" />">
 							<i class="fa fa-plus" aria-hidden="true"></i>
 							<la:message key="labels.chat_new_chat" />
 						</button>
 					</div>
-					<div class="card-body p-0">
+					<div class="fads-card-body fads-p-0">
 						<div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="<la:message key="labels.chat_messages_area" />">
 							<div id="emptyState" class="empty-state">
 								<div class="empty-state-icon">
@@ -36,7 +36,7 @@ ${fe:html(true)}
 								<p class="empty-state-description"><la:message key="labels.chat_welcome_description" /></p>
 							</div>
 						</div>
-						<div id="progressIndicator" class="progress-indicator d-none" role="status" aria-live="polite">
+						<div id="progressIndicator" class="progress-indicator fads-d-none" role="status" aria-live="polite">
 							<div class="progress-steps">
 								<div class="progress-step" data-phase="intent">
 									<div class="step-icon"><i class="fa fa-lightbulb-o" aria-hidden="true"></i></div>
@@ -62,24 +62,24 @@ ${fe:html(true)}
 							<div class="progress-message" id="progressMessage"></div>
 						</div>
 					</div>
-					<div class="card-footer">
-						<div id="errorBanner" class="error-banner d-none" role="alert">
+					<div class="fads-card-footer">
+						<div id="errorBanner" class="error-banner fads-d-none" role="alert">
 							<div class="error-banner-content">
-								<i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
+								<i class="fa fa-exclamation-triangle fads-me-2" aria-hidden="true"></i>
 								<span class="error-message"></span>
 							</div>
-							<button type="button" class="error-banner-retry btn btn-sm btn-outline-light">
-								<i class="fa fa-refresh me-1" aria-hidden="true"></i><la:message key="labels.chat_retry" />
+							<button type="button" class="error-banner-retry fads-btn fads-btn-sm fads-btn-subtle">
+								<i class="fa fa-refresh fads-me-1" aria-hidden="true"></i><la:message key="labels.chat_retry" />
 							</button>
-							<button type="button" class="error-banner-dismiss btn-close btn-close-white" aria-label="<la:message key="labels.chat_dismiss" />"></button>
+							<button type="button" class="error-banner-dismiss fads-btn-close" aria-label="<la:message key="labels.chat_dismiss" />"></button>
 						</div>
 						<div class="input-wrapper">
-							<div class="input-group">
-								<textarea id="chatInput" class="form-control"
+							<div class="fads-input-group">
+								<textarea id="chatInput" class="fads-textfield"
 									placeholder="<la:message key="labels.chat_input_placeholder" />"
 									rows="1" maxlength="4000"
 									aria-label="<la:message key="labels.chat_input_placeholder" />"></textarea>
-								<button type="button" id="sendBtn" class="btn btn-primary" aria-label="<la:message key="labels.chat_send" />">
+								<button type="button" id="sendBtn" class="fads-btn fads-btn-primary" aria-label="<la:message key="labels.chat_send" />">
 									<i class="fa fa-paper-plane" aria-hidden="true"></i>
 								</button>
 							</div>
@@ -96,8 +96,7 @@ ${fe:html(true)}
 	<jsp:include page="../footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/fads-ui.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/chat.js')}"></script>
 	<script type="text/javascript">
 		$(function() {

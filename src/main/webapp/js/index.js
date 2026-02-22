@@ -39,15 +39,7 @@ $(function() {
 
   $(document).on("click touchend", function(e) {
     if (!$(e.target).closest("#searchOptions, #searchOptionsButton").length) {
-      $("#searchOptions").removeClass("active");
-    }
-  });
-
-  $("[data-toggle='control-options']").on("click", function(e) {
-    e.preventDefault();
-    var target = $(this).attr("data-target") || $(this).attr("href");
-    if (target) {
-      $(target).toggleClass("active");
+      $("#searchOptions").removeClass("show");
     }
   });
 

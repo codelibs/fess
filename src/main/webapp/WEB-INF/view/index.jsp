@@ -10,9 +10,8 @@ ${fe:html(true)}
 		href="${fe:url('/osdd')}"
 		title="<la:message key="labels.index_osdd_title" />" />
 </c:if>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
-	type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet"
 	type="text/css" />
 </head>
@@ -20,47 +19,47 @@ ${fe:html(true)}
 	<la:form action="/search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
-			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+			<nav class="fads-topnav fads-topnav-fixed">
 				<div id="content" class="container">
-					<div class="navbar-brand"></div>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar"
+					<div class="fads-topnav-brand"></div>
+					<button class="fads-navbar-toggler" type="button" data-fads-target="#navbar"
 							aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
+						<span class="fads-navbar-toggler-icon"></span>
 					</button>
-					<div class="collapse navbar-collapse" id="navbar">
-						<div class="me-auto"></div>
-						<ul class="nav navbar-nav">
+					<div class="fads-collapse" id="navbar">
+						<div></div>
+						<ul class="nav">
 							<c:if test="${eoled}">
-								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
-									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a>
+								<li class="nav-item" title="<la:message key="labels.eol_error" />">
+									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle fads-text-danger" aria-hidden="true"></i></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
-								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
+								<li class="nav-item"
 									title="<la:message key="labels.development_mode_warning" />"
-								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"
+								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle fads-text-warning" aria-hidden="true"
 									></i></a></li>
 							</c:if>
 							<c:choose>
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
-										<div class="dropdown">
-											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+										<div class="fads-dropdown">
+											<a id="userMenu" class="nav-link" data-fads-dropdown
 												href="#" role="button" aria-haspopup="true"
 												aria-expanded="false"> <i class="fa fa-fw fa-user" aria-hidden="true"></i>${username}
 											</a>
-											<div class="dropdown-menu" aria-labelledby="userMenu">
+											<div class="fads-dropdown-menu" aria-labelledby="userMenu">
 												<c:if test="${editableUser == true}">
-													<la:link href="/profile" styleClass="dropdown-item">
+													<la:link href="/profile" styleClass="fads-dropdown-item">
 														<la:message key="labels.profile" />
 													</la:link>
 												</c:if>
 												<c:if test="${adminUser == true}">
-													<la:link href="/admin" styleClass="dropdown-item">
+													<la:link href="/admin" styleClass="fads-dropdown-item">
 														<la:message key="labels.administration" />
 													</la:link>
 												</c:if>
-												<la:link href="/logout/" styleClass="dropdown-item">
+												<la:link href="/logout/" styleClass="fads-dropdown-item">
 													<la:message key="labels.logout" />
 												</la:link>
 											</div>
@@ -94,18 +93,18 @@ ${fe:html(true)}
 				</div>
 			</nav>
 		</header>
-		<div id="searchOptions" class="collapse">
+		<div id="searchOptions" class="fads-collapse">
 			<div class="container">
 				<jsp:include page="searchOptions.jsp" />
 				<div>
-					<button type="button" class="btn btn-light" id="searchOptionsClearButton">
+					<button type="button" class="fads-btn fads-btn-default" id="searchOptionsClearButton">
 						<la:message key="labels.search_options_clear" />
 					</button>
-					<button type="submit" class="btn btn-primary">
+					<button type="submit" class="fads-btn fads-btn-primary">
 						<i class="fa fa-search" aria-hidden="true"></i>
 						<la:message key="labels.search" />
 					</button>
-					<la:link href="/search/advance" styleClass="btn btn-info">
+					<la:link href="/search/advance" styleClass="fads-btn fads-btn-info">
 						<i class="fa fa-cog" aria-hidden="true"></i>
 						<la:message key="labels.advance" />
 					</la:link>
@@ -113,8 +112,8 @@ ${fe:html(true)}
 			</div>
 		</div>
 		<main class="container">
-			<div class="row">
-				<div class="col text-center searchFormBox">
+			<div class="fads-row">
+				<div class="fads-col fads-text-center searchFormBox">
 					<h1 class="mainLogo">
 						<img src="${fe:url('/images/logo.png')}"
 							alt="<la:message key="labels.index_title" />" />
@@ -122,7 +121,7 @@ ${fe:html(true)}
 					<div class="notification">${notification}</div>
 					<div>
 						<la:info id="msg" message="true">
-							<div class="alert alert-info">${msg}</div>
+							<div class="fads-banner fads-banner-info">${msg}</div>
 						</la:info>
 						<la:errors header="errors.front_header"
 							footer="errors.front_footer" prefix="errors.front_prefix"
@@ -130,16 +129,16 @@ ${fe:html(true)}
 					</div>
 					<fieldset>
 						<legend><la:message key="labels.search" /></legend>
-						<div class="clearfix">
-							<div class="mx-auto col-10 col-sm-8 col-md-8 col-lg-6">
-								<la:text styleClass="query form-control"
+						<div class="fads-clearfix">
+							<div style="margin:0 auto" class="fads-col-10 fads-col-sm-8 fads-col-md-8 fads-col-lg-6">
+								<la:text styleClass="query fads-textfield"
 									property="q" size="50" maxlength="1000" styleId="contentQuery"
 									autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${!empty popularWords}">
-							<div class="clearfix">
-								<p class="text-truncate">
+							<div class="fads-clearfix">
+								<p class="fads-text-truncate">
 									<la:message key="labels.search_popular_word_word" />
 									<c:forEach var="item" varStatus="s" items="${popularWords}">
 										<c:if test="${s.index < 3}">
@@ -147,21 +146,21 @@ ${fe:html(true)}
 												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 										<c:if test="${3 <= s.index}">
-											<la:link styleClass="d-none d-sm-inline-block"
+											<la:link styleClass="fads-d-none fads-d-sm-inline-block"
 												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 									</c:forEach>
 								</p>
 							</div>
 						</c:if>
-						<div class="clearfix searchButtonBox btn-group">
+						<div class="fads-clearfix searchButtonBox btn-group">
 							<button type="submit" name="search" id="searchButton"
-								class="btn btn-primary">
+								class="fads-btn fads-btn-primary">
 								<i class="fa fa-search" aria-hidden="true"></i>
 								<la:message key="labels.index_form_search_btn" />
 							</button>
-							<button type="button" class="btn btn-outline-secondary"
-								data-bs-toggle="collapse" data-bs-target="#searchOptions"
+							<button type="button" class="fads-btn fads-btn-subtle"
+								data-fads-collapse="#searchOptions"
 								id="searchOptionsButton">
 								<i class="fa fa-cog" aria-hidden="true"></i>
 								<la:message key="labels.index_form_option_btn" />
@@ -175,8 +174,7 @@ ${fe:html(true)}
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script src="${fe:url('/js/popper.min.js')}"></script>
-	<script src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script src="${fe:url('/js/fads-ui.js')}"></script>
 	<script src="${fe:url('/js/suggestor.js')}"></script>
 	<script src="${fe:url('/js/index.js')}"></script>
 </body>

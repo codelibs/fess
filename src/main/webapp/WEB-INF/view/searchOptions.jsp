@@ -3,11 +3,11 @@
 	<la:message key="labels.search_options" />
 </h3>
 <div>
-	<fieldset class="mb-3">
+	<fieldset class="fads-mb-3">
 		<legend><la:message key="labels.index_num" /></legend>
 		<label for="numSearchOption"><la:message key="labels.index_num" /></label>
 		<la:select property="num" styleId="numSearchOption"
-			styleClass="form-control">
+			styleClass="fads-textfield">
 			<option value="10">
 				<la:message key="labels.search_result_select_num" />
 			</option>
@@ -19,11 +19,11 @@
 			<la:option value="100">100</la:option>
 		</la:select>
 	</fieldset>
-	<fieldset class="mb-3">
+	<fieldset class="fads-mb-3">
 		<legend><la:message key="labels.index_sort" /></legend>
 		<label for="sortSearchOption"><la:message key="labels.index_sort" /></label>
 		<la:select property="sort" styleId="sortSearchOption"
-			styleClass="form-control">
+			styleClass="fads-textfield">
 			<option value="">
 				<la:message key="labels.search_result_select_sort" />
 			</option>
@@ -72,23 +72,23 @@
 			</c:if>
 		</la:select>
 	</fieldset>
-	<fieldset class="mb-3">
+	<fieldset class="fads-mb-3">
 		<legend><la:message key="labels.index_lang" /></legend>
 		<label for="langSearchOption"><la:message key="labels.index_lang" /></label>
 		<la:select property="lang" styleId="langSearchOption" multiple="true"
-			styleClass="form-control">
+			styleClass="fads-textfield">
 			<c:forEach var="item" items="${langItems}">
 				<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 			</c:forEach>
 		</la:select>
 	</fieldset>
 	<c:if test="${displayLabelTypeItems}">
-		<fieldset class="mb-3">
+		<fieldset class="fads-mb-3">
 			<legend><la:message key="labels.index_label" /></legend>
 			<label for="labelTypeSearchOption"><la:message
 					key="labels.index_label" /></label>
 			<la:select property="fields.label" styleId="labelTypeSearchOption"
-				multiple="true" styleClass="form-control">
+				multiple="true" styleClass="fads-textfield">
 				<c:forEach var="item" items="${labelTypeItems}">
 					<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 				</c:forEach>

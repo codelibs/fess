@@ -6,23 +6,23 @@ ${fe:html(true)}
             key="labels.dict_mapping_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="dict"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.dict_mapping_title"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><la:link href="/admin/dict">
                                 <la:message key="labels.dict_list_link"/>
@@ -34,63 +34,63 @@ ${fe:html(true)}
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.dict_mapping_list_link"/>
                             </h3>
-                            <div class="card-tools">
+                            <div class="fads-card-tools">
                                 <div class="btn-group">
-                                    <la:link href="/admin/dict" styleClass="btn btn-default btn-xs">
+                                    <la:link href="/admin/dict" styleClass="fads-btn fads-btn-default fads-btn-compact">
                                         <i class="fa fa-book" aria-hidden="true"></i>
                                         <la:message key="labels.dict_list_link"/>
                                     </la:link>
                                     <la:link href="list/1?dictId=${f:u(dictId)}"
-                                             styleClass="btn btn-primary btn-xs">
+                                             styleClass="fads-btn fads-btn-primary fads-btn-compact">
                                         <i class="fa fa-th-list" aria-hidden="true"></i>
                                         <la:message key="labels.dict_mapping_list_link"/>
                                     </la:link>
                                     <la:link href="createnew/${f:u(dictId)}"
-                                             styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
+                                             styleClass="fads-btn fads-btn-success fads-btn-compact ${f:h(editableClass)}">
                                         <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.dict_mapping_link_create"/>
                                     </la:link>
                                     <la:link href="downloadpage/${f:u(dictId)}"
-                                             styleClass="btn btn-primary btn-xs">
+                                             styleClass="fads-btn fads-btn-primary fads-btn-compact">
                                         <i class="fa fa-download" aria-hidden="true"></i>
                                         <la:message key="labels.dict_mapping_link_download"/>
                                     </la:link>
                                     <la:link href="uploadpage/${f:u(dictId)}"
-                                             styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
+                                             styleClass="fads-btn fads-btn-success fads-btn-compact ${f:h(editableClass)}">
                                         <i class="fa fa-upload" aria-hidden="true"></i>
                                         <la:message key="labels.dict_mapping_link_upload"/>
                                     </la:link>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
                             <%-- List --%>
                             <c:if test="${charMappingPager.allRecordCount == 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
+                                <div class="fads-row top10">
+                                    <div class="fads-col-sm-12">
                                         <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
                             </c:if>
                             <c:if test="${charMappingPager.allRecordCount > 0}">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.dict_mapping_list" />">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.dict_mapping_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.dict_mapping_source"/></th>
@@ -112,7 +112,7 @@ ${fe:html(true)}
                                 </div>
                                 <c:set var="pager" value="${charMappingPager}"
                                        scope="request"/>
-                                <div class="row">
+                                <div class="fads-row">
                                     <div class="col-sm-2">
                                         <la:message key="labels.pagination_page_guide_msg"
                                                     arg0="${f:h(pager.currentPageNumber)}"
@@ -120,37 +120,37 @@ ${fe:html(true)}
                                                     arg2="${f:h(pager.allRecordCount)}"/>
                                     </div>
                                     <div class="col-sm-10">
-                                        <ul class="pagination pagination-sm m-0 float-right">
+                                        <ul class="fads-pagination" style="margin-left:auto">
                                             <c:if test="${pager.existPrePage}">
-                                                <li class="page-item"><la:link
-                                                        styleClass="page-link"
+                                                <li class=""><la:link
+                                                        styleClass=""
                                                         href="list/${pager.currentPageNumber - 1}?dictId=${f:u(dictId)}">
                                                     <la:message key="labels.prev_page"/>
                                                 </la:link></li>
                                             </c:if>
                                             <c:if test="${!pager.existPrePage}">
-                                                <li class="page-item disabled"><a
-                                                        class="page-link" href="#"><la:message
+                                                <li class="disabled"><a
+                                                        class="" href="#"><la:message
                                                         key="labels.prev_page"/></a></li>
                                             </c:if>
                                             <c:forEach var="p" varStatus="s"
                                                        items="${pager.pageNumberList}">
                                                 <li
-                                                        <c:if test="${p == pager.currentPageNumber}">class="page-item active"</c:if>>
+                                                        <c:if test="${p == pager.currentPageNumber}">class="active"</c:if>>
                                                     <la:link
-                                                            styleClass="page-link"
+                                                            styleClass=""
                                                             href="list/${p}?dictId=${f:u(dictId)}">${p}</la:link></li>
                                             </c:forEach>
                                             <c:if test="${pager.existNextPage}">
-                                                <li class="page-item"><la:link
-                                                        styleClass="page-link"
+                                                <li class=""><la:link
+                                                        styleClass=""
                                                         href="list/${pager.currentPageNumber + 1}?dictId=${f:u(dictId)}">
                                                     <la:message key="labels.next_page"/>
                                                 </la:link></li>
                                             </c:if>
                                             <c:if test="${!pager.existNextPage}">
-                                                <li class="page-item disabled"><a
-                                                        class="page-link" href="#"><la:message
+                                                <li class="disabled"><a
+                                                        class="" href="#"><la:message
                                                         key="labels.next_page"/></a></li>
                                             </c:if>
                                         </ul>

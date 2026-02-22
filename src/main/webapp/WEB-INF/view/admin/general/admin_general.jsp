@@ -6,18 +6,18 @@ ${fe:html(true)}
             key="labels.crawler_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="general"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.crawler_title_edit"/>
                         </h1>
@@ -27,19 +27,19 @@ ${fe:html(true)}
         </div>
         <section class="content">
             <la:form action="/admin/general/">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card card-outline card-success">
-                            <div class="card-body">
+                <div class="fads-row">
+                    <div class="fads-col-md-12">
+                        <div class="fads-card fads-fads-card-success">
+                            <div class="fads-card-body">
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
+                                        <div class="fads-banner fads-banner-info">${msg}</div>
                                     </la:info>
                                     <la:errors property="_global"/>
                                 </div>
                                     <%-- System --%>
                                 <h4><la:message key="labels.general_menu_system"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.web_api_json_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -52,7 +52,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.login_required"/></span>
                                     <div class="form-inline col-sm-9">
@@ -65,7 +65,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.login_link"/></span>
                                     <div class="form-inline col-sm-9">
@@ -79,7 +79,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <c:if test="${fesenType!='cloud' and fesenType!='aws'}">
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.result_collapsed"/></span>
                                     <div class="form-inline col-sm-9">
@@ -93,7 +93,7 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 </c:if>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.thumbnail"/></span>
                                     <div class="form-inline col-sm-9">
@@ -106,43 +106,43 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="appValue" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="appValue" class="fads-label"><la:message
                                             key="labels.app_value"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="appValue"/>
                                         <la:textarea styleId="appValue" property="appValue"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="defaultLabelValue" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="defaultLabelValue" class="fads-label"><la:message
                                             key="labels.default_label_value"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="defaultLabelValue"/>
                                         <la:textarea styleId="defaultLabelValue" property="defaultLabelValue"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="defaultSortValue" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="defaultSortValue" class="fads-label"><la:message
                                             key="labels.default_sort_value"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="defaultSortValue"/>
                                         <la:textarea styleId="defaultSortValue" property="defaultSortValue"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="virtualHostValue" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="virtualHostValue" class="fads-label"><la:message
                                             key="labels.virtual_host_value"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="virtualHostValue"/>
                                         <la:textarea styleId="virtualHostValue" property="virtualHostValue"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.popular_word_word_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -155,16 +155,16 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="csvFileEncoding" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="csvFileEncoding" class="fads-label"><la:message
                                             key="labels.csv_file_encoding"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="csvFileEncoding"/>
                                         <la:text styleId="csvFileEncoding" property="csvFileEncoding"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.append_query_param_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -178,16 +178,16 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="notificationTo" class="fads-label"><la:message
                                             key="labels.notification_to"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="notificationTo"/>
-                                        <div class="input-group">
+                                        <div class="fads-input-group">
                                             <la:text styleId="notificationTo" property="notificationTo"
-                                                     styleClass="form-control"/>
-                                            <div class="input-group-append">
-                                                <button type="submit" class="btn btn-default ${f:h(editableClass)}"
+                                                     styleClass="fads-textfield"/>
+                                            <div class="">
+                                                <button type="submit" class="fads-btn fads-btn-default ${f:h(editableClass)}"
                                                         name="sendmail" value="test">
                                                     <la:message key="labels.send_testmail"/>
                                                 </button>
@@ -197,7 +197,7 @@ ${fe:html(true)}
                                 </div>
                                     <%-- Crawler --%>
                                 <h4><la:message key="labels.general_menu_crawler"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.incremental_crawling"/></span>
                                     <div class="form-inline col-sm-9">
@@ -211,51 +211,51 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="crawlingThreadCount"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.crawling_thread_count"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="crawlingThreadCount"/>
                                         <input type="number" name="crawlingThreadCount" id="crawlingThreadCount"
-                                               value="${f:h(crawlingThreadCount)}" class="form-control"
+                                               value="${f:h(crawlingThreadCount)}" class="fads-textfield"
                                                min="1" max="1000">
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="dayForCleanup" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="dayForCleanup" class="fads-label"><la:message
                                             key="labels.day_for_cleanup"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="dayForCleanup"/>
                                         <input type="number" name="dayForCleanup" id="dayForCleanup"
-                                               value="${f:h(dayForCleanup)}" class="form-control"
+                                               value="${f:h(dayForCleanup)}" class="fads-textfield"
                                                min="-1" max="3650">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="ignoreFailureType" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="ignoreFailureType" class="fads-label"><la:message
                                             key="labels.ignore_failure_type"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ignoreFailureType"/>
                                         <la:text styleId="ignoreFailureType" property="ignoreFailureType"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="failureCountThreshold"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.failure_count_threshold"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="failureCountThreshold"/>
                                         <input type="number" name="failureCountThreshold" id="failureCountThreshold"
-                                               value="${f:h(failureCountThreshold)}" class="form-control"
+                                               value="${f:h(failureCountThreshold)}" class="fads-textfield"
                                                min="-1" max="1000">
                                     </div>
                                 </div>
                                     <%-- Logging --%>
                                 <h4><la:message key="labels.general_menu_logging"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.search_log_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -268,7 +268,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.user_info_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -281,7 +281,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.user_favorite_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -294,54 +294,54 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="purgeSearchLogDay" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="purgeSearchLogDay" class="fads-label"><la:message
                                             key="labels.purge_search_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeSearchLogDay"/>
                                         <input type="number" name="purgeSearchLogDay" id="purgeSearchLogDay"
-                                               value="${f:h(purgeSearchLogDay)}" class="form-control"
+                                               value="${f:h(purgeSearchLogDay)}" class="fads-textfield"
                                                min="-1" max="3650">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="purgeJobLogDay" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="purgeJobLogDay" class="fads-label"><la:message
                                             key="labels.purge_job_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeJobLogDay"/>
                                         <input type="number" name="purgeJobLogDay" id="purgeJobLogDay"
-                                               value="${f:h(purgeJobLogDay)}" class="form-control"
+                                               value="${f:h(purgeJobLogDay)}" class="fads-textfield"
                                                min="-1" max="3650">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="purgeUserInfoDay" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="purgeUserInfoDay" class="fads-label"><la:message
                                             key="labels.purge_user_info_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeUserInfoDay"/>
                                         <input type="number" name="purgeUserInfoDay" id="purgeUserInfoDay"
-                                               value="${f:h(purgeUserInfoDay)}" class="form-control"
+                                               value="${f:h(purgeUserInfoDay)}" class="fads-textfield"
                                                min="-1" max="3650">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="purgeByBots" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="purgeByBots" class="fads-label"><la:message
                                             key="labels.purge_by_bots"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="purgeByBots"/>
                                         <la:text styleId="purgeByBots" property="purgeByBots"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="logLevel" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="logLevel" class="fads-label"><la:message
                                             key="labels.log_level"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="logLevel"/>
-                                        <la:select styleId="logLevel" property="logLevel" styleClass="form-control">
+                                        <la:select styleId="logLevel" property="logLevel" styleClass="fads-textfield">
                                             <la:option value="OFF">OFF</la:option>
                                             <la:option value="FATAL">FATAL</la:option>
                                             <la:option value="ERROR">ERROR</la:option>
@@ -355,7 +355,7 @@ ${fe:html(true)}
                                 </div>
                                     <%-- Suggest --%>
                                 <h4><la:message key="labels.general_menu_suggest"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.suggest_search_log_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -368,7 +368,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.suggest_documents_enabled"/></span>
                                     <div class="form-inline col-sm-9">
@@ -381,215 +381,215 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="purgeSuggestSearchLogDay"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.purge_suggest_search_log_day"/></label>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="purgeSuggestSearchLogDay"/>
                                         <input type="number" name="purgeSuggestSearchLogDay"
                                                id="purgeSuggestSearchLogDay"
-                                               value="${f:h(purgeSuggestSearchLogDay)}" class="form-control"
+                                               value="${f:h(purgeSuggestSearchLogDay)}" class="fads-textfield"
                                                min="-1" max="3650">
                                         <la:message key="labels.day"/>
                                     </div>
                                 </div>
                                     <%-- LDAP --%>
                                 <h4><la:message key="labels.general_menu_ldap"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapProviderUrl"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_provider_url"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapProviderUrl"/>
                                         <la:text styleId="ldapProviderUrl" property="ldapProviderUrl"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapBaseDn"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_base_dn"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapBaseDn"/>
                                         <la:text styleId="ldapBaseDn" property="ldapBaseDn"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapAdminSecurityPrincipal"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_admin_security_principal"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapAdminSecurityPrincipal"/>
                                         <la:text styleId="ldapAdminSecurityPrincipal"
                                                  property="ldapAdminSecurityPrincipal"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapAdminSecurityCredentials"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_admin_security_credentials"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapAdminSecurityCredentials"/>
                                         <la:password styleId="ldapAdminSecurityCredentials"
                                                      property="ldapAdminSecurityCredentials"
-                                                     styleClass="form-control" autocomplete="new-password"/>
+                                                     styleClass="fads-textfield" autocomplete="new-password"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapSecurityPrincipal"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_security_principal"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapSecurityPrincipal"/>
                                         <la:text styleId="ldapSecurityPrincipal" property="ldapSecurityPrincipal"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapAccountFilter"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_account_filter"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapAccountFilter"/>
                                         <la:text styleId="ldapAccountFilter" property="ldapAccountFilter"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapGroupFilter"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_group_filter"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapGroupFilter"/>
                                         <la:text styleId="ldapGroupFilter" property="ldapGroupFilter"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="ldapMemberofAttribute"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.ldap_memberof_attribute"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="ldapMemberofAttribute"/>
                                         <la:text styleId="ldapMemberofAttribute" property="ldapMemberofAttribute"
-                                                 styleClass="form-control" autocomplete="off"/>
+                                                 styleClass="fads-textfield" autocomplete="off"/>
                                     </div>
                                 </div>
                                     <%-- Nortification --%>
                                 <h4><la:message key="labels.general_menu_notification"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="notificationLogin"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.notification_login"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="notificationLogin"/>
                                         <la:textarea styleId="notificationLogin" property="notificationLogin"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="notificationSearchTop"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.notification_search_top"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="notificationSearchTop"/>
                                         <la:textarea styleId="notificationSearchTop" property="notificationSearchTop"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
                                     <%-- Storage --%>
                                 <h4><la:message key="labels.general_storage"/></h4>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageType"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_type"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageType"/>
                                         <la:select styleId="storageType" property="storageType"
-                                                   styleClass="form-control">
+                                                   styleClass="fads-textfield">
                                             <la:option value="auto"><la:message key="labels.storage_type_auto"/></la:option>
                                             <la:option value="s3"><la:message key="labels.storage_type_s3"/></la:option>
                                             <la:option value="gcs"><la:message key="labels.storage_type_gcs"/></la:option>
                                         </la:select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageBucket"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_bucket"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageBucket"/>
                                         <la:text styleId="storageBucket" property="storageBucket"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageEndpoint"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_endpoint"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageEndpoint"/>
                                         <la:text styleId="storageEndpoint" property="storageEndpoint"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageAccessKey"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_access_key"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageAccessKey"/>
                                         <la:password styleId="storageAccessKey" property="storageAccessKey"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageSecretKey"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_secret_key"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageSecretKey"/>
                                         <la:password styleId="storageSecretKey" property="storageSecretKey"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageRegion"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_region"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageRegion"/>
                                         <la:text styleId="storageRegion" property="storageRegion"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageProjectId"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_project_id"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageProjectId"/>
                                         <la:text styleId="storageProjectId" property="storageProjectId"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="storageCredentialsPath"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.storage_credentials_path"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="storageCredentialsPath"/>
                                         <la:text styleId="storageCredentialsPath" property="storageCredentialsPath"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
+                            <div class="fads-card-footer">
                                 <c:if test="${editable}">
-                                    <button type="submit" class="btn btn-success" name="update"
+                                    <button type="submit" class="fads-btn fads-btn-success" name="update"
                                             value="<la:message key="labels.crawl_button_update" />">
                                         <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                         <la:message key="labels.crawl_button_update"/>

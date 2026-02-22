@@ -66,6 +66,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -129,12 +130,24 @@ public class FessFunctions {
      */
     public static String html(final boolean isOpen) {
         if (isOpen) {
-            return "<html lang=\"" + LaRequestUtil.getOptionalRequest().map(req -> {
+            final String lang = LaRequestUtil.getOptionalRequest().map(req -> {
                 if (req.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof Locale locale) {
                     return locale;
                 }
                 return Locale.ENGLISH;
-            }).orElse(Locale.ENGLISH).getLanguage() + "\">";
+            }).orElse(Locale.ENGLISH).getLanguage();
+            final String colorMode = LaRequestUtil.getOptionalRequest().map(req -> {
+                final Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    for (final Cookie c : cookies) {
+                        if ("fess_theme".equals(c.getName())) {
+                            return "dark".equals(c.getValue()) ? "dark" : "light";
+                        }
+                    }
+                }
+                return "light";
+            }).orElse("light");
+            return "<html lang=\"" + lang + "\" data-color-mode=\"" + colorMode + "\">";
         }
         return "</html>";
     }

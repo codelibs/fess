@@ -6,23 +6,23 @@ ${fe:html(true)}
             key="labels.scheduledjob_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="scheduler"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.scheduledjob_title_details"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
@@ -37,20 +37,20 @@ ${fe:html(true)}
                 </c:if>
                 <la:hidden property="createdBy"/>
                 <la:hidden property="createdTime"/>
-                <div class="row">
-                    <div class="col-md-12">
+                <div class="fads-row">
+                    <div class="fads-col-md-12">
                         <div
-                                class="card card-outline <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
+                                class="fads-card <c:if test="${crudMode == 1 || crudMode == 2}">card-success</c:if><c:if test="${crudMode == 3}">card-danger</c:if><c:if test="${crudMode == 4}">card-primary</c:if>">
                                 <%-- Card Header --%>
-                            <div class="card-header">
+                            <div class="fads-card-header">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                             </div>
                                 <%-- Card Body --%>
-                            <div class="card-body">
+                            <div class="fads-card-body">
                                     <%-- Message --%>
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
+                                        <div class="fads-banner fads-banner-info">${msg}</div>
                                     </la:info>
                                     <la:errors/>
                                 </div>
@@ -111,48 +111,48 @@ ${fe:html(true)}
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-default" name="list" value="back">
+                            <div class="fads-card-footer">
+                                <button type="submit" class="fads-btn fads-btn-default" name="list" value="back">
                                     <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                     <la:message key="labels.crud_button_back"/>
                                 </button>
                                 <c:if test="${editable}">
-                                    <button type="submit" class="btn btn-primary" name="edit"
+                                    <button type="submit" class="fads-btn fads-btn-primary" name="edit"
                                             value="<la:message key="labels.crud_button_edit" />">
                                         <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                                         <la:message key="labels.crud_button_edit"/>
                                     </button>
                                     <c:if test="${!running and !systemJobId}">
-                                        <button type="button" class="btn btn-danger" name="delete"
-                                                data-toggle="modal" data-target="#confirmToDelete"
+                                        <button type="button" class="fads-btn fads-btn-danger" name="delete"
+                                                data-fads-dialog="confirmToDelete"
                                                 value="<la:message key="labels.crud_button_delete" />">
                                             <i class="fa fa-trash" aria-hidden="true"></i>
                                             <la:message key="labels.crud_button_delete"/>
                                         </button>
-                                        <div class="modal fade" id="confirmToDelete" tabindex="-1"
+                                        <div class="fads-dialog-overlay" id="confirmToDelete" tabindex="-1"
                                              role="dialog">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content bg-danger">
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title">
+                                            <div class="fads-dialog">
+                                                <div class="fads-dialog-danger">
+                                                    <div class="fads-dialog-header">
+                                                        <h4 class="">
                                                             <la:message key="labels.crud_title_delete"/>
                                                         </h4>
-                                                        <button type="button" class="close" data-dismiss="modal"
+                                                        <button type="button" class="close" data-fads-dialog-close
                                                                 aria-label="Close">
                                                             <span aria-hidden="true">×</span>
                                                         </button>
                                                     </div>
-                                                    <div class="modal-body">
+                                                    <div class="fads-dialog-body">
                                                         <p>
                                                             <la:message key="labels.crud_delete_confirmation"/>
                                                         </p>
                                                     </div>
-                                                    <div class="modal-footer justify-content-between">
-                                                        <button type="button" class="btn btn-outline-light"
-                                                                data-dismiss="modal">
+                                                    <div class="fads-dialog-footer">
+                                                        <button type="button" class="fads-btn fads-btn-outline-light"
+                                                                data-fads-dialog-close>
                                                             <la:message key="labels.crud_button_cancel"/>
                                                         </button>
-                                                        <button type="submit" class="btn btn-outline-light"
+                                                        <button type="submit" class="fads-btn fads-btn-outline-light"
                                                                 name="delete"
                                                                 value="<la:message key="labels.crud_button_delete" />">
                                                             <i class="fa fa-trash" aria-hidden="true"></i>
@@ -164,14 +164,14 @@ ${fe:html(true)}
                                         </div>
                                     </c:if>
                                     <c:if test="${running}">
-                                        <button type="submit" class="btn btn-danger" name="stop"
+                                        <button type="submit" class="fads-btn fads-btn-danger" name="stop"
                                                 value="<la:message key="labels.scheduledjob_button_stop" />">
                                             <i class="fa fa-stop" aria-hidden="true"></i>
                                             <la:message key="labels.scheduledjob_button_stop"/>
                                         </button>
                                     </c:if>
                                     <c:if test="${!running && enabled}">
-                                        <button type="submit" class="btn btn-success" name="start"
+                                        <button type="submit" class="fads-btn fads-btn-success" name="start"
                                                 value="<la:message key="labels.scheduledjob_button_start" />">
                                             <i class="fa fa-play-circle" aria-hidden="true"></i>
                                             <la:message key="labels.scheduledjob_button_start"/>

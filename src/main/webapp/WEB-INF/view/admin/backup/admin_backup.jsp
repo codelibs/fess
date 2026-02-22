@@ -6,49 +6,49 @@ ${fe:html(true)}
             key="labels.backup_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="backup"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.backup_configuration"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.backup_configuration"/>
                             </h3>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
                             <%-- List --%>
                             <div class="data-wrapper">
-                                <div class="row">
-                                    <div class="col-sm-12">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
                                         <c:if test="${editable}">
                                             <la:form action="/admin/backup/upload/" enctype="multipart/form-data"
                                                      styleClass="form-inline">
@@ -56,8 +56,8 @@ ${fe:html(true)}
                                                         key="labels.backup_bulk_file"/></label>
                                                 <div class="mb-2 mr-sm-2"><input type="file" id="bulkFile"
                                                                                  name="bulkFile"
-                                                                                 class="form-control-file"/></div>
-                                                <button type="submit" class="btn btn-success mb-2" name="upload">
+                                                                                 class="fads-textfield"/></div>
+                                                <button type="submit" class="fads-btn fads-btn-success fads-mb-2" name="upload">
                                                     <i class="fa fa-upload" aria-hidden="true"></i>
                                                     <la:message key="labels.backup_button_upload"/>
                                                 </button>
@@ -65,9 +65,9 @@ ${fe:html(true)}
                                         </c:if>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.backup_list" />">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.backup_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.backup_name"/></th>

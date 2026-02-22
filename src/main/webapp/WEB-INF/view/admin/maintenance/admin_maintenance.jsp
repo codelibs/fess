@@ -6,18 +6,18 @@ ${fe:html(true)}
             key="labels.maintenance_title_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="log"/>
         <jsp:param name="menuType" value="maintenance"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.maintenance_title_configuration"/>
                         </h1>
@@ -28,23 +28,23 @@ ${fe:html(true)}
         <section class="content">
             <la:form action="/admin/maintenance/" styleClass="row">
                 <%-- Message: BEGIN --%>
-                <div class="col-md-12">
+                <div class="fads-col-md-12">
                     <la:info id="msg" message="true">
-                        <div class="alert alert-info">${msg}</div>
+                        <div class="fads-banner fads-banner-info">${msg}</div>
                     </la:info>
                     <la:errors/>
                 </div>
                 <c:if test="${editable}">
                     <%-- Message: END --%>
-                    <div class="col-md-12">
-                        <div class="card card-outline card-primary">
-                            <div class="card-header">
-                                <h3 class="card-title">
+                    <div class="fads-col-md-12">
+                        <div class="fads-card">
+                            <div class="fads-card-header">
+                                <h3 class="fads-card-title">
                                     <la:message key="labels.upgrade_reindex"/>
                                 </h3>
                             </div>
-                            <div class="card-body">
-                                <div class="form-group row">
+                            <div class="fads-card-body">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.replace_aliases"/></span>
                                     <div class="form-inline col-sm-9">
@@ -57,7 +57,7 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.reset_dictionaries"/></span>
                                     <div class="form-inline col-sm-9">
@@ -70,28 +70,28 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="numberOfShardsForDoc" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                <div class="fads-form-field">
+                                    <label for="numberOfShardsForDoc" class="fads-label"><la:message
                                             key="labels.number_of_shards_for_doc"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="numberOfShardsForDoc"/>
                                         <la:text styleId="numberOfShardsForDoc" property="numberOfShardsForDoc"
-                                                 styleClass="form-control"/>
+                                                 styleClass="fads-textfield"/>
                                     </div>
                                 </div>
-                                <div class="form-group row">
+                                <div class="fads-form-field">
                                     <label for="autoExpandReplicasForDoc"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                           class="fads-label"><la:message
                                             key="labels.auto_expand_replicas_for_doc"/></label>
-                                    <div class="col-sm-9">
+                                    <div class="fads-col-sm-9">
                                         <la:errors property="autoExpandReplicasForDoc"/>
                                         <la:text styleId="autoExpandReplicasForDoc"
-                                                 property="autoExpandReplicasForDoc" styleClass="form-control"/>
+                                                 property="autoExpandReplicasForDoc" styleClass="fads-textfield"/>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary ${f:h(editableClass)}"
+                            <div class="fads-card-footer">
+                                <button type="submit" class="fads-btn fads-btn-primary ${f:h(editableClass)}"
                                         name="reindexOnly"
                                         value="<la:message key="labels.reindex_start_button"/>">
                                     <i class="fa fa-arrow-circle-right" aria-hidden="true"></i>
@@ -100,15 +100,15 @@ ${fe:html(true)}
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="card card-outline card-primary">
-                            <div class="card-header">
-                                <h3 class="card-title">
+                    <div class="fads-col-md-12">
+                        <div class="fads-card">
+                            <div class="fads-card-header">
+                                <h3 class="fads-card-title">
                                     <la:message key="labels.reload_doc_index"/>
                                 </h3>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary"
+                            <div class="fads-card-footer">
+                                <button type="submit" class="fads-btn fads-btn-primary"
                                         name="reloadDocIndex"
                                         value="<la:message key="labels.reload_doc_index_button"/>">
                                     <i class="fa fa-sync" aria-hidden="true"></i>
@@ -117,42 +117,42 @@ ${fe:html(true)}
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="card card-outline card-primary">
-                            <div class="card-header">
-                                <h3 class="card-title">
+                    <div class="fads-col-md-12">
+                        <div class="fads-card">
+                            <div class="fads-card-header">
+                                <h3 class="fads-card-title">
                                     <la:message key="labels.clear_crawler_index"/>
                                 </h3>
                             </div>
-                            <div class="card-footer">
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmToClearCrawlerIndex">
+                            <div class="fads-card-footer">
+                                <button type="button" class="fads-btn fads-btn-danger" data-fads-dialog="confirmToClearCrawlerIndex">
                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                     <la:message key="labels.clear_crawler_index_button"/>
                                 </button>
-                                <div class="modal fade" id="confirmToClearCrawlerIndex"
+                                <div class="fads-dialog-overlay" id="confirmToClearCrawlerIndex"
                                      tabindex="-1" role="dialog">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content bg-danger">
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">
+                                    <div class="fads-dialog">
+                                        <div class="fads-dialog-danger">
+                                            <div class="fads-dialog-header">
+                                                <h4 class="">
                                                     <la:message key="labels.clear_crawler_index_button"/>
                                                 </h4>
-                                                <button type="button" class="close" data-dismiss="modal"
+                                                <button type="button" class="close" data-fads-dialog-close
                                                         aria-label="Close">
                                                     <span aria-hidden="true">×</span>
                                                 </button>
                                             </div>
-                                            <div class="modal-body">
+                                            <div class="fads-dialog-body">
                                                 <p>
                                                     <la:message key="labels.crud_delete_confirmation"/>
                                                 </p>
                                             </div>
-                                            <div class="modal-footer justify-content-between">
-                                                <button type="button" class="btn btn-outline-light"
-                                                        data-dismiss="modal">
+                                            <div class="fads-dialog-footer">
+                                                <button type="button" class="fads-btn fads-btn-outline-light"
+                                                        data-fads-dialog-close>
                                                     <la:message key="labels.crud_button_cancel"/>
                                                 </button>
-                                                <button type="submit" class="btn btn-outline-light"
+                                                <button type="submit" class="fads-btn fads-btn-outline-light"
                                                         name="clearCrawlerIndex"
                                                         value="<la:message key="labels.crud_button_delete" />">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
@@ -166,15 +166,15 @@ ${fe:html(true)}
                         </div>
                     </div>
                 </c:if>
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.diagnostic_logs"/>
                             </h3>
                         </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary"
+                        <div class="fads-card-footer">
+                            <button type="submit" class="fads-btn fads-btn-primary"
                                     name="downloadLogs"
                                     value="<la:message key="labels.download_diagnostic_logs_button"/>">
                                 <i class="fa fa-download" aria-hidden="true"></i>

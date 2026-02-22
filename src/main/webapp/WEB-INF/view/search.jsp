@@ -12,19 +12,18 @@ ${fe:html(true)}
 		href="${fe:url('/osdd')}"
 		title="<la:message key="labels.index_osdd_title" />" />
 </c:if>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
-	type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet"
 	type="text/css" />
 </head>
 <body class="search">
 	<jsp:include page="header.jsp" />
 	<main id="content" class="container">
-		<ul class="list-inline">
-			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_sort" /> <a
-				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
-				data-bs-toggle="collapse"> <c:if test="${empty sort}">
+		<ul class="fads-list-inline">
+			<li class="fads-list-inline-item"><la:message key="labels.searchoptions_menu_sort" /> <a
+				href="#searchOptions" class="fads-lozenge fads-lozenge-primary fads-text-decoration-none"
+				data-fads-collapse="#searchOptions"> <c:if test="${empty sort}">
 						<la:message key="labels.searchoptions_score" />
 					</c:if> <c:if test="${sort=='score.desc'}">
 						<la:message key="labels.searchoptions_score" />
@@ -56,14 +55,14 @@ ${fe:html(true)}
 						<la:message key="labels.search_result_sort_multiple" />
 					</c:if>
 			</a></li>
-			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_num" /> <a
-				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
-				data-bs-toggle="collapse"> <la:message
+			<li class="fads-list-inline-item"><la:message key="labels.searchoptions_menu_num" /> <a
+				href="#searchOptions" class="fads-lozenge fads-lozenge-primary fads-text-decoration-none"
+				data-fads-collapse="#searchOptions"> <la:message
 						key="labels.searchoptions_num" arg0="${f:h(num)}" />
 			</a></li>
-			<li class="list-inline-item"><la:message key="labels.searchoptions_menu_lang" /> <a
-				href="#searchOptions" class="badge text-bg-primary text-decoration-none"
-				data-bs-toggle="collapse"> <c:if test="${empty lang}">
+			<li class="fads-list-inline-item"><la:message key="labels.searchoptions_menu_lang" /> <a
+				href="#searchOptions" class="fads-lozenge fads-lozenge-primary fads-text-decoration-none"
+				data-fads-collapse="#searchOptions"> <c:if test="${empty lang}">
 						<la:message key="labels.searchoptions_all" />
 					</c:if> <c:if test="${!empty lang}">
 						<c:forEach var="sLang" items="${lang}">
@@ -74,9 +73,9 @@ ${fe:html(true)}
 					</c:if>
 			</a></li>
 			<c:if test="${displayLabelTypeItems}">
-				<li class="list-inline-item"><la:message key="labels.searchoptions_menu_labels" /> <a
-					href="#searchOptions" class="badge text-bg-primary text-decoration-none"
-					data-bs-toggle="collapse"> <c:if
+				<li class="fads-list-inline-item"><la:message key="labels.searchoptions_menu_labels" /> <a
+					href="#searchOptions" class="fads-lozenge fads-lozenge-primary fads-text-decoration-none"
+					data-fads-collapse="#searchOptions"> <c:if
 							test="${empty fields.label}">
 							<la:message key="labels.searchoptions_all" />
 						</c:if> <c:if test="${!empty fields.label}">
@@ -90,9 +89,9 @@ ${fe:html(true)}
 			</c:if>
 		</ul>
 		<c:if test="${!empty popularWords}">
-			<div class="row">
-				<div class="col">
-					<p class="text-truncate">
+			<div class="fads-row">
+				<div class="fads-col">
+					<p class="fads-text-truncate">
 						<la:message key="labels.search_popular_word_word" />
 						<c:forEach var="item" varStatus="s" items="${popularWords}">
 							<c:if test="${s.index < 3}">
@@ -100,7 +99,7 @@ ${fe:html(true)}
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 							<c:if test="${3 <= s.index}">
-								<la:link styleClass="d-none d-sm-inline-block"
+								<la:link styleClass="fads-d-none fads-d-sm-inline-block"
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 						</c:forEach>
@@ -109,9 +108,9 @@ ${fe:html(true)}
 			</div>
 		</c:if>
 		<c:if test="${!empty relatedQueries}">
-			<div class="row">
-				<div class="col">
-					<p class="text-truncate">
+			<div class="fads-row">
+				<div class="fads-col">
+					<p class="fads-text-truncate">
 						<la:message key="labels.search_related_queries" />
 						<c:forEach var="item" varStatus="s" items="${relatedQueries}">
 							<c:if test="${s.index < 3}">
@@ -119,7 +118,7 @@ ${fe:html(true)}
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 							<c:if test="${3 <= s.index}">
-								<la:link styleClass="d-none d-sm-inline-block"
+								<la:link styleClass="fads-d-none fads-d-sm-inline-block"
 									href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 							</c:if>
 						</c:forEach>
@@ -128,8 +127,8 @@ ${fe:html(true)}
 			</div>
 		</c:if>
 		<c:forEach var="item" varStatus="s" items="${relatedContents}">
-			<div class="row">
-				<div class="col">
+			<div class="fads-row">
+				<div class="fads-col">
 					${item}
 				</div>
 			</div>
@@ -137,7 +136,7 @@ ${fe:html(true)}
 		<c:choose>
 			<c:when test="${f:h(allRecordCount) != 0}">
 				<jsp:include page="searchResults.jsp" />
-				<div class="text-end d-print-none">
+				<div class="fads-text-right fads-d-print-none">
 					<a href="#"><la:message key="labels.footer_back_to_top" /></a>
 				</div>
 			</c:when>
@@ -150,8 +149,7 @@ ${fe:html(true)}
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/fads-ui.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>
 </body>

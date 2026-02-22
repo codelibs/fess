@@ -10,59 +10,59 @@ ${fe:html(true)}
 		title="<la:message key="labels.index_osdd_title" />"
 	/>
 </c:if>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet" type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<la:form styleClass="form-stacked" action="/search/" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
-			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+			<nav class="fads-topnav fads-topnav-fixed">
 				<div class="container">
-					<la:link styleClass="navbar-brand d-inline-flex" href="/">
+					<la:link styleClass="fads-topnav-brand fads-d-inline-flex" href="/">
 						<img src="${fe:url('/images/logo-head.png')}"
 							alt="<la:message key="labels.header_brand_name" />"
 							class="align-items-center" />
 					</la:link>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar"
+					<button class="fads-navbar-toggler" type="button" data-fads-target="#navbar" aria-controls="navbar"
 						aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
+						<span class="fads-navbar-toggler-icon"></span>
 					</button>
-					<div class="collapse navbar-collapse" id="navbar">
-						<div class="me-auto"></div>
-						<ul class="nav navbar-nav">
+					<div class="fads-collapse" id="navbar">
+						<div></div>
+						<ul class="nav">
 							<c:if test="${eoled}">
-								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
-									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a>
+								<li class="nav-item" title="<la:message key="labels.eol_error" />">
+									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle fads-text-danger" aria-hidden="true"></i></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
-								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
+								<li class="nav-item"
 									title="<la:message key="labels.development_mode_warning" />"
-								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"
+								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle fads-text-warning" aria-hidden="true"
 									></i></a></li>
 							</c:if>
 							<c:choose>
 								<c:when test="${!empty username && username != 'guest'}">
 									<li class="nav-item">
-										<div class="dropdown">
-											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+										<div class="fads-dropdown">
+											<a id="userMenu" class="nav-link" data-fads-dropdown
 												href="#" role="button" aria-haspopup="true" aria-expanded="false"
 											> <i class="fa fa-fw fa-user" aria-hidden="true"></i>${username}
 											</a>
-											<div class="dropdown-menu" aria-labelledby="userMenu">
+											<div class="fads-dropdown-menu" aria-labelledby="userMenu">
 												<c:if test="${editableUser == true}">
-													<la:link href="/profile" styleClass="dropdown-item">
+													<la:link href="/profile" styleClass="fads-dropdown-item">
 														<la:message key="labels.profile" />
 													</la:link>
 												</c:if>
 												<c:if test="${adminUser == true}">
-													<la:link href="/admin" styleClass="dropdown-item">
+													<la:link href="/admin" styleClass="fads-dropdown-item">
 														<la:message key="labels.administration" />
 													</la:link>
 												</c:if>
-												<la:link href="/logout/" styleClass="dropdown-item">
+												<la:link href="/logout/" styleClass="fads-dropdown-item">
 													<la:message key="labels.logout" />
 												</la:link>
 											</div>
@@ -95,50 +95,50 @@ ${fe:html(true)}
 			<div class="notification">${notification}</div>
 			<div>
 				<la:info id="msg" message="true">
-					<div class="alert alert-info">${msg}</div>
+					<div class="fads-banner fads-banner-info">${msg}</div>
 				</la:info>
 				<la:errors header="errors.front_header" footer="errors.front_footer" prefix="errors.front_prefix"
 					suffix="errors.front_suffix"
 				/>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_q" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_q" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_must_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<input class="form-control" type="text" id="as_q" name="as.q" value="${f:h(fe:join(as.q))}">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<input class="fads-textfield" type="text" id="as_q" name="as.q" value="${f:h(fe:join(as.q))}">
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_epq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_epq" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_phrase_query"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<input class="form-control" type="text" id="as_epq" name="as.epq" value="${f:h(fe:join(as.epq))}">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<input class="fads-textfield" type="text" id="as_epq" name="as.epq" value="${f:h(fe:join(as.epq))}">
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_oq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_oq" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_should_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<input class="form-control" type="text" id="as_oq" name="as.oq" value="${f:h(fe:join(as.oq))}">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<input class="fads-textfield" type="text" id="as_oq" name="as.oq" value="${f:h(fe:join(as.oq))}">
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_nq" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_nq" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_not_queries"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<input class="form-control" type="text" id="as_nq" name="as.nq" value="${f:h(fe:join(as.nq))}">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<input class="fads-textfield" type="text" id="as_nq" name="as.nq" value="${f:h(fe:join(as.nq))}">
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="numSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="numSearchOption" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.index_num"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<la:select property="num" styleId="numSearchOption" styleClass="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<la:select property="num" styleId="numSearchOption" styleClass="fads-textfield">
 						<option value="">
 							<la:message key="labels.search_result_select_num" />
 						</option>
@@ -151,12 +151,12 @@ ${fe:html(true)}
 					</la:select>
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="sortSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="sortSearchOption" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.index_sort"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<la:select property="sort" styleId="sortSearchOption" styleClass="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<la:select property="sort" styleId="sortSearchOption" styleClass="fads-textfield">
 						<option value="">
 							<la:message key="labels.search_result_select_sort" />
 						</option>
@@ -206,12 +206,12 @@ ${fe:html(true)}
 					</la:select>
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="langSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="langSearchOption" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.index_lang"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="fads-textfield">
 						<c:forEach var="item" items="${langItems}">
 							<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 						</c:forEach>
@@ -219,12 +219,12 @@ ${fe:html(true)}
 				</div>
 			</div>
 			<c:if test="${displayLabelTypeItems}">
-				<div class="mb-3 row">
-					<label for="labelTypeSearchOption" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+				<div class="fads-mb-3 fads-row">
+					<label for="labelTypeSearchOption" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 							key="labels.index_label"
 						/></label>
-					<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-						<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="form-control">
+					<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+						<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="fads-textfield">
 							<c:forEach var="item" items="${labelTypeItems}">
 								<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 							</c:forEach>
@@ -232,12 +232,12 @@ ${fe:html(true)}
 					</div>
 				</div>
 			</c:if>
-			<div class="mb-3 row">
-				<label for="as_timestamp" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_timestamp" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_timestamp"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<select id="as_timestamp" name="as.timestamp" class="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<select id="as_timestamp" name="as.timestamp" class="fads-textfield">
 						<option value=""><la:message key="labels.advance_search_timestamp_default" /></option>
 						<option value="[now-1d/d TO *]"
 							<c:if test="${as.timestamp.contains('[now-1d/d TO *]')}">selected</c:if>
@@ -254,12 +254,12 @@ ${fe:html(true)}
 					</select>
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_filetype" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_filetype" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_filetype"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<select id="as_filetype" name="as.filetype" class="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<select id="as_filetype" name="as.filetype" class="fads-textfield">
 						<option value=""><la:message key="labels.advance_search_filetype_default" /></option>
 						<option value="html" <c:if test="${as.filetype.contains('html')}">selected</c:if>><la:message
 								key="labels.advance_search_filetype_html"
@@ -279,12 +279,12 @@ ${fe:html(true)}
 					</select>
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_occt" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_occt" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_occt"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<select id="as_occt" name="as.occt" class="form-control">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<select id="as_occt" name="as.occt" class="fads-textfield">
 						<option value=""><la:message key="labels.advance_search_occt_default" /></option>
 						<option value="allintitle" <c:if test="${as.occt.contains('allintitle')}">selected</c:if>><la:message
 								key="labels.advance_search_occt_allintitle"
@@ -295,19 +295,19 @@ ${fe:html(true)}
 					</select>
 				</div>
 			</div>
-			<div class="mb-3 row">
-				<label for="as_sitesearch" class="col-lg-3 col-md-4 col-sm-5 col-12 col-form-label"><la:message
+			<div class="fads-mb-3 fads-row">
+				<label for="as_sitesearch" class="fads-col-lg-3 fads-col-md-4 fads-col-sm-5 fads-col-12 fads-col-form-label"><la:message
 						key="labels.advance_search_sitesearch"
 					/></label>
-				<div class="col-lg-5 col-md-8 col-sm-7 col-6">
-					<input class="form-control" type="text" id="as_sitesearch" name="as.sitesearch" value="${f:h(fe:join(as.sitesearch))}">
+				<div class="fads-col-lg-5 fads-col-md-8 fads-col-sm-7 fads-col-6">
+					<input class="fads-textfield" type="text" id="as_sitesearch" name="as.sitesearch" value="${f:h(fe:join(as.sitesearch))}">
 				</div>
 			</div>
 
-			<div class="row justify-content-center">
-				<div class="col-auto">
+			<div class="fads-row fads-justify-content-center">
+				<div class="fads-col-auto">
 					<button type="submit" name="search" id="searchButton"
-						class="btn btn-primary mx-auto">
+						class="fads-btn fads-btn-primary" style="margin:0 auto">
 						<i class="fa fa-search" aria-hidden="true"></i>
 						<la:message key="labels.index_form_search_btn" />
 					</button>
@@ -318,8 +318,7 @@ ${fe:html(true)}
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/fads-ui.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/advance.js')}"></script>
 </body>

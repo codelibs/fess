@@ -6,34 +6,34 @@ ${fe:html(true)}
             key="labels.storage_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="storage"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.storage_configuration"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <a aria-hidden="true" href="${contextPath}/admin/storage/">
                                     <i class="fas fa-database fa-fw"
                                        aria-hidden="true"></i>${f:h(bucket)}
@@ -42,23 +42,23 @@ ${fe:html(true)}
                                     / <span><a
                                         href="${contextPath}/admin/storage/list/${f:u(item.id)}/">${f:h(item.name)}</a></span>
                                 </c:forEach>
-                                / <c:if test="${editable}"><a data-toggle="modal" data-target="#createDir" href="#"><i
+                                / <c:if test="${editable}"><a data-fads-dialog="createDir" href="#"><i
                                     class="fas fa-folder fa-fw" aria-hidden="true"></i></a></c:if>
                             </h3>
                             <c:if test="${editable}">
-								<div class="card-tools">
-                                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#uploadeFile" href="#">
+								<div class="fads-card-tools">
+                                    <a class="fads-btn fads-btn-success fads-btn-compact" data-fads-dialog="uploadeFile" href="#">
                                         <i class="fa fa-upload" aria-hidden="true"></i>
                                         <la:message key="labels.storage_button_upload"/>
                                     </a>
                                 </div>
                             </c:if>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
@@ -67,34 +67,34 @@ ${fe:html(true)}
 
                                 <c:if test="${editable}">
                                     <div class="modal" id="createDir" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog">
+                                        <div class="fads-dialog">
                                             <la:form action="/admin/storage/createDir/"
                                                      enctype="multipart/form-data" styleClass="modal-content">
                                                 <input type="hidden" name="path" value="${f:h(path)}"/>
-                                                <div class="modal-header">
-                                                    <h4 class="modal-title">
+                                                <div class="fads-dialog-header">
+                                                    <h4 class="">
                                                         <la:message key="labels.crud_title_create"/>
                                                     </h4>
-                                                    <button type="button" class="close" data-dismiss="modal"
+                                                    <button type="button" class="close" data-fads-dialog-close
                                                             aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
-                                                <div class="modal-body">
-                                                    <div class="form-group row">
-                                                        <label for="name" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                                <div class="fads-dialog-body">
+                                                    <div class="fads-form-field">
+                                                        <label for="name" class="fads-label"><la:message
                                                                 key="labels.storage_folder_name"/></label>
                                                         <div class="form-inline col-sm-9">
-                                                           <input id="name" type="text" name="name" class="form-control"/>
+                                                           <input id="name" type="text" name="name" class="fads-textfield"/>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-outline-secondary"
-                                                            data-dismiss="modal">
+                                                <div class="fads-dialog-footer">
+                                                    <button type="button" class="fads-btn fads-btn-subtle"
+                                                            data-fads-dialog-close>
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
-                                                    <button type="submit" class="btn btn-success" name="createDir">
+                                                    <button type="submit" class="fads-btn fads-btn-success" name="createDir">
                                                         <i class="fa fa-make" aria-hidden="true"></i>
                                                         <la:message key="labels.crud_button_create"/>
                                                     </button>
@@ -104,34 +104,34 @@ ${fe:html(true)}
                                     </div>
 
                                     <div class="modal" id="uploadeFile" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog">
+                                        <div class="fads-dialog">
                                             <la:form action="/admin/storage/upload/" enctype="multipart/form-data"
                                                      styleClass="modal-content">
                                                 <input type="hidden" name="path" value="${f:h(path)}"/>
-                                                <div class="modal-header">
-                                                    <h4 class="modal-title">
+                                                <div class="fads-dialog-header">
+                                                    <h4 class="">
                                                         <la:message key="labels.storage_upload_file"/>
                                                     </h4>
-                                                    <button type="button" class="close" data-dismiss="modal"
+                                                    <button type="button" class="close" data-fads-dialog-close
                                                             aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
-                                                <div class="modal-body">
-                                                    <div class="form-group row">
-                                                        <label for="uploadFile" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                                <div class="fads-dialog-body">
+                                                    <div class="fads-form-field">
+                                                        <label for="uploadFile" class="fads-label"><la:message
                                                                 key="labels.storage_file"/></label>
                                                         <div class="form-inline col-sm-9">
-                                                            <input type="file" name="uploadFile" id="uploadFile"  class="form-control-file"/>
+                                                            <input type="file" name="uploadFile" id="uploadFile"  class="fads-textfield"/>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer justify-content-between">
-                                                    <button type="button" class="btn btn-outline-secondary"
-                                                            data-dismiss="modal">
+                                                <div class="fads-dialog-footer">
+                                                    <button type="button" class="fads-btn fads-btn-subtle"
+                                                            data-fads-dialog-close>
                                                         <la:message key="labels.crud_button_cancel"/>
                                                     </button>
-                                                    <button type="submit" class="btn btn-success" name="upload">
+                                                    <button type="submit" class="fads-btn fads-btn-success" name="upload">
                                                         <i class="fa fa-upload" aria-hidden="true"></i>
                                                         <la:message key="labels.storage_button_upload"/>
                                                     </button>
@@ -141,9 +141,9 @@ ${fe:html(true)}
                                     </div>
                                 </c:if>
 
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.storage_list" />">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.storage_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.storage_name"/></th>
@@ -191,7 +191,7 @@ ${fe:html(true)}
                                                 </c:if>
                                                 <td>
                                                     <c:if test="${not data.directory}">
-                                                        <a class="btn btn-primary btn-xs" role="button" name="download"
+                                                        <a class="fads-btn fads-btn-primary fads-btn-compact" role="button" name="download"
                                                            href="${contextPath}/admin/storage/download/${f:h(data.id)}/"
                                                            value="<la:message key="labels.storage_button_download" />"
                                                         >
@@ -199,56 +199,56 @@ ${fe:html(true)}
                                                             <la:message key="labels.storage_button_download"/>
                                                         </a>
                                                         <c:if test="${editable}">
-	                                                        <a class="btn btn-primary btn-xs" role="button" name="editTags"
+	                                                        <a class="fads-btn fads-btn-primary fads-btn-compact" role="button" name="editTags"
 	                                                           href="${contextPath}/admin/storage/editTags?path=${f:u(data.path)}&name=${f:u(data.name)}"
 	                                                           value="<la:message key="labels.storage_button_tags" />"
 	                                                        >
 	                                                            <i class="fa fa-tags" aria-hidden="true"></i>
 	                                                            <la:message key="labels.storage_button_tags"/>
 	                                                        </a>
-                                                            <button type="button" class="btn btn-danger btn-xs"
-                                                                    name="delete" data-toggle="modal"
-                                                                    data-target="#confirmToDelete-${f:h(data.hashCode)}"
+                                                            <button type="button" class="fads-btn fads-btn-danger fads-btn-compact"
+                                                                    name="delete" 
+                                                                    data-fads-dialog="confirmToDelete-${f:h(data.hashCode)}"
                                                                     value="<la:message key="labels.crud_button_delete" />"
                                                             >
                                                                 <i class="fa fa-times" aria-hidden="true"></i>
                                                                 <la:message key="labels.crud_button_delete"/>
                                                             </button>
-                                                            <div class="modal fade"
+                                                            <div class="fads-dialog-overlay"
                                                                  id="confirmToDelete-${f:h(data.hashCode)}"
                                                                  tabindex="-1" role="dialog"
                                                             >
-                                                                <div class="modal-dialog">
-                                                                    <div class="modal-content bg-danger">
-                                                                        <div class="modal-header">
-                                                                            <h4 class="modal-title">
+                                                                <div class="fads-dialog">
+                                                                    <div class="fads-dialog-danger">
+                                                                        <div class="fads-dialog-header">
+                                                                            <h4 class="">
                                                                                 <la:message
                                                                                         key="labels.crud_title_delete"/>
                                                                                 : ${f:h(data.name)}
                                                                             </h4>
                                                                             <button type="button" class="close"
-                                                                                    data-dismiss="modal"
+                                                                                    data-fads-dialog-close
                                                                                     aria-label="Close">
                                                                                 <span aria-hidden="true">×</span>
                                                                             </button>
                                                                         </div>
-                                                                        <div class="modal-body">
+                                                                        <div class="fads-dialog-body">
                                                                             <p>
                                                                                 <la:message
                                                                                         key="labels.crud_delete_confirmation"/>
                                                                             </p>
                                                                         </div>
-                                                                        <div class="modal-footer justify-content-between">
+                                                                        <div class="fads-dialog-footer">
                                                                             <button type="button"
-                                                                                    class="btn btn-outline-light"
-                                                                                    data-dismiss="modal">
+                                                                                    class="fads-btn fads-btn-outline-light"
+                                                                                    data-fads-dialog-close>
                                                                                 <la:message
                                                                                         key="labels.crud_button_cancel"/>
                                                                             </button>
                                                                             <la:form
                                                                                     action="${contextPath}/admin/storage/delete/${f:h(data.id)}/">
                                                                                 <button type="submit"
-                                                                                        class="btn btn-outline-light"
+                                                                                        class="fads-btn fads-btn-outline-light"
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >

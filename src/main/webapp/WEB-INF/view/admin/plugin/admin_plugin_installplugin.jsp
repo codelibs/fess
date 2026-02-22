@@ -5,18 +5,18 @@ ${fe:html(true)}
     <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.plugin_install_title"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="plugin"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.plugin_install_title"/>
                         </h1>
@@ -25,38 +25,38 @@ ${fe:html(true)}
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
                     <la:info id="msg" message="true">
-                        <div class="alert alert-info">${msg}</div>
+                        <div class="fads-banner fads-banner-info">${msg}</div>
                     </la:info>
                     <la:errors property="_global"/>
                 </div>
-                <div class="col-md-12">
-                    <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">
+                <div class="fads-col-md-12">
+                    <div class="fads-card fads-fads-card-success">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.plugin_install"/>
                             </h3>
                         </div>
                         <la:form action="/admin/plugin/install" enctype="multipart/form-data">
-                        <div class="card-body">
-                            <ul class="nav nav-tabs" role="tablist">
-                                <li role="presentation" class="nav-item"><a href="#remote" aria-controls="remote" class="nav-link active"
+                        <div class="fads-card-body">
+                            <ul class="fads-tabs" role="tablist">
+                                <li role="presentation" class="fads-tab-item"><a href="#remote" aria-controls="remote" class="fads-tab-link active"
                                                                           role="tab"
-                                                                          data-toggle="tab"
+                                                                          data-fads-tab="true"
                                 ><la:message key="labels.plugin_remote_install"/></a></li>
-                                <li role="presentation" class="nav-item"><a href="#local" aria-controls="local" class="nav-link" role="tab"
-                                                           data-toggle="tab"><la:message
+                                <li role="presentation" class="fads-tab-item"><a href="#local" aria-controls="local" class="fads-tab-link" role="tab"
+                                                           data-fads-tab="true"><la:message
                                         key="labels.plugin_local_install"
                                 /></a></li>
                             </ul>
-                            <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane active" id="remote">
-                                    <div class="card-body">
-                                        <div class="form-group row">
+                            <div class="fads-tab-content">
+                                <div role="tabpanel" class="fads-tab-pane active" id="remote">
+                                    <div class="fads-card-body">
+                                        <div class="fads-form-field">
                                             <la:errors property="selectedArtifact"/>
-                                            <la:select styleId="artifacts" property="id" styleClass="form-control">
+                                            <la:select styleId="artifacts" property="id" styleClass="fads-textfield">
                                                 <c:forEach var="item" varStatus="s"
                                                            items="${availableArtifactItems}">
                                                     <la:option
@@ -66,19 +66,19 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                <div role="tabpanel" class="tab-pane" id="local">
-                                    <div class="card-body">
-                                        <div class="form-group row">
+                                <div role="tabpanel" class="fads-tab-pane" id="local">
+                                    <div class="fads-card-body">
+                                        <div class="fads-form-field">
                                             <label for="jarFile" class="col-md-3 text-sm-right col-form-label"><la:message
                                                     key="labels.plugin_jar_file"/></label>
                                             <div class="col-md-9 text-sm-right col-form-label">
-                                                <input id="jarFile" type="file" name="jarFile" class="form-control-file"/>
+                                                <input id="jarFile" type="file" name="jarFile" class="fads-textfield"/>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-success" name="install"
+                            <button type="submit" class="fads-btn fads-btn-success" name="install"
                                     value="<la:message key="labels.crud_button_install" />"
                             >
                                 <i class="fa fa-plus" aria-hidden="true"></i>
@@ -86,9 +86,9 @@ ${fe:html(true)}
                             </button>
                         </div>
                         </la:form>
-                        <div class="card-footer">
+                        <div class="fads-card-footer">
                             <la:form action="/admin/plugin/">
-                            <button type="submit" class="btn btn-default" name="back"
+                            <button type="submit" class="fads-btn fads-btn-default" name="back"
                                     value="<la:message key="labels.crud_button_back" />">
                                 <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
                                 <la:message key="labels.crud_button_back"/>

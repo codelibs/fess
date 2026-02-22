@@ -5,17 +5,15 @@ ${fe:html(true)}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.system_error_title" /></title>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
-	type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet"
-	type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
 <body class="error">
 	<jsp:include page="../header.jsp" />
 	<main class="container">
-		<div class="text-center">
+		<div class="fads-text-center">
 			<h2>
 				<la:message key="labels.page_not_found_title" />
 			</h2>
@@ -29,8 +27,7 @@ ${fe:html(true)}
 	<input type="hidden" id="contextPath" value="${pageContext.request.contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/clipboard.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/fads-ui.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/search.js')}"></script>
 </body>

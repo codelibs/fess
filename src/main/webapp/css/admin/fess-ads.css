@@ -1,0 +1,1180 @@
+/* ==========================================================================
+   Fess Admin Design System (fess-ads.css)
+   Replaces Bootstrap 4.6.2 + AdminLTE 3.2 for the Fess admin panel.
+   Uses CSS custom properties from tokens.css with --ds-* prefix.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Reset & Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--ds-font-family);
+  background: var(--ds-surface-sunken);
+  color: var(--ds-text);
+  font-size: var(--ds-font-size-100);
+  line-height: var(--ds-font-lineHeight-300);
+  margin: 0;
+}
+
+a {
+  color: var(--ds-link);
+}
+
+/* Scrollbar styling for dark mode */
+html[data-color-mode="dark"] {
+  color-scheme: dark;
+}
+
+html[data-color-mode="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-color-mode="dark"] ::-webkit-scrollbar-track {
+  background: var(--ds-surface-sunken);
+}
+
+html[data-color-mode="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--ds-background-neutral);
+  border-radius: var(--ds-radius-100);
+}
+
+html[data-color-mode="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--ds-background-neutral-hovered);
+}
+
+/* ==========================================================================
+   2. Admin Layout (replaces AdminLTE layout)
+   ==========================================================================
+   Admin page layout structure:
+     body.fads-admin-layout
+       div.fads-layout-wrapper
+         nav.fads-topnav
+         aside.fads-sidenav
+         main.fads-main-content
+         footer.fads-footer
+   ========================================================================== */
+
+.fads-admin-layout {
+  min-height: 100vh;
+}
+
+.fads-layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.fads-sidenav {
+  width: 250px;
+  background: var(--ds-surface);
+  border-right: 1px solid var(--ds-border);
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--ds-z-navigation);
+  transition: width 0.3s ease, overflow 0.3s ease;
+}
+
+.fads-sidenav-collapsed .fads-sidenav {
+  width: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 992px) {
+  .fads-sidenav-collapsed .fads-sidenav {
+    width: 0;
+    overflow: hidden;
+  }
+}
+
+.fads-main-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: var(--ds-space-300);
+  min-height: calc(100vh - 56px);
+  margin-top: 56px;
+}
+
+.fads-topnav {
+  height: 56px;
+  background: var(--ds-background-brand-bold);
+  color: var(--ds-text-inverse);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ds-space-200);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--ds-z-navigation) + 1);
+}
+
+.fads-footer {
+  background: var(--ds-surface);
+  border-top: 1px solid var(--ds-border);
+  padding: var(--ds-space-200);
+  color: var(--ds-text-subtle);
+  font-size: var(--ds-font-size-075);
+  margin-left: 250px;
+}
+
+/* Responsive: sidebar becomes overlay on small screens */
+@media (max-width: 991.98px) {
+  .fads-sidenav {
+    position: absolute;
+    z-index: calc(var(--ds-z-navigation) + 2);
+  }
+
+  .fads-main-content {
+    margin-left: 0;
+  }
+
+  .fads-footer {
+    margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   3. Sidenav Components
+   ========================================================================== */
+
+.fads-sidenav-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-space-200);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.fads-sidenav-search {
+  padding: var(--ds-space-100) var(--ds-space-200);
+  margin-bottom: var(--ds-space-100);
+}
+
+.fads-sidenav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fads-sidenav-header {
+  text-transform: uppercase;
+  font-size: var(--ds-font-size-050);
+  color: var(--ds-text-subtlest);
+  padding: var(--ds-space-200) var(--ds-space-200) var(--ds-space-050);
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: 0.05em;
+}
+
+.fads-sidenav-item {
+  /* container for nav link */
+}
+
+.fads-sidenav-link {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-100) var(--ds-space-200);
+  color: var(--ds-text);
+  text-decoration: none;
+  border-radius: var(--ds-radius-100);
+  gap: var(--ds-space-100);
+  transition: background 0.15s ease;
+}
+
+.fads-sidenav-link:hover {
+  background: var(--ds-surface-hovered);
+}
+
+.fads-sidenav-link.active {
+  background: var(--ds-background-selected);
+  color: var(--ds-text-selected);
+  font-weight: var(--ds-font-weight-medium);
+}
+
+.fads-sidenav-link i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Expandable section toggle */
+.fads-sidenav-section-toggle {
+  /* parent container for expandable sections */
+}
+
+[aria-expanded="true"] > .fads-sidenav-link .fa-angle-left {
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+
+[aria-expanded="false"] > .fads-sidenav-link .fa-angle-left {
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+/* Nested navigation list */
+.fads-sidenav-nested {
+  display: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+[aria-expanded="true"] > .fads-sidenav-nested,
+[aria-expanded="true"] + .fads-sidenav-nested {
+  display: block;
+}
+
+.fads-sidenav-nested .fads-sidenav-link {
+  padding-left: var(--ds-space-500);
+}
+
+/* ==========================================================================
+   4. Page Header
+   ========================================================================== */
+
+.fads-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ds-space-300);
+  flex-wrap: wrap;
+  gap: var(--ds-space-100);
+}
+
+.fads-page-header h1 {
+  font-size: var(--ds-font-size-400);
+  font-weight: var(--ds-font-weight-semibold);
+  margin: 0;
+  color: var(--ds-text);
+}
+
+/* ==========================================================================
+   5. Buttons (replaces Bootstrap btn-*)
+   ========================================================================== */
+
+.fads-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-050);
+  padding: var(--ds-space-075) var(--ds-space-150);
+  border-radius: var(--ds-radius-100);
+  font-size: var(--ds-font-size-100);
+  font-weight: var(--ds-font-weight-medium);
+  line-height: var(--ds-font-lineHeight-200);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.fads-btn-primary {
+  background: var(--ds-background-brand-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-btn-primary:hover {
+  background: var(--ds-background-brand-bold-hovered);
+}
+
+.fads-btn-success {
+  background: var(--ds-background-success-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-btn-success:hover {
+  background: var(--ds-background-success-bold-hovered);
+}
+
+.fads-btn-danger {
+  background: var(--ds-background-danger-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-btn-danger:hover {
+  background: var(--ds-background-danger-bold-hovered);
+}
+
+.fads-btn-warning {
+  background: var(--ds-background-warning-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-btn-warning:hover {
+  background: var(--ds-background-warning-bold-hovered);
+}
+
+.fads-btn-default {
+  background: var(--ds-background-neutral);
+  color: var(--ds-text);
+}
+
+.fads-btn-default:hover {
+  background: var(--ds-background-neutral-hovered);
+}
+
+.fads-btn-subtle {
+  background: transparent;
+  color: var(--ds-text);
+}
+
+.fads-btn-subtle:hover {
+  background: var(--ds-background-neutral-subtle-hovered);
+}
+
+.fads-btn-link {
+  background: none;
+  color: var(--ds-link);
+  padding: 0;
+  border: none;
+}
+
+.fads-btn-compact {
+  padding: var(--ds-space-025) var(--ds-space-100);
+  font-size: var(--ds-font-size-075);
+}
+
+.fads-btn-block {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.fads-btn-icon {
+  padding: var(--ds-space-050);
+  border-radius: var(--ds-radius-100);
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.fads-btn-icon:hover {
+  background: var(--ds-background-neutral-subtle-hovered);
+}
+
+.fads-btn:disabled,
+.fads-btn.disabled {
+  opacity: var(--ds-opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.fads-btn-outline-light {
+  background: transparent;
+  color: var(--ds-text-inverse);
+  border: 1px solid var(--ds-text-inverse);
+}
+
+.fads-btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   6. Cards (replaces Bootstrap card)
+   ========================================================================== */
+
+.fads-card {
+  background: var(--ds-surface-raised);
+  border-radius: var(--ds-radius-200);
+  box-shadow: var(--ds-shadow-raised);
+  margin-bottom: var(--ds-space-300);
+}
+
+.fads-card-header {
+  padding: var(--ds-space-150) var(--ds-space-200);
+  border-bottom: 2px solid var(--ds-background-brand-bold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fads-card-success .fads-card-header {
+  border-bottom-color: var(--ds-background-success-bold);
+}
+
+.fads-card-body {
+  padding: var(--ds-space-200);
+}
+
+.fads-card-footer {
+  padding: var(--ds-space-150) var(--ds-space-200);
+  border-top: 1px solid var(--ds-border);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-100);
+}
+
+.fads-card-title {
+  font-size: var(--ds-font-size-200);
+  font-weight: var(--ds-font-weight-semibold);
+  margin: 0;
+}
+
+.fads-card-tools {
+  display: flex;
+  gap: var(--ds-space-100);
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   7. Tables (replaces Bootstrap table)
+   ========================================================================== */
+
+.fads-table {
+  width: 100%;
+  border-collapse: collapse;
+  display: table;
+  table-layout: fixed;
+}
+
+.fads-table th {
+  background: var(--ds-surface-sunken);
+  font-weight: var(--ds-font-weight-semibold);
+  text-align: left;
+  padding: var(--ds-space-100) var(--ds-space-150);
+  border-bottom: 2px solid var(--ds-border);
+  font-size: var(--ds-font-size-075);
+  color: var(--ds-text-subtle);
+}
+
+.fads-table td {
+  padding: var(--ds-space-100) var(--ds-space-150);
+  border-bottom: 1px solid var(--ds-border);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: table-cell;
+}
+
+.fads-table tr:hover td {
+  background: var(--ds-surface-hovered);
+}
+
+.fads-table tr[data-href] {
+  cursor: pointer;
+}
+
+.fads-table tr.active td {
+  background: var(--ds-background-selected);
+}
+
+.fads-table .label {
+  color: var(--ds-text-inverse);
+}
+
+/* ==========================================================================
+   7b. Tabs
+   ========================================================================== */
+
+.fads-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--ds-space-200);
+  border-bottom: 2px solid var(--ds-border);
+  gap: var(--ds-space-050);
+}
+
+.fads-tabs .fads-tab-item {
+  margin-bottom: -2px;
+}
+
+.fads-tabs .fads-tab-link {
+  display: block;
+  padding: var(--ds-space-100) var(--ds-space-200);
+  color: var(--ds-text-subtle);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  font-weight: var(--ds-font-weight-medium);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.fads-tabs .fads-tab-link:hover {
+  color: var(--ds-text);
+  text-decoration: none;
+}
+
+.fads-tabs .fads-tab-link.active {
+  color: var(--ds-text-brand);
+  border-bottom-color: var(--ds-border-selected);
+}
+
+.fads-tab-content .fads-tab-pane {
+  display: none;
+}
+
+.fads-tab-content .fads-tab-pane.active {
+  display: block;
+}
+
+/* ==========================================================================
+   8. Forms (replaces Bootstrap form controls)
+   ========================================================================== */
+
+.fads-form-field {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 3fr;
+  gap: var(--ds-space-100);
+  margin-bottom: var(--ds-space-200);
+  align-items: start;
+}
+
+.fads-label {
+  font-size: var(--ds-font-size-100);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-text);
+  padding-top: var(--ds-space-075);
+  text-align: right;
+}
+
+.fads-textfield,
+.fads-textarea,
+.fads-select {
+  width: 100%;
+  padding: var(--ds-space-075) var(--ds-space-100);
+  border: 2px solid var(--ds-border-input);
+  border-radius: var(--ds-radius-100);
+  background: var(--ds-background-input);
+  color: var(--ds-text);
+  font-size: var(--ds-font-size-100);
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.fads-textfield:focus,
+.fads-textarea:focus,
+.fads-select:focus {
+  border-color: var(--ds-border-focused);
+}
+
+.fads-textfield:hover,
+.fads-textarea:hover,
+.fads-select:hover {
+  background: var(--ds-background-input-hovered);
+}
+
+.fads-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.fads-select {
+  appearance: auto;
+}
+
+/* Input group */
+.fads-input-group {
+  display: flex;
+}
+
+.fads-input-group > * {
+  border-radius: 0;
+}
+
+.fads-input-group > *:first-child {
+  border-radius: var(--ds-radius-100) 0 0 var(--ds-radius-100);
+}
+
+.fads-input-group > *:last-child {
+  border-radius: 0 var(--ds-radius-100) var(--ds-radius-100) 0;
+}
+
+.fads-input-group .fads-textfield {
+  flex: 1;
+}
+
+.fads-input-group-text {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-075) var(--ds-space-100);
+  background: var(--ds-background-neutral);
+  border: 2px solid var(--ds-border-input);
+  color: var(--ds-text-subtle);
+}
+
+/* Error states */
+ul.has-error {
+  color: var(--ds-text-danger);
+  list-style: none;
+  padding: 0;
+}
+
+.has-error + .fads-textfield,
+.has-error + .fads-select,
+.has-error + .fads-textarea {
+  border-color: var(--ds-border-danger);
+}
+
+/* File input */
+input[type="file"].fads-textfield {
+  padding: var(--ds-space-050);
+}
+
+/* ==========================================================================
+   9. Banners/Alerts (replaces Bootstrap alerts)
+   ========================================================================== */
+
+.fads-banner {
+  padding: var(--ds-space-200);
+  border-radius: var(--ds-radius-100);
+  margin-bottom: var(--ds-space-200);
+  font-size: var(--ds-font-size-100);
+}
+
+.fads-banner-info {
+  background: var(--ds-background-information);
+  color: var(--ds-text);
+  border-left: 3px solid var(--ds-background-information-bold);
+}
+
+.fads-banner-error {
+  background: var(--ds-background-danger);
+  color: var(--ds-text);
+  border-left: 3px solid var(--ds-background-danger-bold);
+}
+
+.fads-banner-warning {
+  background: var(--ds-background-warning);
+  color: var(--ds-text);
+  border-left: 3px solid var(--ds-background-warning-bold);
+}
+
+.fads-banner-success {
+  background: var(--ds-background-success);
+  color: var(--ds-text);
+  border-left: 3px solid var(--ds-background-success-bold);
+}
+
+/* ==========================================================================
+   10. Dialog/Modal (replaces Bootstrap modal)
+   ========================================================================== */
+
+.fads-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 30, 66, 0.54);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--ds-z-modal);
+}
+
+.fads-dialog-overlay.show {
+  display: flex;
+}
+
+.fads-dialog {
+  background: var(--ds-surface-overlay);
+  border-radius: var(--ds-radius-200);
+  box-shadow: var(--ds-shadow-overlay);
+  width: 480px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.fads-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-300) var(--ds-space-300) var(--ds-space-200);
+}
+
+.fads-dialog-header h4 {
+  margin: 0;
+  font-size: var(--ds-font-size-300);
+  font-weight: var(--ds-font-weight-medium);
+}
+
+.fads-dialog-body {
+  padding: var(--ds-space-100) var(--ds-space-300);
+}
+
+.fads-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-100);
+  padding: var(--ds-space-200) var(--ds-space-300) var(--ds-space-300);
+}
+
+/* Danger dialog variant */
+.fads-dialog-danger {
+  border-top: 3px solid var(--ds-background-danger-bold);
+}
+
+.fads-dialog-danger .fads-dialog-header h4 {
+  color: var(--ds-text-danger);
+}
+
+/* Dark mode overlay */
+html[data-color-mode="dark"] .fads-dialog-overlay {
+  background: rgba(3, 4, 4, 0.7);
+}
+
+/* ==========================================================================
+   11. Breadcrumbs
+   ========================================================================== */
+
+.fads-breadcrumbs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: var(--ds-space-050);
+  font-size: var(--ds-font-size-075);
+  color: var(--ds-text-subtle);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.fads-breadcrumbs li + li::before {
+  content: "/";
+  margin-right: var(--ds-space-050);
+  color: var(--ds-text-subtlest);
+}
+
+.fads-breadcrumbs a {
+  color: var(--ds-link);
+  text-decoration: none;
+}
+
+.fads-breadcrumbs .active {
+  color: var(--ds-text-subtle);
+}
+
+/* ==========================================================================
+   12. Pagination
+   ========================================================================== */
+
+.fads-pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: var(--ds-space-025);
+}
+
+.fads-pagination li a,
+.fads-pagination li span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--ds-space-100);
+  border-radius: var(--ds-radius-100);
+  font-size: var(--ds-font-size-075);
+  text-decoration: none;
+  color: var(--ds-text);
+  background: transparent;
+}
+
+.fads-pagination li a:hover,
+.fads-pagination li span:hover {
+  background: var(--ds-background-neutral-subtle-hovered);
+}
+
+.fads-pagination li.active a {
+  background: var(--ds-background-selected-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-pagination li.disabled a,
+.fads-pagination li.disabled span {
+  opacity: var(--ds-opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   13. Lozenge/Badge
+   ========================================================================== */
+
+.fads-lozenge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--ds-space-025) var(--ds-space-075);
+  border-radius: var(--ds-radius-050);
+  font-size: var(--ds-font-size-050);
+  font-weight: var(--ds-font-weight-bold);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.fads-lozenge-primary {
+  background: var(--ds-background-brand-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-lozenge-success {
+  background: var(--ds-background-success-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-lozenge-danger {
+  background: var(--ds-background-danger-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-lozenge-warning {
+  background: var(--ds-background-warning-bold);
+  color: var(--ds-text-inverse);
+}
+
+.fads-lozenge-subtle {
+  background: var(--ds-background-neutral);
+  color: var(--ds-text);
+}
+
+/* ==========================================================================
+   14. Dropdown Menu
+   ========================================================================== */
+
+.fads-dropdown {
+  position: relative;
+}
+
+.fads-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  min-width: 160px;
+  background: var(--ds-surface-overlay);
+  border-radius: var(--ds-radius-200);
+  box-shadow: var(--ds-shadow-overlay);
+  padding: var(--ds-space-050) 0;
+  display: none;
+  z-index: var(--ds-z-dropdown);
+}
+
+.fads-dropdown-menu.show {
+  display: block;
+}
+
+.fads-dropdown-item {
+  display: block;
+  padding: var(--ds-space-075) var(--ds-space-200);
+  color: var(--ds-text);
+  text-decoration: none;
+  font-size: var(--ds-font-size-100);
+}
+
+.fads-dropdown-item:hover {
+  background: var(--ds-surface-hovered);
+}
+
+.fads-dropdown-divider {
+  border-top: 1px solid var(--ds-border);
+  margin: var(--ds-space-050) 0;
+}
+
+/* ==========================================================================
+   15. Tooltip (CSS-only simple tooltip)
+   ========================================================================== */
+
+[data-fads-tooltip] {
+  position: relative;
+}
+
+[data-fads-tooltip]::after {
+  content: attr(data-fads-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: var(--ds-space-050) var(--ds-space-100);
+  background: var(--ds-background-neutral-bold);
+  color: var(--ds-text-inverse);
+  font-size: var(--ds-font-size-075);
+  border-radius: var(--ds-radius-050);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: var(--ds-z-tooltip);
+}
+
+[data-fads-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   16. Grid Utilities (replaces Bootstrap grid)
+   ========================================================================== */
+
+.fads-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-200);
+}
+
+.fads-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.fads-col-1  { flex: 0 0 8.333333%;  max-width: 8.333333%;  }
+.fads-col-2  { flex: 0 0 16.666667%; max-width: 16.666667%; }
+.fads-col-3  { flex: 0 0 25%;        max-width: 25%;        }
+.fads-col-4  { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.fads-col-5  { flex: 0 0 41.666667%; max-width: 41.666667%; }
+.fads-col-6  { flex: 0 0 50%;        max-width: 50%;        }
+.fads-col-7  { flex: 0 0 58.333333%; max-width: 58.333333%; }
+.fads-col-8  { flex: 0 0 66.666667%; max-width: 66.666667%; }
+.fads-col-9  { flex: 0 0 75%;        max-width: 75%;        }
+.fads-col-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+.fads-col-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+.fads-col-12 { flex: 0 0 100%;       max-width: 100%;       }
+
+/* Responsive: sm (576px) */
+@media (min-width: 576px) {
+  .fads-col-sm-1  { flex: 0 0 8.333333%;  max-width: 8.333333%;  }
+  .fads-col-sm-2  { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .fads-col-sm-3  { flex: 0 0 25%;        max-width: 25%;        }
+  .fads-col-sm-4  { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .fads-col-sm-5  { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .fads-col-sm-6  { flex: 0 0 50%;        max-width: 50%;        }
+  .fads-col-sm-7  { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .fads-col-sm-8  { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .fads-col-sm-9  { flex: 0 0 75%;        max-width: 75%;        }
+  .fads-col-sm-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .fads-col-sm-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .fads-col-sm-12 { flex: 0 0 100%;       max-width: 100%;       }
+}
+
+/* Responsive: md (768px) */
+@media (min-width: 768px) {
+  .fads-col-md-1  { flex: 0 0 8.333333%;  max-width: 8.333333%;  }
+  .fads-col-md-2  { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .fads-col-md-3  { flex: 0 0 25%;        max-width: 25%;        }
+  .fads-col-md-4  { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .fads-col-md-5  { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .fads-col-md-6  { flex: 0 0 50%;        max-width: 50%;        }
+  .fads-col-md-7  { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .fads-col-md-8  { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .fads-col-md-9  { flex: 0 0 75%;        max-width: 75%;        }
+  .fads-col-md-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .fads-col-md-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .fads-col-md-12 { flex: 0 0 100%;       max-width: 100%;       }
+}
+
+/* Responsive: lg (992px) */
+@media (min-width: 992px) {
+  .fads-col-lg-1  { flex: 0 0 8.333333%;  max-width: 8.333333%;  }
+  .fads-col-lg-2  { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .fads-col-lg-3  { flex: 0 0 25%;        max-width: 25%;        }
+  .fads-col-lg-4  { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .fads-col-lg-5  { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .fads-col-lg-6  { flex: 0 0 50%;        max-width: 50%;        }
+  .fads-col-lg-7  { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .fads-col-lg-8  { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .fads-col-lg-9  { flex: 0 0 75%;        max-width: 75%;        }
+  .fads-col-lg-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .fads-col-lg-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .fads-col-lg-12 { flex: 0 0 100%;       max-width: 100%;       }
+}
+
+/* ==========================================================================
+   17. Utility Classes
+   ========================================================================== */
+
+/* Text alignment */
+.fads-text-center { text-align: center; }
+.fads-text-right  { text-align: right;  }
+.fads-text-left   { text-align: left;   }
+
+/* Float */
+.fads-float-right { float: right; }
+.fads-float-left  { float: left;  }
+
+/* Display */
+.fads-d-none         { display: none;         }
+.fads-d-flex         { display: flex;         }
+.fads-d-inline-block { display: inline-block; }
+.fads-d-block        { display: block;        }
+.fads-d-inline-flex  { display: inline-flex;  }
+
+/* Flexbox alignment */
+.fads-justify-between { justify-content: space-between; }
+.fads-align-center    { align-items: center;            }
+
+/* Gap utilities */
+.fads-gap-100 { gap: var(--ds-space-100); }
+.fads-gap-200 { gap: var(--ds-space-200); }
+.fads-gap-300 { gap: var(--ds-space-300); }
+.fads-gap-400 { gap: var(--ds-space-400); }
+
+/* Margin utilities */
+.fads-m-0     { margin: 0;                        }
+.fads-mb-2    { margin-bottom: var(--ds-space-200); }
+.fads-mt-2    { margin-top: var(--ds-space-200);    }
+.fads-me-auto { margin-right: auto;               }
+.fads-ms-auto { margin-left: auto;                }
+
+/* Padding utilities */
+.fads-p-0 { padding: 0;                      }
+.fads-p-2 { padding: var(--ds-space-200);     }
+
+/* Visually hidden (screen reader only) */
+.fads-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Text color utilities */
+.fads-text-danger  { color: var(--ds-text-danger);  }
+.fads-text-warning { color: var(--ds-text-warning); }
+.fads-text-success { color: var(--ds-text-success); }
+.fads-text-primary { color: var(--ds-text-brand);   }
+.fads-text-muted   { color: var(--ds-text-subtle);  }
+.fads-text-inverse { color: var(--ds-text-inverse);  }
+
+/* Clearfix */
+.fads-clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* ==========================================================================
+   18. Legacy Compatibility (from admin style.css)
+   ========================================================================== */
+
+/* Margin-top utilities used in admin pages */
+.top5  { margin-top: 5px;  }
+.top10 { margin-top: 10px; }
+.top15 { margin-top: 15px; }
+.top20 { margin-top: 20px; }
+.top25 { margin-top: 25px; }
+.top30 { margin-top: 30px; }
+
+/* Notification */
+.notification {
+  text-align: center;
+}
+
+/* System info textarea */
+textarea.systemInfoData {
+  height: 22em;
+  line-height: 1.5em;
+}
+
+/* Search result styles (searchlist admin page) */
+#result {
+  padding: 0;
+  list-style: none;
+}
+
+#result li {
+  margin-bottom: var(--ds-space-200);
+}
+
+#result .title {
+  font-size: var(--ds-font-size-200);
+}
+
+#result .title a {
+  color: var(--ds-link);
+  text-decoration: none;
+}
+
+#result .title a:hover {
+  text-decoration: underline;
+}
+
+#result .body {
+  color: var(--ds-text);
+  font-size: var(--ds-font-size-100);
+}
+
+#result .site {
+  color: var(--ds-text-success);
+  font-size: var(--ds-font-size-075);
+}
+
+/* ==========================================================================
+   19. Auth Layout (login page)
+   ========================================================================== */
+
+.fads-auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-surface-sunken);
+}
+
+.fads-auth-card {
+  width: 360px;
+  max-width: 90vw;
+}
+
+/* ==========================================================================
+   20. Collapse
+   ========================================================================== */
+
+.fads-collapse {
+  display: none;
+}
+
+.fads-collapse.show {
+  display: block;
+}
+
+/* ==========================================================================
+   21. Responsive Helpers
+   ========================================================================== */
+
+/* Small screens (max-width: 575.98px) */
+@media (max-width: 575.98px) {
+  .fads-d-sm-none {
+    display: none;
+  }
+}
+
+/* Small screens and up (min-width: 576px) */
+@media (min-width: 576px) {
+  .fads-d-sm-inline-block {
+    display: inline-block;
+  }
+
+  .fads-d-sm-flex {
+    display: flex;
+  }
+}
+
+/* Medium screens and up (min-width: 768px) */
+@media (min-width: 768px) {
+  .fads-d-md-flex {
+    display: flex;
+  }
+
+  .fads-d-md-none {
+    display: none;
+  }
+}
+
+/* Print */
+@media print {
+  .fads-d-print-none {
+    display: none !important;
+  }
+}

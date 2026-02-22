@@ -1,6 +1,6 @@
 $(function() {
-  var $firstInput = $('input[type="text"],select,textarea', ".login-box,section.content").first();
-  var $errorInput = $(".form-group .has-error").first().next("input,select,textarea");
+  var $firstInput = $('input[type="text"],select,textarea', ".fads-auth-card,section.content,.fads-main-content").first();
+  var $errorInput = $(".fads-form-field .fads-textfield-error").first().next("input,select,textarea");
 
   if ($errorInput.length) {
     $errorInput.focus();
@@ -8,7 +8,7 @@ $(function() {
     $firstInput.focus();
   }
 
-  $("section.content input").on("keypress", function(e) {
+  $("section.content input, .fads-main-content input").on("keypress", function(e) {
     if (e.which === 13) {
       var $submitButton = $("input#submit, button#submit");
       if ($submitButton.length > 0) {
@@ -18,7 +18,7 @@ $(function() {
     }
   });
 
-  $(".table tr[data-href]").each(function() {
+  $(".fads-table tr[data-href]").each(function() {
     var $row = $(this);
     $row.css("cursor", "pointer")
       .on("mouseenter", function() {
@@ -32,15 +32,15 @@ $(function() {
       });
   });
 
-  $("#confirmToDelete").on("show.bs.modal", function(event) {
-    var button = $(event.relatedTarget);
+  $("[data-fads-dialog='confirmToDelete']").on("click", function(event) {
+    var button = $(event.currentTarget);
     var docId = button.data("docid");
     var title = button.data("title");
     var url = button.data("url");
 
-    var $modal = $(this);
-    $modal.find(".modal-body #delete-doc-title").text(title);
-    $modal.find(".modal-body #delete-doc-url").text(url);
-    $modal.find(".modal-footer input#docId").val(docId);
+    var $dialog = $("#confirmToDelete");
+    $dialog.find("#delete-doc-title").text(title);
+    $dialog.find("#delete-doc-url").text(url);
+    $dialog.find("input#docId").val(docId);
   });
 });

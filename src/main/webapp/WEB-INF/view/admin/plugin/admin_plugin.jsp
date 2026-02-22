@@ -5,59 +5,59 @@ ${fe:html(true)}
     <title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.plugin_title"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="system"/>
         <jsp:param name="menuType" value="plugin"/>
     </jsp:include>
-    <main class="content-wrapper">
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+    <main class="fads-main-content">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.plugin_title"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
+                        <div class="fads-card-header">
+                            <h3 class="fads-card-title">
                                 <la:message key="labels.crud_title_list"/>
                             </h3>
-                            <div class="card-tools">
+                            <div class="fads-card-tools">
                                 <div class="btn-group">
                                     <la:link href="installplugin"
-                                             styleClass="btn btn-success btn-xs ${f:h(editableClass)}">
+                                             styleClass="fads-btn fads-btn-success fads-btn-compact ${f:h(editableClass)}">
                                         <i class="fa fa-plus" aria-hidden="true"></i>
                                         <la:message key="labels.plugin_install"/>
                                     </la:link>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
                             <%-- List --%>
                             <div class="data-wrapper">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.plugin_list" />">
+                                <div class="fads-row">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.plugin_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.plugin_type"/></th>
@@ -74,43 +74,43 @@ ${fe:html(true)}
                                                     <td>${f:h(artifact.version)}</td>
                                                     <td>
                                                         <c:if test="${editable}">
-                                                            <div class="text-center">
-                                                                <button type="button" class="btn btn-danger btn-xs"
-                                                                        name="delete" data-toggle="modal"
-                                                                        data-target='#confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
+                                                            <div class="fads-text-center">
+                                                                <button type="button" class="fads-btn fads-btn-danger fads-btn-compact"
+                                                                        name="delete" 
+                                                                        data-fads-dialog='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version).replace(".", "\\.")}'
                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                 >
                                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                                     <la:message key="labels.crud_button_delete"/>
                                                                 </button>
                                                             </div>
-                                                            <div class="modal fade"
+                                                            <div class="fads-dialog-overlay"
                                                                  id='confirmToDelete-${f:h(artifact.name)}-${f:h(artifact.version)}'
                                                                  tabindex="-1" role="dialog"
                                                             >
-                                                                <div class="modal-dialog">
-                                                                    <div class="modal-content bg-danger">
-                                                                        <div class="modal-header">
-                                                                            <h4 class="modal-title">
+                                                                <div class="fads-dialog">
+                                                                    <div class="fads-dialog-danger">
+                                                                        <div class="fads-dialog-header">
+                                                                            <h4 class="">
                                                                                 <la:message
                                                                                         key="labels.crud_title_delete"/>
                                                                             </h4>
                                                                             <button type="button" class="close"
-                                                                                    data-dismiss="modal"
+                                                                                    data-fads-dialog-close
                                                                                     aria-label="Close">
                                                                                 <span aria-hidden="true">×</span>
                                                                             </button>
                                                                         </div>
-                                                                        <div class="modal-body">
+                                                                        <div class="fads-dialog-body">
                                                                             <p>
                                                                                 <la:message
                                                                                         key="labels.crud_delete_confirmation"/>
                                                                             </p>
                                                                         </div>
-                                                                        <div class="modal-footer justify-content-between">
+                                                                        <div class="fads-dialog-footer">
                                                                             <button type="button"
-                                                                                    class="btn btn-outline-light"
-                                                                                    data-dismiss="modal">
+                                                                                    class="fads-btn fads-btn-outline-light"
+                                                                                    data-fads-dialog-close>
                                                                                 <la:message
                                                                                         key="labels.crud_button_cancel"/>
                                                                             </button>
@@ -120,7 +120,7 @@ ${fe:html(true)}
                                                                                 <input type="hidden" name="version"
                                                                                        value="${f:h(artifact.version)}">
                                                                                 <button type="submit"
-                                                                                        class="btn btn-outline-light"
+                                                                                        class="fads-btn fads-btn-outline-light"
                                                                                         name="delete"
                                                                                         value="<la:message key="labels.crud_button_delete" />"
                                                                                 >

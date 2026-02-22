@@ -1,12 +1,12 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <c:if test="${crudMode == 1}">
-	<button type="submit" class="btn btn-default" name="list"
+	<button type="submit" class="fads-btn fads-btn-default" name="list"
 		value="<la:message key="labels.crud_button_back" />">
 		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
-	<button type="submit" class="btn btn-success" name="create"
+	<button type="submit" class="fads-btn fads-btn-success" name="create"
 		value="<la:message key="labels.crud_button_create" />">
 		<i class="fa fa-plus" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_create" />
@@ -14,12 +14,12 @@
 	</c:if>
 </c:if>
 <c:if test="${crudMode == 2}">
-	<button type="submit" class="btn btn-default" name="edit" value="back">
+	<button type="submit" class="fads-btn fads-btn-default" name="edit" value="back">
 		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
-	<button type="submit" class="btn btn-success" name="update"
+	<button type="submit" class="fads-btn fads-btn-success" name="update"
 		value="<la:message key="labels.crud_button_update" />">
 		<i class="fa fa-pencil-alt" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_update" />
@@ -27,52 +27,50 @@
 	</c:if>
 </c:if>
 <c:if test="${crudMode == 4}">
-	<button type="submit" class="btn btn-default" name="list" value="back">
+	<button type="submit" class="fads-btn fads-btn-default" name="list" value="back">
 		<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<c:if test="${editable}">
-	<button type="submit" class="btn btn-primary" name="edit"
+	<button type="submit" class="fads-btn fads-btn-primary" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
 		<i class="fa fa-pencil-alt" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_edit" />
 	</button>
-	<button type="button" class="btn btn-danger" name="delete"
-		data-toggle="modal" data-target="#confirmToDelete"
+	<button type="button" class="fads-btn fads-btn-danger" name="delete"
+		data-fads-dialog="confirmToDelete"
 		value="<la:message key="labels.crud_button_delete" />">
 		<i class="fa fa-trash" aria-hidden="true"></i>
 		<la:message key="labels.crud_button_delete" />
 	</button>
-	<div class="modal fade" id="confirmToDelete" tabindex="-1"
-		role="dialog">
-		<div class="modal-dialog">
-			<div class="modal-content bg-danger">
-				<div class="modal-header">
-					<h4 class="modal-title">
-						<la:message key="labels.crud_title_delete" />
-					</h4>
-					<button type="button" class="close" data-dismiss="modal"
-						aria-label="Close">
-						<span aria-hidden="true">×</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<p>
-						<la:message key="labels.crud_delete_confirmation" />
-					</p>
-				</div>
-				<div class="modal-footer justify-content-between">
-					<button type="button" class="btn btn-outline-light"
-						data-dismiss="modal">
-						<la:message key="labels.crud_button_cancel" />
-					</button>
-					<button type="submit" class="btn btn-outline-light"
-						name="delete"
-						value="<la:message key="labels.crud_button_delete" />">
-						<i class="fa fa-trash" aria-hidden="true"></i>
-						<la:message key="labels.crud_button_delete" />
-					</button>
-				</div>
+	<div class="fads-dialog-overlay" id="confirmToDelete" tabindex="-1"
+		role="dialog" aria-hidden="true">
+		<div class="fads-dialog fads-dialog-danger">
+			<div class="fads-dialog-header">
+				<h4>
+					<la:message key="labels.crud_title_delete" />
+				</h4>
+				<button type="button" class="fads-btn-icon" data-fads-dialog-close
+					aria-label="Close">
+					<span aria-hidden="true">&#x00D7;</span>
+				</button>
+			</div>
+			<div class="fads-dialog-body">
+				<p>
+					<la:message key="labels.crud_delete_confirmation" />
+				</p>
+			</div>
+			<div class="fads-dialog-footer">
+				<button type="button" class="fads-btn fads-btn-default"
+					data-fads-dialog-close>
+					<la:message key="labels.crud_button_cancel" />
+				</button>
+				<button type="submit" class="fads-btn fads-btn-danger"
+					name="delete"
+					value="<la:message key="labels.crud_button_delete" />">
+					<i class="fa fa-trash" aria-hidden="true"></i>
+					<la:message key="labels.crud_button_delete" />
+				</button>
 			</div>
 		</div>
 	</div>

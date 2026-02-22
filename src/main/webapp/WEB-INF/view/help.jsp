@@ -5,31 +5,29 @@ ${fe:html(true)}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.search_title" /></title>
-<link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
-	type="text/css" />
-<link href="${fe:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/tokens.css')}" rel="stylesheet" type="text/css" />
+<link href="${fe:url('/css/fess-ads.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<jsp:include page="header.jsp" />
 	<main class="container">
-		<div class="row">
-			<div class="col">
+		<div class="fads-row">
+			<div class="fads-col">
 
 				<jsp:include page="${helpPage}" />
 
 			</div>
 		</div>
-		<div class="text-end">
+		<div class="fads-text-right">
 			<a href="#"><la:message key="labels.footer_back_to_top" /></a>
 		</div>
 	</main>
 	<jsp:include page="footer.jsp" />
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/fads-ui.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/help.js')}"></script>
 </body>

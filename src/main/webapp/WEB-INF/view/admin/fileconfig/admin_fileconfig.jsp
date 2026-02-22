@@ -6,82 +6,82 @@ ${fe:html(true)}
             key="labels.file_crawling_configuration"/></title>
     <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
+<body class="fads-admin-layout">
+<div class="fads-layout-wrapper">
     <jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
     <jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
         <jsp:param name="menuCategoryType" value="crawl"/>
         <jsp:param name="menuType" value="fileConfig"/>
     </jsp:include>
-    <main class="content-wrapper">
+    <main class="fads-main-content">
         <%-- Content Header --%>
 
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
+        <div class="fads-page-header">
+            <div >
+                <div class="fads-d-flex fads-align-center" style="flex-wrap:wrap;gap:var(--ds-space-100)">
+                    <div class="fads-col-sm-6">
                         <h1>
                             <la:message key="labels.file_crawling_configuration"/>
                         </h1>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="fads-col-sm-6">
                         <jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
                     </div>
                 </div>
             </div>
         </div>
         <section class="content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-outline card-primary">
+            <div class="fads-row">
+                <div class="fads-col-md-12">
+                    <div class="fads-card">
                         <%-- Card Header --%>
-                        <div class="card-header">
+                        <div class="fads-card-header">
                             <jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
                         </div>
                         <%-- Card Body --%>
-                        <div class="card-body">
+                        <div class="fads-card-body">
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="fads-banner fads-banner-info">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
-                            <a role="button" data-toggle="collapse" href="#listSearchForm" aria-expanded="false"
+                            <a role="button" data-fads-collapse="#listSearchForm" aria-expanded="false"
                                aria-controls="listSearchForm"><i class="fas fa-search" aria-hidden="true"></i></a>
                             <div class="collapse <c:if test="${!empty name || !empty paths || !empty description}">show</c:if>" id="listSearchForm">
                                 <la:form action="/admin/fileconfig/">
-                                    <div class="form-group row">
+                                    <div class="fads-form-field">
                                         <label for="name" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.name"/></label>
                                         <div class="col-sm-10">
-                                            <la:text styleId="name" property="name" styleClass="form-control"/>
+                                            <la:text styleId="name" property="name" styleClass="fads-textfield"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row">
+                                    <div class="fads-form-field">
                                         <label for="paths" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.paths"/></label>
                                         <div class="col-sm-10">
-                                            <la:text styleId="paths" property="paths" styleClass="form-control"/>
+                                            <la:text styleId="paths" property="paths" styleClass="fads-textfield"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row">
+                                    <div class="fads-form-field">
                                         <label for="description" class="col-sm-2 text-sm-right col-form-label"><la:message
                                                 key="labels.description"/></label>
                                         <div class="col-sm-10">
                                             <la:text styleId="description" property="description"
-                                                     styleClass="form-control"/>
+                                                     styleClass="fads-textfield"/>
                                         </div>
                                     </div>
-                                    <div class="form-group row">
+                                    <div class="fads-form-field">
                                         <div class="offset-sm-2 col-sm-10">
-                                            <button type="submit" class="btn btn-primary" id="submit"
+                                            <button type="submit" class="fads-btn fads-btn-primary" id="submit"
                                                     name="search"
                                                     value="<la:message key="labels.crud_button_search" />">
                                                 <i class="fa fa-search" aria-hidden="true"></i>
                                                 <la:message key="labels.crud_button_search"/>
                                             </button>
-                                            <button type="submit" class="btn btn-default" name="reset"
+                                            <button type="submit" class="fads-btn fads-btn-default" name="reset"
                                                     value="<la:message key="labels.crud_button_reset" />">
                                                 <la:message key="labels.crud_button_reset"/>
                                             </button>
@@ -91,21 +91,21 @@ ${fe:html(true)}
                             </div>
                             <%-- List --%>
                             <c:if test="${fileConfigPager.allRecordCount == 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
+                                <div class="fads-row top10">
+                                    <div class="fads-col-sm-12">
                                         <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>
                             </c:if>
                             <c:if test="${fileConfigPager.allRecordCount > 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
-                                        <table class="table table-bordered table-striped" aria-label="<la:message key="labels.file_config_list" />">
+                                <div class="fads-row top10">
+                                    <div class="fads-col-sm-12">
+                                        <table class="fads-table" aria-label="<la:message key="labels.file_config_list" />">
                                             <thead>
                                             <tr>
                                                 <th><la:message key="labels.name"/></th>
-                                                <th class="text-center" style="width: 20%"><la:message
+                                                <th class="fads-text-center" style="width: 20%"><la:message
                                                         key="labels.available"/></th>
                                             </tr>
                                             </thead>
@@ -115,9 +115,9 @@ ${fe:html(true)}
                                                 <tr
                                                         data-href="${contextPath}/admin/fileconfig/details/4/${f:u(data.id)}" role="button" tabindex="0">
                                                     <td>${f:h(data.name)}</td>
-                                                    <td class="text-center"><c:if
+                                                    <td class="fads-text-center"><c:if
                                                             test="${data.available=='true'}">
-																	<span class="badge bg-primary"><la:message
+																	<span class="fads-lozenge fads-lozenge-primary"><la:message
                                                                             key="labels.enabled"/></span>
                                                     </c:if> <c:if test="${data.available=='false'}">
 																	<span class="badge bg-gray"><la:message

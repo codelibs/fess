@@ -1,0 +1,201 @@
+/* ADS Design Tokens - Fess Admin
+ * Light/Dark mode CSS custom properties based on Atlassian Design System
+ */
+
+:root, html[data-color-mode="light"] {
+  /* Surface */
+  --ds-surface: #FFFFFF;
+  --ds-surface-raised: #FFFFFF;
+  --ds-surface-sunken: #F7F8F9;
+  --ds-surface-overlay: #FFFFFF;
+  --ds-surface-hovered: #F1F2F4;
+  --ds-surface-pressed: #DCDFE4;
+
+  /* Text */
+  --ds-text: #172B4D;
+  --ds-text-subtle: #626F86;
+  --ds-text-subtlest: #8590A2;
+  --ds-text-inverse: #FFFFFF;
+  --ds-text-danger: #AE2E24;
+  --ds-text-warning: #A54800;
+  --ds-text-success: #216E4E;
+  --ds-text-brand: #0052CC;
+  --ds-text-selected: #0052CC;
+  --ds-text-disabled: #8590A2;
+
+  /* Link */
+  --ds-link: #0052CC;
+  --ds-link-pressed: #0747A6;
+  --ds-link-visited: #5243AA;
+
+  /* Background */
+  --ds-background-brand-bold: #0052CC;
+  --ds-background-brand-bold-hovered: #0747A6;
+  --ds-background-brand-bold-pressed: #003884;
+  --ds-background-neutral: #F1F2F4;
+  --ds-background-neutral-hovered: #DCDFE4;
+  --ds-background-neutral-pressed: #B3B9C4;
+  --ds-background-neutral-subtle: transparent;
+  --ds-background-neutral-subtle-hovered: #DCDFE4;
+  --ds-background-neutral-subtle-pressed: #B3B9C4;
+  --ds-background-danger-bold: #E34935;
+  --ds-background-danger-bold-hovered: #C9372C;
+  --ds-background-danger-bold-pressed: #AE2E24;
+  --ds-background-danger: #FFECEB;
+  --ds-background-success-bold: #1F845A;
+  --ds-background-success-bold-hovered: #216E4E;
+  --ds-background-success-bold-pressed: #164B35;
+  --ds-background-success: #DCFFF1;
+  --ds-background-warning-bold: #E2730F;
+  --ds-background-warning-bold-hovered: #C25100;
+  --ds-background-warning-bold-pressed: #A54800;
+  --ds-background-warning: #FFF7D6;
+  --ds-background-information: #E9F2FF;
+  --ds-background-information-bold: #0065FF;
+  --ds-background-selected: #E9F2FF;
+  --ds-background-selected-bold: #0052CC;
+  --ds-background-input: #FFFFFF;
+  --ds-background-input-hovered: #F7F8F9;
+  --ds-background-disabled: #F1F2F4;
+
+  /* Border */
+  --ds-border: #091E4224;
+  --ds-border-bold: #626F86;
+  --ds-border-input: #7A869A;
+  --ds-border-focused: #388BFF;
+  --ds-border-danger: #E34935;
+  --ds-border-success: #1F845A;
+  --ds-border-warning: #E2730F;
+  --ds-border-selected: #0052CC;
+  --ds-border-disabled: #091E420F;
+
+  /* Shadow */
+  --ds-shadow-raised: 0 1px 1px #091E4240, 0 0 1px #091E424F;
+  --ds-shadow-overlay: 0 4px 8px -2px #091E4240, 0 0 1px #091E424F;
+  --ds-shadow-overflow: 0 0 12px #091E4229;
+
+  /* Spacing (8px base) */
+  --ds-space-0: 0px;
+  --ds-space-025: 2px;
+  --ds-space-050: 4px;
+  --ds-space-075: 6px;
+  --ds-space-100: 8px;
+  --ds-space-150: 12px;
+  --ds-space-200: 16px;
+  --ds-space-250: 20px;
+  --ds-space-300: 24px;
+  --ds-space-400: 32px;
+  --ds-space-500: 40px;
+  --ds-space-600: 48px;
+
+  /* Typography */
+  --ds-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --ds-font-size-050: 11px;
+  --ds-font-size-075: 12px;
+  --ds-font-size-100: 14px;
+  --ds-font-size-200: 16px;
+  --ds-font-size-300: 20px;
+  --ds-font-size-400: 24px;
+  --ds-font-size-500: 29px;
+  --ds-font-size-600: 35px;
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
+  --ds-font-lineHeight-100: 16px;
+  --ds-font-lineHeight-200: 20px;
+  --ds-font-lineHeight-300: 24px;
+  --ds-font-lineHeight-400: 28px;
+  --ds-font-lineHeight-500: 32px;
+  --ds-font-lineHeight-600: 40px;
+
+  /* Radius */
+  --ds-radius-050: 2px;
+  --ds-radius-100: 4px;
+  --ds-radius-200: 8px;
+  --ds-radius-300: 12px;
+  --ds-radius-round: 50%;
+
+  /* Opacity */
+  --ds-opacity-disabled: 0.4;
+
+  /* Z-index */
+  --ds-z-blanket: 500;
+  --ds-z-modal: 510;
+  --ds-z-navigation: 200;
+  --ds-z-tooltip: 600;
+  --ds-z-dropdown: 400;
+}
+
+html[data-color-mode="dark"] {
+  /* Surface */
+  --ds-surface: #1D2125;
+  --ds-surface-raised: #22272B;
+  --ds-surface-sunken: #161A1D;
+  --ds-surface-overlay: #282E33;
+  --ds-surface-hovered: #282E33;
+  --ds-surface-pressed: #2C333A;
+
+  /* Text */
+  --ds-text: #B6C2CF;
+  --ds-text-subtle: #8C9BAB;
+  --ds-text-subtlest: #738496;
+  --ds-text-inverse: #1D2125;
+  --ds-text-danger: #F87168;
+  --ds-text-warning: #FAA53D;
+  --ds-text-success: #4BCE97;
+  --ds-text-brand: #579DFF;
+  --ds-text-selected: #579DFF;
+  --ds-text-disabled: #56647A;
+
+  /* Link */
+  --ds-link: #579DFF;
+  --ds-link-pressed: #85B8FF;
+  --ds-link-visited: #B8ACF6;
+
+  /* Background */
+  --ds-background-brand-bold: #579DFF;
+  --ds-background-brand-bold-hovered: #85B8FF;
+  --ds-background-brand-bold-pressed: #CCE0FF;
+  --ds-background-neutral: #A1BDD914;
+  --ds-background-neutral-hovered: #A6C5E229;
+  --ds-background-neutral-pressed: #BFDBF847;
+  --ds-background-neutral-subtle: transparent;
+  --ds-background-neutral-subtle-hovered: #A1BDD914;
+  --ds-background-neutral-subtle-pressed: #A6C5E229;
+  --ds-background-danger-bold: #E34935;
+  --ds-background-danger-bold-hovered: #F87168;
+  --ds-background-danger-bold-pressed: #FD9891;
+  --ds-background-danger: #42221F;
+  --ds-background-success-bold: #1F845A;
+  --ds-background-success-bold-hovered: #4BCE97;
+  --ds-background-success-bold-pressed: #7EE2B8;
+  --ds-background-success: #1C3329;
+  --ds-background-warning-bold: #E2730F;
+  --ds-background-warning-bold-hovered: #FAA53D;
+  --ds-background-warning-bold-pressed: #FEC57B;
+  --ds-background-warning: #332E1B;
+  --ds-background-information: #1C2B41;
+  --ds-background-information-bold: #388BFF;
+  --ds-background-selected: #1C2B41;
+  --ds-background-selected-bold: #579DFF;
+  --ds-background-input: #22272B;
+  --ds-background-input-hovered: #282E33;
+  --ds-background-disabled: #A1BDD914;
+
+  /* Border */
+  --ds-border: #A6C5E229;
+  --ds-border-bold: #738496;
+  --ds-border-input: #738496;
+  --ds-border-focused: #579DFF;
+  --ds-border-danger: #F87168;
+  --ds-border-success: #4BCE97;
+  --ds-border-warning: #FAA53D;
+  --ds-border-selected: #579DFF;
+  --ds-border-disabled: #A1BDD914;
+
+  /* Shadow */
+  --ds-shadow-raised: 0 1px 1px #03040480, 0 0 1px #03040480;
+  --ds-shadow-overlay: 0 4px 8px -2px #03040480, 0 0 1px #03040480;
+  --ds-shadow-overflow: 0 0 12px #0304044F;
+}
