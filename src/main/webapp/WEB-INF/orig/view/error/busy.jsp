@@ -4,7 +4,7 @@ ${fe:html(true)}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><la:message key="labels.system_error_title" /></title>
+<title><la:message key="labels.busy_title" /></title>
 <link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${fe:url('/css/style.css')}" rel="stylesheet"
@@ -17,12 +17,9 @@ ${fe:html(true)}
 	<main class="container">
 		<div class="text-center">
 			<h2>
-				<la:message key="labels.page_not_found_title" />
+				<la:message key="labels.busy_title" />
 			</h2>
-			<div>
-				<la:message key="labels.check_url" />
-				<br /> ${f:h(url)}
-			</div>
+			<div class="errormessage"><la:message key="labels.busy_message" /></div>
 		</div>
 	</main>
 	<jsp:include page="../footer.jsp" />

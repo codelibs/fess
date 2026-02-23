@@ -46,7 +46,7 @@ ${fe:html(true)}
                                     <%-- Message: BEGIN --%>
                                 <div>
                                     <la:info id="msg" message="true">
-                                        <div class="alert alert-info">${msg}</div>
+                                        <div class="alert alert-success">${msg}</div>
                                     </la:info>
                                     <la:errors/>
                                 </div>

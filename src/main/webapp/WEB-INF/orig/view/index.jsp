@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
 ${fe:html(true)}
-<head profile="http://a9.com/-/spec/opensearch/1.1/">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,15 +32,14 @@ ${fe:html(true)}
 						<ul class="nav navbar-nav">
 							<c:if test="${eoled}">
 								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
-									<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
+									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
 								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
 									title="<la:message key="labels.development_mode_warning" />"
-								><a class="nav-link active" href="${installationLink}" target="_olh"><em
-										class="fa fa-exclamation-triangle text-warning"
-									></em></a></li>
+								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"
+									></i></a></li>
 							</c:if>
 							<c:choose>
 								<c:when test="${!empty username && username != 'guest'}">
@@ -48,7 +47,7 @@ ${fe:html(true)}
 										<div class="dropdown">
 											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
 												href="#" role="button" aria-haspopup="true"
-												aria-expanded="false"> <em class="fa fa-fw fa-user"></em>${username}
+												aria-expanded="false"> <i class="fa fa-fw fa-user" aria-hidden="true"></i>${username}
 											</a>
 											<div class="dropdown-menu" aria-labelledby="userMenu">
 												<c:if test="${editableUser == true}">
@@ -72,14 +71,22 @@ ${fe:html(true)}
 									<li class="nav-item"><la:link href="/login"
 											styleClass="nav-link" role="button" aria-haspopup="true"
 											aria-expanded="false">
-											<em class="fa fa-fw fa-sign-in"></em>
+											<i class="fa fa-fw fa-sign-in" aria-hidden="true"></i>
 											<la:message key="labels.login" />
 										</la:link></li>
 								</c:when>
 							</c:choose>
+							<c:if test="${chatEnabled}">
+								<li class="nav-item"><la:link href="/chat"
+										styleClass="nav-link" role="button" aria-haspopup="true"
+										aria-expanded="false">
+										<i class="fa fa-fw fa-robot" aria-hidden="true"></i>
+										<la:message key="labels.chat_ai_mode" />
+									</la:link></li>
+							</c:if>
 							<li class="nav-item"><la:link href="/help"
 									styleClass="nav-link help-link">
-									<em class="fa fa-fw fa-question-circle"></em>
+									<i class="fa fa-fw fa-question-circle" aria-hidden="true"></i>
 									<la:message key="labels.index_help" />
 								</la:link></li>
 						</ul>
@@ -95,11 +102,11 @@ ${fe:html(true)}
 						<la:message key="labels.search_options_clear" />
 					</button>
 					<button type="submit" class="btn btn-primary">
-						<em class="fa fa-search"></em>
+						<i class="fa fa-search" aria-hidden="true"></i>
 						<la:message key="labels.search" />
 					</button>
-					<la:link href="/search/advance" styleClass="btn btn-info">
-						<em class="fa fa-cog"></em>
+					<la:link href="/search/advance" styleClass="btn btn-outline-secondary">
+						<i class="fa fa-cog" aria-hidden="true"></i>
 						<la:message key="labels.advance" />
 					</la:link>
 				</div>
@@ -150,13 +157,13 @@ ${fe:html(true)}
 						<div class="clearfix searchButtonBox btn-group">
 							<button type="submit" name="search" id="searchButton"
 								class="btn btn-primary">
-								<em class="fa fa-search"></em>
+								<i class="fa fa-search" aria-hidden="true"></i>
 								<la:message key="labels.index_form_search_btn" />
 							</button>
 							<button type="button" class="btn btn-outline-secondary"
 								data-bs-toggle="collapse" data-bs-target="#searchOptions"
 								id="searchOptionsButton">
-								<em class="fa fa-cog"></em>
+								<i class="fa fa-cog" aria-hidden="true"></i>
 								<la:message key="labels.index_form_option_btn" />
 							</button>
 						</div>
@@ -167,10 +174,10 @@ ${fe:html(true)}
 		<jsp:include page="footer.jsp" />
 	</la:form>
 	<input type="hidden" id="contextPath" value="${contextPath}" />
-	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/suggestor.js')}"></script>
-	<script type="text/javascript" src="${fe:url('/js/index.js')}"></script>
+	<script src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
+	<script src="${fe:url('/js/popper.min.js')}"></script>
+	<script src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script src="${fe:url('/js/suggestor.js')}"></script>
+	<script src="${fe:url('/js/index.js')}"></script>
 </body>
 ${fe:html(false)}

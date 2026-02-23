@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
 ${fe:html(true)}
-<head profile="http://a9.com/-/spec/opensearch/1.1/">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -34,15 +34,14 @@ ${fe:html(true)}
 						<ul class="nav navbar-nav">
 							<c:if test="${eoled}">
 								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left" title="<la:message key="labels.eol_error" />">
-									<a class="nav-link active" href="${eolLink}" target="_olh"><em class="fas fa-times-circle text-danger"></em></a>
+									<a class="nav-link active" href="${eolLink}" target="_olh"><i class="fas fa-times-circle text-danger" aria-hidden="true"></i></a>
 								</li>
 							</c:if>
 							<c:if test="${developmentMode}">
 								<li class="nav-item" data-bs-toggle="tooltip" data-placement="left"
 									title="<la:message key="labels.development_mode_warning" />"
-								><a class="nav-link active" href="${installationLink}" target="_olh"><em
-										class="fa fa-exclamation-triangle text-warning"
-									></em></a></li>
+								><a class="nav-link active" href="${installationLink}" target="_olh"><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"
+									></i></a></li>
 							</c:if>
 							<c:choose>
 								<c:when test="${!empty username && username != 'guest'}">
@@ -50,7 +49,7 @@ ${fe:html(true)}
 										<div class="dropdown">
 											<a id="userMenu" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
 												href="#" role="button" aria-haspopup="true" aria-expanded="false"
-											> <em class="fa fa-fw fa-user"></em>${username}
+											> <i class="fa fa-fw fa-user" aria-hidden="true"></i>${username}
 											</a>
 											<div class="dropdown-menu" aria-labelledby="userMenu">
 												<c:if test="${editableUser == true}">
@@ -74,13 +73,13 @@ ${fe:html(true)}
 									<li class="nav-item"><la:link href="/login" styleClass="nav-link" role="button" aria-haspopup="true"
 											aria-expanded="false"
 										>
-											<em class="fa fa-fw fa-sign-in"></em>
+											<i class="fa fa-fw fa-sign-in" aria-hidden="true"></i>
 											<la:message key="labels.login" />
 										</la:link></li>
 								</c:when>
 							</c:choose>
 							<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
-									<em class="fa fa-fw fa-question-circle"></em>
+									<i class="fa fa-fw fa-question-circle" aria-hidden="true"></i>
 									<la:message key="labels.index_help" />
 								</la:link></li>
 						</ul>
@@ -309,7 +308,7 @@ ${fe:html(true)}
 				<div class="col-auto">
 					<button type="submit" name="search" id="searchButton"
 						class="btn btn-primary mx-auto">
-						<em class="fa fa-search"></em>
+						<i class="fa fa-search" aria-hidden="true"></i>
 						<la:message key="labels.index_form_search_btn" />
 					</button>
 				</div>

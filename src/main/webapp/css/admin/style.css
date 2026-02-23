@@ -88,3 +88,19 @@ textarea.systemInfoData {
 .login-box {
 	height: 500px;
 }
+
+.empty-list-placeholder {
+	text-align: center;
+	padding: 2em 1em;
+}
+
+.empty-list-placeholder .fa {
+	font-size: 2.5em;
+	margin-bottom: 0.5em;
+	display: block;
+}
+
+.empty-list-placeholder p {
+	color: #6c757d;
+	margin-top: 0.5em;
+}

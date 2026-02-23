@@ -620,6 +620,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Your search - &lt;b&gt;{0}&lt;/b&gt; - did not match any documents. */
     public static final String LABELS_did_not_match = "{labels.did_not_match}";
 
+    /** The key of the message: Try different keywords or check your spelling. */
+    public static final String LABELS_did_not_match_suggestion = "{labels.did_not_match_suggestion}";
+
     /** The key of the message: Fess */
     public static final String LABELS_search_title = "{labels.search_title}";
 
@@ -979,6 +982,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Reset */
     public static final String LABELS_facet_label_reset = "{labels.facet_label_reset}";
+
+    /** The key of the message: Filter */
+    public static final String LABELS_facet_filter_button = "{labels.facet_filter_button}";
 
     /** The key of the message: All */
     public static final String LABELS_searchoptions_all = "{labels.searchoptions_all}";

@@ -39,15 +39,13 @@ ${fe:html(true)}
                             <%-- Message --%>
                             <div>
                                 <la:info id="msg" message="true">
-                                    <div class="alert alert-info">${msg}</div>
+                                    <div class="alert alert-success">${msg}</div>
                                 </la:info>
                                 <la:errors/>
                             </div>
                             <%-- List --%>
                             <c:if test="${rolePager.allRecordCount == 0}">
-                                <div class="row top10">
-                                    <div class="col-sm-12">
-                                        <i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
+                                <div class="row top10"><div class="col-sm-12 empty-list-placeholder"><i class="fa fa-info-circle text-primary" aria-hidden="true"></i>
                                         <la:message key="labels.list_could_not_find_crud_table"/>
                                     </div>
                                 </div>

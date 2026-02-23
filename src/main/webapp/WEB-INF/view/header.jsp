@@ -116,7 +116,7 @@
 					<i class="fa fa-search" aria-hidden="true"></i>
 					<la:message key="labels.search" />
 				</button>
-				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-info">
+				<la:link href="/search/advance?q=${f:u(q)}${fe:pagingQuery(null)}" styleClass="btn btn-outline-secondary">
 					<i class="fa fa-cog" aria-hidden="true"></i>
 					<la:message key="labels.advance" />
 				</la:link>

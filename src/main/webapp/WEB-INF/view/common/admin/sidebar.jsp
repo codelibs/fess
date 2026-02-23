@@ -48,7 +48,7 @@
 					<c:if test="${fe:permission('admin-wizard-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/wizard/')}" class="nav-link <c:if test="${param.menuType=='wizard'}">active</c:if>" <c:if test="${param.menuType=='wizard'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-magic nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_wizard" /></p>
 						</a>
 					</li>
@@ -56,7 +56,7 @@
 					<c:if test="${fe:permission('admin-general-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/general/')}" class="nav-link <c:if test="${param.menuType=='general'}">active</c:if>" <c:if test="${param.menuType=='general'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-sliders-h nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_crawl_config" /></p>
 						</a>
 					</li>
@@ -64,21 +64,21 @@
 					<c:if test="${fe:permission('admin-scheduler-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/scheduler/')}" class="nav-link <c:if test="${param.menuType=='scheduler'}">active</c:if>" <c:if test="${param.menuType=='scheduler'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-clock nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_scheduler_config" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-design-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/design/')}" class="nav-link <c:if test="${param.menuType=='design'}">active</c:if>" <c:if test="${param.menuType=='design'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-palette nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_design" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-dict-view') and fesenType!='cloud' and fesenType!='aws'}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/dict/')}" class="nav-link <c:if test="${param.menuType=='dict'}">active</c:if>" <c:if test="${param.menuType=='dict'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-book nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_dict" /></p>
 						</a>
 					</li>
@@ -87,7 +87,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/accesstoken/')}"
 						   class="nav-link <c:if test="${param.menuType=='accessToken'}">active</c:if>" <c:if test="${param.menuType=='accessToken'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-key nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_access_token" /></p>
 						</a>
 					</li>
@@ -95,7 +95,7 @@
 					<c:if test="${fe:permission('admin-plugin-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/plugin/')}" class="nav-link <c:if test="${param.menuType=='plugin'}">active</c:if>" <c:if test="${param.menuType=='plugin'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-plug nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_plugin" /></p>
 						</a>
 					</li>
@@ -103,7 +103,7 @@
 					<c:if test="${fe:permission('admin-storage-view') and storageEnabled.booleanValue()}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/storage/')}" class="nav-link <c:if test="${param.menuType=='storage'}">active</c:if>" <c:if test="${param.menuType=='storage'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-hdd nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_storage" /></p>
 						</a>
 					</li>
@@ -124,7 +124,7 @@
 					<c:if test="${fe:permission('admin-webconfig-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/webconfig/')}" class="nav-link <c:if test="${param.menuType=='webConfig'}">active</c:if>" <c:if test="${param.menuType=='webConfig'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-globe nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_web" /></p>
 						</a></li></c:if>
 						
@@ -132,7 +132,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/fileconfig/')}"
 						   class="nav-link <c:if test="${param.menuType=='fileConfig'}">active</c:if>" <c:if test="${param.menuType=='fileConfig'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-folder nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_file_system" /></p>
 						</a></li></c:if>
 						
@@ -140,21 +140,21 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/dataconfig/')}"
 						   class="nav-link <c:if test="${param.menuType=='dataConfig'}">active</c:if>" <c:if test="${param.menuType=='dataConfig'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-database nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_data_store" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-labeltype-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/labeltype/')}" class="nav-link <c:if test="${param.menuType=='labelType'}">active</c:if>" <c:if test="${param.menuType=='labelType'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-tag nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_label_type" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-keymatch-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/keymatch/')}" class="nav-link <c:if test="${param.menuType=='keyMatch'}">active</c:if>" <c:if test="${param.menuType=='keyMatch'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-crosshairs nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_key_match" /></p>
 						</a></li></c:if>
 						
@@ -162,7 +162,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/boostdoc/')}"
 						   class="nav-link <c:if test="${param.menuType=='boostDocumentRule'}">active</c:if>" <c:if test="${param.menuType=='boostDocumentRule'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-arrow-up nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_boost_document_rule" /></p>
 						</a></li></c:if>
 						
@@ -170,7 +170,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/relatedcontent/')}"
 						   class="nav-link <c:if test="${param.menuType=='relatedContent'}">active</c:if>" <c:if test="${param.menuType=='relatedContent'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-link nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_related_content" /></p>
 						</a></li></c:if>
 						
@@ -178,14 +178,14 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/relatedquery/')}"
 						   class="nav-link <c:if test="${param.menuType=='relatedQuery'}">active</c:if>" <c:if test="${param.menuType=='relatedQuery'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-exchange-alt nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_related_query" /></p>
 						</a></li></c:if>
 						
 					<c:if test="${fe:permission('admin-pathmap-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/pathmap/')}" class="nav-link <c:if test="${param.menuType=='pathMapping'}">active</c:if>" <c:if test="${param.menuType=='pathMapping'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-sitemap nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_path_mapping" /></p>
 						</a></li></c:if>
 						
@@ -193,7 +193,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/webauth/')}"
 						   class="nav-link <c:if test="${param.menuType=='webAuthentication'}">active</c:if>" <c:if test="${param.menuType=='webAuthentication'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-lock nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_web_authentication" /></p>
 						</a></li></c:if>
 						
@@ -201,7 +201,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/fileauth/')}"
 						   class="nav-link <c:if test="${param.menuType=='fileAuthentication'}">active</c:if>" <c:if test="${param.menuType=='fileAuthentication'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-shield-alt nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_file_authentication" /></p>
 						</a></li></c:if>
 						
@@ -209,7 +209,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/reqheader/')}"
 						   class="nav-link <c:if test="${param.menuType=='requestHeader'}">active</c:if>" <c:if test="${param.menuType=='requestHeader'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-heading nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_request_header" /></p>
 						</a></li></c:if>
 						
@@ -217,7 +217,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/duplicatehost/')}"
 						   class="nav-link <c:if test="${param.menuType=='duplicateHost'}">active</c:if>" <c:if test="${param.menuType=='duplicateHost'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-clone nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_duplicate_host" /></p>
 						</a></li></c:if>
 						
@@ -236,21 +236,21 @@
 					<c:if test="${fe:permission('admin-user-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/user/')}" class="nav-link <c:if test="${param.menuType=='user'}">active</c:if>" <c:if test="${param.menuType=='user'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-user nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_user" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-role-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/role/')}" class="nav-link <c:if test="${param.menuType=='role'}">active</c:if>" <c:if test="${param.menuType=='role'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-user-tag nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_role" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-group-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/group/')}" class="nav-link <c:if test="${param.menuType=='group'}">active</c:if>" <c:if test="${param.menuType=='group'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-users nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_group" /></p>
 						</a></li></c:if>
 
@@ -270,7 +270,7 @@
 					<c:if test="${fe:permission('admin-suggest-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/suggest/')}" class="nav-link <c:if test="${param.menuType=='suggestWord'}">active</c:if>" <c:if test="${param.menuType=='suggestWord'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-lightbulb nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_suggest_word" /></p>
 						</a></li></c:if>
 
@@ -278,14 +278,14 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/elevateword/')}"
 						   class="nav-link <c:if test="${param.menuType=='elevateWord'}">active</c:if>" <c:if test="${param.menuType=='elevateWord'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-level-up-alt nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_elevate_word" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-badword-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/badword/')}" class="nav-link <c:if test="${param.menuType=='badWord'}">active</c:if>" <c:if test="${param.menuType=='badWord'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-ban nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_bad_word" /></p>
 						</a></li></c:if>
 
@@ -305,21 +305,21 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/systeminfo/')}"
 						   class="nav-link <c:if test="${param.menuType=='systemInfo'}">active</c:if>" <c:if test="${param.menuType=='systemInfo'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-info-circle nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_system_info" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-searchlog-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/searchlog/')}" class="nav-link <c:if test="${param.menuType=='searchLog'}">active</c:if>" <c:if test="${param.menuType=='searchLog'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-search nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_searchLog" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-joblog-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/joblog/')}" class="nav-link <c:if test="${param.menuType=='jobLog'}">active</c:if>" <c:if test="${param.menuType=='jobLog'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-history nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_jobLog" /></p>
 						</a></li></c:if>
 
@@ -327,14 +327,14 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/crawlinginfo/')}"
 						   class="nav-link <c:if test="${param.menuType=='crawlingInfo'}">active</c:if>" <c:if test="${param.menuType=='crawlingInfo'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-spider nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_crawling_info" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-log-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/log/')}" class="nav-link <c:if test="${param.menuType=='log'}">active</c:if>" <c:if test="${param.menuType=='log'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-file-alt nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_log" /></p>
 						</a></li></c:if>
 
@@ -342,7 +342,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/failureurl/')}"
 						   class="nav-link <c:if test="${param.menuType=='failureUrl'}">active</c:if>" <c:if test="${param.menuType=='failureUrl'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-exclamation-triangle nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_failure_url" /></p>
 						</a></li></c:if>
 
@@ -350,14 +350,14 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/searchlist/')}"
 						   class="nav-link <c:if test="${param.menuType=='searchList'}">active</c:if>" <c:if test="${param.menuType=='searchList'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-th-list nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_search_list" /></p>
 						</a></li></c:if>
 
 					<c:if test="${fe:permission('admin-backup-view')}">
 					<li class="nav-item">
 						<a href="${fe:url('/admin/backup/')}" class="nav-link <c:if test="${param.menuType=='backup'}">active</c:if>" <c:if test="${param.menuType=='backup'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-download nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_backup" /></p>
 						</a></li></c:if>
 
@@ -365,7 +365,7 @@
 					<li class="nav-item">
 						<a href="${fe:url('/admin/maintenance/')}"
 						   class="nav-link <c:if test="${param.menuType=='maintenance'}">active</c:if>" <c:if test="${param.menuType=='maintenance'}">aria-current="page"</c:if>>
-							<i class='fa fa-genderless nav-icon' aria-hidden="true"></i>
+							<i class='fa fa-wrench nav-icon' aria-hidden="true"></i>
 							<p><la:message key="labels.menu_maintenance" /></p>
 						</a></li></c:if>
 

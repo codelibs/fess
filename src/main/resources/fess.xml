@@ -101,6 +101,10 @@
 			<arg>"error/badRequest.jsp"</arg>
 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
+			<arg>"errorBusy"</arg>
+			<arg>"error/busy.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
 			<arg>"cache"</arg>
 			<arg>"cache.hbs"</arg>
 		</postConstruct>

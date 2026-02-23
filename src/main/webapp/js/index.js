@@ -31,8 +31,16 @@ $(function() {
 
   $("#searchForm").on("submit", function() {
     $searchButton.prop("disabled", true);
+    var $icon = $searchButton.find("i.fa-search");
+    if ($icon.length > 0) {
+      $icon.removeClass("fa fa-search").addClass("spinner-border spinner-border-sm");
+    }
     setTimeout(function() {
       $searchButton.prop("disabled", false);
+      var $spinner = $searchButton.find(".spinner-border");
+      if ($spinner.length > 0) {
+        $spinner.removeClass("spinner-border spinner-border-sm").addClass("fa fa-search");
+      }
     }, BUTTON_DISABLE_DURATION);
     return true;
   });
