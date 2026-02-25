@@ -447,13 +447,34 @@ public class OpenAiLlmClient implements LlmClient {
         }
 
         // Max tokens (top-level for OpenAI)
+        final String maxTokensKey = useMaxCompletionTokens(model) ? "max_completion_tokens" : "max_tokens";
         if (request.getMaxTokens() != null) {
-            body.put("max_tokens", request.getMaxTokens());
+            body.put(maxTokensKey, request.getMaxTokens());
         } else {
-            body.put("max_tokens", getMaxTokens());
+            body.put(maxTokensKey, getMaxTokens());
         }
 
         return body;
+    }
+
+    /**
+     * Determines whether the given model requires the "max_completion_tokens" parameter
+     * instead of the legacy "max_tokens" parameter.
+     *
+     * @param model the model name
+     * @return true if the model uses max_completion_tokens
+     */
+    protected boolean useMaxCompletionTokens(final String model) {
+        if (StringUtil.isBlank(model)) {
+            return false;
+        }
+        if (model.startsWith("o1") || model.startsWith("o3") || model.startsWith("o4")) {
+            return true;
+        }
+        if (model.startsWith("gpt-5")) {
+            return true;
+        }
+        return false;
     }
 
     /**
