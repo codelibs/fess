@@ -137,7 +137,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         assertEquals("gpt-5-mini", body.get("model"));
         assertEquals(false, body.get("stream"));
         assertEquals(0.7, body.get("temperature"));
-        assertEquals(4096, body.get("max_tokens"));
+        assertEquals(4096, body.get("max_completion_tokens"));
 
         @SuppressWarnings("unchecked")
         final List<Map<String, String>> messages = (List<Map<String, String>>) body.get("messages");
@@ -182,7 +182,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         final Map<String, Object> body = client.buildRequestBody(request, false);
 
-        assertEquals(1000, body.get("max_tokens"));
+        assertEquals(1000, body.get("max_completion_tokens"));
     }
 
     @Test
@@ -1054,6 +1054,353 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         } catch (final LlmException error) {
             assertTrue(error.getMessage().contains("503"));
         }
+    }
+
+    // ========== useMaxCompletionTokens tests ==========
+
+    @Test
+    public void test_useMaxCompletionTokens_legacyModels() {
+        assertFalse(client.useMaxCompletionTokens("gpt-3.5-turbo"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4o"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4o-mini"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4-turbo"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_newerModels() {
+        assertTrue(client.useMaxCompletionTokens("o1"));
+        assertTrue(client.useMaxCompletionTokens("o1-mini"));
+        assertTrue(client.useMaxCompletionTokens("o1-preview"));
+        assertTrue(client.useMaxCompletionTokens("o3"));
+        assertTrue(client.useMaxCompletionTokens("o3-mini"));
+        assertTrue(client.useMaxCompletionTokens("o4-mini"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5-mini"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5.1"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5.2"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_blankOrNull() {
+        assertFalse(client.useMaxCompletionTokens(null));
+        assertFalse(client.useMaxCompletionTokens(""));
+        assertFalse(client.useMaxCompletionTokens("  "));
+    }
+
+    @Test
+    public void test_buildRequestBody_legacyModel_usesMaxTokens() {
+        client.setTestModel("gpt-4");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-4", body.get("model"));
+        assertEquals(4096, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_requestModelOverride() {
+        client.setTestModel("gpt-4");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setModel("o3-mini").setMaxTokens(2048).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o3-mini", body.get("model"));
+        assertEquals(2048, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    // ========== useMaxCompletionTokens: boundary/edge cases ==========
+
+    @Test
+    public void test_useMaxCompletionTokens_o1Variants() {
+        assertTrue(client.useMaxCompletionTokens("o1"));
+        assertTrue(client.useMaxCompletionTokens("o1-mini"));
+        assertTrue(client.useMaxCompletionTokens("o1-preview"));
+        assertTrue(client.useMaxCompletionTokens("o1-2024-12-17"));
+        assertTrue(client.useMaxCompletionTokens("o1-pro"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_o3Variants() {
+        assertTrue(client.useMaxCompletionTokens("o3"));
+        assertTrue(client.useMaxCompletionTokens("o3-mini"));
+        assertTrue(client.useMaxCompletionTokens("o3-mini-2025-01-31"));
+        assertTrue(client.useMaxCompletionTokens("o3-pro"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_o4Variants() {
+        assertTrue(client.useMaxCompletionTokens("o4-mini"));
+        assertTrue(client.useMaxCompletionTokens("o4-mini-2025-04-16"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_gpt5Variants() {
+        assertTrue(client.useMaxCompletionTokens("gpt-5"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5-mini"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5-turbo"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5.1"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5.2"));
+        assertTrue(client.useMaxCompletionTokens("gpt-5-2025-06-01"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_gpt4FamilyReturnsFalse() {
+        assertFalse(client.useMaxCompletionTokens("gpt-4"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4o"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4o-mini"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4-turbo"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4-turbo-2024-04-09"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4-0613"));
+        assertFalse(client.useMaxCompletionTokens("gpt-4-1106-preview"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_gpt35ReturnsFalse() {
+        assertFalse(client.useMaxCompletionTokens("gpt-3.5-turbo"));
+        assertFalse(client.useMaxCompletionTokens("gpt-3.5-turbo-0125"));
+        assertFalse(client.useMaxCompletionTokens("gpt-3.5-turbo-16k"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_chatgptModelReturnsFalse() {
+        assertFalse(client.useMaxCompletionTokens("chatgpt-4o-latest"));
+    }
+
+    @Test
+    public void test_useMaxCompletionTokens_unknownModelReturnsFalse() {
+        assertFalse(client.useMaxCompletionTokens("some-custom-model"));
+        assertFalse(client.useMaxCompletionTokens("my-fine-tuned-model"));
+        assertFalse(client.useMaxCompletionTokens("llama-3"));
+    }
+
+    // ========== buildRequestBody: max_tokens key selection integration ==========
+
+    @Test
+    public void test_buildRequestBody_o1Model_usesMaxCompletionTokens() {
+        client.setTestModel("o1");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(8192);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o1", body.get("model"));
+        assertEquals(8192, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_o3MiniModel_usesMaxCompletionTokens() {
+        client.setTestModel("o3-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o3-mini", body.get("model"));
+        assertEquals(4096, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_o4MiniModel_usesMaxCompletionTokens() {
+        client.setTestModel("o4-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o4-mini", body.get("model"));
+        assertEquals(4096, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_gpt4oModel_usesMaxTokens() {
+        client.setTestModel("gpt-4o");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-4o", body.get("model"));
+        assertEquals(4096, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_gpt35Model_usesMaxTokens() {
+        client.setTestModel("gpt-3.5-turbo");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(2048);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-3.5-turbo", body.get("model"));
+        assertEquals(2048, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_legacyDefaultModel_requestOverridesToNewer() {
+        client.setTestModel("gpt-4");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setModel("gpt-5-mini").addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-5-mini", body.get("model"));
+        assertEquals(4096, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_newerDefaultModel_requestOverridesToLegacy() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setModel("gpt-4o").addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-4o", body.get("model"));
+        assertEquals(4096, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_newerModel_withRequestMaxTokens() {
+        client.setTestModel("o3-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setMaxTokens(1024).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o3-mini", body.get("model"));
+        assertEquals(1024, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_legacyModel_withRequestMaxTokens() {
+        client.setTestModel("gpt-4");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setMaxTokens(512).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("gpt-4", body.get("model"));
+        assertEquals(512, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_streaming_newerModel_usesMaxCompletionTokens() {
+        client.setTestModel("gpt-5");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, true);
+
+        assertEquals(true, body.get("stream"));
+        assertEquals("gpt-5", body.get("model"));
+        assertEquals(4096, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_streaming_legacyModel_usesMaxTokens() {
+        client.setTestModel("gpt-4");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, true);
+
+        assertEquals(true, body.get("stream"));
+        assertEquals("gpt-4", body.get("model"));
+        assertEquals(4096, body.get("max_tokens"));
+        assertNull(body.get("max_completion_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_blankRequestModel_fallsBackToDefaultKeySelection() {
+        client.setTestModel("o1");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setModel("").addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o1", body.get("model"));
+        assertEquals(4096, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_nullRequestModel_fallsBackToDefaultKeySelection() {
+        client.setTestModel("o3-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(2048);
+
+        final LlmChatRequest request = new LlmChatRequest().setModel(null).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("o3-mini", body.get("model"));
+        assertEquals(2048, body.get("max_completion_tokens"));
+        assertNull(body.get("max_tokens"));
+    }
+
+    @Test
+    public void test_buildRequestBody_bodyContainsExactlyOneMaxTokensKey() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertTrue(body.containsKey("max_completion_tokens"));
+        assertFalse(body.containsKey("max_tokens"));
+
+        // Legacy model should have the opposite
+        client.setTestModel("gpt-4");
+        final Map<String, Object> body2 = client.buildRequestBody(request, false);
+
+        assertTrue(body2.containsKey("max_tokens"));
+        assertFalse(body2.containsKey("max_completion_tokens"));
     }
 
     // ========== Helper methods ==========
