@@ -17,6 +17,7 @@ package org.codelibs.fess.llm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -205,5 +206,168 @@ public class LlmClientManager {
                     e.getMessage(), System.currentTimeMillis() - startTime, e);
             throw new LlmException("LLM streaming chat request failed", e);
         }
+    }
+
+    // RAG workflow delegation methods
+
+    /**
+     * Detects the intent of a user message using the configured LLM client.
+     *
+     * @param userMessage the user's message
+     * @return the detected intent with extracted keywords
+     * @throws LlmException if LLM is not available
+     */
+    public IntentDetectionResult detectIntent(final String userMessage) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        return getClient().detectIntent(userMessage);
+    }
+
+    /**
+     * Evaluates search results for relevance using the configured LLM client.
+     *
+     * @param userMessage the original user message
+     * @param query the search query used
+     * @param searchResults the search results to evaluate
+     * @return evaluation result with relevant document IDs
+     * @throws LlmException if LLM is not available
+     */
+    public RelevanceEvaluationResult evaluateResults(final String userMessage, final String query,
+            final List<Map<String, Object>> searchResults) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        return getClient().evaluateResults(userMessage, query, searchResults);
+    }
+
+    /**
+     * Generates an answer using document content (synchronous).
+     *
+     * @param userMessage the user's message
+     * @param documents the documents with content
+     * @param history the conversation history
+     * @return the chat response
+     * @throws LlmException if LLM is not available
+     */
+    public LlmChatResponse generateAnswer(final String userMessage, final List<Map<String, Object>> documents,
+            final List<LlmMessage> history) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        return getClient().generateAnswer(userMessage, documents, history);
+    }
+
+    /**
+     * Generates an answer using document content (streaming).
+     *
+     * @param userMessage the user's message
+     * @param documents the documents with content
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void streamGenerateAnswer(final String userMessage, final List<Map<String, Object>> documents, final List<LlmMessage> history,
+            final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().streamGenerateAnswer(userMessage, documents, history, callback);
+    }
+
+    /**
+     * Generates a response asking user for clarification.
+     *
+     * @param userMessage the user's message
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateUnclearIntentResponse(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateUnclearIntentResponse(userMessage, history, callback);
+    }
+
+    /**
+     * Generates a response when no relevant documents are found.
+     *
+     * @param userMessage the user's message
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateNoResultsResponse(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateNoResultsResponse(userMessage, history, callback);
+    }
+
+    /**
+     * Generates a response when the specified document URL is not found.
+     *
+     * @param userMessage the user's message
+     * @param documentUrl the URL that was not found
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateDocumentNotFoundResponse(final String userMessage, final String documentUrl, final List<LlmMessage> history,
+            final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateDocumentNotFoundResponse(userMessage, documentUrl, history, callback);
+    }
+
+    /**
+     * Generates a summary of the specified documents.
+     *
+     * @param userMessage the user's message
+     * @param documents the documents to summarize
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateSummaryResponse(final String userMessage, final List<Map<String, Object>> documents, final List<LlmMessage> history,
+            final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateSummaryResponse(userMessage, documents, history, callback);
+    }
+
+    /**
+     * Generates an FAQ answer using document content (streaming).
+     *
+     * @param userMessage the user's message
+     * @param documents the documents with content
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateFaqAnswerResponse(final String userMessage, final List<Map<String, Object>> documents,
+            final List<LlmMessage> history, final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateFaqAnswerResponse(userMessage, documents, history, callback);
+    }
+
+    /**
+     * Generates a direct answer without document search.
+     *
+     * @param userMessage the user's message
+     * @param history the conversation history
+     * @param callback the streaming callback
+     * @throws LlmException if LLM is not available
+     */
+    public void generateDirectAnswer(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        getClient().generateDirectAnswer(userMessage, history, callback);
     }
 }
