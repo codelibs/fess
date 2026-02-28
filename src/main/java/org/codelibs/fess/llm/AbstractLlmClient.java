@@ -436,7 +436,7 @@ public abstract class AbstractLlmClient implements LlmClient {
     public LlmChatResponse generateAnswer(final String userMessage, final List<Map<String, Object>> documents,
             final List<LlmMessage> history) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildContext(documents);
+        final String context = buildContext(documents, fessConfig);
         final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
 
         return chat(request);
@@ -446,7 +446,7 @@ public abstract class AbstractLlmClient implements LlmClient {
     public void streamGenerateAnswer(final String userMessage, final List<Map<String, Object>> documents, final List<LlmMessage> history,
             final LlmStreamCallback callback) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildFullContentContext(documents, fessConfig);
+        final String context = buildContext(documents, fessConfig);
         final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
         request.setStream(true);
 
@@ -591,7 +591,7 @@ public abstract class AbstractLlmClient implements LlmClient {
     public void generateFaqAnswerResponse(final String userMessage, final List<Map<String, Object>> documents,
             final List<LlmMessage> history, final LlmStreamCallback callback) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildFullContentContext(documents, fessConfig);
+        final String context = buildContext(documents, fessConfig);
 
         final String baseSystemPrompt = fessConfig.getRagChatSystemPrompt();
         final String systemPrompt;
@@ -712,63 +712,13 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     /**
-     * Builds context from search results for the LLM prompt.
+     * Builds context from document content for the LLM prompt.
      *
-     * @param searchResults the search results to build context from
-     * @return the context string for the LLM prompt
-     */
-    protected String buildContext(final List<Map<String, Object>> searchResults) {
-        if (searchResults.isEmpty()) {
-            return "";
-        }
-
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxChars = fessConfig.getRagChatContextMaxCharsAsInteger();
-
-        final StringBuilder context = new StringBuilder();
-        context.append("The following are search results that may help answer the question:\n\n");
-
-        int totalChars = context.length();
-        int index = 1;
-
-        for (final Map<String, Object> doc : searchResults) {
-            final String title = getStringValue(doc, "title");
-            final String url = getStringValue(doc, "url");
-            final String content = getStringValue(doc, "content_description");
-
-            final StringBuilder docContext = new StringBuilder();
-            docContext.append("[").append(index).append("] ");
-            if (StringUtil.isNotBlank(title)) {
-                docContext.append(title).append("\n");
-            }
-            if (StringUtil.isNotBlank(url)) {
-                docContext.append("URL: ").append(url).append("\n");
-            }
-            if (StringUtil.isNotBlank(content)) {
-                docContext.append(content).append("\n");
-            }
-            docContext.append("\n");
-
-            if (totalChars + docContext.length() > maxChars) {
-                break;
-            }
-
-            context.append(docContext);
-            totalChars += docContext.length();
-            index++;
-        }
-
-        return context.toString();
-    }
-
-    /**
-     * Builds context from full document content.
-     *
-     * @param documents the documents with full content
+     * @param documents the search result documents
      * @param fessConfig the Fess configuration
      * @return the context string
      */
-    protected String buildFullContentContext(final List<Map<String, Object>> documents, final FessConfig fessConfig) {
+    protected String buildContext(final List<Map<String, Object>> documents, final FessConfig fessConfig) {
         final int maxChars = fessConfig.getRagChatContextMaxCharsAsInteger();
         final StringBuilder context = new StringBuilder();
         context.append("The following are documents that contain information to answer the question:\n\n");
