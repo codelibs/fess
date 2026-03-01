@@ -317,10 +317,12 @@ public class OpenAiLlmClient extends AbstractLlmClient {
 
         body.put("stream", stream);
 
-        if (request.getTemperature() != null) {
-            body.put("temperature", request.getTemperature());
-        } else {
-            body.put("temperature", getTemperature());
+        if (supportsTemperature(model)) {
+            if (request.getTemperature() != null) {
+                body.put("temperature", request.getTemperature());
+            } else {
+                body.put("temperature", getTemperature());
+            }
         }
 
         final String maxTokensKey = useMaxCompletionTokens(model) ? "max_completion_tokens" : "max_tokens";
@@ -328,6 +330,10 @@ public class OpenAiLlmClient extends AbstractLlmClient {
             body.put(maxTokensKey, request.getMaxTokens());
         } else {
             body.put(maxTokensKey, getMaxTokens());
+        }
+
+        if (isReasoningModel(model) && request.getThinkingBudget() != null && request.getThinkingBudget() == 0) {
+            body.put("reasoning_effort", "low");
         }
 
         return body;
@@ -341,6 +347,46 @@ public class OpenAiLlmClient extends AbstractLlmClient {
      * @return true if the model uses max_completion_tokens
      */
     protected boolean useMaxCompletionTokens(final String model) {
+        if (StringUtil.isBlank(model)) {
+            return false;
+        }
+        if (model.startsWith("o1") || model.startsWith("o3") || model.startsWith("o4")) {
+            return true;
+        }
+        if (model.startsWith("gpt-5")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determines whether the given model supports the "temperature" parameter.
+     * Some newer models (e.g., gpt-5-mini) only support the default temperature value.
+     *
+     * @param model the model name
+     * @return true if the model supports custom temperature values
+     */
+    protected boolean supportsTemperature(final String model) {
+        if (StringUtil.isBlank(model)) {
+            return true;
+        }
+        if (model.startsWith("o1") || model.startsWith("o3") || model.startsWith("o4")) {
+            return false;
+        }
+        if (model.startsWith("gpt-5")) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Determines whether the given model is a reasoning model that uses internal
+     * reasoning tokens (e.g., o1, o3, o4, gpt-5 series).
+     *
+     * @param model the model name
+     * @return true if the model is a reasoning model
+     */
+    protected boolean isReasoningModel(final String model) {
         if (StringUtil.isBlank(model)) {
             return false;
         }
@@ -392,5 +438,15 @@ public class OpenAiLlmClient extends AbstractLlmClient {
     @Override
     protected int getTimeout() {
         return ComponentUtil.getFessConfig().getRagLlmOpenaiTimeoutAsInteger();
+    }
+
+    @Override
+    protected int getIntentDetectionMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmOpenaiIntentMaxTokensAsInteger();
+    }
+
+    @Override
+    protected int getEvaluationMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmOpenaiEvaluationMaxTokensAsInteger();
     }
 }
