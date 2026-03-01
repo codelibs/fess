@@ -1983,7 +1983,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String RAG_LLM_GEMINI_API_KEY = "rag.llm.gemini.api.key";
 
-    /** The key of the configuration. e.g. gemini-2.5-flash */
+    /** The key of the configuration. e.g. gemini-3-flash-preview */
     String RAG_LLM_GEMINI_MODEL = "rag.llm.gemini.model";
 
     /** The key of the configuration. e.g. https://generativelanguage.googleapis.com/v1beta */
@@ -9391,7 +9391,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'rag.llm.gemini.model'. <br>
-     * The value is, e.g. gemini-2.5-flash <br>
+     * The value is, e.g. gemini-3-flash-preview <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagLlmGeminiModel();
@@ -13831,7 +13831,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_URL, "https://api.openai.com/v1");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_TIMEOUT, "60000");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_KEY, "");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-2.5-flash");
+            defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-3-flash-preview");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_URL, "https://generativelanguage.googleapis.com/v1beta");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_TIMEOUT, "60000");
             defaultMap.put(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL, "60");

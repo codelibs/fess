@@ -30,6 +30,7 @@ public class LlmChatRequest {
     private Integer maxTokens;
     private Double temperature;
     private boolean stream;
+    private Integer thinkingBudget;
 
     /**
      * Default constructor.
@@ -176,6 +177,28 @@ public class LlmChatRequest {
      */
     public LlmChatRequest setStream(final boolean stream) {
         this.stream = stream;
+        return this;
+    }
+
+    /**
+     * Gets the thinking budget for models that support thinking tokens.
+     * {@code null} means use the model default, {@code 0} disables thinking.
+     *
+     * @return the thinking budget
+     */
+    public Integer getThinkingBudget() {
+        return thinkingBudget;
+    }
+
+    /**
+     * Sets the thinking budget for models that support thinking tokens.
+     * {@code null} means use the model default, {@code 0} disables thinking.
+     *
+     * @param thinkingBudget the thinking budget
+     * @return this request for method chaining
+     */
+    public LlmChatRequest setThinkingBudget(final Integer thinkingBudget) {
+        this.thinkingBudget = thinkingBudget;
         return this;
     }
 }
