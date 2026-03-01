@@ -1968,6 +1968,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60000 */
     String RAG_LLM_OLLAMA_TIMEOUT = "rag.llm.ollama.timeout";
 
+    /** The key of the configuration. e.g. 500 */
+    String RAG_LLM_OLLAMA_INTENT_MAX_TOKENS = "rag.llm.ollama.intent.max.tokens";
+
+    /** The key of the configuration. e.g. 500 */
+    String RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS = "rag.llm.ollama.evaluation.max.tokens";
+
     /** The key of the configuration. e.g.  */
     String RAG_LLM_OPENAI_API_KEY = "rag.llm.openai.api.key";
 
@@ -1980,6 +1986,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60000 */
     String RAG_LLM_OPENAI_TIMEOUT = "rag.llm.openai.timeout";
 
+    /** The key of the configuration. e.g. 2048 */
+    String RAG_LLM_OPENAI_INTENT_MAX_TOKENS = "rag.llm.openai.intent.max.tokens";
+
+    /** The key of the configuration. e.g. 2048 */
+    String RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS = "rag.llm.openai.evaluation.max.tokens";
+
     /** The key of the configuration. e.g.  */
     String RAG_LLM_GEMINI_API_KEY = "rag.llm.gemini.api.key";
 
@@ -1991,6 +2003,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 60000 */
     String RAG_LLM_GEMINI_TIMEOUT = "rag.llm.gemini.timeout";
+
+    /** The key of the configuration. e.g. 1024 */
+    String RAG_LLM_GEMINI_INTENT_MAX_TOKENS = "rag.llm.gemini.intent.max.tokens";
+
+    /** The key of the configuration. e.g. 1024 */
+    String RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS = "rag.llm.gemini.evaluation.max.tokens";
 
     /** The key of the configuration. e.g. 60 */
     String RAG_LLM_AVAILABILITY_CHECK_INTERVAL = "rag.llm.availability.check.interval";
@@ -9327,6 +9345,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagLlmOllamaTimeoutAsInteger();
 
     /**
+     * Get the value for the key 'rag.llm.ollama.intent.max.tokens'. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmOllamaIntentMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.ollama.intent.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmOllamaIntentMaxTokensAsInteger();
+
+    /**
+     * Get the value for the key 'rag.llm.ollama.evaluation.max.tokens'. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmOllamaEvaluationMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.ollama.evaluation.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmOllamaEvaluationMaxTokensAsInteger();
+
+    /**
      * Get the value for the key 'rag.llm.openai.api.key'. <br>
      * The value is, e.g.  <br>
      * comment: OpenAI settings.
@@ -9373,6 +9421,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagLlmOpenaiTimeoutAsInteger();
 
     /**
+     * Get the value for the key 'rag.llm.openai.intent.max.tokens'. <br>
+     * The value is, e.g. 2048 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmOpenaiIntentMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.openai.intent.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 2048 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmOpenaiIntentMaxTokensAsInteger();
+
+    /**
+     * Get the value for the key 'rag.llm.openai.evaluation.max.tokens'. <br>
+     * The value is, e.g. 2048 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmOpenaiEvaluationMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.openai.evaluation.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 2048 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmOpenaiEvaluationMaxTokensAsInteger();
+
+    /**
      * Get the value for the key 'rag.llm.gemini.api.key'. <br>
      * The value is, e.g.  <br>
      * comment: Google Gemini settings.
@@ -9417,6 +9495,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getRagLlmGeminiTimeoutAsInteger();
+
+    /**
+     * Get the value for the key 'rag.llm.gemini.intent.max.tokens'. <br>
+     * The value is, e.g. 1024 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmGeminiIntentMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.gemini.intent.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 1024 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmGeminiIntentMaxTokensAsInteger();
+
+    /**
+     * Get the value for the key 'rag.llm.gemini.evaluation.max.tokens'. <br>
+     * The value is, e.g. 1024 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagLlmGeminiEvaluationMaxTokens();
+
+    /**
+     * Get the value for the key 'rag.llm.gemini.evaluation.max.tokens' as {@link Integer}. <br>
+     * The value is, e.g. 1024 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagLlmGeminiEvaluationMaxTokensAsInteger();
 
     /**
      * Get the value for the key 'rag.llm.availability.check.interval'. <br>
@@ -13067,6 +13175,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_LLM_OLLAMA_TIMEOUT);
         }
 
+        public String getRagLlmOllamaIntentMaxTokens() {
+            return get(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmOllamaIntentMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS);
+        }
+
+        public String getRagLlmOllamaEvaluationMaxTokens() {
+            return get(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmOllamaEvaluationMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS);
+        }
+
         public String getRagLlmOpenaiApiKey() {
             return get(FessConfig.RAG_LLM_OPENAI_API_KEY);
         }
@@ -13091,6 +13215,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_LLM_OPENAI_TIMEOUT);
         }
 
+        public String getRagLlmOpenaiIntentMaxTokens() {
+            return get(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmOpenaiIntentMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS);
+        }
+
+        public String getRagLlmOpenaiEvaluationMaxTokens() {
+            return get(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmOpenaiEvaluationMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS);
+        }
+
         public String getRagLlmGeminiApiKey() {
             return get(FessConfig.RAG_LLM_GEMINI_API_KEY);
         }
@@ -13113,6 +13253,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getRagLlmGeminiTimeoutAsInteger() {
             return getAsInteger(FessConfig.RAG_LLM_GEMINI_TIMEOUT);
+        }
+
+        public String getRagLlmGeminiIntentMaxTokens() {
+            return get(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmGeminiIntentMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS);
+        }
+
+        public String getRagLlmGeminiEvaluationMaxTokens() {
+            return get(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS);
+        }
+
+        public Integer getRagLlmGeminiEvaluationMaxTokensAsInteger() {
+            return getAsInteger(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS);
         }
 
         public String getRagLlmAvailabilityCheckInterval() {
@@ -13826,14 +13982,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_API_URL, "http://localhost:11434");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "gemma3:4b");
             defaultMap.put(FessConfig.RAG_LLM_OLLAMA_TIMEOUT, "60000");
+            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS, "500");
+            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS, "500");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_KEY, "");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_MODEL, "gpt-5-mini");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_URL, "https://api.openai.com/v1");
             defaultMap.put(FessConfig.RAG_LLM_OPENAI_TIMEOUT, "60000");
+            defaultMap.put(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS, "2048");
+            defaultMap.put(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS, "2048");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_KEY, "");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-3-flash-preview");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_URL, "https://generativelanguage.googleapis.com/v1beta");
             defaultMap.put(FessConfig.RAG_LLM_GEMINI_TIMEOUT, "60000");
+            defaultMap.put(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS, "1024");
+            defaultMap.put(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS, "1024");
             defaultMap.put(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL, "60");
             defaultMap.put(FessConfig.RAG_CHAT_MAX_TOKENS, "4096");
             defaultMap.put(FessConfig.RAG_CHAT_TEMPERATURE, "0.7");

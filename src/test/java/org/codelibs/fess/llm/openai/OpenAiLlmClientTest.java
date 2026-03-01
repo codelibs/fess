@@ -139,7 +139,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
         assertEquals("gpt-5-mini", body.get("model"));
         assertEquals(false, body.get("stream"));
-        assertEquals(0.7, body.get("temperature"));
+        assertNull(body.get("temperature"));
         assertEquals(4096, body.get("max_completion_tokens"));
 
         @SuppressWarnings("unchecked")
@@ -164,7 +164,7 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildRequestBody_withRequestTemperature() {
-        client.setTestModel("gpt-5-mini");
+        client.setTestModel("gpt-4o");
         client.setTestTemperature(0.7);
         client.setTestMaxTokens(4096);
 
@@ -1186,6 +1186,184 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         assertFalse(client.useMaxCompletionTokens("llama-3"));
     }
 
+    // ========== supportsTemperature tests ==========
+
+    @Test
+    public void test_supportsTemperature_legacyModels() {
+        assertTrue(client.supportsTemperature("gpt-3.5-turbo"));
+        assertTrue(client.supportsTemperature("gpt-4"));
+        assertTrue(client.supportsTemperature("gpt-4o"));
+        assertTrue(client.supportsTemperature("gpt-4o-mini"));
+        assertTrue(client.supportsTemperature("gpt-4-turbo"));
+    }
+
+    @Test
+    public void test_supportsTemperature_newerModels() {
+        assertFalse(client.supportsTemperature("o1"));
+        assertFalse(client.supportsTemperature("o1-mini"));
+        assertFalse(client.supportsTemperature("o1-preview"));
+        assertFalse(client.supportsTemperature("o3"));
+        assertFalse(client.supportsTemperature("o3-mini"));
+        assertFalse(client.supportsTemperature("o4-mini"));
+        assertFalse(client.supportsTemperature("gpt-5"));
+        assertFalse(client.supportsTemperature("gpt-5-mini"));
+        assertFalse(client.supportsTemperature("gpt-5.1"));
+        assertFalse(client.supportsTemperature("gpt-5.2"));
+    }
+
+    @Test
+    public void test_supportsTemperature_blankOrNull() {
+        assertTrue(client.supportsTemperature(null));
+        assertTrue(client.supportsTemperature(""));
+        assertTrue(client.supportsTemperature("  "));
+    }
+
+    @Test
+    public void test_supportsTemperature_unknownModelReturnsTrue() {
+        assertTrue(client.supportsTemperature("some-custom-model"));
+        assertTrue(client.supportsTemperature("my-fine-tuned-model"));
+        assertTrue(client.supportsTemperature("llama-3"));
+    }
+
+    // ========== isReasoningModel tests ==========
+
+    @Test
+    public void test_isReasoningModel_legacyModels() {
+        assertFalse(client.isReasoningModel("gpt-3.5-turbo"));
+        assertFalse(client.isReasoningModel("gpt-4"));
+        assertFalse(client.isReasoningModel("gpt-4o"));
+        assertFalse(client.isReasoningModel("gpt-4o-mini"));
+        assertFalse(client.isReasoningModel("gpt-4-turbo"));
+    }
+
+    @Test
+    public void test_isReasoningModel_reasoningModels() {
+        assertTrue(client.isReasoningModel("o1"));
+        assertTrue(client.isReasoningModel("o1-mini"));
+        assertTrue(client.isReasoningModel("o1-preview"));
+        assertTrue(client.isReasoningModel("o3"));
+        assertTrue(client.isReasoningModel("o3-mini"));
+        assertTrue(client.isReasoningModel("o4-mini"));
+        assertTrue(client.isReasoningModel("gpt-5"));
+        assertTrue(client.isReasoningModel("gpt-5-mini"));
+        assertTrue(client.isReasoningModel("gpt-5.1"));
+    }
+
+    @Test
+    public void test_isReasoningModel_blankOrNull() {
+        assertFalse(client.isReasoningModel(null));
+        assertFalse(client.isReasoningModel(""));
+        assertFalse(client.isReasoningModel("  "));
+    }
+
+    // ========== buildRequestBody: reasoning_effort integration ==========
+
+    @Test
+    public void test_buildRequestBody_reasoningModel_thinkingBudgetZero_setsReasoningEffortLow() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(500);
+
+        final LlmChatRequest request = new LlmChatRequest().setThinkingBudget(0).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("low", body.get("reasoning_effort"));
+    }
+
+    @Test
+    public void test_buildRequestBody_reasoningModel_thinkingBudgetNull_noReasoningEffort() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertNull(body.get("reasoning_effort"));
+    }
+
+    @Test
+    public void test_buildRequestBody_legacyModel_thinkingBudgetZero_noReasoningEffort() {
+        client.setTestModel("gpt-4o");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setThinkingBudget(0).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertNull(body.get("reasoning_effort"));
+    }
+
+    @Test
+    public void test_buildRequestBody_o1Model_thinkingBudgetZero_setsReasoningEffortLow() {
+        client.setTestModel("o1");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(500);
+
+        final LlmChatRequest request = new LlmChatRequest().setThinkingBudget(0).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals("low", body.get("reasoning_effort"));
+    }
+
+    // ========== buildRequestBody: temperature integration ==========
+
+    @Test
+    public void test_buildRequestBody_gpt5MiniModel_excludesTemperature() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertNull(body.get("temperature"));
+    }
+
+    @Test
+    public void test_buildRequestBody_gpt5MiniModel_excludesTemperatureEvenWithRequestTemperature() {
+        client.setTestModel("gpt-5-mini");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setTemperature(0.5).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertNull(body.get("temperature"));
+    }
+
+    @Test
+    public void test_buildRequestBody_gpt4oModel_includesTemperature() {
+        client.setTestModel("gpt-4o");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertEquals(0.7, body.get("temperature"));
+    }
+
+    @Test
+    public void test_buildRequestBody_o1Model_excludesTemperature() {
+        client.setTestModel("o1");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(8192);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request, false);
+
+        assertNull(body.get("temperature"));
+    }
+
     // ========== buildRequestBody: max_tokens key selection integration ==========
 
     @Test
@@ -1432,6 +1610,8 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         private int testTimeout = 60000;
         private double testTemperature = 0.7;
         private int testMaxTokens = 4096;
+        private int testIntentDetectionMaxTokens = 2048;
+        private int testEvaluationMaxTokens = 2048;
 
         void setTestApiKey(final String apiKey) {
             this.testApiKey = apiKey;
@@ -1485,6 +1665,16 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         @Override
         protected int getMaxTokens() {
             return testMaxTokens;
+        }
+
+        @Override
+        protected int getIntentDetectionMaxTokens() {
+            return testIntentDetectionMaxTokens;
+        }
+
+        @Override
+        protected int getEvaluationMaxTokens() {
+            return testEvaluationMaxTokens;
         }
 
         @Override

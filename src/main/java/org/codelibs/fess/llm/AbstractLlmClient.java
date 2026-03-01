@@ -286,6 +286,24 @@ public abstract class AbstractLlmClient implements LlmClient {
         return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
     }
 
+    /**
+     * Gets the maximum tokens for intent detection.
+     *
+     * @return the maximum tokens for intent detection
+     */
+    protected int getIntentDetectionMaxTokens() {
+        return 500;
+    }
+
+    /**
+     * Gets the maximum tokens for result evaluation.
+     *
+     * @return the maximum tokens for result evaluation
+     */
+    protected int getEvaluationMaxTokens() {
+        return 500;
+    }
+
     // --- Prompt template setters (for fess_llm.xml injection) ---
 
     /**
@@ -440,7 +458,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
-            request.setMaxTokens(500);
+            request.setMaxTokens(getIntentDetectionMaxTokens());
             request.setTemperature(0.3);
             request.setThinkingBudget(0);
 
@@ -476,7 +494,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
-            request.setMaxTokens(500);
+            request.setMaxTokens(getEvaluationMaxTokens());
             request.setTemperature(0.3);
             request.setThinkingBudget(0);
 

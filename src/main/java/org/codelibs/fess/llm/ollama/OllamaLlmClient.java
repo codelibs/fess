@@ -352,4 +352,14 @@ public class OllamaLlmClient extends AbstractLlmClient {
     protected int getTimeout() {
         return ComponentUtil.getFessConfig().getRagLlmOllamaTimeoutAsInteger();
     }
+
+    @Override
+    protected int getIntentDetectionMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmOllamaIntentMaxTokensAsInteger();
+    }
+
+    @Override
+    protected int getEvaluationMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmOllamaEvaluationMaxTokensAsInteger();
+    }
 }
