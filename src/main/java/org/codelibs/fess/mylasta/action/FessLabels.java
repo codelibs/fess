@@ -3465,7 +3465,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Thinking... */
     public static final String LABELS_chat_phase_intent = "{labels.chat_phase_intent}";
 
-    /** The key of the message: Searching for {keywords}... */
+    /** The key of the message: Searching for __keywords__... */
     public static final String LABELS_chat_phase_search = "{labels.chat_phase_search}";
 
     /** The key of the message: Reviewing search results... */

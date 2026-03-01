@@ -30,6 +30,7 @@
 	       {{maxRelevantDocs}} - max number of relevant documents
 	       {{query}} - search query string
 	       {{searchResults}} - formatted search results for evaluation
+	       {{languageInstruction}} - locale-based language instruction (auto-resolved)
 	     When a property is not set, the default built-in prompt is used. -->
 	<component name="ollamaLlmClient" class="org.codelibs.fess.llm.ollama.OllamaLlmClient">
 		<postConstruct name="init"/>
@@ -60,6 +61,7 @@
 + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
 + "Input: \"How to use Fess with Docker\"\n"
 + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
 + "Question: {{userMessage}}\n\n"
 + "Response (JSON only):"
 		</property>
@@ -71,7 +73,8 @@
 + "- Can they provide more details or keywords?\n"
 + "- What kind of information would be helpful?\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only ask for clarification to help with document search."
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="noResultsSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -83,7 +86,8 @@
 + "- Checking for spelling errors\n"
 + "- Trying related terms\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only inform them about the search results and offer suggestions for refining their search."
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="documentNotFoundSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -94,7 +98,8 @@
 + "- The URL might be incorrect or the document may not be indexed\n"
 + "- They can try searching with keywords instead\n\n"
 + "IMPORTANT: Do NOT provide any information from your own knowledge. "
-+ "Only inform them about the search result."
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="evaluationPrompt">
 "Given the user question and search results, identify the most relevant documents.\n"
@@ -109,7 +114,8 @@
 		</property>
 		<property name="answerGenerationSystemPrompt">
 "{{systemPrompt}}\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="summarySystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -117,7 +123,8 @@
 + "Base your summary ONLY on the provided document content. "
 + "Do NOT add information from your own knowledge.\n\n"
 + "Document content:\n"
-+ "{{documentContent}}"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="faqAnswerSystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -125,7 +132,12 @@
 + "Provide a direct, concise answer based solely on the following documents. "
 + "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
 + "Always cite your sources using [1], [2], etc.\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
 		</property>
 	</component>
 
@@ -158,6 +170,7 @@
 + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
 + "Input: \"How to use Fess with Docker\"\n"
 + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
 + "Question: {{userMessage}}\n\n"
 + "Response (JSON only):"
 		</property>
@@ -169,7 +182,8 @@
 + "- Can they provide more details or keywords?\n"
 + "- What kind of information would be helpful?\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only ask for clarification to help with document search."
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="noResultsSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -181,7 +195,8 @@
 + "- Checking for spelling errors\n"
 + "- Trying related terms\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only inform them about the search results and offer suggestions for refining their search."
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="documentNotFoundSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -192,7 +207,8 @@
 + "- The URL might be incorrect or the document may not be indexed\n"
 + "- They can try searching with keywords instead\n\n"
 + "IMPORTANT: Do NOT provide any information from your own knowledge. "
-+ "Only inform them about the search result."
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="evaluationPrompt">
 "Given the user question and search results, identify the most relevant documents.\n"
@@ -207,7 +223,8 @@
 		</property>
 		<property name="answerGenerationSystemPrompt">
 "{{systemPrompt}}\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="summarySystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -215,7 +232,8 @@
 + "Base your summary ONLY on the provided document content. "
 + "Do NOT add information from your own knowledge.\n\n"
 + "Document content:\n"
-+ "{{documentContent}}"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="faqAnswerSystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -223,7 +241,12 @@
 + "Provide a direct, concise answer based solely on the following documents. "
 + "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
 + "Always cite your sources using [1], [2], etc.\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
 		</property>
 	</component>
 
@@ -256,6 +279,7 @@
 + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
 + "Input: \"How to use Fess with Docker\"\n"
 + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
 + "Question: {{userMessage}}\n\n"
 + "Response (JSON only):"
 		</property>
@@ -267,7 +291,8 @@
 + "- Can they provide more details or keywords?\n"
 + "- What kind of information would be helpful?\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only ask for clarification to help with document search."
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="noResultsSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -279,7 +304,8 @@
 + "- Checking for spelling errors\n"
 + "- Trying related terms\n\n"
 + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-+ "Only inform them about the search results and offer suggestions for refining their search."
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="documentNotFoundSystemPrompt">
 "You are a helpful assistant for a document search system. "
@@ -290,7 +316,8 @@
 + "- The URL might be incorrect or the document may not be indexed\n"
 + "- They can try searching with keywords instead\n\n"
 + "IMPORTANT: Do NOT provide any information from your own knowledge. "
-+ "Only inform them about the search result."
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="evaluationPrompt">
 "Given the user question and search results, identify the most relevant documents.\n"
@@ -305,7 +332,8 @@
 		</property>
 		<property name="answerGenerationSystemPrompt">
 "{{systemPrompt}}\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="summarySystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -313,7 +341,8 @@
 + "Base your summary ONLY on the provided document content. "
 + "Do NOT add information from your own knowledge.\n\n"
 + "Document content:\n"
-+ "{{documentContent}}"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
 		</property>
 		<property name="faqAnswerSystemPrompt">
 "{{systemPrompt}}\n\n"
@@ -321,7 +350,12 @@
 + "Provide a direct, concise answer based solely on the following documents. "
 + "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
 + "Always cite your sources using [1], [2], etc.\n\n"
-+ "{{context}}"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
 		</property>
 	</component>
 </components>

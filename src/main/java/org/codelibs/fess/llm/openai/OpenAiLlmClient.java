@@ -78,14 +78,14 @@ public class OpenAiLlmClient extends AbstractLlmClient {
         final String apiKey = getApiKey();
         if (StringUtil.isBlank(apiKey)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("OpenAI is not available. apiKey is blank");
+                logger.debug("[LLM:OPENAI] OpenAI is not available. apiKey is blank");
             }
             return false;
         }
         final String apiUrl = getApiUrl();
         if (StringUtil.isBlank(apiUrl)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("OpenAI is not available. apiUrl is blank");
+                logger.debug("[LLM:OPENAI] OpenAI is not available. apiUrl is blank");
             }
             return false;
         }
@@ -96,13 +96,14 @@ public class OpenAiLlmClient extends AbstractLlmClient {
                 final int statusCode = response.getCode();
                 final boolean available = statusCode >= 200 && statusCode < 300;
                 if (logger.isDebugEnabled()) {
-                    logger.debug("OpenAI availability check. url={}, statusCode={}, available={}", apiUrl, statusCode, available);
+                    logger.debug("[LLM:OPENAI] OpenAI availability check. url={}, statusCode={}, available={}", apiUrl, statusCode,
+                            available);
                 }
                 return available;
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("OpenAI is not available. url={}, error={}", apiUrl, e.getMessage());
+                logger.debug("[LLM:OPENAI] OpenAI is not available. url={}, error={}", apiUrl, e.getMessage());
             }
             return false;
         }
@@ -115,12 +116,15 @@ public class OpenAiLlmClient extends AbstractLlmClient {
         final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+            logger.debug("[LLM:OPENAI] Sending chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
                     request.getMessages().size());
         }
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[LLM:OPENAI] requestBody={}", json);
+            }
             final HttpPost httpRequest = new HttpPost(url);
             httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             httpRequest.addHeader("Authorization", "Bearer " + getApiKey());
@@ -142,6 +146,9 @@ public class OpenAiLlmClient extends AbstractLlmClient {
                 }
 
                 final String responseBody = response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "";
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[LLM:OPENAI] responseBody={}", responseBody);
+                }
                 final JsonNode jsonNode = objectMapper.readTree(responseBody);
 
                 final LlmChatResponse chatResponse = new LlmChatResponse();
@@ -195,12 +202,15 @@ public class OpenAiLlmClient extends AbstractLlmClient {
         final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting streaming chat request to OpenAI. url={}, model={}, messageCount={}", url, requestBody.get("model"),
-                    request.getMessages().size());
+            logger.debug("[LLM:OPENAI] Starting streaming chat request to OpenAI. url={}, model={}, messageCount={}", url,
+                    requestBody.get("model"), request.getMessages().size());
         }
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[LLM:OPENAI] requestBody={}", json);
+            }
             final HttpPost httpRequest = new HttpPost(url);
             httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             httpRequest.addHeader("Authorization", "Bearer " + getApiKey());
@@ -271,8 +281,8 @@ public class OpenAiLlmClient extends AbstractLlmClient {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Completed streaming chat from OpenAI. url={}, chunkCount={}, elapsedTime={}ms", url, chunkCount,
-                            System.currentTimeMillis() - startTime);
+                    logger.debug("[LLM:OPENAI] Completed streaming chat from OpenAI. url={}, chunkCount={}, elapsedTime={}ms", url,
+                            chunkCount, System.currentTimeMillis() - startTime);
                 }
             }
         } catch (final LlmException e) {

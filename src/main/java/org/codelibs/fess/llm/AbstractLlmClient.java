@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -32,6 +33,7 @@ import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -89,6 +91,9 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     /** Custom system prompt template for FAQ answer generation. Uses {@code {{systemPrompt}}}, {@code {{context}}} placeholders. */
     protected String faqAnswerSystemPrompt;
+
+    /** Custom system prompt for direct answer generation (without document search). */
+    protected String directAnswerSystemPrompt;
 
     /**
      * Default constructor.
@@ -364,17 +369,75 @@ public abstract class AbstractLlmClient implements LlmClient {
         this.faqAnswerSystemPrompt = faqAnswerSystemPrompt;
     }
 
+    /**
+     * Sets the custom system prompt for direct answer generation.
+     *
+     * @param directAnswerSystemPrompt the direct answer system prompt
+     */
+    public void setDirectAnswerSystemPrompt(final String directAnswerSystemPrompt) {
+        this.directAnswerSystemPrompt = directAnswerSystemPrompt;
+    }
+
+    // --- Locale support methods ---
+
+    /**
+     * Gets the user's locale from the current request context.
+     *
+     * @return the user's locale, or default locale if not in request context
+     */
+    protected Locale getUserLocale() {
+        try {
+            return LaRequestUtil.getOptionalRequest().map(request -> request.getLocale()).orElse(Locale.getDefault());
+        } catch (final Exception e) {
+            return Locale.getDefault();
+        }
+    }
+
+    /**
+     * Gets the language instruction based on the user's locale.
+     *
+     * @return the language instruction string, or empty string if locale is English
+     */
+    protected String getLanguageInstruction() {
+        final Locale locale = getUserLocale();
+        final String language = locale.getLanguage();
+        if ("en".equals(language)) {
+            return StringUtil.EMPTY;
+        }
+        return "IMPORTANT: You MUST respond in " + locale.getDisplayLanguage(Locale.ENGLISH) + ".";
+    }
+
+    /**
+     * Resolves the {{languageInstruction}} placeholder in a prompt.
+     *
+     * @param prompt the prompt template
+     * @return the prompt with language instruction resolved
+     */
+    protected String resolveLanguageInstruction(final String prompt) {
+        if (prompt == null) {
+            return null;
+        }
+        final String languageInstruction = getLanguageInstruction();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG] languageInstruction={}", languageInstruction);
+        }
+        return prompt.replace("{{languageInstruction}}", languageInstruction);
+    }
+
     // --- Default RAG method implementations ---
 
     @Override
     public IntentDetectionResult detectIntent(final String userMessage) {
         final long startTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting intent detection. messageLength={}", userMessage != null ? userMessage.length() : 0);
+            logger.debug("[RAG:INTENT] Starting intent detection. userMessage={}", userMessage);
         }
 
         try {
             final String prompt = buildIntentDetectionPrompt(userMessage);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:INTENT] prompt={}", prompt);
+            }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
             request.setMaxTokens(500);
@@ -384,8 +447,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             final IntentDetectionResult result = parseIntentResponse(response.getContent());
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Intent detection completed. intent={}, query={}, elapsedTime={}ms", result.getIntent(), result.getQuery(),
-                        System.currentTimeMillis() - startTime);
+                logger.debug("[RAG:INTENT] Intent detection completed. intent={}, query={}, reasoning={}, elapsedTime={}ms",
+                        result.getIntent(), result.getQuery(), result.getReasoning(), System.currentTimeMillis() - startTime);
             }
 
             return result;
@@ -401,12 +464,15 @@ public abstract class AbstractLlmClient implements LlmClient {
             final List<Map<String, Object>> searchResults) {
         final long startTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting result evaluation. userMessageLength={}, query={}, resultCount={}",
-                    userMessage != null ? userMessage.length() : 0, query, searchResults.size());
+            logger.debug("[RAG:EVAL] Starting result evaluation. userMessage={}, query={}, resultCount={}", userMessage, query,
+                    searchResults.size());
         }
 
         try {
             final String prompt = buildEvaluationPrompt(userMessage, query, searchResults);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:EVAL] prompt={}", prompt);
+            }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
             request.setMaxTokens(500);
@@ -416,7 +482,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Result evaluation completed. hasRelevant={}, relevantDocIds={}, elapsedTime={}ms",
+                logger.debug("[RAG:EVAL] Result evaluation completed. hasRelevant={}, relevantDocIds={}, elapsedTime={}ms",
                         result.isHasRelevantResults(), result.getRelevantDocIds(), System.currentTimeMillis() - startTime);
             }
 
@@ -435,6 +501,10 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public LlmChatResponse generateAnswer(final String userMessage, final List<Map<String, Object>> documents,
             final List<LlmMessage> history) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage, documents.size(),
+                    history.size());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String context = buildContext(documents, fessConfig);
         final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
@@ -445,6 +515,10 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public void streamGenerateAnswer(final String userMessage, final List<Map<String, Object>> documents, final List<LlmMessage> history,
             final LlmStreamCallback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] streamGenerateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage,
+                    documents.size(), history.size());
+        }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String context = buildContext(documents, fessConfig);
         final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
@@ -469,7 +543,12 @@ public abstract class AbstractLlmClient implements LlmClient {
                     + "- What kind of information would be helpful?\n\n" + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
                     + "Only ask for clarification to help with document search.";
         }
-        request.addSystemMessage(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateUnclearIntentResponse. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
+                    userMessage, history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
@@ -497,7 +576,12 @@ public abstract class AbstractLlmClient implements LlmClient {
                     + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
                     + "Only inform them about the search results and offer suggestions for refining their search.";
         }
-        request.addSystemMessage(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateNoResultsResponse. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
+                    userMessage, history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
@@ -525,7 +609,12 @@ public abstract class AbstractLlmClient implements LlmClient {
                     + "- They can try searching with keywords instead\n\n"
                     + "IMPORTANT: Do NOT provide any information from your own knowledge. " + "Only inform them about the search result.";
         }
-        request.addSystemMessage(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateDocumentNotFoundResponse. resolvedPrompt={}, documentUrl={}, userMessage={}, historySize={}",
+                    resolvedPrompt, documentUrl, userMessage, history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
@@ -576,7 +665,12 @@ public abstract class AbstractLlmClient implements LlmClient {
             final String suffix = "\n\n" + instructionText + "\n\nDocument content:\n" + documentContent.toString();
             systemPrompt = baseSystemPrompt + suffix;
         }
-        request.addSystemMessage(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateSummaryResponse. resolvedPrompt={}, userMessage={}, documentCount={}, historySize={}",
+                    resolvedPrompt, userMessage, documents.size(), history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
@@ -605,9 +699,14 @@ public abstract class AbstractLlmClient implements LlmClient {
                     + "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
                     + "Always cite your sources using [1], [2], etc.\n\n" + (StringUtil.isNotBlank(context) ? context : "");
         }
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateFaqAnswerResponse. resolvedPrompt={}, contextLength={}, userMessage={}, historySize={}",
+                    resolvedPrompt, context != null ? context.length() : 0, userMessage, history.size());
+        }
 
         final LlmChatRequest request = new LlmChatRequest();
-        request.addSystemMessage(systemPrompt);
+        request.addSystemMessage(resolvedPrompt);
         addHistory(request, history);
         request.addUserMessage(userMessage);
         request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
@@ -622,7 +721,18 @@ public abstract class AbstractLlmClient implements LlmClient {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        request.addSystemMessage(fessConfig.getRagChatSystemPrompt());
+        final String systemPrompt;
+        if (directAnswerSystemPrompt != null) {
+            systemPrompt = directAnswerSystemPrompt.replace("{{systemPrompt}}", fessConfig.getRagChatSystemPrompt());
+        } else {
+            systemPrompt = fessConfig.getRagChatSystemPrompt();
+        }
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateDirectAnswer. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
+                    userMessage, history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
@@ -643,7 +753,7 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected String buildIntentDetectionPrompt(final String userMessage) {
         if (intentDetectionPrompt != null) {
-            return intentDetectionPrompt.replace("{{userMessage}}", userMessage);
+            return resolveLanguageInstruction(intentDetectionPrompt.replace("{{userMessage}}", userMessage));
         }
 
         return "Analyze the following user question and determine the intent.\n" + "Return a JSON object with:\n"
@@ -664,7 +774,8 @@ public abstract class AbstractLlmClient implements LlmClient {
                 + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
                 + "Input: \"How to use Fess with Docker\"\n"
                 + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
-                + "Question: " + userMessage + "\n\n" + "Response (JSON only):";
+                + resolveLanguageInstruction("{{languageInstruction}}") + "\n" + "Question: " + userMessage + "\n\n"
+                + "Response (JSON only):";
     }
 
     /**
@@ -720,11 +831,15 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected String buildContext(final List<Map<String, Object>> documents, final FessConfig fessConfig) {
         final int maxChars = fessConfig.getRagChatContextMaxCharsAsInteger();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:CONTEXT] Building context. documentCount={}, maxChars={}", documents.size(), maxChars);
+        }
         final StringBuilder context = new StringBuilder();
         context.append("The following are documents that contain information to answer the question:\n\n");
 
         int totalChars = context.length();
         int index = 1;
+        boolean truncated = false;
 
         for (final Map<String, Object> doc : documents) {
             final String title = getStringValue(doc, "title");
@@ -755,12 +870,18 @@ public abstract class AbstractLlmClient implements LlmClient {
                     docContext.append("...\n\n");
                     context.append(docContext);
                 }
+                truncated = true;
                 break;
             }
 
             context.append(docContext);
             totalChars += docContext.length();
             index++;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:CONTEXT] Context built. contextLength={}, documentsIncluded={}, truncated={}", context.length(), index - 1,
+                    truncated);
         }
 
         return context.toString();
@@ -792,7 +913,12 @@ public abstract class AbstractLlmClient implements LlmClient {
                 systemPrompt = baseSystemPrompt;
             }
         }
-        request.addSystemMessage(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] buildStreamingRequest. resolvedPrompt={}, contextLength={}, userMessage={}, historySize={}",
+                    resolvedPrompt, context != null ? context.length() : 0, userMessage, history.size());
+        }
+        request.addSystemMessage(resolvedPrompt);
 
         addHistory(request, history);
         request.addUserMessage(userMessage);

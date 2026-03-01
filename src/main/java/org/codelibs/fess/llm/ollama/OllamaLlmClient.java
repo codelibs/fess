@@ -74,7 +74,7 @@ public class OllamaLlmClient extends AbstractLlmClient {
         final String apiUrl = getApiUrl();
         if (StringUtil.isBlank(apiUrl)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Ollama is not available. apiUrl is blank");
+                logger.debug("[LLM:OLLAMA] Ollama is not available. apiUrl is blank");
             }
             return false;
         }
@@ -84,7 +84,7 @@ public class OllamaLlmClient extends AbstractLlmClient {
                 final int statusCode = response.getCode();
                 if (statusCode < 200 || statusCode >= 300) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Ollama availability check failed. url={}, statusCode={}", apiUrl, statusCode);
+                        logger.debug("[LLM:OLLAMA] Ollama availability check failed. url={}, statusCode={}", apiUrl, statusCode);
                     }
                     return false;
                 }
@@ -94,7 +94,7 @@ public class OllamaLlmClient extends AbstractLlmClient {
             }
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Ollama is not available. url={}, error={}", apiUrl, e.getMessage());
+                logger.debug("[LLM:OLLAMA] Ollama is not available. url={}, error={}", apiUrl, e.getMessage());
             }
             return false;
         }
@@ -121,7 +121,7 @@ public class OllamaLlmClient extends AbstractLlmClient {
                         final String modelName = model.get("name").asText();
                         if (configuredModel.equals(modelName)) {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Model found. configured={}, found={}", configuredModel, modelName);
+                                logger.debug("[LLM:OLLAMA] Model found. configured={}, found={}", configuredModel, modelName);
                             }
                             return true;
                         }
@@ -132,7 +132,7 @@ public class OllamaLlmClient extends AbstractLlmClient {
             return false;
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to parse Ollama models response. error={}", e.getMessage());
+                logger.debug("[LLM:OLLAMA] Failed to parse Ollama models response. error={}", e.getMessage());
             }
             return true;
         }
@@ -145,12 +145,15 @@ public class OllamaLlmClient extends AbstractLlmClient {
         final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Sending chat request to Ollama. url={}, model={}, messageCount={}", url, requestBody.get("model"),
+            logger.debug("[LLM:OLLAMA] Sending chat request to Ollama. url={}, model={}, messageCount={}", url, requestBody.get("model"),
                     request.getMessages().size());
         }
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[LLM:OLLAMA] requestBody={}", json);
+            }
             final HttpPost httpRequest = new HttpPost(url);
             httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
@@ -162,6 +165,9 @@ public class OllamaLlmClient extends AbstractLlmClient {
                 }
 
                 final String responseBody = response.getEntity() != null ? EntityUtils.toString(response.getEntity()) : "";
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[LLM:OLLAMA] responseBody={}", responseBody);
+                }
                 final JsonNode jsonNode = objectMapper.readTree(responseBody);
 
                 final LlmChatResponse chatResponse = new LlmChatResponse();
@@ -206,12 +212,15 @@ public class OllamaLlmClient extends AbstractLlmClient {
         final long startTime = System.currentTimeMillis();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Starting streaming chat request to Ollama. url={}, model={}, messageCount={}", url, requestBody.get("model"),
-                    request.getMessages().size());
+            logger.debug("[LLM:OLLAMA] Starting streaming chat request to Ollama. url={}, model={}, messageCount={}", url,
+                    requestBody.get("model"), request.getMessages().size());
         }
 
         try {
             final String json = objectMapper.writeValueAsString(requestBody);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[LLM:OLLAMA] requestBody={}", json);
+            }
             final HttpPost httpRequest = new HttpPost(url);
             httpRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
@@ -258,8 +267,8 @@ public class OllamaLlmClient extends AbstractLlmClient {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Completed streaming chat from Ollama. url={}, chunkCount={}, elapsedTime={}ms", url, chunkCount,
-                            System.currentTimeMillis() - startTime);
+                    logger.debug("[LLM:OLLAMA] Completed streaming chat from Ollama. url={}, chunkCount={}, elapsedTime={}ms", url,
+                            chunkCount, System.currentTimeMillis() - startTime);
                 }
             }
         } catch (final LlmException e) {
