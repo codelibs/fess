@@ -512,4 +512,14 @@ public class GeminiLlmClient extends AbstractLlmClient {
     protected int getTimeout() {
         return ComponentUtil.getFessConfig().getRagLlmGeminiTimeoutAsInteger();
     }
+
+    @Override
+    protected int getIntentDetectionMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmGeminiIntentMaxTokensAsInteger();
+    }
+
+    @Override
+    protected int getEvaluationMaxTokens() {
+        return ComponentUtil.getFessConfig().getRagLlmGeminiEvaluationMaxTokensAsInteger();
+    }
 }
