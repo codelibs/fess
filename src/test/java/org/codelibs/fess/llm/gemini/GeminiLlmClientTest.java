@@ -344,6 +344,62 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_buildRequestBody_withThinkingBudget() {
+        client.setTestModel("gemini-3-flash-preview");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().setThinkingBudget(1024).addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> generationConfig = (Map<String, Object>) body.get("generationConfig");
+        assertNotNull(generationConfig);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> thinkingConfig = (Map<String, Object>) generationConfig.get("thinkingConfig");
+        assertNotNull(thinkingConfig);
+        assertEquals(1024, thinkingConfig.get("thinkingBudget"));
+    }
+
+    @Test
+    public void test_buildRequestBody_withThinkingBudgetZero() {
+        client.setTestModel("gemini-3-flash-preview");
+        client.setTestTemperature(0.3);
+        client.setTestMaxTokens(500);
+
+        final LlmChatRequest request = new LlmChatRequest().setThinkingBudget(0).addUserMessage("Detect intent");
+
+        final Map<String, Object> body = client.buildRequestBody(request);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> generationConfig = (Map<String, Object>) body.get("generationConfig");
+        assertNotNull(generationConfig);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> thinkingConfig = (Map<String, Object>) generationConfig.get("thinkingConfig");
+        assertNotNull(thinkingConfig);
+        assertEquals(0, thinkingConfig.get("thinkingBudget"));
+    }
+
+    @Test
+    public void test_buildRequestBody_withoutThinkingBudget() {
+        client.setTestModel("gemini-2.5-flash");
+        client.setTestTemperature(0.7);
+        client.setTestMaxTokens(4096);
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+
+        final Map<String, Object> body = client.buildRequestBody(request);
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> generationConfig = (Map<String, Object>) body.get("generationConfig");
+        assertNotNull(generationConfig);
+        assertNull(generationConfig.get("thinkingConfig"));
+    }
+
+    @Test
     public void test_buildRequestBody_noSystemMessage() {
         client.setTestModel("gemini-2.5-flash");
         client.setTestTemperature(0.7);
@@ -1196,6 +1252,218 @@ public class GeminiLlmClientTest extends UnitFessTestCase {
         } catch (final LlmException error) {
             assertTrue(error.getMessage().contains("503"));
         }
+    }
+
+    // ========== Multi-line JSON and thinking token tests ==========
+
+    @Test
+    public void test_streamChat_multiLineJson() throws IOException {
+        // Gemini 3 sends multi-line JSON objects in streaming responses
+        final String streamResponse = "[{\n" //
+                + "  \"candidates\": [{\n" //
+                + "    \"content\": {\n" //
+                + "      \"parts\": [{\n" //
+                + "        \"text\": \"Hello\"\n" //
+                + "      }],\n" //
+                + "      \"role\": \"model\"\n" //
+                + "    }\n" //
+                + "  }]\n" //
+                + "}\n" //
+                + ",{\n" //
+                + "  \"candidates\": [{\n" //
+                + "    \"content\": {\n" //
+                + "      \"parts\": [{\n" //
+                + "        \"text\": \" World\"\n" //
+                + "      }],\n" //
+                + "      \"role\": \"model\"\n" //
+                + "    },\n" //
+                + "    \"finishReason\": \"STOP\"\n" //
+                + "  }]\n" //
+                + "}]";
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals(2, chunks.size());
+        assertEquals("Hello", chunks.get(0));
+        assertEquals(" World", chunks.get(1));
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_streamChat_skipsThinkingParts() throws IOException {
+        // Gemini 3 models may include thinking parts with "thought": true
+        final String streamResponse = """
+                [
+                {"candidates":[{"content":{"parts":[{"thought":true,"text":"Let me think about this..."}],"role":"model"}}]},
+                {"candidates":[{"content":{"parts":[{"text":"Actual response"}],"role":"model"},"finishReason":"STOP"}]}
+                ]
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final List<String> chunks = new ArrayList<>();
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        // Thinking part should be skipped, only actual response should be received
+        assertEquals(1, chunks.size());
+        assertEquals("Actual response", chunks.get(0));
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_streamChat_multiLineJsonWithThinking() throws IOException {
+        // Gemini 3 multi-line format with thinking parts
+        final String streamResponse = "[{\n" //
+                + "  \"candidates\": [{\n" //
+                + "    \"content\": {\n" //
+                + "      \"parts\": [{\n" //
+                + "        \"thought\": true,\n" //
+                + "        \"text\": \"Thinking about the question...\"\n" //
+                + "      }],\n" //
+                + "      \"role\": \"model\"\n" //
+                + "    }\n" //
+                + "  }]\n" //
+                + "},\n" //
+                + "{\n" //
+                + "  \"candidates\": [{\n" //
+                + "    \"content\": {\n" //
+                + "      \"parts\": [{\n" //
+                + "        \"text\": \"The answer is 42.\"\n" //
+                + "      }],\n" //
+                + "      \"role\": \"model\"\n" //
+                + "    },\n" //
+                + "    \"finishReason\": \"STOP\"\n" //
+                + "  }]\n" //
+                + "}]";
+
+        mockServer.enqueue(new MockResponse().setBody(streamResponse).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("What is the answer?");
+        final List<String> chunks = new ArrayList<>();
+        final AtomicBoolean doneReceived = new AtomicBoolean(false);
+
+        client.streamChat(request, new LlmStreamCallback() {
+            @Override
+            public void onChunk(final String content, final boolean done) {
+                chunks.add(content);
+                if (done) {
+                    doneReceived.set(true);
+                }
+            }
+
+            @Override
+            public void onError(final Throwable error) {
+                fail("Unexpected error: " + error.getMessage());
+            }
+        });
+
+        assertEquals(1, chunks.size());
+        assertEquals("The answer is 42.", chunks.get(0));
+        assertTrue(doneReceived.get());
+    }
+
+    @Test
+    public void test_chat_skipsThinkingParts() throws IOException {
+        // Non-streaming chat with thinking parts
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [
+                                {"thought": true, "text": "Let me reason about this..."},
+                                {"text": "The actual answer."}
+                            ],
+                            "role": "model"
+                        },
+                        "finishReason": "STOP"
+                    }],
+                    "usageMetadata": {
+                        "promptTokenCount": 10,
+                        "candidatesTokenCount": 50,
+                        "totalTokenCount": 60
+                    }
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        // Should skip thinking part and only return actual text
+        assertEquals("The actual answer.", response.getContent());
+        assertEquals("STOP", response.getFinishReason());
+    }
+
+    @Test
+    public void test_chat_onlyThinkingParts() throws IOException {
+        // Edge case: response contains only thinking parts
+        final String responseJson = """
+                {
+                    "candidates": [{
+                        "content": {
+                            "parts": [
+                                {"thought": true, "text": "Thinking..."}
+                            ],
+                            "role": "model"
+                        },
+                        "finishReason": "STOP"
+                    }]
+                }
+                """;
+
+        mockServer.enqueue(new MockResponse().setBody(responseJson).addHeader("Content-Type", "application/json"));
+
+        setupClientForMockServer();
+
+        final LlmChatRequest request = new LlmChatRequest().addUserMessage("Hello");
+        final LlmChatResponse response = client.chat(request);
+
+        // No non-thinking text content
+        assertNull(response.getContent());
     }
 
     // ========== Helper methods ==========

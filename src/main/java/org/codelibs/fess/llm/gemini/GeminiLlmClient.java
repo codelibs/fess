@@ -158,8 +158,21 @@ public class GeminiLlmClient extends AbstractLlmClient {
                     final JsonNode firstCandidate = jsonNode.get("candidates").get(0);
                     if (firstCandidate.has("content") && firstCandidate.get("content").has("parts")) {
                         final JsonNode parts = firstCandidate.get("content").get("parts");
-                        if (parts.isArray() && parts.size() > 0 && parts.get(0).has("text")) {
-                            chatResponse.setContent(parts.get(0).get("text").asText());
+                        if (parts.isArray()) {
+                            final StringBuilder textContent = new StringBuilder();
+                            for (int i = 0; i < parts.size(); i++) {
+                                final JsonNode part = parts.get(i);
+                                // Skip thinking parts
+                                if (part.has("thought") && part.get("thought").asBoolean(false)) {
+                                    continue;
+                                }
+                                if (part.has("text")) {
+                                    textContent.append(part.get("text").asText());
+                                }
+                            }
+                            if (textContent.length() > 0) {
+                                chatResponse.setContent(textContent.toString());
+                            }
                         }
                     }
                     if (firstCandidate.has("finishReason") && !firstCandidate.get("finishReason").isNull()) {
@@ -246,51 +259,101 @@ public class GeminiLlmClient extends AbstractLlmClient {
                 int chunkCount = 0;
                 try (BufferedReader reader =
                         new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
+                    final StringBuilder jsonBuffer = new StringBuilder();
+                    int braceDepth = 0;
+                    boolean inString = false;
+                    boolean streamDone = false;
+
                     String line;
-                    while ((line = reader.readLine()) != null) {
+                    while ((line = reader.readLine()) != null && !streamDone) {
                         if (StringUtil.isBlank(line)) {
                             continue;
                         }
 
-                        String trimmedLine = line.trim();
-                        if (trimmedLine.equals("[") || trimmedLine.equals("]") || trimmedLine.equals(",")) {
-                            continue;
-                        }
-                        if (trimmedLine.startsWith(",")) {
-                            trimmedLine = trimmedLine.substring(1).trim();
-                        }
+                        for (int ci = 0; ci < line.length() && !streamDone; ci++) {
+                            final char c = line.charAt(ci);
 
-                        try {
-                            final JsonNode jsonNode = objectMapper.readTree(trimmedLine);
-
-                            boolean done = false;
-                            if (jsonNode.has("candidates") && jsonNode.get("candidates").isArray()
-                                    && jsonNode.get("candidates").size() > 0) {
-                                final JsonNode firstCandidate = jsonNode.get("candidates").get(0);
-                                if (firstCandidate.has("finishReason") && !firstCandidate.get("finishReason").isNull()
-                                        && !"null".equals(firstCandidate.get("finishReason").asText())) {
-                                    done = true;
+                            if (braceDepth == 0) {
+                                // Outside JSON object - skip array-level delimiters
+                                if (c == '{') {
+                                    braceDepth = 1;
+                                    jsonBuffer.setLength(0);
+                                    jsonBuffer.append(c);
                                 }
+                                continue;
+                            }
 
-                                if (firstCandidate.has("content") && firstCandidate.get("content").has("parts")) {
-                                    final JsonNode parts = firstCandidate.get("content").get("parts");
-                                    if (parts.isArray() && parts.size() > 0 && parts.get(0).has("text")) {
-                                        final String content = parts.get(0).get("text").asText();
-                                        callback.onChunk(content, done);
-                                        chunkCount++;
-                                    } else if (done) {
-                                        callback.onChunk("", true);
+                            // Inside JSON object
+                            jsonBuffer.append(c);
+
+                            if (inString) {
+                                if (c == '\\') {
+                                    // Escape sequence - append next char and skip
+                                    ci++;
+                                    if (ci < line.length()) {
+                                        jsonBuffer.append(line.charAt(ci));
                                     }
-                                } else if (done) {
-                                    callback.onChunk("", true);
+                                } else if (c == '"') {
+                                    inString = false;
                                 }
+                            } else {
+                                if (c == '"') {
+                                    inString = true;
+                                } else if (c == '{') {
+                                    braceDepth++;
+                                } else if (c == '}') {
+                                    braceDepth--;
+                                    if (braceDepth == 0) {
+                                        // Complete JSON object accumulated
+                                        final String jsonStr = jsonBuffer.toString();
+                                        jsonBuffer.setLength(0);
 
-                                if (done) {
-                                    break;
+                                        try {
+                                            final JsonNode jsonNode = objectMapper.readTree(jsonStr);
+
+                                            boolean done = false;
+                                            if (jsonNode.has("candidates") && jsonNode.get("candidates").isArray()
+                                                    && jsonNode.get("candidates").size() > 0) {
+                                                final JsonNode firstCandidate = jsonNode.get("candidates").get(0);
+                                                if (firstCandidate.has("finishReason") && !firstCandidate.get("finishReason").isNull()
+                                                        && !"null".equals(firstCandidate.get("finishReason").asText())) {
+                                                    done = true;
+                                                }
+
+                                                if (firstCandidate.has("content") && firstCandidate.get("content").has("parts")) {
+                                                    final JsonNode parts = firstCandidate.get("content").get("parts");
+                                                    boolean textSent = false;
+                                                    if (parts.isArray()) {
+                                                        for (int pi = 0; pi < parts.size(); pi++) {
+                                                            final JsonNode part = parts.get(pi);
+                                                            // Skip thinking parts
+                                                            if (part.has("thought") && part.get("thought").asBoolean(false)) {
+                                                                continue;
+                                                            }
+                                                            if (part.has("text")) {
+                                                                callback.onChunk(part.get("text").asText(), done);
+                                                                chunkCount++;
+                                                                textSent = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (done && !textSent) {
+                                                        callback.onChunk("", true);
+                                                    }
+                                                } else if (done) {
+                                                    callback.onChunk("", true);
+                                                }
+
+                                                if (done) {
+                                                    streamDone = true;
+                                                }
+                                            }
+                                        } catch (final JsonProcessingException e) {
+                                            logger.warn("Failed to parse Gemini streaming response. json={}", jsonStr, e);
+                                        }
+                                    }
                                 }
                             }
-                        } catch (final JsonProcessingException e) {
-                            logger.warn("Failed to parse Gemini streaming response. line={}", line, e);
                         }
                     }
                 }
@@ -385,6 +448,11 @@ public class GeminiLlmClient extends AbstractLlmClient {
             generationConfig.put("maxOutputTokens", request.getMaxTokens());
         } else {
             generationConfig.put("maxOutputTokens", getMaxTokens());
+        }
+        if (request.getThinkingBudget() != null) {
+            final Map<String, Object> thinkingConfig = new HashMap<>();
+            thinkingConfig.put("thinkingBudget", request.getThinkingBudget());
+            generationConfig.put("thinkingConfig", thinkingConfig);
         }
         if (!generationConfig.isEmpty()) {
             body.put("generationConfig", generationConfig);

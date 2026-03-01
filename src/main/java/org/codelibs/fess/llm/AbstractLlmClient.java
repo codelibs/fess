@@ -442,6 +442,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             request.addUserMessage(prompt);
             request.setMaxTokens(500);
             request.setTemperature(0.3);
+            request.setThinkingBudget(0);
 
             final LlmChatResponse response = chat(request);
             final IntentDetectionResult result = parseIntentResponse(response.getContent());
@@ -477,6 +478,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             request.addUserMessage(prompt);
             request.setMaxTokens(500);
             request.setTemperature(0.3);
+            request.setThinkingBudget(0);
 
             final LlmChatResponse response = chat(request);
             final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
