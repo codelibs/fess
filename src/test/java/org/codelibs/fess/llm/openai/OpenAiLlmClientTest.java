@@ -50,10 +50,13 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
-        super.tearDown(testInfo);
+        if (client != null) {
+            client.destroy();
+        }
         if (mockServer != null) {
             mockServer.shutdown();
         }
+        super.tearDown(testInfo);
     }
 
     @Test
@@ -1487,6 +1490,16 @@ public class OpenAiLlmClientTest extends UnitFessTestCase {
         @Override
         protected String getLlmType() {
             return NAME;
+        }
+
+        @Override
+        protected boolean isRagChatEnabled() {
+            return false;
+        }
+
+        @Override
+        protected int getAvailabilityCheckInterval() {
+            return 0;
         }
     }
 }

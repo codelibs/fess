@@ -19,18 +19,343 @@
 	</component>
 
 	<!-- LLM clients -->
+	<!-- Each client supports prompt customization via property injection.
+	     Modify properties below to customize prompts per provider.
+	     Available placeholders:
+	       {{userMessage}} - user input
+	       {{documentUrl}} - document URLs
+	       {{systemPrompt}} - rag.chat.system.prompt from fess_config.properties
+	       {{context}} - formatted document context for answer generation
+	       {{documentContent}} - formatted document content for summary
+	       {{maxRelevantDocs}} - max number of relevant documents
+	       {{query}} - search query string
+	       {{searchResults}} - formatted search results for evaluation
+	       {{languageInstruction}} - locale-based language instruction (auto-resolved)
+	     When a property is not set, the default built-in prompt is used. -->
 	<component name="ollamaLlmClient" class="org.codelibs.fess.llm.ollama.OllamaLlmClient">
 		<postConstruct name="init"/>
 		<preDestroy name="destroy"/>
+		<property name="intentDetectionPrompt">
+"Analyze the following user question and determine the intent.\n"
++ "Return a JSON object with:\n"
++ "- \"intent\": one of:\n"
++ "  - \"search\": user wants to search for documents\n"
++ "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n"
++ "  - \"faq\": user is asking a FAQ-type question\n"
++ "  - \"unclear\": cannot determine what documents to search (question is too vague)\n"
++ "- \"query\": Lucene query string for search (required for search/faq intents)\n"
++ "- \"url\": the document URL to summarize (required for summary intent)\n"
++ "- \"reasoning\": brief explanation of your decision\n\n"
++ "LUCENE QUERY GUIDELINES:\n"
++ "- Proper nouns/product names: use quotation marks (e.g., \"Fess\")\n"
++ "- Title boosting: for important terms, use title:\"term\"^2\n"
++ "- Required terms: use + prefix (e.g., +Fess +Docker)\n"
++ "- Optional/synonym terms: use OR grouping (e.g., (tutorial OR guide OR howto))\n"
++ "- Multi-word phrases: use quotation marks\n\n"
++ "IMPORTANT RULES:\n"
++ "1. ALWAYS generate a Lucene query for search/faq intents. Use \"unclear\" only if truly ambiguous.\n"
++ "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n"
++ "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n"
++ "EXAMPLES:\n"
++ "Input: \"Fess\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
++ "Input: \"How to use Fess with Docker\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
++ "Question: {{userMessage}}\n\n"
++ "Response (JSON only):"
+		</property>
+		<property name="unclearIntentSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user's question is too vague to determine what documents to search for. "
++ "Generate a polite message asking for clarification. Ask them:\n"
++ "- What specific topic or document are they looking for?\n"
++ "- Can they provide more details or keywords?\n"
++ "- What kind of information would be helpful?\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="noResultsSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The search for relevant documents returned no results matching the user's query. "
++ "Generate a polite message informing the user that no documents matching their query were found. "
++ "Suggest ways they could refine their search, such as:\n"
++ "- Using different keywords\n"
++ "- Being more specific or more general\n"
++ "- Checking for spelling errors\n"
++ "- Trying related terms\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="documentNotFoundSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user requested a summary of a document, but the specified URL was not found in the system. "
++ "URL searched: {{documentUrl}}\n\n"
++ "Generate a polite message informing the user that:\n"
++ "- The specified document could not be found\n"
++ "- The URL might be incorrect or the document may not be indexed\n"
++ "- They can try searching with keywords instead\n\n"
++ "IMPORTANT: Do NOT provide any information from your own knowledge. "
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="evaluationPrompt">
+"Given the user question and search results, identify the most relevant documents.\n"
++ "Return a JSON object with:\n"
++ "- \"relevant_indexes\": array of 1-based indexes of relevant documents (max {{maxRelevantDocs}})\n"
++ "- \"has_relevant\": boolean indicating if any results are relevant\n\n"
++ "Question: {{userMessage}}\n"
++ "Query: {{query}}\n\n"
++ "Search Results:\n"
++ "{{searchResults}}"
++ "Response (JSON only):"
+		</property>
+		<property name="answerGenerationSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="summarySystemPrompt">
+"{{systemPrompt}}\n\n"
++ "You are summarizing specific documents for the user. "
++ "Base your summary ONLY on the provided document content. "
++ "Do NOT add information from your own knowledge.\n\n"
++ "Document content:\n"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="faqAnswerSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "The user is asking a frequently asked question. "
++ "Provide a direct, concise answer based solely on the following documents. "
++ "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
++ "Always cite your sources using [1], [2], etc.\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
+		</property>
 	</component>
 
 	<component name="openaiLlmClient" class="org.codelibs.fess.llm.openai.OpenAiLlmClient">
 		<postConstruct name="init"/>
 		<preDestroy name="destroy"/>
+		<property name="intentDetectionPrompt">
+"Analyze the following user question and determine the intent.\n"
++ "Return a JSON object with:\n"
++ "- \"intent\": one of:\n"
++ "  - \"search\": user wants to search for documents\n"
++ "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n"
++ "  - \"faq\": user is asking a FAQ-type question\n"
++ "  - \"unclear\": cannot determine what documents to search (question is too vague)\n"
++ "- \"query\": Lucene query string for search (required for search/faq intents)\n"
++ "- \"url\": the document URL to summarize (required for summary intent)\n"
++ "- \"reasoning\": brief explanation of your decision\n\n"
++ "LUCENE QUERY GUIDELINES:\n"
++ "- Proper nouns/product names: use quotation marks (e.g., \"Fess\")\n"
++ "- Title boosting: for important terms, use title:\"term\"^2\n"
++ "- Required terms: use + prefix (e.g., +Fess +Docker)\n"
++ "- Optional/synonym terms: use OR grouping (e.g., (tutorial OR guide OR howto))\n"
++ "- Multi-word phrases: use quotation marks\n\n"
++ "IMPORTANT RULES:\n"
++ "1. ALWAYS generate a Lucene query for search/faq intents. Use \"unclear\" only if truly ambiguous.\n"
++ "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n"
++ "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n"
++ "EXAMPLES:\n"
++ "Input: \"Fess\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
++ "Input: \"How to use Fess with Docker\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
++ "Question: {{userMessage}}\n\n"
++ "Response (JSON only):"
+		</property>
+		<property name="unclearIntentSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user's question is too vague to determine what documents to search for. "
++ "Generate a polite message asking for clarification. Ask them:\n"
++ "- What specific topic or document are they looking for?\n"
++ "- Can they provide more details or keywords?\n"
++ "- What kind of information would be helpful?\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="noResultsSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The search for relevant documents returned no results matching the user's query. "
++ "Generate a polite message informing the user that no documents matching their query were found. "
++ "Suggest ways they could refine their search, such as:\n"
++ "- Using different keywords\n"
++ "- Being more specific or more general\n"
++ "- Checking for spelling errors\n"
++ "- Trying related terms\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="documentNotFoundSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user requested a summary of a document, but the specified URL was not found in the system. "
++ "URL searched: {{documentUrl}}\n\n"
++ "Generate a polite message informing the user that:\n"
++ "- The specified document could not be found\n"
++ "- The URL might be incorrect or the document may not be indexed\n"
++ "- They can try searching with keywords instead\n\n"
++ "IMPORTANT: Do NOT provide any information from your own knowledge. "
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="evaluationPrompt">
+"Given the user question and search results, identify the most relevant documents.\n"
++ "Return a JSON object with:\n"
++ "- \"relevant_indexes\": array of 1-based indexes of relevant documents (max {{maxRelevantDocs}})\n"
++ "- \"has_relevant\": boolean indicating if any results are relevant\n\n"
++ "Question: {{userMessage}}\n"
++ "Query: {{query}}\n\n"
++ "Search Results:\n"
++ "{{searchResults}}"
++ "Response (JSON only):"
+		</property>
+		<property name="answerGenerationSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="summarySystemPrompt">
+"{{systemPrompt}}\n\n"
++ "You are summarizing specific documents for the user. "
++ "Base your summary ONLY on the provided document content. "
++ "Do NOT add information from your own knowledge.\n\n"
++ "Document content:\n"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="faqAnswerSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "The user is asking a frequently asked question. "
++ "Provide a direct, concise answer based solely on the following documents. "
++ "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
++ "Always cite your sources using [1], [2], etc.\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
+		</property>
 	</component>
 
 	<component name="geminiLlmClient" class="org.codelibs.fess.llm.gemini.GeminiLlmClient">
 		<postConstruct name="init"/>
 		<preDestroy name="destroy"/>
+		<property name="intentDetectionPrompt">
+"Analyze the following user question and determine the intent.\n"
++ "Return a JSON object with:\n"
++ "- \"intent\": one of:\n"
++ "  - \"search\": user wants to search for documents\n"
++ "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n"
++ "  - \"faq\": user is asking a FAQ-type question\n"
++ "  - \"unclear\": cannot determine what documents to search (question is too vague)\n"
++ "- \"query\": Lucene query string for search (required for search/faq intents)\n"
++ "- \"url\": the document URL to summarize (required for summary intent)\n"
++ "- \"reasoning\": brief explanation of your decision\n\n"
++ "LUCENE QUERY GUIDELINES:\n"
++ "- Proper nouns/product names: use quotation marks (e.g., \"Fess\")\n"
++ "- Title boosting: for important terms, use title:\"term\"^2\n"
++ "- Required terms: use + prefix (e.g., +Fess +Docker)\n"
++ "- Optional/synonym terms: use OR grouping (e.g., (tutorial OR guide OR howto))\n"
++ "- Multi-word phrases: use quotation marks\n\n"
++ "IMPORTANT RULES:\n"
++ "1. ALWAYS generate a Lucene query for search/faq intents. Use \"unclear\" only if truly ambiguous.\n"
++ "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n"
++ "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n"
++ "EXAMPLES:\n"
++ "Input: \"Fess\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
++ "Input: \"How to use Fess with Docker\"\n"
++ "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
++ "{{languageInstruction}}\n"
++ "Question: {{userMessage}}\n\n"
++ "Response (JSON only):"
+		</property>
+		<property name="unclearIntentSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user's question is too vague to determine what documents to search for. "
++ "Generate a polite message asking for clarification. Ask them:\n"
++ "- What specific topic or document are they looking for?\n"
++ "- Can they provide more details or keywords?\n"
++ "- What kind of information would be helpful?\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only ask for clarification to help with document search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="noResultsSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The search for relevant documents returned no results matching the user's query. "
++ "Generate a polite message informing the user that no documents matching their query were found. "
++ "Suggest ways they could refine their search, such as:\n"
++ "- Using different keywords\n"
++ "- Being more specific or more general\n"
++ "- Checking for spelling errors\n"
++ "- Trying related terms\n\n"
++ "IMPORTANT: Do NOT provide any answers from your own knowledge. "
++ "Only inform them about the search results and offer suggestions for refining their search.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="documentNotFoundSystemPrompt">
+"You are a helpful assistant for a document search system. "
++ "The user requested a summary of a document, but the specified URL was not found in the system. "
++ "URL searched: {{documentUrl}}\n\n"
++ "Generate a polite message informing the user that:\n"
++ "- The specified document could not be found\n"
++ "- The URL might be incorrect or the document may not be indexed\n"
++ "- They can try searching with keywords instead\n\n"
++ "IMPORTANT: Do NOT provide any information from your own knowledge. "
++ "Only inform them about the search result.\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="evaluationPrompt">
+"Given the user question and search results, identify the most relevant documents.\n"
++ "Return a JSON object with:\n"
++ "- \"relevant_indexes\": array of 1-based indexes of relevant documents (max {{maxRelevantDocs}})\n"
++ "- \"has_relevant\": boolean indicating if any results are relevant\n\n"
++ "Question: {{userMessage}}\n"
++ "Query: {{query}}\n\n"
++ "Search Results:\n"
++ "{{searchResults}}"
++ "Response (JSON only):"
+		</property>
+		<property name="answerGenerationSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="summarySystemPrompt">
+"{{systemPrompt}}\n\n"
++ "You are summarizing specific documents for the user. "
++ "Base your summary ONLY on the provided document content. "
++ "Do NOT add information from your own knowledge.\n\n"
++ "Document content:\n"
++ "{{documentContent}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="faqAnswerSystemPrompt">
+"{{systemPrompt}}\n\n"
++ "The user is asking a frequently asked question. "
++ "Provide a direct, concise answer based solely on the following documents. "
++ "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
++ "Always cite your sources using [1], [2], etc.\n\n"
++ "{{context}}\n"
++ "{{languageInstruction}}"
+		</property>
+		<property name="directAnswerSystemPrompt">
+"{{systemPrompt}}\n"
++ "{{languageInstruction}}"
+		</property>
 	</component>
 </components>

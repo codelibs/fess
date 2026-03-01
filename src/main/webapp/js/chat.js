@@ -271,9 +271,9 @@ var FessChat = (function() {
                 if (data.status === 'start') {
                     updatePhase(data.phase, 'active');
                     var phaseMessage = config.labels.phases[data.phase] || data.message || 'Processing...';
-                    // Replace {keywords} placeholder with actual keywords
+                    // Replace __keywords__ placeholder with actual keywords
                     if (data.keywords) {
-                        phaseMessage = phaseMessage.replace('{keywords}', data.keywords);
+                        phaseMessage = phaseMessage.replace('__keywords__', data.keywords);
                     }
                     showStatus('thinking', phaseMessage);
                     updateProgressMessage(phaseMessage);
