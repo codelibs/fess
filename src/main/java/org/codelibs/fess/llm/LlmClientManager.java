@@ -15,9 +15,9 @@
  */
 package org.codelibs.fess.llm;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +36,7 @@ public class LlmClientManager {
     private static final Logger logger = LogManager.getLogger(LlmClientManager.class);
 
     /** The list of registered LLM clients. */
-    protected final List<LlmClient> clientList = new ArrayList<>();
+    protected final List<LlmClient> clientList = new CopyOnWriteArrayList<>();
 
     /**
      * Default constructor.
@@ -83,10 +83,19 @@ public class LlmClientManager {
         if (ComponentUtil.hasComponent(name)) {
             final LlmClient client = ComponentUtil.getComponent(name);
             if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LlmClient found. componentName={}, clientName={}, available={}", name, client.getName(),
+                logger.debug("[LLM] LlmClient found via DI. componentName={}, clientName={}, available={}", name, client.getName(),
                         client.isAvailable());
             }
             return client;
+        }
+        // Fallback: search registered clients
+        for (final LlmClient client : clientList) {
+            if (llmType.equals(client.getName())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[LLM] LlmClient found via registration. name={}", client.getName());
+                }
+                return client;
+            }
         }
         logger.warn("LlmClient not found: {}", name);
         return null;
@@ -98,7 +107,7 @@ public class LlmClientManager {
      * @return The LLM type string from configuration (e.g., "ollama", "openai", "gemini")
      */
     protected String getLlmType() {
-        return ComponentUtil.getFessConfig().getRagLlmType();
+        return ComponentUtil.getFessConfig().getSystemProperty("rag.llm.name", "ollama");
     }
 
     /**

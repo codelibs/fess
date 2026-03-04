@@ -157,6 +157,8 @@ public interface FessProp {
 
     Map<String, Object> propMap = new ConcurrentHashMap<>();
 
+    String getOrDefault(String propertyKey, String defaultValue);
+
     //
     // system.properties
     //

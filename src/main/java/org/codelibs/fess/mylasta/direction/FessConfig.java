@@ -1956,77 +1956,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String RAG_CHAT_ENABLED = "rag.chat.enabled";
 
-    /** The key of the configuration. e.g. ollama */
-    String RAG_LLM_TYPE = "rag.llm.type";
-
-    /** The key of the configuration. e.g. http://localhost:11434 */
-    String RAG_LLM_OLLAMA_API_URL = "rag.llm.ollama.api.url";
-
-    /** The key of the configuration. e.g. gemma3:4b */
-    String RAG_LLM_OLLAMA_MODEL = "rag.llm.ollama.model";
-
-    /** The key of the configuration. e.g. 60000 */
-    String RAG_LLM_OLLAMA_TIMEOUT = "rag.llm.ollama.timeout";
-
-    /** The key of the configuration. e.g. 500 */
-    String RAG_LLM_OLLAMA_INTENT_MAX_TOKENS = "rag.llm.ollama.intent.max.tokens";
-
-    /** The key of the configuration. e.g. 500 */
-    String RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS = "rag.llm.ollama.evaluation.max.tokens";
-
-    /** The key of the configuration. e.g.  */
-    String RAG_LLM_OPENAI_API_KEY = "rag.llm.openai.api.key";
-
-    /** The key of the configuration. e.g. gpt-5-mini */
-    String RAG_LLM_OPENAI_MODEL = "rag.llm.openai.model";
-
-    /** The key of the configuration. e.g. https://api.openai.com/v1 */
-    String RAG_LLM_OPENAI_API_URL = "rag.llm.openai.api.url";
-
-    /** The key of the configuration. e.g. 60000 */
-    String RAG_LLM_OPENAI_TIMEOUT = "rag.llm.openai.timeout";
-
-    /** The key of the configuration. e.g. 2048 */
-    String RAG_LLM_OPENAI_INTENT_MAX_TOKENS = "rag.llm.openai.intent.max.tokens";
-
-    /** The key of the configuration. e.g. 2048 */
-    String RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS = "rag.llm.openai.evaluation.max.tokens";
-
-    /** The key of the configuration. e.g.  */
-    String RAG_LLM_GEMINI_API_KEY = "rag.llm.gemini.api.key";
-
-    /** The key of the configuration. e.g. gemini-3-flash-preview */
-    String RAG_LLM_GEMINI_MODEL = "rag.llm.gemini.model";
-
-    /** The key of the configuration. e.g. https://generativelanguage.googleapis.com/v1beta */
-    String RAG_LLM_GEMINI_API_URL = "rag.llm.gemini.api.url";
-
-    /** The key of the configuration. e.g. 60000 */
-    String RAG_LLM_GEMINI_TIMEOUT = "rag.llm.gemini.timeout";
-
-    /** The key of the configuration. e.g. 1024 */
-    String RAG_LLM_GEMINI_INTENT_MAX_TOKENS = "rag.llm.gemini.intent.max.tokens";
-
-    /** The key of the configuration. e.g. 1024 */
-    String RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS = "rag.llm.gemini.evaluation.max.tokens";
-
-    /** The key of the configuration. e.g. 60 */
-    String RAG_LLM_AVAILABILITY_CHECK_INTERVAL = "rag.llm.availability.check.interval";
-
-    /** The key of the configuration. e.g. 4096 */
-    String RAG_CHAT_MAX_TOKENS = "rag.chat.max.tokens";
-
-    /** The key of the configuration. e.g. 0.7 */
-    String RAG_CHAT_TEMPERATURE = "rag.chat.temperature";
-
     /** The key of the configuration. e.g. 5 */
     String RAG_CHAT_CONTEXT_MAX_DOCUMENTS = "rag.chat.context.max.documents";
-
-    /** The key of the configuration. e.g. 4000 */
-    String RAG_CHAT_CONTEXT_MAX_CHARS = "rag.chat.context.max.chars";
-
-    /** The key of the configuration. e.g. You are an AI assistant for Fess search engine. Answer questions based on the search results provided. Always cite your sources using [1], [2], etc. */
-    String RAG_CHAT_SYSTEM_PROMPT = "rag.chat.system.prompt";
 
     /** The key of the configuration. e.g. 30 */
     String RAG_CHAT_SESSION_TIMEOUT_MINUTES = "rag.chat.session.timeout.minutes";
@@ -2045,9 +1976,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. title,url,content,doc_id,content_title,content_description */
     String RAG_CHAT_CONTENT_FIELDS = "rag.chat.content.fields";
-
-    /** The key of the configuration. e.g. 3 */
-    String RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS = "rag.chat.evaluation.max.relevant.docs";
 
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
@@ -9307,277 +9235,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isRagChatEnabled();
 
     /**
-     * Get the value for the key 'rag.llm.type'. <br>
-     * The value is, e.g. ollama <br>
-     * comment: LLM provider type (ollama, openai, gemini).
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmType();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.api.url'. <br>
-     * The value is, e.g. http://localhost:11434 <br>
-     * comment: Ollama settings (default LLM provider).
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOllamaApiUrl();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.model'. <br>
-     * The value is, e.g. gemma3:4b <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOllamaModel();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.timeout'. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOllamaTimeout();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.timeout' as {@link Integer}. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOllamaTimeoutAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.intent.max.tokens'. <br>
-     * The value is, e.g. 500 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOllamaIntentMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.intent.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 500 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOllamaIntentMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.evaluation.max.tokens'. <br>
-     * The value is, e.g. 500 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOllamaEvaluationMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.ollama.evaluation.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 500 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOllamaEvaluationMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.api.key'. <br>
-     * The value is, e.g.  <br>
-     * comment: OpenAI settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiApiKey();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.api.key' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * comment: OpenAI settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOpenaiApiKeyAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.model'. <br>
-     * The value is, e.g. gpt-5-mini <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiModel();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.api.url'. <br>
-     * The value is, e.g. https://api.openai.com/v1 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiApiUrl();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.timeout'. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiTimeout();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.timeout' as {@link Integer}. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOpenaiTimeoutAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.intent.max.tokens'. <br>
-     * The value is, e.g. 2048 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiIntentMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.intent.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 2048 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOpenaiIntentMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.evaluation.max.tokens'. <br>
-     * The value is, e.g. 2048 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmOpenaiEvaluationMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.openai.evaluation.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 2048 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmOpenaiEvaluationMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.api.key'. <br>
-     * The value is, e.g.  <br>
-     * comment: Google Gemini settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiApiKey();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.api.key' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * comment: Google Gemini settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmGeminiApiKeyAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.model'. <br>
-     * The value is, e.g. gemini-3-flash-preview <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiModel();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.api.url'. <br>
-     * The value is, e.g. https://generativelanguage.googleapis.com/v1beta <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiApiUrl();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.timeout'. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiTimeout();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.timeout' as {@link Integer}. <br>
-     * The value is, e.g. 60000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmGeminiTimeoutAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.intent.max.tokens'. <br>
-     * The value is, e.g. 1024 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiIntentMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.intent.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 1024 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmGeminiIntentMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.evaluation.max.tokens'. <br>
-     * The value is, e.g. 1024 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmGeminiEvaluationMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.llm.gemini.evaluation.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 1024 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmGeminiEvaluationMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.llm.availability.check.interval'. <br>
-     * The value is, e.g. 60 <br>
-     * comment: LLM availability check interval in seconds. Set to 0 to disable periodic checks.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagLlmAvailabilityCheckInterval();
-
-    /**
-     * Get the value for the key 'rag.llm.availability.check.interval' as {@link Integer}. <br>
-     * The value is, e.g. 60 <br>
-     * comment: LLM availability check interval in seconds. Set to 0 to disable periodic checks.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagLlmAvailabilityCheckIntervalAsInteger();
-
-    /**
-     * Get the value for the key 'rag.chat.max.tokens'. <br>
-     * The value is, e.g. 4096 <br>
-     * comment: Chat generation settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatMaxTokens();
-
-    /**
-     * Get the value for the key 'rag.chat.max.tokens' as {@link Integer}. <br>
-     * The value is, e.g. 4096 <br>
-     * comment: Chat generation settings.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagChatMaxTokensAsInteger();
-
-    /**
-     * Get the value for the key 'rag.chat.temperature'. <br>
-     * The value is, e.g. 0.7 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatTemperature();
-
-    /**
-     * Get the value for the key 'rag.chat.temperature' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 0.7 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not decimal.
-     */
-    java.math.BigDecimal getRagChatTemperatureAsDecimal();
-
-    /**
      * Get the value for the key 'rag.chat.context.max.documents'. <br>
      * The value is, e.g. 5 <br>
+     * comment: Chat generation settings.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagChatContextMaxDocuments();
@@ -9585,32 +9245,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rag.chat.context.max.documents' as {@link Integer}. <br>
      * The value is, e.g. 5 <br>
+     * comment: Chat generation settings.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getRagChatContextMaxDocumentsAsInteger();
-
-    /**
-     * Get the value for the key 'rag.chat.context.max.chars'. <br>
-     * The value is, e.g. 4000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatContextMaxChars();
-
-    /**
-     * Get the value for the key 'rag.chat.context.max.chars' as {@link Integer}. <br>
-     * The value is, e.g. 4000 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagChatContextMaxCharsAsInteger();
-
-    /**
-     * Get the value for the key 'rag.chat.system.prompt'. <br>
-     * The value is, e.g. You are an AI assistant for Fess search engine. Answer questions based on the search results provided. Always cite your sources using [1], [2], etc. <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatSystemPrompt();
 
     /**
      * Get the value for the key 'rag.chat.session.timeout.minutes'. <br>
@@ -9699,23 +9338,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagChatContentFields();
-
-    /**
-     * Get the value for the key 'rag.chat.evaluation.max.relevant.docs'. <br>
-     * The value is, e.g. 3 <br>
-     * comment: Maximum number of relevant documents to select in evaluation phase.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatEvaluationMaxRelevantDocs();
-
-    /**
-     * Get the value for the key 'rag.chat.evaluation.max.relevant.docs' as {@link Integer}. <br>
-     * The value is, e.g. 3 <br>
-     * comment: Maximum number of relevant documents to select in evaluation phase.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagChatEvaluationMaxRelevantDocsAsInteger();
 
     /**
      * Get the value for the key 'index.export.path'. <br>
@@ -13155,164 +12777,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.RAG_CHAT_ENABLED);
         }
 
-        public String getRagLlmType() {
-            return get(FessConfig.RAG_LLM_TYPE);
-        }
-
-        public String getRagLlmOllamaApiUrl() {
-            return get(FessConfig.RAG_LLM_OLLAMA_API_URL);
-        }
-
-        public String getRagLlmOllamaModel() {
-            return get(FessConfig.RAG_LLM_OLLAMA_MODEL);
-        }
-
-        public String getRagLlmOllamaTimeout() {
-            return get(FessConfig.RAG_LLM_OLLAMA_TIMEOUT);
-        }
-
-        public Integer getRagLlmOllamaTimeoutAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OLLAMA_TIMEOUT);
-        }
-
-        public String getRagLlmOllamaIntentMaxTokens() {
-            return get(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmOllamaIntentMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS);
-        }
-
-        public String getRagLlmOllamaEvaluationMaxTokens() {
-            return get(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmOllamaEvaluationMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS);
-        }
-
-        public String getRagLlmOpenaiApiKey() {
-            return get(FessConfig.RAG_LLM_OPENAI_API_KEY);
-        }
-
-        public Integer getRagLlmOpenaiApiKeyAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OPENAI_API_KEY);
-        }
-
-        public String getRagLlmOpenaiModel() {
-            return get(FessConfig.RAG_LLM_OPENAI_MODEL);
-        }
-
-        public String getRagLlmOpenaiApiUrl() {
-            return get(FessConfig.RAG_LLM_OPENAI_API_URL);
-        }
-
-        public String getRagLlmOpenaiTimeout() {
-            return get(FessConfig.RAG_LLM_OPENAI_TIMEOUT);
-        }
-
-        public Integer getRagLlmOpenaiTimeoutAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OPENAI_TIMEOUT);
-        }
-
-        public String getRagLlmOpenaiIntentMaxTokens() {
-            return get(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmOpenaiIntentMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS);
-        }
-
-        public String getRagLlmOpenaiEvaluationMaxTokens() {
-            return get(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmOpenaiEvaluationMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS);
-        }
-
-        public String getRagLlmGeminiApiKey() {
-            return get(FessConfig.RAG_LLM_GEMINI_API_KEY);
-        }
-
-        public Integer getRagLlmGeminiApiKeyAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_GEMINI_API_KEY);
-        }
-
-        public String getRagLlmGeminiModel() {
-            return get(FessConfig.RAG_LLM_GEMINI_MODEL);
-        }
-
-        public String getRagLlmGeminiApiUrl() {
-            return get(FessConfig.RAG_LLM_GEMINI_API_URL);
-        }
-
-        public String getRagLlmGeminiTimeout() {
-            return get(FessConfig.RAG_LLM_GEMINI_TIMEOUT);
-        }
-
-        public Integer getRagLlmGeminiTimeoutAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_GEMINI_TIMEOUT);
-        }
-
-        public String getRagLlmGeminiIntentMaxTokens() {
-            return get(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmGeminiIntentMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS);
-        }
-
-        public String getRagLlmGeminiEvaluationMaxTokens() {
-            return get(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS);
-        }
-
-        public Integer getRagLlmGeminiEvaluationMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS);
-        }
-
-        public String getRagLlmAvailabilityCheckInterval() {
-            return get(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL);
-        }
-
-        public Integer getRagLlmAvailabilityCheckIntervalAsInteger() {
-            return getAsInteger(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL);
-        }
-
-        public String getRagChatMaxTokens() {
-            return get(FessConfig.RAG_CHAT_MAX_TOKENS);
-        }
-
-        public Integer getRagChatMaxTokensAsInteger() {
-            return getAsInteger(FessConfig.RAG_CHAT_MAX_TOKENS);
-        }
-
-        public String getRagChatTemperature() {
-            return get(FessConfig.RAG_CHAT_TEMPERATURE);
-        }
-
-        public java.math.BigDecimal getRagChatTemperatureAsDecimal() {
-            return getAsDecimal(FessConfig.RAG_CHAT_TEMPERATURE);
-        }
-
         public String getRagChatContextMaxDocuments() {
             return get(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS);
         }
 
         public Integer getRagChatContextMaxDocumentsAsInteger() {
             return getAsInteger(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS);
-        }
-
-        public String getRagChatContextMaxChars() {
-            return get(FessConfig.RAG_CHAT_CONTEXT_MAX_CHARS);
-        }
-
-        public Integer getRagChatContextMaxCharsAsInteger() {
-            return getAsInteger(FessConfig.RAG_CHAT_CONTEXT_MAX_CHARS);
-        }
-
-        public String getRagChatSystemPrompt() {
-            return get(FessConfig.RAG_CHAT_SYSTEM_PROMPT);
         }
 
         public String getRagChatSessionTimeoutMinutes() {
@@ -13357,14 +12827,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getRagChatContentFields() {
             return get(FessConfig.RAG_CHAT_CONTENT_FIELDS);
-        }
-
-        public String getRagChatEvaluationMaxRelevantDocs() {
-            return get(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS);
-        }
-
-        public Integer getRagChatEvaluationMaxRelevantDocsAsInteger() {
-            return getAsInteger(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS);
         }
 
         public String getIndexExportPath() {
@@ -13978,38 +13440,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_DIGIT, "false");
             defaultMap.put(FessConfig.PASSWORD_REQUIRE_SPECIAL_CHAR, "false");
             defaultMap.put(FessConfig.RAG_CHAT_ENABLED, "false");
-            defaultMap.put(FessConfig.RAG_LLM_TYPE, "ollama");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_API_URL, "http://localhost:11434");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_MODEL, "gemma3:4b");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_TIMEOUT, "60000");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_INTENT_MAX_TOKENS, "500");
-            defaultMap.put(FessConfig.RAG_LLM_OLLAMA_EVALUATION_MAX_TOKENS, "500");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_KEY, "");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_MODEL, "gpt-5-mini");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_API_URL, "https://api.openai.com/v1");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_TIMEOUT, "60000");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_INTENT_MAX_TOKENS, "2048");
-            defaultMap.put(FessConfig.RAG_LLM_OPENAI_EVALUATION_MAX_TOKENS, "2048");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_KEY, "");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_MODEL, "gemini-3-flash-preview");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_API_URL, "https://generativelanguage.googleapis.com/v1beta");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_TIMEOUT, "60000");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_INTENT_MAX_TOKENS, "1024");
-            defaultMap.put(FessConfig.RAG_LLM_GEMINI_EVALUATION_MAX_TOKENS, "1024");
-            defaultMap.put(FessConfig.RAG_LLM_AVAILABILITY_CHECK_INTERVAL, "60");
-            defaultMap.put(FessConfig.RAG_CHAT_MAX_TOKENS, "4096");
-            defaultMap.put(FessConfig.RAG_CHAT_TEMPERATURE, "0.7");
             defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_DOCUMENTS, "5");
-            defaultMap.put(FessConfig.RAG_CHAT_CONTEXT_MAX_CHARS, "4000");
-            defaultMap.put(FessConfig.RAG_CHAT_SYSTEM_PROMPT,
-                    "You are an AI assistant for Fess search engine. Answer questions based on the search results provided. Always cite your sources using [1], [2], etc.");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "20");
             defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_ENABLED, "true");
             defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE, "10");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
-            defaultMap.put(FessConfig.RAG_CHAT_EVALUATION_MAX_RELEVANT_DOCS, "3");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");

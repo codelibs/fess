@@ -33,11 +33,10 @@ import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,36 +64,6 @@ public abstract class AbstractLlmClient implements LlmClient {
     /** The scheduled task for periodic availability checks. */
     protected TimeoutTask availabilityCheckTask;
 
-    /** Custom prompt template for intent detection. Use {@code ${userMessage}} as placeholder. */
-    protected String intentDetectionPrompt;
-
-    /** Custom system prompt for unclear intent responses. */
-    protected String unclearIntentSystemPrompt;
-
-    /** Custom system prompt for no-results responses. */
-    protected String noResultsSystemPrompt;
-
-    /** Custom system prompt for document-not-found responses. Use {@code ${documentUrl}} as placeholder. */
-    protected String documentNotFoundSystemPrompt;
-
-    /** Custom system prompt suffix for summary generation. */
-    protected String summarySystemPromptSuffix;
-
-    /** Custom prompt template for relevance evaluation. Uses {@code {{maxRelevantDocs}}}, {@code {{userMessage}}}, {@code {{query}}}, {@code {{searchResults}}} placeholders. */
-    protected String evaluationPrompt;
-
-    /** Custom system prompt template for answer generation. Uses {@code {{systemPrompt}}}, {@code {{context}}} placeholders. */
-    protected String answerGenerationSystemPrompt;
-
-    /** Custom system prompt template for summary generation. Uses {@code {{systemPrompt}}}, {@code {{documentContent}}} placeholders. */
-    protected String summarySystemPrompt;
-
-    /** Custom system prompt template for FAQ answer generation. Uses {@code {{systemPrompt}}}, {@code {{context}}} placeholders. */
-    protected String faqAnswerSystemPrompt;
-
-    /** Custom system prompt for direct answer generation (without document search). */
-    protected String directAnswerSystemPrompt;
-
     /**
      * Default constructor.
      */
@@ -103,6 +72,16 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     // --- Shared infrastructure ---
+
+    /**
+     * Registers this client with the LlmClientManager.
+     * Called via postConstruct before init().
+     */
+    public void register() {
+        if (ComponentUtil.hasComponent("llmClientManager")) {
+            ComponentUtil.getComponent(LlmClientManager.class).register(this);
+        }
+    }
 
     /**
      * Initializes the HTTP client and starts availability checking.
@@ -246,155 +225,133 @@ public abstract class AbstractLlmClient implements LlmClient {
      *
      * @return the interval in seconds
      */
-    protected int getAvailabilityCheckInterval() {
-        return ComponentUtil.getFessConfig().getRagLlmAvailabilityCheckIntervalAsInteger();
-    }
+    protected abstract int getAvailabilityCheckInterval();
 
     /**
      * Checks if RAG chat feature is enabled.
      *
      * @return true if RAG chat is enabled
      */
-    protected boolean isRagChatEnabled() {
-        return ComponentUtil.getFessConfig().isRagChatEnabled();
-    }
+    protected abstract boolean isRagChatEnabled();
 
     /**
      * Gets the configured LLM type.
      *
      * @return the LLM type from configuration
      */
-    protected String getLlmType() {
-        return ComponentUtil.getFessConfig().getRagLlmType();
-    }
+    protected abstract String getLlmType();
 
     /**
      * Gets the temperature parameter.
      *
      * @return the temperature
      */
-    protected double getTemperature() {
-        return ComponentUtil.getFessConfig().getRagChatTemperatureAsDecimal().doubleValue();
-    }
+    protected abstract double getTemperature();
 
     /**
      * Gets the maximum tokens for the response.
      *
      * @return the maximum tokens
      */
-    protected int getMaxTokens() {
-        return ComponentUtil.getFessConfig().getRagChatMaxTokensAsInteger();
-    }
+    protected abstract int getMaxTokens();
+
+    /**
+     * Gets the base system prompt for RAG chat responses.
+     *
+     * @return the system prompt
+     */
+    protected abstract String getSystemPrompt();
+
+    /**
+     * Gets the intent detection prompt template.
+     *
+     * @return the intent detection prompt
+     */
+    protected abstract String getIntentDetectionPrompt();
+
+    /**
+     * Gets the system prompt for unclear intent responses.
+     *
+     * @return the unclear intent system prompt
+     */
+    protected abstract String getUnclearIntentSystemPrompt();
+
+    /**
+     * Gets the system prompt for no-results responses.
+     *
+     * @return the no-results system prompt
+     */
+    protected abstract String getNoResultsSystemPrompt();
+
+    /**
+     * Gets the system prompt for document-not-found responses.
+     *
+     * @return the document-not-found system prompt
+     */
+    protected abstract String getDocumentNotFoundSystemPrompt();
+
+    /**
+     * Gets the evaluation prompt for relevance checking.
+     *
+     * @return the evaluation prompt
+     */
+    protected abstract String getEvaluationPrompt();
+
+    /**
+     * Gets the system prompt for answer generation.
+     *
+     * @return the answer generation system prompt
+     */
+    protected abstract String getAnswerGenerationSystemPrompt();
+
+    /**
+     * Gets the system prompt for summary generation.
+     *
+     * @return the summary system prompt
+     */
+    protected abstract String getSummarySystemPrompt();
+
+    /**
+     * Gets the system prompt for FAQ answer generation.
+     *
+     * @return the FAQ answer system prompt
+     */
+    protected abstract String getFaqAnswerSystemPrompt();
+
+    /**
+     * Gets the system prompt for direct answer generation.
+     *
+     * @return the direct answer system prompt
+     */
+    protected abstract String getDirectAnswerSystemPrompt();
+
+    /**
+     * Gets the maximum characters for context building.
+     *
+     * @return the maximum characters
+     */
+    protected abstract int getContextMaxChars();
+
+    /**
+     * Gets the maximum number of relevant documents for evaluation.
+     *
+     * @return the maximum number of relevant documents
+     */
+    protected abstract int getEvaluationMaxRelevantDocs();
 
     /**
      * Gets the maximum tokens for intent detection.
      *
      * @return the maximum tokens for intent detection
      */
-    protected int getIntentDetectionMaxTokens() {
-        return 500;
-    }
+    protected abstract int getIntentDetectionMaxTokens();
 
     /**
      * Gets the maximum tokens for result evaluation.
      *
      * @return the maximum tokens for result evaluation
      */
-    protected int getEvaluationMaxTokens() {
-        return 500;
-    }
-
-    // --- Prompt template setters (for fess_llm.xml injection) ---
-
-    /**
-     * Sets the custom prompt template for intent detection.
-     *
-     * @param intentDetectionPrompt the prompt template with {@code {{userMessage}}} placeholder
-     */
-    public void setIntentDetectionPrompt(final String intentDetectionPrompt) {
-        this.intentDetectionPrompt = intentDetectionPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for unclear intent responses.
-     *
-     * @param unclearIntentSystemPrompt the system prompt
-     */
-    public void setUnclearIntentSystemPrompt(final String unclearIntentSystemPrompt) {
-        this.unclearIntentSystemPrompt = unclearIntentSystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for no-results responses.
-     *
-     * @param noResultsSystemPrompt the system prompt
-     */
-    public void setNoResultsSystemPrompt(final String noResultsSystemPrompt) {
-        this.noResultsSystemPrompt = noResultsSystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for document-not-found responses.
-     *
-     * @param documentNotFoundSystemPrompt the system prompt with {@code {{documentUrl}}} placeholder
-     */
-    public void setDocumentNotFoundSystemPrompt(final String documentNotFoundSystemPrompt) {
-        this.documentNotFoundSystemPrompt = documentNotFoundSystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt suffix for summary generation.
-     *
-     * @param summarySystemPromptSuffix the prompt suffix
-     */
-    public void setSummarySystemPromptSuffix(final String summarySystemPromptSuffix) {
-        this.summarySystemPromptSuffix = summarySystemPromptSuffix;
-    }
-
-    /**
-     * Sets the custom evaluation prompt for relevance checking.
-     *
-     * @param evaluationPrompt the evaluation prompt template
-     */
-    public void setEvaluationPrompt(final String evaluationPrompt) {
-        this.evaluationPrompt = evaluationPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for answer generation.
-     *
-     * @param answerGenerationSystemPrompt the answer generation system prompt template
-     */
-    public void setAnswerGenerationSystemPrompt(final String answerGenerationSystemPrompt) {
-        this.answerGenerationSystemPrompt = answerGenerationSystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for summary generation.
-     *
-     * @param summarySystemPrompt the summary system prompt template
-     */
-    public void setSummarySystemPrompt(final String summarySystemPrompt) {
-        this.summarySystemPrompt = summarySystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for FAQ answer generation.
-     *
-     * @param faqAnswerSystemPrompt the FAQ answer system prompt template
-     */
-    public void setFaqAnswerSystemPrompt(final String faqAnswerSystemPrompt) {
-        this.faqAnswerSystemPrompt = faqAnswerSystemPrompt;
-    }
-
-    /**
-     * Sets the custom system prompt for direct answer generation.
-     *
-     * @param directAnswerSystemPrompt the direct answer system prompt
-     */
-    public void setDirectAnswerSystemPrompt(final String directAnswerSystemPrompt) {
-        this.directAnswerSystemPrompt = directAnswerSystemPrompt;
-    }
+    protected abstract int getEvaluationMaxTokens();
 
     // --- Locale support methods ---
 
@@ -525,9 +482,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.debug("[RAG:ANSWER] generateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage, documents.size(),
                     history.size());
         }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildContext(documents, fessConfig);
-        final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
+        final String context = buildContext(documents);
+        final LlmChatRequest request = buildStreamingRequest(userMessage, context, history);
 
         return chat(request);
     }
@@ -539,9 +495,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.debug("[RAG:ANSWER] streamGenerateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage,
                     documents.size(), history.size());
         }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildContext(documents, fessConfig);
-        final LlmChatRequest request = buildStreamingRequest(fessConfig, userMessage, context, history);
+        final String context = buildContext(documents);
+        final LlmChatRequest request = buildStreamingRequest(userMessage, context, history);
         request.setStream(true);
 
         streamChat(request, callback);
@@ -549,21 +504,9 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     @Override
     public void generateUnclearIntentResponse(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String systemPrompt;
-        if (unclearIntentSystemPrompt != null) {
-            systemPrompt = unclearIntentSystemPrompt;
-        } else {
-            systemPrompt = "You are a helpful assistant for a document search system. "
-                    + "The user's question is too vague to determine what documents to search for. "
-                    + "Generate a polite message asking for clarification. Ask them:\n"
-                    + "- What specific topic or document are they looking for?\n" + "- Can they provide more details or keywords?\n"
-                    + "- What kind of information would be helpful?\n\n" + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-                    + "Only ask for clarification to help with document search.";
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(getUnclearIntentSystemPrompt());
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateUnclearIntentResponse. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
                     userMessage, history.size());
@@ -572,8 +515,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -581,22 +524,9 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     @Override
     public void generateNoResultsResponse(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String systemPrompt;
-        if (noResultsSystemPrompt != null) {
-            systemPrompt = noResultsSystemPrompt;
-        } else {
-            systemPrompt = "You are a helpful assistant for a document search system. "
-                    + "The search for relevant documents returned no results matching the user's query. "
-                    + "Generate a polite message informing the user that no documents matching their query were found. "
-                    + "Suggest ways they could refine their search, such as:\n" + "- Using different keywords\n"
-                    + "- Being more specific or more general\n" + "- Checking for spelling errors\n" + "- Trying related terms\n\n"
-                    + "IMPORTANT: Do NOT provide any answers from your own knowledge. "
-                    + "Only inform them about the search results and offer suggestions for refining their search.";
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(getNoResultsSystemPrompt());
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateNoResultsResponse. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
                     userMessage, history.size());
@@ -605,8 +535,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -615,21 +545,9 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public void generateDocumentNotFoundResponse(final String userMessage, final String documentUrl, final List<LlmMessage> history,
             final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String systemPrompt;
-        if (documentNotFoundSystemPrompt != null) {
-            systemPrompt = documentNotFoundSystemPrompt.replace("{{documentUrl}}", documentUrl);
-        } else {
-            systemPrompt = "You are a helpful assistant for a document search system. "
-                    + "The user requested a summary of a document, but the specified URL was not found in the system. " + "URL searched: "
-                    + documentUrl + "\n\n" + "Generate a polite message informing the user that:\n"
-                    + "- The specified document could not be found\n" + "- The URL might be incorrect or the document may not be indexed\n"
-                    + "- They can try searching with keywords instead\n\n"
-                    + "IMPORTANT: Do NOT provide any information from your own knowledge. " + "Only inform them about the search result.";
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(getDocumentNotFoundSystemPrompt().replace("{{documentUrl}}", documentUrl));
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateDocumentNotFoundResponse. resolvedPrompt={}, documentUrl={}, userMessage={}, historySize={}",
                     resolvedPrompt, documentUrl, userMessage, history.size());
@@ -638,8 +556,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -648,7 +566,6 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public void generateSummaryResponse(final String userMessage, final List<Map<String, Object>> documents, final List<LlmMessage> history,
             final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
         final StringBuilder documentContent = new StringBuilder();
@@ -669,23 +586,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
         }
 
-        final String baseSystemPrompt = fessConfig.getRagChatSystemPrompt();
-        final String systemPrompt;
-        if (summarySystemPrompt != null) {
-            systemPrompt = summarySystemPrompt.replace("{{systemPrompt}}", baseSystemPrompt)
-                    .replace("{{documentContent}}", documentContent.toString());
-        } else if (summarySystemPromptSuffix != null) {
-            // Deprecated fallback for backward compatibility
-            final String suffix = "\n\n" + summarySystemPromptSuffix + "\n\nDocument content:\n" + documentContent.toString();
-            systemPrompt = baseSystemPrompt + suffix;
-        } else {
-            // Hardcoded fallback
-            final String instructionText = "You are summarizing specific documents for the user. "
-                    + "Base your summary ONLY on the provided document content. " + "Do NOT add information from your own knowledge.";
-            final String suffix = "\n\n" + instructionText + "\n\nDocument content:\n" + documentContent.toString();
-            systemPrompt = baseSystemPrompt + suffix;
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(getSummarySystemPrompt().replace("{{systemPrompt}}", getSystemPrompt())
+                .replace("{{documentContent}}", documentContent.toString()));
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateSummaryResponse. resolvedPrompt={}, userMessage={}, documentCount={}, historySize={}",
                     resolvedPrompt, userMessage, documents.size(), history.size());
@@ -694,8 +596,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -704,22 +606,10 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public void generateFaqAnswerResponse(final String userMessage, final List<Map<String, Object>> documents,
             final List<LlmMessage> history, final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String context = buildContext(documents, fessConfig);
+        final String context = buildContext(documents);
 
-        final String baseSystemPrompt = fessConfig.getRagChatSystemPrompt();
-        final String systemPrompt;
-        if (faqAnswerSystemPrompt != null) {
-            systemPrompt = faqAnswerSystemPrompt.replace("{{systemPrompt}}", baseSystemPrompt)
-                    .replace("{{context}}", StringUtil.isNotBlank(context) ? context : "");
-        } else {
-            // Default FAQ prompt
-            systemPrompt = baseSystemPrompt + "\n\n" + "The user is asking a frequently asked question. "
-                    + "Provide a direct, concise answer based solely on the following documents. "
-                    + "If the answer is clearly stated in the documents, provide it without unnecessary elaboration. "
-                    + "Always cite your sources using [1], [2], etc.\n\n" + (StringUtil.isNotBlank(context) ? context : "");
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt = resolveLanguageInstruction(getFaqAnswerSystemPrompt().replace("{{systemPrompt}}", getSystemPrompt())
+                .replace("{{context}}", StringUtil.isNotBlank(context) ? context : ""));
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateFaqAnswerResponse. resolvedPrompt={}, contextLength={}, userMessage={}, historySize={}",
                     resolvedPrompt, context != null ? context.length() : 0, userMessage, history.size());
@@ -729,8 +619,8 @@ public abstract class AbstractLlmClient implements LlmClient {
         request.addSystemMessage(resolvedPrompt);
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -738,16 +628,10 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     @Override
     public void generateDirectAnswer(final String userMessage, final List<LlmMessage> history, final LlmStreamCallback callback) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String systemPrompt;
-        if (directAnswerSystemPrompt != null) {
-            systemPrompt = directAnswerSystemPrompt.replace("{{systemPrompt}}", fessConfig.getRagChatSystemPrompt());
-        } else {
-            systemPrompt = fessConfig.getRagChatSystemPrompt();
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt =
+                resolveLanguageInstruction(getDirectAnswerSystemPrompt().replace("{{systemPrompt}}", getSystemPrompt()));
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] generateDirectAnswer. resolvedPrompt={}, userMessage={}, historySize={}", resolvedPrompt,
                     userMessage, history.size());
@@ -756,8 +640,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
         request.setStream(true);
 
         streamChat(request, callback);
@@ -772,30 +656,7 @@ public abstract class AbstractLlmClient implements LlmClient {
      * @return the constructed prompt string
      */
     protected String buildIntentDetectionPrompt(final String userMessage) {
-        if (intentDetectionPrompt != null) {
-            return resolveLanguageInstruction(intentDetectionPrompt.replace("{{userMessage}}", userMessage));
-        }
-
-        return "Analyze the following user question and determine the intent.\n" + "Return a JSON object with:\n"
-                + "- \"intent\": one of:\n" + "  - \"search\": user wants to search for documents\n"
-                + "  - \"summary\": user wants a summary of a specific document (extract URL from question)\n"
-                + "  - \"faq\": user is asking a FAQ-type question\n"
-                + "  - \"unclear\": cannot determine what documents to search (question is too vague)\n"
-                + "- \"query\": Lucene query string for search (required for search/faq intents)\n"
-                + "- \"url\": the document URL to summarize (required for summary intent)\n"
-                + "- \"reasoning\": brief explanation of your decision\n\n" + "LUCENE QUERY GUIDELINES:\n"
-                + "- Proper nouns/product names: use quotation marks (e.g., \"Fess\")\n"
-                + "- Title boosting: for important terms, use title:\"term\"^2\n" + "- Required terms: use + prefix (e.g., +Fess +Docker)\n"
-                + "- Optional/synonym terms: use OR grouping (e.g., (tutorial OR guide OR howto))\n"
-                + "- Multi-word phrases: use quotation marks\n\n" + "IMPORTANT RULES:\n"
-                + "1. ALWAYS generate a Lucene query for search/faq intents. Use \"unclear\" only if truly ambiguous.\n"
-                + "2. Do NOT answer from your own knowledge. All responses must be based on document search.\n"
-                + "3. If user mentions a specific URL or document path, use \"summary\" intent.\n\n" + "EXAMPLES:\n" + "Input: \"Fess\"\n"
-                + "Output: {\"intent\":\"search\",\"query\":\"title:\\\"Fess\\\"^2 OR \\\"Fess\\\"\",\"reasoning\":\"Product name search\"}\n\n"
-                + "Input: \"How to use Fess with Docker\"\n"
-                + "Output: {\"intent\":\"search\",\"query\":\"+\\\"Fess\\\" +Docker (usage OR howto OR tutorial)\",\"reasoning\":\"Tutorial query\"}\n\n"
-                + resolveLanguageInstruction("{{languageInstruction}}") + "\n" + "Question: " + userMessage + "\n\n"
-                + "Response (JSON only):";
+        return resolveLanguageInstruction(getIntentDetectionPrompt().replace("{{userMessage}}", userMessage));
     }
 
     /**
@@ -807,8 +668,6 @@ public abstract class AbstractLlmClient implements LlmClient {
      * @return the evaluation prompt
      */
     protected String buildEvaluationPrompt(final String userMessage, final String query, final List<Map<String, Object>> searchResults) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
         // Build search results formatted text
         final StringBuilder searchResultsText = new StringBuilder();
         for (int i = 0; i < searchResults.size(); i++) {
@@ -818,39 +677,20 @@ public abstract class AbstractLlmClient implements LlmClient {
             searchResultsText.append("Description: ").append(getStringValue(doc, "content_description")).append("\n\n");
         }
 
-        if (evaluationPrompt != null) {
-            return evaluationPrompt
-                    .replace("{{maxRelevantDocs}}", String.valueOf(fessConfig.getRagChatEvaluationMaxRelevantDocsAsInteger()))
-                    .replace("{{userMessage}}", userMessage)
-                    .replace("{{query}}", query)
-                    .replace("{{searchResults}}", searchResultsText.toString());
-        }
-
-        // Fallback: hardcoded default
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Given the user question and search results, identify the most relevant documents.\n");
-        sb.append("Return a JSON object with:\n");
-        sb.append("- \"relevant_indexes\": array of 1-based indexes of relevant documents (max ");
-        sb.append(fessConfig.getRagChatEvaluationMaxRelevantDocsAsInteger());
-        sb.append(")\n");
-        sb.append("- \"has_relevant\": boolean indicating if any results are relevant\n\n");
-        sb.append("Question: ").append(userMessage).append("\n");
-        sb.append("Query: ").append(query).append("\n\n");
-        sb.append("Search Results:\n");
-        sb.append(searchResultsText);
-        sb.append("Response (JSON only):");
-        return sb.toString();
+        return getEvaluationPrompt().replace("{{maxRelevantDocs}}", String.valueOf(getEvaluationMaxRelevantDocs()))
+                .replace("{{userMessage}}", userMessage)
+                .replace("{{query}}", query)
+                .replace("{{searchResults}}", searchResultsText.toString());
     }
 
     /**
      * Builds context from document content for the LLM prompt.
      *
      * @param documents the search result documents
-     * @param fessConfig the Fess configuration
      * @return the context string
      */
-    protected String buildContext(final List<Map<String, Object>> documents, final FessConfig fessConfig) {
-        final int maxChars = fessConfig.getRagChatContextMaxCharsAsInteger();
+    protected String buildContext(final List<Map<String, Object>> documents) {
+        final int maxChars = getContextMaxChars();
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:CONTEXT] Building context. documentCount={}, maxChars={}", documents.size(), maxChars);
         }
@@ -910,30 +750,17 @@ public abstract class AbstractLlmClient implements LlmClient {
     /**
      * Builds a streaming LLM chat request with conversation history.
      *
-     * @param fessConfig the Fess configuration
      * @param userMessage the user's message
      * @param context the context from search results
      * @param history the conversation history
      * @return the LLM chat request
      */
-    protected LlmChatRequest buildStreamingRequest(final FessConfig fessConfig, final String userMessage, final String context,
-            final List<LlmMessage> history) {
+    protected LlmChatRequest buildStreamingRequest(final String userMessage, final String context, final List<LlmMessage> history) {
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String baseSystemPrompt = fessConfig.getRagChatSystemPrompt();
-        final String systemPrompt;
-        if (answerGenerationSystemPrompt != null) {
-            systemPrompt = answerGenerationSystemPrompt.replace("{{systemPrompt}}", baseSystemPrompt)
-                    .replace("{{context}}", StringUtil.isNotBlank(context) ? context : "");
-        } else {
-            // Fallback: original logic
-            if (StringUtil.isNotBlank(context)) {
-                systemPrompt = baseSystemPrompt + "\n\n" + context;
-            } else {
-                systemPrompt = baseSystemPrompt;
-            }
-        }
-        final String resolvedPrompt = resolveLanguageInstruction(systemPrompt);
+        final String resolvedPrompt =
+                resolveLanguageInstruction(getAnswerGenerationSystemPrompt().replace("{{systemPrompt}}", getSystemPrompt())
+                        .replace("{{context}}", StringUtil.isNotBlank(context) ? context : ""));
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:ANSWER] buildStreamingRequest. resolvedPrompt={}, contextLength={}, userMessage={}, historySize={}",
                     resolvedPrompt, context != null ? context.length() : 0, userMessage, history.size());
@@ -943,8 +770,8 @@ public abstract class AbstractLlmClient implements LlmClient {
         addHistory(request, history);
         request.addUserMessage(userMessage);
 
-        request.setMaxTokens(fessConfig.getRagChatMaxTokensAsInteger());
-        request.setTemperature(fessConfig.getRagChatTemperatureAsDecimal().doubleValue());
+        request.setMaxTokens(getMaxTokens());
+        request.setTemperature(getTemperature());
 
         return request;
     }

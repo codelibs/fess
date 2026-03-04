@@ -604,6 +604,8 @@ public class PluginHelper {
         THUMBNAIL("fess-thumbnail"), //
         /** Crawler plugins */
         CRAWLER("fess-crawler"), //
+        /** LLM plugins */
+        LLM("fess-llm"), //
         /** Unknown/generic JAR files */
         UNKNOWN("jar");
 
@@ -655,6 +657,9 @@ public class PluginHelper {
             }
             if (name.startsWith(CRAWLER.getId())) {
                 return CRAWLER;
+            }
+            if (name.startsWith(LLM.getId())) {
+                return LLM;
             }
             return UNKNOWN;
         }
