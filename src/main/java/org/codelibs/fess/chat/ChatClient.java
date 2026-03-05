@@ -421,20 +421,120 @@ public class ChatClient {
 
     /**
      * Extracts conversation history from a chat session as LlmMessage list.
+     * The assistant message content in history is controlled by the
+     * {@code rag.chat.history.assistant.content} configuration property.
      *
      * @param session the chat session
      * @return the list of LlmMessages representing the conversation history
      */
     protected List<LlmMessage> extractHistory(final ChatSession session) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "source_titles");
+
         final List<LlmMessage> history = new ArrayList<>();
         for (final ChatMessage msg : session.getMessages()) {
             if (msg.isUser()) {
                 history.add(LlmMessage.user(msg.getContent()));
             } else if (msg.isAssistant()) {
-                history.add(LlmMessage.assistant(msg.getContent()));
+                final String content = buildAssistantHistoryContent(msg, assistantContentMode);
+                if (content != null) {
+                    history.add(LlmMessage.assistant(content));
+                }
             }
         }
         return history;
+    }
+
+    /**
+     * Builds the assistant message content for history based on the specified mode.
+     *
+     * @param msg the assistant chat message
+     * @param mode the content mode (full, source_titles, source_titles_and_urls, truncated, none)
+     * @return the content string for history, or null if the message should be excluded
+     */
+    protected String buildAssistantHistoryContent(final ChatMessage msg, final String mode) {
+        switch (mode) {
+        case "full":
+            return msg.getContent();
+        case "source_titles":
+            return buildSourceTitlesContent(msg);
+        case "source_titles_and_urls":
+            return buildSourceTitlesAndUrlsContent(msg);
+        case "truncated":
+            return buildTruncatedContent(msg);
+        case "none":
+            return null;
+        default:
+            return msg.getContent();
+        }
+    }
+
+    /**
+     * Builds a summary string from source document titles.
+     *
+     * @param msg the assistant chat message
+     * @return a string listing referenced document titles
+     */
+    protected String buildSourceTitlesContent(final ChatMessage msg) {
+        final List<ChatSource> sources = msg.getSources();
+        if (sources == null || sources.isEmpty()) {
+            return msg.getContent();
+        }
+        final String titles =
+                sources.stream().map(ChatSource::getTitle).filter(t -> t != null && !t.isEmpty()).collect(Collectors.joining(", "));
+        if (titles.isEmpty()) {
+            return msg.getContent();
+        }
+        return "[Referenced documents: " + titles + "]";
+    }
+
+    /**
+     * Builds a summary string from source document titles and URLs.
+     *
+     * @param msg the assistant chat message
+     * @return a string listing referenced document titles and URLs
+     */
+    protected String buildSourceTitlesAndUrlsContent(final ChatMessage msg) {
+        final List<ChatSource> sources = msg.getSources();
+        if (sources == null || sources.isEmpty()) {
+            return msg.getContent();
+        }
+        final String refs = sources.stream().map(s -> {
+            final String title = s.getTitle();
+            final String url = s.getUrl();
+            if (title != null && !title.isEmpty() && url != null && !url.isEmpty()) {
+                return title + " (" + url + ")";
+            } else if (title != null && !title.isEmpty()) {
+                return title;
+            } else if (url != null && !url.isEmpty()) {
+                return url;
+            }
+            return null;
+        }).filter(s -> s != null).collect(Collectors.joining(", "));
+        if (refs.isEmpty()) {
+            return msg.getContent();
+        }
+        return "[References: " + refs + "]";
+    }
+
+    /**
+     * Builds a truncated version of the assistant message content.
+     * The maximum length is controlled by {@code rag.chat.history.assistant.max.chars}.
+     *
+     * @param msg the assistant chat message
+     * @return the truncated content
+     */
+    protected String buildTruncatedContent(final ChatMessage msg) {
+        final String content = msg.getContent();
+        if (content == null) {
+            return null;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxChars = Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.assistant.max.chars", "500"));
+        if (content.length() <= maxChars) {
+            return content;
+        }
+        return content.substring(0, maxChars) + "...";
     }
 
     /**
