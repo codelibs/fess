@@ -1968,12 +1968,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 20 */
     String RAG_CHAT_HISTORY_MAX_MESSAGES = "rag.chat.history.max.messages";
 
-    /** The key of the configuration. e.g. true */
-    String RAG_CHAT_RATE_LIMIT_ENABLED = "rag.chat.rate.limit.enabled";
-
-    /** The key of the configuration. e.g. 10 */
-    String RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE = "rag.chat.rate.limit.requests.per.minute";
-
     /** The key of the configuration. e.g. title,url,content,doc_id,content_title,content_description */
     String RAG_CHAT_CONTENT_FIELDS = "rag.chat.content.fields";
 
@@ -9299,37 +9293,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatHistoryMaxMessagesAsInteger();
 
     /**
-     * Get the value for the key 'rag.chat.rate.limit.enabled'. <br>
-     * The value is, e.g. true <br>
-     * comment: Rate limiting for chat.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatRateLimitEnabled();
-
-    /**
-     * Is the property for the key 'rag.chat.rate.limit.enabled' true? <br>
-     * The value is, e.g. true <br>
-     * comment: Rate limiting for chat.
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isRagChatRateLimitEnabled();
-
-    /**
-     * Get the value for the key 'rag.chat.rate.limit.requests.per.minute'. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getRagChatRateLimitRequestsPerMinute();
-
-    /**
-     * Get the value for the key 'rag.chat.rate.limit.requests.per.minute' as {@link Integer}. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getRagChatRateLimitRequestsPerMinuteAsInteger();
-
-    /**
      * Get the value for the key 'rag.chat.content.fields'. <br>
      * The value is, e.g. title,url,content,doc_id,content_title,content_description <br>
      * comment: <br>
@@ -12809,22 +12772,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES);
         }
 
-        public String getRagChatRateLimitEnabled() {
-            return get(FessConfig.RAG_CHAT_RATE_LIMIT_ENABLED);
-        }
-
-        public boolean isRagChatRateLimitEnabled() {
-            return is(FessConfig.RAG_CHAT_RATE_LIMIT_ENABLED);
-        }
-
-        public String getRagChatRateLimitRequestsPerMinute() {
-            return get(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE);
-        }
-
-        public Integer getRagChatRateLimitRequestsPerMinuteAsInteger() {
-            return getAsInteger(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE);
-        }
-
         public String getRagChatContentFields() {
             return get(FessConfig.RAG_CHAT_CONTENT_FIELDS);
         }
@@ -13444,8 +13391,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "20");
-            defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_ENABLED, "true");
-            defaultMap.put(FessConfig.RAG_CHAT_RATE_LIMIT_REQUESTS_PER_MINUTE, "10");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
