@@ -36,10 +36,13 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.LastaWebKey;
 import org.lastaflute.web.util.LaRequestUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Abstract base class for LLM client implementations.
@@ -242,18 +245,12 @@ public abstract class AbstractLlmClient implements LlmClient {
     protected abstract String getLlmType();
 
     /**
-     * Gets the temperature parameter.
+     * Gets the configuration prefix for this provider.
+     * Used to look up per-prompt-type parameters from FessConfig.
      *
-     * @return the temperature
+     * @return the config prefix (e.g. "rag.llm.openai")
      */
-    protected abstract double getTemperature();
-
-    /**
-     * Gets the maximum tokens for the response.
-     *
-     * @return the maximum tokens
-     */
-    protected abstract int getMaxTokens();
+    protected abstract String getConfigPrefix();
 
     /**
      * Gets the base system prompt for RAG chat responses.
@@ -339,19 +336,35 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected abstract int getEvaluationMaxRelevantDocs();
 
-    /**
-     * Gets the maximum tokens for intent detection.
-     *
-     * @return the maximum tokens for intent detection
-     */
-    protected abstract int getIntentDetectionMaxTokens();
+    // --- Per-prompt-type parameter application ---
 
     /**
-     * Gets the maximum tokens for result evaluation.
+     * Applies per-prompt-type parameters to the request from configuration.
+     * Reads temperature, max.tokens, and thinking.budget from config using
+     * the pattern: {configPrefix}.{promptType}.{paramName}
      *
-     * @return the maximum tokens for result evaluation
+     * Subclasses can override to add provider-specific parameters (e.g. reasoning_effort, top_p).
+     *
+     * @param request the LLM chat request
+     * @param promptType the prompt type (e.g. "intent", "evaluation", "answer")
      */
-    protected abstract int getEvaluationMaxTokens();
+    protected void applyPromptTypeParams(final LlmChatRequest request, final String promptType) {
+        final String prefix = getConfigPrefix() + "." + promptType;
+        final var config = ComponentUtil.getFessConfig();
+
+        final String temp = config.getOrDefault(prefix + ".temperature", null);
+        if (temp != null) {
+            request.setTemperature(Double.parseDouble(temp));
+        }
+        final String maxTokens = config.getOrDefault(prefix + ".max.tokens", null);
+        if (maxTokens != null) {
+            request.setMaxTokens(Integer.parseInt(maxTokens));
+        }
+        final String thinkingBudget = config.getOrDefault(prefix + ".thinking.budget", null);
+        if (thinkingBudget != null) {
+            request.setThinkingBudget(Integer.parseInt(thinkingBudget));
+        }
+    }
 
     // --- Locale support methods ---
 
@@ -361,11 +374,16 @@ public abstract class AbstractLlmClient implements LlmClient {
      * @return the user's locale, or default locale if not in request context
      */
     protected Locale getUserLocale() {
-        try {
-            return LaRequestUtil.getOptionalRequest().map(request -> request.getLocale()).orElse(Locale.getDefault());
-        } catch (final Exception e) {
-            return Locale.getDefault();
-        }
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            final HttpSession session = request.getSession(false);
+            if (session != null && session.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof final Locale sessionLocale) {
+                return sessionLocale;
+            }
+            if (request.getAttribute(LastaWebKey.USER_LOCALE_KEY) instanceof final Locale requestLocale) {
+                return requestLocale;
+            }
+            return request.getLocale();
+        }).orElse(Locale.getDefault());
     }
 
     /**
@@ -415,9 +433,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
-            request.setMaxTokens(getIntentDetectionMaxTokens());
-            request.setTemperature(0.3);
-            request.setThinkingBudget(0);
+            applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chat(request);
             final IntentDetectionResult result = parseIntentResponse(response.getContent());
@@ -451,9 +467,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final LlmChatRequest request = new LlmChatRequest();
             request.addUserMessage(prompt);
-            request.setMaxTokens(getEvaluationMaxTokens());
-            request.setTemperature(0.3);
-            request.setThinkingBudget(0);
+            applyPromptTypeParams(request, "evaluation");
 
             final LlmChatResponse response = chat(request);
             final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
@@ -515,8 +529,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "unclear");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -535,8 +548,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "noresults");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -556,8 +568,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "docnotfound");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -596,8 +607,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "summary");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -619,8 +629,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         request.addSystemMessage(resolvedPrompt);
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "faq");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -640,8 +649,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         addHistory(request, history);
         request.addUserMessage(userMessage);
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "direct");
         request.setStream(true);
 
         streamChat(request, callback);
@@ -770,8 +778,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         addHistory(request, history);
         request.addUserMessage(userMessage);
 
-        request.setMaxTokens(getMaxTokens());
-        request.setTemperature(getTemperature());
+        applyPromptTypeParams(request, "answer");
 
         return request;
     }

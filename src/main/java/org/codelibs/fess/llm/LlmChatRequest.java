@@ -16,7 +16,9 @@
 package org.codelibs.fess.llm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Request object for LLM chat completion.
@@ -31,6 +33,7 @@ public class LlmChatRequest {
     private Double temperature;
     private boolean stream;
     private Integer thinkingBudget;
+    private Map<String, String> extraParams;
 
     /**
      * Default constructor.
@@ -200,5 +203,50 @@ public class LlmChatRequest {
     public LlmChatRequest setThinkingBudget(final Integer thinkingBudget) {
         this.thinkingBudget = thinkingBudget;
         return this;
+    }
+
+    /**
+     * Gets the extra parameters for provider-specific settings.
+     *
+     * @return the extra parameters map, or {@code null} if not set
+     */
+    public Map<String, String> getExtraParams() {
+        return extraParams;
+    }
+
+    /**
+     * Sets the extra parameters for provider-specific settings.
+     *
+     * @param extraParams the extra parameters map
+     * @return this request for method chaining
+     */
+    public LlmChatRequest setExtraParams(final Map<String, String> extraParams) {
+        this.extraParams = extraParams;
+        return this;
+    }
+
+    /**
+     * Adds a single extra parameter for provider-specific settings.
+     *
+     * @param key the parameter key
+     * @param value the parameter value
+     * @return this request for method chaining
+     */
+    public LlmChatRequest putExtraParam(final String key, final String value) {
+        if (extraParams == null) {
+            extraParams = new HashMap<>();
+        }
+        extraParams.put(key, value);
+        return this;
+    }
+
+    /**
+     * Gets a single extra parameter value.
+     *
+     * @param key the parameter key
+     * @return the parameter value, or {@code null} if not set
+     */
+    public String getExtraParam(final String key) {
+        return extraParams != null ? extraParams.get(key) : null;
     }
 }
