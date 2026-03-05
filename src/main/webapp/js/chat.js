@@ -24,6 +24,12 @@ var FessChat = (function() {
                 evaluate: 'Evaluating results...',
                 fetch: 'Retrieving content...',
                 answer: 'Generating answer...'
+            },
+            errors: {
+                rate_limit: 'The AI service rate limit has been reached. Please wait a moment and try again.',
+                auth_error: 'AI service authentication failed. Please contact the administrator.',
+                service_unavailable: 'The AI service is temporarily unavailable. Please try again later.',
+                unknown: 'An error occurred. Please try again.'
             }
         }
     };
@@ -336,7 +342,9 @@ var FessChat = (function() {
             var errorMessage = config.labels.error;
             try {
                 var data = JSON.parse(e.data);
-                if (data.message) {
+                if (data.errorCode && config.labels.errors && config.labels.errors[data.errorCode]) {
+                    errorMessage = config.labels.errors[data.errorCode];
+                } else if (data.message) {
                     errorMessage = data.message;
                 }
             } catch (ex) {}

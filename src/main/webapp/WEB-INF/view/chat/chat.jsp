@@ -120,6 +120,12 @@ ${fe:html(true)}
 						evaluate: '<la:message key="labels.chat_phase_evaluate" />',
 						fetch: '<la:message key="labels.chat_phase_fetch" />',
 						answer: '<la:message key="labels.chat_phase_answer" />'
+					},
+					errors: {
+						rate_limit: '<la:message key="labels.chat_error_rate_limit" />',
+						auth_error: '<la:message key="labels.chat_error_auth" />',
+						service_unavailable: '<la:message key="labels.chat_error_service_unavailable" />',
+						unknown: '<la:message key="labels.chat_error" />'
 					}
 				}
 			});
