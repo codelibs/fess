@@ -383,4 +383,11 @@ public class EditForm {
      */
     @Size(max = 1000)
     public String storageCredentialsPath;
+
+    /**
+     * RAG LLM provider name.
+     * Selects which LLM client to use for RAG operations.
+     */
+    @Size(max = 100)
+    public String ragLlmName;
 }

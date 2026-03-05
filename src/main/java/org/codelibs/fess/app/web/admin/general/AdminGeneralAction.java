@@ -31,6 +31,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.llm.LlmClient;
+import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
@@ -76,6 +78,11 @@ public class AdminGeneralAction extends FessAdminAction {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameGeneral()));
         runtime.registerData("dayItems", getDayItems());
+        final boolean ragEnabled = isRagSectionVisible();
+        runtime.registerData("ragEnabled", ragEnabled);
+        if (ragEnabled) {
+            runtime.registerData("ragLlmNameItems", getRagLlmNameItems());
+        }
     }
 
     @Override
@@ -215,6 +222,9 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setStorageRegion(form.storageRegion);
         fessConfig.setStorageProjectId(form.storageProjectId);
         fessConfig.setStorageCredentialsPath(form.storageCredentialsPath);
+        if (form.ragLlmName != null && isValidRagLlmName(form.ragLlmName)) {
+            fessConfig.setRagLlmName(form.ragLlmName);
+        }
 
         fessConfig.storeSystemProperties();
         ComponentUtil.getLdapManager().updateConfig();
@@ -281,6 +291,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.storageRegion = fessConfig.getStorageRegion();
         form.storageProjectId = fessConfig.getStorageProjectId();
         form.storageCredentialsPath = fessConfig.getStorageCredentialsPath();
+        form.ragLlmName = fessConfig.getRagLlmName();
         form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 
@@ -298,6 +309,45 @@ public class AdminGeneralAction extends FessAdminAction {
         }
         items.add(Integer.toString(365));
         return items;
+    }
+
+    private boolean isRagSectionVisible() {
+        if (!fessConfig.isRagChatEnabled()) {
+            return false;
+        }
+        if (!ComponentUtil.hasComponent("llmClientManager")) {
+            return false;
+        }
+        final LlmClientManager llmClientManager = ComponentUtil.getComponent("llmClientManager");
+        return llmClientManager.getClients().length > 0;
+    }
+
+    private List<Map<String, String>> getRagLlmNameItems() {
+        final List<Map<String, String>> itemList = new ArrayList<>();
+        final LlmClientManager llmClientManager = ComponentUtil.getComponent("llmClientManager");
+        for (final LlmClient client : llmClientManager.getClients()) {
+            final Map<String, String> map = new HashMap<>();
+            map.put(Constants.ITEM_LABEL, client.getName());
+            map.put(Constants.ITEM_VALUE, client.getName());
+            itemList.add(map);
+        }
+        return itemList;
+    }
+
+    private static boolean isValidRagLlmName(final String name) {
+        if (!ComponentUtil.getFessConfig().isRagChatEnabled()) {
+            return false;
+        }
+        if (!ComponentUtil.hasComponent("llmClientManager")) {
+            return false;
+        }
+        final LlmClientManager llmClientManager = ComponentUtil.getComponent("llmClientManager");
+        for (final LlmClient client : llmClientManager.getClients()) {
+            if (name.equals(client.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

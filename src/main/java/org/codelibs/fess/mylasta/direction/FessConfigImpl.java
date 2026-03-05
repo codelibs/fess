@@ -28,6 +28,14 @@ public class FessConfigImpl extends FessConfig.SimpleImpl {
 
     private static final long serialVersionUID = 1L;
 
+    private static class KeyNotFoundException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        private KeyNotFoundException(final String key) {
+            super(key);
+        }
+    }
+
     @Override
     protected ObjectiveProperties newObjectiveProperties(final String resourcePath, final PropertyFilter propertyFilter) {
         return new ObjectiveProperties(resourcePath) { // for e.g. checking existence and filtering value
@@ -43,9 +51,17 @@ public class FessConfigImpl extends FessConfig.SimpleImpl {
 
             private String getFromCache(final String propertyKey) {
                 try {
-                    return cache.get(propertyKey,
-                            () -> System.getProperty(Constants.FESS_CONFIG_PREFIX + propertyKey, super.get(propertyKey)));
+                    return cache.get(propertyKey, () -> {
+                        final String value = System.getProperty(Constants.FESS_CONFIG_PREFIX + propertyKey, super.get(propertyKey));
+                        if (value == null) {
+                            throw new KeyNotFoundException(propertyKey);
+                        }
+                        return value;
+                    });
                 } catch (final ExecutionException e) {
+                    if (e.getCause() instanceof KeyNotFoundException) {
+                        return null;
+                    }
                     return super.get(propertyKey);
                 }
             }

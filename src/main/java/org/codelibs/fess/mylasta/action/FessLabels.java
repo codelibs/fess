@@ -2847,6 +2847,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Credentials Path */
     public static final String LABELS_storage_credentials_path = "{labels.storage_credentials_path}";
 
+    /** The key of the message: AI Mode */
+    public static final String LABELS_general_rag = "{labels.general_rag}";
+
+    /** The key of the message: LLM Provider */
+    public static final String LABELS_rag_llm_name = "{labels.rag_llm_name}";
+
     /** The key of the message: Send Test Mail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
 
