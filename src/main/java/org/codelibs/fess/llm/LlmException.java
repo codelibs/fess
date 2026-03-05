@@ -26,6 +26,21 @@ public class LlmException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
+    /** Error code for rate limit (HTTP 429). */
+    public static final String ERROR_RATE_LIMIT = "rate_limit";
+
+    /** Error code for authentication failure (HTTP 401/403). */
+    public static final String ERROR_AUTH = "auth_error";
+
+    /** Error code for service unavailable (HTTP 502/503). */
+    public static final String ERROR_SERVICE_UNAVAILABLE = "service_unavailable";
+
+    /** Error code for unknown errors. */
+    public static final String ERROR_UNKNOWN = "unknown";
+
+    /** The error code indicating the type of LLM error. */
+    private final String errorCode;
+
     /**
      * Creates a new exception with the specified message.
      *
@@ -33,6 +48,7 @@ public class LlmException extends FessSystemException {
      */
     public LlmException(final String message) {
         super(message);
+        errorCode = ERROR_UNKNOWN;
     }
 
     /**
@@ -43,5 +59,38 @@ public class LlmException extends FessSystemException {
      */
     public LlmException(final String message, final Throwable cause) {
         super(message, cause);
+        errorCode = ERROR_UNKNOWN;
+    }
+
+    /**
+     * Creates a new exception with the specified message and error code.
+     *
+     * @param message the error message
+     * @param errorCode the error code
+     */
+    public LlmException(final String message, final String errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * Creates a new exception with the specified message, error code and cause.
+     *
+     * @param message the error message
+     * @param errorCode the error code
+     * @param cause the cause of the exception
+     */
+    public LlmException(final String message, final String errorCode, final Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * Gets the error code.
+     *
+     * @return the error code
+     */
+    public String getErrorCode() {
+        return errorCode;
     }
 }

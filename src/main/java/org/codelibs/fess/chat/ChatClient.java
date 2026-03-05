@@ -37,6 +37,7 @@ import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.llm.ChatIntent;
 import org.codelibs.fess.llm.IntentDetectionResult;
 import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.llm.LlmMessage;
 import org.codelibs.fess.llm.LlmStreamCallback;
@@ -405,10 +406,15 @@ public class ChatClient {
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);
 
+        } catch (final LlmException e) {
+            logger.warn("LLM error during enhanced chat. sessionId={}, errorCode={}, error={}, elapsedTime={}ms", session.getSessionId(),
+                    e.getErrorCode(), e.getMessage(), System.currentTimeMillis() - startTime, e);
+            callback.onError("llm", e.getErrorCode());
+            throw e;
         } catch (final Exception e) {
             logger.warn("Error during enhanced chat. sessionId={}, error={}, elapsedTime={}ms", session.getSessionId(), e.getMessage(),
                     System.currentTimeMillis() - startTime, e);
-            callback.onError("unknown", e.getMessage());
+            callback.onError("unknown", LlmException.ERROR_UNKNOWN);
             throw e;
         }
     }

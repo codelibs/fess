@@ -3450,6 +3450,15 @@ public class FessLabels extends UserMessages {
     /** The key of the message: An error occurred. Please try again. */
     public static final String LABELS_chat_error = "{labels.chat_error}";
 
+    /** The key of the message: The AI service rate limit has been reached. Please wait a moment and try again. */
+    public static final String LABELS_chat_error_rate_limit = "{labels.chat_error_rate_limit}";
+
+    /** The key of the message: AI service authentication failed. Please contact the administrator. */
+    public static final String LABELS_chat_error_auth = "{labels.chat_error_auth}";
+
+    /** The key of the message: The AI service is temporarily unavailable. Please try again later. */
+    public static final String LABELS_chat_error_service_unavailable = "{labels.chat_error_service_unavailable}";
+
     /** The key of the message: Sources */
     public static final String LABELS_chat_sources = "{labels.chat_sources}";
 

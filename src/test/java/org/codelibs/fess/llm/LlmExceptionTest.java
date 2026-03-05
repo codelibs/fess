@@ -112,4 +112,48 @@ public class LlmExceptionTest extends UnitFessTestCase {
         final LlmException exception = new LlmException("");
         assertEquals("", exception.getMessage());
     }
+
+    @Test
+    public void test_constructorWithMessageDefaultsToUnknownErrorCode() {
+        final LlmException exception = new LlmException("Error message");
+        assertEquals(LlmException.ERROR_UNKNOWN, exception.getErrorCode());
+    }
+
+    @Test
+    public void test_constructorWithMessageAndCauseDefaultsToUnknownErrorCode() {
+        final RuntimeException cause = new RuntimeException("Root cause");
+        final LlmException exception = new LlmException("Error occurred", cause);
+        assertEquals(LlmException.ERROR_UNKNOWN, exception.getErrorCode());
+    }
+
+    @Test
+    public void test_constructorWithMessageAndErrorCode() {
+        final LlmException exception = new LlmException("Rate limit exceeded", LlmException.ERROR_RATE_LIMIT);
+        assertEquals("Rate limit exceeded", exception.getMessage());
+        assertEquals(LlmException.ERROR_RATE_LIMIT, exception.getErrorCode());
+        assertNull(exception.getCause());
+    }
+
+    @Test
+    public void test_constructorWithMessageErrorCodeAndCause() {
+        final RuntimeException cause = new RuntimeException("Root cause");
+        final LlmException exception = new LlmException("Auth failed", LlmException.ERROR_AUTH, cause);
+        assertEquals("Auth failed", exception.getMessage());
+        assertEquals(LlmException.ERROR_AUTH, exception.getErrorCode());
+        assertSame(cause, exception.getCause());
+    }
+
+    @Test
+    public void test_errorCodeConstants() {
+        assertEquals("rate_limit", LlmException.ERROR_RATE_LIMIT);
+        assertEquals("auth_error", LlmException.ERROR_AUTH);
+        assertEquals("service_unavailable", LlmException.ERROR_SERVICE_UNAVAILABLE);
+        assertEquals("unknown", LlmException.ERROR_UNKNOWN);
+    }
+
+    @Test
+    public void test_getErrorCodeWithServiceUnavailable() {
+        final LlmException exception = new LlmException("Service unavailable", LlmException.ERROR_SERVICE_UNAVAILABLE);
+        assertEquals(LlmException.ERROR_SERVICE_UNAVAILABLE, exception.getErrorCode());
+    }
 }

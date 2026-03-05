@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
+import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.helper.SystemHelper;
@@ -282,7 +283,7 @@ public class ChatApiManager extends BaseApiManager {
                 @Override
                 public void onError(final String phase, final String errorMessage) {
                     try {
-                        sendSseEvent(writer, "error", Map.of("phase", phase, "message", errorMessage));
+                        sendSseEvent(writer, "error", Map.of("phase", phase, "message", errorMessage, "errorCode", errorMessage));
                         if (logger.isDebugEnabled()) {
                             logger.debug("SSE error event sent. phase={}, error={}", phase, errorMessage);
                         }
@@ -322,7 +323,7 @@ public class ChatApiManager extends BaseApiManager {
             logger.warn("Failed to process stream request. sessionId={}, message={}", sessionId, e.getMessage(), e);
             if (!response.isCommitted()) {
                 try (final PrintWriter writer = response.getWriter()) {
-                    sendSseEvent(writer, "error", Map.of("message", "Internal server error"));
+                    sendSseEvent(writer, "error", Map.of("message", "Internal server error", "errorCode", LlmException.ERROR_UNKNOWN));
                 } catch (final IOException ioe) {
                     logger.warn("Failed to send error response. error={}", ioe.getMessage());
                 }
