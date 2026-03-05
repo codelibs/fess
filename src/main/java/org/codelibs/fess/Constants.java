@@ -711,6 +711,9 @@ public class Constants extends CoreLibConstants {
     /** Storage type configuration key (s3, gcs, auto). */
     public static final String STORAGE_TYPE = "storage.type";
 
+    /** RAG LLM name configuration key. */
+    public static final String RAG_LLM_NAME = "rag.llm.name";
+
     /** Storage region configuration key (for S3). */
     public static final String STORAGE_REGION = "storage.region";
 

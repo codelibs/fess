@@ -646,6 +646,14 @@ public interface FessProp {
         return getSystemProperty(Constants.STORAGE_CREDENTIALS_PATH, StringUtil.EMPTY);
     }
 
+    default void setRagLlmName(final String value) {
+        setSystemProperty(Constants.RAG_LLM_NAME, value);
+    }
+
+    default String getRagLlmName() {
+        return getSystemProperty(Constants.RAG_LLM_NAME, "ollama");
+    }
+
     Integer getLdapMaxUsernameLengthAsInteger();
 
     default String getLdapSecurityPrincipal(final String username) {

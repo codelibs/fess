@@ -586,6 +586,24 @@ ${fe:html(true)}
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
+                                    <%-- RAG --%>
+                                <c:if test="${ragEnabled}">
+                                <h4><la:message key="labels.general_rag"/></h4>
+                                <div class="form-group row">
+                                    <label for="ragLlmName"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.rag_llm_name"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ragLlmName"/>
+                                        <la:select styleId="ragLlmName" property="ragLlmName"
+                                                   styleClass="form-control">
+                                            <c:forEach var="item" items="${ragLlmNameItems}">
+                                                <la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
+                                            </c:forEach>
+                                        </la:select>
+                                    </div>
+                                </div>
+                                </c:if>
                             </div>
                             <div class="card-footer">
                                 <c:if test="${editable}">
