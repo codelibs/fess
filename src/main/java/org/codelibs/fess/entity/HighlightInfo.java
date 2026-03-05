@@ -32,6 +32,10 @@ public class HighlightInfo {
     private int numOfFragments;
     /** The offset for fragment positioning. */
     private int fragmentOffset;
+    /** Custom pre-tags for highlighting (null uses OpenSearch defaults). */
+    private String[] preTags;
+    /** Custom post-tags for highlighting (null uses OpenSearch defaults). */
+    private String[] postTags;
 
     /**
      * Default constructor that initializes highlighting settings from Fess configuration.
@@ -122,6 +126,46 @@ public class HighlightInfo {
      */
     public HighlightInfo fragmentOffset(final int fragmentOffset) {
         this.fragmentOffset = fragmentOffset;
+        return this;
+    }
+
+    /**
+     * Gets the custom pre-tags for highlighting.
+     *
+     * @return the pre-tags array, or null if using defaults
+     */
+    public String[] getPreTags() {
+        return preTags;
+    }
+
+    /**
+     * Sets the custom pre-tags for highlighting with fluent interface.
+     *
+     * @param preTags the pre-tags to set
+     * @return this HighlightInfo instance for method chaining
+     */
+    public HighlightInfo preTags(final String... preTags) {
+        this.preTags = preTags;
+        return this;
+    }
+
+    /**
+     * Gets the custom post-tags for highlighting.
+     *
+     * @return the post-tags array, or null if using defaults
+     */
+    public String[] getPostTags() {
+        return postTags;
+    }
+
+    /**
+     * Sets the custom post-tags for highlighting with fluent interface.
+     *
+     * @param postTags the post-tags to set
+     * @return this HighlightInfo instance for method chaining
+     */
+    public HighlightInfo postTags(final String... postTags) {
+        this.postTags = postTags;
         return this;
     }
 }

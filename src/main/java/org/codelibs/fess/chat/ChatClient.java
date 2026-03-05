@@ -799,7 +799,10 @@ public class ChatClient {
 
         @Override
         public HighlightInfo getHighlightInfo() {
-            return ComponentUtil.getViewHelper().createHighlightInfo();
+            return new HighlightInfo().fragmentSize(Integer.parseInt(fessConfig.getOrDefault("rag.chat.highlight.fragment.size", "500")))
+                    .numOfFragments(Integer.parseInt(fessConfig.getOrDefault("rag.chat.highlight.number.of.fragments", "3")))
+                    .preTags(StringUtil.EMPTY)
+                    .postTags(StringUtil.EMPTY);
         }
 
         @Override

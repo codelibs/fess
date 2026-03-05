@@ -336,6 +336,13 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected abstract int getEvaluationMaxRelevantDocs();
 
+    /**
+     * Gets the maximum number of characters for evaluation description.
+     *
+     * @return the maximum number of characters
+     */
+    protected abstract int getEvaluationDescriptionMaxChars();
+
     // --- Per-prompt-type parameter application ---
 
     /**
@@ -677,18 +684,39 @@ public abstract class AbstractLlmClient implements LlmClient {
      */
     protected String buildEvaluationPrompt(final String userMessage, final String query, final List<Map<String, Object>> searchResults) {
         // Build search results formatted text
+        final int maxChars = getEvaluationDescriptionMaxChars();
         final StringBuilder searchResultsText = new StringBuilder();
         for (int i = 0; i < searchResults.size(); i++) {
             final Map<String, Object> doc = searchResults.get(i);
             searchResultsText.append("[").append(i + 1).append("] ");
             searchResultsText.append("Title: ").append(getStringValue(doc, "title")).append("\n");
-            searchResultsText.append("Description: ").append(getStringValue(doc, "content_description")).append("\n\n");
+            final String content = getStringValue(doc, "content");
+            final String description = getStringValue(doc, "content_description");
+            String descText = StringUtil.isNotBlank(content) ? content : description;
+            descText = stripHtmlTags(descText);
+            if (descText != null && descText.length() > maxChars) {
+                descText = descText.substring(0, maxChars);
+            }
+            searchResultsText.append("Description: ").append(descText != null ? descText : "").append("\n\n");
         }
 
         return getEvaluationPrompt().replace("{{maxRelevantDocs}}", String.valueOf(getEvaluationMaxRelevantDocs()))
                 .replace("{{userMessage}}", userMessage)
                 .replace("{{query}}", query)
                 .replace("{{searchResults}}", searchResultsText.toString());
+    }
+
+    /**
+     * Strips HTML tags from the given text.
+     *
+     * @param text the text to strip HTML tags from
+     * @return the text without HTML tags
+     */
+    protected String stripHtmlTags(final String text) {
+        if (StringUtil.isBlank(text)) {
+            return text;
+        }
+        return text.replaceAll("<[^>]+>", "");
     }
 
     /**

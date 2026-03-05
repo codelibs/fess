@@ -2035,6 +2035,14 @@ public class SearchEngineClient implements Client {
             final int phraseLimit = fessConfig.getQueryHighlightPhraseLimitAsInteger();
             final String encoder = fessConfig.getQueryHighlightEncoder();
             final HighlightBuilder highlightBuilder = new HighlightBuilder();
+            final String[] preTags = highlightInfo.getPreTags();
+            final String[] postTags = highlightInfo.getPostTags();
+            if (preTags != null) {
+                highlightBuilder.preTags(preTags);
+            }
+            if (postTags != null) {
+                highlightBuilder.postTags(postTags);
+            }
             queryFieldConfig.highlightedFields(
                     stream -> stream.forEach(hf -> highlightBuilder.field(new HighlightBuilder.Field(hf).highlighterType(highlighterType)
                             .fragmentSize(fragmentSize)
