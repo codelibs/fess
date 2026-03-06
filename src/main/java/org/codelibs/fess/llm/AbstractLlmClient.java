@@ -58,6 +58,9 @@ public abstract class AbstractLlmClient implements LlmClient {
     /** Shared ObjectMapper instance for JSON processing. */
     protected static final ObjectMapper objectMapper = new ObjectMapper();
 
+    /** Buffer size reserved when truncating context to fit within max chars limit. */
+    protected static final int CONTEXT_TRUNCATION_BUFFER = 100;
+
     /** The HTTP client used for API communication. */
     protected CloseableHttpClient httpClient;
 
@@ -760,7 +763,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             if (totalChars + docContext.length() > maxChars) {
                 // Truncate content to fit
-                final int remaining = maxChars - totalChars - 100;
+                final int remaining = maxChars - totalChars - CONTEXT_TRUNCATION_BUFFER;
                 if (remaining > 0 && docContext.length() > remaining) {
                     docContext.setLength(remaining);
                     docContext.append("...\n\n");
@@ -1032,6 +1035,27 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
         }
         return Collections.emptyList();
+    }
+
+    // --- Error handling ---
+
+    /**
+     * Resolves an HTTP status code to an LlmException error code.
+     *
+     * @param statusCode the HTTP status code
+     * @return the corresponding error code
+     */
+    protected String resolveErrorCode(final int statusCode) {
+        if (statusCode == 429) {
+            return LlmException.ERROR_RATE_LIMIT;
+        }
+        if (statusCode == 401 || statusCode == 403) {
+            return LlmException.ERROR_AUTH;
+        }
+        if (statusCode == 502 || statusCode == 503) {
+            return LlmException.ERROR_SERVICE_UNAVAILABLE;
+        }
+        return LlmException.ERROR_UNKNOWN;
     }
 
     // --- Utility methods ---
