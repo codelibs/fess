@@ -1143,6 +1143,120 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertTrue(result.contains("http://example.com/page1"));
     }
 
+    @Test
+    public void test_getAnchorList_relativeUrlWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"page 2.html\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/dir/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/dir/page%202.html", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_absolutePathWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"/path with space/page.html\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/dir/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/path%20with%20space/page.html", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_protocolRelativeWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"//cdn.example.com/a b.js\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://cdn.example.com/a%20b.js", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_parentTraversalWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"../page 2.html\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/dir/sub/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/dir/page%202.html", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_parentTraversalAboveRootWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"/../page 2.html\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/page%202.html", result.get(0));
+    }
+
+    @Test
+    public void test_getAnchorList_parentTraversalFromRootWithSpace() throws Exception {
+        final String data = "<html><body><a href=\"../page 2.html\">link</a></body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = createAnchorListTransformer();
+        final Map<String, String> rules = new LinkedHashMap<>();
+        rules.put("//A", "href");
+        transformer.setChildUrlRuleMap(rules);
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/test.html");
+        responseData.setCharSet("UTF-8");
+
+        final List<String> result = transformer.getAnchorList(document, responseData);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com/page%202.html", result.get(0));
+    }
+
     private FessXpathTransformer createAnchorListTransformer() {
         final FessXpathTransformer transformer = new FessXpathTransformer() {
             @Override
