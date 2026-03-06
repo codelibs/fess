@@ -1107,6 +1107,43 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             final int pos = urlValue.indexOf(':');
             if (pos > 0 && pos < 10) {
                 u = encodeUrl(normalizeUrl(urlValue), encoding);
+            } else {
+                // Fallback: manually construct absolute URL for relative paths
+                final String scheme = uri.getScheme();
+                final String authority = uri.getAuthority();
+                if (scheme != null && authority != null) {
+                    final String fallbackUrl;
+                    if (urlValue.startsWith("//")) {
+                        fallbackUrl = scheme + ":" + urlValue;
+                    } else if (urlValue.startsWith("?") || urlValue.startsWith("#")) {
+                        fallbackUrl = uri.toString() + urlValue;
+                    } else if (urlValue.startsWith("/")) {
+                        String absPath = urlValue;
+                        while (absPath.startsWith("/../")) {
+                            absPath = absPath.substring(3);
+                        }
+                        if (!absPath.startsWith("/")) {
+                            absPath = "/" + absPath;
+                        }
+                        fallbackUrl = scheme + "://" + authority + absPath;
+                    } else {
+                        String basePath = uri.getRawPath();
+                        if (basePath == null) {
+                            basePath = "/";
+                        }
+                        final int lastSlash = basePath.lastIndexOf('/');
+                        final String parentPath = lastSlash >= 0 ? basePath.substring(0, lastSlash + 1) : "/";
+                        String resolvedPath = parentPath + urlValue;
+                        while (resolvedPath.startsWith("/../")) {
+                            resolvedPath = resolvedPath.substring(3);
+                        }
+                        if (!resolvedPath.startsWith("/")) {
+                            resolvedPath = "/" + resolvedPath;
+                        }
+                        fallbackUrl = scheme + "://" + authority + resolvedPath;
+                    }
+                    u = encodeUrl(normalizeUrl(fallbackUrl), encoding);
+                }
             }
         }
 
