@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -215,7 +216,7 @@ public class ChatClient {
             // Phase 1: Intent Detection
             long phaseStartTime = System.currentTimeMillis();
             callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "Analyzing your question...");
-            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage);
+            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
             callback.onPhaseComplete(ChatPhaseCallback.PHASE_INTENT);
 
             if (logger.isDebugEnabled()) {
@@ -485,7 +486,17 @@ public class ChatClient {
         if (titles.isEmpty()) {
             return msg.getContent();
         }
-        return "[Referenced documents: " + titles + "]";
+        final String sourceSuffix = "\n[Referenced documents: " + titles + "]";
+        final String content = msg.getContent();
+        if (content == null || content.isEmpty()) {
+            return sourceSuffix;
+        }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxChars = Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.assistant.summary.max.chars", "500"));
+        if (content.length() <= maxChars) {
+            return content + sourceSuffix;
+        }
+        return content.substring(0, maxChars) + "... [truncated]" + sourceSuffix;
     }
 
     /**
@@ -537,6 +548,11 @@ public class ChatClient {
         return content.substring(0, maxChars) + "...";
     }
 
+    private static final int MAX_QUERY_LENGTH = 1000;
+
+    private static final Pattern DANGEROUS_QUERY_PATTERN =
+            Pattern.compile("\\*:\\*|_all:|_source:|script[_\\s]*\\{|script_fields|groovy|mvel|painless\\s*\\{", Pattern.CASE_INSENSITIVE);
+
     /**
      * Searches documents using a Lucene query.
      *
@@ -547,6 +563,17 @@ public class ChatClient {
         if (StringUtil.isBlank(query)) {
             return Collections.emptyList();
         }
+
+        if (query.length() > MAX_QUERY_LENGTH) {
+            logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
+            return Collections.emptyList();
+        }
+
+        if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
+            logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
+            return Collections.emptyList();
+        }
+
         return searchDocuments(query);
     }
 
@@ -604,7 +631,8 @@ public class ChatClient {
 
         try {
             final SearchRenderData data = new SearchRenderData();
-            final ChatSearchRequestParams params = new ChatSearchRequestParams("url:\"" + url + "\"", maxDocs, fessConfig);
+            final ChatSearchRequestParams params =
+                    new ChatSearchRequestParams("url:\"" + escapeLuceneValue(url) + "\"", maxDocs, fessConfig);
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
@@ -618,6 +646,27 @@ public class ChatClient {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * Escapes special characters in the value for use in Lucene queries.
+     *
+     * @param value the value to escape
+     * @return the escaped value
+     */
+    protected String escapeLuceneValue(final String value) {
+        if (value == null) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(value.length() + 16);
+        for (int i = 0; i < value.length(); i++) {
+            final char c = value.charAt(i);
+            if (c == '\\' || c == '"') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     /**

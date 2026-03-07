@@ -160,6 +160,15 @@ public class ChatApiManager extends BaseApiManager {
                 return;
             }
 
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final int maxMessageLength = getMaxMessageLength(fessConfig);
+            if (message.length() > maxMessageLength) {
+                logger.warn("Chat message exceeds max length. length={}, max={}", message.length(), maxMessageLength);
+                writeJsonResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                        createErrorResponse("Message is too long (max " + maxMessageLength + " characters)"));
+                return;
+            }
+
             final String userId = getUserId(request);
             final ChatResult result = ComponentUtil.getChatClient().chat(sessionId, message, userId);
 
@@ -206,6 +215,15 @@ public class ChatApiManager extends BaseApiManager {
                 logger.debug("Message is required but was empty for stream request");
             }
             writeJsonResponse(response, HttpServletResponse.SC_BAD_REQUEST, createErrorResponse("Message is required"));
+            return;
+        }
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxMessageLength = getMaxMessageLength(fessConfig);
+        if (message.length() > maxMessageLength) {
+            logger.warn("Stream message exceeds max length. length={}, max={}", message.length(), maxMessageLength);
+            writeJsonResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                    createErrorResponse("Message is too long (max " + maxMessageLength + " characters)"));
             return;
         }
 
@@ -270,7 +288,7 @@ public class ChatApiManager extends BaseApiManager {
                 @Override
                 public void onChunk(final String content, final boolean done) {
                     try {
-                        if (!done && StringUtil.isNotBlank(content)) {
+                        if (!done && content != null && !content.isEmpty()) {
                             sendSseEvent(writer, "chunk", Map.of("content", content));
                         }
                     } catch (final Exception e) {
@@ -281,11 +299,11 @@ public class ChatApiManager extends BaseApiManager {
                 }
 
                 @Override
-                public void onError(final String phase, final String errorMessage) {
+                public void onError(final String phase, final String errorCode) {
                     try {
-                        sendSseEvent(writer, "error", Map.of("phase", phase, "message", errorMessage, "errorCode", errorMessage));
+                        sendSseEvent(writer, "error", Map.of("phase", phase, "message", errorCode, "errorCode", errorCode));
                         if (logger.isDebugEnabled()) {
-                            logger.debug("SSE error event sent. phase={}, error={}", phase, errorMessage);
+                            logger.debug("SSE error event sent. phase={}, error={}", phase, errorCode);
                         }
                     } catch (final Exception e) {
                         if (logger.isDebugEnabled()) {
@@ -406,6 +424,21 @@ public class ChatApiManager extends BaseApiManager {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
         return org.codelibs.fess.Constants.GUEST_USER.equals(username) ? null : username;
+    }
+
+    /**
+     * Returns the maximum message length for chat messages.
+     *
+     * @param fessConfig the Fess configuration
+     * @return the maximum message length
+     */
+    protected int getMaxMessageLength(final FessConfig fessConfig) {
+        try {
+            return Integer.parseInt(fessConfig.getOrDefault("rag.chat.message.max.length", "4000"));
+        } catch (final NumberFormatException e) {
+            logger.warn("Invalid rag.chat.message.max.length config, using default 4000");
+            return 4000;
+        }
     }
 
     @Override

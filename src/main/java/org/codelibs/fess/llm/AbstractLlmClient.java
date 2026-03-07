@@ -437,16 +437,52 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
 
         try {
-            final String prompt = buildIntentDetectionPrompt(userMessage);
+            final String systemPrompt = buildIntentDetectionSystemPrompt();
             if (logger.isDebugEnabled()) {
-                logger.debug("[RAG:INTENT] prompt={}", prompt);
+                logger.debug("[RAG:INTENT] systemPrompt={}", systemPrompt);
             }
             final LlmChatRequest request = new LlmChatRequest();
-            request.addUserMessage(prompt);
+            request.addSystemMessage(systemPrompt);
+            request.addUserMessage(wrapUserInput(userMessage));
             applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chat(request);
-            final IntentDetectionResult result = parseIntentResponse(response.getContent());
+            final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:INTENT] Intent detection completed. intent={}, query={}, reasoning={}, elapsedTime={}ms",
+                        result.getIntent(), result.getQuery(), result.getReasoning(), System.currentTimeMillis() - startTime);
+            }
+
+            return result;
+        } catch (final Exception e) {
+            logger.warn("Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
+                    System.currentTimeMillis() - startTime);
+            return IntentDetectionResult.fallbackSearch(userMessage);
+        }
+    }
+
+    @Override
+    public IntentDetectionResult detectIntent(final String userMessage, final List<LlmMessage> history) {
+        final long startTime = System.currentTimeMillis();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:INTENT] Starting intent detection with history. userMessage={}, historySize={}", userMessage,
+                    history != null ? history.size() : 0);
+        }
+
+        try {
+            final String systemPrompt = buildIntentDetectionSystemPrompt();
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:INTENT] systemPrompt={}", systemPrompt);
+            }
+            final LlmChatRequest request = new LlmChatRequest();
+            request.addSystemMessage(systemPrompt);
+            addIntentHistory(request, history);
+            request.addUserMessage(wrapUserInput(userMessage));
+            applyPromptTypeParams(request, "intent");
+
+            final LlmChatResponse response = chat(request);
+            final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG:INTENT] Intent detection completed. intent={}, query={}, reasoning={}, elapsedTime={}ms",
@@ -476,6 +512,8 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:EVAL] prompt={}", prompt);
             }
             final LlmChatRequest request = new LlmChatRequest();
+            request.addSystemMessage("You are a relevance evaluator. Assess whether search results are relevant to the user's question. "
+                    + "Respond with JSON only.");
             request.addUserMessage(prompt);
             applyPromptTypeParams(request, "evaluation");
 
@@ -589,22 +627,44 @@ public abstract class AbstractLlmClient implements LlmClient {
             final LlmStreamCallback callback) {
         final LlmChatRequest request = new LlmChatRequest();
 
+        final int maxChars = getContextMaxChars();
         final StringBuilder documentContent = new StringBuilder();
+        int totalChars = 0;
+        boolean truncated = false;
         for (final Map<String, Object> doc : documents) {
             final String title = (String) doc.get("title");
             final String content = (String) doc.get("content");
             final String url = (String) doc.get("url");
 
-            documentContent.append("=== Document ===\n");
+            final StringBuilder docEntry = new StringBuilder();
+            docEntry.append("=== Document ===\n");
             if (title != null) {
-                documentContent.append("Title: ").append(title).append("\n");
+                docEntry.append("Title: ").append(title).append("\n");
             }
             if (url != null) {
-                documentContent.append("URL: ").append(url).append("\n");
+                docEntry.append("URL: ").append(url).append("\n");
             }
             if (content != null) {
-                documentContent.append("Content:\n").append(content).append("\n\n");
+                docEntry.append("Content:\n").append(stripHtmlTags(content)).append("\n\n");
             }
+
+            if (totalChars + docEntry.length() > maxChars) {
+                final int remaining = maxChars - totalChars - CONTEXT_TRUNCATION_BUFFER;
+                if (remaining > 0 && docEntry.length() > remaining) {
+                    docEntry.setLength(remaining);
+                    docEntry.append("...\n\n");
+                    documentContent.append(docEntry);
+                }
+                truncated = true;
+                break;
+            }
+
+            documentContent.append(docEntry);
+            totalChars += docEntry.length();
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] generateSummaryResponse. documentContentLength={}, truncated={}", totalChars, truncated);
         }
 
         final String resolvedPrompt = resolveLanguageInstruction(getSummarySystemPrompt().replace("{{systemPrompt}}", getSystemPrompt())
@@ -668,13 +728,40 @@ public abstract class AbstractLlmClient implements LlmClient {
     // --- Prompt building methods ---
 
     /**
-     * Builds the intent detection prompt.
+     * Wraps user input with delimiters, escaping any closing tags in the content.
      *
-     * @param userMessage the user's message
-     * @return the constructed prompt string
+     * @param userMessage the user's message to wrap
+     * @return the wrapped user input
      */
-    protected String buildIntentDetectionPrompt(final String userMessage) {
-        return resolveLanguageInstruction(getIntentDetectionPrompt().replace("{{userMessage}}", userMessage));
+    protected String wrapUserInput(final String userMessage) {
+        final String escaped = userMessage.replace("</user_input>", "&lt;/user_input&gt;");
+        return "<user_input>" + escaped + "</user_input>";
+    }
+
+    /**
+     * Builds the system prompt for intent detection by removing the user-specific placeholders.
+     *
+     * @return the system prompt for intent detection
+     */
+    protected String buildIntentDetectionSystemPrompt() {
+        return resolveLanguageInstruction(getIntentDetectionPrompt().replace("{{conversationHistory}}", "").replace("{{userMessage}}", ""));
+    }
+
+    /**
+     * Adds conversation history as structured messages for intent detection.
+     *
+     * @param request the LLM chat request
+     * @param history the conversation history
+     */
+    protected void addIntentHistory(final LlmChatRequest request, final List<LlmMessage> history) {
+        if (history == null || history.isEmpty()) {
+            return;
+        }
+        final int maxHistory = Integer.parseInt(ComponentUtil.getFessConfig().getOrDefault("rag.chat.intent.history.max.messages", "4"));
+        final int start = Math.max(0, history.size() - maxHistory);
+        for (int i = start; i < history.size(); i++) {
+            request.addMessage(history.get(i));
+        }
     }
 
     /**
@@ -704,7 +791,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
 
         return getEvaluationPrompt().replace("{{maxRelevantDocs}}", String.valueOf(getEvaluationMaxRelevantDocs()))
-                .replace("{{userMessage}}", userMessage)
+                .replace("{{userMessage}}", wrapUserInput(userMessage))
                 .replace("{{query}}", query)
                 .replace("{{searchResults}}", searchResultsText.toString());
     }
@@ -757,7 +844,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             // Prefer full content, fallback to description
             final String docContent = StringUtil.isNotBlank(content) ? content : description;
             if (StringUtil.isNotBlank(docContent)) {
-                docContext.append(docContent).append("\n");
+                docContext.append(stripHtmlTags(docContent)).append("\n");
             }
             docContext.append("\n");
 
@@ -806,12 +893,57 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
         request.addSystemMessage(resolvedPrompt);
 
-        addHistory(request, history);
+        final int totalBudget = Integer.parseInt(
+                ComponentUtil.getFessConfig().getOrDefault("rag.chat.total.context.max.chars", String.valueOf(getContextMaxChars())));
+        final int fixedSize = resolvedPrompt.length() + userMessage.length();
+        final int historyBudget = totalBudget - fixedSize;
+
+        if (historyBudget > 0) {
+            addHistoryWithBudget(request, history, historyBudget);
+        } else {
+            logger.warn("[RAG:ANSWER] No budget remaining for history. totalBudget={}, fixedSize={}", totalBudget, fixedSize);
+        }
+
         request.addUserMessage(userMessage);
 
         applyPromptTypeParams(request, "answer");
 
         return request;
+    }
+
+    /**
+     * Adds conversation history to the request, truncating from oldest to fit within the character budget.
+     *
+     * @param request the LLM chat request
+     * @param history the conversation history (oldest first)
+     * @param budgetChars the maximum total characters for history messages
+     */
+    protected void addHistoryWithBudget(final LlmChatRequest request, final List<LlmMessage> history, final int budgetChars) {
+        if (history.isEmpty()) {
+            return;
+        }
+
+        // Walk from newest to oldest, accumulating messages that fit
+        int remaining = budgetChars;
+        int startIndex = history.size();
+        for (int i = history.size() - 1; i >= 0; i--) {
+            final int msgLen = history.get(i).getContent().length();
+            if (msgLen <= remaining) {
+                remaining -= msgLen;
+                startIndex = i;
+            } else {
+                break;
+            }
+        }
+
+        if (startIndex < history.size() && startIndex > 0) {
+            logger.warn("[RAG:ANSWER] History truncated to fit context window. originalSize={}, includedFrom={}, budgetChars={}",
+                    history.size(), startIndex, budgetChars);
+        }
+
+        for (int i = startIndex; i < history.size(); i++) {
+            request.addMessage(history.get(i));
+        }
     }
 
     // --- JSON parsing utilities ---
@@ -820,9 +952,10 @@ public abstract class AbstractLlmClient implements LlmClient {
      * Parses the LLM response and extracts intent detection result.
      *
      * @param response the JSON response from LLM
+     * @param userMessage the original user message
      * @return the parsed intent detection result
      */
-    protected IntentDetectionResult parseIntentResponse(final String response) {
+    protected IntentDetectionResult parseIntentResponse(final String response, final String userMessage) {
         try {
             final String intentStr = extractJsonString(response, "intent");
             final ChatIntent intent = ChatIntent.fromValue(intentStr);
@@ -840,8 +973,8 @@ public abstract class AbstractLlmClient implements LlmClient {
                 return IntentDetectionResult.unclear(reasoning);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to parse intent response. response={}", response, e);
-            return IntentDetectionResult.unclear("Parse error: " + e.getMessage());
+            logger.warn("Failed to parse intent response, falling back to search. response={}", response, e);
+            return IntentDetectionResult.fallbackSearch(userMessage);
         }
     }
 
@@ -868,8 +1001,12 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return RelevanceEvaluationResult.withRelevantDocs(docIds, indexes);
         } catch (final Exception e) {
-            logger.warn("Failed to parse evaluation response. response={}", response, e);
-            return RelevanceEvaluationResult.noRelevantResults();
+            logger.warn("Failed to parse evaluation response, falling back to all relevant. response={}", response, e);
+            final List<String> allDocIds = searchResults.stream()
+                    .map(doc -> getStringValue(doc, "doc_id"))
+                    .filter(StringUtil::isNotBlank)
+                    .collect(Collectors.toList());
+            return RelevanceEvaluationResult.fallbackAllRelevant(allDocIds);
         }
     }
 
@@ -1051,6 +1188,12 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
         if (statusCode == 401 || statusCode == 403) {
             return LlmException.ERROR_AUTH;
+        }
+        if (statusCode == 404) {
+            return LlmException.ERROR_MODEL_NOT_FOUND;
+        }
+        if (statusCode == 408) {
+            return LlmException.ERROR_TIMEOUT;
         }
         if (statusCode == 502 || statusCode == 503) {
             return LlmException.ERROR_SERVICE_UNAVAILABLE;

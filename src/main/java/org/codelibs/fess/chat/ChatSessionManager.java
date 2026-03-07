@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -233,21 +234,24 @@ public class ChatSessionManager {
      */
     protected void enforceMaxSize() {
         final int maxSize = getMaxSessionSize();
-        if (sessionCache.size() <= maxSize) {
-            return;
+        synchronized (sessionCache) {
+            if (sessionCache.size() <= maxSize) {
+                return;
+            }
+
+            final int toRemove = sessionCache.size() - maxSize;
+            logger.warn("Session cache reached maximum size. Removing oldest sessions. currentSize={}, maxSize={}, removing={}",
+                    sessionCache.size(), maxSize, toRemove);
+
+            // Remove oldest sessions
+            sessionCache.entrySet()
+                    .stream()
+                    .sorted((e1, e2) -> e1.getValue().getLastAccessedAt().compareTo(e2.getValue().getLastAccessedAt()))
+                    .limit(toRemove)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList())
+                    .forEach(sessionCache::remove);
         }
-
-        final int toRemove = sessionCache.size() - maxSize;
-        logger.warn("Session cache reached maximum size. Removing oldest sessions. currentSize={}, maxSize={}, removing={}",
-                sessionCache.size(), maxSize, toRemove);
-
-        // Remove oldest sessions
-        sessionCache.entrySet()
-                .stream()
-                .sorted((e1, e2) -> e1.getValue().getLastAccessedAt().compareTo(e2.getValue().getLastAccessedAt()))
-                .limit(toRemove)
-                .map(Map.Entry::getKey)
-                .forEach(sessionCache::remove);
     }
 
     /**
@@ -268,7 +272,12 @@ public class ChatSessionManager {
      * @return the session timeout in minutes
      */
     protected int getSessionTimeoutMinutes() {
-        return ComponentUtil.getFessConfig().getRagChatSessionTimeoutMinutesAsInteger();
+        final int value = ComponentUtil.getFessConfig().getRagChatSessionTimeoutMinutesAsInteger();
+        if (value <= 0) {
+            logger.warn("Invalid session timeout: {}. Using default: 30", value);
+            return 30;
+        }
+        return value;
     }
 
     /**
@@ -277,7 +286,12 @@ public class ChatSessionManager {
      * @return the maximum session cache size
      */
     protected int getMaxSessionSize() {
-        return ComponentUtil.getFessConfig().getRagChatSessionMaxSizeAsInteger();
+        final int value = ComponentUtil.getFessConfig().getRagChatSessionMaxSizeAsInteger();
+        if (value <= 0) {
+            logger.warn("Invalid max session size: {}. Using default: 100", value);
+            return 100;
+        }
+        return value;
     }
 
     /**
@@ -286,7 +300,12 @@ public class ChatSessionManager {
      * @return the maximum number of history messages
      */
     protected int getMaxHistoryMessages() {
-        return ComponentUtil.getFessConfig().getRagChatHistoryMaxMessagesAsInteger();
+        final int value = ComponentUtil.getFessConfig().getRagChatHistoryMaxMessagesAsInteger();
+        if (value <= 0) {
+            logger.warn("Invalid max history messages: {}. Using default: 20", value);
+            return 20;
+        }
+        return value;
     }
 
     /**

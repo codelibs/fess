@@ -73,6 +73,17 @@ public interface LlmClient {
     IntentDetectionResult detectIntent(String userMessage);
 
     /**
+     * Detects the intent of a user message with conversation history context.
+     *
+     * @param userMessage the user's message
+     * @param history the conversation history for context
+     * @return the detected intent with extracted keywords
+     */
+    default IntentDetectionResult detectIntent(String userMessage, List<LlmMessage> history) {
+        return detectIntent(userMessage);
+    }
+
+    /**
      * Evaluates search results for relevance to the user's question.
      *
      * @param userMessage the original user message
