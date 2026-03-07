@@ -550,8 +550,7 @@ public class ChatClient {
 
     private static final int MAX_QUERY_LENGTH = 1000;
 
-    private static final Pattern DANGEROUS_QUERY_PATTERN =
-            Pattern.compile("\\*:\\*|_all:|_source:|script[_\\s]*\\{|script_fields|groovy|mvel|painless\\s*\\{", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DANGEROUS_QUERY_PATTERN = Pattern.compile("\\*:\\*");
 
     /**
      * Searches documents using a Lucene query.
