@@ -245,12 +245,6 @@ public class ChatApiManager extends BaseApiManager {
         try (final PrintWriter writer = response.getWriter()) {
             final String userId = getUserId(request);
 
-            // Send initial session info
-            sendSseEvent(writer, "session", Map.of("sessionId", sessionId != null ? sessionId : ""));
-            if (logger.isDebugEnabled()) {
-                logger.debug("SSE session event sent. sessionId={}", sessionId);
-            }
-
             // Create phase callback for SSE events
             final ChatPhaseCallback phaseCallback = new ChatPhaseCallback() {
                 @Override

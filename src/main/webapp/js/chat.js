@@ -264,13 +264,6 @@ var FessChat = (function() {
             messageElement = addMessage('assistant', config.labels.waiting, true);
         };
 
-        eventSource.addEventListener('session', function(e) {
-            var data = JSON.parse(e.data);
-            if (data.sessionId) {
-                state.sessionId = data.sessionId;
-            }
-        });
-
         eventSource.addEventListener('phase', function(e) {
             var data = JSON.parse(e.data);
             if (data.phase) {

@@ -96,12 +96,12 @@ public class ChatSessionManager {
     }
 
     /**
-     * Gets a session by ID.
+     * Finds a session by ID without updating the last accessed time.
      *
      * @param sessionId the session ID
      * @return the session, or null if not found or expired
      */
-    public ChatSession getSession(final String sessionId) {
+    private ChatSession findSession(final String sessionId) {
         final ChatSession session = sessionCache.get(sessionId);
         if (session == null) {
             if (logger.isDebugEnabled()) {
@@ -114,6 +114,20 @@ public class ChatSessionManager {
             if (logger.isDebugEnabled()) {
                 logger.debug("Session expired and removed. sessionId={}, lastAccessedAt={}", sessionId, session.getLastAccessedAt());
             }
+            return null;
+        }
+        return session;
+    }
+
+    /**
+     * Gets a session by ID.
+     *
+     * @param sessionId the session ID
+     * @return the session, or null if not found or expired
+     */
+    public ChatSession getSession(final String sessionId) {
+        final ChatSession session = findSession(sessionId);
+        if (session == null) {
             return null;
         }
         session.touch();
@@ -132,7 +146,7 @@ public class ChatSessionManager {
      */
     public ChatSession getOrCreateSession(final String sessionId, final String userId) {
         if (sessionId != null) {
-            final ChatSession session = getSession(sessionId);
+            final ChatSession session = findSession(sessionId);
             if (session != null) {
                 final String sessionUserId = session.getUserId();
                 // Validate userId matches - prevent cross-user session access
@@ -140,11 +154,13 @@ public class ChatSessionManager {
                     logger.warn("Session userId mismatch. sessionId={}, requestUserId={}", sessionId, userId);
                 } else if (userId == null && sessionUserId == null) {
                     // Both null (unauthenticated + no userCode) - allow by sessionId only
+                    session.touch();
                     if (logger.isDebugEnabled()) {
                         logger.debug("Reusing existing session (both userId null). sessionId={}", sessionId);
                     }
                     return session;
                 } else if (userId != null && userId.equals(sessionUserId)) {
+                    session.touch();
                     if (logger.isDebugEnabled()) {
                         logger.debug("Reusing existing session. sessionId={}, userId={}", sessionId, userId);
                     }
@@ -197,7 +213,7 @@ public class ChatSessionManager {
      * @return true if the session was found, owned by the user, and cleared; false otherwise
      */
     public boolean clearSession(final String sessionId, final String userId) {
-        final ChatSession session = getSession(sessionId);
+        final ChatSession session = findSession(sessionId);
         if (session == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Cannot clear session, not found. sessionId={}", sessionId);
@@ -215,6 +231,7 @@ public class ChatSessionManager {
                     sessionUserId);
             return false;
         }
+        session.touch();
         session.clearMessages();
         if (logger.isDebugEnabled()) {
             logger.debug("Session cleared. sessionId={}, userId={}", sessionId, userId);

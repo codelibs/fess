@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.chat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.search.SearchAction;
@@ -92,9 +93,17 @@ public class ChatAction extends FessSearchAction {
             if (logger.isDebugEnabled()) {
                 logger.debug("Clearing chat session. sessionId={}", form.sessionId);
             }
-            chatSessionManager.clearSession(form.sessionId);
+            chatSessionManager.clearSession(form.sessionId, getUserId());
         }
         return redirect(getClass());
+    }
+
+    protected String getUserId() {
+        final String username = systemHelper.getUsername();
+        if (!Constants.GUEST_USER.equals(username)) {
+            return username;
+        }
+        return userInfoHelper.getUserCode();
     }
 
 }
