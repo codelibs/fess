@@ -16,6 +16,7 @@
 package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -362,9 +363,176 @@ public class ChatClientTest extends UnitFessTestCase {
         assertEquals("This is a ...", history.get(1).getContent());
     }
 
+    // ========== escapeLuceneValue tests ==========
+
+    @Test
+    public void test_escapeLuceneValue_null() {
+        assertEquals("", chatClient.testEscapeLuceneValue(null));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_empty() {
+        assertEquals("", chatClient.testEscapeLuceneValue(""));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_noSpecialChars() {
+        assertEquals("hello world", chatClient.testEscapeLuceneValue("hello world"));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_backslash() {
+        assertEquals("path\\\\to\\\\file", chatClient.testEscapeLuceneValue("path\\to\\file"));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_doubleQuote() {
+        assertEquals("say \\\"hello\\\"", chatClient.testEscapeLuceneValue("say \"hello\""));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_mixed() {
+        assertEquals("a\\\\b\\\"c", chatClient.testEscapeLuceneValue("a\\b\"c"));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_luceneCharsUnchanged() {
+        assertEquals("a + b - c * d ? e", chatClient.testEscapeLuceneValue("a + b - c * d ? e"));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_urlWithParams() {
+        assertEquals("https://example.com/path?q=test&lang=en",
+                chatClient.testEscapeLuceneValue("https://example.com/path?q=test&lang=en"));
+    }
+
+    @Test
+    public void test_escapeLuceneValue_consecutiveBackslashes() {
+        assertEquals("\\\\\\\\", chatClient.testEscapeLuceneValue("\\\\"));
+    }
+
+    // ========== searchWithQuery tests ==========
+
+    @Test
+    public void test_searchWithQuery_null() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery(null);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_blank() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery("   ");
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_exceedsMaxLength() {
+        final String longQuery = "a".repeat(1001);
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery(longQuery);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_exactlyMaxLength() {
+        chatClient.resetSearchDocumentsCalled();
+        final String query = "a".repeat(1000);
+        chatClient.testSearchWithQuery(query);
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_validQuery() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("OpenSearch tutorial");
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_validFieldQuery() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("title:fess");
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_rejects_starColonStar() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery("*:*");
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_rejects_starColonStarEmbedded() {
+        chatClient.resetSearchDocumentsCalled();
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery("title:hello AND *:*");
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_allows_scriptKeyword() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("painless scripting tutorial");
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_allows_internalFieldName() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("_source configuration guide");
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    // ========== escapeHtml tests ==========
+
+    @Test
+    public void test_escapeHtml_null() {
+        assertEquals("", chatClient.testEscapeHtml(null));
+    }
+
+    @Test
+    public void test_escapeHtml_empty() {
+        assertEquals("", chatClient.testEscapeHtml(""));
+    }
+
+    @Test
+    public void test_escapeHtml_noSpecialChars() {
+        assertEquals("hello world", chatClient.testEscapeHtml("hello world"));
+    }
+
+    @Test
+    public void test_escapeHtml_ampersand() {
+        assertEquals("a &amp; b", chatClient.testEscapeHtml("a & b"));
+    }
+
+    @Test
+    public void test_escapeHtml_lessThan() {
+        assertEquals("a &lt; b", chatClient.testEscapeHtml("a < b"));
+    }
+
+    @Test
+    public void test_escapeHtml_greaterThan() {
+        assertEquals("a &gt; b", chatClient.testEscapeHtml("a > b"));
+    }
+
+    @Test
+    public void test_escapeHtml_allSpecialChars() {
+        assertEquals("&amp;&lt;&gt;&quot;&#39;", chatClient.testEscapeHtml("&<>\"'"));
+    }
+
+    @Test
+    public void test_escapeHtml_scriptTag() {
+        assertEquals("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", chatClient.testEscapeHtml("<script>alert('xss')</script>"));
+    }
+
     // ========== Testable subclass ==========
 
     static class TestableChatClient extends ChatClient {
+
+        private boolean searchDocumentsCalled = false;
 
         String testBuildAssistantHistoryContent(final ChatMessage msg, final String mode) {
             return buildAssistantHistoryContent(msg, mode);
@@ -372,6 +540,32 @@ public class ChatClientTest extends UnitFessTestCase {
 
         List<LlmMessage> testExtractHistory(final ChatSession session) {
             return extractHistory(session);
+        }
+
+        String testEscapeLuceneValue(final String value) {
+            return escapeLuceneValue(value);
+        }
+
+        List<Map<String, Object>> testSearchWithQuery(final String query) {
+            return searchWithQuery(query);
+        }
+
+        String testEscapeHtml(final String text) {
+            return escapeHtml(text);
+        }
+
+        @Override
+        protected List<Map<String, Object>> searchDocuments(final String query) {
+            searchDocumentsCalled = true;
+            return Collections.emptyList();
+        }
+
+        boolean wasSearchDocumentsCalled() {
+            return searchDocumentsCalled;
+        }
+
+        void resetSearchDocumentsCalled() {
+            searchDocumentsCalled = false;
         }
     }
 }
