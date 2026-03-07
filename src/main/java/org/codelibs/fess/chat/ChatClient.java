@@ -17,6 +17,7 @@ package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -612,11 +613,28 @@ public class ChatClient {
             final List<Map<String, Object>> results = ComponentUtil.getSearchHelper()
                     .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
                             SearchRequestParams.SearchRequestType.JSON);
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(), results.size(),
-                        System.currentTimeMillis() - startTime);
+
+            // Reorder results to match original docIds order (preserve search score order)
+            final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
+            for (final Map<String, Object> doc : results) {
+                final String docId = (String) doc.get("doc_id");
+                if (docId != null) {
+                    resultMap.put(docId, doc);
+                }
             }
-            return results;
+            final List<Map<String, Object>> orderedResults = new ArrayList<>();
+            for (final String docId : docIds) {
+                final Map<String, Object> doc = resultMap.get(docId);
+                if (doc != null) {
+                    orderedResults.add(doc);
+                }
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(),
+                        orderedResults.size(), System.currentTimeMillis() - startTime);
+            }
+            return orderedResults;
         } catch (final Exception e) {
             logger.warn("Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
                     System.currentTimeMillis() - startTime);

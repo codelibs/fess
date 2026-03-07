@@ -333,11 +333,14 @@ public abstract class AbstractLlmClient implements LlmClient {
     protected abstract String getDirectAnswerSystemPrompt();
 
     /**
-     * Gets the maximum characters for context building.
+     * Gets the maximum characters for context building for a specific prompt type.
+     * Each LlmClient implementation defines per-prompt-type defaults appropriate
+     * for its target model.
      *
+     * @param promptType the prompt type (e.g., "answer", "summary", "faq")
      * @return the maximum characters
      */
-    protected abstract int getContextMaxChars();
+    protected abstract int getContextMaxChars(String promptType);
 
     /**
      * Gets the maximum number of relevant documents for evaluation.
@@ -603,7 +606,10 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:EVAL] prompt={}", prompt);
             }
             final LlmChatRequest request = new LlmChatRequest();
-            request.addSystemMessage("You are a relevance evaluator. Assess whether search results are relevant to the user's question. "
+            request.addSystemMessage("You are a strict relevance evaluator. "
+                    + "Select ONLY documents that DIRECTLY address the user's specific question topic. "
+                    + "Do NOT select documents about different or merely related topics. "
+                    + "Do NOT select table-of-contents or index pages that lack substantive content. "
                     + "Respond with JSON only. Do not include any text outside the JSON object.\n\n"
                     + "Example output: {\"relevant_indexes\": [1, 3], \"has_relevant\": true}");
             request.addUserMessage(prompt);
@@ -636,7 +642,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.debug("[RAG:ANSWER] generateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage, documents.size(),
                     history.size());
         }
-        final String context = buildContext(documents);
+        final String context = buildContext(documents, "answer");
         final LlmChatRequest request = buildStreamingRequest(userMessage, context, history);
 
         return chatWithConcurrencyControl(request);
@@ -649,7 +655,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.debug("[RAG:ANSWER] streamGenerateAnswer. userMessage={}, documentCount={}, historySize={}", userMessage,
                     documents.size(), history.size());
         }
-        final String context = buildContext(documents);
+        final String context = buildContext(documents, "answer");
         final LlmChatRequest request = buildStreamingRequest(userMessage, context, history);
         request.setStream(true);
 
@@ -720,7 +726,7 @@ public abstract class AbstractLlmClient implements LlmClient {
             final LlmStreamCallback callback) {
         final LlmChatRequest request = new LlmChatRequest();
 
-        final int maxChars = getContextMaxChars();
+        final int maxChars = getContextMaxChars("summary");
         final StringBuilder documentContent = new StringBuilder();
         int totalChars = 0;
         boolean truncated = false;
@@ -779,7 +785,7 @@ public abstract class AbstractLlmClient implements LlmClient {
     @Override
     public void generateFaqAnswerResponse(final String userMessage, final List<Map<String, Object>> documents,
             final List<LlmMessage> history, final LlmStreamCallback callback) {
-        final String context = buildContext(documents);
+        final String context = buildContext(documents, "faq");
 
         final String resolvedPrompt = resolveLanguageInstruction(getFaqAnswerSystemPrompt().replace("{{systemPrompt}}", getSystemPrompt())
                 .replace("{{context}}", StringUtil.isNotBlank(context) ? context : ""));
@@ -914,10 +920,11 @@ public abstract class AbstractLlmClient implements LlmClient {
      * Builds context from document content for the LLM prompt.
      *
      * @param documents the search result documents
+     * @param promptType the prompt type (e.g., "answer", "summary", "faq")
      * @return the context string
      */
-    protected String buildContext(final List<Map<String, Object>> documents) {
-        final int maxChars = getContextMaxChars();
+    protected String buildContext(final List<Map<String, Object>> documents, final String promptType) {
+        final int maxChars = getContextMaxChars(promptType);
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG:CONTEXT] Building context. documentCount={}, maxChars={}", documents.size(), maxChars);
         }
