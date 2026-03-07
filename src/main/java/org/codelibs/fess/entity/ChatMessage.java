@@ -268,10 +268,24 @@ public class ChatMessage implements Serializable {
          */
         public ChatSource(final int index, final Map<String, Object> doc) {
             this.index = index;
-            this.title = (String) doc.get("title");
-            this.url = (String) doc.get("url");
-            this.docId = (String) doc.get("doc_id");
-            this.snippet = (String) doc.get("content_description");
+            String titleValue = toStringOrNull(doc.get("title"));
+            if (titleValue == null || titleValue.isEmpty()) {
+                titleValue = toStringOrNull(doc.get("content_title"));
+            }
+            this.title = titleValue;
+            this.url = toStringOrNull(doc.get("url"));
+            this.docId = toStringOrNull(doc.get("doc_id"));
+            this.snippet = toStringOrNull(doc.get("content_description"));
+        }
+
+        private static String toStringOrNull(final Object value) {
+            if (value == null) {
+                return null;
+            }
+            if (value instanceof String) {
+                return (String) value;
+            }
+            return value.toString();
         }
 
         /**

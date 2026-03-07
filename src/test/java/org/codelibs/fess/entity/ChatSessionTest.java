@@ -195,6 +195,128 @@ public class ChatSessionTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_trimHistoryStartsWithUserMessage() {
+        final ChatSession session = new ChatSession();
+        // Create: user, assistant, user, assistant, user, assistant (6 messages)
+        session.addUserMessage("User 1");
+        session.addAssistantMessage("Assistant 1");
+        session.addUserMessage("User 2");
+        session.addAssistantMessage("Assistant 2");
+        session.addUserMessage("User 3");
+        session.addAssistantMessage("Assistant 3");
+        assertEquals(6, session.getMessageCount());
+
+        // Trimming to 3 would start at index 3 (assistant), so it should go back to index 2 (user)
+        session.trimHistory(3);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(4, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 2", messages.get(0).getContent());
+        assertEquals(ChatMessage.ROLE_ASSISTANT, messages.get(1).getRole());
+        assertEquals("Assistant 2", messages.get(1).getContent());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(2).getRole());
+        assertEquals("User 3", messages.get(2).getContent());
+        assertEquals(ChatMessage.ROLE_ASSISTANT, messages.get(3).getRole());
+        assertEquals("Assistant 3", messages.get(3).getContent());
+    }
+
+    @Test
+    public void test_trimHistoryAlreadyStartsWithUser() {
+        final ChatSession session = new ChatSession();
+        // Create: user, assistant, user, assistant, user, assistant (6 messages)
+        session.addUserMessage("User 1");
+        session.addAssistantMessage("Assistant 1");
+        session.addUserMessage("User 2");
+        session.addAssistantMessage("Assistant 2");
+        session.addUserMessage("User 3");
+        session.addAssistantMessage("Assistant 3");
+
+        // Trimming to 4 starts at index 2 which is user - no skip needed
+        session.trimHistory(4);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(4, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 2", messages.get(0).getContent());
+    }
+
+    @Test
+    public void test_trimHistoryMaxMessagesOne_startsWithAssistant() {
+        final ChatSession session = new ChatSession();
+        session.addUserMessage("User 1");
+        session.addAssistantMessage("Assistant 1");
+        session.addUserMessage("User 2");
+        session.addAssistantMessage("Assistant 2");
+
+        // maxMessages=1 starts at index 3 (Assistant 2) -> go back to index 2 (User 2)
+        // Result should keep the last user/assistant pair
+        session.trimHistory(1);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(2, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 2", messages.get(0).getContent());
+        assertEquals(ChatMessage.ROLE_ASSISTANT, messages.get(1).getRole());
+        assertEquals("Assistant 2", messages.get(1).getContent());
+    }
+
+    @Test
+    public void test_trimHistoryAllUserMessages() {
+        final ChatSession session = new ChatSession();
+        session.addUserMessage("User 1");
+        session.addUserMessage("User 2");
+        session.addUserMessage("User 3");
+        session.addUserMessage("User 4");
+
+        // All user messages - trimming to 2 starts at index 2 which is user, no skip needed
+        session.trimHistory(2);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(2, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 3", messages.get(0).getContent());
+    }
+
+    @Test
+    public void test_trimHistoryEvenPairs() {
+        final ChatSession session = new ChatSession();
+        // 8 messages: 4 user/assistant pairs
+        for (int i = 1; i <= 4; i++) {
+            session.addUserMessage("User " + i);
+            session.addAssistantMessage("Assistant " + i);
+        }
+
+        // Trim to 6 -> start at index 2 (User 2), which is user -> no skip
+        session.trimHistory(6);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(6, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 2", messages.get(0).getContent());
+    }
+
+    @Test
+    public void test_trimHistoryOddMaxMessages() {
+        final ChatSession session = new ChatSession();
+        // 8 messages: 4 user/assistant pairs
+        for (int i = 1; i <= 4; i++) {
+            session.addUserMessage("User " + i);
+            session.addAssistantMessage("Assistant " + i);
+        }
+
+        // Trim to 5 -> start at index 3 (Assistant 2) -> go back to index 2 (User 2)
+        session.trimHistory(5);
+
+        final List<ChatMessage> messages = session.getMessages();
+        assertEquals(6, messages.size());
+        assertEquals(ChatMessage.ROLE_USER, messages.get(0).getRole());
+        assertEquals("User 2", messages.get(0).getContent());
+        assertEquals(ChatMessage.ROLE_ASSISTANT, messages.get(5).getRole());
+        assertEquals("Assistant 4", messages.get(5).getContent());
+    }
+
+    @Test
     public void test_trimHistoryBelowMax() {
         final ChatSession session = new ChatSession();
         session.addUserMessage("Message 1");

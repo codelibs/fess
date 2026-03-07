@@ -35,6 +35,21 @@ public class LlmException extends FessSystemException {
     /** Error code for service unavailable (HTTP 502/503). */
     public static final String ERROR_SERVICE_UNAVAILABLE = "service_unavailable";
 
+    /** Error code for request timeout. */
+    public static final String ERROR_TIMEOUT = "timeout";
+
+    /** Error code for context length exceeded. */
+    public static final String ERROR_CONTEXT_LENGTH_EXCEEDED = "context_length_exceeded";
+
+    /** Error code for model not found. */
+    public static final String ERROR_MODEL_NOT_FOUND = "model_not_found";
+
+    /** Error code for invalid response from the LLM provider. */
+    public static final String ERROR_INVALID_RESPONSE = "invalid_response";
+
+    /** Error code for connection errors. */
+    public static final String ERROR_CONNECTION = "connection_error";
+
     /** Error code for unknown errors. */
     public static final String ERROR_UNKNOWN = "unknown";
 

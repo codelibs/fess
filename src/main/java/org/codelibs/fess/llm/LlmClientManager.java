@@ -243,6 +243,25 @@ public class LlmClientManager {
     }
 
     /**
+     * Detects the intent of a user message with conversation history context.
+     *
+     * @param userMessage the user's message
+     * @param history the conversation history for context
+     * @return the detected intent with extracted keywords
+     * @throws LlmException if LLM is not available
+     */
+    public IntentDetectionResult detectIntent(final String userMessage, final List<LlmMessage> history) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] Delegating detectIntent with history. llmType={}, historySize={}", getLlmType(),
+                    history != null ? history.size() : 0);
+        }
+        if (!available()) {
+            throw new LlmException("LLM client is not available");
+        }
+        return getClient().detectIntent(userMessage, history);
+    }
+
+    /**
      * Evaluates search results for relevance using the configured LLM client.
      *
      * @param userMessage the original user message

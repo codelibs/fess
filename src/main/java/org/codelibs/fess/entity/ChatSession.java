@@ -38,7 +38,7 @@ public class ChatSession {
     private LocalDateTime createdAt;
 
     /** The timestamp when the session was last accessed. */
-    private LocalDateTime lastAccessedAt;
+    private volatile LocalDateTime lastAccessedAt;
 
     /** The list of messages in this session. */
     private List<ChatMessage> messages;
@@ -240,7 +240,12 @@ public class ChatSession {
     public void trimHistory(final int maxMessages) {
         synchronized (messagesLock) {
             if (messages != null && messages.size() > maxMessages) {
-                final List<ChatMessage> trimmed = new ArrayList<>(messages.subList(messages.size() - maxMessages, messages.size()));
+                int start = messages.size() - maxMessages;
+                // Ensure trimmed history starts with a user message, not an assistant message
+                if (start < messages.size() && ChatMessage.ROLE_ASSISTANT.equals(messages.get(start).getRole())) {
+                    start = Math.max(0, start - 1);
+                }
+                final List<ChatMessage> trimmed = new ArrayList<>(messages.subList(start, messages.size()));
                 messages.clear();
                 messages.addAll(trimmed);
             }
