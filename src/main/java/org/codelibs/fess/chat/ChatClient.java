@@ -17,6 +17,7 @@ package org.codelibs.fess.chat;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -109,34 +110,36 @@ public class ChatClient {
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
+        // Extract history snapshot before adding current user message to avoid duplication
         final List<LlmMessage> history = extractHistory(session);
+        // Add user message immediately for session integrity under concurrent access
+        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
+        session.addMessage(userChatMessage);
+        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
 
-        final LlmChatResponse llmResponse;
         try {
-            llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
+            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
+
+            final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
+
+            for (int i = 0; i < searchResults.size(); i++) {
+                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
+            }
+
+            session.addMessage(assistantMessage);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                        searchResults.size(), System.currentTimeMillis() - startTime);
+            }
+
+            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
             logger.warn("Failed to get response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
             throw e;
+        } finally {
+            session.trimHistory(getMaxHistoryMessages());
         }
-
-        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
-        final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
-
-        for (int i = 0; i < searchResults.size(); i++) {
-            assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-        }
-
-        session.addMessage(userChatMessage);
-        session.addMessage(assistantMessage);
-        session.trimHistory(getMaxHistoryMessages());
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
-        }
-
-        return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
     }
 
     /**
@@ -155,8 +158,12 @@ public class ChatClient {
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
+        // Extract history snapshot before adding current user message to avoid duplication
         final List<LlmMessage> history = extractHistory(session);
+        // Add user message immediately for session integrity under concurrent access
+        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
+        session.addMessage(userChatMessage);
+        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
 
         final StringBuilder responseContent = new StringBuilder();
         try {
@@ -164,28 +171,27 @@ public class ChatClient {
                 responseContent.append(chunk);
                 callback.onChunk(chunk, done);
             });
+
+            final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
+
+            for (int i = 0; i < searchResults.size(); i++) {
+                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
+            }
+
+            session.addMessage(assistantMessage);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms",
+                        session.getSessionId(), searchResults.size(), System.currentTimeMillis() - startTime);
+            }
+
+            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
             logger.warn("Failed to stream response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
             throw e;
+        } finally {
+            session.trimHistory(getMaxHistoryMessages());
         }
-
-        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
-        final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
-
-        for (int i = 0; i < searchResults.size(); i++) {
-            assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-        }
-
-        session.addMessage(userChatMessage);
-        session.addMessage(assistantMessage);
-        session.trimHistory(getMaxHistoryMessages());
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
-        }
-
-        return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
     }
 
     /**
@@ -202,13 +208,19 @@ public class ChatClient {
     public ChatResult streamChatEnhanced(final String sessionId, final String userMessage, final String userId,
             final ChatPhaseCallback callback) {
         final long startTime = System.currentTimeMillis();
+        // Note: Locale is resolved via LaRequestUtil in LlmClient. During long SSE processing,
+        // the request context may become unavailable, falling back to Locale.getDefault().
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Starting enhanced streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId,
                     userMessage);
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
+        // Extract history snapshot before adding current user message to avoid duplication
         final List<LlmMessage> history = extractHistory(session);
+        // Add user message immediately for session integrity under concurrent access
+        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
+        session.addMessage(userChatMessage);
         final StringBuilder fullResponse = new StringBuilder();
         List<Map<String, Object>> sources = new ArrayList<>();
 
@@ -387,8 +399,7 @@ public class ChatClient {
                         fullResponse.length(), htmlContent.length(), System.currentTimeMillis() - renderStartTime);
             }
 
-            // Create and save messages
-            final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
+            // Create and save assistant message (user message was already added at the start)
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(fullResponse.toString());
             assistantMessage.setHtmlContent(htmlContent);
 
@@ -396,9 +407,7 @@ public class ChatClient {
                 assistantMessage.addSource(new ChatSource(i + 1, sources.get(i)));
             }
 
-            session.addMessage(userChatMessage);
             session.addMessage(assistantMessage);
-            session.trimHistory(getMaxHistoryMessages());
 
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG] Enhanced chat request completed. sessionId={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
@@ -417,6 +426,8 @@ public class ChatClient {
                     System.currentTimeMillis() - startTime, e);
             callback.onError("unknown", LlmException.ERROR_UNKNOWN);
             throw e;
+        } finally {
+            session.trimHistory(getMaxHistoryMessages());
         }
     }
 
@@ -479,12 +490,12 @@ public class ChatClient {
     protected String buildSourceTitlesContent(final ChatMessage msg) {
         final List<ChatSource> sources = msg.getSources();
         if (sources == null || sources.isEmpty()) {
-            return msg.getContent();
+            return buildTruncatedContent(msg);
         }
         final String titles =
                 sources.stream().map(ChatSource::getTitle).filter(t -> t != null && !t.isEmpty()).collect(Collectors.joining(", "));
         if (titles.isEmpty()) {
-            return msg.getContent();
+            return buildTruncatedContent(msg);
         }
         final String sourceSuffix = "\n[Referenced documents: " + titles + "]";
         final String content = msg.getContent();
@@ -553,9 +564,9 @@ public class ChatClient {
     private static final Pattern DANGEROUS_QUERY_PATTERN = Pattern.compile("\\*:\\*");
 
     /**
-     * Searches documents using a Lucene query.
+     * Searches documents using a Fess query.
      *
-     * @param query the Lucene query string
+     * @param query the Fess query string
      * @return the list of search result documents
      */
     protected List<Map<String, Object>> searchWithQuery(final String query) {
@@ -602,11 +613,28 @@ public class ChatClient {
             final List<Map<String, Object>> results = ComponentUtil.getSearchHelper()
                     .getDocumentListByDocIds(docIds.toArray(new String[0]), fields, OptionalThing.empty(),
                             SearchRequestParams.SearchRequestType.JSON);
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(), results.size(),
-                        System.currentTimeMillis() - startTime);
+
+            // Reorder results to match original docIds order (preserve search score order)
+            final Map<String, Map<String, Object>> resultMap = new LinkedHashMap<>();
+            for (final Map<String, Object> doc : results) {
+                final String docId = (String) doc.get("doc_id");
+                if (docId != null) {
+                    resultMap.put(docId, doc);
+                }
             }
-            return results;
+            final List<Map<String, Object>> orderedResults = new ArrayList<>();
+            for (final String docId : docIds) {
+                final Map<String, Object> doc = resultMap.get(docId);
+                if (doc != null) {
+                    orderedResults.add(doc);
+                }
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Full content fetched. docIdCount={}, fetchedCount={}, elapsedTime={}ms", docIds.size(),
+                        orderedResults.size(), System.currentTimeMillis() - startTime);
+            }
+            return orderedResults;
         } catch (final Exception e) {
             logger.warn("Failed to fetch full content for docIds={}. error={}, elapsedTime={}ms", docIds, e.getMessage(),
                     System.currentTimeMillis() - startTime);
@@ -631,7 +659,7 @@ public class ChatClient {
         try {
             final SearchRenderData data = new SearchRenderData();
             final ChatSearchRequestParams params =
-                    new ChatSearchRequestParams("url:\"" + escapeLuceneValue(url) + "\"", maxDocs, fessConfig);
+                    new ChatSearchRequestParams("url:\"" + escapeQueryValue(url) + "\"", maxDocs, fessConfig);
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
@@ -648,18 +676,21 @@ public class ChatClient {
     }
 
     /**
-     * Escapes special characters in the value for use in Lucene queries.
+     * Escapes special characters in the value for use in Fess queries.
      *
      * @param value the value to escape
      * @return the escaped value
      */
-    protected String escapeLuceneValue(final String value) {
+    protected String escapeQueryValue(final String value) {
         if (value == null) {
             return "";
         }
         final StringBuilder sb = new StringBuilder(value.length() + 16);
         for (int i = 0; i < value.length(); i++) {
             final char c = value.charAt(i);
+            if (c == '\0') {
+                continue; // Skip NULL characters
+            }
             if (c == '\\' || c == '"') {
                 sb.append('\\');
             }
@@ -706,6 +737,9 @@ public class ChatClient {
 
     /**
      * Searches for documents relevant to the user's query.
+     * SearchHelper applies role-based access control filtering through
+     * SearchRequestType.JSON and the role filter mechanism, ensuring
+     * users only see documents they are authorized to access.
      *
      * @param query the search query
      * @return a list of documents matching the query

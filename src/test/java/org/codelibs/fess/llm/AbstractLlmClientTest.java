@@ -610,7 +610,7 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         }
 
         String testBuildContext(final List<Map<String, Object>> documents) {
-            return buildContext(documents);
+            return buildContext(documents, "answer");
         }
 
         String testStripHtmlTags(final String text) {
@@ -734,7 +734,7 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         }
 
         @Override
-        protected int getContextMaxChars() {
+        protected int getContextMaxChars(final String promptType) {
             return testContextMaxChars;
         }
 

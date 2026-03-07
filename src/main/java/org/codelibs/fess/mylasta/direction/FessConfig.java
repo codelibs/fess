@@ -1968,8 +1968,32 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 20 */
     String RAG_CHAT_HISTORY_MAX_MESSAGES = "rag.chat.history.max.messages";
 
+    /** The key of the configuration. e.g. 4 */
+    String RAG_CHAT_INTENT_HISTORY_MAX_MESSAGES = "rag.chat.intent.history.max.messages";
+
     /** The key of the configuration. e.g. title,url,content,doc_id,content_title,content_description */
     String RAG_CHAT_CONTENT_FIELDS = "rag.chat.content.fields";
+
+    /** The key of the configuration. e.g. 4000 */
+    String RAG_CHAT_MESSAGE_MAX_LENGTH = "rag.chat.message.max.length";
+
+    /** The key of the configuration. e.g. 500 */
+    String RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE = "rag.chat.highlight.fragment.size";
+
+    /** The key of the configuration. e.g. 3 */
+    String RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS = "rag.chat.highlight.number.of.fragments";
+
+    /** The key of the configuration. e.g. source_titles */
+    String RAG_CHAT_HISTORY_ASSISTANT_CONTENT = "rag.chat.history.assistant.content";
+
+    /** The key of the configuration. e.g. 500 */
+    String RAG_CHAT_HISTORY_ASSISTANT_MAX_CHARS = "rag.chat.history.assistant.max.chars";
+
+    /** The key of the configuration. e.g. 500 */
+    String RAG_CHAT_HISTORY_ASSISTANT_SUMMARY_MAX_CHARS = "rag.chat.history.assistant.summary.max.chars";
+
+    /** The key of the configuration. e.g. 2000 */
+    String RAG_CHAT_HISTORY_MAX_CHARS = "rag.chat.history.max.chars";
 
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
@@ -9293,6 +9317,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getRagChatHistoryMaxMessagesAsInteger();
 
     /**
+     * Get the value for the key 'rag.chat.intent.history.max.messages'. <br>
+     * The value is, e.g. 4 <br>
+     * comment: Maximum number of history messages used for intent detection.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatIntentHistoryMaxMessages();
+
+    /**
+     * Get the value for the key 'rag.chat.intent.history.max.messages' as {@link Integer}. <br>
+     * The value is, e.g. 4 <br>
+     * comment: Maximum number of history messages used for intent detection.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatIntentHistoryMaxMessagesAsInteger();
+
+    /**
      * Get the value for the key 'rag.chat.content.fields'. <br>
      * The value is, e.g. title,url,content,doc_id,content_title,content_description <br>
      * comment: <br>
@@ -9301,6 +9342,110 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagChatContentFields();
+
+    /**
+     * Get the value for the key 'rag.chat.message.max.length'. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatMessageMaxLength();
+
+    /**
+     * Get the value for the key 'rag.chat.message.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatMessageMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.highlight.fragment.size'. <br>
+     * The value is, e.g. 500 <br>
+     * comment: Highlight settings for RAG search.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHighlightFragmentSize();
+
+    /**
+     * Get the value for the key 'rag.chat.highlight.fragment.size' as {@link Integer}. <br>
+     * The value is, e.g. 500 <br>
+     * comment: Highlight settings for RAG search.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHighlightFragmentSizeAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.highlight.number.of.fragments'. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHighlightNumberOfFragments();
+
+    /**
+     * Get the value for the key 'rag.chat.highlight.number.of.fragments' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHighlightNumberOfFragmentsAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.history.assistant.content'. <br>
+     * The value is, e.g. source_titles <br>
+     * comment: History content mode for assistant messages (full, source_titles, source_titles_and_urls, truncated, none).
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHistoryAssistantContent();
+
+    /**
+     * Get the value for the key 'rag.chat.history.assistant.max.chars'. <br>
+     * The value is, e.g. 500 <br>
+     * comment: Maximum characters for assistant history content.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHistoryAssistantMaxChars();
+
+    /**
+     * Get the value for the key 'rag.chat.history.assistant.max.chars' as {@link Integer}. <br>
+     * The value is, e.g. 500 <br>
+     * comment: Maximum characters for assistant history content.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHistoryAssistantMaxCharsAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.history.assistant.summary.max.chars'. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHistoryAssistantSummaryMaxChars();
+
+    /**
+     * Get the value for the key 'rag.chat.history.assistant.summary.max.chars' as {@link Integer}. <br>
+     * The value is, e.g. 500 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHistoryAssistantSummaryMaxCharsAsInteger();
+
+    /**
+     * Get the value for the key 'rag.chat.history.max.chars'. <br>
+     * The value is, e.g. 2000 <br>
+     * comment: Maximum total characters for conversation history in LLM requests.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHistoryMaxChars();
+
+    /**
+     * Get the value for the key 'rag.chat.history.max.chars' as {@link Integer}. <br>
+     * The value is, e.g. 2000 <br>
+     * comment: Maximum total characters for conversation history in LLM requests.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHistoryMaxCharsAsInteger();
 
     /**
      * Get the value for the key 'index.export.path'. <br>
@@ -12772,8 +12917,68 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES);
         }
 
+        public String getRagChatIntentHistoryMaxMessages() {
+            return get(FessConfig.RAG_CHAT_INTENT_HISTORY_MAX_MESSAGES);
+        }
+
+        public Integer getRagChatIntentHistoryMaxMessagesAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_INTENT_HISTORY_MAX_MESSAGES);
+        }
+
         public String getRagChatContentFields() {
             return get(FessConfig.RAG_CHAT_CONTENT_FIELDS);
+        }
+
+        public String getRagChatMessageMaxLength() {
+            return get(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH);
+        }
+
+        public Integer getRagChatMessageMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH);
+        }
+
+        public String getRagChatHighlightFragmentSize() {
+            return get(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public Integer getRagChatHighlightFragmentSizeAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public String getRagChatHighlightNumberOfFragments() {
+            return get(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
+        }
+
+        public Integer getRagChatHighlightNumberOfFragmentsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS);
+        }
+
+        public String getRagChatHistoryAssistantContent() {
+            return get(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT);
+        }
+
+        public String getRagChatHistoryAssistantMaxChars() {
+            return get(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_MAX_CHARS);
+        }
+
+        public Integer getRagChatHistoryAssistantMaxCharsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_MAX_CHARS);
+        }
+
+        public String getRagChatHistoryAssistantSummaryMaxChars() {
+            return get(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_SUMMARY_MAX_CHARS);
+        }
+
+        public Integer getRagChatHistoryAssistantSummaryMaxCharsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_SUMMARY_MAX_CHARS);
+        }
+
+        public String getRagChatHistoryMaxChars() {
+            return get(FessConfig.RAG_CHAT_HISTORY_MAX_CHARS);
+        }
+
+        public Integer getRagChatHistoryMaxCharsAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HISTORY_MAX_CHARS);
         }
 
         public String getIndexExportPath() {
@@ -13391,7 +13596,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_TIMEOUT_MINUTES, "30");
             defaultMap.put(FessConfig.RAG_CHAT_SESSION_MAX_SIZE, "10000");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_MESSAGES, "20");
+            defaultMap.put(FessConfig.RAG_CHAT_INTENT_HISTORY_MAX_MESSAGES, "4");
             defaultMap.put(FessConfig.RAG_CHAT_CONTENT_FIELDS, "title,url,content,doc_id,content_title,content_description");
+            defaultMap.put(FessConfig.RAG_CHAT_MESSAGE_MAX_LENGTH, "4000");
+            defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE, "500");
+            defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
+            defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT, "source_titles");
+            defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_MAX_CHARS, "500");
+            defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_SUMMARY_MAX_CHARS, "500");
+            defaultMap.put(FessConfig.RAG_CHAT_HISTORY_MAX_CHARS, "2000");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");

@@ -156,14 +156,10 @@ public class LlmClientManager {
                 logger.debug("[LLM] message: role={}, content={}", msg.getRole(), msg.getContent());
             }
         }
-        if (!available()) {
-            logger.warn("LLM chat request failed. LLM client is not available. llmType={}", llmType);
-            throw new LlmException("LLM client is not available");
-        }
         try {
-            final LlmClient client = getClient();
+            final LlmClient client = getAvailableClient();
             if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] Using LLM client. clientName={}", client != null ? client.getName() : "null");
+                logger.debug("[LLM] Using LLM client. clientName={}", client.getName());
             }
             final LlmChatResponse response = client.chat(request);
             if (logger.isDebugEnabled()) {
@@ -198,14 +194,10 @@ public class LlmClientManager {
                 logger.debug("[LLM] message: role={}, content={}", msg.getRole(), msg.getContent());
             }
         }
-        if (!available()) {
-            logger.warn("LLM streaming chat request failed. LLM client is not available. llmType={}", llmType);
-            throw new LlmException("LLM client is not available");
-        }
         try {
-            final LlmClient client = getClient();
+            final LlmClient client = getAvailableClient();
             if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] Using LLM client for streaming. clientName={}", client != null ? client.getName() : "null");
+                logger.debug("[LLM] Using LLM client for streaming. clientName={}", client.getName());
             }
             client.streamChat(request, callback);
             if (logger.isDebugEnabled()) {
@@ -223,6 +215,27 @@ public class LlmClientManager {
         }
     }
 
+    /**
+     * Gets the available LLM client, performing a single lookup.
+     *
+     * @return the available LLM client
+     * @throws LlmException if LLM client is not available
+     */
+    protected LlmClient getAvailableClient() {
+        final String llmType = getLlmType();
+        if (Constants.NONE.equals(llmType)) {
+            throw new LlmException("LLM client is not available");
+        }
+        if (!isRagChatEnabled()) {
+            throw new LlmException("LLM client is not available");
+        }
+        final LlmClient client = getClient();
+        if (client == null || !client.isAvailable()) {
+            throw new LlmException("LLM client is not available");
+        }
+        return client;
+    }
+
     // RAG workflow delegation methods
 
     /**
@@ -236,10 +249,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating detectIntent. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        return getClient().detectIntent(userMessage);
+        return getAvailableClient().detectIntent(userMessage);
     }
 
     /**
@@ -255,10 +265,7 @@ public class LlmClientManager {
             logger.debug("[LLM] Delegating detectIntent with history. llmType={}, historySize={}", getLlmType(),
                     history != null ? history.size() : 0);
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        return getClient().detectIntent(userMessage, history);
+        return getAvailableClient().detectIntent(userMessage, history);
     }
 
     /**
@@ -275,10 +282,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating evaluateResults. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        return getClient().evaluateResults(userMessage, query, searchResults);
+        return getAvailableClient().evaluateResults(userMessage, query, searchResults);
     }
 
     /**
@@ -295,10 +299,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateAnswer. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        return getClient().generateAnswer(userMessage, documents, history);
+        return getAvailableClient().generateAnswer(userMessage, documents, history);
     }
 
     /**
@@ -315,10 +316,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating streamGenerateAnswer. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().streamGenerateAnswer(userMessage, documents, history, callback);
+        getAvailableClient().streamGenerateAnswer(userMessage, documents, history, callback);
     }
 
     /**
@@ -333,10 +331,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateUnclearIntentResponse. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateUnclearIntentResponse(userMessage, history, callback);
+        getAvailableClient().generateUnclearIntentResponse(userMessage, history, callback);
     }
 
     /**
@@ -351,10 +346,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateNoResultsResponse. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateNoResultsResponse(userMessage, history, callback);
+        getAvailableClient().generateNoResultsResponse(userMessage, history, callback);
     }
 
     /**
@@ -371,10 +363,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateDocumentNotFoundResponse. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateDocumentNotFoundResponse(userMessage, documentUrl, history, callback);
+        getAvailableClient().generateDocumentNotFoundResponse(userMessage, documentUrl, history, callback);
     }
 
     /**
@@ -391,10 +380,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateSummaryResponse. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateSummaryResponse(userMessage, documents, history, callback);
+        getAvailableClient().generateSummaryResponse(userMessage, documents, history, callback);
     }
 
     /**
@@ -411,10 +397,7 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateFaqAnswerResponse. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateFaqAnswerResponse(userMessage, documents, history, callback);
+        getAvailableClient().generateFaqAnswerResponse(userMessage, documents, history, callback);
     }
 
     /**
@@ -429,9 +412,6 @@ public class LlmClientManager {
         if (logger.isDebugEnabled()) {
             logger.debug("[LLM] Delegating generateDirectAnswer. llmType={}", getLlmType());
         }
-        if (!available()) {
-            throw new LlmException("LLM client is not available");
-        }
-        getClient().generateDirectAnswer(userMessage, history, callback);
+        getAvailableClient().generateDirectAnswer(userMessage, history, callback);
     }
 }
