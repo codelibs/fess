@@ -36,6 +36,11 @@ import jakarta.annotation.PreDestroy;
  * Manager class for chat sessions.
  * Sessions are stored in memory with automatic expiration.
  *
+ * <p><b>Note:</b> Sessions are stored in a local in-memory ConcurrentHashMap.
+ * In multi-instance deployments (e.g., behind a load balancer), sessions are
+ * not shared between instances. Use sticky sessions or an external session
+ * store if session affinity across instances is required.</p>
+ *
  * @author FessProject
  */
 public class ChatSessionManager {
@@ -129,10 +134,25 @@ public class ChatSessionManager {
         if (sessionId != null) {
             final ChatSession session = getSession(sessionId);
             if (session != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Reusing existing session. sessionId={}, userId={}", sessionId, userId);
+                final String sessionUserId = session.getUserId();
+                // Validate userId matches - prevent cross-user session access
+                if (userId != null && !userId.equals(sessionUserId)) {
+                    logger.warn("Session userId mismatch. sessionId={}, requestUserId={}", sessionId, userId);
+                } else if (userId == null && sessionUserId == null) {
+                    // Both null (unauthenticated + no userCode) - allow by sessionId only
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Reusing existing session (both userId null). sessionId={}", sessionId);
+                    }
+                    return session;
+                } else if (userId != null && userId.equals(sessionUserId)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Reusing existing session. sessionId={}, userId={}", sessionId, userId);
+                    }
+                    return session;
+                } else {
+                    // userId is null but sessionUserId is not - create new session
+                    logger.warn("Session userId mismatch (null vs non-null). sessionId={}, sessionUserId={}", sessionId, sessionUserId);
                 }
-                return session;
             }
         }
         if (logger.isDebugEnabled()) {
@@ -170,7 +190,41 @@ public class ChatSessionManager {
     }
 
     /**
-     * Clears the messages in a session.
+     * Clears the messages in a session with userId ownership check.
+     *
+     * @param sessionId the session ID
+     * @param userId the user ID for ownership verification (can be null)
+     * @return true if the session was found, owned by the user, and cleared; false otherwise
+     */
+    public boolean clearSession(final String sessionId, final String userId) {
+        final ChatSession session = getSession(sessionId);
+        if (session == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cannot clear session, not found. sessionId={}", sessionId);
+            }
+            return false;
+        }
+        // Verify ownership
+        final String sessionUserId = session.getUserId();
+        if (userId != null && !userId.equals(sessionUserId)) {
+            logger.warn("Cannot clear session, userId mismatch. sessionId={}, requestUserId={}", sessionId, userId);
+            return false;
+        }
+        if (userId == null && sessionUserId != null) {
+            logger.warn("Cannot clear session, userId mismatch (null vs non-null). sessionId={}, sessionUserId={}", sessionId,
+                    sessionUserId);
+            return false;
+        }
+        session.clearMessages();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Session cleared. sessionId={}, userId={}", sessionId, userId);
+        }
+        return true;
+    }
+
+    /**
+     * Clears the messages in a session without ownership check.
+     * Used for internal/admin operations where ownership verification is not needed.
      *
      * @param sessionId the session ID
      * @return true if the session was found and cleared, false otherwise
@@ -185,7 +239,7 @@ public class ChatSessionManager {
         }
         session.clearMessages();
         if (logger.isDebugEnabled()) {
-            logger.debug("Session cleared. sessionId={}", sessionId);
+            logger.debug("Session cleared (no ownership check). sessionId={}", sessionId);
         }
         return true;
     }

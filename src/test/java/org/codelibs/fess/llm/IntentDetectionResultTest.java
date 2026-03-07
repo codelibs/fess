@@ -57,9 +57,9 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_search_withLuceneQuery() {
+    public void test_search_withFessQuery() {
         final String query = "+Fess +Docker (tutorial OR guide)";
-        final IntentDetectionResult result = IntentDetectionResult.search(query, "Lucene query");
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "Fess query");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
         assertEquals(query, result.getQuery());
@@ -168,13 +168,13 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_search_withComplexLuceneQuery() {
+    public void test_search_withComplexFessQuery() {
         final String query = "title:\"Fess\"^2 OR \"Fess\"";
-        final IntentDetectionResult result = IntentDetectionResult.search(query, "Lucene query");
+        final IntentDetectionResult result = IntentDetectionResult.search(query, "Fess query");
 
         assertEquals(ChatIntent.SEARCH, result.getIntent());
         assertEquals(query, result.getQuery());
-        assertEquals("Lucene query", result.getReasoning());
+        assertEquals("Fess query", result.getReasoning());
     }
 
     @Test
@@ -213,7 +213,7 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_query_complexLuceneSyntax() {
+    public void test_query_complexFessSyntax() {
         final String query = "title:\"security policy\"^2 OR (+security +policy (guide OR document))";
         final IntentDetectionResult result = IntentDetectionResult.search(query, "complex query");
 
@@ -221,9 +221,9 @@ public class IntentDetectionResultTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_faq_complexLuceneSyntax() {
+    public void test_faq_complexFessSyntax() {
         final String query = "+\"OpenSearch\" (configuration OR settings OR config)";
-        final IntentDetectionResult result = IntentDetectionResult.faq(query, "FAQ with Lucene");
+        final IntentDetectionResult result = IntentDetectionResult.faq(query, "FAQ with Fess query");
 
         assertEquals(ChatIntent.FAQ, result.getIntent());
         assertEquals(query, result.getQuery());

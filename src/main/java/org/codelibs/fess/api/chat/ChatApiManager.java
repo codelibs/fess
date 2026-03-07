@@ -146,11 +146,19 @@ public class ChatApiManager extends BaseApiManager {
 
             if (StringUtil.isBlank(message)) {
                 if ("true".equals(clearParam) && StringUtil.isNotBlank(sessionId)) {
-                    ComponentUtil.getChatSessionManager().clearSession(sessionId);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Session cleared. sessionId={}", sessionId);
+                    final String clearUserId = getUserId(request);
+                    final boolean cleared = ComponentUtil.getChatSessionManager().clearSession(sessionId, clearUserId);
+                    if (cleared) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Session cleared. sessionId={}, userId={}", sessionId, clearUserId);
+                        }
+                        writeJsonResponse(response, HttpServletResponse.SC_OK, createSuccessResponse(sessionId, "Session cleared", null));
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Session not found or not owned. sessionId={}, userId={}", sessionId, clearUserId);
+                        }
+                        writeJsonResponse(response, HttpServletResponse.SC_NOT_FOUND, createErrorResponse("Session not found"));
                     }
-                    writeJsonResponse(response, HttpServletResponse.SC_OK, createSuccessResponse(sessionId, "Session cleared", null));
                     return;
                 }
                 if (logger.isDebugEnabled()) {
@@ -195,9 +203,9 @@ public class ChatApiManager extends BaseApiManager {
      * @throws IOException if an I/O error occurs
      */
     protected void processStreamRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        if (!"POST".equalsIgnoreCase(request.getMethod()) && !"GET".equalsIgnoreCase(request.getMethod())) {
+        if (!"GET".equalsIgnoreCase(request.getMethod()) && !"POST".equalsIgnoreCase(request.getMethod())) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Invalid method for stream request. method={}", request.getMethod());
+                logger.debug("Invalid method for stream request. method={}, expected GET or POST", request.getMethod());
             }
             writeJsonResponse(response, HttpServletResponse.SC_METHOD_NOT_ALLOWED, createErrorResponse("Method not allowed"));
             return;
@@ -337,6 +345,10 @@ public class ChatApiManager extends BaseApiManager {
                 logger.debug("SSE stream completed. sessionId={}, hasHtmlContent={}", result.getSessionId(), htmlContent != null);
             }
 
+        } catch (final LlmException e) {
+            // LlmException from streamChatEnhanced already sent onError via callback - avoid double-send
+            logger.warn("LLM error during stream request. sessionId={}, errorCode={}, message={}", sessionId, e.getErrorCode(),
+                    e.getMessage(), e);
         } catch (final Exception e) {
             logger.warn("Failed to process stream request. sessionId={}, message={}", sessionId, e.getMessage(), e);
             if (!response.isCommitted()) {
@@ -423,7 +435,11 @@ public class ChatApiManager extends BaseApiManager {
     protected String getUserId(final HttpServletRequest request) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
-        return org.codelibs.fess.Constants.GUEST_USER.equals(username) ? null : username;
+        if (!org.codelibs.fess.Constants.GUEST_USER.equals(username)) {
+            return username;
+        }
+        // For guest users, use cookie-based userCode for session identification
+        return ComponentUtil.getUserInfoHelper().getUserCode();
     }
 
     /**

@@ -363,52 +363,51 @@ public class ChatClientTest extends UnitFessTestCase {
         assertEquals("This is a ...", history.get(1).getContent());
     }
 
-    // ========== escapeLuceneValue tests ==========
+    // ========== escapeQueryValue tests ==========
 
     @Test
-    public void test_escapeLuceneValue_null() {
-        assertEquals("", chatClient.testEscapeLuceneValue(null));
+    public void test_escapeQueryValue_null() {
+        assertEquals("", chatClient.testEscapeQueryValue(null));
     }
 
     @Test
-    public void test_escapeLuceneValue_empty() {
-        assertEquals("", chatClient.testEscapeLuceneValue(""));
+    public void test_escapeQueryValue_empty() {
+        assertEquals("", chatClient.testEscapeQueryValue(""));
     }
 
     @Test
-    public void test_escapeLuceneValue_noSpecialChars() {
-        assertEquals("hello world", chatClient.testEscapeLuceneValue("hello world"));
+    public void test_escapeQueryValue_noSpecialChars() {
+        assertEquals("hello world", chatClient.testEscapeQueryValue("hello world"));
     }
 
     @Test
-    public void test_escapeLuceneValue_backslash() {
-        assertEquals("path\\\\to\\\\file", chatClient.testEscapeLuceneValue("path\\to\\file"));
+    public void test_escapeQueryValue_backslash() {
+        assertEquals("path\\\\to\\\\file", chatClient.testEscapeQueryValue("path\\to\\file"));
     }
 
     @Test
-    public void test_escapeLuceneValue_doubleQuote() {
-        assertEquals("say \\\"hello\\\"", chatClient.testEscapeLuceneValue("say \"hello\""));
+    public void test_escapeQueryValue_doubleQuote() {
+        assertEquals("say \\\"hello\\\"", chatClient.testEscapeQueryValue("say \"hello\""));
     }
 
     @Test
-    public void test_escapeLuceneValue_mixed() {
-        assertEquals("a\\\\b\\\"c", chatClient.testEscapeLuceneValue("a\\b\"c"));
+    public void test_escapeQueryValue_mixed() {
+        assertEquals("a\\\\b\\\"c", chatClient.testEscapeQueryValue("a\\b\"c"));
     }
 
     @Test
-    public void test_escapeLuceneValue_luceneCharsUnchanged() {
-        assertEquals("a + b - c * d ? e", chatClient.testEscapeLuceneValue("a + b - c * d ? e"));
+    public void test_escapeQueryValue_luceneCharsUnchanged() {
+        assertEquals("a + b - c * d ? e", chatClient.testEscapeQueryValue("a + b - c * d ? e"));
     }
 
     @Test
-    public void test_escapeLuceneValue_urlWithParams() {
-        assertEquals("https://example.com/path?q=test&lang=en",
-                chatClient.testEscapeLuceneValue("https://example.com/path?q=test&lang=en"));
+    public void test_escapeQueryValue_urlWithParams() {
+        assertEquals("https://example.com/path?q=test&lang=en", chatClient.testEscapeQueryValue("https://example.com/path?q=test&lang=en"));
     }
 
     @Test
-    public void test_escapeLuceneValue_consecutiveBackslashes() {
-        assertEquals("\\\\\\\\", chatClient.testEscapeLuceneValue("\\\\"));
+    public void test_escapeQueryValue_consecutiveBackslashes() {
+        assertEquals("\\\\\\\\", chatClient.testEscapeQueryValue("\\\\"));
     }
 
     // ========== searchWithQuery tests ==========
@@ -542,8 +541,8 @@ public class ChatClientTest extends UnitFessTestCase {
             return extractHistory(session);
         }
 
-        String testEscapeLuceneValue(final String value) {
-            return escapeLuceneValue(value);
+        String testEscapeQueryValue(final String value) {
+            return escapeQueryValue(value);
         }
 
         List<Map<String, Object>> testSearchWithQuery(final String query) {

@@ -17,7 +17,7 @@ package org.codelibs.fess.llm;
 
 /**
  * Represents the result of intent detection from user input.
- * Contains the detected intent type, Lucene query, and other metadata.
+ * Contains the detected intent type, Fess query, and other metadata.
  */
 public class IntentDetectionResult {
 
@@ -43,9 +43,9 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Returns the Lucene query string for search.
+     * Returns the Fess query string for search.
      *
-     * @return the Lucene query string, or null if not available
+     * @return the Fess query string, or null if not available
      */
     public String getQuery() {
         return query;
@@ -70,9 +70,9 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Creates a search intent result with a Lucene query.
+     * Creates a search intent result with a Fess query.
      *
-     * @param query the Lucene query string
+     * @param query the Fess query string
      * @param reasoning the detection reasoning
      * @return the search intent result
      */
@@ -92,9 +92,9 @@ public class IntentDetectionResult {
     }
 
     /**
-     * Creates a FAQ intent result with a Lucene query.
+     * Creates a FAQ intent result with a Fess query.
      *
-     * @param query the Lucene query string
+     * @param query the Fess query string
      * @param reasoning the detection reasoning
      * @return the FAQ intent result
      */
