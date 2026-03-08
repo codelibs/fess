@@ -98,6 +98,12 @@ public class ChatAction extends FessSearchAction {
         return redirect(getClass());
     }
 
+    /**
+     * Returns the user ID for the current session. If the user is authenticated, returns the username;
+     * otherwise, returns the guest user code.
+     *
+     * @return the user ID
+     */
     protected String getUserId() {
         final String username = systemHelper.getUsername();
         if (!Constants.GUEST_USER.equals(username)) {
