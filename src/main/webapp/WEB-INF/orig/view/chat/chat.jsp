@@ -21,10 +21,41 @@ ${fe:html(true)}
 							<i class="fa fa-robot me-1" aria-hidden="true"></i>
 							<span class="status-text"><la:message key="labels.chat_status_ready" /></span>
 						</div>
-						<button type="button" id="newChatBtn" class="btn btn-outline-secondary btn-sm" aria-label="<la:message key="labels.chat_new_chat" />">
-							<i class="fa fa-plus" aria-hidden="true"></i>
-							<la:message key="labels.chat_new_chat" />
-						</button>
+						<div class="d-flex gap-2">
+							<button type="button" id="filterToggleBtn" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false" aria-controls="filterPanel">
+								<i class="fa fa-filter" aria-hidden="true"></i>
+								<la:message key="labels.chat_filter" />
+								<span id="filterBadge" class="badge rounded-pill bg-primary d-none">0</span>
+							</button>
+							<button type="button" id="newChatBtn" class="btn btn-outline-secondary btn-sm" aria-label="<la:message key="labels.chat_new_chat" />">
+								<i class="fa fa-plus" aria-hidden="true"></i>
+								<la:message key="labels.chat_new_chat" />
+							</button>
+						</div>
+					</div>
+					<div id="filterPanel" class="collapse">
+						<div class="filter-panel-body">
+							<c:if test="${displayLabelTypeItems}">
+							<div class="filter-group">
+								<div class="filter-group-title"><la:message key="labels.facet_label_title" /></div>
+								<div class="filter-group-items">
+									<c:forEach var="item" items="${labelTypeItems}">
+									<button type="button" class="chat-filter-btn btn btn-outline-secondary btn-sm" data-filter-type="label" data-filter-value="${f:h(item.value)}">${f:h(item.label)}</button>
+									</c:forEach>
+								</div>
+							</div>
+							</c:if>
+							<c:forEach var="facetQueryView" items="${facetQueryViewList}">
+							<div class="filter-group">
+								<div class="filter-group-title"><la:message key="${facetQueryView.title}" /></div>
+								<div class="filter-group-items">
+									<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
+									<button type="button" class="chat-filter-btn btn btn-outline-secondary btn-sm" data-filter-type="ex_q" data-filter-value="${f:h(queryEntry.value)}"><c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if><c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if></button>
+									</c:forEach>
+								</div>
+							</div>
+							</c:forEach>
+						</div>
 					</div>
 					<div class="card-body p-0">
 						<div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="<la:message key="labels.chat_messages_area" />">

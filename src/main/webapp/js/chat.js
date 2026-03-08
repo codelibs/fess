@@ -42,7 +42,8 @@ var FessChat = (function() {
         completedPhases: [],
         lastMessage: null,
         lastError: null,
-        errorHandled: false
+        errorHandled: false,
+        filters: { labels: [], extraQueries: [] }
     };
 
     var elements = {};
@@ -65,7 +66,10 @@ var FessChat = (function() {
             progressIndicator: $('#progressIndicator'),
             progressMessage: $('#progressMessage'),
             errorBanner: $('#errorBanner'),
-            charCount: $('#charCount')
+            charCount: $('#charCount'),
+            filterToggleBtn: $('#filterToggleBtn'),
+            filterBadge: $('#filterBadge'),
+            filterPanel: $('#filterPanel')
         };
 
         bindEvents();
@@ -102,6 +106,23 @@ var FessChat = (function() {
         });
 
         elements.newChatBtn.on('click', newChat);
+
+        // Filter button click handlers
+        $(document).on('click', '.chat-filter-btn', function() {
+            var btn = $(this);
+            var filterType = btn.data('filter-type');
+            var filterValue = btn.data('filter-value');
+
+            btn.toggleClass('active');
+
+            if (filterType === 'label') {
+                toggleFilter(state.filters.labels, filterValue);
+            } else if (filterType === 'ex_q') {
+                toggleFilter(state.filters.extraQueries, filterValue);
+            }
+
+            updateFilterBadge();
+        });
 
         // Suggestion chip click handlers
         $('.suggestion-chip').on('click', function() {
@@ -254,6 +275,7 @@ var FessChat = (function() {
         if (state.sessionId) {
             url += '&sessionId=' + encodeURIComponent(state.sessionId);
         }
+        url += getFilterQueryParams();
 
         var eventSource = new EventSource(url);
         state.errorHandled = false;
@@ -645,6 +667,54 @@ var FessChat = (function() {
     }
 
     /**
+     * Toggle a value in an array (add if not present, remove if present)
+     */
+    function toggleFilter(array, value) {
+        var index = array.indexOf(value);
+        if (index === -1) {
+            array.push(value);
+        } else {
+            array.splice(index, 1);
+        }
+    }
+
+    /**
+     * Update the filter badge count
+     */
+    function updateFilterBadge() {
+        var count = state.filters.labels.length + state.filters.extraQueries.length;
+        if (count > 0) {
+            elements.filterBadge.text(count).removeClass('d-none');
+        } else {
+            elements.filterBadge.addClass('d-none');
+        }
+    }
+
+    /**
+     * Get filter query parameters string for URL
+     */
+    function getFilterQueryParams() {
+        var params = '';
+        for (var i = 0; i < state.filters.labels.length; i++) {
+            params += '&fields.label=' + encodeURIComponent(state.filters.labels[i]);
+        }
+        for (var i = 0; i < state.filters.extraQueries.length; i++) {
+            params += '&ex_q=' + encodeURIComponent(state.filters.extraQueries[i]);
+        }
+        return params;
+    }
+
+    /**
+     * Reset all filters
+     */
+    function resetFilters() {
+        state.filters.labels = [];
+        state.filters.extraQueries = [];
+        $('.chat-filter-btn').removeClass('active');
+        updateFilterBadge();
+    }
+
+    /**
      * Start a new chat
      */
     function newChat() {
@@ -669,6 +739,7 @@ var FessChat = (function() {
         state.lastError = null;
         state.currentPhase = null;
         state.completedPhases = [];
+        resetFilters();
         elements.chatMessages.find('.chat-message').remove();
         showEmptyState();
         hideErrorBanner();
