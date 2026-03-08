@@ -541,6 +541,12 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (isEmptyContentWithLengthFinish(response)) {
+                logger.warn(
+                        "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
+                        userMessage);
+                return IntentDetectionResult.fallbackSearch(userMessage);
+            }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
 
             if (logger.isDebugEnabled()) {
@@ -576,6 +582,12 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (isEmptyContentWithLengthFinish(response)) {
+                logger.warn(
+                        "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
+                        userMessage);
+                return IntentDetectionResult.fallbackSearch(userMessage);
+            }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
 
             if (logger.isDebugEnabled()) {
@@ -616,6 +628,16 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "evaluation");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (isEmptyContentWithLengthFinish(response)) {
+                logger.warn(
+                        "[RAG:EVAL] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to all relevant. userMessage={}",
+                        userMessage);
+                final List<String> allDocIds = searchResults.stream()
+                        .map(doc -> getStringValue(doc, "doc_id"))
+                        .filter(StringUtil::isNotBlank)
+                        .collect(Collectors.toList());
+                return RelevanceEvaluationResult.fallbackAllRelevant(allDocIds);
+            }
             final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
 
             if (logger.isDebugEnabled()) {
@@ -1314,6 +1336,18 @@ public abstract class AbstractLlmClient implements LlmClient {
     }
 
     // --- Utility methods ---
+
+    /**
+     * Checks if the LLM response has empty/blank content with a "length" finish reason.
+     * This typically indicates that a reasoning model consumed all tokens for internal
+     * reasoning, leaving no tokens for actual output content.
+     *
+     * @param response the LLM chat response
+     * @return true if content is empty/blank and finish reason is "length"
+     */
+    protected boolean isEmptyContentWithLengthFinish(final LlmChatResponse response) {
+        return StringUtil.isBlank(response.getContent()) && "length".equals(response.getFinishReason());
+    }
 
     /**
      * Gets a string value from a map.
