@@ -26,7 +26,7 @@ var FessChat = (function() {
                 answer: 'Generating answer...'
             },
             errors: {
-                rate_limit: 'The AI service rate limit has been reached. Please wait a moment and try again.',
+                rate_limit: 'It\'s currently busy. Please wait a moment and try again.',
                 auth_error: 'AI service authentication failed. Please contact the administrator.',
                 service_unavailable: 'The AI service is temporarily unavailable. Please try again later.',
                 unknown: 'An error occurred. Please try again.'
@@ -41,7 +41,8 @@ var FessChat = (function() {
         currentPhase: null,
         completedPhases: [],
         lastMessage: null,
-        lastError: null
+        lastError: null,
+        errorHandled: false
     };
 
     var elements = {};
@@ -255,6 +256,7 @@ var FessChat = (function() {
         }
 
         var eventSource = new EventSource(url);
+        state.errorHandled = false;
         var responseContent = '';
         var messageElement = null;
 
@@ -332,6 +334,7 @@ var FessChat = (function() {
         });
 
         eventSource.addEventListener('error', function(e) {
+            state.errorHandled = true;
             var errorMessage = config.labels.error;
             try {
                 var data = JSON.parse(e.data);
@@ -347,7 +350,9 @@ var FessChat = (function() {
         });
 
         eventSource.onerror = function() {
-            handleError(thinkingId, messageElement, config.labels.error);
+            if (!state.errorHandled) {
+                handleError(thinkingId, messageElement, config.labels.error);
+            }
             eventSource.close();
         };
 

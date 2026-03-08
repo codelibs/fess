@@ -3456,7 +3456,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: An error occurred. Please try again. */
     public static final String LABELS_chat_error = "{labels.chat_error}";
 
-    /** The key of the message: The AI service rate limit has been reached. Please wait a moment and try again. */
+    /** The key of the message: It's currently busy. Please wait a moment and try again. */
     public static final String LABELS_chat_error_rate_limit = "{labels.chat_error_rate_limit}";
 
     /** The key of the message: AI service authentication failed. Please contact the administrator. */
