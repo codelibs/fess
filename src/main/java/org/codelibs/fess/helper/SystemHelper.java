@@ -892,6 +892,31 @@ public class SystemHelper {
         return System.getProperty(Constants.FESS_LOG_LEVEL, Level.WARN.toString());
     }
 
+    private static final String[] LLM_LOG_PACKAGES =
+            { "org.codelibs.fess.llm", "org.codelibs.fess.chat", "org.codelibs.fess.api.chat", "org.codelibs.fess.app.web.chat" };
+
+    /**
+     * Sets the log level for LLM-related packages.
+     *
+     * @param level the log level to set
+     */
+    public void setLlmLogLevel(final String level) {
+        final Level logLevel = Level.toLevel(level, Level.INFO);
+        System.setProperty(Constants.FESS_LLM_LOG_LEVEL, logLevel.toString());
+        for (final String pkg : LLM_LOG_PACKAGES) {
+            Configurator.setLevel(pkg, logLevel);
+        }
+    }
+
+    /**
+     * Returns the current log level for LLM-related packages.
+     *
+     * @return the LLM log level
+     */
+    public String getLlmLogLevel() {
+        return System.getProperty(Constants.FESS_LLM_LOG_LEVEL, Level.INFO.toString());
+    }
+
     /**
      * Creates a temporary file.
      *

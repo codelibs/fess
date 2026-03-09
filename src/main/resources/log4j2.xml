@@ -14,6 +14,7 @@
 		<Property name="backup.searchlog.max.age" value="90" />
 		<Property name="audit.log.pattern" value="%msg%n" />
 		<Property name="searchlog.log.pattern" value="%msg%n" />
+		<Property name="llm.log.level" value="${sys:fess.llm.log.level:-info}" />
 	</Properties>
 
 	<Appenders>
@@ -66,6 +67,21 @@
 				</Delete>
 			</DefaultRolloverStrategy>
 		</RollingFile>
+		<RollingFile name="LlmFile" fileName="${log.file.basedir}/fess-llm.log"
+			filePattern="${log.file.basedir}/fess-llm${backup.date.suffix}-%i.log.gz">
+			<PatternLayout><Pattern>${log.pattern}</Pattern></PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="max" min="1"
+				max="${backup.max.history}" compressionLevel="9">
+				<Delete basePath="${log.file.basedir}">
+					<IfFileName glob="fess-llm*.log.gz" />
+					<IfLastModified age="P${backup.max.age}D" />
+				</Delete>
+			</DefaultRolloverStrategy>
+		</RollingFile>
 	</Appenders>
 
 	<Loggers>
@@ -82,6 +98,18 @@
 			<AppenderRef ref="AppFile" />
 		</Logger>
 		<Logger name="com.onelogin.saml2" level="off"/>
+		<Logger name="org.codelibs.fess.llm" additivity="false" level="${llm.log.level}">
+			<AppenderRef ref="LlmFile" />
+		</Logger>
+		<Logger name="org.codelibs.fess.chat" additivity="false" level="${llm.log.level}">
+			<AppenderRef ref="LlmFile" />
+		</Logger>
+		<Logger name="org.codelibs.fess.api.chat" additivity="false" level="${llm.log.level}">
+			<AppenderRef ref="LlmFile" />
+		</Logger>
+		<Logger name="org.codelibs.fess.app.web.chat" additivity="false" level="${llm.log.level}">
+			<AppenderRef ref="LlmFile" />
+		</Logger>
 		<Logger name="fess.log.audit" additivity="false" level="info">
 			<AppenderRef ref="AuditFile" />
 		</Logger>
