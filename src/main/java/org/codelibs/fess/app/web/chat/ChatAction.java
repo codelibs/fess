@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.app.web.chat;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
@@ -23,6 +27,8 @@ import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.app.web.search.SearchAction;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatSessionManager;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -78,6 +84,13 @@ public class ChatAction extends FessSearchAction {
         return asHtml(virtualHost(path_Chat_ChatJsp)).useForm(SearchForm.class).renderWith(data -> {
             RenderDataUtil.register(data, "chatEnabled", true);
             RenderDataUtil.register(data, "chatPage", true);
+            // Label type items for filter UI
+            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH,
+                    request.getLocale() == null ? Locale.ROOT : request.getLocale());
+            RenderDataUtil.register(data, "labelTypeItems", labelTypeItems);
+            RenderDataUtil.register(data, "displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
+            // Facet query views for filter UI (file type, timestamp, size)
+            RenderDataUtil.register(data, "facetQueryViewList", ComponentUtil.getViewHelper().getFacetQueryViewList());
         });
     }
 

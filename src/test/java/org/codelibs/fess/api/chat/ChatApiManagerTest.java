@@ -18,10 +18,14 @@ package org.codelibs.fess.api.chat;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -368,12 +372,184 @@ public class ChatApiManagerTest extends UnitFessTestCase {
         assertEquals(sources, response.get("sources"));
     }
 
+    // ===== parseExtraQueries tests =====
+
+    private void setupViewHelperWithFacetGroups(FacetQueryView... views) {
+        final ViewHelper viewHelper = new ViewHelper();
+        for (final FacetQueryView view : views) {
+            viewHelper.addFacetQueryView(view);
+        }
+        ComponentUtil.register(viewHelper, "viewHelper");
+    }
+
+    private FacetQueryView createFacetQueryView(String title, String... keyValuePairs) {
+        final FacetQueryView view = new FacetQueryView();
+        view.setTitle(title);
+        for (int i = 0; i < keyValuePairs.length; i += 2) {
+            view.addQuery(keyValuePairs[i], keyValuePairs[i + 1]);
+        }
+        return view;
+    }
+
+    @Test
+    public void test_parseExtraQueries_null() {
+        setupViewHelperWithFacetGroups();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        // ex_q not set (null)
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void test_parseExtraQueries_empty() {
+        setupViewHelperWithFacetGroups();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[0]);
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void test_parseExtraQueries_singleQuery() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML", result[0]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_sameGroupOrJoin() {
+        setupViewHelperWithFacetGroups(
+                createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD", "PDF", "filetype:PDF"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "filetype:WORD" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD", result[0]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_sameGroupThreeValues() {
+        setupViewHelperWithFacetGroups(
+                createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD", "PDF", "filetype:PDF"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "filetype:WORD", "filetype:PDF" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD OR filetype:PDF", result[0]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_differentGroupsAndJoin() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"),
+                createFacetQueryView("timestamp", "1month", "timestamp:[now-1M TO *]", "1year", "timestamp:[now-1y TO *]"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "timestamp:[now-1M TO *]" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(2, result.length);
+        assertEquals("filetype:HTML", result[0]);
+        assertEquals("timestamp:[now-1M TO *]", result[1]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_mixedOrAndAnd() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"),
+                createFacetQueryView("timestamp", "1month", "timestamp:[now-1M TO *]", "1year", "timestamp:[now-1y TO *]"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "filetype:WORD", "timestamp:[now-1M TO *]" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(2, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD", result[0]);
+        assertEquals("timestamp:[now-1M TO *]", result[1]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_threeGroupsMixed() {
+        setupViewHelperWithFacetGroups(
+                createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD", "PDF", "filetype:PDF"),
+                createFacetQueryView("timestamp", "1month", "timestamp:[now-1M TO *]", "1year", "timestamp:[now-1y TO *]"),
+                createFacetQueryView("size", "small", "content_length:[0 TO 10000]", "large", "content_length:[10000 TO *]"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q",
+                new String[] { "filetype:HTML", "filetype:PDF", "timestamp:[now-1y TO *]", "content_length:[0 TO 10000]" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(3, result.length);
+        assertEquals("filetype:HTML OR filetype:PDF", result[0]);
+        assertEquals("timestamp:[now-1y TO *]", result[1]);
+        assertEquals("content_length:[0 TO 10000]", result[2]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_invalidQueryRejected() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "filetype:INJECTED" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML", result[0]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_allInvalidQueries() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:INJECTED", "malicious:query" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void test_parseExtraQueries_nullValueInArray() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", null, "filetype:WORD" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD", result[0]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_noFacetViewsDefined() {
+        setupViewHelperWithFacetGroups();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(0, result.length);
+    }
+
+    @Test
+    public void test_parseExtraQueries_preservesOrder() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"),
+                createFacetQueryView("timestamp", "1month", "timestamp:[now-1M TO *]"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        // Send timestamp first, then filetype — result should follow FacetQueryView order, not request order
+        request.setParameterValues("ex_q", new String[] { "timestamp:[now-1M TO *]", "filetype:HTML", "filetype:WORD" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(2, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD", result[0]);
+        assertEquals("timestamp:[now-1M TO *]", result[1]);
+    }
+
+    @Test
+    public void test_parseExtraQueries_allValuesFromOneGroup() {
+        setupViewHelperWithFacetGroups(createFacetQueryView("filetype", "HTML", "filetype:HTML", "WORD", "filetype:WORD"),
+                createFacetQueryView("timestamp", "1month", "timestamp:[now-1M TO *]"));
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameterValues("ex_q", new String[] { "filetype:HTML", "filetype:WORD" });
+        final String[] result = chatApiManager.parseExtraQueries(request);
+        assertEquals(1, result.length);
+        assertEquals("filetype:HTML OR filetype:WORD", result[0]);
+    }
+
     /**
      * Simple mock HttpServletRequest for testing.
      */
     private static class MockHttpServletRequest extends jakarta.servlet.http.HttpServletRequestWrapper {
         private String servletPath;
         private String method = "POST";
+        private final Map<String, String[]> parameterValuesMap = new HashMap<>();
 
         public MockHttpServletRequest() {
             super(new MockServletRequest());
@@ -395,6 +571,15 @@ public class ChatApiManagerTest extends UnitFessTestCase {
 
         public void setMethod(String method) {
             this.method = method;
+        }
+
+        @Override
+        public String[] getParameterValues(String name) {
+            return parameterValuesMap.get(name);
+        }
+
+        public void setParameterValues(String name, String[] values) {
+            parameterValuesMap.put(name, values);
         }
     }
 

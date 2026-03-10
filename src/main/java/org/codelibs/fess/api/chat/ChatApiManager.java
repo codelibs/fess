@@ -17,19 +17,24 @@ package org.codelibs.fess.api.chat;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
-import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -178,7 +183,14 @@ public class ChatApiManager extends BaseApiManager {
             }
 
             final String userId = getUserId(request);
-            final ChatResult result = ComponentUtil.getChatClient().chat(sessionId, message, userId);
+            final Map<String, String[]> fields = parseFieldFilters(request);
+            final String[] extraQueries = parseExtraQueries(request);
+            final ChatResult result;
+            if (fields.isEmpty() && extraQueries.length == 0) {
+                result = ComponentUtil.getChatClient().chat(sessionId, message, userId);
+            } else {
+                result = ComponentUtil.getChatClient().chat(sessionId, message, userId, fields, extraQueries);
+            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Chat request completed. sessionId={}, responseLength={}", result.getSessionId(),
@@ -315,8 +327,17 @@ public class ChatApiManager extends BaseApiManager {
                 }
             };
 
-            // Stream the response using enhanced flow
-            final ChatResult result = ComponentUtil.getChatClient().streamChatEnhanced(sessionId, message, userId, phaseCallback);
+            // Parse filter parameters
+            final Map<String, String[]> fields = parseFieldFilters(request);
+            final String[] extraQueries = parseExtraQueries(request);
+
+            // Stream the response using enhanced flow (use legacy method when no filters for backward compatibility)
+            final ChatResult result;
+            if (fields.isEmpty() && extraQueries.length == 0) {
+                result = ComponentUtil.getChatClient().streamChatEnhanced(sessionId, message, userId, phaseCallback);
+            } else {
+                result = ComponentUtil.getChatClient().streamChatEnhanced(sessionId, message, userId, fields, extraQueries, phaseCallback);
+            }
 
             // Send sources
             final List<ChatSource> sources = result.getMessage().getSources();
@@ -449,6 +470,102 @@ public class ChatApiManager extends BaseApiManager {
             logger.warn("Invalid rag.chat.message.max.length config, using default 4000");
             return 4000;
         }
+    }
+
+    /**
+     * Parses and validates field filter parameters from the request.
+     * Only configured label values are accepted to prevent query injection.
+     *
+     * @param request the HTTP request
+     * @return a map of field names to their validated filter values
+     */
+    protected Map<String, String[]> parseFieldFilters(final HttpServletRequest request) {
+        final Map<String, String[]> fields = new HashMap<>();
+        final String[] labels = request.getParameterValues("fields.label");
+        if (labels != null && labels.length > 0) {
+            // Validate against configured label types (union of request locale and ROOT for robustness)
+            final Locale requestLocale = request.getLocale() != null ? request.getLocale() : Locale.ROOT;
+            final Set<String> allowedLabels = new java.util.HashSet<>();
+            ComponentUtil.getLabelTypeHelper()
+                    .getLabelTypeItemList(SearchRequestParams.SearchRequestType.SEARCH, requestLocale)
+                    .stream()
+                    .map(m -> m.get("value"))
+                    .forEach(allowedLabels::add);
+            if (!Locale.ROOT.equals(requestLocale)) {
+                ComponentUtil.getLabelTypeHelper()
+                        .getLabelTypeItemList(SearchRequestParams.SearchRequestType.SEARCH, Locale.ROOT)
+                        .stream()
+                        .map(m -> m.get("value"))
+                        .forEach(allowedLabels::add);
+            }
+            final List<String> validLabels = new ArrayList<>();
+            for (final String label : labels) {
+                if (label != null && allowedLabels.contains(label)) {
+                    validLabels.add(label);
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("Rejected unknown label filter value: {}", label);
+                }
+            }
+            if (!validLabels.isEmpty()) {
+                fields.put("label", validLabels.toArray(new String[0]));
+            }
+        }
+        return fields;
+    }
+
+    /**
+     * Parses and validates extra query parameters from the request.
+     * Only configured facet query values are accepted to prevent query injection.
+     *
+     * @param request the HTTP request
+     * @return an array of validated extra query strings
+     */
+    protected String[] parseExtraQueries(final HttpServletRequest request) {
+        final String[] extraQueries = request.getParameterValues("ex_q");
+        if (extraQueries == null || extraQueries.length == 0) {
+            return new String[0];
+        }
+        // Build allowlist from configured facet queries
+        final List<FacetQueryView> facetQueryViewList = ComponentUtil.getViewHelper().getFacetQueryViewList();
+        final Set<String> allowedQueries = new java.util.HashSet<>();
+        for (final FacetQueryView view : facetQueryViewList) {
+            allowedQueries.addAll(view.getQueryMap().values());
+        }
+        final List<String> validQueries = new ArrayList<>();
+        for (final String eq : extraQueries) {
+            if (eq != null && allowedQueries.contains(eq)) {
+                validQueries.add(eq);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Rejected unknown extra query filter value: {}", eq);
+            }
+        }
+        if (validQueries.isEmpty()) {
+            return new String[0];
+        }
+        // Group validated queries by FacetQueryView and OR-join within the same group
+        final Set<String> used = new java.util.HashSet<>();
+        final List<String> groupedQueries = new ArrayList<>();
+        for (final FacetQueryView view : facetQueryViewList) {
+            final Set<String> viewValues = new java.util.HashSet<>(view.getQueryMap().values());
+            final List<String> matched = new ArrayList<>();
+            for (final String vq : validQueries) {
+                if (viewValues.contains(vq)) {
+                    matched.add(vq);
+                    used.add(vq);
+                }
+            }
+            if (matched.size() == 1) {
+                groupedQueries.add(matched.get(0));
+            } else if (matched.size() > 1) {
+                groupedQueries.add(String.join(" OR ", matched));
+            }
+        }
+        for (final String vq : validQueries) {
+            if (!used.contains(vq)) {
+                groupedQueries.add(vq);
+            }
+        }
+        return groupedQueries.toArray(new String[0]);
     }
 
     @Override
