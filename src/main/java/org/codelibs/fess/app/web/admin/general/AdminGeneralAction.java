@@ -235,6 +235,9 @@ public class AdminGeneralAction extends FessAdminAction {
         if (StringUtil.isNotBlank(form.logLevel)) {
             systemHelper.setLogLevel(form.logLevel);
         }
+        if (StringUtil.isNotBlank(form.llmLogLevel)) {
+            systemHelper.setLlmLogLevel(form.llmLogLevel);
+        }
     }
 
     /**
@@ -292,6 +295,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.storageProjectId = fessConfig.getStorageProjectId();
         form.storageCredentialsPath = fessConfig.getStorageCredentialsPath();
         form.ragLlmName = fessConfig.getRagLlmName();
+        form.llmLogLevel = ComponentUtil.getSystemHelper().getLlmLogLevel().toUpperCase();
         form.logLevel = ComponentUtil.getSystemHelper().getLogLevel().toUpperCase();
     }
 

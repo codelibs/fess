@@ -798,6 +798,9 @@ public class Constants extends CoreLibConstants {
     /** Fess log level configuration key. */
     public static final String FESS_LOG_LEVEL = "fess.log.level";
 
+    /** Fess LLM log level configuration key. */
+    public static final String FESS_LLM_LOG_LEVEL = "fess.llm.log.level";
+
     /** Track total hits configuration key. */
     public static final String TRACK_TOTAL_HITS = "track_total_hits";
 

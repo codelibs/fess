@@ -2853,6 +2853,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LLM Provider */
     public static final String LABELS_rag_llm_name = "{labels.rag_llm_name}";
 
+    /** The key of the message: Log Level */
+    public static final String LABELS_llm_log_level = "{labels.llm_log_level}";
+
     /** The key of the message: Send Test Mail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
 

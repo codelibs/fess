@@ -390,4 +390,11 @@ public class EditForm {
      */
     @Size(max = 100)
     public String ragLlmName;
+
+    /**
+     * LLM log level.
+     * Controls the logging level for LLM-related packages.
+     */
+    @Size(max = 10)
+    public String llmLogLevel;
 }

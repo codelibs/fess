@@ -603,6 +603,23 @@ ${fe:html(true)}
                                         </la:select>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label for="llmLogLevel"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.llm_log_level"/></label>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="llmLogLevel"/>
+                                        <la:select styleId="llmLogLevel" property="llmLogLevel"
+                                                   styleClass="form-control">
+                                            <la:option value="OFF">OFF</la:option>
+                                            <la:option value="ERROR">ERROR</la:option>
+                                            <la:option value="WARN">WARN</la:option>
+                                            <la:option value="INFO">INFO</la:option>
+                                            <la:option value="DEBUG">DEBUG</la:option>
+                                            <la:option value="TRACE">TRACE</la:option>
+                                        </la:select>
+                                    </div>
+                                </div>
                                 </c:if>
                             </div>
                             <div class="card-footer">
