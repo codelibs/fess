@@ -18,7 +18,7 @@ package org.codelibs.fess.crawler.transformer;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -836,39 +836,39 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getBaseUri() throws Exception {
+    public void test_getBaseUrl() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
-        URI value;
+        URL value;
 
-        value = transformer.getBaseUri("http://hoge.com/", null);
-        assertEquals("http://hoge.com/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/", null);
+        assertEquals("http://hoge.com/", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/", "http://hoge.com/");
-        assertEquals("http://hoge.com/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/", "http://hoge.com/");
+        assertEquals("http://hoge.com/", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/aaa/bbb.html", "http://hoge.com/");
-        assertEquals("http://hoge.com/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/aaa/bbb.html", "http://hoge.com/");
+        assertEquals("http://hoge.com/", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/aaa/bbb.html", "http://hoge.com/ccc/");
-        assertEquals("http://hoge.com/ccc/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/aaa/bbb.html", "http://hoge.com/ccc/");
+        assertEquals("http://hoge.com/ccc/", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/aaa/bbb.html", null);
-        assertEquals("http://hoge.com/aaa/bbb.html", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/aaa/bbb.html", null);
+        assertEquals("http://hoge.com/aaa/bbb.html", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/", "://hoge.com/aaa/");
-        assertEquals("http://hoge.com/aaa/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/", "://hoge.com/aaa/");
+        assertEquals("http://hoge.com/aaa/", value.toExternalForm());
 
-        value = transformer.getBaseUri("https://hoge.com/", "://hoge.com/aaa/");
-        assertEquals("https://hoge.com/aaa/", value.toString());
+        value = transformer.getBaseUrl("https://hoge.com/", "://hoge.com/aaa/");
+        assertEquals("https://hoge.com/aaa/", value.toExternalForm());
 
-        value = transformer.getBaseUri("http://hoge.com/", "//hoge.com/aaa/");
-        assertEquals("http://hoge.com/aaa/", value.toString());
+        value = transformer.getBaseUrl("http://hoge.com/", "//hoge.com/aaa/");
+        assertEquals("http://hoge.com/aaa/", value.toExternalForm());
 
-        value = transformer.getBaseUri("https://hoge.com/", "//hoge.com/aaa/");
-        assertEquals("https://hoge.com/aaa/", value.toString());
+        value = transformer.getBaseUrl("https://hoge.com/", "//hoge.com/aaa/");
+        assertEquals("https://hoge.com/aaa/", value.toExternalForm());
 
-        value = transformer.getBaseUri("https://hoge.com/", "aaa/");
-        assertEquals("https://hoge.com/aaa/", value.toString());
+        value = transformer.getBaseUrl("https://hoge.com/", "aaa/");
+        assertEquals("https://hoge.com/aaa/", value.toExternalForm());
     }
 
     @Test

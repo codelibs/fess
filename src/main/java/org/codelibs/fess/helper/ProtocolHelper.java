@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.JarURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,27 +101,26 @@ public class ProtocolHelper {
             while (resources.hasMoreElements()) {
                 final java.net.URL resource = resources.nextElement();
                 logger.debug("Loading resource: url={}", resource);
-                final URI resourceUri;
-                try {
-                    resourceUri = resource.toURI();
-                } catch (final URISyntaxException e) {
-                    logger.warn("Invalid URI for resource: url={}", resource, e);
-                    continue;
-                }
 
-                if ("file".equals(resourceUri.getScheme())) {
-                    final File directory = new File(resourceUri);
+                if ("file".equals(resource.getProtocol())) {
+                    final File directory;
+                    try {
+                        directory = new File(resource.toURI());
+                    } catch (final URISyntaxException e) {
+                        logger.warn("Invalid URI for resource: url={}", resource, e);
+                        continue;
+                    }
                     if (directory.exists() && directory.isDirectory()) {
                         final File[] files = directory.listFiles(File::isDirectory);
                         if (files != null) {
                             for (final File file : files) {
                                 final String name = file.getName();
                                 subPackages.add(name);
-                                logger.debug("Found subpackage: name={}, resource={}", name, resourceUri);
+                                logger.debug("Found subpackage: name={}, resource={}", name, resource);
                             }
                         }
                     }
-                } else if ("jar".equals(resourceUri.getScheme())) {
+                } else if ("jar".equals(resource.getProtocol())) {
                     final JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
                     try (JarFile jarFile = jarURLConnection.getJarFile()) {
                         final Enumeration<JarEntry> entries = jarFile.entries();
@@ -133,7 +131,7 @@ public class ProtocolHelper {
                                 final String name = entryName.substring(path.length() + 1, entryName.length() - 1);
                                 if (name.indexOf('/') == -1) {
                                     subPackages.add(name);
-                                    logger.debug("Found subpackage: name={}, resource={}", name, resourceUri);
+                                    logger.debug("Found subpackage: name={}, resource={}", name, resource);
                                 }
                             }
                         }
