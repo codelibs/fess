@@ -35,26 +35,56 @@ ${fe:html(true)}
 					</div>
 					<div id="filterPanel" class="collapse">
 						<div class="filter-panel-body">
-							<c:if test="${displayLabelTypeItems}">
-							<div class="filter-group">
-								<div class="filter-group-title"><la:message key="labels.facet_label_title" /></div>
-								<div class="filter-group-items">
-									<c:forEach var="item" items="${labelTypeItems}">
-									<button type="button" class="chat-filter-btn btn btn-outline-secondary btn-sm" data-filter-type="label" data-filter-value="${f:h(item.value)}">${f:h(item.label)}</button>
-									</c:forEach>
+							<div class="filter-dropdowns">
+								<c:if test="${displayLabelTypeItems}">
+								<div class="dropdown">
+									<button type="button" class="filter-group-toggle btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+										<i class="fa fa-tag me-1" aria-hidden="true"></i><la:message key="labels.facet_label_title" />
+										<span class="filter-group-badge badge rounded-pill bg-primary d-none">0</span>
+									</button>
+									<div class="dropdown-menu filter-dropdown-menu">
+										<div class="filter-search-wrapper">
+											<input type="text" class="filter-search-input form-control form-control-sm" placeholder="<la:message key="labels.chat_filter_search_placeholder" />" aria-label="<la:message key="labels.chat_filter_search_placeholder" />" />
+										</div>
+										<div class="filter-dropdown-list">
+											<c:forEach var="item" items="${labelTypeItems}">
+											<label class="filter-check-item">
+												<input type="checkbox" class="filter-check" data-filter-type="label" data-filter-value="${f:h(item.value)}" />
+												<span class="filter-check-label">${f:h(item.label)}</span>
+											</label>
+											</c:forEach>
+										</div>
+										<div class="filter-dropdown-footer">
+											<button type="button" class="filter-clear-group btn btn-sm btn-link"><la:message key="labels.chat_clear" /></button>
+										</div>
+									</div>
 								</div>
-							</div>
-							</c:if>
-							<c:forEach var="facetQueryView" items="${facetQueryViewList}">
-							<div class="filter-group">
-								<div class="filter-group-title"><la:message key="${facetQueryView.title}" /></div>
-								<div class="filter-group-items">
-									<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
-									<button type="button" class="chat-filter-btn btn btn-outline-secondary btn-sm" data-filter-type="ex_q" data-filter-value="${f:h(queryEntry.value)}"><c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if><c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if></button>
-									</c:forEach>
+								</c:if>
+								<c:forEach var="facetQueryView" items="${facetQueryViewList}">
+								<div class="dropdown">
+									<button type="button" class="filter-group-toggle btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+										<i class="fa fa-folder-o me-1" aria-hidden="true"></i><la:message key="${facetQueryView.title}" />
+										<span class="filter-group-badge badge rounded-pill bg-primary d-none">0</span>
+									</button>
+									<div class="dropdown-menu filter-dropdown-menu">
+										<div class="filter-search-wrapper">
+											<input type="text" class="filter-search-input form-control form-control-sm" placeholder="<la:message key="labels.chat_filter_search_placeholder" />" aria-label="<la:message key="labels.chat_filter_search_placeholder" />" />
+										</div>
+										<div class="filter-dropdown-list">
+											<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
+											<label class="filter-check-item">
+												<input type="checkbox" class="filter-check" data-filter-type="ex_q" data-filter-value="${f:h(queryEntry.value)}" />
+												<span class="filter-check-label"><c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if><c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if></span>
+											</label>
+											</c:forEach>
+										</div>
+										<div class="filter-dropdown-footer">
+											<button type="button" class="filter-clear-group btn btn-sm btn-link"><la:message key="labels.chat_clear" /></button>
+										</div>
+									</div>
 								</div>
+								</c:forEach>
 							</div>
-							</c:forEach>
 						</div>
 					</div>
 					<div class="card-body p-0">

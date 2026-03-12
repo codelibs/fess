@@ -107,21 +107,55 @@ var FessChat = (function() {
 
         elements.newChatBtn.on('click', newChat);
 
-        // Filter button click handlers
-        $(document).on('click', '.chat-filter-btn', function() {
-            var btn = $(this);
-            var filterType = btn.data('filter-type');
-            var filterValue = btn.data('filter-value');
-
-            btn.toggleClass('active');
+        // Filter checkbox change handlers
+        $(document).on('change', '.filter-check', function() {
+            var checkbox = $(this);
+            var filterType = checkbox.data('filter-type');
+            var filterValue = checkbox.data('filter-value');
+            var isChecked = checkbox.prop('checked');
 
             if (filterType === 'label') {
-                toggleFilter(state.filters.labels, filterValue);
+                setFilter(state.filters.labels, filterValue, isChecked);
             } else if (filterType === 'ex_q') {
-                toggleFilter(state.filters.extraQueries, filterValue);
+                setFilter(state.filters.extraQueries, filterValue, isChecked);
             }
 
+            updateGroupBadge(checkbox.closest('.dropdown'));
             updateFilterBadge();
+        });
+
+        // Filter search input handler
+        $(document).on('input', '.filter-search-input', function() {
+            var query = $(this).val().toLowerCase();
+            $(this).closest('.filter-dropdown-menu').find('.filter-check-item').each(function() {
+                var label = $(this).find('.filter-check-label').text().toLowerCase();
+                $(this).toggle(label.indexOf(query) !== -1);
+            });
+        });
+
+        // Filter clear group handler
+        $(document).on('click', '.filter-clear-group', function() {
+            var dropdown = $(this).closest('.dropdown');
+            dropdown.find('.filter-check:checked').each(function() {
+                $(this).prop('checked', false);
+                var filterType = $(this).data('filter-type');
+                var filterValue = $(this).data('filter-value');
+                if (filterType === 'label') {
+                    setFilter(state.filters.labels, filterValue, false);
+                } else if (filterType === 'ex_q') {
+                    setFilter(state.filters.extraQueries, filterValue, false);
+                }
+            });
+            updateGroupBadge(dropdown);
+            updateFilterBadge();
+        });
+
+        // Hide search input for groups with 10 or fewer items
+        $('.filter-dropdown-menu').each(function() {
+            var itemCount = $(this).find('.filter-check-item').length;
+            if (itemCount <= 10) {
+                $(this).find('.filter-search-wrapper').hide();
+            }
         });
 
         // Suggestion chip click handlers
@@ -667,14 +701,27 @@ var FessChat = (function() {
     }
 
     /**
-     * Toggle a value in an array (add if not present, remove if present)
+     * Set a filter value based on checked state (add if checked, remove if unchecked)
      */
-    function toggleFilter(array, value) {
+    function setFilter(array, value, checked) {
         var index = array.indexOf(value);
-        if (index === -1) {
+        if (checked && index === -1) {
             array.push(value);
-        } else {
+        } else if (!checked && index !== -1) {
             array.splice(index, 1);
+        }
+    }
+
+    /**
+     * Update badge for a specific dropdown group
+     */
+    function updateGroupBadge(dropdown) {
+        var count = dropdown.find('.filter-check:checked').length;
+        var badge = dropdown.find('.filter-group-badge');
+        if (count > 0) {
+            badge.text(count).removeClass('d-none');
+        } else {
+            badge.addClass('d-none');
         }
     }
 
@@ -710,7 +757,10 @@ var FessChat = (function() {
     function resetFilters() {
         state.filters.labels = [];
         state.filters.extraQueries = [];
-        $('.chat-filter-btn').removeClass('active');
+        $('.filter-check').prop('checked', false);
+        $('.filter-group-badge').addClass('d-none');
+        $('.filter-search-input').val('');
+        $('.filter-check-item').show();
         updateFilterBadge();
     }
 
