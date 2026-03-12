@@ -664,4 +664,45 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
         assertNotNull(result);
         assertEquals(128, result.length());
     }
+
+    @Test
+    public void test_generateId_fileUrlWithBrackets() {
+        String result = crawlingInfoHelper.generateId("file:///data/logs[2024]/access.log");
+        assertNotNull(result);
+        assertEquals(128, result.length());
+    }
+
+    @Test
+    public void test_generateId_fileUrlWithPercent() {
+        String result = crawlingInfoHelper.generateId("file:///data/100%25_done/report.txt");
+        assertNotNull(result);
+        assertEquals(128, result.length());
+    }
+
+    @Test
+    public void test_generateId_urlWithUnicode() {
+        String result = crawlingInfoHelper.generateId("file:///home/ユーザー/ドキュメント.pdf");
+        assertNotNull(result);
+        assertEquals(128, result.length());
+    }
+
+    @Test
+    public void test_generateId_deterministic() {
+        String result1 = crawlingInfoHelper.generateId("file:///data/logs[2024]/access.log");
+        String result2 = crawlingInfoHelper.generateId("file:///data/logs[2024]/access.log");
+        assertEquals(result1, result2);
+    }
+
+    @Test
+    public void test_generateId_distinctForSpecialChars() {
+        // Distinct special-character inputs must produce distinct IDs
+        String withBrackets = crawlingInfoHelper.generateId("file:///data/logs[2024]/access.log");
+        String withoutBrackets = crawlingInfoHelper.generateId("file:///data/logs2024/access.log");
+        String withPercent = crawlingInfoHelper.generateId("file:///data/100%25_done/report.txt");
+        String withUnicode = crawlingInfoHelper.generateId("file:///home/ユーザー/ドキュメント.pdf");
+        assertFalse(withBrackets.equals(withoutBrackets));
+        assertFalse(withBrackets.equals(withPercent));
+        assertFalse(withBrackets.equals(withUnicode));
+        assertFalse(withPercent.equals(withUnicode));
+    }
 }

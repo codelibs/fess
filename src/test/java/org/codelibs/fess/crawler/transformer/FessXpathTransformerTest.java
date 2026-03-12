@@ -1267,4 +1267,178 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         transformer.init();
         return transformer;
     }
+
+    @Test
+    public void test_htmlEntity_numericDecimal() throws Exception {
+        final String data = "<html><head><title>&#214;sterreich</title></head><body></body></html>";
+        final Document document = getDocument(data);
+        final String title = document.getElementsByTagName("TITLE").item(0).getTextContent();
+        assertEquals("\u00D6sterreich", title);
+    }
+
+    @Test
+    public void test_htmlEntity_numericHex() throws Exception {
+        final String data = "<html><head><title>&#xD6;sterreich</title></head><body></body></html>";
+        final Document document = getDocument(data);
+        final String title = document.getElementsByTagName("TITLE").item(0).getTextContent();
+        assertEquals("\u00D6sterreich", title);
+    }
+
+    @Test
+    public void test_htmlEntity_namedEntity() throws Exception {
+        final String data = "<html><head><title>&Ouml;sterreich</title></head><body></body></html>";
+        final Document document = getDocument(data);
+        final String title = document.getElementsByTagName("TITLE").item(0).getTextContent();
+        assertEquals("\u00D6sterreich", title);
+    }
+
+    @Test
+    public void test_htmlEntity_inMetaDescription() throws Exception {
+        final String data = "<html><head><meta name=\"description\" content=\"&#214;ffnungszeiten\"/></head><body></body></html>";
+        final Document document = getDocument(data);
+        final org.w3c.dom.NodeList metaNodes = document.getElementsByTagName("META");
+        String description = null;
+        for (int i = 0; i < metaNodes.getLength(); i++) {
+            final org.w3c.dom.Element meta = (org.w3c.dom.Element) metaNodes.item(i);
+            if ("description".equals(meta.getAttribute("name"))) {
+                description = meta.getAttribute("content");
+                break;
+            }
+        }
+        assertEquals("\u00D6ffnungszeiten", description);
+    }
+
+    @Test
+    public void test_htmlEntity_multipleEntities() throws Exception {
+        final String data = "<html><head><title>&#196;pfel und &#214;pfel</title></head><body></body></html>";
+        final Document document = getDocument(data);
+        final String title = document.getElementsByTagName("TITLE").item(0).getTextContent();
+        assertEquals("\u00C4pfel und \u00D6pfel", title);
+    }
+
+    @Test
+    public void test_htmlEntity_mixedContent() throws Exception {
+        final String data = "<html><body><p>Caf&#233; &amp; Bar</p></body></html>";
+        final Document document = getDocument(data);
+        final String bodyText = document.getElementsByTagName("BODY").item(0).getTextContent();
+        assertTrue(bodyText.contains("Caf\u00E9"));
+        assertTrue(bodyText.contains("& Bar"));
+    }
+
+    @Test
+    public void test_htmlEntity_inBody() throws Exception {
+        final String data = "<html><body>Gr&#252;&#223;e</body></html>";
+        final Document document = getDocument(data);
+        final String bodyText = document.getElementsByTagName("BODY").item(0).getTextContent();
+        assertTrue(bodyText.contains("Gr\u00FC\u00DFe"));
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_withBrackets() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // topic/2732: java.net.URL accepts brackets in paths unlike java.net.URI
+        final String value = transformer.normalizeCanonicalUrl("http://example.com/", "/path/[id]/page");
+        assertEquals("http://example.com/path/[id]/page", value);
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_withPercent() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final String value = transformer.normalizeCanonicalUrl("http://example.com/", "/100%25/done");
+        assertNotNull(value);
+        assertEquals("http://example.com/100%25/done", value);
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_withQueryAndFragment() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final String value = transformer.normalizeCanonicalUrl("http://example.com/", "/page?q=test#section");
+        assertNotNull(value);
+        assertEquals("http://example.com/page?q=test#section", value);
+    }
+
+    @Test
+    public void test_getURL_withNull() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final URL value = transformer.getURL("http://example.com/", null);
+        assertNull(value);
+    }
+
+    @Test
+    public void test_getURL_withProtocolRelative() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final URL value = transformer.getURL("http://example.com/", "://cdn.example.com/file.js");
+        assertNotNull(value);
+        assertEquals("http://cdn.example.com/file.js", value.toExternalForm());
+    }
+
+    @Test
+    public void test_getURL_withRelativePath() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final URL value = transformer.getURL("http://example.com/dir/page.html", "other.html");
+        assertNotNull(value);
+        assertEquals("http://example.com/dir/other.html", value.toExternalForm());
+    }
+
+    @Test
+    public void test_isValidUrl_withBrackets() {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // topic/2732: java.net.URL accepts brackets in paths, so this is valid
+        assertTrue(transformer.isValidUrl("http://example.com/[test]/page"));
+    }
+
+    @Test
+    public void test_isValidUrl_withCustomScheme() {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // topic/2732: java.net.URL does not support smb:// scheme, so isValidUrl returns false
+        assertFalse(transformer.isValidUrl("smb://server/share/file"));
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_malformedReturnsNull() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // Completely invalid base URL should return null
+        final String value = transformer.normalizeCanonicalUrl("not-a-url", "/page");
+        assertNull(value);
+    }
+
+    @Test
+    public void test_getURL_withMalformedBase() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        try {
+            transformer.getURL("not-a-url", "/page");
+            fail();
+        } catch (final Exception e) {
+            // MalformedURLException expected for invalid base URL
+        }
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_withMalformedRelative() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // Valid base URL with malformed relative: java.net.URL is lenient, resolves anyway
+        final String value = transformer.normalizeCanonicalUrl("http://example.com/", "://");
+        // java.net.URL(base, "://") prepends protocol, result may vary
+        // The key point: no exception is thrown and a result is returned
+        assertNotNull(value);
+    }
+
+    @Test
+    public void test_getURL_withMalformedRelative() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // Valid base with empty-authority relative: java.net.URL is lenient
+        final URL value = transformer.getURL("http://example.com/", "page with spaces");
+        // java.net.URL accepts spaces in path (unlike URI)
+        assertNotNull(value);
+        assertTrue(value.toExternalForm().contains("page with spaces"));
+    }
+
+    @Test
+    public void test_normalizeCanonicalUrl_withCustomSchemeRelative() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        // URI→URL migration: java.net.URL rejects unknown schemes like javascript:
+        final String value = transformer.normalizeCanonicalUrl("http://example.com/", "javascript:void(0)");
+        // normalizeCanonicalUrl catches MalformedURLException and returns null
+        assertNull(value);
+    }
 }

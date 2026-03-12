@@ -334,4 +334,39 @@ public class DocumentUtilTest extends UnitFessTestCase {
         List<Map<String, Object>> result = DocumentUtil.getValue(doc, "listOfMaps", List.class);
         assertEquals(listOfMaps, result);
     }
+
+    @Test
+    public void test_encodeUrl_squareBrackets() {
+        // CharUtil.isUrlChar treats [ ] as valid URL chars, so they pass through unchanged
+        String result = DocumentUtil.encodeUrl("http://example.com/path/[id]/page");
+        assertEquals("http://example.com/path/[id]/page", result);
+    }
+
+    @Test
+    public void test_encodeUrl_percentSign() {
+        // CharUtil.isUrlChar treats % as valid URL char, so it passes through unchanged
+        String result = DocumentUtil.encodeUrl("http://example.com/100%25/done");
+        assertEquals("http://example.com/100%25/done", result);
+    }
+
+    @Test
+    public void test_encodeUrl_curlyBraces() {
+        // CharUtil.isUrlChar does NOT include { }, so they get percent-encoded
+        String result = DocumentUtil.encodeUrl("http://example.com/{id}");
+        assertEquals("http://example.com/%7Bid%7D", result);
+    }
+
+    @Test
+    public void test_encodeUrl_unicodeChars() {
+        // Non-ASCII characters are percent-encoded; encoding depends on request context
+        String result = DocumentUtil.encodeUrl("http://example.com/\u00D6sterreich");
+        assertEquals("http://example.com/%D6sterreich", result);
+    }
+
+    @Test
+    public void test_encodeUrl_fileProtocolWithSpecialChars() {
+        // [ ] and % pass through; space would be encoded but %20 stays as-is (% is URL char)
+        String result = DocumentUtil.encodeUrl("file:///data/[logs]/file%20name.txt");
+        assertEquals("file:///data/[logs]/file%20name.txt", result);
+    }
 }
