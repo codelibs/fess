@@ -201,7 +201,7 @@ public class ChatApiManager extends BaseApiManager {
                     createSuccessResponse(result.getSessionId(), result.getMessage().getContent(), result.getMessage().getSources()));
 
         } catch (final Exception e) {
-            logger.warn("Failed to process chat request. message={}", e.getMessage(), e);
+            logger.warn("[RAG] Failed to process chat request. message={}", e.getMessage(), e);
             writeJsonResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, createErrorResponse("Internal server error"));
         }
     }
@@ -365,7 +365,7 @@ public class ChatApiManager extends BaseApiManager {
             logger.warn("LLM error during stream request. sessionId={}, errorCode={}, message={}", sessionId, e.getErrorCode(),
                     e.getMessage(), e);
         } catch (final Exception e) {
-            logger.warn("Failed to process stream request. sessionId={}, message={}", sessionId, e.getMessage(), e);
+            logger.warn("[RAG] Failed to process stream request. sessionId={}, message={}", sessionId, e.getMessage(), e);
             if (!response.isCommitted()) {
                 try (final PrintWriter writer = response.getWriter()) {
                     sendSseEvent(writer, "error", Map.of("message", "Internal server error", "errorCode", LlmException.ERROR_UNKNOWN));
@@ -389,7 +389,7 @@ public class ChatApiManager extends BaseApiManager {
             writer.write("data: " + objectMapper.writeValueAsString(data) + "\n\n");
             writer.flush();
         } catch (final JsonProcessingException e) {
-            logger.warn("Error serializing SSE data", e);
+            logger.warn("[RAG] Failed to serialize SSE data. event={}", event, e);
         }
     }
 

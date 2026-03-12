@@ -126,13 +126,15 @@ public class ChatClient {
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
             addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             session.addMessage(assistantMessage);
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                        searchResults.size(), System.currentTimeMillis() - startTime);
-            }
+            logger.info("[RAG] Chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
-            logger.warn("Failed to get response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            if (e instanceof LlmException) {
+                logger.warn("[RAG] LLM error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
+            } else {
+                logger.warn("[RAG] Unexpected error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            }
             throw e;
         } finally {
             session.trimHistory(getMaxHistoryMessages());
@@ -176,14 +178,16 @@ public class ChatClient {
 
             session.addMessage(assistantMessage);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                        searchResults.size(), System.currentTimeMillis() - startTime);
-            }
+            logger.info("[RAG] Chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
-            logger.warn("Failed to get response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            if (e instanceof LlmException) {
+                logger.warn("[RAG] LLM error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
+            } else {
+                logger.warn("[RAG] Unexpected error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            }
             throw e;
         } finally {
             session.trimHistory(getMaxHistoryMessages());
@@ -222,13 +226,15 @@ public class ChatClient {
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
             addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             session.addMessage(assistantMessage);
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms",
-                        session.getSessionId(), searchResults.size(), System.currentTimeMillis() - startTime);
-            }
+            logger.info("[RAG] Stream chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
-            logger.warn("Failed to stream response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            if (e instanceof LlmException) {
+                logger.warn("[RAG] LLM error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
+            } else {
+                logger.warn("[RAG] Unexpected error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            }
             throw e;
         } finally {
             session.trimHistory(getMaxHistoryMessages());
@@ -276,14 +282,16 @@ public class ChatClient {
 
             session.addMessage(assistantMessage);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms",
-                        session.getSessionId(), searchResults.size(), System.currentTimeMillis() - startTime);
-            }
+            logger.info("[RAG] Stream chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    searchResults.size(), System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
-            logger.warn("Failed to stream response from LLM. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            if (e instanceof LlmException) {
+                logger.warn("[RAG] LLM error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
+            } else {
+                logger.warn("[RAG] Unexpected error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
+            }
             throw e;
         } finally {
             session.trimHistory(getMaxHistoryMessages());
@@ -534,21 +542,20 @@ public class ChatClient {
 
             session.addMessage(assistantMessage);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("[RAG] Enhanced chat request completed. sessionId={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
-                        session.getSessionId(), sources.size(), fullResponse.length(), System.currentTimeMillis() - startTime);
-            }
+            logger.info("[RAG] Enhanced chat completed. sessionId={}, intent={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
+                    session.getSessionId(), intentResult.getIntent(), sources.size(), fullResponse.length(),
+                    System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);
 
         } catch (final LlmException e) {
-            logger.warn("LLM error during enhanced chat. sessionId={}, errorCode={}, error={}, elapsedTime={}ms", session.getSessionId(),
-                    e.getErrorCode(), e.getMessage(), System.currentTimeMillis() - startTime, e);
+            logger.warn("[RAG] LLM error during enhanced chat. sessionId={}, errorCode={}, error={}, elapsedTime={}ms",
+                    session.getSessionId(), e.getErrorCode(), e.getMessage(), System.currentTimeMillis() - startTime, e);
             callback.onError("llm", e.getErrorCode());
             throw e;
         } catch (final Exception e) {
-            logger.warn("Error during enhanced chat. sessionId={}, error={}, elapsedTime={}ms", session.getSessionId(), e.getMessage(),
-                    System.currentTimeMillis() - startTime, e);
+            logger.warn("[RAG] Unexpected error during enhanced chat. sessionId={}, error={}, elapsedTime={}ms", session.getSessionId(),
+                    e.getMessage(), System.currentTimeMillis() - startTime, e);
             callback.onError("unknown", LlmException.ERROR_UNKNOWN);
             throw e;
         } finally {
