@@ -121,6 +121,8 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized {} with timeout: {}ms", getClass().getSimpleName(), timeout);
         }
+        logger.info("[LLM] {} initialized. model={}, timeout={}ms, maxConcurrent={}", getName(), getModel(), getTimeout(),
+                getMaxConcurrentRequests());
 
         concurrencyLimiter = new Semaphore(getMaxConcurrentRequests());
 
@@ -131,6 +133,7 @@ public abstract class AbstractLlmClient implements LlmClient {
      * Cleans up resources.
      */
     public void destroy() {
+        logger.info("[LLM] {} shutting down.", getName());
         if (availabilityCheckTask != null && !availabilityCheckTask.isCanceled()) {
             availabilityCheckTask.cancel();
             if (logger.isDebugEnabled()) {
@@ -400,6 +403,8 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
         try {
             if (!concurrencyLimiter.tryAcquire(getConcurrencyWaitTimeoutMs(), TimeUnit.MILLISECONDS)) {
+                logger.warn("[LLM] Concurrency limit exceeded. name={}, maxConcurrent={}, waitTimeout={}ms", getName(),
+                        getMaxConcurrentRequests(), getConcurrencyWaitTimeoutMs());
                 throw new LlmException("Too many concurrent requests", LlmException.ERROR_RATE_LIMIT);
             }
             try {
@@ -408,6 +413,7 @@ public abstract class AbstractLlmClient implements LlmClient {
                 concurrencyLimiter.release();
             }
         } catch (final InterruptedException e) {
+            logger.warn("[LLM] Request interrupted while waiting for concurrency permit. name={}", getName());
             Thread.currentThread().interrupt();
             throw new LlmException("Request interrupted", LlmException.ERROR_TIMEOUT);
         }
@@ -427,6 +433,8 @@ public abstract class AbstractLlmClient implements LlmClient {
         }
         try {
             if (!concurrencyLimiter.tryAcquire(getConcurrencyWaitTimeoutMs(), TimeUnit.MILLISECONDS)) {
+                logger.warn("[LLM] Concurrency limit exceeded. name={}, maxConcurrent={}, waitTimeout={}ms", getName(),
+                        getMaxConcurrentRequests(), getConcurrencyWaitTimeoutMs());
                 throw new LlmException("Too many concurrent requests", LlmException.ERROR_RATE_LIMIT);
             }
             try {
@@ -435,6 +443,7 @@ public abstract class AbstractLlmClient implements LlmClient {
                 concurrencyLimiter.release();
             }
         } catch (final InterruptedException e) {
+            logger.warn("[LLM] Request interrupted while waiting for concurrency permit. name={}", getName());
             Thread.currentThread().interrupt();
             throw new LlmException("Request interrupted", LlmException.ERROR_TIMEOUT);
         }
@@ -549,6 +558,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
 
+            logger.info("[RAG:INTENT] Intent detected. intent={}, query={}, elapsedTime={}ms", result.getIntent(), result.getQuery(),
+                    System.currentTimeMillis() - startTime);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG:INTENT] Intent detection completed. intent={}, query={}, reasoning={}, elapsedTime={}ms",
                         result.getIntent(), result.getQuery(), result.getReasoning(), System.currentTimeMillis() - startTime);
@@ -556,7 +567,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return result;
         } catch (final Exception e) {
-            logger.warn("Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
+            logger.warn("[RAG:INTENT] Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
                     System.currentTimeMillis() - startTime);
             return IntentDetectionResult.fallbackSearch(userMessage);
         }
@@ -590,6 +601,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
 
+            logger.info("[RAG:INTENT] Intent detected. intent={}, query={}, elapsedTime={}ms", result.getIntent(), result.getQuery(),
+                    System.currentTimeMillis() - startTime);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG:INTENT] Intent detection completed. intent={}, query={}, reasoning={}, elapsedTime={}ms",
                         result.getIntent(), result.getQuery(), result.getReasoning(), System.currentTimeMillis() - startTime);
@@ -597,7 +610,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return result;
         } catch (final Exception e) {
-            logger.warn("Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
+            logger.warn("[RAG:INTENT] Failed to detect intent, falling back to search. error={}, elapsedTime={}ms", e.getMessage(),
                     System.currentTimeMillis() - startTime);
             return IntentDetectionResult.fallbackSearch(userMessage);
         }
@@ -640,6 +653,9 @@ public abstract class AbstractLlmClient implements LlmClient {
             }
             final RelevanceEvaluationResult result = parseEvaluationResponse(response.getContent(), searchResults);
 
+            logger.info("[RAG:EVAL] Evaluation completed. hasRelevant={}, relevantCount={}, totalResults={}, elapsedTime={}ms",
+                    result.isHasRelevantResults(), result.getRelevantDocIds().size(), searchResults.size(),
+                    System.currentTimeMillis() - startTime);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG:EVAL] Result evaluation completed. hasRelevant={}, relevantDocIds={}, elapsedTime={}ms",
                         result.isHasRelevantResults(), result.getRelevantDocIds(), System.currentTimeMillis() - startTime);
@@ -647,7 +663,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return result;
         } catch (final Exception e) {
-            logger.warn("Failed to evaluate results, using all results. error={}, elapsedTime={}ms", e.getMessage(),
+            logger.warn("[RAG:EVAL] Failed to evaluate results, using all results. error={}, elapsedTime={}ms", e.getMessage(),
                     System.currentTimeMillis() - startTime);
             final List<String> allDocIds = searchResults.stream()
                     .map(doc -> getStringValue(doc, "doc_id"))
@@ -1133,7 +1149,7 @@ public abstract class AbstractLlmClient implements LlmClient {
                 return IntentDetectionResult.unclear(reasoning);
             }
         } catch (final Exception e) {
-            logger.warn("Failed to parse intent response, falling back to search. response={}", response, e);
+            logger.warn("[RAG:INTENT] Failed to parse intent response, falling back to search. response={}", response, e);
             return IntentDetectionResult.fallbackSearch(userMessage);
         }
     }
@@ -1161,7 +1177,7 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return RelevanceEvaluationResult.withRelevantDocs(docIds, indexes);
         } catch (final Exception e) {
-            logger.warn("Failed to parse evaluation response, falling back to all relevant. response={}", response, e);
+            logger.warn("[RAG:EVAL] Failed to parse evaluation response, falling back to all relevant. response={}", response, e);
             final List<String> allDocIds = searchResults.stream()
                     .map(doc -> getStringValue(doc, "doc_id"))
                     .filter(StringUtil::isNotBlank)
