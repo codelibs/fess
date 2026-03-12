@@ -527,6 +527,55 @@ public class ChatClientTest extends UnitFessTestCase {
         assertEquals("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", chatClient.testEscapeHtml("<script>alert('xss')</script>"));
     }
 
+    // ========== buildGoUrl tests ==========
+
+    @Test
+    public void test_buildGoUrl_basic() {
+        final String url = chatClient.testBuildGoUrl("", "doc123", "query456", 1710000000L, 0);
+        assertEquals("/go/?rt=1710000000&docId=doc123&queryId=query456&order=0", url);
+    }
+
+    @Test
+    public void test_buildGoUrl_withContextPath() {
+        final String url = chatClient.testBuildGoUrl("/fess", "doc123", "query456", 1710000000L, 2);
+        assertEquals("/fess/go/?rt=1710000000&docId=doc123&queryId=query456&order=2", url);
+    }
+
+    @Test
+    public void test_buildGoUrl_nullDocId() {
+        assertNull(chatClient.testBuildGoUrl("", null, "query456", 1710000000L, 0));
+    }
+
+    @Test
+    public void test_buildGoUrl_nullQueryId() {
+        assertNull(chatClient.testBuildGoUrl("", "doc123", null, 1710000000L, 0));
+    }
+
+    @Test
+    public void test_buildGoUrl_encodesSpecialCharacters() {
+        final String url = chatClient.testBuildGoUrl("", "doc&id=1", "query id#2", 1710000000L, 0);
+        assertTrue(url.contains("docId=doc%26id%3D1"));
+        assertTrue(url.contains("queryId=query+id%232"));
+    }
+
+    // ========== ChatSource goUrl/urlLink tests ==========
+
+    @Test
+    public void test_chatSource_goUrlAndUrlLink() {
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Test Doc");
+        doc.put("url", "smb://server/share/file.doc");
+        doc.put("doc_id", "doc123");
+        doc.put("url_link", "http://proxy.example.com/file.doc");
+
+        final ChatMessage.ChatSource source = new ChatMessage.ChatSource(1, doc);
+        assertEquals("http://proxy.example.com/file.doc", source.getUrlLink());
+        assertNull(source.getGoUrl());
+
+        source.setGoUrl("/go/?rt=123&docId=doc123&queryId=q1&order=0");
+        assertEquals("/go/?rt=123&docId=doc123&queryId=q1&order=0", source.getGoUrl());
+    }
+
     // ========== Testable subclass ==========
 
     static class TestableChatClient extends ChatClient {
@@ -551,6 +600,11 @@ public class ChatClientTest extends UnitFessTestCase {
 
         String testEscapeHtml(final String text) {
             return escapeHtml(text);
+        }
+
+        String testBuildGoUrl(final String contextPath, final String docId, final String queryId, final long requestedTime,
+                final int order) {
+            return buildGoUrl(contextPath, docId, queryId, requestedTime, order);
         }
 
         @Override
