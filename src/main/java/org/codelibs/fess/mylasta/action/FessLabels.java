@@ -3444,7 +3444,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Update */
     public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
 
-    /** The key of the message: AI Chat - Fess */
+    /** The key of the message: AI Search Mode - Fess */
     public static final String LABELS_chat_title = "{labels.chat_title}";
 
     /** The key of the message: New Chat */
