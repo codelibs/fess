@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.chat;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -47,8 +49,10 @@ import org.codelibs.fess.llm.RelevanceEvaluationResult;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Client class for RAG (Retrieval-Augmented Generation) chat functionality.
@@ -105,6 +109,7 @@ public class ChatClient {
      */
     public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
         final long startTime = System.currentTimeMillis();
+        final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Starting chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
         }
@@ -113,14 +118,13 @@ public class ChatClient {
         final List<LlmMessage> history = extractHistory(session);
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
+        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage);
+        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
 
         try {
             final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
-            for (int i = 0; i < searchResults.size(); i++) {
-                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-            }
+            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             session.addMessage(assistantMessage);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG] Chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
@@ -150,6 +154,7 @@ public class ChatClient {
         final Map<String, String[]> safeFields = fields != null ? fields : Collections.emptyMap();
         final String[] safeExtraQueries = extraQueries != null ? extraQueries : new String[0];
         final long startTime = System.currentTimeMillis();
+        final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Starting chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
         }
@@ -160,16 +165,14 @@ public class ChatClient {
         // Add user message immediately for session integrity under concurrent access
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage, safeFields, safeExtraQueries);
+        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage, safeFields, safeExtraQueries);
+        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
 
         try {
             final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
-
-            for (int i = 0; i < searchResults.size(); i++) {
-                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-            }
+            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
 
             session.addMessage(assistantMessage);
 
@@ -198,6 +201,7 @@ public class ChatClient {
      */
     public ChatResult streamChat(final String sessionId, final String userMessage, final String userId, final LlmStreamCallback callback) {
         final long startTime = System.currentTimeMillis();
+        final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Starting streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
         }
@@ -206,7 +210,8 @@ public class ChatClient {
         final List<LlmMessage> history = extractHistory(session);
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage);
+        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage);
+        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
 
         final StringBuilder responseContent = new StringBuilder();
         try {
@@ -215,9 +220,7 @@ public class ChatClient {
                 callback.onChunk(chunk, done);
             });
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
-            for (int i = 0; i < searchResults.size(); i++) {
-                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-            }
+            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
             session.addMessage(assistantMessage);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG] Streaming chat request completed. sessionId={}, sourcesCount={}, elapsedTime={}ms",
@@ -248,6 +251,7 @@ public class ChatClient {
         final Map<String, String[]> safeFields = fields != null ? fields : Collections.emptyMap();
         final String[] safeExtraQueries = extraQueries != null ? extraQueries : new String[0];
         final long startTime = System.currentTimeMillis();
+        final String contextPath = resolveContextPath();
         if (logger.isDebugEnabled()) {
             logger.debug("[RAG] Starting streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
         }
@@ -256,7 +260,8 @@ public class ChatClient {
         final List<LlmMessage> history = extractHistory(session);
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
-        final List<Map<String, Object>> searchResults = searchDocuments(userMessage, safeFields, safeExtraQueries);
+        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage, safeFields, safeExtraQueries);
+        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
 
         final StringBuilder responseContent = new StringBuilder();
         try {
@@ -267,9 +272,7 @@ public class ChatClient {
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
 
-            for (int i = 0; i < searchResults.size(); i++) {
-                assistantMessage.addSource(new ChatSource(i + 1, searchResults.get(i)));
-            }
+            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
 
             session.addMessage(assistantMessage);
 
@@ -319,6 +322,8 @@ public class ChatClient {
         final Map<String, String[]> safeFields = fields != null ? fields : Collections.emptyMap();
         final String[] safeExtraQueries = extraQueries != null ? extraQueries : new String[0];
         final long startTime = System.currentTimeMillis();
+        // Capture context path early before request context may become unavailable during SSE processing
+        final String contextPath = resolveContextPath();
         // Note: Locale is resolved via LaRequestUtil in LlmClient. During long SSE processing,
         // the request context may become unavailable, falling back to Locale.getDefault().
         if (logger.isDebugEnabled()) {
@@ -334,6 +339,8 @@ public class ChatClient {
         session.addMessage(userChatMessage);
         final StringBuilder fullResponse = new StringBuilder();
         List<Map<String, Object>> sources = new ArrayList<>();
+        String searchQueryId = null;
+        long searchRequestedTime = 0L;
 
         try {
             // Phase 1: Intent Detection
@@ -366,7 +373,10 @@ public class ChatClient {
                 final String documentUrl = intentResult.getDocumentUrl();
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching for document...", documentUrl);
-                final List<Map<String, Object>> urlResults = searchByUrl(documentUrl);
+                final ChatSearchResult urlSearchResult = searchByUrlWithMetadata(documentUrl);
+                final List<Map<String, Object>> urlResults = urlSearchResult.getDocuments();
+                searchQueryId = urlSearchResult.getQueryId();
+                searchRequestedTime = urlSearchResult.getRequestedTime();
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
                 if (logger.isDebugEnabled()) {
                     logger.debug("[RAG] Phase {} completed. documentUrl={}, resultCount={}, phaseElapsedTime={}ms",
@@ -419,7 +429,10 @@ public class ChatClient {
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
-                final List<Map<String, Object>> searchResults = searchWithQuery(query, safeFields, safeExtraQueries);
+                final ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+                final List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
+                searchQueryId = querySearchResult.getQueryId();
+                searchRequestedTime = querySearchResult.getRequestedTime();
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
                 if (logger.isDebugEnabled()) {
@@ -515,8 +528,9 @@ public class ChatClient {
             assistantMessage.setHtmlContent(htmlContent);
 
             for (int i = 0; i < sources.size(); i++) {
-                assistantMessage.addSource(new ChatSource(i + 1, sources.get(i)));
+                populateUrlLink(sources.get(i));
             }
+            addSourcesToMessage(assistantMessage, sources, contextPath, searchQueryId, searchRequestedTime);
 
             session.addMessage(assistantMessage);
 
@@ -681,21 +695,25 @@ public class ChatClient {
      * @return the list of search result documents
      */
     protected List<Map<String, Object>> searchWithQuery(final String query) {
+        return searchWithQueryAndMetadata(query).getDocuments();
+    }
+
+    private ChatSearchResult searchWithQueryAndMetadata(final String query) {
         if (StringUtil.isBlank(query)) {
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
         if (query.length() > MAX_QUERY_LENGTH) {
             logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
         if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
             logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
-        return searchDocuments(query);
+        return searchDocumentsWithMetadata(query);
     }
 
     /**
@@ -708,25 +726,30 @@ public class ChatClient {
      */
     protected List<Map<String, Object>> searchWithQuery(final String query, final Map<String, String[]> fields,
             final String[] extraQueries) {
+        return searchWithQueryAndMetadata(query, fields, extraQueries).getDocuments();
+    }
+
+    private ChatSearchResult searchWithQueryAndMetadata(final String query, final Map<String, String[]> fields,
+            final String[] extraQueries) {
         if (fields.isEmpty() && extraQueries.length == 0) {
-            return searchWithQuery(query);
+            return searchWithQueryAndMetadata(query);
         }
 
         if (StringUtil.isBlank(query)) {
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
         if (query.length() > MAX_QUERY_LENGTH) {
             logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
         if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
             logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
-            return Collections.emptyList();
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
 
-        return searchDocuments(query, fields, extraQueries);
+        return searchDocumentsWithMetadata(query, fields, extraQueries);
     }
 
     /**
@@ -805,6 +828,8 @@ public class ChatClient {
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
+            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
+
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
             if (docs != null) {
@@ -877,6 +902,80 @@ public class ChatClient {
         return ComponentUtil.getFessConfig().getRagChatHistoryMaxMessagesAsInteger();
     }
 
+    /** Thread-local storage for search metadata captured during searchDocuments calls. */
+    private static final ThreadLocal<String> lastSearchQueryId = new ThreadLocal<>();
+
+    /** Thread-local storage for search metadata captured during searchDocuments calls. */
+    private static final ThreadLocal<Long> lastSearchRequestedTime = new ThreadLocal<>();
+
+    /**
+     * Stores search metadata for retrieval by internal callers.
+     *
+     * @param queryId the query ID from SearchRenderData
+     * @param requestedTime the requested time from SearchRenderData
+     */
+    protected void setLastSearchMetadata(final String queryId, final long requestedTime) {
+        lastSearchQueryId.set(queryId);
+        lastSearchRequestedTime.set(requestedTime);
+    }
+
+    /**
+     * Clears search metadata from ThreadLocal to prevent stale data on error paths.
+     */
+    private void clearLastSearchMetadata() {
+        lastSearchQueryId.remove();
+        lastSearchRequestedTime.remove();
+    }
+
+    /**
+     * Creates a ChatSearchResult by calling the protected searchDocuments method
+     * and retrieving captured metadata.
+     */
+    private ChatSearchResult searchDocumentsWithMetadata(final String query) {
+        try {
+            final List<Map<String, Object>> docs = searchDocuments(query);
+            return buildChatSearchResult(docs);
+        } finally {
+            clearLastSearchMetadata();
+        }
+    }
+
+    /**
+     * Creates a ChatSearchResult by calling the protected searchDocuments method
+     * and retrieving captured metadata.
+     */
+    private ChatSearchResult searchDocumentsWithMetadata(final String query, final Map<String, String[]> fields,
+            final String[] extraQueries) {
+        try {
+            final List<Map<String, Object>> docs = searchDocuments(query, fields, extraQueries);
+            return buildChatSearchResult(docs);
+        } finally {
+            clearLastSearchMetadata();
+        }
+    }
+
+    /**
+     * Creates a ChatSearchResult by calling the protected searchByUrl method
+     * and retrieving captured metadata.
+     */
+    private ChatSearchResult searchByUrlWithMetadata(final String url) {
+        try {
+            final List<Map<String, Object>> docs = searchByUrl(url);
+            return buildChatSearchResult(docs);
+        } finally {
+            clearLastSearchMetadata();
+        }
+    }
+
+    /**
+     * Creates a ChatSearchResult from documents and captured ThreadLocal metadata.
+     */
+    private ChatSearchResult buildChatSearchResult(final List<Map<String, Object>> docs) {
+        final String queryId = lastSearchQueryId.get();
+        final Long requestedTime = lastSearchRequestedTime.get();
+        return new ChatSearchResult(docs, queryId, requestedTime != null ? requestedTime : 0L);
+    }
+
     /**
      * Searches for documents relevant to the user's query.
      * SearchHelper applies role-based access control filtering through
@@ -885,6 +984,9 @@ public class ChatClient {
      * <p>
      * This is the primary extension point for subclasses to customize search behavior.
      * It is called by backward-compatible (no-filter) methods.
+     * <p>
+     * Subclasses that override this method should call {@link #setLastSearchMetadata(String, long)}
+     * to provide queryId and requestedTime for go URL generation.
      *
      * @param query the search query
      * @return a list of documents matching the query
@@ -903,6 +1005,8 @@ public class ChatClient {
             final ChatSearchRequestParams params = new ChatSearchRequestParams(query, maxDocs, fessConfig);
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
+
+            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
 
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
@@ -953,6 +1057,8 @@ public class ChatClient {
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
+            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
+
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
             if (docs != null) {
@@ -971,6 +1077,113 @@ public class ChatClient {
                     System.currentTimeMillis() - startTime);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Resolves the context path from the current request, or empty string if unavailable.
+     *
+     * @return the context path
+     */
+    protected String resolveContextPath() {
+        return LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getContextPath).orElse("");
+    }
+
+    /**
+     * Builds a go URL for the given document.
+     *
+     * @param contextPath the application context path
+     * @param docId the document ID
+     * @param queryId the query ID from the search
+     * @param requestedTime the requested time from the search
+     * @param order the order index of the document
+     * @return the go URL, or null if docId or queryId is null
+     */
+    protected String buildGoUrl(final String contextPath, final String docId, final String queryId, final long requestedTime,
+            final int order) {
+        if (docId == null || queryId == null) {
+            return null;
+        }
+        return contextPath + "/go/?rt=" + requestedTime + "&docId=" + URLEncoder.encode(docId, StandardCharsets.UTF_8) + "&queryId="
+                + URLEncoder.encode(queryId, StandardCharsets.UTF_8) + "&order=" + order;
+    }
+
+    /**
+     * Creates ChatSource objects from search results and adds them to the assistant message.
+     *
+     * @param assistantMessage the message to add sources to
+     * @param sourceList the search result documents
+     * @param contextPath the application context path
+     * @param queryId the query ID from the search
+     * @param requestedTime the requested time from the search
+     */
+    protected void addSourcesToMessage(final ChatMessage assistantMessage, final List<Map<String, Object>> sourceList,
+            final String contextPath, final String queryId, final long requestedTime) {
+        for (int i = 0; i < sourceList.size(); i++) {
+            final ChatSource source = new ChatSource(i + 1, sourceList.get(i));
+            source.setGoUrl(buildGoUrl(contextPath, source.getDocId(), queryId, requestedTime, i));
+            assistantMessage.addSource(source);
+        }
+    }
+
+    /**
+     * Populates the url_link field in the document map if not already present.
+     *
+     * @param doc the document map
+     */
+    protected void populateUrlLink(final Map<String, Object> doc) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (doc.get(fessConfig.getResponseFieldUrlLink()) == null) {
+            doc.put(fessConfig.getResponseFieldUrlLink(), ComponentUtil.getViewHelper().getUrlLink(doc));
+        }
+    }
+
+    /**
+     * Result of a search operation, including queryId and requestedTime.
+     */
+    protected static class ChatSearchResult {
+        private final List<Map<String, Object>> documents;
+        private final String queryId;
+        private final long requestedTime;
+
+        /**
+         * Creates a new chat search result.
+         *
+         * @param documents the search result documents
+         * @param queryId the query ID
+         * @param requestedTime the requested time
+         */
+        public ChatSearchResult(final List<Map<String, Object>> documents, final String queryId, final long requestedTime) {
+            this.documents = documents;
+            this.queryId = queryId;
+            this.requestedTime = requestedTime;
+        }
+
+        /**
+         * Gets the search result documents.
+         *
+         * @return the list of documents
+         */
+        public List<Map<String, Object>> getDocuments() {
+            return documents;
+        }
+
+        /**
+         * Gets the query ID.
+         *
+         * @return the query ID
+         */
+        public String getQueryId() {
+            return queryId;
+        }
+
+        /**
+         * Gets the requested time.
+         *
+         * @return the requested time
+         */
+        public long getRequestedTime() {
+            return requestedTime;
+        }
     }
 
     /**

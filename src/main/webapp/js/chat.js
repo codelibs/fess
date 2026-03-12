@@ -626,12 +626,12 @@ var FessChat = (function() {
         for (var i = 0; i < sources.length; i++) {
             var source = sources[i];
             var title = source.title || source.url || ('Source ' + (i + 1));
-            var url = sanitizeUrl(source.url);
+            var navigationUrl = sanitizeUrl(source.goUrl || source.urlLink || source.url);
             var icon = getFileTypeIcon(source.url, source.mimetype);
             var typeLabel = getFileTypeLabel(source.url, source.mimetype);
 
             html += '<li>' +
-                '<a href="' + escapeHtml(url) + '" class="source-card" target="_blank" rel="noopener noreferrer">' +
+                '<a href="' + escapeHtml(navigationUrl) + '" class="source-card" target="_blank" rel="noopener noreferrer">' +
                     '<span class="source-index">' + (i + 1) + '</span>' +
                     '<div class="source-info">' +
                         '<span class="source-title">' + escapeHtml(title) + '</span>' +

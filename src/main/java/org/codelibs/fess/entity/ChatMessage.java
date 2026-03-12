@@ -254,6 +254,12 @@ public class ChatMessage implements Serializable {
         /** A snippet from the source document. */
         private String snippet;
 
+        /** The ViewHelper-processed URL for display. */
+        private String urlLink;
+
+        /** The go link URL for navigation with access control and click logging. */
+        private String goUrl;
+
         /**
          * Default constructor.
          */
@@ -276,6 +282,7 @@ public class ChatMessage implements Serializable {
             this.url = toStringOrNull(doc.get("url"));
             this.docId = toStringOrNull(doc.get("doc_id"));
             this.snippet = toStringOrNull(doc.get("content_description"));
+            this.urlLink = toStringOrNull(doc.get("url_link"));
         }
 
         private static String toStringOrNull(final Object value) {
@@ -376,6 +383,42 @@ public class ChatMessage implements Serializable {
          */
         public void setSnippet(final String snippet) {
             this.snippet = snippet;
+        }
+
+        /**
+         * Gets the ViewHelper-processed URL for display.
+         *
+         * @return the URL link
+         */
+        public String getUrlLink() {
+            return urlLink;
+        }
+
+        /**
+         * Sets the ViewHelper-processed URL for display.
+         *
+         * @param urlLink the URL link
+         */
+        public void setUrlLink(final String urlLink) {
+            this.urlLink = urlLink;
+        }
+
+        /**
+         * Gets the go link URL for navigation.
+         *
+         * @return the go URL
+         */
+        public String getGoUrl() {
+            return goUrl;
+        }
+
+        /**
+         * Sets the go link URL for navigation.
+         *
+         * @param goUrl the go URL
+         */
+        public void setGoUrl(final String goUrl) {
+            this.goUrl = goUrl;
         }
     }
 }
