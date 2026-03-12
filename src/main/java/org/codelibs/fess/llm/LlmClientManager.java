@@ -97,7 +97,7 @@ public class LlmClientManager {
                 return client;
             }
         }
-        logger.error("[LLM] LlmClient not found. componentName={}", name);
+        logger.warn("[LLM] LlmClient not found. componentName={}", name);
         return null;
     }
 
@@ -172,7 +172,7 @@ public class LlmClientManager {
                     System.currentTimeMillis() - startTime);
             throw e;
         } catch (final Exception e) {
-            logger.error("[LLM] Chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
+            logger.warn("[LLM] Chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
                     System.currentTimeMillis() - startTime, e);
             throw new LlmException("LLM chat request failed", e);
         }
@@ -209,7 +209,7 @@ public class LlmClientManager {
                     System.currentTimeMillis() - startTime);
             throw e;
         } catch (final Exception e) {
-            logger.error("[LLM] Stream chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType,
+            logger.warn("[LLM] Stream chat request failed with unexpected error. llmType={}, error={}, elapsedTime={}ms", llmType,
                     e.getMessage(), System.currentTimeMillis() - startTime, e);
             throw new LlmException("LLM streaming chat request failed", e);
         }
