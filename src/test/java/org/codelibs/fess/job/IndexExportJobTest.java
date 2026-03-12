@@ -1527,4 +1527,48 @@ public class IndexExportJobTest extends UnitFessTestCase {
             return "html";
         }
     }
+
+    // --- buildFilePath() regression tests for special characters ---
+
+    @Test
+    public void test_buildFilePath_withBrackets() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "file:///data/[logs]/access.log", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        // Brackets are invalid in URI syntax, so this should fall back to _invalid/hash path
+        assertTrue(result.toString().startsWith(tempDir.toString() + "/_invalid/"));
+        assertTrue(result.toString().endsWith(".html"));
+    }
+
+    @Test
+    public void test_buildFilePath_withPercent() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "file:///data/100%/report.txt", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        // Bare percent is invalid in URI syntax, so this should fall back to _invalid/hash path
+        assertTrue(result.toString().startsWith(tempDir.toString() + "/_invalid/"));
+        assertTrue(result.toString().endsWith(".html"));
+    }
+
+    @Test
+    public void test_buildFilePath_withEncodedUmlaut() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/%C3%96sterreich/page", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        // Properly percent-encoded URL should parse successfully (not fall back to _invalid)
+        assertFalse(result.toString().contains("_invalid"));
+        assertTrue(result.toString().contains("example.com"));
+        assertTrue(result.toString().endsWith(".html"));
+    }
+
+    @Test
+    public void test_buildFilePath_normalUrl() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/path/page.html", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertFalse(result.toString().contains("_invalid"));
+        assertTrue(result.toString().contains("example.com"));
+        assertTrue(result.toString().contains("path"));
+        assertTrue(result.toString().endsWith("page.html"));
+    }
 }
