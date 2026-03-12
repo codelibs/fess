@@ -3498,6 +3498,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Filter */
     public static final String LABELS_chat_filter = "{labels.chat_filter}";
 
+    /** The key of the message: Search... */
+    public static final String LABELS_chat_filter_search_placeholder = "{labels.chat_filter_search_placeholder}";
+
+    /** The key of the message: Clear */
+    public static final String LABELS_chat_clear = "{labels.chat_clear}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
