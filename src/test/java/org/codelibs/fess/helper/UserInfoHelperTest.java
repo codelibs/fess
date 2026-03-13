@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +25,9 @@ import java.util.Map;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
+import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.Cookie;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.Test;
 
 public class UserInfoHelperTest extends UnitFessTestCase {
 

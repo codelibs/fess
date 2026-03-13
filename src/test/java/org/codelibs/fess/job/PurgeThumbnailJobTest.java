@@ -19,7 +19,6 @@ import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

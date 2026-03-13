@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.cors;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 public class CorsHandlerFactoryTest extends UnitFessTestCase {
 

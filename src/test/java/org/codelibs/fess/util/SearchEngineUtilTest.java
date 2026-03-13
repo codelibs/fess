@@ -22,13 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.SearchEngineUtil.XContentBuilderCallback;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.opensearch.common.xcontent.XContentType;
 import org.opensearch.core.xcontent.MediaType;
 import org.opensearch.core.xcontent.ToXContent;
 import org.opensearch.core.xcontent.XContentBuilder;
-import org.opensearch.search.SearchHit;
-import org.junit.jupiter.api.Test;
 
 public class SearchEngineUtilTest extends UnitFessTestCase {
 

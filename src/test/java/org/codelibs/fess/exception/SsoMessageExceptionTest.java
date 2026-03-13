@@ -15,12 +15,13 @@
  */
 package org.codelibs.fess.exception;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.validation.VaMessenger;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import org.junit.jupiter.api.Test;
 
 public class SsoMessageExceptionTest extends UnitFessTestCase {
 

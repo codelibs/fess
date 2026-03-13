@@ -18,10 +18,9 @@ package org.codelibs.fess.entity;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.search.aggregations.BucketOrder;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.search.aggregations.BucketOrder;
 
 public class FacetInfoTest extends UnitFessTestCase {
 

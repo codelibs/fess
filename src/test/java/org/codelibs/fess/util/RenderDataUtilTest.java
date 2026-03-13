@@ -24,8 +24,8 @@ import java.util.Set;
 
 import org.codelibs.fess.opensearch.user.bsentity.BsUser;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.web.response.render.RenderData;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.response.render.RenderData;
 
 public class RenderDataUtilTest extends UnitFessTestCase {
 

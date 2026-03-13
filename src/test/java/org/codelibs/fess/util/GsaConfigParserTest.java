@@ -26,10 +26,10 @@ import org.codelibs.fess.exception.GsaConfigException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.opensearch.config.exentity.LabelType;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class GsaConfigParserTest extends UnitFessTestCase {
 

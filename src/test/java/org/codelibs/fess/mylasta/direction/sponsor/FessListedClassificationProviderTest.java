@@ -20,9 +20,9 @@ import java.util.Locale;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.jdbc.ClassificationMeta;
 import org.dbflute.optional.OptionalThing;
-import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.db.dbflute.exception.ProvidedClassificationNotFoundException;
 
 public class FessListedClassificationProviderTest extends UnitFessTestCase {
 

@@ -20,7 +20,6 @@ import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
@@ -36,11 +35,11 @@ import java.util.Set;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class UriTypeTest extends UnitFessTestCase {
 

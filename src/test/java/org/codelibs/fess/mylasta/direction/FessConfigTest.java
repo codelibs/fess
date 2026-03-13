@@ -16,14 +16,12 @@
 package org.codelibs.fess.mylasta.direction;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 public class FessConfigTest extends UnitFessTestCase {
 

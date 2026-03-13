@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.response.next.HtmlNext;
 
 public class FessHtmlPathTest extends UnitFessTestCase {
 

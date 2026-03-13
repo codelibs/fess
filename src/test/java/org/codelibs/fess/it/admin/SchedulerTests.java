@@ -16,17 +16,13 @@
 package org.codelibs.fess.it.admin;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.it.CrudTestBase;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import io.restassured.path.json.JsonPath;
 
 @Tag("it")
 public class SchedulerTests extends CrudTestBase {

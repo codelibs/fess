@@ -24,9 +24,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.servlet.request.stream.WrittenStreamOut;
-import org.junit.jupiter.api.Test;
 
 public class OsddHelperTest extends UnitFessTestCase {
 

@@ -16,7 +16,6 @@
 package org.codelibs.fess.job;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -24,24 +23,20 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.exception.IORuntimeException;
-import org.lastaflute.job.LaJobRuntime;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.di.exception.IORuntimeException;
+import org.lastaflute.job.LaJobRuntime;
 
 public class ExecJobTest extends UnitFessTestCase {
 

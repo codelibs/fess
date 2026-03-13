@@ -22,7 +22,6 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-
 import org.codelibs.jcifs.smb.SID;
 import org.codelibs.jcifs.smb.impl.SmbException;
 import org.junit.jupiter.api.Test;

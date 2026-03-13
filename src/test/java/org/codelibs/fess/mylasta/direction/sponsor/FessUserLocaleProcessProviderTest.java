@@ -17,17 +17,13 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 
 import java.util.Locale;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
-import org.lastaflute.web.path.ActionPathResolver;
-import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.servlet.request.RequestManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.servlet.request.RequestManager;
 
 public class FessUserLocaleProcessProviderTest extends UnitFessTestCase {
 

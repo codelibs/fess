@@ -23,18 +23,16 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.entity.QueryContext;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.exception.InvalidQueryException;
-import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.util.DfTypeUtil;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.TermQueryBuilder;
 import org.opensearch.index.query.WildcardQueryBuilder;
 import org.opensearch.search.sort.SortBuilder;
-import org.junit.jupiter.api.Test;
 
 public class TermQueryCommandTest extends QueryTestBase {
     private static final Logger logger = LogManager.getLogger(TermQueryCommandTest.class);

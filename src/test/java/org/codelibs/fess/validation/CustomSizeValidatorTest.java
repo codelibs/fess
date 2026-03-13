@@ -18,11 +18,11 @@ package org.codelibs.fess.validation;
 import java.lang.annotation.Annotation;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class CustomSizeValidatorTest extends UnitFessTestCase {
 

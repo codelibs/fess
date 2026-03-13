@@ -15,12 +15,13 @@
  */
 package org.codelibs.fess.script;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

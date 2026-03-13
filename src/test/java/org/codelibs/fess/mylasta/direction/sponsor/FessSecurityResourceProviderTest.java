@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
-import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.core.security.InvertibleCryptographer;
-import org.lastaflute.core.security.OneWayCryptographer;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.security.InvertibleCryptographer;
+import org.lastaflute.core.security.OneWayCryptographer;
 
 public class FessSecurityResourceProviderTest extends UnitFessTestCase {
 

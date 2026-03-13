@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.opensearch.common;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import javax.sql.DataSource;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -36,8 +38,6 @@ import org.dbflute.outsidesql.factory.OutsideSqlExecutorFactory;
 import org.dbflute.s2dao.jdbc.TnResultSetHandlerFactory;
 import org.dbflute.s2dao.metadata.TnBeanMetaDataFactory;
 import org.dbflute.twowaysql.factory.SqlAnalyzerFactory;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

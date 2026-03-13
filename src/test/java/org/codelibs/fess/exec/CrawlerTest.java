@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.exec;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -29,11 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
@@ -51,10 +48,9 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.mail.CardView;
 import org.dbflute.mail.send.supplement.SMailPostingDiscloser;
-import org.lastaflute.core.mail.Postbox;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.mail.Postbox;
 
 public class CrawlerTest extends UnitFessTestCase {
 

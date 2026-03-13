@@ -19,17 +19,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.codelibs.fess.entity.GeoInfo;
-import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.QueryFieldConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.web.servlet.request.SimpleRequestManager;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class SearchRequestParamsTest extends UnitFessTestCase {
 

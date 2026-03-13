@@ -31,10 +31,10 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.PrunedTag;
 import org.codelibs.nekohtml.parsers.DOMParser;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.junit.jupiter.api.Test;
 
 public class FessPropTest extends UnitFessTestCase {
 

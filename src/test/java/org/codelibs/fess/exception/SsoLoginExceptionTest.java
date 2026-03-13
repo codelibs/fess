@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.exception;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,8 +24,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class SsoLoginExceptionTest extends UnitFessTestCase {

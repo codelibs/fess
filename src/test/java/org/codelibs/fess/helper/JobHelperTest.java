@@ -23,9 +23,9 @@ import org.codelibs.fess.opensearch.config.exentity.JobLog;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.job.LaCron;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.job.LaCron;
 
 public class JobHelperTest extends UnitFessTestCase {
 

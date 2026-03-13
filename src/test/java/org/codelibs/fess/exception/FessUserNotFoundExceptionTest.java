@@ -15,8 +15,9 @@
  */
 package org.codelibs.fess.exception;
 
-import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class FessUserNotFoundExceptionTest extends UnitFessTestCase {

@@ -20,9 +20,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test class for QueryCommand template methods and Set-based field lookups.

@@ -22,12 +22,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.mail.send.hook.SMailCallbackContext;
-import org.lastaflute.core.mail.Postbox;
-import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.opensearch.cluster.health.ClusterHealthStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.opensearch.cluster.health.ClusterHealthStatus;
 
 public class PingSearchEngineJobTest extends UnitFessTestCase {
 

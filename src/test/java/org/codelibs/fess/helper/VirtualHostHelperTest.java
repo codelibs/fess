@@ -20,9 +20,9 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.response.next.HtmlNext;
 
 public class VirtualHostHelperTest extends UnitFessTestCase {
 

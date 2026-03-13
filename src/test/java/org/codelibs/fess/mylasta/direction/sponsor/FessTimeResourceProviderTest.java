@@ -15,12 +15,13 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.util.TimeZone;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

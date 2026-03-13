@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +26,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class JobProcessTest extends UnitFessTestCase {

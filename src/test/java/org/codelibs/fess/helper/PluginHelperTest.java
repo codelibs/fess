@@ -27,9 +27,9 @@ import org.codelibs.fess.exception.PluginException;
 import org.codelibs.fess.helper.PluginHelper.Artifact;
 import org.codelibs.fess.helper.PluginHelper.ArtifactType;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.di.exception.IORuntimeException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.di.exception.IORuntimeException;
 
 public class PluginHelperTest extends UnitFessTestCase {
     private PluginHelper pluginHelper;

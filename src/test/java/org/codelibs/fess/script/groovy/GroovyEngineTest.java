@@ -22,9 +22,6 @@ import java.util.Map;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-
-import groovy.lang.GroovyClassLoader;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;

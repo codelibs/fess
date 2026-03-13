@@ -21,10 +21,9 @@ import java.util.TimeZone;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.system.provider.DfFinalTimeZoneProvider;
-import org.lastaflute.core.direction.FwAssistantDirector;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.direction.FwAssistantDirector;
 
 public class FessCurtainBeforeHookTest extends UnitFessTestCase {
 

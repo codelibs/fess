@@ -15,13 +15,14 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
-import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.core.json.JsonMappingOption;
-import org.lastaflute.core.json.JsonMappingOption.JsonFieldNaming;
-import org.dbflute.optional.OptionalThing;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.json.JsonMappingOption;
+import org.lastaflute.core.json.JsonMappingOption.JsonFieldNaming;
 
 public class FessJsonResourceProviderTest extends UnitFessTestCase {
 

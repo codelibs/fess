@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 

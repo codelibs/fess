@@ -32,8 +32,8 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.common.SetOnce;
 import org.junit.jupiter.api.Test;
+import org.opensearch.common.SetOnce;
 
 public class WebConfigTest extends UnitFessTestCase {
 

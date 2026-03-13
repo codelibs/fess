@@ -24,13 +24,13 @@ import org.codelibs.fess.script.AbstractScriptEngine;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class DocBoostMatcherTest extends UnitFessTestCase {
 

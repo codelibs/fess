@@ -15,17 +15,17 @@
  */
 package org.codelibs.fess.mylasta.direction.sponsor;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.util.TimeZone;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class FessUserTimeZoneProcessProviderTest extends UnitFessTestCase {
 

@@ -15,15 +15,12 @@
  */
 package org.codelibs.fess.timer;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.function.Supplier;
 
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

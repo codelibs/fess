@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class AuthenticationChainTest extends UnitFessTestCase {

@@ -23,9 +23,9 @@ import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.MatchPhraseQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
-import org.junit.jupiter.api.Test;
 
 public class PhraseQueryCommandTest extends QueryTestBase {
     private PhraseQueryCommand queryCommand;
