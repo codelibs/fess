@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
@@ -371,6 +372,105 @@ public class ChatApiManagerTest extends UnitFessTestCase {
         assertEquals(sources, response.get("sources"));
     }
 
+    // ===== getMaxMessageLength tests =====
+
+    @Test
+    public void test_getMaxMessageLength_default() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.message.max.length".equals(key)) {
+                    return defaultValue;
+                }
+                return defaultValue;
+            }
+        });
+
+        final int result = chatApiManager.getMaxMessageLength(ComponentUtil.getFessConfig());
+        assertEquals(4000, result);
+    }
+
+    @Test
+    public void test_getMaxMessageLength_customValue() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.message.max.length".equals(key)) {
+                    return "8000";
+                }
+                return defaultValue;
+            }
+        });
+
+        final int result = chatApiManager.getMaxMessageLength(ComponentUtil.getFessConfig());
+        assertEquals(8000, result);
+    }
+
+    @Test
+    public void test_getMaxMessageLength_invalidValue() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.message.max.length".equals(key)) {
+                    return "not-a-number";
+                }
+                return defaultValue;
+            }
+        });
+
+        final int result = chatApiManager.getMaxMessageLength(ComponentUtil.getFessConfig());
+        assertEquals(4000, result);
+    }
+
+    // ===== Access Type attribute tests =====
+
+    @Test
+    public void test_mockRequest_attributeStorage() {
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        assertNull(request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE));
+
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, "ollama");
+        assertEquals("ollama", request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE));
+    }
+
+    @Test
+    public void test_mockRequest_attributeOverwrite() {
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, "ollama");
+        assertEquals("ollama", request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE));
+
+        request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, "openai");
+        assertEquals("openai", request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE));
+    }
+
+    @Test
+    public void test_accessType_constantValues() {
+        assertEquals("json", Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+        assertEquals("gsa", Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
+        assertEquals("web", Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
+        assertEquals("admin", Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
+        assertEquals("other", Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
+    }
+
+    @Test
+    public void test_accessType_llmNamesAreDifferentFromBuiltinTypes() {
+        final String[] llmNames = { "ollama", "openai", "gemini" };
+        for (final String llmName : llmNames) {
+            assertFalse(Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(llmName));
+            assertFalse(Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(llmName));
+            assertFalse(Constants.SEARCH_LOG_ACCESS_TYPE_WEB.equals(llmName));
+            assertFalse(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(llmName));
+            assertFalse(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(llmName));
+        }
+    }
+
     // ===== parseExtraQueries tests =====
 
     private void setupViewHelperWithFacetGroups(FacetQueryView... views) {
@@ -549,6 +649,7 @@ public class ChatApiManagerTest extends UnitFessTestCase {
         private String servletPath;
         private String method = "POST";
         private final Map<String, String[]> parameterValuesMap = new HashMap<>();
+        private final Map<String, Object> attributeMap = new HashMap<>();
 
         public MockHttpServletRequest() {
             super(new MockServletRequest());
@@ -579,6 +680,16 @@ public class ChatApiManagerTest extends UnitFessTestCase {
 
         public void setParameterValues(String name, String[] values) {
             parameterValuesMap.put(name, values);
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            return attributeMap.get(name);
+        }
+
+        @Override
+        public void setAttribute(String name, Object o) {
+            attributeMap.put(name, o);
         }
     }
 
