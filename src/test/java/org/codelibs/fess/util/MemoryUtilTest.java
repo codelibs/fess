@@ -30,9 +30,9 @@ import org.apache.commons.io.FileUtils;
 import org.codelibs.core.collection.Maps;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.sai.internal.ir.debug.ObjectSizeCalculator;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
-import org.junit.jupiter.api.Test;
 
 public class MemoryUtilTest extends UnitFessTestCase {
 

@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class ErrorToWarnRewritePolicyTest extends UnitFessTestCase {

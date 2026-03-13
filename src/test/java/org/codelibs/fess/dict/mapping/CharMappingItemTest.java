@@ -16,11 +16,9 @@
 package org.codelibs.fess.dict.mapping;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-
-import java.util.Arrays;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import org.junit.jupiter.api.Test;
 
 public class CharMappingItemTest extends UnitFessTestCase {

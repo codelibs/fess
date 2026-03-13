@@ -25,7 +25,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.HighlightInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class QueryStringBuilderTest extends UnitFessTestCase {

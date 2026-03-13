@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalEntity;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class OptionalUtilTest extends UnitFessTestCase {

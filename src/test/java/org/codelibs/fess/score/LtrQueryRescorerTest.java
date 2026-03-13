@@ -22,10 +22,10 @@ import java.util.Map;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.search.rescore.QueryRescorerBuilder;
-import org.opensearch.search.rescore.RescorerBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.search.rescore.QueryRescorerBuilder;
+import org.opensearch.search.rescore.RescorerBuilder;
 
 public class LtrQueryRescorerTest extends UnitFessTestCase {
 

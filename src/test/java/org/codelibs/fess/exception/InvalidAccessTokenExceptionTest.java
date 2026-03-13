@@ -15,9 +15,9 @@
  */
 package org.codelibs.fess.exception;
 
-import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class InvalidAccessTokenExceptionTest extends UnitFessTestCase {

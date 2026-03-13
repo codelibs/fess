@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.annotation;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -25,7 +27,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

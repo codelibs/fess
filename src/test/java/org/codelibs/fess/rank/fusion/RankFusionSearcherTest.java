@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.rank.fusion;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 /**

@@ -23,9 +23,9 @@ import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.optional.OptionalThing;
-import org.lastaflute.web.login.credential.LoginCredential;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 public class ActivityHelperTest extends UnitFessTestCase {
 

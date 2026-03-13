@@ -15,8 +15,9 @@
  */
 package org.codelibs.fess.dict.stopwords;
 
-import org.codelibs.fess.unit.UnitFessTestCase;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 
 public class StopwordsItemTest extends UnitFessTestCase {

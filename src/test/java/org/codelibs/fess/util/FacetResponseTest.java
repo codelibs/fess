@@ -19,9 +19,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.io.BaseEncoding;
-import org.junit.jupiter.api.Test;
 
 public class FacetResponseTest extends UnitFessTestCase {
 

@@ -21,25 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
-import org.codelibs.fess.util.SystemUtil;
-import org.lastaflute.job.JobManager;
-import org.lastaflute.job.key.LaJobUnique;
-import org.lastaflute.job.subsidiary.CronConsumer;
-
-import jakarta.servlet.ServletContext;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.ServletContext;
 
 public class PythonJobTest extends UnitFessTestCase {
 

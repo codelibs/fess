@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.query;
 
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.Query;
@@ -23,12 +22,9 @@ import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
-
-import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.index.query.DisMaxQueryBuilder;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.FuzzyQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
-import org.junit.jupiter.api.Test;
 
 public class FuzzyQueryCommandTest extends QueryTestBase {
 

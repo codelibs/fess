@@ -44,10 +44,10 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.opensearch.index.query.QueryBuilder;
-import org.opensearch.search.sort.FieldSortBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.search.sort.FieldSortBuilder;
 
 public class CrawlingConfigHelperTest extends UnitFessTestCase {
     private CrawlingConfigHelper crawlingConfigHelper;

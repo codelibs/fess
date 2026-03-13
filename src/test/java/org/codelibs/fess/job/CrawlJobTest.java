@@ -15,10 +15,7 @@
  */
 package org.codelibs.fess.job;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,23 +23,14 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.ProcessHelper;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-
+import org.codelibs.fess.opensearch.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.opensearch.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.opensearch.config.exentity.ScheduledJob;
-import org.codelibs.fess.opensearch.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.dbflute.bhv.readable.EntityRowHandler;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.InputStreamThread;
-import org.codelibs.fess.util.JobProcess;
 import org.dbflute.bhv.readable.CBCall;
-import org.dbflute.cbean.result.PagingResultBean;
-
-import jakarta.servlet.ServletContext;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import org.dbflute.bhv.readable.EntityRowHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

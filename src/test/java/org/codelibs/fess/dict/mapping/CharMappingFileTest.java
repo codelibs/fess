@@ -17,6 +17,7 @@ package org.codelibs.fess.dict.mapping;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,15 +27,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.codelibs.core.io.CloseableUtil;
+import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.curl.CurlResponse;
-import java.io.FileInputStream;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;

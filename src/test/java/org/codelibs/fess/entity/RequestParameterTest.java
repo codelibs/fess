@@ -16,7 +16,6 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class RequestParameterTest extends UnitFessTestCase {

@@ -16,16 +16,12 @@
 package org.codelibs.fess.ds.callback;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import jakarta.annotation.PostConstruct;
 
 import org.codelibs.fess.entity.DataStoreParams;
 import org.codelibs.fess.exception.DataStoreException;
@@ -42,9 +38,10 @@ import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.annotation.PostConstruct;
 
 public class IndexUpdateCallbackImplTest extends UnitFessTestCase {
 

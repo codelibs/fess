@@ -18,10 +18,10 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.core.security.InvertibleCryptographer;
-import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.security.InvertibleCryptographer;
+import org.lastaflute.web.servlet.cookie.CookieResourceProvider;
 
 public class FessCookieResourceProviderTest extends UnitFessTestCase {
 

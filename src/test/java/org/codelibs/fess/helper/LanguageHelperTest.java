@@ -21,9 +21,9 @@ import java.util.Map;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.script.Script;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.script.Script;
 
 public class LanguageHelperTest extends UnitFessTestCase {
 

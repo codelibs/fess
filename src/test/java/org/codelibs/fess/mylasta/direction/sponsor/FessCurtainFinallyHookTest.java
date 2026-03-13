@@ -22,11 +22,9 @@ import java.net.URLClassLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.core.direction.FwAssistantDirector;
-import org.lastaflute.core.direction.FwCoreDirection;
-import org.lastaflute.web.direction.FwWebDirection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.core.direction.FwAssistantDirector;
 
 public class FessCurtainFinallyHookTest extends UnitFessTestCase {
 

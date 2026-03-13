@@ -16,14 +16,13 @@
 package org.codelibs.fess.mylasta.creator;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+// NamingConventionImpl removed - using mock instead
 import org.lastaflute.di.core.assembler.AutoBindingDefFactory;
 import org.lastaflute.di.core.customizer.ComponentCustomizer;
 import org.lastaflute.di.core.meta.impl.InstanceDefFactory;
 import org.lastaflute.di.naming.NamingConvention;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
-// NamingConventionImpl removed - using mock instead
 
 public class PagerCreatorTest extends UnitFessTestCase {
 

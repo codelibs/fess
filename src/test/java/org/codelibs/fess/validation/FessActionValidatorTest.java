@@ -16,11 +16,10 @@
 package org.codelibs.fess.validation;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.lastaflute.core.message.UserMessages;
+import org.junit.jupiter.api.Test;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.validation.ActionValidator;
-import org.junit.jupiter.api.Test;
 
 public class FessActionValidatorTest extends UnitFessTestCase {
 

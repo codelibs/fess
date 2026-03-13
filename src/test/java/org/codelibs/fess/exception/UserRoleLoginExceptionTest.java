@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.exception;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 public class UserRoleLoginExceptionTest extends UnitFessTestCase {

@@ -30,10 +30,10 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.servlet.http.Cookie;
 
 public class SearchHelperTest extends UnitFessTestCase {
     private SearchHelper searchHelper;

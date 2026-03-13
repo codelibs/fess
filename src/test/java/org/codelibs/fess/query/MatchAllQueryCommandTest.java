@@ -23,10 +23,10 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.index.query.MatchAllQueryBuilder;
-import org.opensearch.index.query.QueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.index.query.MatchAllQueryBuilder;
+import org.opensearch.index.query.QueryBuilder;
 
 public class MatchAllQueryCommandTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(MatchAllQueryCommandTest.class);

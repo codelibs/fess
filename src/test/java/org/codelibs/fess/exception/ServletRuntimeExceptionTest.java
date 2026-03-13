@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.exception;
 
-import jakarta.servlet.ServletException;
-
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
+
+import jakarta.servlet.ServletException;
 
 public class ServletRuntimeExceptionTest extends UnitFessTestCase {
 

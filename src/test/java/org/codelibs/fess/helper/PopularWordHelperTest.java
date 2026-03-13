@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
-
-import com.google.common.cache.CacheBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import com.google.common.cache.CacheBuilder;
 
 public class PopularWordHelperTest extends UnitFessTestCase {
 

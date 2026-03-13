@@ -22,10 +22,10 @@ import org.apache.lucene.search.Query;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.query.QueryProcessor.FilterChain;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
-import org.junit.jupiter.api.Test;
 
 public class QueryProcessorTest extends UnitFessTestCase {
 

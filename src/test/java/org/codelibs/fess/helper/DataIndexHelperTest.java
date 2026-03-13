@@ -32,9 +32,9 @@ import org.codelibs.fess.opensearch.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.opensearch.config.exentity.DataConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.opensearch.index.query.QueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.index.query.QueryBuilder;
 
 public class DataIndexHelperTest extends UnitFessTestCase {
 

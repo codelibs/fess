@@ -15,24 +15,23 @@
  */
 package org.codelibs.fess.query;
 
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PrefixQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.util.DfTypeUtil;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.MatchPhrasePrefixQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
-import org.junit.jupiter.api.Test;
 
 public class PrefixQueryCommandTest extends QueryTestBase {
     private PrefixQueryCommand queryCommand;

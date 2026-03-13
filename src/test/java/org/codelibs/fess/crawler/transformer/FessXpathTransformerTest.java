@@ -64,13 +64,13 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.MemoryUtil;
 import org.codelibs.nekohtml.parsers.DOMParser;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
     private static final Logger logger = LogManager.getLogger(FessXpathTransformerTest.class);

@@ -28,11 +28,11 @@ import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class RoleQueryHelperTest extends UnitFessTestCase {
     public CachedCipher cipher;

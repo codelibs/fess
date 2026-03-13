@@ -20,9 +20,9 @@ import java.util.Map;
 
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.junit.jupiter.api.Test;
 
 public class PrunedTagTest extends UnitFessTestCase {
 

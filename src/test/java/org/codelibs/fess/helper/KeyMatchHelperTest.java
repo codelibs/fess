@@ -26,11 +26,11 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.opensearch.config.exentity.KeyMatch;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilder;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class KeyMatchHelperTest extends UnitFessTestCase {
 

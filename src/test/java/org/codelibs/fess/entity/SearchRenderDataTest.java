@@ -17,17 +17,16 @@ package org.codelibs.fess.entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.FacetResponse;
-import org.opensearch.search.aggregations.Aggregation;
-import org.opensearch.search.aggregations.Aggregations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.opensearch.search.aggregations.Aggregation;
+import org.opensearch.search.aggregations.Aggregations;
 
 public class SearchRenderDataTest extends UnitFessTestCase {
 

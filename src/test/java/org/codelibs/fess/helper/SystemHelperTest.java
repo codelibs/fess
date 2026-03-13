@@ -38,12 +38,12 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.SimpleRequestManager;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 
 public class SystemHelperTest extends UnitFessTestCase {
 

@@ -28,19 +28,14 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
-
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.Test;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.DisMaxQueryBuilder;
 import org.opensearch.index.query.FuzzyQueryBuilder;
 import org.opensearch.index.query.MatchAllQueryBuilder;
-import org.opensearch.index.query.MatchPhraseQueryBuilder;
-import org.opensearch.index.query.PrefixQueryBuilder;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.TermQueryBuilder;
-import org.opensearch.index.query.WildcardQueryBuilder;
-import org.codelibs.fess.query.DefaultQueryBuilder;
-import org.junit.jupiter.api.Test;
 
 public class BoostQueryCommandTest extends QueryTestBase {
     private BoostQueryCommand boostQueryCommand;

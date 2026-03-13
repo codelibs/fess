@@ -16,10 +16,10 @@
 package org.codelibs.fess.validation;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-
-import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CronExpressionValidatorTest extends UnitFessTestCase {
 
