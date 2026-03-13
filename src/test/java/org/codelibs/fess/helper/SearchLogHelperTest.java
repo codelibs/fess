@@ -32,8 +32,12 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.login.UserBean;
+import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.request.SimpleRequestManager;
 
 public class SearchLogHelperTest extends UnitFessTestCase {
 
@@ -171,6 +175,9 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
         final MockVirtualHostHelper virtualHostHelper = new MockVirtualHostHelper();
         ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
+
+        // Register mock RequestManager to avoid FessLoginAssist → UserBhv DI chain failure in parallel tests
+        ComponentUtil.register(new MockRequestManager(), RequestManager.class.getCanonicalName());
     }
 
     private SearchLog callAddSearchLogAndGetResult(final String accessTypeAttribute) {
@@ -401,6 +408,13 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         @Override
         public String getVirtualHostKey() {
             return "";
+        }
+    }
+
+    private static class MockRequestManager extends SimpleRequestManager {
+        @Override
+        public <USER_BEAN extends UserBean<ID>, ID> OptionalThing<USER_BEAN> findUserBean(final Class<USER_BEAN> userBeanType) {
+            return OptionalThing.empty();
         }
     }
 
