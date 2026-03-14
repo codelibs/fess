@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
@@ -183,6 +184,11 @@ public class ChatApiManager extends BaseApiManager {
             }
 
             final String userId = getUserId(request);
+
+            // Set LLM type name as Access Type for search log
+            request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
+                    ComponentUtil.getFessConfig().getSystemProperty("rag.llm.name", "ollama"));
+
             final Map<String, String[]> fields = parseFieldFilters(request);
             final String[] extraQueries = parseExtraQueries(request);
             final ChatResult result;
@@ -256,6 +262,10 @@ public class ChatApiManager extends BaseApiManager {
 
         try (final PrintWriter writer = response.getWriter()) {
             final String userId = getUserId(request);
+
+            // Set LLM type name as Access Type for search log
+            request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE,
+                    ComponentUtil.getFessConfig().getSystemProperty("rag.llm.name", "ollama"));
 
             // Create phase callback for SSE events
             final ChatPhaseCallback phaseCallback = new ChatPhaseCallback() {

@@ -56,6 +56,8 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.action.update.UpdateRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.opensearch.script.Script;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -124,6 +126,28 @@ public class SearchLogHelper {
         searchLogLogger = LogManager.getLogger(loggerName);
     }
 
+    /** Holds resolved dependencies for search log creation, decoupled from ComponentUtil. */
+    protected static class SearchLogContext {
+        final FessConfig fessConfig;
+        final String[] roles;
+        final String userCode;
+        final String userId;
+        final HttpServletRequest request;
+        final String clientIp;
+        final String virtualHostKey;
+
+        SearchLogContext(final FessConfig fessConfig, final String[] roles, final String userCode, final String userId,
+                final HttpServletRequest request, final String clientIp, final String virtualHostKey) {
+            this.fessConfig = fessConfig;
+            this.roles = roles;
+            this.userCode = userCode;
+            this.userId = userId;
+            this.request = request;
+            this.clientIp = clientIp;
+            this.virtualHostKey = virtualHostKey;
+        }
+    }
+
     /**
      * Adds a search log to the queue.
      *
@@ -143,19 +167,51 @@ public class SearchLogHelper {
             return;
         }
 
-        final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
-        final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
+        final SearchLogContext context = createSearchLogContext(params, fessConfig);
+        createSearchLog(params, requestedTime, queryId, query, pageStart, pageSize, queryResponseList, context);
+    }
+
+    /**
+     * Resolves the runtime dependencies needed to build a SearchLog.
+     *
+     * @param params The search request parameters.
+     * @param fessConfig The Fess configuration.
+     * @return The resolved search log context.
+     */
+    protected SearchLogContext createSearchLogContext(final SearchRequestParams params, final FessConfig fessConfig) {
+        final String[] roles = ComponentUtil.getRoleQueryHelper().build(params.getType()).stream().toArray(n -> new String[n]);
+        final String userCode = fessConfig.isUserInfo() ? ComponentUtil.getUserInfoHelper().getUserCode() : null;
+        final String userId = ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(null);
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
+        final String clientIp = request != null ? ComponentUtil.getViewHelper().getClientIp(request) : null;
+        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
+
+        return new SearchLogContext(fessConfig, roles, userCode, userId, request, clientIp, virtualHostKey);
+    }
+
+    /**
+     * Builds a SearchLog from the given parameters and context, then adds it to the queue.
+     *
+     * @param params The search request parameters.
+     * @param requestedTime The time the search was requested.
+     * @param queryId The ID of the search query.
+     * @param query The search query string.
+     * @param pageStart The start position of the page.
+     * @param pageSize The size of the page.
+     * @param queryResponseList The list of query responses.
+     * @param context The search log context holding resolved dependencies.
+     */
+    protected void createSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId,
+            final String query, final int pageStart, final int pageSize, final QueryResponseList queryResponseList,
+            final SearchLogContext context) {
         final SearchLog searchLog = new SearchLog();
 
-        if (fessConfig.isUserInfo()) {
-            final String userCode = userInfoHelper.getUserCode();
-            if (userCode != null) {
-                searchLog.setUserSessionId(userCode);
-                searchLog.setUserInfo(getUserInfo(userCode));
-            }
+        if (context.userCode != null) {
+            searchLog.setUserSessionId(context.userCode);
+            searchLog.setUserInfo(getUserInfo(context.userCode));
         }
 
-        searchLog.setRoles(roleQueryHelper.build(params.getType()).stream().toArray(n -> new String[n]));
+        searchLog.setRoles(context.roles);
         searchLog.setQueryId(queryId);
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
         searchLog.setHitCountRelation(queryResponseList.getAllRecordCountRelation());
@@ -166,27 +222,19 @@ public class SearchLogHelper {
         searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
-        ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(user -> {
-            searchLog.setUser(user.getUserId());
-        });
 
-        LaRequestUtil.getOptionalRequest().ifPresent(req -> {
-            searchLog.setClientIp(StringUtils.abbreviate(ComponentUtil.getViewHelper().getClientIp(req), 100));
-            searchLog.setReferer(StringUtils.abbreviate(req.getHeader("referer"), 1000));
-            searchLog.setUserAgent(StringUtils.abbreviate(req.getHeader("user-agent"), 255));
-            final Object accessType = req.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
-            if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
-                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
-                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
-            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
-                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
-            } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
-                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
-            } else {
-                searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
-            }
-            final Object languages = req.getAttribute(Constants.REQUEST_LANGUAGES);
+        if (context.userId != null) {
+            searchLog.setUser(context.userId);
+        }
+
+        if (context.request != null) {
+            searchLog.setClientIp(StringUtils.abbreviate(context.clientIp, 100));
+            searchLog.setReferer(StringUtils.abbreviate(context.request.getHeader("referer"), 1000));
+            searchLog.setUserAgent(StringUtils.abbreviate(context.request.getHeader("user-agent"), 255));
+
+            searchLog.setAccessType(determineAccessType(context.request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE)));
+
+            final Object languages = context.request.getAttribute(Constants.REQUEST_LANGUAGES);
             if (languages != null) {
                 searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
             } else {
@@ -194,9 +242,9 @@ public class SearchLogHelper {
             }
 
             @SuppressWarnings("unchecked")
-            final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) req.getAttribute(Constants.FIELD_LOGS);
+            final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) context.request.getAttribute(Constants.FIELD_LOGS);
             if (fieldLogMap != null) {
-                final int queryMaxLength = fessConfig.getQueryMaxLengthAsInteger();
+                final int queryMaxLength = context.fessConfig.getQueryMaxLengthAsInteger();
                 for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
                     for (final String value : logEntry.getValue()) {
                         searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, queryMaxLength));
@@ -204,24 +252,43 @@ public class SearchLogHelper {
                 }
             }
 
-            for (final String s : fessConfig.getSearchlogRequestHeadersAsArray()) {
+            for (final String s : context.fessConfig.getSearchlogRequestHeadersAsArray()) {
                 final String key = s.replace('-', '_').toLowerCase(Locale.ENGLISH);
-                Collections.list(req.getHeaders(s)).stream().forEach(v -> {
+                Collections.list(context.request.getHeaders(s)).stream().forEach(v -> {
                     searchLog.addRequestHeaderValue(key, v);
                 });
             }
-        });
+        }
 
-        final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
-        if (StringUtil.isNotBlank(virtualHostKey)) {
-            searchLog.setVirtualHost(virtualHostKey);
+        if (StringUtil.isNotBlank(context.virtualHostKey)) {
+            searchLog.setVirtualHost(context.virtualHostKey);
         } else {
             searchLog.setVirtualHost(StringUtil.EMPTY);
         }
 
         addDocumentsInResponse(queryResponseList, searchLog);
-
         searchLogQueue.add(searchLog);
+    }
+
+    /**
+     * Returns the access type string from the given request attribute value, defaulting to web.
+     *
+     * @param accessType The access type attribute value from the request.
+     * @return The access type string.
+     */
+    protected String determineAccessType(final Object accessType) {
+        if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
+            return Constants.SEARCH_LOG_ACCESS_TYPE_JSON;
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_GSA.equals(accessType)) {
+            return Constants.SEARCH_LOG_ACCESS_TYPE_GSA;
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
+            return Constants.SEARCH_LOG_ACCESS_TYPE_OTHER;
+        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN.equals(accessType)) {
+            return Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN;
+        } else if (accessType instanceof String && StringUtil.isNotBlank((String) accessType)) {
+            return (String) accessType;
+        }
+        return Constants.SEARCH_LOG_ACCESS_TYPE_WEB;
     }
 
     /**
