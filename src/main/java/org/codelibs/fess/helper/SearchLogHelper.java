@@ -167,6 +167,18 @@ public class SearchLogHelper {
             return;
         }
 
+        final SearchLogContext context = createSearchLogContext(params, fessConfig);
+        createSearchLog(params, requestedTime, queryId, query, pageStart, pageSize, queryResponseList, context);
+    }
+
+    /**
+     * Resolves the runtime dependencies needed to build a SearchLog.
+     *
+     * @param params The search request parameters.
+     * @param fessConfig The Fess configuration.
+     * @return The resolved search log context.
+     */
+    protected SearchLogContext createSearchLogContext(final SearchRequestParams params, final FessConfig fessConfig) {
         final String[] roles = ComponentUtil.getRoleQueryHelper().build(params.getType()).stream().toArray(n -> new String[n]);
         final String userCode = fessConfig.isUserInfo() ? ComponentUtil.getUserInfoHelper().getUserCode() : null;
         final String userId = ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).map(FessUserBean::getUserId).orElse(null);
@@ -174,8 +186,7 @@ public class SearchLogHelper {
         final String clientIp = request != null ? ComponentUtil.getViewHelper().getClientIp(request) : null;
         final String virtualHostKey = ComponentUtil.getVirtualHostHelper().getVirtualHostKey();
 
-        final SearchLogContext context = new SearchLogContext(fessConfig, roles, userCode, userId, request, clientIp, virtualHostKey);
-        createSearchLog(params, requestedTime, queryId, query, pageStart, pageSize, queryResponseList, context);
+        return new SearchLogContext(fessConfig, roles, userCode, userId, request, clientIp, virtualHostKey);
     }
 
     /**

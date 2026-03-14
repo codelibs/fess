@@ -32,21 +32,17 @@ import org.codelibs.fess.opensearch.log.exentity.SearchLog;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
-import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.lastaflute.web.login.UserBean;
-import org.lastaflute.web.servlet.request.RequestManager;
-import org.lastaflute.web.servlet.request.SimpleRequestManager;
 
 public class SearchLogHelperTest extends UnitFessTestCase {
 
-    private SearchLogHelper searchLogHelper;
+    private TestableSearchLogHelper searchLogHelper;
 
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
-        searchLogHelper = new SearchLogHelper();
+        searchLogHelper = new TestableSearchLogHelper();
         setupMockComponents();
         searchLogHelper.init();
     }
@@ -321,13 +317,9 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_addSearchLog_wiring() {
-        ComponentUtil.register(new MockRoleQueryHelper(), "roleQueryHelper");
-        ComponentUtil.register(new MockUserInfoHelper(), "userInfoHelper");
-        ComponentUtil.register(new MockViewHelper(), "viewHelper");
-        ComponentUtil.register(new MockVirtualHostHelper(), "virtualHostHelper");
-        ComponentUtil.register(new MockRequestManager(), RequestManager.class.getCanonicalName());
-
         setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+        final jakarta.servlet.http.HttpServletRequest request = org.lastaflute.web.util.LaRequestUtil.getOptionalRequest().orElse(null);
+        searchLogHelper.testContext = createTestContext(request);
 
         final MockSearchRequestParams params = new MockSearchRequestParams();
         final LocalDateTime now = LocalDateTime.now();
@@ -344,40 +336,12 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         assertNull(searchLog.getVirtualHost());
     }
 
-    // Mock classes for addSearchLog wiring test
+    private static class TestableSearchLogHelper extends SearchLogHelper {
+        private SearchLogContext testContext;
 
-    private static class MockRoleQueryHelper extends RoleQueryHelper {
         @Override
-        public Set<String> build(final SearchRequestType searchRequestType) {
-            return Collections.emptySet();
-        }
-    }
-
-    private static class MockUserInfoHelper extends UserInfoHelper {
-        @Override
-        public String getUserCode() {
-            return null;
-        }
-    }
-
-    private static class MockViewHelper extends ViewHelper {
-        @Override
-        public String getClientIp(final jakarta.servlet.http.HttpServletRequest req) {
-            return "127.0.0.1";
-        }
-    }
-
-    private static class MockVirtualHostHelper extends VirtualHostHelper {
-        @Override
-        public String getVirtualHostKey() {
-            return "";
-        }
-    }
-
-    private static class MockRequestManager extends SimpleRequestManager {
-        @Override
-        public <USER_BEAN extends UserBean<ID>, ID> OptionalThing<USER_BEAN> findUserBean(final Class<USER_BEAN> userBeanType) {
-            return OptionalThing.empty();
+        protected SearchLogContext createSearchLogContext(final SearchRequestParams params, final FessConfig fessConfig) {
+            return testContext != null ? testContext : super.createSearchLogContext(params, fessConfig);
         }
     }
 
