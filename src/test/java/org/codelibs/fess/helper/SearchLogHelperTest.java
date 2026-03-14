@@ -163,35 +163,29 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
     // ===== addSearchLog Access Type tests =====
 
-    private void setupAddSearchLogComponents() {
-        final MockRoleQueryHelper roleQueryHelper = new MockRoleQueryHelper();
-        ComponentUtil.register(roleQueryHelper, "roleQueryHelper");
-
-        final MockUserInfoHelper userInfoHelper = new MockUserInfoHelper();
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-
-        final MockViewHelper viewHelper = new MockViewHelper();
-        ComponentUtil.register(viewHelper, "viewHelper");
-
-        final MockVirtualHostHelper virtualHostHelper = new MockVirtualHostHelper();
-        ComponentUtil.register(virtualHostHelper, "virtualHostHelper");
-
-        // Register mock RequestManager to avoid FessLoginAssist → UserBhv DI chain failure in parallel tests
-        ComponentUtil.register(new MockRequestManager(), RequestManager.class.getCanonicalName());
+    private SearchLogHelper.SearchLogContext createTestContext(final jakarta.servlet.http.HttpServletRequest request) {
+        return new SearchLogHelper.SearchLogContext((FessConfig) ComponentUtil.getFessConfig(), new String[0], // roles
+                null, // userCode
+                null, // userId
+                request, // request
+                "127.0.0.1", // clientIp
+                "" // virtualHostKey
+        );
     }
 
-    private SearchLog callAddSearchLogAndGetResult(final String accessTypeAttribute) {
-        setupAddSearchLogComponents();
-
+    private SearchLog callCreateSearchLogAndGetResult(final String accessTypeAttribute) {
         if (accessTypeAttribute != null) {
             setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, accessTypeAttribute);
         }
+
+        final jakarta.servlet.http.HttpServletRequest request = org.lastaflute.web.util.LaRequestUtil.getOptionalRequest().orElse(null);
+        final SearchLogHelper.SearchLogContext context = createTestContext(request);
 
         final MockSearchRequestParams params = new MockSearchRequestParams();
         final LocalDateTime now = LocalDateTime.now();
         final QueryResponseList queryResponseList = new QueryResponseList(Collections.emptyList(), 0L, "eq", 0L, false, null, 0, 10, 0);
 
-        searchLogHelper.addSearchLog(params, now, "test-query-id", "test query", 0, 10, queryResponseList);
+        searchLogHelper.createSearchLog(params, now, "test-query-id", "test query", 0, 10, queryResponseList, context);
 
         assertFalse(searchLogHelper.searchLogQueue.isEmpty());
         return searchLogHelper.searchLogQueue.poll();
@@ -199,94 +193,141 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_addSearchLog_accessType_json() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+        final SearchLog searchLog = callCreateSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_JSON, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_gsa() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
+        final SearchLog searchLog = callCreateSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_GSA);
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_GSA, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_other() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
+        final SearchLog searchLog = callCreateSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_admin() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
+        final SearchLog searchLog = callCreateSearchLogAndGetResult(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN);
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_defaultWeb() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult(null);
+        final SearchLog searchLog = callCreateSearchLogAndGetResult(null);
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_ollama() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult("ollama");
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("ollama");
         assertEquals("ollama", searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_openai() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult("openai");
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("openai");
         assertEquals("openai", searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_gemini() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult("gemini");
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("gemini");
         assertEquals("gemini", searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_customLlmName() {
-        final SearchLog searchLog = callAddSearchLogAndGetResult("my-custom-llm");
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("my-custom-llm");
         assertEquals("my-custom-llm", searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_blankStringDefaultsToWeb() {
-        setupAddSearchLogComponents();
-        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, "");
-
-        final MockSearchRequestParams params = new MockSearchRequestParams();
-        final LocalDateTime now = LocalDateTime.now();
-        final QueryResponseList queryResponseList = new QueryResponseList(Collections.emptyList(), 0L, "eq", 0L, false, null, 0, 10, 0);
-
-        searchLogHelper.addSearchLog(params, now, "test-query-id", "test query", 0, 10, queryResponseList);
-
-        assertFalse(searchLogHelper.searchLogQueue.isEmpty());
-        final SearchLog searchLog = searchLogHelper.searchLogQueue.poll();
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("");
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
     }
 
     @Test
     public void test_addSearchLog_accessType_whitespaceOnlyDefaultsToWeb() {
-        setupAddSearchLogComponents();
-        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, "   ");
+        final SearchLog searchLog = callCreateSearchLogAndGetResult("   ");
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
+    }
+
+    @Test
+    public void test_addSearchLog_accessType_nonStringObjectDefaultsToWeb() {
+        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Integer.valueOf(123));
+
+        final jakarta.servlet.http.HttpServletRequest request = org.lastaflute.web.util.LaRequestUtil.getOptionalRequest().orElse(null);
+        final SearchLogHelper.SearchLogContext context = createTestContext(request);
 
         final MockSearchRequestParams params = new MockSearchRequestParams();
         final LocalDateTime now = LocalDateTime.now();
         final QueryResponseList queryResponseList = new QueryResponseList(Collections.emptyList(), 0L, "eq", 0L, false, null, 0, 10, 0);
 
-        searchLogHelper.addSearchLog(params, now, "test-query-id", "test query", 0, 10, queryResponseList);
+        searchLogHelper.createSearchLog(params, now, "test-query-id", "test query", 0, 10, queryResponseList, context);
 
         assertFalse(searchLogHelper.searchLogQueue.isEmpty());
         final SearchLog searchLog = searchLogHelper.searchLogQueue.poll();
         assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
     }
 
+    // ===== determineAccessType direct tests =====
+
     @Test
-    public void test_addSearchLog_accessType_nonStringObjectDefaultsToWeb() {
-        setupAddSearchLogComponents();
-        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Integer.valueOf(123));
+    public void test_determineAccessType_json() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_JSON, searchLogHelper.determineAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON));
+    }
+
+    @Test
+    public void test_determineAccessType_gsa() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_GSA, searchLogHelper.determineAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_GSA));
+    }
+
+    @Test
+    public void test_determineAccessType_other() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER, searchLogHelper.determineAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER));
+    }
+
+    @Test
+    public void test_determineAccessType_admin() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN, searchLogHelper.determineAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_ADMIN));
+    }
+
+    @Test
+    public void test_determineAccessType_customString() {
+        assertEquals("my-custom-llm", searchLogHelper.determineAccessType("my-custom-llm"));
+    }
+
+    @Test
+    public void test_determineAccessType_blankDefaultsToWeb() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLogHelper.determineAccessType(""));
+    }
+
+    @Test
+    public void test_determineAccessType_nullDefaultsToWeb() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLogHelper.determineAccessType(null));
+    }
+
+    @Test
+    public void test_determineAccessType_nonStringDefaultsToWeb() {
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLogHelper.determineAccessType(Integer.valueOf(123)));
+    }
+
+    // ===== addSearchLog integration test (exercises wrapper wiring) =====
+
+    @Test
+    public void test_addSearchLog_wiring() {
+        ComponentUtil.register(new MockRoleQueryHelper(), "roleQueryHelper");
+        ComponentUtil.register(new MockUserInfoHelper(), "userInfoHelper");
+        ComponentUtil.register(new MockViewHelper(), "viewHelper");
+        ComponentUtil.register(new MockVirtualHostHelper(), "virtualHostHelper");
+        ComponentUtil.register(new MockRequestManager(), RequestManager.class.getCanonicalName());
+
+        setMockRequestAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
 
         final MockSearchRequestParams params = new MockSearchRequestParams();
         final LocalDateTime now = LocalDateTime.now();
@@ -296,7 +337,48 @@ public class SearchLogHelperTest extends UnitFessTestCase {
 
         assertFalse(searchLogHelper.searchLogQueue.isEmpty());
         final SearchLog searchLog = searchLogHelper.searchLogQueue.poll();
-        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_WEB, searchLog.getAccessType());
+        assertEquals(Constants.SEARCH_LOG_ACCESS_TYPE_JSON, searchLog.getAccessType());
+        assertEquals("test query", searchLog.getSearchWord());
+        assertEquals("test-query-id", searchLog.getQueryId());
+        assertEquals("127.0.0.1", searchLog.getClientIp());
+        assertNull(searchLog.getVirtualHost());
+    }
+
+    // Mock classes for addSearchLog wiring test
+
+    private static class MockRoleQueryHelper extends RoleQueryHelper {
+        @Override
+        public Set<String> build(final SearchRequestType searchRequestType) {
+            return Collections.emptySet();
+        }
+    }
+
+    private static class MockUserInfoHelper extends UserInfoHelper {
+        @Override
+        public String getUserCode() {
+            return null;
+        }
+    }
+
+    private static class MockViewHelper extends ViewHelper {
+        @Override
+        public String getClientIp(final jakarta.servlet.http.HttpServletRequest req) {
+            return "127.0.0.1";
+        }
+    }
+
+    private static class MockVirtualHostHelper extends VirtualHostHelper {
+        @Override
+        public String getVirtualHostKey() {
+            return "";
+        }
+    }
+
+    private static class MockRequestManager extends SimpleRequestManager {
+        @Override
+        public <USER_BEAN extends UserBean<ID>, ID> OptionalThing<USER_BEAN> findUserBean(final Class<USER_BEAN> userBeanType) {
+            return OptionalThing.empty();
+        }
     }
 
     // Mock classes for addSearchLog tests
@@ -380,41 +462,6 @@ public class SearchLogHelperTest extends UnitFessTestCase {
         @Override
         public java.util.Locale getLocale() {
             return java.util.Locale.ROOT;
-        }
-    }
-
-    private static class MockRoleQueryHelper extends RoleQueryHelper {
-        @Override
-        public Set<String> build(final SearchRequestType searchRequestType) {
-            return Collections.emptySet();
-        }
-    }
-
-    private static class MockUserInfoHelper extends UserInfoHelper {
-        @Override
-        public String getUserCode() {
-            return null;
-        }
-    }
-
-    private static class MockViewHelper extends ViewHelper {
-        @Override
-        public String getClientIp(final jakarta.servlet.http.HttpServletRequest req) {
-            return "127.0.0.1";
-        }
-    }
-
-    private static class MockVirtualHostHelper extends VirtualHostHelper {
-        @Override
-        public String getVirtualHostKey() {
-            return "";
-        }
-    }
-
-    private static class MockRequestManager extends SimpleRequestManager {
-        @Override
-        public <USER_BEAN extends UserBean<ID>, ID> OptionalThing<USER_BEAN> findUserBean(final Class<USER_BEAN> userBeanType) {
-            return OptionalThing.empty();
         }
     }
 
