@@ -18,8 +18,8 @@ package org.codelibs.fess.script.groovy;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,9 +32,14 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.job.LaJobRuntime;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalNotification;
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 /**
@@ -43,9 +48,9 @@ import jakarta.annotation.PreDestroy;
  * and DI container integration.
  *
  * <p>Thread Safety: This class is thread-safe. Each cached entry holds its own
- * GroovyClassLoader. The cache is protected by Collections.synchronizedMap.
- * Each evaluate() call creates a new Script instance to ensure thread isolation
- * of bindings.</p>
+ * GroovyClassLoader. The cache uses Guava Cache with segment-based locking for
+ * lock-free concurrent reads. Each evaluate() call creates a new Script instance
+ * to ensure thread isolation of bindings.</p>
  *
  * <p>Note on class-level isolation: Compiled Script classes are cached and reused.
  * Class-level state (static fields, metaclass mutations) persists across evaluations
@@ -54,32 +59,65 @@ import jakarta.annotation.PreDestroy;
  * static state, so this is acceptable.</p>
  *
  * <p>Resource Management: Each cached entry's GroovyClassLoader is closed on
- * eviction. All remaining entries are cleaned up via close() (@PreDestroy).</p>
+ * eviction via RemovalListener. All remaining entries are cleaned up via close() (@PreDestroy).</p>
  */
 public class GroovyEngine extends AbstractScriptEngine {
     private static final Logger logger = LogManager.getLogger(GroovyEngine.class);
 
-    private static final int DEFAULT_CACHE_SIZE = 100;
+    /** Maximum number of compiled scripts to cache. Configurable via DI. */
+    protected int scriptCacheSize = 1000;
 
-    private static final int MAX_SCRIPT_LOG_LENGTH = 200;
+    /** Maximum length of script text included in warning log messages. Configurable via DI. */
+    protected int maxScriptLogLength = 200;
 
-    private final Map<String, CachedScript> scriptCache;
+    private Cache<String, CachedScript> scriptCache;
 
     /**
      * Default constructor for GroovyEngine.
      */
     public GroovyEngine() {
         super();
-        scriptCache = Collections.synchronizedMap(new LinkedHashMap<String, CachedScript>(DEFAULT_CACHE_SIZE + 1, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<String, CachedScript> eldest) {
-                if (size() > DEFAULT_CACHE_SIZE) {
-                    eldest.getValue().close();
-                    return true;
-                }
-                return false;
-            }
-        });
+        buildScriptCache();
+    }
+
+    /**
+     * Rebuilds the script cache after DI injection.
+     * Called by the DI container after property injection.
+     */
+    @PostConstruct
+    public void init() {
+        buildScriptCache();
+    }
+
+    private void buildScriptCache() {
+        final Cache<String, CachedScript> oldCache = scriptCache;
+        scriptCache = CacheBuilder.newBuilder()
+                .maximumSize(scriptCacheSize)
+                .removalListener((final RemovalNotification<String, CachedScript> notification) -> {
+                    notification.getValue().close();
+                })
+                .build();
+        if (oldCache != null) {
+            oldCache.invalidateAll();
+        }
+    }
+
+    /**
+     * Sets the maximum number of compiled scripts to cache.
+     *
+     * @param scriptCacheSize the cache size
+     */
+    public void setScriptCacheSize(final int scriptCacheSize) {
+        this.scriptCacheSize = scriptCacheSize;
+    }
+
+    /**
+     * Sets the maximum length of script text included in warning log messages.
+     *
+     * @param maxScriptLogLength the max length
+     */
+    public void setMaxScriptLogLength(final int maxScriptLogLength) {
+        this.maxScriptLogLength = maxScriptLogLength;
     }
 
     /**
@@ -129,7 +167,7 @@ public class GroovyEngine extends AbstractScriptEngine {
             throw e;
         } catch (final Exception e) {
             final String truncatedScript =
-                    template.length() > MAX_SCRIPT_LOG_LENGTH ? template.substring(0, MAX_SCRIPT_LOG_LENGTH) + "..." : template;
+                    template.length() > maxScriptLogLength ? template.substring(0, maxScriptLogLength) + "..." : template;
             logger.warn("Failed to evaluate Groovy script: script(length={})={}, parameterKeys={}", template.length(), truncatedScript,
                     safeParamMap.keySet(), e);
             logScriptExecution(template, "failure:" + e.getClass().getSimpleName());
@@ -139,30 +177,28 @@ public class GroovyEngine extends AbstractScriptEngine {
 
     @SuppressWarnings("unchecked")
     private CachedScript getOrCompile(final String template) {
-        synchronized (scriptCache) {
-            CachedScript cached = scriptCache.get(template);
-            if (cached != null) {
-                return cached;
-            }
-            ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
-            if (parentClassLoader == null) {
-                parentClassLoader = GroovyEngine.class.getClassLoader();
-            }
-            final GroovyClassLoader classLoader = new GroovyClassLoader(parentClassLoader);
-            try {
-                final Class<? extends Script> scriptClass = (Class<? extends Script>) classLoader.parseClass(template);
-                cached = new CachedScript(scriptClass, classLoader);
-                scriptCache.put(template, cached);
-                return cached;
-            } catch (final Exception e) {
-                try {
-                    classLoader.clearCache();
-                    classLoader.close();
-                } catch (final IOException closeEx) {
-                    logger.warn("Failed to close GroovyClassLoader after compilation failure", closeEx);
+        try {
+            return scriptCache.get(template, () -> {
+                ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+                if (parentClassLoader == null) {
+                    parentClassLoader = GroovyEngine.class.getClassLoader();
                 }
-                throw e;
-            }
+                final GroovyClassLoader classLoader = new GroovyClassLoader(parentClassLoader);
+                try {
+                    final Class<? extends Script> scriptClass = (Class<? extends Script>) classLoader.parseClass(template);
+                    return new CachedScript(scriptClass, classLoader);
+                } catch (final Exception e) {
+                    try {
+                        classLoader.clearCache();
+                        classLoader.close();
+                    } catch (final IOException closeEx) {
+                        logger.warn("Failed to close GroovyClassLoader after compilation failure", closeEx);
+                    }
+                    throw e;
+                }
+            });
+        } catch (final ExecutionException e) {
+            throw (RuntimeException) e.getCause();
         }
     }
 
@@ -172,12 +208,8 @@ public class GroovyEngine extends AbstractScriptEngine {
      */
     @PreDestroy
     public void close() {
-        synchronized (scriptCache) {
-            for (final CachedScript cached : scriptCache.values()) {
-                cached.close();
-            }
-            scriptCache.clear();
-        }
+        scriptCache.invalidateAll();
+        scriptCache.cleanUp();
     }
 
     /**

@@ -466,6 +466,24 @@ public class GroovyEngineTest extends UnitFessTestCase {
     }
 
     /**
+     * Test that configurable script cache size works with eviction
+     */
+    @Test
+    public void test_configurableScriptCacheSize() {
+        final GroovyEngine engine = new GroovyEngine();
+        engine.scriptCacheSize = 5;
+        engine.init();
+
+        final Map<String, Object> params = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, engine.evaluate("return " + i, params));
+        }
+        // eviction後も再コンパイルで正しく動作
+        assertEquals(0, engine.evaluate("return 0", params));
+        engine.close();
+    }
+
+    /**
      * Test that close() can be called without error
      */
     @Test

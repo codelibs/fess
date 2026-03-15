@@ -4,6 +4,11 @@
 <components>
 	<component name="groovyEngine"
 		class="org.codelibs.fess.script.groovy.GroovyEngine">
+		<!--
+		<property name="scriptCacheSize">1000</property>
+		<property name="maxScriptLogLength">200</property>
+		-->
+		<postConstruct name="init"></postConstruct>
 		<postConstruct name="register"></postConstruct>
 	</component>
 </components>
