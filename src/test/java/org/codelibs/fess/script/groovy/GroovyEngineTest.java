@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.script.groovy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -37,6 +44,9 @@ public class GroovyEngineTest extends UnitFessTestCase {
 
     @Override
     protected void tearDown(TestInfo testInfo) throws Exception {
+        if (groovyEngine != null) {
+            groovyEngine.close();
+        }
         ComponentUtil.setFessConfig(null);
         super.tearDown(testInfo);
     }
@@ -406,6 +416,254 @@ public class GroovyEngineTest extends UnitFessTestCase {
         final Object mapResult = groovyEngine.evaluate("return [key: 'value']", params);
         assertNotNull(mapResult);
         assertTrue(mapResult instanceof java.util.Map);
+    }
+
+    // ===== Cache Tests =====
+
+    /**
+     * Test that the same script evaluated multiple times produces correct results (cache hit)
+     */
+    @Test
+    public void test_evaluate_cacheHit() {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("x", 5);
+        assertEquals(10, groovyEngine.evaluate("return x * 2", params));
+
+        params.put("x", 7);
+        assertEquals(14, groovyEngine.evaluate("return x * 2", params));
+
+        params.put("x", 0);
+        assertEquals(0, groovyEngine.evaluate("return x * 2", params));
+    }
+
+    /**
+     * Test that different scripts are cached separately
+     */
+    @Test
+    public void test_evaluate_differentScriptsCached() {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("x", 5);
+
+        assertEquals(10, groovyEngine.evaluate("return x * 2", params));
+        assertEquals(25, groovyEngine.evaluate("return x * 5", params));
+        assertEquals(10, groovyEngine.evaluate("return x * 2", params));
+    }
+
+    /**
+     * Test that cached scripts maintain binding isolation between evaluations
+     */
+    @Test
+    public void test_evaluate_cacheBindingIsolation() {
+        final Map<String, Object> params1 = new HashMap<>();
+        params1.put("name", "Alice");
+
+        final Map<String, Object> params2 = new HashMap<>();
+        params2.put("name", "Bob");
+
+        assertEquals("Alice", groovyEngine.evaluate("return name", params1));
+        assertEquals("Bob", groovyEngine.evaluate("return name", params2));
+        assertEquals("Alice", groovyEngine.evaluate("return name", params1));
+    }
+
+    /**
+     * Test that close() can be called without error
+     */
+    @Test
+    public void test_close() {
+        final GroovyEngine engine = new GroovyEngine();
+        engine.evaluate("return 1", new HashMap<>());
+        engine.close();
+    }
+
+    /**
+     * Test that cache eviction works when exceeding max size (100).
+     * Evaluates 110 distinct scripts, then verifies all still produce correct results.
+     */
+    @Test
+    public void test_evaluate_cacheEviction() {
+        final GroovyEngine engine = new GroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+
+        for (int i = 0; i < 110; i++) {
+            assertEquals(i, engine.evaluate("return " + i, params));
+        }
+
+        // Earlier scripts should still work (recompiled after eviction)
+        assertEquals(0, engine.evaluate("return 0", params));
+        assertEquals(50, engine.evaluate("return 50", params));
+        assertEquals(109, engine.evaluate("return 109", params));
+
+        engine.close();
+    }
+
+    /**
+     * Test that cached scripts do not leak binding state between evaluations.
+     * Verifies that local variables in one evaluation do not affect the next.
+     */
+    @Test
+    public void test_evaluate_noStateLeakBetweenEvaluations() {
+        final GroovyEngine engine = new GroovyEngine();
+        final String script = "def counter = 0; counter += x; return counter";
+
+        final Map<String, Object> params1 = new HashMap<>();
+        params1.put("x", 5);
+        assertEquals(5, engine.evaluate(script, params1));
+
+        // Second evaluation of the same cached script should not see previous state
+        final Map<String, Object> params2 = new HashMap<>();
+        params2.put("x", 3);
+        assertEquals(3, engine.evaluate(script, params2));
+
+        engine.close();
+    }
+
+    // ===== Compilation Failure Tests =====
+
+    /**
+     * Test that syntax errors are not cached and can be retried
+     */
+    @Test
+    public void test_evaluate_syntaxErrorNotCached() {
+        final GroovyEngine engine = new GroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+        final String invalidScript = "this is not valid {{{";
+
+        // First call: syntax error returns null
+        assertNull(engine.evaluate(invalidScript, params));
+
+        // Second call: should also return null (not cached, recompiles and fails again)
+        assertNull(engine.evaluate(invalidScript, params));
+
+        // Valid script should still work after syntax errors
+        assertEquals(42, engine.evaluate("return 42", params));
+
+        engine.close();
+    }
+
+    /**
+     * Test that repeated syntax errors don't accumulate resources
+     */
+    @Test
+    public void test_evaluate_repeatedSyntaxErrors() {
+        final GroovyEngine engine = new GroovyEngine();
+        final Map<String, Object> params = new HashMap<>();
+
+        for (int i = 0; i < 10; i++) {
+            assertNull(engine.evaluate("invalid script {{{ " + i, params));
+        }
+
+        // Engine should still function normally
+        assertEquals("ok", engine.evaluate("return 'ok'", params));
+
+        engine.close();
+    }
+
+    // ===== Concurrent Evaluation Tests =====
+
+    /**
+     * Test concurrent evaluation of the same script from multiple threads
+     */
+    @Test
+    public void test_evaluate_concurrentSameScript() throws Exception {
+        final GroovyEngine engine = new GroovyEngine();
+        final int threadCount = 8;
+        final int iterationsPerThread = 50;
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final AtomicInteger errors = new AtomicInteger(0);
+
+        final List<Future<?>> futures = new ArrayList<>();
+        for (int t = 0; t < threadCount; t++) {
+            final int threadId = t;
+            futures.add(executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < iterationsPerThread; i++) {
+                        final Map<String, Object> params = new HashMap<>();
+                        params.put("x", threadId * 1000 + i);
+                        final Object result = engine.evaluate("return x * 2", params);
+                        if (result == null || !result.equals((threadId * 1000 + i) * 2)) {
+                            errors.incrementAndGet();
+                        }
+                    }
+                } catch (final Exception e) {
+                    errors.incrementAndGet();
+                }
+            }));
+        }
+
+        startLatch.countDown();
+        for (final Future<?> future : futures) {
+            future.get();
+        }
+
+        executor.shutdown();
+        assertEquals(0, errors.get());
+        engine.close();
+    }
+
+    /**
+     * Test concurrent evaluation of different scripts from multiple threads
+     */
+    @Test
+    public void test_evaluate_concurrentDifferentScripts() throws Exception {
+        final GroovyEngine engine = new GroovyEngine();
+        final int threadCount = 4;
+        final int scriptsPerThread = 20;
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final AtomicInteger errors = new AtomicInteger(0);
+
+        final List<Future<?>> futures = new ArrayList<>();
+        for (int t = 0; t < threadCount; t++) {
+            final int threadId = t;
+            futures.add(executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < scriptsPerThread; i++) {
+                        final Map<String, Object> params = new HashMap<>();
+                        final int expected = threadId * 100 + i;
+                        final Object result = engine.evaluate("return " + expected, params);
+                        if (result == null || !result.equals(expected)) {
+                            errors.incrementAndGet();
+                        }
+                    }
+                } catch (final Exception e) {
+                    errors.incrementAndGet();
+                }
+            }));
+        }
+
+        startLatch.countDown();
+        for (final Future<?> future : futures) {
+            future.get();
+        }
+
+        executor.shutdown();
+        assertEquals(0, errors.get());
+        engine.close();
+    }
+
+    // ===== Close Lifecycle Tests =====
+
+    /**
+     * Test that close() can be called multiple times without error
+     */
+    @Test
+    public void test_close_idempotent() {
+        final GroovyEngine engine = new GroovyEngine();
+        engine.evaluate("return 1", new HashMap<>());
+        engine.close();
+        engine.close(); // second close should not throw
+    }
+
+    /**
+     * Test that close() on a fresh engine (no evaluations) works
+     */
+    @Test
+    public void test_close_noEvaluations() {
+        final GroovyEngine engine = new GroovyEngine();
+        engine.close();
     }
 
     // ===== Edge Cases =====

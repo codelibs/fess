@@ -136,4 +136,122 @@ public class DocBoostMatcherTest extends UnitFessTestCase {
         map.put("boost2", 2);
         assertTrue(12.0f == docBoostMatcher.getValue(map));
     }
+
+    @Test
+    public void test_getValue_floatReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("1.5f");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(1.5f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_getValue_doubleReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("2.5d");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(2.5f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_getValue_longReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("100L");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(100.0f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_getValue_numericStringReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("'3.14'");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertTrue(Math.abs(3.14f - docBoostMatcher.getValue(map)) < 0.001f);
+    }
+
+    @Test
+    public void test_getValue_emptyStringReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("''");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(0.0f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_getValue_nullReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("null");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(0.0f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_match_nullMap() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setMatchExpression("true");
+        assertFalse(docBoostMatcher.match(null));
+    }
+
+    @Test
+    public void test_match_emptyMap() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setMatchExpression("true");
+        assertFalse(docBoostMatcher.match(new HashMap<>()));
+    }
+
+    @Test
+    public void test_match_nullExpression() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        // matchExpression is null by default
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertFalse(docBoostMatcher.match(map));
+    }
+
+    @Test
+    public void test_match_nonBooleanReturn() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setMatchExpression("'string_value'");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertFalse(docBoostMatcher.match(map));
+    }
+
+    @Test
+    public void test_getValue_nonNumericString() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("'not_a_number'");
+        docBoostMatcher.setMatchExpression("true");
+
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("data1", 1);
+        assertEquals(0.0f, docBoostMatcher.getValue(map));
+    }
+
+    @Test
+    public void test_getValue_nullMap() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("10");
+        assertEquals(0.0f, docBoostMatcher.getValue(null));
+    }
+
+    @Test
+    public void test_getValue_emptyMap() {
+        final DocBoostMatcher docBoostMatcher = new DocBoostMatcher();
+        docBoostMatcher.setBoostExpression("10");
+        assertEquals(0.0f, docBoostMatcher.getValue(new HashMap<>()));
+    }
 }
