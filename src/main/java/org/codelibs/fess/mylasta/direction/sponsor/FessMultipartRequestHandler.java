@@ -192,8 +192,8 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected void setupServletFileUpload(final JakartaServletDiskFileUpload upload, final HttpServletRequest request) {
         upload.setHeaderCharset(Charset.forName(request.getCharacterEncoding()));
-        upload.setSizeMax(getSizeMax());
-        upload.setFileCountMax(getFileCountMax()); // since commons-fileupload-1.5
+        upload.setMaxSize(getSizeMax());
+        upload.setMaxFileCount(getFileCountMax()); // since commons-fileupload-1.5
     }
 
     protected long getSizeMax() {
@@ -235,7 +235,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
     protected void showFormFieldParameter(final DiskFileItem item) {
         if (logger.isDebugEnabled()) {
-            logger.debug("[param] {}={}", item.getFieldName(), item.getString());
+            try {
+                logger.debug("[param] {}={}", item.getFieldName(), item.getString());
+            } catch (final IOException e) {
+                logger.debug("[param] {}=(failed to read)", item.getFieldName());
+            }
         }
     }
 
@@ -263,7 +267,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
             try {
                 value = item.getString(Charset.forName("ISO-8859-1"));
             } catch (final java.io.UnsupportedEncodingException uee) {
-                value = item.getString();
+                try {
+                    value = item.getString();
+                } catch (final IOException e) {
+                    throw new IllegalStateException("Failed to get string from the item: " + item, e);
+                }
             } catch (final IOException e) {
                 throw new IllegalStateException("Failed to get string from the item: " + item, e);
             }
