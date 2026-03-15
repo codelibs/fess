@@ -17,6 +17,8 @@ package org.codelibs.fess.indexer;
 
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.opensearch.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.util.ComponentUtil;
@@ -29,6 +31,7 @@ import org.codelibs.fess.util.ComponentUtil;
  *
  */
 public class DocBoostMatcher {
+    private static final Logger logger = LogManager.getLogger(DocBoostMatcher.class);
 
     /** The expression used to calculate the boost value (defaults to "0") */
     private String boostExpression = "0";
@@ -105,7 +108,12 @@ public class DocBoostMatcher {
             return ((Double) value).floatValue();
         }
         if (value != null) {
-            return Float.parseFloat(value.toString());
+            try {
+                return Float.parseFloat(value.toString());
+            } catch (final NumberFormatException e) {
+                logger.warn("Failed to parse boost value: expression={}, value={}", boostExpression, value, e);
+                return 0.0f;
+            }
         }
 
         return 0.0f;
