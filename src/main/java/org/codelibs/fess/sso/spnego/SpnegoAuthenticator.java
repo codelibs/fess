@@ -188,7 +188,16 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     logger.debug("principal={}", principal);
                 }
             } catch (final Exception e) {
-                final String msg = "Failed to process Authorization Header: " + request.getHeader(Constants.AUTHZ_HEADER);
+                final String authzHeader = request.getHeader(Constants.AUTHZ_HEADER);
+                final String maskedHeader;
+                if (authzHeader == null) {
+                    maskedHeader = "null";
+                } else if (authzHeader.length() <= 10) {
+                    maskedHeader = "***";
+                } else {
+                    maskedHeader = authzHeader.substring(0, 10) + "***";
+                }
+                final String msg = "Failed to process Authorization Header: " + maskedHeader;
                 if (logger.isDebugEnabled()) {
                     logger.debug(msg);
                 }
