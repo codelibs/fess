@@ -401,6 +401,10 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (concurrencyLimiter == null) {
             return chat(request);
         }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] Acquiring concurrency permit. name={}, availablePermits={}, maxConcurrent={}", getName(),
+                    concurrencyLimiter.availablePermits(), getMaxConcurrentRequests());
+        }
         try {
             if (!concurrencyLimiter.tryAcquire(getConcurrencyWaitTimeoutMs(), TimeUnit.MILLISECONDS)) {
                 logger.warn("[LLM] Concurrency limit exceeded. name={}, maxConcurrent={}, waitTimeout={}ms", getName(),
@@ -430,6 +434,10 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (concurrencyLimiter == null) {
             streamChat(request, callback);
             return;
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] Acquiring concurrency permit. name={}, availablePermits={}, maxConcurrent={}", getName(),
+                    concurrencyLimiter.availablePermits(), getMaxConcurrentRequests());
         }
         try {
             if (!concurrencyLimiter.tryAcquire(getConcurrencyWaitTimeoutMs(), TimeUnit.MILLISECONDS)) {
@@ -550,6 +558,10 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:INTENT] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
+                        response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
+            }
             if (isEmptyContentWithLengthFinish(response)) {
                 logger.warn(
                         "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
@@ -593,6 +605,10 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "intent");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:INTENT] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
+                        response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
+            }
             if (isEmptyContentWithLengthFinish(response)) {
                 logger.warn(
                         "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
@@ -641,6 +657,10 @@ public abstract class AbstractLlmClient implements LlmClient {
             applyPromptTypeParams(request, "evaluation");
 
             final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:EVAL] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
+                        response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
+            }
             if (isEmptyContentWithLengthFinish(response)) {
                 logger.warn(
                         "[RAG:EVAL] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to all relevant. userMessage={}",
@@ -1119,6 +1139,10 @@ public abstract class AbstractLlmClient implements LlmClient {
 
         for (int i = startIndex; i < history.size(); i++) {
             request.addMessage(history.get(i));
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:ANSWER] History included. totalHistory={}, includedCount={}, startIndex={}, usedChars={}, budgetChars={}",
+                    history.size(), history.size() - startIndex, startIndex, budgetChars - remaining, budgetChars);
         }
     }
 

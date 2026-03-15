@@ -443,6 +443,8 @@ public class ChatClient {
                 searchRequestedTime = querySearchResult.getRequestedTime();
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
 
+                logger.info("[RAG] Search completed. query={}, resultCount={}, elapsedTime={}ms", query, searchResults.size(),
+                        System.currentTimeMillis() - phaseStartTime);
                 if (logger.isDebugEnabled()) {
                     logger.debug("[RAG] Phase {} completed. query={}, resultCount={}, phaseElapsedTime={}ms",
                             ChatPhaseCallback.PHASE_SEARCH, query, searchResults.size(), System.currentTimeMillis() - phaseStartTime);
@@ -542,8 +544,9 @@ public class ChatClient {
 
             session.addMessage(assistantMessage);
 
-            logger.info("[RAG] Enhanced chat completed. sessionId={}, intent={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
-                    session.getSessionId(), intentResult.getIntent(), sources.size(), fullResponse.length(),
+            logger.info(
+                    "[RAG] Enhanced chat completed. sessionId={}, userId={}, intent={}, sourcesCount={}, responseLength={}, elapsedTime={}ms",
+                    session.getSessionId(), userId, intentResult.getIntent(), sources.size(), fullResponse.length(),
                     System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, sources);

@@ -163,8 +163,7 @@ public class LlmClientManager {
             }
             final LlmChatResponse response = client.chat(request);
             if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LLM chat request completed. llmType={}, contentLength={}, elapsedTime={}ms", llmType,
-                        response.getContent() != null ? response.getContent().length() : 0, System.currentTimeMillis() - startTime);
+                logger.debug("[LLM] LLM chat request completed. llmType={}", llmType);
             }
             return response;
         } catch (final LlmException e) {
@@ -201,8 +200,7 @@ public class LlmClientManager {
             }
             client.streamChat(request, callback);
             if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LLM streaming chat request completed. llmType={}, elapsedTime={}ms", llmType,
-                        System.currentTimeMillis() - startTime);
+                logger.debug("[LLM] LLM streaming chat request completed. llmType={}", llmType);
             }
         } catch (final LlmException e) {
             logger.warn("[LLM] Stream chat request failed. llmType={}, error={}, elapsedTime={}ms", llmType, e.getMessage(),
