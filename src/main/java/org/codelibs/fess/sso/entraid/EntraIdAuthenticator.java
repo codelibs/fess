@@ -333,7 +333,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     protected void validateNonce(final StateData stateData, final IAuthenticationResult authData) {
         final String idToken = authData.idToken();
         if (logger.isDebugEnabled()) {
-            logger.debug("idToken={}", idToken);
+            logger.debug("idToken={}***", idToken.substring(0, Math.min(8, idToken.length())));
         }
         try {
             final JWTClaimsSet claimsSet = JWTParser.parse(idToken).getJWTClaimsSet();
@@ -363,7 +363,7 @@ public class EntraIdAuthenticator implements SsoAuthenticator {
     public IAuthenticationResult getAccessToken(final String refreshToken) {
         final String authority = getAuthority() + getTenant() + "/";
         if (logger.isDebugEnabled()) {
-            logger.debug("refreshToken={}, authority={}", refreshToken, authority);
+            logger.debug("refreshToken={}***, authority={}", refreshToken.substring(0, Math.min(8, refreshToken.length())), authority);
         }
         try {
             final ConfidentialClientApplication app = ConfidentialClientApplication
