@@ -16,11 +16,15 @@
 package org.codelibs.fess.job;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -180,8 +184,20 @@ public class IndexExportJob {
         final String content = formatter.format(source, excludeFields);
 
         try {
+            final Path basePath = Paths.get(exportPath);
+            Files.createDirectories(basePath);
+            final Path realBase = basePath.toRealPath();
             Files.createDirectories(filePath.getParent());
-            Files.writeString(filePath, content, StandardCharsets.UTF_8);
+            final Path realParent = filePath.getParent().toRealPath();
+            if (!realParent.startsWith(realBase)) {
+                logger.warn("Symlink traversal detected: url={}, realParent={}, realBase={}", url, realParent, realBase);
+                return;
+            }
+            final byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+            try (OutputStream out = Files.newOutputStream(filePath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                    LinkOption.NOFOLLOW_LINKS)) {
+                out.write(bytes);
+            }
         } catch (final IOException e) {
             logger.warn("Failed to export document: url={}", url, e);
         }
@@ -220,17 +236,26 @@ public class IndexExportJob {
             final String[] components = (host + "/" + path).split("/");
             final StringBuilder sanitized = new StringBuilder();
             for (int i = 0; i < components.length; i++) {
-                if (i > 0) {
-                    sanitized.append('/');
-                }
                 String component = components[i].replaceAll("[<>:\"|?*\\\\]", "_");
+                if (".".equals(component) || "..".equals(component)) {
+                    continue;
+                }
                 if (component.length() > MAX_PATH_COMPONENT_LENGTH) {
                     component = component.substring(0, MAX_PATH_COMPONENT_LENGTH);
+                }
+                if (sanitized.length() > 0) {
+                    sanitized.append('/');
                 }
                 sanitized.append(component);
             }
 
-            return Paths.get(exportPath, sanitized.toString());
+            final Path resolved = Paths.get(exportPath, sanitized.toString()).normalize();
+            final Path baseDir = Paths.get(exportPath).normalize();
+            if (!resolved.startsWith(baseDir)) {
+                logger.warn("Path traversal detected: url={}, resolved={}", url, resolved);
+                return Paths.get(exportPath, "_invalid", hashString(url) + formatter.getFileExtension());
+            }
+            return resolved;
         } catch (final Exception e) {
             logger.debug("Failed to parse URL: {}", url, e);
             return Paths.get(exportPath, "_invalid", hashString(url) + formatter.getFileExtension());
