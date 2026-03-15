@@ -37,7 +37,7 @@
         }
       },
       {
-        "lang_ca": {
+        "lang_ckb-iq": {
           "match": "*_ckb-iq",
           "mapping": {
             "type": "text",
@@ -91,7 +91,7 @@
         }
       },
       {
-        "lang_en": {
+        "lang_en-ie": {
           "match": "*_en-ie",
           "mapping": {
             "type": "text",
@@ -185,7 +185,7 @@
           "match": "*_hi",
           "mapping": {
             "type": "text",
-            "analyzer": "empty_analyzer"
+            "analyzer": "hindi_analyzer"
           }
         }
       },
@@ -208,7 +208,7 @@
         }
       },
       {
-        "lang_hu": {
+        "lang_hy": {
           "match": "*_hy",
           "mapping": {
             "type": "text",

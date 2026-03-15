@@ -806,10 +806,12 @@
           "tokenizer": "standard",
           "filter": [
             "truncate20_filter",
+            "possessive_stemmer_en_filter",
             "lowercase",
+            "stopword_en_filter",
             "english_keywords",
             "english_override",
-            "possessive_stemmer_en_filter"
+            "stemmer_en_filter"
           ]
         },
         "finnish_analyzer": {
@@ -856,6 +858,7 @@
             "lowercase",
             "german_stop",
             "german_normalization",
+            "german_keywords",
             "german_override",
             "german_stemmer"
           ]
@@ -1005,7 +1008,8 @@
             "lowercase",
             "arabic_normalization",
             "persian_normalization",
-            "persian_stop"
+            "persian_stop",
+            "persian_keywords"
           ]
         },
         "portuguese_analyzer": {
@@ -1027,6 +1031,7 @@
             "truncate20_filter",
             "lowercase",
             "romanian_stop",
+            "romanian_keywords",
             "romanian_override",
             "romanian_stemmer"
           ]
@@ -1093,7 +1098,8 @@
           "filter": [
             "truncate20_filter",
             "lowercase",
-            "thai_stop"
+            "thai_stop",
+            "thai_keywords"
           ]
         },
         "traditional_chinese_analyzer": {
