@@ -350,7 +350,7 @@ var FessChat = (function() {
             if (data.content) {
                 responseContent += data.content;
                 if (messageElement) {
-                    messageElement.find('.message-text').text(responseContent);
+                    messageElement.find('.message-text').html(renderMarkdown(responseContent));
                     scrollToBottom();
                 }
             }
@@ -842,6 +842,53 @@ var FessChat = (function() {
      */
     function scrollToBottom() {
         elements.chatMessages.scrollTop(elements.chatMessages[0].scrollHeight);
+    }
+
+    /**
+     * Render Markdown text to sanitized HTML.
+     * Policy is aligned with server-side MarkdownRenderer (OWASP sanitizer).
+     */
+    var markdownDomPurifyInitialized = false;
+    var markdownSanitizeConfig = {
+        ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6',
+                       'p','br','hr',
+                       'strong','em','b','i','u','s','del',
+                       'ul','ol','li',
+                       'code','pre',
+                       'blockquote',
+                       'table','thead','tbody','tr','th','td',
+                       'a','img',
+                       'span','div'],
+        ALLOWED_ATTR: ['href','src','alt','title','class'],
+        ALLOW_DATA_ATTR: false,
+        ALLOWED_URI_REGEXP: /^https?:\/\//i
+    };
+    function initMarkdownSanitizer() {
+        if (markdownDomPurifyInitialized || typeof DOMPurify === 'undefined') return;
+        // Register hook once: add rel="nofollow" to links, restrict class to code/pre/span/div
+        // (matches server-side requireRelNofollowOnLinks and allowAttributes("class").onElements(...))
+        DOMPurify.addHook('afterSanitizeAttributes', function(node) {
+            if (node.tagName === 'A' && node.hasAttribute('href')) {
+                node.setAttribute('rel', 'nofollow');
+            }
+            if (node.hasAttribute('class')) {
+                var tag = node.tagName;
+                if (tag !== 'CODE' && tag !== 'PRE' && tag !== 'SPAN' && tag !== 'DIV') {
+                    node.removeAttribute('class');
+                }
+            }
+        });
+        markdownDomPurifyInitialized = true;
+    }
+    function renderMarkdown(text) {
+        if (!text) return '';
+        if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+            return escapeHtml(text);
+        }
+        initMarkdownSanitizer();
+        // breaks: true to match server-side softbreak("<br/>")
+        var html = marked.parse(text, { gfm: true, breaks: true });
+        return DOMPurify.sanitize(html, markdownSanitizeConfig);
     }
 
     /**

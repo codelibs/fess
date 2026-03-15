@@ -159,6 +159,8 @@ ${fe:html(true)}
 	<script type="text/javascript" src="${fe:url('/js/jquery-3.7.1.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/popper.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/bootstrap.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/marked.min.js')}"></script>
+	<script type="text/javascript" src="${fe:url('/js/purify.min.js')}"></script>
 	<script type="text/javascript" src="${fe:url('/js/chat.js')}"></script>
 	<script type="text/javascript">
 		$(function() {
