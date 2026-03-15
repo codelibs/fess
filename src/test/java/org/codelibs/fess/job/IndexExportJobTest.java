@@ -1570,4 +1570,123 @@ public class IndexExportJobTest extends UnitFessTestCase {
         assertTrue(result.toString().contains("path"));
         assertTrue(result.toString().endsWith("page.html"));
     }
+
+    // --- path traversal prevention tests ---
+
+    @Test
+    public void test_buildFilePath_dotDotTraversal() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/foo/../../etc/passwd", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_dotDotStripped() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/foo/../../etc/passwd", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertFalse(result.toString().contains(".."));
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_singleDotIgnored() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/./path/./page.html", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertFalse(result.toString().contains("_invalid"));
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+        assertTrue(result.toString().contains("example.com"));
+        assertTrue(result.toString().endsWith("page.html"));
+    }
+
+    @Test
+    public void test_buildFilePath_multipleDotDotSequences() {
+        final Path result = indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/a/b/c/../../../../../../../tmp/evil",
+                new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_percentEncodedDotDot() {
+        final Path result = indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/%2e%2e/%2e%2e/etc/passwd",
+                new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertFalse(result.toString().contains(".."));
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_backslashTraversal() {
+        final Path result = indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/foo\\..\\..\\etc\\passwd",
+                new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_onlyDotDotComponents() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/../../../", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    @Test
+    public void test_buildFilePath_encodedSlashTraversal() {
+        final Path result =
+                indexExportJob.buildFilePath(tempDir.toString(), "http://example.com/%2Fetc%2Fpasswd", new HtmlIndexExportFormatter());
+        assertNotNull(result);
+        assertTrue(result.normalize().startsWith(tempDir.normalize()), "Path must stay within base directory: " + result);
+    }
+
+    // --- symlink traversal prevention tests ---
+
+    @Test
+    public void test_exportDocument_symlinkIntermediateDir() throws Exception {
+        final Path outsideDir = Files.createTempDirectory("outside");
+        try {
+            final Path hostDir = tempDir.resolve("evil.com");
+            Files.createSymbolicLink(hostDir, outsideDir);
+
+            final Map<String, Object> source = new LinkedHashMap<>();
+            source.put("url", "http://evil.com/secret.html");
+            source.put("content", "should not be written outside");
+
+            indexExportJob.exportDocument(source, tempDir.toString(), Collections.emptySet(), new HtmlIndexExportFormatter());
+
+            assertFalse(Files.exists(outsideDir.resolve("secret.html")), "File must not be written outside base directory via symlink");
+        } finally {
+            Files.deleteIfExists(tempDir.resolve("evil.com"));
+            deleteRecursive(outsideDir);
+        }
+    }
+
+    @Test
+    public void test_exportDocument_symlinkAtLeafFile() throws Exception {
+        final Path outsideDir = Files.createTempDirectory("outside");
+        try {
+            final Path outsideTarget = outsideDir.resolve("stolen.html");
+            Files.writeString(outsideTarget, "original", StandardCharsets.UTF_8);
+
+            final Path hostDir = tempDir.resolve("example.com");
+            Files.createDirectories(hostDir);
+            final Path symlinkFile = hostDir.resolve("page.html");
+            Files.createSymbolicLink(symlinkFile, outsideTarget);
+
+            final Map<String, Object> source = new LinkedHashMap<>();
+            source.put("url", "http://example.com/page.html");
+            source.put("content", "overwritten via symlink");
+
+            indexExportJob.exportDocument(source, tempDir.toString(), Collections.emptySet(), new HtmlIndexExportFormatter());
+
+            assertEquals("original", Files.readString(outsideTarget));
+        } finally {
+            Files.deleteIfExists(tempDir.resolve("example.com/page.html"));
+            Files.deleteIfExists(tempDir.resolve("example.com"));
+            deleteRecursive(outsideDir);
+        }
+    }
 }
