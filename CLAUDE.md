@@ -52,6 +52,10 @@ mvn jdeb:jdeb           # Build .deb package
 mvn test                                    # Run unit tests (*Test.java)
 mvn test -Dtest=ClassName                   # Run single unit test
 
+# To install fess jar for plugin dependency resolution:
+# Change pom.xml <packaging>war</packaging> to <packaging>jar</packaging> first
+mvn clean install -DskipTests               # Then revert packaging back to war
+
 # Integration tests (*Tests.java) - requires running Fess server
 mvn test -P integrationTests -Dtest.fess.url="http://localhost:8080" -Dtest.search_engine.url="http://localhost:9201"
 ```
@@ -164,6 +168,9 @@ opensearch/{index}/
 - Format: `key=value` (e.g., `userId={}`, `url={}`)
 - Prefix with `[name]` when context identification is needed
 - Mask sensitive values (passwords, tokens)
+
+## i18n / Localization
+- This project supports up to 21 languages. When modifying user-facing strings, error codes, or labels, always propagate changes to ALL language files (fess_label_*.properties and frontend i18n files).
 
 ## Important Patterns for AI Assistants
 
