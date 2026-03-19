@@ -16,6 +16,7 @@
 package org.codelibs.fess.llm;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -368,11 +369,55 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     /**
      * Gets the maximum characters for conversation history in LLM requests.
+     * Each LlmClient implementation should override to define defaults appropriate
+     * for its target model. The default returns 4000 for backward compatibility.
      *
      * @return the maximum history characters
      */
     protected int getHistoryMaxChars() {
-        return Integer.parseInt(ComponentUtil.getFessConfig().getOrDefault("rag.chat.history.max.chars", "2000"));
+        return 4000;
+    }
+
+    /**
+     * Gets the maximum number of history messages for intent detection.
+     * The default returns 6. Override in subclasses for provider-specific tuning.
+     *
+     * @return the maximum number of messages
+     */
+    protected int getIntentHistoryMaxMessages() {
+        return 6;
+    }
+
+    /**
+     * Gets the maximum characters for intent detection history.
+     * The default returns 3000. Override in subclasses for provider-specific tuning.
+     *
+     * @return the maximum characters
+     */
+    protected int getIntentHistoryMaxChars() {
+        return 3000;
+    }
+
+    /**
+     * Gets the maximum characters for assistant message content in history.
+     * The default returns 800. Override in subclasses for provider-specific tuning.
+     *
+     * @return the maximum characters
+     */
+    @Override
+    public int getHistoryAssistantMaxChars() {
+        return 800;
+    }
+
+    /**
+     * Gets the maximum characters for assistant summary content in history.
+     * The default returns 800. Override in subclasses for provider-specific tuning.
+     *
+     * @return the maximum characters
+     */
+    @Override
+    public int getHistoryAssistantSummaryMaxChars() {
+        return 800;
     }
 
     // --- Concurrency control ---
@@ -974,9 +1019,24 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (history == null || history.isEmpty()) {
             return;
         }
-        final int maxHistory = Integer.parseInt(ComponentUtil.getFessConfig().getOrDefault("rag.chat.intent.history.max.messages", "4"));
-        final int start = Math.max(0, history.size() - maxHistory);
-        for (int i = start; i < history.size(); i++) {
+        final int maxMessages = getIntentHistoryMaxMessages();
+        final int maxChars = getIntentHistoryMaxChars();
+
+        int remaining = maxChars;
+        final int earliest = Math.max(0, history.size() - maxMessages);
+        int startIndex = history.size();
+
+        for (int i = history.size() - 1; i >= earliest; i--) {
+            final int msgLen = history.get(i).getContent().length();
+            if (msgLen <= remaining) {
+                remaining -= msgLen;
+                startIndex = i;
+            } else {
+                break;
+            }
+        }
+
+        for (int i = startIndex; i < history.size(); i++) {
             request.addMessage(history.get(i));
         }
     }
@@ -1158,26 +1218,50 @@ public abstract class AbstractLlmClient implements LlmClient {
             return;
         }
 
-        // Walk from newest to oldest, accumulating messages that fit
-        int remaining = budgetChars;
-        int startIndex = history.size();
-        for (int i = history.size() - 1; i >= 0; i--) {
-            final int msgLen = history.get(i).getContent().length();
-            if (msgLen <= remaining) {
-                remaining -= msgLen;
-                startIndex = i;
+        // Build turn list: group adjacent user-assistant pairs as turns, standalone messages as single-message turns
+        final List<int[]> turns = new ArrayList<>();
+        int idx = 0;
+        while (idx < history.size()) {
+            if (idx + 1 < history.size() && "user".equals(history.get(idx).getRole())
+                    && "assistant".equals(history.get(idx + 1).getRole())) {
+                turns.add(new int[] { idx, idx + 2 });
+                idx += 2;
             } else {
-                break;
+                turns.add(new int[] { idx, idx + 1 });
+                idx++;
             }
         }
 
-        if (startIndex < history.size() && startIndex > 0) {
-            logger.warn("[RAG:ANSWER] History truncated to fit context window. originalSize={}, includedFrom={}, budgetChars={}",
-                    history.size(), startIndex, budgetChars);
+        // Walk from newest turn to oldest, selecting contiguous newest turns that fit within budget
+        int remaining = budgetChars;
+        int firstIncludedTurn = turns.size();
+        for (int t = turns.size() - 1; t >= 0; t--) {
+            final int[] turn = turns.get(t);
+            int turnLen = 0;
+            for (int i = turn[0]; i < turn[1]; i++) {
+                turnLen += history.get(i).getContent().length();
+            }
+            if (turnLen <= remaining) {
+                remaining -= turnLen;
+                firstIncludedTurn = t;
+            } else {
+                break; // Stop at first non-fitting turn to maintain contiguous recency
+            }
         }
 
-        // If even the newest message exceeds the budget, truncate it to provide minimal context
-        if (startIndex == history.size() && !history.isEmpty() && budgetChars > CONTEXT_TRUNCATION_BUFFER) {
+        if (firstIncludedTurn < turns.size()) {
+            for (int t = firstIncludedTurn; t < turns.size(); t++) {
+                final int[] turn = turns.get(t);
+                for (int i = turn[0]; i < turn[1]; i++) {
+                    request.addMessage(history.get(i));
+                }
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:ANSWER] History included. totalHistory={}, includedTurns={}/{}, usedChars={}, budgetChars={}",
+                        history.size(), turns.size() - firstIncludedTurn, turns.size(), budgetChars - remaining, budgetChars);
+            }
+        } else if (budgetChars > CONTEXT_TRUNCATION_BUFFER) {
+            // Fallback: truncate the newest message to fit
             final LlmMessage newest = history.get(history.size() - 1);
             final String truncated = newest.getContent().substring(0, Math.min(budgetChars, newest.getContent().length()));
             request.addMessage(new LlmMessage(newest.getRole(), truncated));
@@ -1185,15 +1269,9 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:ANSWER] Newest history message truncated to fit budget. originalLength={}, truncatedLength={}",
                         newest.getContent().length(), truncated.length());
             }
-            return;
-        }
-
-        for (int i = startIndex; i < history.size(); i++) {
-            request.addMessage(history.get(i));
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG:ANSWER] History included. totalHistory={}, includedCount={}, startIndex={}, usedChars={}, budgetChars={}",
-                    history.size(), history.size() - startIndex, startIndex, budgetChars - remaining, budgetChars);
+        } else {
+            logger.warn("[RAG:ANSWER] History truncated to fit context window. originalSize={}, budgetChars={}", history.size(),
+                    budgetChars);
         }
     }
 

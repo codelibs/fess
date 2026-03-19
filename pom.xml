@@ -1392,6 +1392,12 @@
 			<groupId>org.dbflute.mail</groupId>
 			<artifactId>mailflute</artifactId>
 			<version>${mailflute.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>jakarta.mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- csv -->

@@ -41,6 +41,7 @@ import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.llm.ChatIntent;
 import org.codelibs.fess.llm.IntentDetectionResult;
 import org.codelibs.fess.llm.LlmChatResponse;
+import org.codelibs.fess.llm.LlmClient;
 import org.codelibs.fess.llm.LlmClientManager;
 import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.llm.LlmMessage;
@@ -523,14 +524,18 @@ public class ChatClient {
      */
     protected List<LlmMessage> extractHistory(final ChatSession session) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "source_titles");
+        final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "smart_summary");
+
+        final LlmClient client = llmClientManager.getClient();
+        final int assistantMaxChars = client != null ? client.getHistoryAssistantMaxChars() : 800;
+        final int summaryMaxChars = client != null ? client.getHistoryAssistantSummaryMaxChars() : 800;
 
         final List<LlmMessage> history = new ArrayList<>();
         for (final ChatMessage msg : session.getMessages()) {
             if (msg.isUser()) {
                 history.add(LlmMessage.user(msg.getContent()));
             } else if (msg.isAssistant()) {
-                final String content = buildAssistantHistoryContent(msg, assistantContentMode);
+                final String content = buildAssistantHistoryContent(msg, assistantContentMode, assistantMaxChars, summaryMaxChars);
                 if (content != null) {
                     history.add(LlmMessage.assistant(content));
                 }
@@ -543,19 +548,24 @@ public class ChatClient {
      * Builds the assistant message content for history based on the specified mode.
      *
      * @param msg the assistant chat message
-     * @param mode the content mode (full, source_titles, source_titles_and_urls, truncated, none)
+     * @param mode the content mode (full, smart_summary, source_titles, source_titles_and_urls, truncated, none)
+     * @param assistantMaxChars the maximum characters for truncated mode
+     * @param summaryMaxChars the maximum characters for summary modes
      * @return the content string for history, or null if the message should be excluded
      */
-    protected String buildAssistantHistoryContent(final ChatMessage msg, final String mode) {
+    protected String buildAssistantHistoryContent(final ChatMessage msg, final String mode, final int assistantMaxChars,
+            final int summaryMaxChars) {
         switch (mode) {
         case "full":
             return msg.getContent();
+        case "smart_summary":
+            return buildSmartSummaryContent(msg, summaryMaxChars);
         case "source_titles":
-            return buildSourceTitlesContent(msg);
+            return buildSourceTitlesContent(msg, summaryMaxChars);
         case "source_titles_and_urls":
             return buildSourceTitlesAndUrlsContent(msg);
         case "truncated":
-            return buildTruncatedContent(msg);
+            return buildTruncatedContent(msg, assistantMaxChars);
         case "none":
             return null;
         default:
@@ -567,29 +577,32 @@ public class ChatClient {
      * Builds a summary string from source document titles.
      *
      * @param msg the assistant chat message
+     * @param summaryMaxChars the maximum characters for the content summary
      * @return a string listing referenced document titles
      */
-    protected String buildSourceTitlesContent(final ChatMessage msg) {
+    protected String buildSourceTitlesContent(final ChatMessage msg, final int summaryMaxChars) {
         final List<ChatSource> sources = msg.getSources();
         if (sources == null || sources.isEmpty()) {
-            return buildTruncatedContent(msg);
+            return buildTruncatedContent(msg, summaryMaxChars);
         }
-        final String titles =
-                sources.stream().map(ChatSource::getTitle).filter(t -> t != null && !t.isEmpty()).collect(Collectors.joining(", "));
-        if (titles.isEmpty()) {
-            return buildTruncatedContent(msg);
+        final int maxSuffixLen = Math.max(0, summaryMaxChars / 4);
+        final String suffix = buildSourceTitlesSuffix(sources, maxSuffixLen);
+        if (suffix.isEmpty()) {
+            return buildTruncatedContent(msg, summaryMaxChars);
         }
-        final String sourceSuffix = "\n[Referenced documents: " + titles + "]";
         final String content = msg.getContent();
         if (content == null || content.isEmpty()) {
-            return sourceSuffix;
+            return suffix;
         }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxChars = Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.assistant.summary.max.chars", "500"));
-        if (content.length() <= maxChars) {
-            return content + sourceSuffix;
+        final String truncMarker = "... [truncated]";
+        final int bodyBudget = Math.max(0, summaryMaxChars - suffix.length() - truncMarker.length());
+        if (content.length() <= bodyBudget) {
+            return content + suffix;
         }
-        return content.substring(0, maxChars) + "... [truncated]" + sourceSuffix;
+        if (bodyBudget <= 0) {
+            return suffix;
+        }
+        return content.substring(0, bodyBudget) + truncMarker + suffix;
     }
 
     /**
@@ -623,22 +636,81 @@ public class ChatClient {
 
     /**
      * Builds a truncated version of the assistant message content.
-     * The maximum length is controlled by {@code rag.chat.history.assistant.max.chars}.
      *
      * @param msg the assistant chat message
+     * @param maxChars the maximum characters for the content
      * @return the truncated content
      */
-    protected String buildTruncatedContent(final ChatMessage msg) {
+    protected String buildTruncatedContent(final ChatMessage msg, final int maxChars) {
         final String content = msg.getContent();
         if (content == null) {
             return null;
         }
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxChars = Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.assistant.max.chars", "500"));
         if (content.length() <= maxChars) {
             return content;
         }
         return content.substring(0, maxChars) + "...";
+    }
+
+    /**
+     * Builds a smart summary of the assistant message for history.
+     * Preserves the beginning (direct answer) and end (conclusion) of long responses,
+     * omitting the middle section, and appends source titles.
+     *
+     * @param msg the assistant chat message
+     * @param maxChars the maximum characters for the summary
+     * @return the summarized content with source titles
+     */
+    protected String buildSmartSummaryContent(final ChatMessage msg, final int maxChars) {
+        final String content = msg.getContent();
+        if (content == null) {
+            return null;
+        }
+        final String omitMarker = "\n...[omitted]...\n";
+        final int maxSuffixLen = Math.max(0, maxChars / 4);
+        final String suffix = buildSourceTitlesSuffix(msg.getSources(), maxSuffixLen);
+        final int bodyBudget = Math.max(0, maxChars - suffix.length() - omitMarker.length());
+        if (content.length() <= bodyBudget) {
+            return content + suffix;
+        }
+        if (bodyBudget <= 0) {
+            return suffix.isEmpty() ? content.substring(0, Math.min(content.length(), maxChars)) : suffix;
+        }
+        final int headChars = (int) (bodyBudget * 0.6);
+        final int tailChars = bodyBudget - headChars;
+        final String head = content.substring(0, headChars);
+        final String tail = content.substring(content.length() - tailChars);
+        return head + omitMarker + tail + suffix;
+    }
+
+    /**
+     * Builds the source titles suffix string (e.g., "\n[Referenced documents: Title1, Title2]").
+     * Returns an empty string if no sources or titles are available.
+     *
+     * @param sources the source documents
+     * @return the source titles suffix, or empty string
+     */
+    private String buildSourceTitlesSuffix(final List<ChatSource> sources) {
+        return buildSourceTitlesSuffix(sources, Integer.MAX_VALUE);
+    }
+
+    private String buildSourceTitlesSuffix(final List<ChatSource> sources, final int maxSuffixLength) {
+        if (sources == null || sources.isEmpty()) {
+            return "";
+        }
+        final String titles =
+                sources.stream().map(ChatSource::getTitle).filter(t -> t != null && !t.isEmpty()).collect(Collectors.joining(", "));
+        if (titles.isEmpty()) {
+            return "";
+        }
+        final String suffix = "\n[Referenced documents: " + titles + "]";
+        if (suffix.length() <= maxSuffixLength) {
+            return suffix;
+        }
+        if (maxSuffixLength <= 0) {
+            return "";
+        }
+        return suffix.substring(0, maxSuffixLength);
     }
 
     private static final int MAX_QUERY_LENGTH = 1000;

@@ -81,7 +81,31 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_buildIntentRequest_trimsHistoryToMaxFour() {
+    public void test_buildIntentRequest_trimsHistoryToMaxSix() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1"));
+        history.add(LlmMessage.assistant("A1"));
+        history.add(LlmMessage.user("Q2"));
+        history.add(LlmMessage.assistant("A2"));
+        history.add(LlmMessage.user("Q3"));
+        history.add(LlmMessage.assistant("A3"));
+        history.add(LlmMessage.user("Q4"));
+        history.add(LlmMessage.assistant("A4"));
+        final LlmChatRequest request = client.testBuildIntentRequest("Q5", history);
+        final List<LlmMessage> messages = request.getMessages();
+        // system + 6 history (last 6: Q2,A2,Q3,A3,Q4,A4) + user = 8 messages
+        assertEquals(8, messages.size());
+        // First history message should be Q2 (Q1,A1 trimmed)
+        assertEquals("Q2", messages.get(1).getContent());
+        assertEquals("A2", messages.get(2).getContent());
+        assertEquals("Q3", messages.get(3).getContent());
+        assertEquals("A3", messages.get(4).getContent());
+        assertEquals("Q4", messages.get(5).getContent());
+        assertEquals("A4", messages.get(6).getContent());
+    }
+
+    @Test
+    public void test_buildIntentRequest_historyExactlySix() {
         final List<LlmMessage> history = new ArrayList<>();
         history.add(LlmMessage.user("Q1"));
         history.add(LlmMessage.assistant("A1"));
@@ -91,30 +115,14 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         history.add(LlmMessage.assistant("A3"));
         final LlmChatRequest request = client.testBuildIntentRequest("Q4", history);
         final List<LlmMessage> messages = request.getMessages();
-        // system + 4 history (last 4: Q2,A2,Q3,A3) + user = 6 messages
-        assertEquals(6, messages.size());
-        // First history message should be Q2 (Q1,A1 trimmed)
-        assertEquals("Q2", messages.get(1).getContent());
-        assertEquals("A2", messages.get(2).getContent());
-        assertEquals("Q3", messages.get(3).getContent());
-        assertEquals("A3", messages.get(4).getContent());
-    }
-
-    @Test
-    public void test_buildIntentRequest_historyExactlyFour() {
-        final List<LlmMessage> history = new ArrayList<>();
-        history.add(LlmMessage.user("Q1"));
-        history.add(LlmMessage.assistant("A1"));
-        history.add(LlmMessage.user("Q2"));
-        history.add(LlmMessage.assistant("A2"));
-        final LlmChatRequest request = client.testBuildIntentRequest("Q3", history);
-        final List<LlmMessage> messages = request.getMessages();
-        // system + 4 history + user = 6 messages (all included)
-        assertEquals(6, messages.size());
+        // system + 6 history + user = 8 messages (all included)
+        assertEquals(8, messages.size());
         assertEquals("Q1", messages.get(1).getContent());
         assertEquals("A1", messages.get(2).getContent());
         assertEquals("Q2", messages.get(3).getContent());
         assertEquals("A2", messages.get(4).getContent());
+        assertEquals("Q3", messages.get(5).getContent());
+        assertEquals("A3", messages.get(6).getContent());
     }
 
     @Test
@@ -494,23 +502,25 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
 
     @Test
     public void test_buildIntentRequest_manyTurns_trimmed() {
-        // Verify maxHistory=4 still applies for structured messages
+        // Verify maxHistory=6 applies for structured messages
         final List<LlmMessage> history = new ArrayList<>();
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= 8; i++) {
             history.add(LlmMessage.user("Question " + i));
         }
 
-        final LlmChatRequest request = client.testBuildIntentRequest("Question 7", history);
+        final LlmChatRequest request = client.testBuildIntentRequest("Question 9", history);
         final List<LlmMessage> messages = request.getMessages();
 
-        // system + 4 history (last 4) + user = 6 messages
-        assertEquals(6, messages.size());
+        // system + 6 history (last 6) + user = 8 messages
+        assertEquals(8, messages.size());
         assertEquals("system", messages.get(0).getRole());
         assertEquals("Question 3", messages.get(1).getContent());
         assertEquals("Question 4", messages.get(2).getContent());
         assertEquals("Question 5", messages.get(3).getContent());
         assertEquals("Question 6", messages.get(4).getContent());
-        assertTrue(messages.get(5).getContent().contains("Question 7"));
+        assertEquals("Question 7", messages.get(5).getContent());
+        assertEquals("Question 8", messages.get(6).getContent());
+        assertTrue(messages.get(7).getContent().contains("Question 9"));
     }
 
     @Test
@@ -692,6 +702,318 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         assertTrue(userMsg.contains("</user_input>"));
     }
 
+    // ========== addHistoryWithBudget tests ==========
+
+    @Test
+    public void test_addHistoryWithBudget_allFit() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Hi")); // 2 chars
+        history.add(LlmMessage.assistant("Hello")); // 5 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 100);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Hi", request.getMessages().get(0).getContent());
+        assertEquals("Hello", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_skipsLargeMessage() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2 chars
+        history.add(LlmMessage.assistant("A".repeat(200))); // 200 chars - too large
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        history.add(LlmMessage.assistant("A2")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 10);
+        // Q2 and A2 fit (4 chars), Q1 fits (6 chars), but A1 is too large and skipped
+        // Pair integrity: Q1 without A1 => Q1 excluded
+        // Result: Q2, A2
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+        assertEquals("A2", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_pairIntegrity() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2 chars
+        history.add(LlmMessage.assistant("A".repeat(50))); // 50 chars
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        history.add(LlmMessage.assistant("A2")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        // Budget=10: Q2(2)+A2(2)=4 fit, Q1(2) fits but A1(50) doesn't => pair excluded
+        client.testAddHistoryWithBudget(request, history, 10);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+        assertEquals("A2", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_emptyHistory() {
+        final List<LlmMessage> history = new ArrayList<>();
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 100);
+        assertEquals(0, request.getMessages().size());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_fallbackTruncation() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("A".repeat(500)));
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 200);
+        assertEquals(1, request.getMessages().size());
+        assertEquals(200, request.getMessages().get(0).getContent().length());
+    }
+
+    // ========== addIntentHistory tests ==========
+
+    @Test
+    public void test_addIntentHistory_withCharBudget() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Short")); // 5 chars
+        history.add(LlmMessage.assistant("A".repeat(500))); // 500 chars
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        history.add(LlmMessage.assistant("A2")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        // Default: maxMessages=6, maxChars=3000
+        // From newest: A2(2), Q2(2+2=4), assistant(500+4=504), Short(5+504=509) => all fit
+        assertEquals(4, request.getMessages().size());
+    }
+
+    @Test
+    public void test_addIntentHistory_maxMessages() {
+        final List<LlmMessage> history = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            history.add(LlmMessage.user("Q" + i));
+        }
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        // maxMessages=6, so only last 6
+        assertEquals(6, request.getMessages().size());
+        assertEquals("Q4", request.getMessages().get(0).getContent());
+    }
+
+    @Test
+    public void test_addIntentHistory_charBudgetCutsOff() {
+        client.setTestIntentHistoryMaxChars(10);
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("A".repeat(20))); // 20 chars - won't fit
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        history.add(LlmMessage.assistant("A2")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        // Budget=10: A2(2), Q2(4) fit, then A*20 breaks => only Q2, A2
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+        assertEquals("A2", request.getMessages().get(1).getContent());
+    }
+
+    // ========== addHistoryWithBudget — turn-based packing tests ==========
+
+    @Test
+    public void test_addHistoryWithBudget_turnBasedPacking_twoCompleteTurns() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2
+        history.add(LlmMessage.assistant("A1")); // 2
+        history.add(LlmMessage.user("Q2")); // 2
+        history.add(LlmMessage.assistant("A2")); // 2
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 100);
+        assertEquals(4, request.getMessages().size());
+        assertEquals("Q1", request.getMessages().get(0).getContent());
+        assertEquals("A1", request.getMessages().get(1).getContent());
+        assertEquals("Q2", request.getMessages().get(2).getContent());
+        assertEquals("A2", request.getMessages().get(3).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_turnBasedPacking_newestTurnOnly() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("A".repeat(100))); // 100
+        history.add(LlmMessage.assistant("B".repeat(100))); // 100
+        history.add(LlmMessage.user("Q2")); // 2
+        history.add(LlmMessage.assistant("A2")); // 2
+        final LlmChatRequest request = new LlmChatRequest();
+        // Budget=10: newest turn Q2+A2=4 fits, older turn=200 doesn't
+        client.testAddHistoryWithBudget(request, history, 10);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+        assertEquals("A2", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_turnBasedPacking_contiguousRecency() {
+        // 3 turns: turn0(Q1+A1=4), turn1(big=200), turn2(Q3+A3=4)
+        // Budget=20: turn2 fits (4, remaining=16), turn1 doesn't fit (200>16), stop
+        // Even though turn0 (4 chars) would fit individually, contiguity is maintained
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2
+        history.add(LlmMessage.assistant("A1")); // 2
+        history.add(LlmMessage.user("B".repeat(100))); // 100
+        history.add(LlmMessage.assistant("C".repeat(100))); // 100
+        history.add(LlmMessage.user("Q3")); // 2
+        history.add(LlmMessage.assistant("A3")); // 2
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 20);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q3", request.getMessages().get(0).getContent());
+        assertEquals("A3", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_turnBasedPacking_standaloneUserMessage() {
+        // A user message not followed by assistant is treated as standalone turn
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2 - standalone
+        history.add(LlmMessage.user("Q2")); // 2 - standalone (no preceding assistant)
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 100);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q1", request.getMessages().get(0).getContent());
+        assertEquals("Q2", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_turnBasedPacking_mixedStandaloneAndPairs() {
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // standalone turn (2)
+        history.add(LlmMessage.user("Q2")); // 2
+        history.add(LlmMessage.assistant("A2")); // pair turn (4)
+        history.add(LlmMessage.user("Q3")); // standalone turn (2)
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 100);
+        assertEquals(4, request.getMessages().size());
+        assertEquals("Q1", request.getMessages().get(0).getContent());
+        assertEquals("Q2", request.getMessages().get(1).getContent());
+        assertEquals("A2", request.getMessages().get(2).getContent());
+        assertEquals("Q3", request.getMessages().get(3).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_singleLargeMessage_truncation() {
+        // Single message larger than budget triggers truncation fallback
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("A".repeat(500)));
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 200);
+        assertEquals(1, request.getMessages().size());
+        assertEquals(200, request.getMessages().get(0).getContent().length());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_exactBudget() {
+        // Total chars exactly equals budget
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("AAAA")); // 4
+        history.add(LlmMessage.assistant("BBBBBB")); // 6
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 10);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("AAAA", request.getMessages().get(0).getContent());
+        assertEquals("BBBBBB", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addHistoryWithBudget_multipleTurns_budgetTight() {
+        // 3 turns: turn0(Q1+A1=10), turn1(Q2+A2=10), turn2(Q3+A3=10)
+        // Budget=25: turn2(10) fits (remaining=15), turn1(10) fits (remaining=5), turn0(10) doesn't
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("QQQQQ")); // 5
+        history.add(LlmMessage.assistant("AAAAA")); // 5
+        history.add(LlmMessage.user("RRRRR")); // 5
+        history.add(LlmMessage.assistant("SSSSS")); // 5
+        history.add(LlmMessage.user("TTTTT")); // 5
+        history.add(LlmMessage.assistant("UUUUU")); // 5
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddHistoryWithBudget(request, history, 25);
+        assertEquals(4, request.getMessages().size());
+        assertEquals("RRRRR", request.getMessages().get(0).getContent());
+        assertEquals("SSSSS", request.getMessages().get(1).getContent());
+        assertEquals("TTTTT", request.getMessages().get(2).getContent());
+        assertEquals("UUUUU", request.getMessages().get(3).getContent());
+    }
+
+    // ========== additional addIntentHistory tests ==========
+
+    @Test
+    public void test_addIntentHistory_emptyHistory() {
+        final List<LlmMessage> history = new ArrayList<>();
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        assertEquals(0, request.getMessages().size());
+    }
+
+    @Test
+    public void test_addIntentHistory_nullHistory() {
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, null);
+        assertEquals(0, request.getMessages().size());
+    }
+
+    @Test
+    public void test_addIntentHistory_allFitWithinBothLimits() {
+        client.setTestIntentHistoryMaxChars(3000);
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Q1")); // 2
+        history.add(LlmMessage.assistant("A1")); // 2
+        history.add(LlmMessage.user("Q2")); // 2
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        assertEquals(3, request.getMessages().size());
+        assertEquals("Q1", request.getMessages().get(0).getContent());
+        assertEquals("A1", request.getMessages().get(1).getContent());
+        assertEquals("Q2", request.getMessages().get(2).getContent());
+    }
+
+    @Test
+    public void test_addIntentHistory_charBudgetMoreRestrictiveThanMessages() {
+        client.setTestIntentHistoryMaxChars(5);
+        // maxMessages=6, but charBudget=5
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("QQQ")); // 3 chars
+        history.add(LlmMessage.assistant("AAA")); // 3 chars
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        // From newest: Q2(2) fits (remaining=3), AAA(3) fits (remaining=0), QQQ(3) doesn't
+        assertEquals(2, request.getMessages().size());
+        assertEquals("AAA", request.getMessages().get(0).getContent());
+        assertEquals("Q2", request.getMessages().get(1).getContent());
+    }
+
+    @Test
+    public void test_addIntentHistory_messageCountMoreRestrictiveThanChars() {
+        client.setTestIntentHistoryMaxChars(10000);
+        // Use a client with maxMessages=6, provide 8 messages
+        final List<LlmMessage> history = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            history.add(LlmMessage.user("Q" + i));
+        }
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        // maxMessages=6, so only last 6
+        assertEquals(6, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+    }
+
+    @Test
+    public void test_addIntentHistory_contiguousBlock() {
+        client.setTestIntentHistoryMaxChars(10);
+        // Messages: [big(20), small(2), small(2)]
+        // From newest: small(2) fits (remaining=8), small(2) fits (remaining=6), big(20) doesn't => break
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("A".repeat(20))); // 20 chars
+        history.add(LlmMessage.user("Q2")); // 2 chars
+        history.add(LlmMessage.user("Q3")); // 2 chars
+        final LlmChatRequest request = new LlmChatRequest();
+        client.testAddIntentHistory(request, history);
+        assertEquals(2, request.getMessages().size());
+        assertEquals("Q2", request.getMessages().get(0).getContent());
+        assertEquals("Q3", request.getMessages().get(1).getContent());
+    }
+
     // ========== Testable subclass ==========
 
     @FunctionalInterface
@@ -709,6 +1031,11 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         private String lastChatPrompt;
         private LlmChatRequest lastChatRequest;
         private StreamChatCapture streamChatCapture;
+        private int testIntentHistoryMaxMessages = 6;
+        private int testIntentHistoryMaxChars = 3000;
+        private int testHistoryMaxChars = 4000;
+        private int testHistoryAssistantMaxChars = 500;
+        private int testHistoryAssistantSummaryMaxChars = 500;
 
         void setTestIntentDetectionPrompt(final String prompt) {
             this.testIntentDetectionPrompt = prompt;
@@ -768,6 +1095,18 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
 
         String testStripHtmlTags(final String text) {
             return stripHtmlTags(text);
+        }
+
+        void setTestIntentHistoryMaxChars(final int maxChars) {
+            this.testIntentHistoryMaxChars = maxChars;
+        }
+
+        void testAddHistoryWithBudget(final LlmChatRequest request, final List<LlmMessage> history, final int budget) {
+            addHistoryWithBudget(request, history, budget);
+        }
+
+        void testAddIntentHistory(final LlmChatRequest request, final List<LlmMessage> history) {
+            addIntentHistory(request, history);
         }
 
         // Implement abstract methods
@@ -904,6 +1243,31 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         @Override
         protected int getEvaluationDescriptionMaxChars() {
             return 500;
+        }
+
+        @Override
+        protected int getHistoryMaxChars() {
+            return testHistoryMaxChars;
+        }
+
+        @Override
+        protected int getIntentHistoryMaxMessages() {
+            return testIntentHistoryMaxMessages;
+        }
+
+        @Override
+        protected int getIntentHistoryMaxChars() {
+            return testIntentHistoryMaxChars;
+        }
+
+        @Override
+        public int getHistoryAssistantMaxChars() {
+            return testHistoryAssistantMaxChars;
+        }
+
+        @Override
+        public int getHistoryAssistantSummaryMaxChars() {
+            return testHistoryAssistantSummaryMaxChars;
         }
 
         @Override

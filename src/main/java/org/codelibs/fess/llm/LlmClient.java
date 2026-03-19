@@ -184,4 +184,22 @@ public interface LlmClient {
      * @param callback the streaming callback
      */
     void generateDirectAnswer(String userMessage, List<LlmMessage> history, LlmStreamCallback callback);
+
+    /**
+     * Gets the maximum characters for assistant message in history.
+     *
+     * @return the maximum characters
+     */
+    default int getHistoryAssistantMaxChars() {
+        return 800;
+    }
+
+    /**
+     * Gets the maximum characters for assistant summary in history.
+     *
+     * @return the maximum characters
+     */
+    default int getHistoryAssistantSummaryMaxChars() {
+        return 800;
+    }
 }
