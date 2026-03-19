@@ -29,6 +29,11 @@ var FessChat = (function() {
                 rate_limit: 'It\'s currently busy. Please wait a moment and try again.',
                 auth_error: 'AI service authentication failed. Please contact the administrator.',
                 service_unavailable: 'The AI service is temporarily unavailable. Please try again later.',
+                timeout: 'The request timed out. Please try again.',
+                context_length_exceeded: 'The message is too long to process. Please shorten it and try again.',
+                model_not_found: 'The AI model was not found. Please contact the administrator.',
+                invalid_response: 'Received an invalid response from the AI service. Please try again.',
+                connection_error: 'Unable to connect to the AI service. Please check the network connection.',
                 unknown: 'An error occurred. Please try again.'
             }
         }

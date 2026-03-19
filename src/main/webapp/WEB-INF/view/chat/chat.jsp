@@ -188,6 +188,11 @@ ${fe:html(true)}
 						rate_limit: '<la:message key="labels.chat_error_rate_limit" />',
 						auth_error: '<la:message key="labels.chat_error_auth" />',
 						service_unavailable: '<la:message key="labels.chat_error_service_unavailable" />',
+						timeout: '<la:message key="labels.chat_error_timeout" />',
+						context_length_exceeded: '<la:message key="labels.chat_error_context_length_exceeded" />',
+						model_not_found: '<la:message key="labels.chat_error_model_not_found" />',
+						invalid_response: '<la:message key="labels.chat_error_invalid_response" />',
+						connection_error: '<la:message key="labels.chat_error_connection" />',
 						unknown: '<la:message key="labels.chat_error" />'
 					}
 				}
