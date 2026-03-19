@@ -336,6 +336,13 @@ public abstract class AbstractLlmClient implements LlmClient {
     protected abstract String getDirectAnswerSystemPrompt();
 
     /**
+     * Gets the query regeneration prompt template.
+     *
+     * @return the query regeneration prompt
+     */
+    protected abstract String getQueryRegenerationPrompt();
+
+    /**
      * Gets the maximum characters for context building for a specific prompt type.
      * Each LlmClient implementation defines per-prompt-type defaults appropriate
      * for its target model.
@@ -704,6 +711,50 @@ public abstract class AbstractLlmClient implements LlmClient {
         final LlmChatRequest request = buildStreamingRequest(userMessage, context, history);
 
         return chatWithConcurrencyControl(request);
+    }
+
+    @Override
+    public String regenerateQuery(final String userMessage, final String failedQuery, final String failureReason,
+            final List<LlmMessage> history) {
+        final long startTime = System.currentTimeMillis();
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RAG:REGEN] Starting query regeneration. userMessage={}, failedQuery={}, failureReason={}", userMessage,
+                    failedQuery, failureReason);
+        }
+
+        try {
+            final String promptTemplate = getQueryRegenerationPrompt();
+            final String prompt = resolveLanguageInstruction(promptTemplate.replace("{{userMessage}}", sanitizeDocumentContent(userMessage))
+                    .replace("{{failedQuery}}", sanitizeDocumentContent(failedQuery))
+                    .replace("{{failureReason}}", failureReason));
+
+            final LlmChatRequest request = new LlmChatRequest();
+            request.addSystemMessage(prompt);
+            addIntentHistory(request, history);
+            request.addUserMessage(wrapUserInput(userMessage));
+            applyPromptTypeParams(request, "queryregeneration");
+
+            final LlmChatResponse response = chatWithConcurrencyControl(request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG:REGEN] LLM response. content={}, promptTokens={}, completionTokens={}", response.getContent(),
+                        response.getPromptTokens(), response.getCompletionTokens());
+            }
+
+            final String newQuery = extractJsonString(response.getContent(), "query");
+            if (StringUtil.isNotBlank(newQuery)) {
+                logger.info("[RAG:REGEN] Query regenerated. newQuery={}, elapsedTime={}ms", newQuery,
+                        System.currentTimeMillis() - startTime);
+                return newQuery;
+            }
+
+            logger.info("[RAG:REGEN] Failed to extract query from response, using failedQuery. elapsedTime={}ms",
+                    System.currentTimeMillis() - startTime);
+            return failedQuery;
+        } catch (final Exception e) {
+            logger.warn("[RAG:REGEN] Query regeneration failed, using failedQuery. error={}, elapsedTime={}ms", e.getMessage(),
+                    System.currentTimeMillis() - startTime);
+            return failedQuery;
+        }
     }
 
     @Override

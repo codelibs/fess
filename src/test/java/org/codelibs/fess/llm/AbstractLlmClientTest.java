@@ -538,6 +538,160 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         assertTrue(wrapped.contains("&lt;/user_input&gt;"));
     }
 
+    // ========== regenerateQuery tests ==========
+
+    @Test
+    public void test_regenerateQuery_success_extractsNewQuery() {
+        client.setChatResponse("{\"query\": \"Fess installation guide\", \"reasoning\": \"simplified keywords\"}");
+
+        final String result = client.regenerateQuery("How do I install Fess on Docker?", "+\"Fess\" +Docker (installation OR setup)",
+                "no_results", Collections.emptyList());
+
+        assertEquals("Fess installation guide", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_success_withHistory() {
+        client.setChatResponse("{\"query\": \"Docker setup\", \"reasoning\": \"follow-up\"}");
+
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("What is Fess?"));
+        history.add(LlmMessage.assistant("Fess is a search server."));
+
+        final String result = client.regenerateQuery("How about Docker?", "title:\"Fess\"^2 +Docker", "no_relevant_results", history);
+
+        assertEquals("Docker setup", result);
+
+        // Verify history was included in the request
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        assertNotNull(capturedRequest);
+        final List<LlmMessage> messages = capturedRequest.getMessages();
+        // system + 2 history + user = 4 messages
+        assertEquals(4, messages.size());
+        assertEquals("system", messages.get(0).getRole());
+        assertEquals("user", messages.get(1).getRole());
+        assertEquals("What is Fess?", messages.get(1).getContent());
+        assertEquals("assistant", messages.get(2).getRole());
+    }
+
+    @Test
+    public void test_regenerateQuery_invalidJson_returnsFailedQuery() {
+        client.setChatResponse("This is not valid JSON at all");
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("original query", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_emptyQueryInJson_returnsFailedQuery() {
+        client.setChatResponse("{\"query\": \"\", \"reasoning\": \"could not generate\"}");
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("original query", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_missingQueryField_returnsFailedQuery() {
+        client.setChatResponse("{\"reasoning\": \"no query generated\"}");
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("original query", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_exception_returnsFailedQuery() {
+        client.setChatResponse(null); // causes LlmException
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("original query", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_jsonWithCodeFence_extractsQuery() {
+        client.setChatResponse("```json\n{\"query\": \"search keywords\", \"reasoning\": \"simplified\"}\n```");
+
+        final String result = client.regenerateQuery("complex question", "complex query syntax", "no_results", Collections.emptyList());
+
+        assertEquals("search keywords", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_promptContainsPlaceholders() {
+        client.setChatResponse("{\"query\": \"new query\", \"reasoning\": \"test\"}");
+
+        client.regenerateQuery("user message here", "failed query here", "no_results", Collections.emptyList());
+
+        // Verify the system prompt contains the replaced values
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        final String systemPrompt = capturedRequest.getMessages().get(0).getContent();
+        assertTrue(systemPrompt.contains("user message here"));
+        assertTrue(systemPrompt.contains("failed query here"));
+        assertTrue(systemPrompt.contains("no_results"));
+        // Verify placeholders are replaced
+        assertFalse(systemPrompt.contains("{{userMessage}}"));
+        assertFalse(systemPrompt.contains("{{failedQuery}}"));
+        assertFalse(systemPrompt.contains("{{failureReason}}"));
+    }
+
+    @Test
+    public void test_regenerateQuery_noRelevantResults_reason() {
+        client.setChatResponse("{\"query\": \"broader search\", \"reasoning\": \"made broader\"}");
+
+        final String result =
+                client.regenerateQuery("specific question", "very specific query", "no_relevant_results", Collections.emptyList());
+
+        assertEquals("broader search", result);
+
+        // Verify the failure reason is in the prompt
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        final String systemPrompt = capturedRequest.getMessages().get(0).getContent();
+        assertTrue(systemPrompt.contains("no_relevant_results"));
+    }
+
+    @Test
+    public void test_regenerateQuery_emptyHistory() {
+        client.setChatResponse("{\"query\": \"simple query\", \"reasoning\": \"test\"}");
+
+        final String result = client.regenerateQuery("question", "original", "no_results", Collections.emptyList());
+
+        assertEquals("simple query", result);
+
+        // system + user = 2 messages (no history)
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        assertEquals(2, capturedRequest.getMessages().size());
+    }
+
+    @Test
+    public void test_regenerateQuery_nullHistory() {
+        client.setChatResponse("{\"query\": \"simple query\", \"reasoning\": \"test\"}");
+
+        final String result = client.regenerateQuery("question", "original", "no_results", null);
+
+        assertEquals("simple query", result);
+
+        // system + user = 2 messages (null history treated as empty)
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        assertEquals(2, capturedRequest.getMessages().size());
+    }
+
+    @Test
+    public void test_regenerateQuery_userInputIsWrapped() {
+        client.setChatResponse("{\"query\": \"result\", \"reasoning\": \"test\"}");
+
+        client.regenerateQuery("my question", "my query", "no_results", Collections.emptyList());
+
+        final LlmChatRequest capturedRequest = client.getLastChatRequest();
+        final List<LlmMessage> messages = capturedRequest.getMessages();
+        final String userMsg = messages.get(messages.size() - 1).getContent();
+        assertTrue(userMsg.contains("<user_input>"));
+        assertTrue(userMsg.contains("my question"));
+        assertTrue(userMsg.contains("</user_input>"));
+    }
+
     // ========== Testable subclass ==========
 
     @FunctionalInterface
@@ -730,6 +884,11 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         @Override
         protected String getDirectAnswerSystemPrompt() {
             return "{{systemPrompt}}\n{{languageInstruction}}";
+        }
+
+        @Override
+        protected String getQueryRegenerationPrompt() {
+            return "query regen prompt {{userMessage}} {{failedQuery}} {{failureReason}} {{languageInstruction}}";
         }
 
         @Override
