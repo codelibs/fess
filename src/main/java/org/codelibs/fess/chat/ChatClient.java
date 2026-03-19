@@ -94,8 +94,8 @@ public class ChatClient {
      */
     public boolean isAvailable() {
         final boolean available = llmClientManager.available();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] ChatClient availability check. available={}", available);
+        if (logger.isTraceEnabled()) {
+            logger.trace("[RAG] ChatClient availability check. available={}", available);
         }
         return available;
     }

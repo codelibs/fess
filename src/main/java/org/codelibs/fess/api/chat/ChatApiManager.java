@@ -88,16 +88,16 @@ public class ChatApiManager extends BaseApiManager {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final boolean ragChatEnabled = fessConfig.isRagChatEnabled();
         if (!ragChatEnabled) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("ChatApiManager.matches() returning false. ragChatEnabled={}", ragChatEnabled);
+            if (logger.isTraceEnabled()) {
+                logger.trace("ChatApiManager.matches() returning false. ragChatEnabled={}", ragChatEnabled);
             }
             return false;
         }
 
         final String servletPath = request.getServletPath();
         final boolean matches = servletPath.startsWith(CHAT_API_PATH);
-        if (logger.isDebugEnabled()) {
-            logger.debug("ChatApiManager.matches() checking path. servletPath={}, expectedPrefix={}, matches={}", servletPath,
+        if (logger.isTraceEnabled()) {
+            logger.trace("ChatApiManager.matches() checking path. servletPath={}, expectedPrefix={}, matches={}", servletPath,
                     CHAT_API_PATH, matches);
         }
         return matches;

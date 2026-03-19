@@ -53,21 +53,21 @@ public class LlmClientManager {
     public boolean available() {
         final String llmType = getLlmType();
         if (Constants.NONE.equals(llmType)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LLM not available. llmType=none");
+            if (logger.isTraceEnabled()) {
+                logger.trace("[LLM] LLM not available. llmType=none");
             }
             return false;
         }
         if (!isRagChatEnabled()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LLM not available. ragChatEnabled=false");
+            if (logger.isTraceEnabled()) {
+                logger.trace("[LLM] LLM not available. ragChatEnabled=false");
             }
             return false;
         }
         final LlmClient client = getClient();
         final boolean isAvailable = client != null && client.isAvailable();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[LLM] LLM availability check. llmType={}, clientFound={}, isAvailable={}", llmType, client != null, isAvailable);
+        if (logger.isTraceEnabled()) {
+            logger.trace("[LLM] LLM availability check. llmType={}, clientFound={}, isAvailable={}", llmType, client != null, isAvailable);
         }
         return isAvailable;
     }
@@ -82,8 +82,8 @@ public class LlmClientManager {
         final String name = llmType + "LlmClient";
         if (ComponentUtil.hasComponent(name)) {
             final LlmClient client = ComponentUtil.getComponent(name);
-            if (logger.isDebugEnabled()) {
-                logger.debug("[LLM] LlmClient found via DI. componentName={}, clientName={}, available={}", name, client.getName(),
+            if (logger.isTraceEnabled()) {
+                logger.trace("[LLM] LlmClient found via DI. componentName={}, clientName={}, available={}", name, client.getName(),
                         client.isAvailable());
             }
             return client;
@@ -91,8 +91,8 @@ public class LlmClientManager {
         // Fallback: search registered clients
         for (final LlmClient client : clientList) {
             if (llmType.equals(client.getName())) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[LLM] LlmClient found via registration. name={}", client.getName());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("[LLM] LlmClient found via registration. name={}", client.getName());
                 }
                 return client;
             }
