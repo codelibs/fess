@@ -18,10 +18,24 @@ package org.codelibs.fess.app.web.base;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.web.RootAction;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.exception.UserRoleLoginException;
+import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 public class FessAdminActionTest extends UnitFessTestCase {
 
@@ -350,6 +364,87 @@ public class FessAdminActionTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
+    //                                                         godHandPrologue Tests
+    //                                                         =========================
+
+    @Test
+    public void test_godHandPrologue_callsAccessDeniedOnUserRoleLoginException() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(capturedLogs);
+
+        final TestActionRuntime testRuntime = new TestActionRuntime("/admin/user/");
+        final FessAdminAction action =
+                createGodHandAction(spyActivityHelper, OptionalThing.of(new FessUserBean(new TestUser("admin", new String[0]))), true);
+
+        action.godHandPrologue(testRuntime);
+
+        assertEquals(1, capturedLogs.size());
+        assertEquals("admin", capturedLogs.get(0).get("user"));
+        assertEquals("/admin/user/", capturedLogs.get(0).get("path"));
+    }
+
+    @Test
+    public void test_godHandPrologue_callsAccessDeniedWithEmptyUser() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(capturedLogs);
+
+        final TestActionRuntime testRuntime = new TestActionRuntime("/admin/role/");
+        final FessAdminAction action = createGodHandAction(spyActivityHelper, OptionalThing.empty(), true);
+
+        action.godHandPrologue(testRuntime);
+
+        assertEquals(1, capturedLogs.size());
+        assertEquals("-", capturedLogs.get(0).get("user"));
+        assertEquals("/admin/role/", capturedLogs.get(0).get("path"));
+    }
+
+    @Test
+    public void test_godHandPrologue_doesNotCallAccessDeniedOnNormalFlow() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(capturedLogs);
+
+        final TestActionRuntime testRuntime = new TestActionRuntime("/admin/user/");
+        final FessAdminAction action =
+                createGodHandAction(spyActivityHelper, OptionalThing.of(new FessUserBean(new TestUser("admin", new String[0]))), false);
+
+        action.godHandPrologue(testRuntime);
+
+        assertEquals(0, capturedLogs.size());
+    }
+
+    @Test
+    public void test_godHandPrologue_returnsRedirectResponse() {
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(new ArrayList<>());
+
+        final TestActionRuntime testRuntime = new TestActionRuntime("/admin/user/");
+        final FessAdminAction action =
+                createGodHandAction(spyActivityHelper, OptionalThing.of(new FessUserBean(new TestUser("admin", new String[0]))), true);
+
+        final ActionResponse response = action.godHandPrologue(testRuntime);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void test_godHandPrologue_accessDeniedWithVariousPaths() {
+        final List<Map<String, String>> capturedLogs = new ArrayList<>();
+        final ActivityHelper spyActivityHelper = createSpyActivityHelper(capturedLogs);
+
+        final String[] paths = { "/admin/user/", "/admin/role/", "/admin/group/", "/admin/scheduler/" };
+        for (final String path : paths) {
+            capturedLogs.clear();
+            final TestActionRuntime testRuntime = new TestActionRuntime(path);
+            final FessAdminAction action = createGodHandAction(spyActivityHelper,
+                    OptionalThing.of(new FessUserBean(new TestUser("testuser", new String[0]))), true);
+
+            action.godHandPrologue(testRuntime);
+
+            assertEquals(1, capturedLogs.size());
+            assertEquals("testuser", capturedLogs.get(0).get("user"));
+            assertEquals(path, capturedLogs.get(0).get("path"));
+        }
+    }
+
+    // ===================================================================================
     //                                                                      Helper Methods
     //                                                                      ==============
 
@@ -360,6 +455,91 @@ public class FessAdminActionTest extends UnitFessTestCase {
                 return "admin-test";
             }
         };
+    }
+
+    private ActivityHelper createSpyActivityHelper(final List<Map<String, String>> capturedLogs) {
+        return new ActivityHelper() {
+            @Override
+            public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+                final Map<String, String> log = new LinkedHashMap<>();
+                log.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+                log.put("path", path);
+                capturedLogs.add(log);
+            }
+        };
+    }
+
+    private FessAdminAction createGodHandAction(final ActivityHelper spyActivityHelper, final OptionalThing<FessUserBean> userBean,
+            final boolean throwException) {
+        return new FessAdminAction() {
+            {
+                activityHelper = spyActivityHelper;
+            }
+
+            @Override
+            protected String getActionRole() {
+                return "admin-test";
+            }
+
+            @Override
+            protected OptionalThing<FessUserBean> getUserBean() {
+                return userBean;
+            }
+
+            @Override
+            protected ActionResponse superGodHandPrologue(final ActionRuntime runtime) {
+                if (throwException) {
+                    throw new UserRoleLoginException(RootAction.class);
+                }
+                return ActionResponse.undefined();
+            }
+
+            @Override
+            protected HtmlResponse redirect(final Class<?> actionType) {
+                return HtmlResponse.undefined();
+            }
+        };
+    }
+
+    static class TestActionRuntime extends ActionRuntime {
+
+        TestActionRuntime(final String requestPath) {
+            super(requestPath, null, null);
+        }
+    }
+
+    static class TestUser implements FessUser {
+
+        private static final long serialVersionUID = 1L;
+
+        private final String name;
+
+        private final String[] permissions;
+
+        TestUser(final String name, final String[] permissions) {
+            this.name = name;
+            this.permissions = permissions;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return permissions;
+        }
     }
 
     private static void assertThrows(final Class<? extends Throwable> expectedType, final Runnable runnable) {

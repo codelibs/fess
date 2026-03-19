@@ -238,10 +238,25 @@ public abstract class FessAdminAction extends FessBaseAction {
     @Override
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         try {
-            return super.godHandPrologue(runtime);
+            return superGodHandPrologue(runtime);
         } catch (final UserRoleLoginException e) {
+            activityHelper.accessDenied(getUserBean(), runtime.getRequestPath());
             return redirect(e.getActionClass());
         }
+    }
+
+    /**
+     * Calls the parent's godHandPrologue method.
+     * <p>
+     * This method exists to allow subclasses or tests to override
+     * the behavior of the parent class invocation.
+     * </p>
+     *
+     * @param runtime the action runtime context
+     * @return the action response from the parent
+     */
+    protected ActionResponse superGodHandPrologue(final ActionRuntime runtime) {
+        return super.godHandPrologue(runtime);
     }
 
     /**

@@ -239,6 +239,40 @@ public class ActivityHelperTest extends UnitFessTestCase {
                 localLogMsg.get());
     }
 
+    // ===== Access Denied Audit Log Tests =====
+
+    @Test
+    public void test_accessDenied() {
+        activityHelper.useEcsFormat = false;
+        activityHelper.accessDenied(OptionalThing.empty(), "/admin/user/");
+        assertEquals("action:ACCESS_DENIED\tuser:-\tpath:/admin/user/", localLogMsg.get());
+
+        activityHelper.accessDenied(createUser("testuser", new String[0]), "/admin/user/");
+        assertEquals("action:ACCESS_DENIED\tuser:testuser\tpath:/admin/user/", localLogMsg.get());
+
+        activityHelper.accessDenied(createUser("testuser", new String[] { "111", "222" }), "/admin/role/");
+        assertEquals("action:ACCESS_DENIED\tuser:testuser\tpath:/admin/role/", localLogMsg.get());
+    }
+
+    @Test
+    public void test_accessDenied_ecs() {
+        activityHelper.useEcsFormat = true;
+        activityHelper.accessDenied(OptionalThing.empty(), "/admin/user/");
+        assertEquals(
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS_DENIED\",\"labels.user\":\"-\",\"labels.path\":\"\\/admin\\/user\\/\"}",
+                localLogMsg.get());
+
+        activityHelper.accessDenied(createUser("testuser", new String[0]), "/admin/user/");
+        assertEquals(
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS_DENIED\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/admin\\/user\\/\"}",
+                localLogMsg.get());
+
+        activityHelper.accessDenied(createUser("testuser", new String[] { "111", "222" }), "/admin/role/");
+        assertEquals(
+                "{\"@timestamp\":\"2022-01-01T00:00:00.000Z\",\"log.level\":\"INFO\",\"ecs.version\":\"1.2.0\",\"service.name\":\"fess\",\"event.dataset\":\"app\",\"process.thread.name\":\"main\",\"log.logger\":\"org.codelibs.fess.helper.ActivityHelperTest$1\",\"labels.action\":\"ACCESS_DENIED\",\"labels.user\":\"testuser\",\"labels.path\":\"\\/admin\\/role\\/\"}",
+                localLogMsg.get());
+    }
+
     // ===== Script Execution Audit Log Tests =====
 
     @Test

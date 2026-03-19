@@ -243,6 +243,19 @@ public class ActivityHelper {
     }
 
     /**
+     * Log the access denied activity.
+     * @param user The user.
+     * @param path The path.
+     */
+    public void accessDenied(final OptionalThing<FessUserBean> user, final String path) {
+        final Map<String, String> valueMap = new LinkedHashMap<>();
+        valueMap.put("action", Action.ACCESS_DENIED.name());
+        valueMap.put("user", user.map(FessUserBean::getUserId).orElse("-"));
+        valueMap.put("path", path);
+        log(valueMap);
+    }
+
+    /**
      * Print the log.
      * @param action The action.
      * @param user The user.
@@ -348,7 +361,11 @@ public class ActivityHelper {
         /**
          * The script execution action.
          */
-        SCRIPT_EXECUTION;
+        SCRIPT_EXECUTION,
+        /**
+         * The access denied action.
+         */
+        ACCESS_DENIED;
     }
 
     /**
