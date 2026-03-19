@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.chat;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -575,11 +576,121 @@ public class ChatClientTest extends UnitFessTestCase {
         assertEquals("/go/?rt=123&docId=doc123&queryId=q1&order=0", source.getGoUrl());
     }
 
+    // ========== searchWithQuery with filters tests ==========
+
+    @Test
+    public void test_searchWithQuery_filters_null() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQueryFiltered(null, Collections.emptyMap(), new String[0]);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_blank() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQueryFiltered("   ", Collections.emptyMap(), new String[0]);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_exceedsMaxLength() {
+        final String longQuery = "a".repeat(1001);
+        final List<Map<String, Object>> result = chatClient.testSearchWithQueryFiltered(longQuery, Collections.emptyMap(), new String[0]);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_validQuery() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQueryFiltered("OpenSearch tutorial", Collections.emptyMap(), new String[0]);
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_rejectsDangerousPattern() {
+        final List<Map<String, Object>> result = chatClient.testSearchWithQueryFiltered("*:*", Collections.emptyMap(), new String[0]);
+        assertTrue(result.isEmpty());
+        assertFalse(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_validWithFields() {
+        chatClient.resetSearchDocumentsCalled();
+        final Map<String, String[]> fields = new HashMap<>();
+        fields.put("label", new String[] { "internal" });
+        chatClient.testSearchWithQueryFiltered("Fess tutorial", fields, new String[0]);
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    @Test
+    public void test_searchWithQuery_filters_validWithExtraQueries() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQueryFiltered("Fess tutorial", Collections.emptyMap(), new String[] { "filetype:pdf" });
+        assertTrue(chatClient.wasSearchDocumentsCalled());
+    }
+
+    // ========== searchWithQuery tracks queries ==========
+
+    @Test
+    public void test_searchWithQuery_tracksQueryString() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("Fess Docker");
+        assertEquals(1, chatClient.getSearchedQueries().size());
+        assertEquals("Fess Docker", chatClient.getSearchedQueries().get(0));
+    }
+
+    @Test
+    public void test_searchWithQuery_multipleSearches_tracksAll() {
+        chatClient.resetSearchDocumentsCalled();
+        chatClient.testSearchWithQuery("query1");
+        chatClient.testSearchWithQuery("query2");
+        assertEquals(2, chatClient.getSearchedQueries().size());
+        assertEquals("query1", chatClient.getSearchedQueries().get(0));
+        assertEquals("query2", chatClient.getSearchedQueries().get(1));
+    }
+
+    // ========== searchWithQuery with configurable results ==========
+
+    @Test
+    public void test_searchWithQuery_returnsConfiguredResults() {
+        final List<Map<String, Object>> docs = new ArrayList<>();
+        final Map<String, Object> doc = new HashMap<>();
+        doc.put("title", "Test Doc");
+        doc.put("doc_id", "doc1");
+        docs.add(doc);
+        chatClient.setSearchResults(docs);
+        chatClient.resetSearchDocumentsCalled();
+
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery("Fess");
+        assertEquals(1, result.size());
+        assertEquals("Test Doc", result.get(0).get("title"));
+    }
+
+    @Test
+    public void test_searchWithQuery_emptyResults() {
+        chatClient.setSearchResults(Collections.emptyList());
+        chatClient.resetSearchDocumentsCalled();
+
+        final List<Map<String, Object>> result = chatClient.testSearchWithQuery("nonexistent");
+        assertTrue(result.isEmpty());
+    }
+
     // ========== Testable subclass ==========
 
     static class TestableChatClient extends ChatClient {
 
         private boolean searchDocumentsCalled = false;
+        private final List<String> searchedQueries = new ArrayList<>();
+        private List<Map<String, Object>> searchResultsToReturn = Collections.emptyList();
+
+        void setSearchResults(final List<Map<String, Object>> results) {
+            this.searchResultsToReturn = results;
+        }
+
+        List<String> getSearchedQueries() {
+            return searchedQueries;
+        }
 
         String testBuildAssistantHistoryContent(final ChatMessage msg, final String mode) {
             return buildAssistantHistoryContent(msg, mode);
@@ -606,10 +717,24 @@ public class ChatClientTest extends UnitFessTestCase {
             return buildGoUrl(contextPath, docId, queryId, requestedTime, order);
         }
 
+        List<Map<String, Object>> testSearchWithQueryFiltered(final String query, final Map<String, String[]> fields,
+                final String[] extraQueries) {
+            return searchWithQuery(query, fields, extraQueries);
+        }
+
         @Override
         protected List<Map<String, Object>> searchDocuments(final String query) {
             searchDocumentsCalled = true;
-            return Collections.emptyList();
+            searchedQueries.add(query);
+            return searchResultsToReturn;
+        }
+
+        @Override
+        protected List<Map<String, Object>> searchDocuments(final String query, final Map<String, String[]> fields,
+                final String[] extraQueries) {
+            searchDocumentsCalled = true;
+            searchedQueries.add(query);
+            return searchResultsToReturn;
         }
 
         boolean wasSearchDocumentsCalled() {
@@ -618,6 +743,7 @@ public class ChatClientTest extends UnitFessTestCase {
 
         void resetSearchDocumentsCalled() {
             searchDocumentsCalled = false;
+            searchedQueries.clear();
         }
     }
 }

@@ -301,6 +301,24 @@ public class LlmClientManager {
     }
 
     /**
+     * Regenerates a search query when the previous query failed.
+     *
+     * @param userMessage the user's original message
+     * @param failedQuery the query that failed
+     * @param failureReason the reason for failure
+     * @param history the conversation history
+     * @return a new query string
+     * @throws LlmException if LLM is not available
+     */
+    public String regenerateQuery(final String userMessage, final String failedQuery, final String failureReason,
+            final List<LlmMessage> history) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] Delegating regenerateQuery. llmType={}", getLlmType());
+        }
+        return getAvailableClient().regenerateQuery(userMessage, failedQuery, failureReason, history);
+    }
+
+    /**
      * Generates an answer using document content (streaming).
      *
      * @param userMessage the user's message

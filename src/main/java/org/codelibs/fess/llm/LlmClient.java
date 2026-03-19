@@ -104,6 +104,17 @@ public interface LlmClient {
     LlmChatResponse generateAnswer(String userMessage, List<Map<String, Object>> documents, List<LlmMessage> history);
 
     /**
+     * Regenerates a search query when the previous query failed to produce relevant results.
+     *
+     * @param userMessage the user's original message
+     * @param failedQuery the query that failed
+     * @param failureReason the reason for failure ("no_results" or "no_relevant_results")
+     * @param history the conversation history
+     * @return a new query string, or the userMessage if regeneration fails
+     */
+    String regenerateQuery(String userMessage, String failedQuery, String failureReason, List<LlmMessage> history);
+
+    /**
      * Generates an answer using document content (streaming version for enhanced flow).
      *
      * @param userMessage the user's message

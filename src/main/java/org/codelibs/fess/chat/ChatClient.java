@@ -108,37 +108,7 @@ public class ChatClient {
      * @return the chat response including session info and sources
      */
     public ChatResult chat(final String sessionId, final String userMessage, final String userId) {
-        final long startTime = System.currentTimeMillis();
-        final String contextPath = resolveContextPath();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
-        }
-
-        final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        final List<LlmMessage> history = extractHistory(session);
-        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
-        session.addMessage(userChatMessage);
-        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage);
-        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-
-        try {
-            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
-            final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
-            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
-            session.addMessage(assistantMessage);
-            logger.info("[RAG] Chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
-            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
-        } catch (final Exception e) {
-            if (e instanceof LlmException) {
-                logger.warn("[RAG] LLM error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
-            } else {
-                logger.warn("[RAG] Unexpected error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
-            }
-            throw e;
-        } finally {
-            session.trimHistory(getMaxHistoryMessages());
-        }
+        return chat(sessionId, userMessage, userId, Collections.emptyMap(), new String[0]);
     }
 
     /**
@@ -167,10 +137,44 @@ public class ChatClient {
         // Add user message immediately for session integrity under concurrent access
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
-        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage, safeFields, safeExtraQueries);
-        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
 
         try {
+            // Intent detection
+            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RAG] Intent detected. intent={}, query={}", intentResult.getIntent(), intentResult.getQuery());
+            }
+
+            if (intentResult.getIntent() == ChatIntent.UNCLEAR) {
+                // Unclear intent - generate answer with empty documents to ask for clarification
+                final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, Collections.emptyList(), history);
+                final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
+                session.addMessage(assistantMessage);
+                logger.info("[RAG] Chat completed (unclear). sessionId={}, elapsedTime={}ms", session.getSessionId(),
+                        System.currentTimeMillis() - startTime);
+                return new ChatResult(session.getSessionId(), assistantMessage, Collections.emptyList());
+            }
+
+            // For SUMMARY intent, search by URL; for SEARCH/FAQ, search with query
+            ChatSearchResult searchResult;
+            if (intentResult.getIntent() == ChatIntent.SUMMARY && StringUtil.isNotBlank(intentResult.getDocumentUrl())) {
+                searchResult = searchByUrlWithMetadata(intentResult.getDocumentUrl());
+            } else {
+                final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                searchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+
+                // Fallback: regenerate query if no results
+                if (searchResult.getDocuments().isEmpty()) {
+                    logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
+                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", history);
+                    if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
+                        logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
+                        searchResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
+                    }
+                }
+            }
+
+            final List<Map<String, Object>> searchResults = searchResult.getDocuments();
             final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
@@ -178,8 +182,8 @@ public class ChatClient {
 
             session.addMessage(assistantMessage);
 
-            logger.info("[RAG] Chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
+            logger.info("[RAG] Chat completed. sessionId={}, intent={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
+                    intentResult.getIntent(), searchResults.size(), System.currentTimeMillis() - startTime);
 
             return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
         } catch (final Exception e) {
@@ -187,110 +191,6 @@ public class ChatClient {
                 logger.warn("[RAG] LLM error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
             } else {
                 logger.warn("[RAG] Unexpected error during chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
-            }
-            throw e;
-        } finally {
-            session.trimHistory(getMaxHistoryMessages());
-        }
-    }
-
-    /**
-     * Performs a streaming chat request with RAG.
-     *
-     * @param sessionId the session ID (can be null for new sessions)
-     * @param userMessage the user's message
-     * @param userId the user ID (can be null for anonymous users)
-     * @param callback the callback to receive streaming chunks
-     * @return the chat result with session info and sources
-     */
-    public ChatResult streamChat(final String sessionId, final String userMessage, final String userId, final LlmStreamCallback callback) {
-        final long startTime = System.currentTimeMillis();
-        final String contextPath = resolveContextPath();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
-        }
-
-        final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        final List<LlmMessage> history = extractHistory(session);
-        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
-        session.addMessage(userChatMessage);
-        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage);
-        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-
-        final StringBuilder responseContent = new StringBuilder();
-        try {
-            llmClientManager.streamGenerateAnswer(userMessage, searchResults, history, (chunk, done) -> {
-                responseContent.append(chunk);
-                callback.onChunk(chunk, done);
-            });
-            final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
-            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
-            session.addMessage(assistantMessage);
-            logger.info("[RAG] Stream chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
-            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
-        } catch (final Exception e) {
-            if (e instanceof LlmException) {
-                logger.warn("[RAG] LLM error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
-            } else {
-                logger.warn("[RAG] Unexpected error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
-            }
-            throw e;
-        } finally {
-            session.trimHistory(getMaxHistoryMessages());
-        }
-    }
-
-    /**
-     * Performs a streaming chat request with RAG and search filters.
-     *
-     * @param sessionId the session ID (can be null for new sessions)
-     * @param userMessage the user's message
-     * @param userId the user ID (can be null for anonymous users)
-     * @param fields the field filters (e.g., label)
-     * @param extraQueries the extra query filters (e.g., filetype, timestamp)
-     * @param callback the callback to receive streaming chunks
-     * @return the chat result with session info and sources
-     */
-    public ChatResult streamChat(final String sessionId, final String userMessage, final String userId, final Map<String, String[]> fields,
-            final String[] extraQueries, final LlmStreamCallback callback) {
-        final Map<String, String[]> safeFields = fields != null ? fields : Collections.emptyMap();
-        final String[] safeExtraQueries = extraQueries != null ? extraQueries : new String[0];
-        final long startTime = System.currentTimeMillis();
-        final String contextPath = resolveContextPath();
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting streaming chat request. sessionId={}, userId={}, userMessage={}", sessionId, userId, userMessage);
-        }
-
-        final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        final List<LlmMessage> history = extractHistory(session);
-        final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
-        session.addMessage(userChatMessage);
-        final ChatSearchResult searchResult = searchDocumentsWithMetadata(userMessage, safeFields, safeExtraQueries);
-        final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-
-        final StringBuilder responseContent = new StringBuilder();
-        try {
-            llmClientManager.streamGenerateAnswer(userMessage, searchResults, history, (chunk, done) -> {
-                responseContent.append(chunk);
-                callback.onChunk(chunk, done);
-            });
-
-            final ChatMessage assistantMessage = ChatMessage.assistantMessage(responseContent.toString());
-
-            addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
-
-            session.addMessage(assistantMessage);
-
-            logger.info("[RAG] Stream chat completed. sessionId={}, sourcesCount={}, elapsedTime={}ms", session.getSessionId(),
-                    searchResults.size(), System.currentTimeMillis() - startTime);
-
-            return new ChatResult(session.getSessionId(), assistantMessage, searchResults);
-        } catch (final Exception e) {
-            if (e instanceof LlmException) {
-                logger.warn("[RAG] LLM error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage());
-            } else {
-                logger.warn("[RAG] Unexpected error during stream chat. sessionId={}, error={}", session.getSessionId(), e.getMessage(), e);
             }
             throw e;
         } finally {
@@ -437,8 +337,8 @@ public class ChatClient {
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
-                final ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
-                final List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
+                ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+                List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
                 searchQueryId = querySearchResult.getQueryId();
                 searchRequestedTime = querySearchResult.getRequestedTime();
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
@@ -450,8 +350,23 @@ public class ChatClient {
                             ChatPhaseCallback.PHASE_SEARCH, query, searchResults.size(), System.currentTimeMillis() - phaseStartTime);
                 }
 
+                // Fallback: regenerate query if no results
                 if (searchResults.isEmpty()) {
-                    // No results - generate fallback response
+                    logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
+                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", history);
+                    if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
+                        logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
+                        callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
+                        final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
+                        searchResults = fallbackResult.getDocuments();
+                        searchQueryId = fallbackResult.getQueryId();
+                        searchRequestedTime = fallbackResult.getRequestedTime();
+                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                    }
+                }
+
+                if (searchResults.isEmpty()) {
+                    // No results even after fallback - generate no-results response
                     phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
                     llmClientManager.generateNoResultsResponse(userMessage, history, (chunk, done) -> {
@@ -467,7 +382,7 @@ public class ChatClient {
                     // Phase 3: Evaluate results
                     phaseStartTime = System.currentTimeMillis();
                     callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
-                    final RelevanceEvaluationResult evalResult = llmClientManager.evaluateResults(userMessage, query, searchResults);
+                    RelevanceEvaluationResult evalResult = llmClientManager.evaluateResults(userMessage, query, searchResults);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
 
                     if (logger.isDebugEnabled()) {
@@ -476,20 +391,52 @@ public class ChatClient {
                                 System.currentTimeMillis() - phaseStartTime);
                     }
 
+                    // Fallback: regenerate query if no relevant results
                     if (!evalResult.isHasRelevantResults()) {
-                        // No relevant results - generate fallback response
-                        phaseStartTime = System.currentTimeMillis();
-                        callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
-                        llmClientManager.generateNoResultsResponse(userMessage, history, (chunk, done) -> {
-                            fullResponse.append(chunk);
-                            callback.onChunk(chunk, done);
-                        });
-                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms",
-                                    ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                        logger.info("[RAG] No relevant results in evaluation, regenerating query. originalQuery={}", query);
+                        final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_relevant_results", history);
+
+                        boolean fallbackSucceeded = false;
+                        if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
+                            callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
+                            final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
+                            final List<Map<String, Object>> fallbackSearchResults = fallbackResult.getDocuments();
+                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+
+                            if (!fallbackSearchResults.isEmpty()) {
+                                // Re-evaluate fallback results
+                                callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "Evaluating relevance...");
+                                final RelevanceEvaluationResult fallbackEvalResult =
+                                        llmClientManager.evaluateResults(userMessage, newQuery, fallbackSearchResults);
+                                callback.onPhaseComplete(ChatPhaseCallback.PHASE_EVALUATE);
+
+                                if (fallbackEvalResult.isHasRelevantResults()) {
+                                    searchResults = fallbackSearchResults;
+                                    searchQueryId = fallbackResult.getQueryId();
+                                    searchRequestedTime = fallbackResult.getRequestedTime();
+                                    evalResult = fallbackEvalResult;
+                                    fallbackSucceeded = true;
+                                }
+                            }
                         }
-                    } else {
+
+                        if (!fallbackSucceeded) {
+                            // All fallbacks failed - generate no-results response
+                            phaseStartTime = System.currentTimeMillis();
+                            callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "Generating response...");
+                            llmClientManager.generateNoResultsResponse(userMessage, history, (chunk, done) -> {
+                                fullResponse.append(chunk);
+                                callback.onChunk(chunk, done);
+                            });
+                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms",
+                                        ChatPhaseCallback.PHASE_ANSWER, fullResponse.length(), System.currentTimeMillis() - phaseStartTime);
+                            }
+                        }
+                    }
+
+                    if (evalResult.isHasRelevantResults()) {
                         // Phase 4: Fetch full content
                         phaseStartTime = System.currentTimeMillis();
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "Retrieving document content...");
