@@ -1001,18 +1001,17 @@ public class ChatClientTest extends UnitFessTestCase {
         }
 
         @Override
-        protected List<Map<String, Object>> searchDocuments(final String query) {
+        protected ChatSearchResult searchDocuments(final String query) {
             searchDocumentsCalled = true;
             searchedQueries.add(query);
-            return searchResultsToReturn;
+            return new ChatSearchResult(searchResultsToReturn, null, 0L);
         }
 
         @Override
-        protected List<Map<String, Object>> searchDocuments(final String query, final Map<String, String[]> fields,
-                final String[] extraQueries) {
+        protected ChatSearchResult searchDocuments(final String query, final Map<String, String[]> fields, final String[] extraQueries) {
             searchDocumentsCalled = true;
             searchedQueries.add(query);
-            return searchResultsToReturn;
+            return new ChatSearchResult(searchResultsToReturn, null, 0L);
         }
 
         boolean wasSearchDocumentsCalled() {

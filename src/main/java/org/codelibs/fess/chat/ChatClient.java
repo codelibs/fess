@@ -159,7 +159,7 @@ public class ChatClient {
             // For SUMMARY intent, search by URL; for SEARCH/FAQ, search with query
             ChatSearchResult searchResult;
             if (intentResult.getIntent() == ChatIntent.SUMMARY && StringUtil.isNotBlank(intentResult.getDocumentUrl())) {
-                searchResult = searchByUrlWithMetadata(intentResult.getDocumentUrl());
+                searchResult = searchByUrl(intentResult.getDocumentUrl());
             } else {
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
                 searchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
@@ -282,7 +282,7 @@ public class ChatClient {
                 final String documentUrl = intentResult.getDocumentUrl();
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching for document...", documentUrl);
-                final ChatSearchResult urlSearchResult = searchByUrlWithMetadata(documentUrl);
+                final ChatSearchResult urlSearchResult = searchByUrl(documentUrl);
                 final List<Map<String, Object>> urlResults = urlSearchResult.getDocuments();
                 searchQueryId = urlSearchResult.getQueryId();
                 searchRequestedTime = urlSearchResult.getRequestedTime();
@@ -728,21 +728,7 @@ public class ChatClient {
     }
 
     private ChatSearchResult searchWithQueryAndMetadata(final String query) {
-        if (StringUtil.isBlank(query)) {
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        if (query.length() > MAX_QUERY_LENGTH) {
-            logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
-            logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        return searchDocumentsWithMetadata(query);
+        return searchWithQueryAndMetadata(query, Collections.emptyMap(), new String[0]);
     }
 
     /**
@@ -760,25 +746,11 @@ public class ChatClient {
 
     private ChatSearchResult searchWithQueryAndMetadata(final String query, final Map<String, String[]> fields,
             final String[] extraQueries) {
-        if (fields.isEmpty() && extraQueries.length == 0) {
-            return searchWithQueryAndMetadata(query);
+        final ChatSearchResult rejected = validateQuery(query);
+        if (rejected != null) {
+            return rejected;
         }
-
-        if (StringUtil.isBlank(query)) {
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        if (query.length() > MAX_QUERY_LENGTH) {
-            logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
-            logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
-            return new ChatSearchResult(Collections.emptyList(), null, 0L);
-        }
-
-        return searchDocumentsWithMetadata(query, fields, extraQueries);
+        return searchDocuments(query, fields, extraQueries);
     }
 
     /**
@@ -834,41 +806,6 @@ public class ChatClient {
                     System.currentTimeMillis() - startTime);
             return Collections.emptyList();
         }
-    }
-
-    /**
-     * Searches for documents by URL.
-     *
-     * @param url the URL to search for
-     * @return list of documents matching the URL
-     */
-    protected List<Map<String, Object>> searchByUrl(final String url) {
-        if (StringUtil.isBlank(url)) {
-            return Collections.emptyList();
-        }
-
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
-
-        try {
-            final SearchRenderData data = new SearchRenderData();
-            final ChatSearchRequestParams params =
-                    new ChatSearchRequestParams("url:\"" + escapeQueryValue(url) + "\"", maxDocs, fessConfig);
-
-            ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
-
-            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
-
-            @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
-            if (docs != null) {
-                return docs;
-            }
-        } catch (final Exception e) {
-            logger.warn("Failed to search documents by URL: url={}", url, e);
-        }
-
-        return Collections.emptyList();
     }
 
     /**
@@ -931,78 +868,66 @@ public class ChatClient {
         return ComponentUtil.getFessConfig().getRagChatHistoryMaxMessagesAsInteger();
     }
 
-    /** Thread-local storage for search metadata captured during searchDocuments calls. */
-    private static final ThreadLocal<String> lastSearchQueryId = new ThreadLocal<>();
-
-    /** Thread-local storage for search metadata captured during searchDocuments calls. */
-    private static final ThreadLocal<Long> lastSearchRequestedTime = new ThreadLocal<>();
-
     /**
-     * Stores search metadata for retrieval by internal callers.
+     * Searches for documents relevant to the user's query.
+     * Delegates to the multi-argument variant with empty filters.
      *
-     * @param queryId the query ID from SearchRenderData
-     * @param requestedTime the requested time from SearchRenderData
+     * @param query the search query
+     * @return a ChatSearchResult with documents and search metadata
      */
-    protected void setLastSearchMetadata(final String queryId, final long requestedTime) {
-        lastSearchQueryId.set(queryId);
-        lastSearchRequestedTime.set(requestedTime);
+    protected ChatSearchResult searchDocuments(final String query) {
+        return searchDocuments(query, Collections.emptyMap(), new String[0]);
     }
 
     /**
-     * Clears search metadata from ThreadLocal to prevent stale data on error paths.
+     * Searches for documents by URL.
+     *
+     * @param url the URL to search for
+     * @return a ChatSearchResult with documents and search metadata
      */
-    private void clearLastSearchMetadata() {
-        lastSearchQueryId.remove();
-        lastSearchRequestedTime.remove();
-    }
-
-    /**
-     * Creates a ChatSearchResult by calling the protected searchDocuments method
-     * and retrieving captured metadata.
-     */
-    private ChatSearchResult searchDocumentsWithMetadata(final String query) {
-        try {
-            final List<Map<String, Object>> docs = searchDocuments(query);
-            return buildChatSearchResult(docs);
-        } finally {
-            clearLastSearchMetadata();
+    protected ChatSearchResult searchByUrl(final String url) {
+        if (StringUtil.isBlank(url)) {
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
-    }
 
-    /**
-     * Creates a ChatSearchResult by calling the protected searchDocuments method
-     * and retrieving captured metadata.
-     */
-    private ChatSearchResult searchDocumentsWithMetadata(final String query, final Map<String, String[]> fields,
-            final String[] extraQueries) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
+
         try {
-            final List<Map<String, Object>> docs = searchDocuments(query, fields, extraQueries);
-            return buildChatSearchResult(docs);
-        } finally {
-            clearLastSearchMetadata();
+            final SearchRenderData data = new SearchRenderData();
+            final ChatSearchRequestParams params =
+                    new ChatSearchRequestParams("url:\"" + escapeQueryValue(url) + "\"", maxDocs, fessConfig);
+
+            ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
+
+            @SuppressWarnings("unchecked")
+            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
+            if (docs != null) {
+                return new ChatSearchResult(docs, data.getQueryId(), data.getRequestedTime());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to search documents by URL: url={}", url, e);
         }
+
+        return new ChatSearchResult(Collections.emptyList(), null, 0L);
     }
 
     /**
-     * Creates a ChatSearchResult by calling the protected searchByUrl method
-     * and retrieving captured metadata.
+     * Validates a query and returns an empty result if invalid, or null if validation passed.
      */
-    private ChatSearchResult searchByUrlWithMetadata(final String url) {
-        try {
-            final List<Map<String, Object>> docs = searchByUrl(url);
-            return buildChatSearchResult(docs);
-        } finally {
-            clearLastSearchMetadata();
+    private ChatSearchResult validateQuery(final String query) {
+        if (StringUtil.isBlank(query)) {
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
         }
-    }
-
-    /**
-     * Creates a ChatSearchResult from documents and captured ThreadLocal metadata.
-     */
-    private ChatSearchResult buildChatSearchResult(final List<Map<String, Object>> docs) {
-        final String queryId = lastSearchQueryId.get();
-        final Long requestedTime = lastSearchRequestedTime.get();
-        return new ChatSearchResult(docs, queryId, requestedTime != null ? requestedTime : 0L);
+        if (query.length() > MAX_QUERY_LENGTH) {
+            logger.warn("[RAG] Rejected LLM-generated query exceeding max length. length={}", query.length());
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
+        }
+        if (DANGEROUS_QUERY_PATTERN.matcher(query).find()) {
+            logger.warn("[RAG] Rejected LLM-generated query with dangerous pattern. query={}", query);
+            return new ChatSearchResult(Collections.emptyList(), null, 0L);
+        }
+        return null;
     }
 
     /**
@@ -1012,66 +937,13 @@ public class ChatClient {
      * users only see documents they are authorized to access.
      * <p>
      * This is the primary extension point for subclasses to customize search behavior.
-     * It is called by backward-compatible (no-filter) methods.
-     * <p>
-     * Subclasses that override this method should call {@link #setLastSearchMetadata(String, long)}
-     * to provide queryId and requestedTime for go URL generation.
-     *
-     * @param query the search query
-     * @return a list of documents matching the query
-     */
-    protected List<Map<String, Object>> searchDocuments(final String query) {
-        final long startTime = System.currentTimeMillis();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Starting document search. query={}, maxDocs={}", query, maxDocs);
-        }
-
-        try {
-            final SearchRenderData data = new SearchRenderData();
-            final ChatSearchRequestParams params = new ChatSearchRequestParams(query, maxDocs, fessConfig);
-
-            ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
-
-            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
-
-            @SuppressWarnings("unchecked")
-            final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
-            if (docs != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("[RAG] Document search completed. query={}, resultCount={}, elapsedTime={}ms", query, docs.size(),
-                            System.currentTimeMillis() - startTime);
-                }
-                return docs;
-            }
-        } catch (final Exception e) {
-            logger.warn("Failed to search documents for RAG: query={}, elapsedTime={}ms", query, System.currentTimeMillis() - startTime, e);
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[RAG] Document search returned no results. query={}, elapsedTime={}ms", query,
-                    System.currentTimeMillis() - startTime);
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Searches for documents relevant to the user's query with filters.
-     * Filter-aware variant used by the chat API when filters are specified.
      *
      * @param query the search query
      * @param fields the field filters (e.g., label)
      * @param extraQueries the extra query filters (e.g., filetype, timestamp)
-     * @return a list of documents matching the query
+     * @return a ChatSearchResult with documents and search metadata
      */
-    protected List<Map<String, Object>> searchDocuments(final String query, final Map<String, String[]> fields,
-            final String[] extraQueries) {
-        if (fields.isEmpty() && extraQueries.length == 0) {
-            return searchDocuments(query);
-        }
-
+    protected ChatSearchResult searchDocuments(final String query, final Map<String, String[]> fields, final String[] extraQueries) {
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int maxDocs = fessConfig.getRagChatContextMaxDocumentsAsInteger();
@@ -1086,8 +958,6 @@ public class ChatClient {
 
             ComponentUtil.getSearchHelper().search(params, data, OptionalThing.empty());
 
-            setLastSearchMetadata(data.getQueryId(), data.getRequestedTime());
-
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> docs = (List<Map<String, Object>>) data.getDocumentItems();
             if (docs != null) {
@@ -1095,7 +965,7 @@ public class ChatClient {
                     logger.debug("[RAG] Document search completed. query={}, resultCount={}, elapsedTime={}ms", query, docs.size(),
                             System.currentTimeMillis() - startTime);
                 }
-                return docs;
+                return new ChatSearchResult(docs, data.getQueryId(), data.getRequestedTime());
             }
         } catch (final Exception e) {
             logger.warn("Failed to search documents for RAG: query={}, elapsedTime={}ms", query, System.currentTimeMillis() - startTime, e);
@@ -1105,7 +975,7 @@ public class ChatClient {
             logger.debug("[RAG] Document search returned no results. query={}, elapsedTime={}ms", query,
                     System.currentTimeMillis() - startTime);
         }
-        return new ArrayList<>();
+        return new ChatSearchResult(new ArrayList<>(), null, 0L);
     }
 
     /**
