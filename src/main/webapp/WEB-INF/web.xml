@@ -90,10 +90,6 @@
       <param-name>antiClickJackingEnabled</param-name>
       <param-value>false</param-value>
     </init-param>
-    <init-param>
-      <param-name>xssProtectionEnabled</param-name>
-      <param-value>false</param-value>
-    </init-param>
   </filter>
 
   <!-- ================================================================================= -->

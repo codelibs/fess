@@ -984,6 +984,10 @@ public class LoadControlFilterTest extends UnitFessTestCase {
         }
 
         @Override
+        public void sendRedirect(String location, int sc, boolean clearBuffer) {
+        }
+
+        @Override
         public void setDateHeader(String name, long date) {
         }
 
