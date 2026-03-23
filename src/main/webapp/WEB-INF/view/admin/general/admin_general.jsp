@@ -178,6 +178,49 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
+                                <%-- Search File Proxy --%>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.search_file_proxy_enabled"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="searchFileProxy"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="searchFileProxy" styleClass="form-check-input" property="searchFileProxy"/>
+                                            <label for="searchFileProxy" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%-- Browser Locale --%>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.search_use_browser_locale"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="searchUseBrowserLocale"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="searchUseBrowserLocale" styleClass="form-check-input" property="searchUseBrowserLocale"/>
+                                            <label for="searchUseBrowserLocale" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%-- SSO Type --%>
+                                <div class="form-group row">
+                                    <label for="ssoType" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.sso_type"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ssoType"/>
+                                        <la:select styleId="ssoType" property="ssoType" styleClass="form-control">
+                                            <la:option value="none">None</la:option>
+                                            <la:option value="oic">OpenID Connect</la:option>
+                                            <la:option value="saml">SAML</la:option>
+                                            <la:option value="spnego">SPNEGO</la:option>
+                                            <la:option value="entraid">Entra ID</la:option>
+                                        </la:select>
+                                    </div>
+                                </div>
                                 <div class="form-group row">
                                     <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.notification_to"/></label>
@@ -220,6 +263,15 @@ ${fe:html(true)}
                                         <input type="number" name="crawlingThreadCount" id="crawlingThreadCount"
                                                value="${f:h(crawlingThreadCount)}" class="form-control"
                                                min="1" max="1000">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="crawlingUserAgent" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.crawling_user_agent"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="crawlingUserAgent"/>
+                                        <la:text styleId="crawlingUserAgent" property="crawlingUserAgent"
+                                                 styleClass="form-control"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -478,6 +530,412 @@ ${fe:html(true)}
                                                  styleClass="form-control" autocomplete="off"/>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label for="ldapSecurityAuthentication"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.ldap_security_authentication"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ldapSecurityAuthentication"/>
+                                        <la:text styleId="ldapSecurityAuthentication" property="ldapSecurityAuthentication"
+                                                 styleClass="form-control" autocomplete="off"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="ldapInitialContextFactory"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.ldap_initial_context_factory"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="ldapInitialContextFactory"/>
+                                        <la:text styleId="ldapInitialContextFactory" property="ldapInitialContextFactory"
+                                                 styleClass="form-control" autocomplete="off"/>
+                                    </div>
+                                </div>
+                                    <%-- OpenID Connect --%>
+                                <h4><la:message key="labels.general_menu_oic"/></h4>
+                                <div class="form-group row">
+                                    <label for="oicClientId"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_client_id"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicClientId"/>
+                                        <la:password styleId="oicClientId" property="oicClientId"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicClientSecret"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_client_secret"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicClientSecret"/>
+                                        <la:password styleId="oicClientSecret" property="oicClientSecret"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicAuthServerUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_auth_server_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicAuthServerUrl"/>
+                                        <la:text styleId="oicAuthServerUrl" property="oicAuthServerUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicTokenServerUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_token_server_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicTokenServerUrl"/>
+                                        <la:text styleId="oicTokenServerUrl" property="oicTokenServerUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicRedirectUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_redirect_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicRedirectUrl"/>
+                                        <la:text styleId="oicRedirectUrl" property="oicRedirectUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicScope"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_scope"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicScope"/>
+                                        <la:text styleId="oicScope" property="oicScope"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicBaseUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_base_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicBaseUrl"/>
+                                        <la:text styleId="oicBaseUrl" property="oicBaseUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicDefaultGroups"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_default_groups"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicDefaultGroups"/>
+                                        <la:text styleId="oicDefaultGroups" property="oicDefaultGroups"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="oicDefaultRoles"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.oic_default_roles"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="oicDefaultRoles"/>
+                                        <la:text styleId="oicDefaultRoles" property="oicDefaultRoles"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                    <%-- SAML --%>
+                                <h4><la:message key="labels.general_menu_saml"/></h4>
+                                <div class="form-group row">
+                                    <label for="samlSpBaseUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_sp_base_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlSpBaseUrl"/>
+                                        <la:text styleId="samlSpBaseUrl" property="samlSpBaseUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlAttributeGroupName"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_attribute_group_name"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlAttributeGroupName"/>
+                                        <la:text styleId="samlAttributeGroupName" property="samlAttributeGroupName"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlAttributeRoleName"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_attribute_role_name"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlAttributeRoleName"/>
+                                        <la:text styleId="samlAttributeRoleName" property="samlAttributeRoleName"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlDefaultGroups"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_default_groups"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlDefaultGroups"/>
+                                        <la:text styleId="samlDefaultGroups" property="samlDefaultGroups"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlDefaultRoles"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_default_roles"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlDefaultRoles"/>
+                                        <la:text styleId="samlDefaultRoles" property="samlDefaultRoles"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                    <%-- SPNEGO --%>
+                                <h4><la:message key="labels.general_menu_spnego"/></h4>
+                                <div class="form-group row">
+                                    <label for="spnegoKrb5Conf"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_krb5_conf"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoKrb5Conf"/>
+                                        <la:text styleId="spnegoKrb5Conf" property="spnegoKrb5Conf"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoLoginConf"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_login_conf"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoLoginConf"/>
+                                        <la:text styleId="spnegoLoginConf" property="spnegoLoginConf"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoLoginClientModule"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_login_client_module"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoLoginClientModule"/>
+                                        <la:text styleId="spnegoLoginClientModule" property="spnegoLoginClientModule"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoLoginServerModule"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_login_server_module"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoLoginServerModule"/>
+                                        <la:text styleId="spnegoLoginServerModule" property="spnegoLoginServerModule"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoPreauthUsername"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_preauth_username"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoPreauthUsername"/>
+                                        <la:text styleId="spnegoPreauthUsername" property="spnegoPreauthUsername"
+                                                 styleClass="form-control" autocomplete="off"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoPreauthPassword"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_preauth_password"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoPreauthPassword"/>
+                                        <la:password styleId="spnegoPreauthPassword" property="spnegoPreauthPassword"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_allow_basic"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="spnegoAllowBasic"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="spnegoAllowBasic" styleClass="form-check-input" property="spnegoAllowBasic"/>
+                                            <label for="spnegoAllowBasic" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_allow_unsecure_basic"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="spnegoAllowUnsecureBasic"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="spnegoAllowUnsecureBasic" styleClass="form-check-input" property="spnegoAllowUnsecureBasic"/>
+                                            <label for="spnegoAllowUnsecureBasic" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_prompt_ntlm"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="spnegoPromptNtlm"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="spnegoPromptNtlm" styleClass="form-check-input" property="spnegoPromptNtlm"/>
+                                            <label for="spnegoPromptNtlm" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_allow_localhost"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="spnegoAllowLocalhost"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="spnegoAllowLocalhost" styleClass="form-check-input" property="spnegoAllowLocalhost"/>
+                                            <label for="spnegoAllowLocalhost" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_allow_delegation"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="spnegoAllowDelegation"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="spnegoAllowDelegation" styleClass="form-check-input" property="spnegoAllowDelegation"/>
+                                            <label for="spnegoAllowDelegation" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="spnegoExcludeDirs"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_exclude_dirs"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoExcludeDirs"/>
+                                        <la:text styleId="spnegoExcludeDirs" property="spnegoExcludeDirs"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                    <%-- Entra ID --%>
+                                <h4><la:message key="labels.general_menu_entraid"/></h4>
+                                <div class="form-group row">
+                                    <label for="entraidClientId"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_client_id"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidClientId"/>
+                                        <la:password styleId="entraidClientId" property="entraidClientId"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidClientSecret"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_client_secret"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidClientSecret"/>
+                                        <la:password styleId="entraidClientSecret" property="entraidClientSecret"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidTenant"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_tenant"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidTenant"/>
+                                        <la:text styleId="entraidTenant" property="entraidTenant"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidAuthority"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_authority"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidAuthority"/>
+                                        <la:text styleId="entraidAuthority" property="entraidAuthority"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidReplyUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_reply_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidReplyUrl"/>
+                                        <la:text styleId="entraidReplyUrl" property="entraidReplyUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidStateTtl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_state_ttl"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidStateTtl"/>
+                                        <la:text styleId="entraidStateTtl" property="entraidStateTtl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidDefaultGroups"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_default_groups"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidDefaultGroups"/>
+                                        <la:text styleId="entraidDefaultGroups" property="entraidDefaultGroups"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidDefaultRoles"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_default_roles"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidDefaultRoles"/>
+                                        <la:text styleId="entraidDefaultRoles" property="entraidDefaultRoles"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidPermissionFields"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_permission_fields"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidPermissionFields"/>
+                                        <la:text styleId="entraidPermissionFields" property="entraidPermissionFields"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_use_ds"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="entraidUseDs"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="entraidUseDs" styleClass="form-check-input" property="entraidUseDs"/>
+                                            <label for="entraidUseDs" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                                     <%-- Nortification --%>
                                 <h4><la:message key="labels.general_menu_notification"/></h4>
                                 <div class="form-group row">
@@ -497,6 +955,36 @@ ${fe:html(true)}
                                     <div class="col-sm-9">
                                         <la:errors property="notificationSearchTop"/>
                                         <la:textarea styleId="notificationSearchTop" property="notificationSearchTop"
+                                                     styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="notificationAdvanceSearch"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.notification_advance_search"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="notificationAdvanceSearch"/>
+                                        <la:textarea styleId="notificationAdvanceSearch" property="notificationAdvanceSearch"
+                                                     styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="slackWebhookUrls"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.slack_webhook_urls"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="slackWebhookUrls"/>
+                                        <la:textarea styleId="slackWebhookUrls" property="slackWebhookUrls"
+                                                     styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="googleChatWebhookUrls"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.google_chat_webhook_urls"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="googleChatWebhookUrls"/>
+                                        <la:textarea styleId="googleChatWebhookUrls" property="googleChatWebhookUrls"
                                                      styleClass="form-control"/>
                                     </div>
                                 </div>

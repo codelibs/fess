@@ -3468,6 +3468,21 @@ public class FessLabels extends UserMessages {
     /** The key of the message: The AI service is temporarily unavailable. Please try again later. */
     public static final String LABELS_chat_error_service_unavailable = "{labels.chat_error_service_unavailable}";
 
+    /** The key of the message: The request timed out. Please try again. */
+    public static final String LABELS_chat_error_timeout = "{labels.chat_error_timeout}";
+
+    /** The key of the message: The message is too long to process. Please shorten it and try again. */
+    public static final String LABELS_chat_error_context_length_exceeded = "{labels.chat_error_context_length_exceeded}";
+
+    /** The key of the message: The AI model was not found. Please contact the administrator. */
+    public static final String LABELS_chat_error_model_not_found = "{labels.chat_error_model_not_found}";
+
+    /** The key of the message: Received an invalid response from the AI service. Please try again. */
+    public static final String LABELS_chat_error_invalid_response = "{labels.chat_error_invalid_response}";
+
+    /** The key of the message: Unable to connect to the AI service. Please check the network connection. */
+    public static final String LABELS_chat_error_connection = "{labels.chat_error_connection}";
+
     /** The key of the message: Sources */
     public static final String LABELS_chat_sources = "{labels.chat_sources}";
 
@@ -3476,6 +3491,12 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: AI Assistant */
     public static final String LABELS_chat_status_ready = "{labels.chat_status_ready}";
+
+    /** The key of the message: Processing */
+    public static final String LABELS_chat_status_thinking = "{labels.chat_status_thinking}";
+
+    /** The key of the message: Error */
+    public static final String LABELS_chat_status_error = "{labels.chat_status_error}";
 
     /** The key of the message: ... */
     public static final String LABELS_chat_waiting = "{labels.chat_waiting}";
@@ -3495,6 +3516,48 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Generating answer... */
     public static final String LABELS_chat_phase_answer = "{labels.chat_phase_answer}";
 
+    /** The key of the message: Chat messages */
+    public static final String LABELS_chat_messages_area = "{labels.chat_messages_area}";
+
+    /** The key of the message: Ask and Discover. */
+    public static final String LABELS_chat_welcome_title = "{labels.chat_welcome_title}";
+
+    /** The key of the message: Ask questions and I'll search through documents to find the answers you need. */
+    public static final String LABELS_chat_welcome_description = "{labels.chat_welcome_description}";
+
+    /** The key of the message: Analyze */
+    public static final String LABELS_chat_step_intent = "{labels.chat_step_intent}";
+
+    /** The key of the message: Search */
+    public static final String LABELS_chat_step_search = "{labels.chat_step_search}";
+
+    /** The key of the message: Evaluate */
+    public static final String LABELS_chat_step_evaluate = "{labels.chat_step_evaluate}";
+
+    /** The key of the message: Retrieve */
+    public static final String LABELS_chat_step_fetch = "{labels.chat_step_fetch}";
+
+    /** The key of the message: Answer */
+    public static final String LABELS_chat_step_answer = "{labels.chat_step_answer}";
+
+    /** The key of the message: Press Enter to send, Shift+Enter for new line */
+    public static final String LABELS_chat_input_hint = "{labels.chat_input_hint}";
+
+    /** The key of the message: Send message */
+    public static final String LABELS_chat_send = "{labels.chat_send}";
+
+    /** The key of the message: Retry */
+    public static final String LABELS_chat_retry = "{labels.chat_retry}";
+
+    /** The key of the message: Dismiss */
+    public static final String LABELS_chat_dismiss = "{labels.chat_dismiss}";
+
+    /** The key of the message: Copied! */
+    public static final String LABELS_chat_copied = "{labels.chat_copied}";
+
+    /** The key of the message: Copy failed */
+    public static final String LABELS_chat_copy_failed = "{labels.chat_copy_failed}";
+
     /** The key of the message: Filter */
     public static final String LABELS_chat_filter = "{labels.chat_filter}";
 
@@ -3503,6 +3566,153 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Clear */
     public static final String LABELS_chat_clear = "{labels.chat_clear}";
+
+    /** The key of the message: Search File Proxy */
+    public static final String LABELS_search_file_proxy_enabled = "{labels.search_file_proxy_enabled}";
+
+    /** The key of the message: Use Browser Locale */
+    public static final String LABELS_search_use_browser_locale = "{labels.search_use_browser_locale}";
+
+    /** The key of the message: SSO Type */
+    public static final String LABELS_sso_type = "{labels.sso_type}";
+
+    /** The key of the message: User Agent */
+    public static final String LABELS_crawling_user_agent = "{labels.crawling_user_agent}";
+
+    /** The key of the message: Slack Webhook URLs */
+    public static final String LABELS_slack_webhook_urls = "{labels.slack_webhook_urls}";
+
+    /** The key of the message: Google Chat Webhook URLs */
+    public static final String LABELS_google_chat_webhook_urls = "{labels.google_chat_webhook_urls}";
+
+    /** The key of the message: Advanced Search Page */
+    public static final String LABELS_notification_advance_search = "{labels.notification_advance_search}";
+
+    /** The key of the message: Security Authentication */
+    public static final String LABELS_ldap_security_authentication = "{labels.ldap_security_authentication}";
+
+    /** The key of the message: Initial Context Factory */
+    public static final String LABELS_ldap_initial_context_factory = "{labels.ldap_initial_context_factory}";
+
+    /** The key of the message: OpenID Connect */
+    public static final String LABELS_general_menu_oic = "{labels.general_menu_oic}";
+
+    /** The key of the message: Client ID */
+    public static final String LABELS_oic_client_id = "{labels.oic_client_id}";
+
+    /** The key of the message: Client Secret */
+    public static final String LABELS_oic_client_secret = "{labels.oic_client_secret}";
+
+    /** The key of the message: Authorization Server URL */
+    public static final String LABELS_oic_auth_server_url = "{labels.oic_auth_server_url}";
+
+    /** The key of the message: Token Server URL */
+    public static final String LABELS_oic_token_server_url = "{labels.oic_token_server_url}";
+
+    /** The key of the message: Redirect URL */
+    public static final String LABELS_oic_redirect_url = "{labels.oic_redirect_url}";
+
+    /** The key of the message: Scope */
+    public static final String LABELS_oic_scope = "{labels.oic_scope}";
+
+    /** The key of the message: Base URL */
+    public static final String LABELS_oic_base_url = "{labels.oic_base_url}";
+
+    /** The key of the message: Default Groups */
+    public static final String LABELS_oic_default_groups = "{labels.oic_default_groups}";
+
+    /** The key of the message: Default Roles */
+    public static final String LABELS_oic_default_roles = "{labels.oic_default_roles}";
+
+    /** The key of the message: SAML */
+    public static final String LABELS_general_menu_saml = "{labels.general_menu_saml}";
+
+    /** The key of the message: SP Base URL */
+    public static final String LABELS_saml_sp_base_url = "{labels.saml_sp_base_url}";
+
+    /** The key of the message: Group Attribute Name */
+    public static final String LABELS_saml_attribute_group_name = "{labels.saml_attribute_group_name}";
+
+    /** The key of the message: Role Attribute Name */
+    public static final String LABELS_saml_attribute_role_name = "{labels.saml_attribute_role_name}";
+
+    /** The key of the message: Default Groups */
+    public static final String LABELS_saml_default_groups = "{labels.saml_default_groups}";
+
+    /** The key of the message: Default Roles */
+    public static final String LABELS_saml_default_roles = "{labels.saml_default_roles}";
+
+    /** The key of the message: SPNEGO */
+    public static final String LABELS_general_menu_spnego = "{labels.general_menu_spnego}";
+
+    /** The key of the message: Krb5 Config */
+    public static final String LABELS_spnego_krb5_conf = "{labels.spnego_krb5_conf}";
+
+    /** The key of the message: Login Config */
+    public static final String LABELS_spnego_login_conf = "{labels.spnego_login_conf}";
+
+    /** The key of the message: Login Client Module */
+    public static final String LABELS_spnego_login_client_module = "{labels.spnego_login_client_module}";
+
+    /** The key of the message: Login Server Module */
+    public static final String LABELS_spnego_login_server_module = "{labels.spnego_login_server_module}";
+
+    /** The key of the message: Pre-Auth Username */
+    public static final String LABELS_spnego_preauth_username = "{labels.spnego_preauth_username}";
+
+    /** The key of the message: Pre-Auth Password */
+    public static final String LABELS_spnego_preauth_password = "{labels.spnego_preauth_password}";
+
+    /** The key of the message: Allow Basic Auth */
+    public static final String LABELS_spnego_allow_basic = "{labels.spnego_allow_basic}";
+
+    /** The key of the message: Allow Unsecure Basic Auth */
+    public static final String LABELS_spnego_allow_unsecure_basic = "{labels.spnego_allow_unsecure_basic}";
+
+    /** The key of the message: Prompt NTLM */
+    public static final String LABELS_spnego_prompt_ntlm = "{labels.spnego_prompt_ntlm}";
+
+    /** The key of the message: Allow Localhost */
+    public static final String LABELS_spnego_allow_localhost = "{labels.spnego_allow_localhost}";
+
+    /** The key of the message: Allow Delegation */
+    public static final String LABELS_spnego_allow_delegation = "{labels.spnego_allow_delegation}";
+
+    /** The key of the message: Exclude Directories */
+    public static final String LABELS_spnego_exclude_dirs = "{labels.spnego_exclude_dirs}";
+
+    /** The key of the message: Entra ID */
+    public static final String LABELS_general_menu_entraid = "{labels.general_menu_entraid}";
+
+    /** The key of the message: Client ID */
+    public static final String LABELS_entraid_client_id = "{labels.entraid_client_id}";
+
+    /** The key of the message: Client Secret */
+    public static final String LABELS_entraid_client_secret = "{labels.entraid_client_secret}";
+
+    /** The key of the message: Tenant */
+    public static final String LABELS_entraid_tenant = "{labels.entraid_tenant}";
+
+    /** The key of the message: Authority */
+    public static final String LABELS_entraid_authority = "{labels.entraid_authority}";
+
+    /** The key of the message: Reply URL */
+    public static final String LABELS_entraid_reply_url = "{labels.entraid_reply_url}";
+
+    /** The key of the message: State TTL */
+    public static final String LABELS_entraid_state_ttl = "{labels.entraid_state_ttl}";
+
+    /** The key of the message: Default Groups */
+    public static final String LABELS_entraid_default_groups = "{labels.entraid_default_groups}";
+
+    /** The key of the message: Default Roles */
+    public static final String LABELS_entraid_default_roles = "{labels.entraid_default_roles}";
+
+    /** The key of the message: Permission Fields */
+    public static final String LABELS_entraid_permission_fields = "{labels.entraid_permission_fields}";
+
+    /** The key of the message: Use Domain Services */
+    public static final String LABELS_entraid_use_ds = "{labels.entraid_use_ds}";
 
     /**
      * Assert the property is not null.

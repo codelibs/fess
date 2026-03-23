@@ -207,8 +207,16 @@ public interface FessProp {
         setSystemProperty(key, Integer.toString(value));
     }
 
+    default void setSearchFileProxy(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, value);
+    }
+
     default boolean isSearchFileProxyEnabled() {
         return getSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, true);
+    }
+
+    default void setUseBrowserLocaleForSearch(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, value);
     }
 
     default boolean isBrowserLocaleForSearchUsed() {
@@ -726,6 +734,10 @@ public interface FessProp {
         return getSystemProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
     }
 
+    default void setNotificationAdvanceSearch(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_ADVANCE_SEARCH, value);
+    }
+
     default String getNotificationAdvanceSearch() {
         return getSystemProperty(Constants.NOTIFICATION_ADVANCE_SEARCH, StringUtil.EMPTY);
     }
@@ -736,6 +748,10 @@ public interface FessProp {
 
     default String getNotificationSearchTop() {
         return getSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
+    }
+
+    default void setUserAgentName(final String value) {
+        setSystemProperty(Constants.CRAWLING_USER_AGENT_PROPERTY, value);
     }
 
     default String getUserAgentName() {
@@ -783,6 +799,10 @@ public interface FessProp {
             value = getSystemProperty("aad.use.ds", "true");
         }
         return Constants.TRUE.equalsIgnoreCase(value);
+    }
+
+    default void setSsoType(final String value) {
+        setSystemProperty(Constants.SSO_TYPE_PROPERTY, value);
     }
 
     default String getSsoType() {
