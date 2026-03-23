@@ -397,4 +397,184 @@ public class EditForm {
      */
     @Size(max = 10)
     public String llmLogLevel;
+
+    /** Enable or disable search file proxy. */
+    @Size(max = 10)
+    public String searchFileProxy;
+
+    /** Enable or disable using browser locale for search. */
+    @Size(max = 10)
+    public String searchUseBrowserLocale;
+
+    /** SSO type (none, oic, saml, spnego, entraid). */
+    @Size(max = 100)
+    public String ssoType;
+
+    /** User agent string for crawling operations. */
+    @Size(max = 1000)
+    public String crawlingUserAgent;
+
+    /** Notification message displayed on the advanced search page. */
+    @Size(max = 3000)
+    public String notificationAdvanceSearch;
+
+    /** Slack webhook URLs for notifications. */
+    @Size(max = 10000)
+    public String slackWebhookUrls;
+
+    /** Google Chat webhook URLs for notifications. */
+    @Size(max = 10000)
+    public String googleChatWebhookUrls;
+
+    /** LDAP security authentication type. */
+    @Size(max = 1000)
+    public String ldapSecurityAuthentication;
+
+    /** LDAP initial context factory class name. */
+    @Size(max = 1000)
+    public String ldapInitialContextFactory;
+
+    /** OpenID Connect client ID. */
+    @Size(max = 1000)
+    public String oicClientId;
+
+    /** OpenID Connect client secret. */
+    @Size(max = 1000)
+    public String oicClientSecret;
+
+    /** OpenID Connect authorization server URL. */
+    @Size(max = 1000)
+    public String oicAuthServerUrl;
+
+    /** OpenID Connect token server URL. */
+    @Size(max = 1000)
+    public String oicTokenServerUrl;
+
+    /** OpenID Connect redirect URL. */
+    @Size(max = 1000)
+    public String oicRedirectUrl;
+
+    /** OpenID Connect scope. */
+    @Size(max = 1000)
+    public String oicScope;
+
+    /** OpenID Connect base URL. */
+    @Size(max = 1000)
+    public String oicBaseUrl;
+
+    /** OpenID Connect default groups. */
+    @Size(max = 1000)
+    public String oicDefaultGroups;
+
+    /** OpenID Connect default roles. */
+    @Size(max = 1000)
+    public String oicDefaultRoles;
+
+    /** SAML service provider base URL. */
+    @Size(max = 1000)
+    public String samlSpBaseUrl;
+
+    /** SAML attribute name for group membership. */
+    @Size(max = 1000)
+    public String samlAttributeGroupName;
+
+    /** SAML attribute name for role membership. */
+    @Size(max = 1000)
+    public String samlAttributeRoleName;
+
+    /** SAML default groups. */
+    @Size(max = 1000)
+    public String samlDefaultGroups;
+
+    /** SAML default roles. */
+    @Size(max = 1000)
+    public String samlDefaultRoles;
+
+    /** SPNEGO Kerberos 5 configuration file path. */
+    @Size(max = 1000)
+    public String spnegoKrb5Conf;
+
+    /** SPNEGO JAAS login configuration file path. */
+    @Size(max = 1000)
+    public String spnegoLoginConf;
+
+    /** SPNEGO JAAS login client module name. */
+    @Size(max = 1000)
+    public String spnegoLoginClientModule;
+
+    /** SPNEGO JAAS login server module name. */
+    @Size(max = 1000)
+    public String spnegoLoginServerModule;
+
+    /** SPNEGO pre-authentication username. */
+    @Size(max = 1000)
+    public String spnegoPreauthUsername;
+
+    /** SPNEGO pre-authentication password. */
+    @Size(max = 1000)
+    public String spnegoPreauthPassword;
+
+    /** Enable or disable SPNEGO basic authentication. */
+    @Size(max = 10)
+    public String spnegoAllowBasic;
+
+    /** Enable or disable SPNEGO unsecure basic authentication. */
+    @Size(max = 10)
+    public String spnegoAllowUnsecureBasic;
+
+    /** Enable or disable SPNEGO NTLM prompt. */
+    @Size(max = 10)
+    public String spnegoPromptNtlm;
+
+    /** Enable or disable SPNEGO localhost authentication. */
+    @Size(max = 10)
+    public String spnegoAllowLocalhost;
+
+    /** Enable or disable SPNEGO credential delegation. */
+    @Size(max = 10)
+    public String spnegoAllowDelegation;
+
+    /** SPNEGO directories to exclude from authentication. */
+    @Size(max = 1000)
+    public String spnegoExcludeDirs;
+
+    /** Entra ID application client ID. */
+    @Size(max = 1000)
+    public String entraidClientId;
+
+    /** Entra ID application client secret. */
+    @Size(max = 1000)
+    public String entraidClientSecret;
+
+    /** Entra ID tenant ID. */
+    @Size(max = 1000)
+    public String entraidTenant;
+
+    /** Entra ID authority URL. */
+    @Size(max = 1000)
+    public String entraidAuthority;
+
+    /** Entra ID OAuth2 reply URL. */
+    @Size(max = 1000)
+    public String entraidReplyUrl;
+
+    /** Entra ID state parameter TTL in seconds. */
+    @Size(max = 100)
+    public String entraidStateTtl;
+
+    /** Entra ID default groups. */
+    @Size(max = 1000)
+    public String entraidDefaultGroups;
+
+    /** Entra ID default roles. */
+    @Size(max = 1000)
+    public String entraidDefaultRoles;
+
+    /** Entra ID permission field names. */
+    @Size(max = 1000)
+    public String entraidPermissionFields;
+
+    /** Enable or disable Entra ID domain services. */
+    @Size(max = 10)
+    public String entraidUseDs;
 }
