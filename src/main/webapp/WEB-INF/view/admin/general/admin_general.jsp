@@ -221,23 +221,6 @@ ${fe:html(true)}
                                         </la:select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.notification_to"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="notificationTo"/>
-                                        <div class="input-group">
-                                            <la:text styleId="notificationTo" property="notificationTo"
-                                                     styleClass="form-control"/>
-                                            <div class="input-group-append">
-                                                <button type="submit" class="btn btn-default ${f:h(editableClass)}"
-                                                        name="sendmail" value="test">
-                                                    <la:message key="labels.send_testmail"/>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                     <%-- Crawler --%>
                                 <h4><la:message key="labels.general_menu_crawler"/></h4>
                                 <div class="form-group row">
@@ -936,8 +919,8 @@ ${fe:html(true)}
                                         </div>
                                     </div>
                                 </div>
-                                    <%-- Nortification --%>
-                                <h4><la:message key="labels.general_menu_notification"/></h4>
+                                    <%-- Notice --%>
+                                <h4><la:message key="labels.general_menu_notice"/></h4>
                                 <div class="form-group row">
                                     <label for="notificationLogin"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -966,6 +949,25 @@ ${fe:html(true)}
                                         <la:errors property="notificationAdvanceSearch"/>
                                         <la:textarea styleId="notificationAdvanceSearch" property="notificationAdvanceSearch"
                                                      styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                    <%-- Notify --%>
+                                <h4><la:message key="labels.general_menu_notify"/></h4>
+                                <div class="form-group row">
+                                    <label for="notificationTo" class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.notification_to"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="notificationTo"/>
+                                        <div class="input-group">
+                                            <la:text styleId="notificationTo" property="notificationTo"
+                                                     styleClass="form-control"/>
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default ${f:h(editableClass)}"
+                                                        name="sendmail" value="test">
+                                                    <la:message key="labels.send_testmail"/>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">

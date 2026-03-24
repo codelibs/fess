@@ -2754,8 +2754,11 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LDAP */
     public static final String LABELS_general_menu_ldap = "{labels.general_menu_ldap}";
 
-    /** The key of the message: Notification */
-    public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
+    /** The key of the message: Notice */
+    public static final String LABELS_general_menu_notice = "{labels.general_menu_notice}";
+
+    /** The key of the message: Notify */
+    public static final String LABELS_general_menu_notify = "{labels.general_menu_notify}";
 
     /** The key of the message: Storage */
     public static final String LABELS_general_storage = "{labels.general_storage}";
