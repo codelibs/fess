@@ -76,10 +76,10 @@ public class LogNotificationJobTest extends UnitFessTestCase {
         String details = testableJob.testFormatDetails(events);
 
         assertNotNull(details);
+        assertTrue(details.contains("Total: 1 event(s)"));
         assertTrue(details.contains("ERROR"));
         assertTrue(details.contains("org.codelibs.fess.TestClass"));
         assertTrue(details.contains("Something went wrong"));
-        assertTrue(details.contains("]")); // timestamp bracket
     }
 
     @Test
@@ -88,16 +88,20 @@ public class LogNotificationJobTest extends UnitFessTestCase {
 
         long timestamp = 1700000000000L;
         List<LogNotificationEvent> events = new ArrayList<>();
-        // Create many events with long messages to exceed 4000 chars
+        // Create many events with long messages
         for (int i = 0; i < 100; i++) {
-            String longMessage = "A".repeat(200) + " event " + i;
+            String longMessage = "A".repeat(300) + " event " + i;
             events.add(new LogNotificationEvent(timestamp, "ERROR", "org.codelibs.fess.TestClass", longMessage, null));
         }
 
         String details = testableJob.testFormatDetails(events);
 
         assertNotNull(details);
-        assertTrue(details.length() <= 4000);
+        // Max 50 events displayed, message truncated to 200 chars
+        assertTrue(details.contains("Total: 100 event(s) (showing 50)"));
+        assertTrue(details.contains("... and 50 more"));
+        // Long messages should be truncated with "..."
+        assertTrue(details.contains("..."));
     }
 
     @Test
@@ -112,9 +116,10 @@ public class LogNotificationJobTest extends UnitFessTestCase {
         String details = testableJob.testFormatDetails(events);
 
         assertNotNull(details);
+        assertTrue(details.contains("Total: 1 event(s)"));
         assertTrue(details.contains("Something went wrong"));
-        assertTrue(details.contains("java.lang.NullPointerException"));
-        assertTrue(details.contains("TestClass.java:42"));
+        // Throwable is no longer included in summary-oriented format
+        // Only log message is shown per event line
     }
 
     @Test
@@ -124,7 +129,7 @@ public class LogNotificationJobTest extends UnitFessTestCase {
         String details = testableJob.testFormatDetails(Collections.emptyList());
 
         assertNotNull(details);
-        assertEquals("", details);
+        assertTrue(details.contains("Total: 0 event(s)"));
     }
 
     @Test
@@ -175,30 +180,34 @@ public class LogNotificationJobTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_formatDetails_emptyThrowable() {
+    public void test_formatDetails_messageTruncation() {
         TestableLogNotificationJob testableJob = new TestableLogNotificationJob();
         List<LogNotificationEvent> events = new ArrayList<>();
-        events.add(new LogNotificationEvent(1700000000000L, "ERROR", "org.test", "error", ""));
+        String longMessage = "X".repeat(250);
+        events.add(new LogNotificationEvent(1700000000000L, "ERROR", "org.test", longMessage, null));
 
         String details = testableJob.testFormatDetails(events);
 
-        assertTrue(details.contains("error"));
-        // Empty throwable should not add an extra throwable line (StringUtil.isNotBlank check)
-        assertFalse(details.contains("  \n"));
+        // Message should be truncated to 200 chars + "..."
+        assertFalse(details.contains("X".repeat(250)));
+        assertTrue(details.contains("X".repeat(200) + "..."));
     }
 
     @Test
-    public void test_formatDetails_exactTruncationBoundary() {
+    public void test_formatDetails_displayLimit() {
         TestableLogNotificationJob testableJob = new TestableLogNotificationJob();
         List<LogNotificationEvent> events = new ArrayList<>();
-        // Each event line is roughly 60 chars header + message
-        // Create enough events to be near 4000 chars
-        for (int i = 0; i < 50; i++) {
-            events.add(new LogNotificationEvent(1700000000000L, "ERROR", "org.test", "message_" + String.format("%03d", i), null));
+        for (int i = 0; i < 60; i++) {
+            events.add(new LogNotificationEvent(1700000000000L, "ERROR", "org.test", "msg" + i, null));
         }
 
         String details = testableJob.testFormatDetails(events);
-        assertTrue(details.length() <= 4000);
+
+        assertTrue(details.contains("Total: 60 event(s) (showing 50)"));
+        assertTrue(details.contains("... and 10 more"));
+        // msg49 should be present (50th event, index 49), msg50 should not
+        assertTrue(details.contains("msg49"));
+        assertFalse(details.contains("msg50"));
     }
 
     private static class TestableLogNotificationJob extends LogNotificationJob {

@@ -8,7 +8,9 @@ Host Name: /*pmb.hostname:orElse('Unknown')*/
 
 --- Log Summary ---
 Level: /*pmb.level*/
-Count: /*pmb.count*/ event(s) in the last /*pmb.interval*/ seconds
+Total: /*pmb.count*/ event(s) in the last /*pmb.interval*/ seconds
 
 --- Log Details ---
 /*pmb.details*/
+
+Note: See the log files for full details.

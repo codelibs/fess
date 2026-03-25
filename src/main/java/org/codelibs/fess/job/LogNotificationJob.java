@@ -60,7 +60,11 @@ public class LogNotificationJob {
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
-    private static final int MAX_DETAILS_LENGTH = 4000;
+    private static final int MAX_DETAILS_LENGTH = 3000;
+
+    private static final int MAX_DISPLAY_EVENTS = 50;
+
+    private static final int MAX_MESSAGE_LENGTH = 200;
 
     /**
      * Executes the log notification job.
@@ -158,19 +162,39 @@ public class LogNotificationJob {
         }
         bulkDelete.execute().actionGet(fessConfig.getIndexSearchTimeout());
 
+        // Delete any remaining events beyond the 1000 limit (discard overflow)
+        try {
+            client.deleteByQuery(indexName, QueryBuilders.termQuery("hostname", hostname));
+        } catch (final Exception e) {
+            logger.debug("Failed to delete remaining log notifications.", e);
+        }
+
         return "Sent log notifications: " + events.size() + " events.";
     }
 
     /**
-     * Formats a list of log notification events into a human-readable string.
+     * Formats a list of log notification events into a human-readable summary string.
      *
      * @param events the list of log notification events
-     * @return the formatted details string, truncated to 4000 characters
+     * @return the formatted details string with summary header and truncated entries
      */
     protected String formatDetails(final List<LogNotificationEvent> events) {
+        final int totalCount = events.size();
+        final int displayCount = Math.min(totalCount, MAX_DISPLAY_EVENTS);
         final StringBuilder sb = new StringBuilder();
-        for (final LogNotificationEvent event : events) {
+        sb.append("Total: ").append(totalCount).append(" event(s)");
+        if (totalCount > displayCount) {
+            sb.append(" (showing ").append(displayCount).append(')');
+        }
+        sb.append("\n\n");
+
+        for (int i = 0; i < displayCount; i++) {
+            final LogNotificationEvent event = events.get(i);
             final String timestamp = TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(event.getTimestamp()));
+            String message = event.getMessage();
+            if (message != null && message.length() > MAX_MESSAGE_LENGTH) {
+                message = message.substring(0, MAX_MESSAGE_LENGTH) + "...";
+            }
             sb.append('[')
                     .append(timestamp)
                     .append("] ")
@@ -178,16 +202,18 @@ public class LogNotificationJob {
                     .append(' ')
                     .append(event.getLoggerName())
                     .append(" - ")
-                    .append(event.getMessage())
+                    .append(message)
                     .append('\n');
-            if (StringUtil.isNotBlank(event.getThrowable())) {
-                sb.append("  ").append(event.getThrowable()).append('\n');
-            }
             if (sb.length() > MAX_DETAILS_LENGTH) {
                 sb.setLength(MAX_DETAILS_LENGTH);
                 break;
             }
         }
+
+        if (totalCount > displayCount) {
+            sb.append("... and ").append(totalCount - displayCount).append(" more\n");
+        }
+
         return sb.toString();
     }
 }
