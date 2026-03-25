@@ -990,6 +990,19 @@ ${fe:html(true)}
                                                      styleClass="form-control"/>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label for="logNotificationEnabled"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.log_notification_enabled"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="logNotificationEnabled"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="logNotificationEnabled"
+                                                         property="logNotificationEnabled"
+                                                         styleClass="form-check-input"/>
+                                        </div>
+                                    </div>
+                                </div>
                                     <%-- Storage --%>
                                 <h4><la:message key="labels.general_storage"/></h4>
                                 <div class="form-group row">

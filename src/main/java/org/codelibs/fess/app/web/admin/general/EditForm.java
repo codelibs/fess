@@ -426,6 +426,10 @@ public class EditForm {
     @Size(max = 10000)
     public String googleChatWebhookUrls;
 
+    /** Enable or disable log notification for ERROR/WARN logs. */
+    @Size(max = 10)
+    public String logNotificationEnabled;
+
     /** LDAP security authentication type. */
     @Size(max = 1000)
     public String ldapSecurityAuthentication;

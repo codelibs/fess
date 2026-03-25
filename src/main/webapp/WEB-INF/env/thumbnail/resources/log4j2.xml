@@ -22,14 +22,18 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
+		<LogNotificationAppender name="LogNotification"
+			minLevel="${sys:fess.log.notification.level:-ERROR}" />
 	</Appenders>
 
 	<Loggers>
 		<Logger name="org.codelibs.fess" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Root>
 	</Loggers>
 </Configuration>

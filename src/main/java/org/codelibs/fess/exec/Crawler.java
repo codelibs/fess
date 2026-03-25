@@ -59,6 +59,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.timer.HotThreadMonitorTarget;
+import org.codelibs.fess.timer.LogNotificationTarget;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -331,6 +332,8 @@ public class Crawler {
 
         TimeoutTask systemMonitorTask = null;
         TimeoutTask hotThreadMonitorTask = null;
+        TimeoutTask logNotificationTask = null;
+        LogNotificationTarget logNotificationTarget = null;
         Thread commandThread = null;
         int exitCode;
         try {
@@ -383,6 +386,9 @@ public class Crawler {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(),
                             true);
 
+            logNotificationTarget = new LogNotificationTarget();
+            logNotificationTask = TimeoutManager.getInstance().addTimeoutTarget(logNotificationTarget, 30, true);
+
             if (options.hotThread != null) {
                 hotThreadMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new HotThreadMonitorTarget(), options.hotThread, true);
             }
@@ -407,6 +413,12 @@ public class Crawler {
             }
             if (hotThreadMonitorTask != null) {
                 hotThreadMonitorTask.cancel();
+            }
+            if (logNotificationTask != null) {
+                logNotificationTask.cancel();
+            }
+            if (logNotificationTarget != null) {
+                logNotificationTarget.flush();
             }
             destroyContainer();
         }

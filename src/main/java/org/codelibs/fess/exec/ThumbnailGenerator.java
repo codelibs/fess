@@ -31,6 +31,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.FesenClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.timer.LogNotificationTarget;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -164,6 +165,8 @@ public class ThumbnailGenerator {
         }
 
         TimeoutTask systemMonitorTask = null;
+        TimeoutTask logNotificationTask = null;
+        LogNotificationTarget logNotificationTarget = null;
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
@@ -186,6 +189,9 @@ public class ThumbnailGenerator {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getThumbnailSystemMonitorIntervalAsInteger(),
                             true);
 
+            logNotificationTarget = new LogNotificationTarget();
+            logNotificationTask = TimeoutManager.getInstance().addTimeoutTarget(logNotificationTarget, 30, true);
+
             final int totalCount = process(options);
             if (totalCount != 0) {
                 logger.info("Processed {} thumbnail task(s).", totalCount);
@@ -206,6 +212,12 @@ public class ThumbnailGenerator {
         } finally {
             if (systemMonitorTask != null) {
                 systemMonitorTask.cancel();
+            }
+            if (logNotificationTask != null) {
+                logNotificationTask.cancel();
+            }
+            if (logNotificationTarget != null) {
+                logNotificationTarget.flush();
             }
             destroyContainer();
         }

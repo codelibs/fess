@@ -1,0 +1,14 @@
+/*
+ [Log Notification]
+*/
+subject: [FESS] /*pmb.level*/ Log Alert: /*pmb.hostname*/
+>>>
+--- Server Info ---
+Host Name: /*pmb.hostname:orElse('Unknown')*/
+
+--- Log Summary ---
+Level: /*pmb.level*/
+Count: /*pmb.count*/ event(s) in the last /*pmb.interval*/ seconds
+
+--- Log Details ---
+/*pmb.details*/

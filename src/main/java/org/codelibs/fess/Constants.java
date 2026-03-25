@@ -276,6 +276,12 @@ public class Constants extends CoreLibConstants {
     /** Property key for Google Chat webhook URLs configuration. */
     public static final String GOOGLE_CHAT_WEBHOOK_URLS_PROPERTY = "google.chat.webhook.urls";
 
+    /** Property key for log notification enabled configuration. */
+    public static final String LOG_NOTIFICATION_ENABLED_PROPERTY = "log.notification.enabled";
+
+    /** Property key for log notification interval configuration. */
+    public static final String LOG_NOTIFICATION_INTERVAL_PROPERTY = "log.notification.interval";
+
     /** Property key for browser locale usage in search configuration. */
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
 

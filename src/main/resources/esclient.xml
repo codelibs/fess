@@ -534,5 +534,8 @@
 		<postConstruct name="addIndexConfig">
 			<arg>"fess_log.user_info/user_info"</arg>
 		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log.notification_queue/notification_queue"</arg>
+		</postConstruct>
 	</component>
 </components>

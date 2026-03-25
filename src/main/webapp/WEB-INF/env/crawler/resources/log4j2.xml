@@ -39,23 +39,29 @@
 			<DefaultRolloverStrategy fileIndex="max" min="1"
 				max="${backup.max.history}" compressionLevel="9" />
 		</RollingFile>
+		<LogNotificationAppender name="LogNotification"
+			minLevel="${sys:fess.log.notification.level:-ERROR}" />
 	</Appenders>
 
 	<Loggers>
 		<Logger name="org.codelibs" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="org.dbflute" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="org.lastaflute" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="fess.log.crawler.stats" additivity="false" level="info">
 			<AppenderRef ref="StatsFile" />
 		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Root>
 	</Loggers>
 </Configuration>
