@@ -32,6 +32,7 @@ import org.codelibs.fess.crawler.client.FesenClient;
 import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
+import org.codelibs.fess.timer.LogNotificationTarget;
 import org.codelibs.fess.timer.SystemMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.SystemUtil;
@@ -146,6 +147,8 @@ public class SuggestCreator {
         }
 
         TimeoutTask systemMonitorTask = null;
+        TimeoutTask logNotificationTask = null;
+        LogNotificationTarget logNotificationTarget = null;
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
@@ -168,6 +171,13 @@ public class SuggestCreator {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(),
                             true);
 
+            if (ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                logNotificationTarget = new LogNotificationTarget();
+                logNotificationTask = TimeoutManager.getInstance()
+                        .addTimeoutTarget(logNotificationTarget, ComponentUtil.getFessConfig().getLogNotificationFlushIntervalAsInteger(),
+                                true);
+            }
+
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {
             if (logger.isDebugEnabled()) {
@@ -182,6 +192,12 @@ public class SuggestCreator {
         } finally {
             if (systemMonitorTask != null) {
                 systemMonitorTask.cancel();
+            }
+            if (logNotificationTask != null) {
+                logNotificationTask.cancel();
+            }
+            if (logNotificationTarget != null) {
+                logNotificationTarget.flush();
             }
             destroyContainer();
         }

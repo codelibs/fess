@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "hostname": {
+      "type": "keyword"
+    },
+    "level": {
+      "type": "keyword"
+    },
+    "loggerName": {
+      "type": "keyword"
+    },
+    "message": {
+      "type": "text",
+      "index": false
+    },
+    "throwable": {
+      "type": "text",
+      "index": false
+    },
+    "timestamp": {
+      "type": "date",
+      "format": "epoch_millis"
+    }
+  }
+}

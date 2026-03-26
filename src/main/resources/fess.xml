@@ -35,6 +35,8 @@
 	</component>
 	<component name="notificationHelper" class="org.codelibs.fess.helper.NotificationHelper">
 	</component>
+	<component name="logNotificationHelper" class="org.codelibs.fess.helper.LogNotificationHelper">
+	</component>
 	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
 	</component>
 	<component name="permissionHelper" class="org.codelibs.fess.helper.PermissionHelper">

@@ -56,8 +56,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.opensearch.action.update.UpdateRequest;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.opensearch.script.Script;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,6 +66,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Helper class for managing search logs.

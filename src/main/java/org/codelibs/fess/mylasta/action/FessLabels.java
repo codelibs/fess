@@ -3588,6 +3588,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Google Chat Webhook URLs */
     public static final String LABELS_google_chat_webhook_urls = "{labels.google_chat_webhook_urls}";
 
+    /** The key of the message: Log Notification */
+    public static final String LABELS_log_notification_enabled = "{labels.log_notification_enabled}";
+
+    /** The key of the message: Log Notification Level */
+    public static final String LABELS_log_notification_level = "{labels.log_notification_level}";
+
     /** The key of the message: Advanced Search Page */
     public static final String LABELS_notification_advance_search = "{labels.notification_advance_search}";
 

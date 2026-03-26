@@ -29,4 +29,6 @@
 	<!-- Backward Compatibility  -->
 	<component name="pingEsJob" class="org.codelibs.fess.job.PingSearchEngineJob" instance="prototype">
 	</component>
+	<component name="logNotificationJob" class="org.codelibs.fess.job.LogNotificationJob" instance="prototype">
+	</component>
 </components>

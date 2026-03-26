@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN" packages="org.codelibs.fess.util">
 
 	<Properties>
 		<Property name="domain.name" value="${sys:fess.log.name:-fess}" />
@@ -82,17 +82,22 @@
 				</Delete>
 			</DefaultRolloverStrategy>
 		</RollingFile>
+		<LogNotificationAppender name="LogNotification"
+			minLevel="${sys:fess.log.notification.level:-ERROR}" />
 	</Appenders>
 
 	<Loggers>
 		<Logger name="org.codelibs" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="org.dbflute" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="org.lastaflute" additivity="false" level="${log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Logger>
 		<Logger name="org.opensearch.bootstrap" additivity="false" level="error">
 			<AppenderRef ref="AppFile" />
@@ -118,6 +123,7 @@
 		</Logger>
 		<Root level="${root.log.level}">
 			<AppenderRef ref="AppFile" />
+			<AppenderRef ref="LogNotification" />
 		</Root>
 	</Loggers>
 </Configuration>

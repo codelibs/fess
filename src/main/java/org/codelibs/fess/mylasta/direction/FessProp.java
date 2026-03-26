@@ -502,7 +502,8 @@ public interface FessProp {
     }
 
     default boolean hasNotification() {
-        return StringUtil.isNotBlank(getNotificationTo()) || StringUtil.isNotBlank(getSlackWebhookUrls());
+        return StringUtil.isNotBlank(getNotificationTo()) || StringUtil.isNotBlank(getSlackWebhookUrls())
+                || StringUtil.isNotBlank(getGoogleChatWebhookUrls());
     }
 
     default void setSlackWebhookUrls(final String value) {
@@ -527,6 +528,22 @@ public interface FessProp {
 
     default String getNotificationTo() {
         return getSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
+    }
+
+    default void setLogNotificationEnabled(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.LOG_NOTIFICATION_ENABLED_PROPERTY, value);
+    }
+
+    default boolean isLogNotificationEnabled() {
+        return getSystemPropertyAsBoolean(Constants.LOG_NOTIFICATION_ENABLED_PROPERTY, false);
+    }
+
+    default void setLogNotificationLevel(final String value) {
+        setSystemProperty(Constants.LOG_NOTIFICATION_LEVEL_PROPERTY, value);
+    }
+
+    default String getLogNotificationLevel() {
+        return getSystemProperty(Constants.LOG_NOTIFICATION_LEVEL_PROPERTY, "ERROR");
     }
 
     default void setSuggestSearchLog(final boolean value) {
