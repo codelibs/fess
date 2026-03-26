@@ -33,6 +33,7 @@ public class LogNotificationTargetTest extends UnitFessTestCase {
         super.setUp(testInfo);
         ComponentUtil.register(new LogNotificationHelper(), "logNotificationHelper");
         ComponentUtil.getLogNotificationHelper().drainAll();
+        ComponentUtil.getFessConfig().setLogNotificationEnabled(true);
         logNotificationTarget = new LogNotificationTarget();
     }
 
@@ -87,5 +88,38 @@ public class LogNotificationTargetTest extends UnitFessTestCase {
         logNotificationTarget.expired();
         logNotificationTarget.expired();
         // No exception means success
+    }
+
+    @Test
+    public void test_expired_disabled_doesNotDrainBuffer() {
+        // Disable log notification
+        ComponentUtil.getFessConfig().setLogNotificationEnabled(false);
+
+        // Add events to buffer
+        ComponentUtil.getLogNotificationHelper()
+                .offer(new LogNotificationEvent(System.currentTimeMillis(), "ERROR", "org.test", "should remain", null));
+
+        // expired() should skip when disabled
+        logNotificationTarget.expired();
+
+        // Buffer should still contain the event since disabled check should return early
+        List<LogNotificationEvent> remaining = ComponentUtil.getLogNotificationHelper().drainAll();
+        assertEquals(1, remaining.size());
+        assertEquals("should remain", remaining.get(0).getMessage());
+    }
+
+    @Test
+    public void test_expired_enabled_drainsBuffer() {
+        // Enable log notification
+        ComponentUtil.getFessConfig().setLogNotificationEnabled(true);
+
+        ComponentUtil.getLogNotificationHelper()
+                .offer(new LogNotificationEvent(System.currentTimeMillis(), "ERROR", "org.test", "msg", null));
+
+        // expired() when enabled will drain buffer (and fail silently on OpenSearch)
+        logNotificationTarget.expired();
+
+        List<LogNotificationEvent> remaining = ComponentUtil.getLogNotificationHelper().drainAll();
+        assertEquals(0, remaining.size());
     }
 }

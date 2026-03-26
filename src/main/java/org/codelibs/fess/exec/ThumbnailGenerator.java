@@ -189,8 +189,12 @@ public class ThumbnailGenerator {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getThumbnailSystemMonitorIntervalAsInteger(),
                             true);
 
-            logNotificationTarget = new LogNotificationTarget();
-            logNotificationTask = TimeoutManager.getInstance().addTimeoutTarget(logNotificationTarget, 30, true);
+            if (ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                logNotificationTarget = new LogNotificationTarget();
+                logNotificationTask = TimeoutManager.getInstance()
+                        .addTimeoutTarget(logNotificationTarget, ComponentUtil.getFessConfig().getLogNotificationFlushIntervalAsInteger(),
+                                true);
+            }
 
             final int totalCount = process(options);
             if (totalCount != 0) {

@@ -49,6 +49,14 @@ public class LogNotificationTarget implements TimeoutTarget {
 
     @Override
     public void expired() {
+        try {
+            if (!ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                return;
+            }
+        } catch (final Exception e) {
+            return;
+        }
+
         final LogNotificationHelper helper;
         try {
             helper = ComponentUtil.getLogNotificationHelper();

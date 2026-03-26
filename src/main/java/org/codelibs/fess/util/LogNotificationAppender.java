@@ -47,7 +47,6 @@ public class LogNotificationAppender extends AbstractAppender {
     private static final Set<String> EXCLUDED_LOGGERS = Set.of( //
             "org.codelibs.fess.helper.NotificationHelper", //
             "org.codelibs.fess.util.LogNotificationAppender", //
-            "org.codelibs.fess.util.LogNotificationBuffer", //
             "org.codelibs.fess.job.LogNotificationJob", //
             "org.codelibs.fess.timer.LogNotificationTarget", //
             "org.codelibs.fess.helper.LogNotificationHelper", //
@@ -84,6 +83,14 @@ public class LogNotificationAppender extends AbstractAppender {
         }
 
         if (!event.getLevel().isMoreSpecificThan(getEffectiveMinLevel())) {
+            return;
+        }
+
+        try {
+            if (!ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                return;
+            }
+        } catch (final Exception e) {
             return;
         }
 

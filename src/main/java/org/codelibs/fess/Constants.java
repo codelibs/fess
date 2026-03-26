@@ -279,9 +279,6 @@ public class Constants extends CoreLibConstants {
     /** Property key for log notification enabled configuration. */
     public static final String LOG_NOTIFICATION_ENABLED_PROPERTY = "log.notification.enabled";
 
-    /** Property key for log notification interval configuration. */
-    public static final String LOG_NOTIFICATION_INTERVAL_PROPERTY = "log.notification.interval";
-
     /** Property key for log notification level configuration. */
     public static final String LOG_NOTIFICATION_LEVEL_PROPERTY = "fess.log.notification.level";
 

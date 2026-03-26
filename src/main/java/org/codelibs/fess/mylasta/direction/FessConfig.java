@@ -2013,6 +2013,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String LOG_NOTIFICATION_BUFFER_SIZE = "log.notification.buffer.size";
 
+    /** The key of the configuration. e.g. 300 */
+    String LOG_NOTIFICATION_INTERVAL = "log.notification.interval";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9531,6 +9534,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getLogNotificationBufferSizeAsInteger();
 
     /**
+     * Get the value for the key 'log.notification.interval'. <br>
+     * The value is, e.g. 300 <br>
+     * comment: Interval (seconds) for the notification job cycle, used in notification messages.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationInterval();
+
+    /**
+     * Get the value for the key 'log.notification.interval' as {@link Integer}. <br>
+     * The value is, e.g. 300 <br>
+     * comment: Interval (seconds) for the notification job cycle, used in notification messages.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationIntervalAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -13063,6 +13083,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE);
         }
 
+        public String getLogNotificationInterval() {
+            return get(FessConfig.LOG_NOTIFICATION_INTERVAL);
+        }
+
+        public Integer getLogNotificationIntervalAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_INTERVAL);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -13673,6 +13701,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.LOG_NOTIFICATION_MAX_MESSAGE_LENGTH, "200");
             defaultMap.put(FessConfig.LOG_NOTIFICATION_SEARCH_SIZE, "1000");
             defaultMap.put(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE, "1000");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_INTERVAL, "300");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

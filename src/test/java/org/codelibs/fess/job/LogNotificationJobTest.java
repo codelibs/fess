@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
@@ -194,6 +196,25 @@ public class LogNotificationJobTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_execute_indexNotExists() {
+        TestFessConfig fessConfig = new TestFessConfig();
+        fessConfig.logNotificationEnabled = true;
+        fessConfig.hasNotification = true;
+        ComponentUtil.setFessConfig(fessConfig);
+
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+        ComponentUtil.register(new SearchEngineClient() {
+            @Override
+            public boolean existsIndex(final String indexName) {
+                return false;
+            }
+        }, "searchEngineClient");
+
+        String result = logNotificationJob.execute();
+        assertEquals("No log notifications.", result);
+    }
+
+    @Test
     public void test_formatDetails_displayLimit() {
         TestableLogNotificationJob testableJob = new TestableLogNotificationJob();
         List<LogNotificationEvent> events = new ArrayList<>();
@@ -238,8 +259,18 @@ public class LogNotificationJobTest extends UnitFessTestCase {
         }
 
         @Override
-        public int getLogNotificationIntervalAsInteger() {
+        public Integer getLogNotificationIntervalAsInteger() {
             return 300;
+        }
+
+        @Override
+        public String getIndexLogIndex() {
+            return "fess_log";
+        }
+
+        @Override
+        public String getIndexSearchTimeout() {
+            return "30000";
         }
 
         @Override

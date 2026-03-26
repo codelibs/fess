@@ -16,6 +16,11 @@
 package org.codelibs.fess.helper;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -89,5 +94,76 @@ public class LogNotificationHelperTest extends UnitFessTestCase {
         assertEquals(1, first.size());
         List<LogNotificationEvent> second = helper.drainAll();
         assertTrue(second.isEmpty());
+    }
+
+    @Test
+    public void test_offer_bufferCapacity() {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        // Default buffer size is 1000; offer more than that
+        for (int i = 0; i < 1100; i++) {
+            helper.offer(new LogNotificationEvent(i, "ERROR", "org.test", "msg" + i, null));
+        }
+        List<LogNotificationEvent> events = helper.drainAll();
+        // Should be capped at buffer size (1000)
+        assertTrue(events.size() <= 1000);
+        assertTrue(events.size() > 0);
+    }
+
+    @Test
+    public void test_offer_bufferCapacity_dropsOldest() {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        // Fill beyond default capacity
+        for (int i = 0; i < 1100; i++) {
+            helper.offer(new LogNotificationEvent(i, "ERROR", "org.test", "msg" + i, null));
+        }
+        List<LogNotificationEvent> events = helper.drainAll();
+        // The newest events should be retained; oldest dropped
+        // Last event should be msg1099
+        LogNotificationEvent last = events.get(events.size() - 1);
+        assertEquals("msg1099", last.getMessage());
+    }
+
+    @Test
+    public void test_concurrent_offerAndDrain() throws Exception {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        int numThreads = 8;
+        int eventsPerThread = 200;
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(numThreads);
+        AtomicInteger totalDrained = new AtomicInteger(0);
+
+        for (int t = 0; t < numThreads; t++) {
+            final int threadId = t;
+            executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    for (int i = 0; i < eventsPerThread; i++) {
+                        helper.offer(new LogNotificationEvent(i, "ERROR", "org.test", "t" + threadId + "-" + i, null));
+                        // Periodically drain
+                        if (i % 50 == 49) {
+                            List<LogNotificationEvent> drained = helper.drainAll();
+                            totalDrained.addAndGet(drained.size());
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        startLatch.countDown();
+        assertTrue(doneLatch.await(30, TimeUnit.SECONDS));
+        executor.shutdown();
+
+        // Drain remaining
+        totalDrained.addAndGet(helper.drainAll().size());
+
+        // Total drained should be <= total offered (some may be dropped at capacity)
+        int totalOffered = numThreads * eventsPerThread;
+        assertTrue(totalDrained.get() > 0);
+        assertTrue(totalDrained.get() <= totalOffered);
     }
 }

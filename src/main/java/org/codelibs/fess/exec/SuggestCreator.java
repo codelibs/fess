@@ -171,8 +171,12 @@ public class SuggestCreator {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getSuggestSystemMonitorIntervalAsInteger(),
                             true);
 
-            logNotificationTarget = new LogNotificationTarget();
-            logNotificationTask = TimeoutManager.getInstance().addTimeoutTarget(logNotificationTarget, 30, true);
+            if (ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                logNotificationTarget = new LogNotificationTarget();
+                logNotificationTask = TimeoutManager.getInstance()
+                        .addTimeoutTarget(logNotificationTarget, ComponentUtil.getFessConfig().getLogNotificationFlushIntervalAsInteger(),
+                                true);
+            }
 
             exitCode = process(options);
         } catch (final ContainerNotAvailableException e) {

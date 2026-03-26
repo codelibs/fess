@@ -386,8 +386,12 @@ public class Crawler {
                     .addTimeoutTarget(new SystemMonitorTarget(), ComponentUtil.getFessConfig().getCrawlerSystemMonitorIntervalAsInteger(),
                             true);
 
-            logNotificationTarget = new LogNotificationTarget();
-            logNotificationTask = TimeoutManager.getInstance().addTimeoutTarget(logNotificationTarget, 30, true);
+            if (ComponentUtil.getFessConfig().isLogNotificationEnabled()) {
+                logNotificationTarget = new LogNotificationTarget();
+                logNotificationTask = TimeoutManager.getInstance()
+                        .addTimeoutTarget(logNotificationTarget, ComponentUtil.getFessConfig().getLogNotificationFlushIntervalAsInteger(),
+                                true);
+            }
 
             if (options.hotThread != null) {
                 hotThreadMonitorTask = TimeoutManager.getInstance().addTimeoutTarget(new HotThreadMonitorTarget(), options.hotThread, true);

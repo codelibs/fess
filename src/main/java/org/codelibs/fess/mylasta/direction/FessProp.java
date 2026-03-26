@@ -538,14 +538,6 @@ public interface FessProp {
         return getSystemPropertyAsBoolean(Constants.LOG_NOTIFICATION_ENABLED_PROPERTY, false);
     }
 
-    default void setLogNotificationInterval(final String value) {
-        setSystemProperty(Constants.LOG_NOTIFICATION_INTERVAL_PROPERTY, value);
-    }
-
-    default int getLogNotificationIntervalAsInteger() {
-        return getSystemPropertyAsInt(Constants.LOG_NOTIFICATION_INTERVAL_PROPERTY, 300);
-    }
-
     default void setLogNotificationLevel(final String value) {
         setSystemProperty(Constants.LOG_NOTIFICATION_LEVEL_PROPERTY, value);
     }
