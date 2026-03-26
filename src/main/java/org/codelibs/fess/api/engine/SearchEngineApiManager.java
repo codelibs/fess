@@ -116,16 +116,29 @@ public class SearchEngineApiManager extends BaseApiManager {
                 throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid session.");
             });
         } catch (final WebApiException e) {
+            final int statusCode = e.getStatusCode();
             String message;
             if (Constants.TRUE.equalsIgnoreCase(ComponentUtil.getFessConfig().getApiJsonResponseExceptionIncluded())) {
-                logger.warn("Failed to access Web API.", e);
+                if (statusCode >= 400 && statusCode < 500) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to access Web API.", e);
+                    }
+                } else {
+                    logger.warn("Failed to access Web API.", e);
+                }
                 message = e.getMessage();
             } else {
                 final String errorCode = UUID.randomUUID().toString();
                 message = "[" + errorCode + "] Failed to access to Web API.";
-                logger.warn(message, e);
+                if (statusCode >= 400 && statusCode < 500) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(message, e);
+                    }
+                } else {
+                    logger.warn(message, e);
+                }
             }
-            response.sendError(e.getStatusCode(), message);
+            response.sendError(statusCode, message);
         }
     }
 
