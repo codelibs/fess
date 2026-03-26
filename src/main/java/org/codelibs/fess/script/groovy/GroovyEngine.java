@@ -70,6 +70,8 @@ public class GroovyEngine extends AbstractScriptEngine {
     /** Maximum length of script text included in warning log messages. Configurable via DI. */
     protected int maxScriptLogLength = 200;
 
+    protected boolean scriptAuditLogEnabled;
+
     private Cache<String, CachedScript> scriptCache;
 
     /**
@@ -87,6 +89,8 @@ public class GroovyEngine extends AbstractScriptEngine {
     @PostConstruct
     public void init() {
         buildScriptCache();
+        scriptAuditLogEnabled = ComponentUtil.available() && ComponentUtil.getFessConfig().isScriptAuditLogEnabled()
+                && ComponentUtil.hasComponent("activityHelper");
     }
 
     private void buildScriptCache() {
@@ -229,6 +233,9 @@ public class GroovyEngine extends AbstractScriptEngine {
      */
     protected ScheduledJob getCurrentScheduledJob() {
         try {
+            if (!ComponentUtil.hasComponent("jobHelper")) {
+                return null;
+            }
             final LaJobRuntime runtime = ComponentUtil.getJobHelper().getJobRuntime();
             if (runtime != null) {
                 final Object job = runtime.getParameterMap().get(Constants.SCHEDULED_JOB);
@@ -251,11 +258,14 @@ public class GroovyEngine extends AbstractScriptEngine {
      * @param result the execution result (e.g., "success" or "failure:ExceptionType")
      */
     protected void logScriptExecution(final String script, final String result) {
+        if (!scriptAuditLogEnabled) {
+            return;
+        }
         try {
-            final ScheduledJob job = getCurrentScheduledJob();
             String source = "unknown";
             String user = "system";
 
+            final ScheduledJob job = getCurrentScheduledJob();
             if (job != null) {
                 source = "scheduler:" + job.getName();
                 if (job.getCreatedBy() != null) {
