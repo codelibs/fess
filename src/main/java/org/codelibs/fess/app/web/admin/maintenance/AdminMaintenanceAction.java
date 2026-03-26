@@ -431,7 +431,7 @@ public class AdminMaintenanceAction extends FessAdminAction {
         }
 
         if (targetPrefixes.isEmpty()) {
-            saveError(messages -> messages.addErrorsFailedToRebuildConfigIndex(GLOBAL));
+            saveError(messages -> messages.addErrorsNoTargetIndexSelected(GLOBAL));
             return redirect(getClass());
         }
 

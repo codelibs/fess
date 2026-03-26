@@ -392,6 +392,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to rebuild config indices. */
     public static final String ERRORS_failed_to_rebuild_config_index = "{errors.failed_to_rebuild_config_index}";
 
+    /** The key of the message: Please select at least one target index to rebuild. */
+    public static final String ERRORS_no_target_index_selected = "{errors.no_target_index_selected}";
+
     /** The key of the message: Failed to read a request file: {0} */
     public static final String ERRORS_failed_to_read_request_file = "{errors.failed_to_read_request_file}";
 
@@ -2320,6 +2323,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToRebuildConfigIndex(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_rebuild_config_index));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.no_target_index_selected' with parameters.
+     * <pre>
+     * message: Please select at least one target index to rebuild.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsNoTargetIndexSelected(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_no_target_index_selected));
         return this;
     }
 
