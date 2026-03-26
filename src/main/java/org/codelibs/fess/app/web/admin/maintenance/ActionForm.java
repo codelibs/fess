@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.maintenance;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.validation.constraints.Size;
@@ -53,4 +54,28 @@ public class ActionForm {
      */
     @Size(max = 10)
     public String autoExpandReplicasForDoc = ComponentUtil.getFessConfig().getIndexAutoExpandReplicas();
+
+    /**
+     * The flag to load bulk data during config index rebuild.
+     */
+    @Size(max = 10)
+    public String loadBulkData;
+
+    /**
+     * The flag to rebuild fess_config indices.
+     */
+    @Size(max = 10)
+    public String rebuildConfigIndex = Constants.ON;
+
+    /**
+     * The flag to rebuild fess_user indices.
+     */
+    @Size(max = 10)
+    public String rebuildUserIndex;
+
+    /**
+     * The flag to rebuild fess_log indices.
+     */
+    @Size(max = 10)
+    public String rebuildLogIndex;
 }

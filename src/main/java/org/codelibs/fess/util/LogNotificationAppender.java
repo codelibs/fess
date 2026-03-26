@@ -34,7 +34,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.codelibs.fess.helper.LogNotificationHelper;
 import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
-import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Custom Log4j2 Appender that captures log events into a buffer for notification purposes.

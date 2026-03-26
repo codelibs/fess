@@ -23,7 +23,9 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -401,6 +403,50 @@ public class AdminMaintenanceAction extends FessAdminAction {
      */
     protected boolean isLogFilename(final String name) {
         return name.endsWith(".log") || name.endsWith(".log.gz");
+    }
+
+    /**
+     * Rebuilds selected configuration indices with the latest mappings.
+     * Executes asynchronously in a background thread.
+     *
+     * @param form the action form containing the target index checkboxes and loadBulkData flag
+     * @return HTML response redirecting to the maintenance page
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse reindexConfigIndices(final ActionForm form) {
+        validate(form, messages -> {}, this::asIndexHtml);
+        verifyToken(this::asIndexHtml);
+
+        final boolean loadBulkData = isCheckboxEnabled(form.loadBulkData);
+        final Set<String> targetPrefixes = new HashSet<>();
+        if (isCheckboxEnabled(form.rebuildConfigIndex)) {
+            targetPrefixes.add("fess_config");
+        }
+        if (isCheckboxEnabled(form.rebuildUserIndex)) {
+            targetPrefixes.add("fess_user");
+        }
+        if (isCheckboxEnabled(form.rebuildLogIndex)) {
+            targetPrefixes.add("fess_log");
+        }
+
+        if (targetPrefixes.isEmpty()) {
+            saveError(messages -> messages.addErrorsNoTargetIndexSelected(GLOBAL));
+            return redirect(getClass());
+        }
+
+        new Thread(() -> {
+            try {
+                if (!searchEngineClient.reindexConfigIndices(loadBulkData, targetPrefixes)) {
+                    logger.warn("Failed to rebuild config indices");
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to rebuild config indices", e);
+            }
+        }, "rebuild-config-indices").start();
+
+        saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+        return redirect(getClass());
     }
 
     /**

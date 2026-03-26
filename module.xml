@@ -58,6 +58,15 @@
 			<param name="module.version" value="${opensearch.version}" />
 			<param name="module.zip.version" value="${opensearch.version}" />
 		</antcall>
+		<!-- reindex -->
+		<antcall target="install.module">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="module.groupId" value="org/codelibs/opensearch/module" />
+			<param name="module.name.prefix" value="" />
+			<param name="module.name" value="reindex" />
+			<param name="module.version" value="${opensearch.version}" />
+			<param name="module.zip.version" value="${opensearch.version}" />
+		</antcall>
 		<!-- transport-netty4 -->
 		<antcall target="install.module">
 			<param name="repo.url" value="${maven.release.repo.url}" />
@@ -88,6 +97,11 @@
 			<fileset dir="${modules.dir}">
 				<include name="lang-expression/asm-*" />
 				<include name="lang-painless/asm-*" />
+				<include name="reindex/commons-codec-*" />
+				<include name="reindex/commons-logging-*" />
+				<include name="reindex/httpclient5-*" />
+				<include name="reindex/httpcore5-*" />
+				<include name="reindex/slf4j-api-*" />
 			</fileset>
 		</delete>
 	</target>
