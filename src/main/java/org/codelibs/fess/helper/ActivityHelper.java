@@ -234,12 +234,12 @@ public class ActivityHelper {
         if (script == null) {
             return "-";
         }
-        String normalized = script.replace('\n', ' ').replace('\r', ' ').replace('\t', '_');
-        final int maxLength = 1000;
+        final int maxLength = ComponentUtil.getFessConfig().getScriptAuditLogMaxLengthAsInteger();
+        String normalized = script;
         if (normalized.length() > maxLength) {
-            return normalized.substring(0, maxLength - 3) + "...";
+            normalized = normalized.substring(0, maxLength - 3) + "...";
         }
-        return normalized;
+        return normalized.replace('\n', ' ').replace('\r', ' ').replace('\t', '_');
     }
 
     /**
