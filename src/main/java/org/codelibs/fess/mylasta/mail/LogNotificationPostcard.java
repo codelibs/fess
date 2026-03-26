@@ -50,7 +50,7 @@ public class LogNotificationPostcard extends LaTypicalPostcard {
 
     @Override
     protected String[] getPropertyNames() {
-        return new String[] { "hostname", "level", "count", "interval", "details" };
+        return new String[] { "level", "hostname", "count", "interval", "details" };
     }
 
     // ===================================================================================
@@ -99,21 +99,21 @@ public class LogNotificationPostcard extends LaTypicalPostcard {
     //                                  Application Variable
     //                                  --------------------
     /**
-     * Set the value of hostname, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param hostname The parameter value of hostname. (NotNull)
-     */
-    public void setHostname(String hostname) {
-        registerVariable("hostname", hostname);
-    }
-
-    /**
      * Set the value of level, used in parameter comment. <br>
      * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
      * @param level The parameter value of level. (NotNull)
      */
     public void setLevel(String level) {
         registerVariable("level", level);
+    }
+
+    /**
+     * Set the value of hostname, used in parameter comment. <br>
+     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
+     * @param hostname The parameter value of hostname. (NotNull)
+     */
+    public void setHostname(String hostname) {
+        registerVariable("hostname", hostname);
     }
 
     /**

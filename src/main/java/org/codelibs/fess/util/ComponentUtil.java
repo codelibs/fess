@@ -54,6 +54,7 @@ import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.helper.MarkdownRenderer;
+import org.codelibs.fess.helper.LogNotificationHelper;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
@@ -117,6 +118,8 @@ public final class ComponentUtil {
     private static final String INGEST_FACTORY = "ingestFactory";
 
     private static final String NOTIFICATION_HELPER = "notificationHelper";
+
+    private static final String LOG_NOTIFICATION_HELPER = "logNotificationHelper";
 
     private static final String SEARCH_HELPER = "searchHelper";
 
@@ -781,6 +784,14 @@ public final class ComponentUtil {
      */
     public static NotificationHelper getNotificationHelper() {
         return getComponent(NOTIFICATION_HELPER);
+    }
+
+    /**
+     * Gets the log notification helper component.
+     * @return The log notification helper.
+     */
+    public static LogNotificationHelper getLogNotificationHelper() {
+        return getComponent(LOG_NOTIFICATION_HELPER);
     }
 
     /**

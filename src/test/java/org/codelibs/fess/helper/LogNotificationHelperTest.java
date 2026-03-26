@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.List;
+
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -56,5 +59,35 @@ public class LogNotificationHelperTest extends UnitFessTestCase {
         // Second round
         helper.init();
         helper.destroy();
+    }
+
+    @Test
+    public void test_offer_and_drainAll() {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        helper.offer(new LogNotificationEvent(1000L, "ERROR", "com.example.Foo", "message1", "throwable1"));
+        helper.offer(new LogNotificationEvent(2000L, "WARN", "com.example.Bar", "message2", null));
+
+        List<LogNotificationEvent> events = helper.drainAll();
+        assertEquals(2, events.size());
+        assertEquals("message1", events.get(0).getMessage());
+        assertEquals("message2", events.get(1).getMessage());
+    }
+
+    @Test
+    public void test_drainAll_empty() {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        List<LogNotificationEvent> events = helper.drainAll();
+        assertNotNull(events);
+        assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void test_drainAll_clears() {
+        LogNotificationHelper helper = new LogNotificationHelper();
+        helper.offer(new LogNotificationEvent(1000L, "ERROR", "org.test", "msg", null));
+        List<LogNotificationEvent> first = helper.drainAll();
+        assertEquals(1, first.size());
+        List<LogNotificationEvent> second = helper.drainAll();
+        assertTrue(second.isEmpty());
     }
 }

@@ -22,10 +22,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.timer.TimeoutTarget;
+import org.codelibs.fess.helper.LogNotificationHelper;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogNotificationBuffer;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
 import org.opensearch.action.bulk.BulkRequestBuilder;
 import org.opensearch.action.bulk.BulkResponse;
 
@@ -49,7 +49,14 @@ public class LogNotificationTarget implements TimeoutTarget {
 
     @Override
     public void expired() {
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final LogNotificationHelper helper;
+        try {
+            helper = ComponentUtil.getLogNotificationHelper();
+        } catch (final Exception e) {
+            return;
+        }
+
+        final List<LogNotificationEvent> events = helper.drainAll();
         if (events.isEmpty()) {
             return;
         }

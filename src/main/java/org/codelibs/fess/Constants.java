@@ -282,6 +282,9 @@ public class Constants extends CoreLibConstants {
     /** Property key for log notification interval configuration. */
     public static final String LOG_NOTIFICATION_INTERVAL_PROPERTY = "log.notification.interval";
 
+    /** Property key for log notification level configuration. */
+    public static final String LOG_NOTIFICATION_LEVEL_PROPERTY = "fess.log.notification.level";
+
     /** Property key for browser locale usage in search configuration. */
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
 

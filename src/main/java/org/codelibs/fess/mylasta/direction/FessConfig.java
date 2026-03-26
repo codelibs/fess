@@ -1995,6 +1995,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. html */
     String INDEX_EXPORT_FORMAT = "index.export.format";
 
+    /** The key of the configuration. e.g. 30 */
+    String LOG_NOTIFICATION_FLUSH_INTERVAL = "log.notification.flush.interval";
+
+    /** The key of the configuration. e.g. 3000 */
+    String LOG_NOTIFICATION_MAX_DETAILS_LENGTH = "log.notification.max.details.length";
+
+    /** The key of the configuration. e.g. 50 */
+    String LOG_NOTIFICATION_MAX_DISPLAY_EVENTS = "log.notification.max.display.events";
+
+    /** The key of the configuration. e.g. 200 */
+    String LOG_NOTIFICATION_MAX_MESSAGE_LENGTH = "log.notification.max.message.length";
+
+    /** The key of the configuration. e.g. 1000 */
+    String LOG_NOTIFICATION_SEARCH_SIZE = "log.notification.search.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String LOG_NOTIFICATION_BUFFER_SIZE = "log.notification.buffer.size";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9407,6 +9425,112 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexExportFormat();
 
     /**
+     * Get the value for the key 'log.notification.flush.interval'. <br>
+     * The value is, e.g. 30 <br>
+     * comment: <br>
+     * Log Notification<br>
+     * Interval (seconds) for flushing log notification buffer to search engine.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationFlushInterval();
+
+    /**
+     * Get the value for the key 'log.notification.flush.interval' as {@link Integer}. <br>
+     * The value is, e.g. 30 <br>
+     * comment: <br>
+     * Log Notification<br>
+     * Interval (seconds) for flushing log notification buffer to search engine.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationFlushIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'log.notification.max.details.length'. <br>
+     * The value is, e.g. 3000 <br>
+     * comment: Maximum length of notification details text.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationMaxDetailsLength();
+
+    /**
+     * Get the value for the key 'log.notification.max.details.length' as {@link Integer}. <br>
+     * The value is, e.g. 3000 <br>
+     * comment: Maximum length of notification details text.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationMaxDetailsLengthAsInteger();
+
+    /**
+     * Get the value for the key 'log.notification.max.display.events'. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum number of events to display in notification.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationMaxDisplayEvents();
+
+    /**
+     * Get the value for the key 'log.notification.max.display.events' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * comment: Maximum number of events to display in notification.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationMaxDisplayEventsAsInteger();
+
+    /**
+     * Get the value for the key 'log.notification.max.message.length'. <br>
+     * The value is, e.g. 200 <br>
+     * comment: Maximum length of each log message in notification.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationMaxMessageLength();
+
+    /**
+     * Get the value for the key 'log.notification.max.message.length' as {@link Integer}. <br>
+     * The value is, e.g. 200 <br>
+     * comment: Maximum length of each log message in notification.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationMaxMessageLengthAsInteger();
+
+    /**
+     * Get the value for the key 'log.notification.search.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of events to fetch from search engine per notification job.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationSearchSize();
+
+    /**
+     * Get the value for the key 'log.notification.search.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of events to fetch from search engine per notification job.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationSearchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'log.notification.buffer.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of events to buffer in memory.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLogNotificationBufferSize();
+
+    /**
+     * Get the value for the key 'log.notification.buffer.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: Maximum number of events to buffer in memory.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLogNotificationBufferSizeAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -12891,6 +13015,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.INDEX_EXPORT_FORMAT);
         }
 
+        public String getLogNotificationFlushInterval() {
+            return get(FessConfig.LOG_NOTIFICATION_FLUSH_INTERVAL);
+        }
+
+        public Integer getLogNotificationFlushIntervalAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_FLUSH_INTERVAL);
+        }
+
+        public String getLogNotificationMaxDetailsLength() {
+            return get(FessConfig.LOG_NOTIFICATION_MAX_DETAILS_LENGTH);
+        }
+
+        public Integer getLogNotificationMaxDetailsLengthAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_MAX_DETAILS_LENGTH);
+        }
+
+        public String getLogNotificationMaxDisplayEvents() {
+            return get(FessConfig.LOG_NOTIFICATION_MAX_DISPLAY_EVENTS);
+        }
+
+        public Integer getLogNotificationMaxDisplayEventsAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_MAX_DISPLAY_EVENTS);
+        }
+
+        public String getLogNotificationMaxMessageLength() {
+            return get(FessConfig.LOG_NOTIFICATION_MAX_MESSAGE_LENGTH);
+        }
+
+        public Integer getLogNotificationMaxMessageLengthAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_MAX_MESSAGE_LENGTH);
+        }
+
+        public String getLogNotificationSearchSize() {
+            return get(FessConfig.LOG_NOTIFICATION_SEARCH_SIZE);
+        }
+
+        public Integer getLogNotificationSearchSizeAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_SEARCH_SIZE);
+        }
+
+        public String getLogNotificationBufferSize() {
+            return get(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE);
+        }
+
+        public Integer getLogNotificationBufferSizeAsInteger() {
+            return getAsInteger(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -13495,6 +13667,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");
             defaultMap.put(FessConfig.INDEX_EXPORT_FORMAT, "html");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_FLUSH_INTERVAL, "30");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_MAX_DETAILS_LENGTH, "3000");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_MAX_DISPLAY_EVENTS, "50");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_MAX_MESSAGE_LENGTH, "200");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_SEARCH_SIZE, "1000");
+            defaultMap.put(FessConfig.LOG_NOTIFICATION_BUFFER_SIZE, "1000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

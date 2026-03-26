@@ -32,7 +32,9 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
+import org.codelibs.fess.helper.LogNotificationHelper;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
+import org.codelibs.fess.util.ComponentUtil;
 
 /**
  * Custom Log4j2 Appender that captures log events into a buffer for notification purposes.
@@ -81,7 +83,14 @@ public class LogNotificationAppender extends AbstractAppender {
             }
         }
 
-        if (!event.getLevel().isMoreSpecificThan(minLevel)) {
+        if (!event.getLevel().isMoreSpecificThan(getEffectiveMinLevel())) {
+            return;
+        }
+
+        final LogNotificationHelper helper;
+        try {
+            helper = ComponentUtil.getLogNotificationHelper();
+        } catch (final Exception e) {
             return;
         }
 
@@ -103,7 +112,19 @@ public class LogNotificationAppender extends AbstractAppender {
                 event.getMessage().getFormattedMessage(), //
                 throwableStr //
         );
-        LogNotificationBuffer.getInstance().offer(notificationEvent);
+        helper.offer(notificationEvent);
+    }
+
+    private Level getEffectiveMinLevel() {
+        try {
+            final String levelStr = ComponentUtil.getSystemProperties().getProperty("fess.log.notification.level");
+            if (levelStr != null) {
+                return Level.toLevel(levelStr, minLevel);
+            }
+        } catch (final Exception e) {
+            // ComponentUtil not initialized yet
+        }
+        return minLevel;
     }
 
     /**

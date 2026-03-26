@@ -28,13 +28,13 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.helper.NotificationHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.LogNotificationPostcard;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
 import org.dbflute.mail.send.hook.SMailCallbackContext;
 import org.lastaflute.core.mail.Postbox;
 import org.opensearch.action.bulk.BulkRequestBuilder;
@@ -60,12 +60,6 @@ public class LogNotificationJob {
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
-    private static final int MAX_DETAILS_LENGTH = 3000;
-
-    private static final int MAX_DISPLAY_EVENTS = 50;
-
-    private static final int MAX_MESSAGE_LENGTH = 200;
-
     /**
      * Executes the log notification job.
      *
@@ -89,10 +83,11 @@ public class LogNotificationJob {
             return "No log notifications.";
         }
 
+        final int searchSize = fessConfig.getLogNotificationSearchSizeAsInteger();
         final String hostname = ComponentUtil.getSystemHelper().getHostname();
         final SearchResponse searchResponse = client.prepareSearch(indexName)
                 .setQuery(QueryBuilders.termQuery("hostname", hostname))
-                .setSize(1000)
+                .setSize(searchSize)
                 .addSort("timestamp", SortOrder.ASC)
                 .execute()
                 .actionGet(fessConfig.getIndexSearchTimeout());
@@ -111,6 +106,10 @@ public class LogNotificationJob {
             docIds.add(hit.getId());
         }
 
+        final int maxDetailsLength = fessConfig.getLogNotificationMaxDetailsLengthAsInteger();
+        final int maxDisplayEvents = fessConfig.getLogNotificationMaxDisplayEventsAsInteger();
+        final int maxMessageLength = fessConfig.getLogNotificationMaxMessageLengthAsInteger();
+
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Map<String, List<LogNotificationEvent>> eventsByLevel =
                 events.stream().collect(Collectors.groupingBy(LogNotificationEvent::getLevel));
@@ -118,7 +117,7 @@ public class LogNotificationJob {
         for (final Map.Entry<String, List<LogNotificationEvent>> entry : eventsByLevel.entrySet()) {
             final String level = entry.getKey();
             final List<LogNotificationEvent> levelEvents = entry.getValue();
-            final String details = formatDetails(levelEvents);
+            final String details = formatDetails(levelEvents, maxDetailsLength, maxDisplayEvents, maxMessageLength);
 
             final String toStrs = fessConfig.getNotificationTo();
             final String[] toAddresses;
@@ -162,7 +161,7 @@ public class LogNotificationJob {
         }
         bulkDelete.execute().actionGet(fessConfig.getIndexSearchTimeout());
 
-        // Delete any remaining events beyond the 1000 limit (discard overflow)
+        // Delete any remaining events beyond the search size limit (discard overflow)
         try {
             client.deleteByQuery(indexName, QueryBuilders.termQuery("hostname", hostname));
         } catch (final Exception e) {
@@ -176,11 +175,15 @@ public class LogNotificationJob {
      * Formats a list of log notification events into a human-readable summary string.
      *
      * @param events the list of log notification events
+     * @param maxDetailsLength the maximum length of the details string
+     * @param maxDisplayEvents the maximum number of events to display
+     * @param maxMessageLength the maximum length of each log message
      * @return the formatted details string with summary header and truncated entries
      */
-    protected String formatDetails(final List<LogNotificationEvent> events) {
+    protected String formatDetails(final List<LogNotificationEvent> events, final int maxDetailsLength, final int maxDisplayEvents,
+            final int maxMessageLength) {
         final int totalCount = events.size();
-        final int displayCount = Math.min(totalCount, MAX_DISPLAY_EVENTS);
+        final int displayCount = Math.min(totalCount, maxDisplayEvents);
         final StringBuilder sb = new StringBuilder();
         sb.append("Total: ").append(totalCount).append(" event(s)");
         if (totalCount > displayCount) {
@@ -192,8 +195,8 @@ public class LogNotificationJob {
             final LogNotificationEvent event = events.get(i);
             final String timestamp = TIMESTAMP_FORMATTER.format(Instant.ofEpochMilli(event.getTimestamp()));
             String message = event.getMessage();
-            if (message != null && message.length() > MAX_MESSAGE_LENGTH) {
-                message = message.substring(0, MAX_MESSAGE_LENGTH) + "...";
+            if (message != null && message.length() > maxMessageLength) {
+                message = message.substring(0, maxMessageLength) + "...";
             }
             sb.append('[')
                     .append(timestamp)
@@ -204,8 +207,8 @@ public class LogNotificationJob {
                     .append(" - ")
                     .append(message)
                     .append('\n');
-            if (sb.length() > MAX_DETAILS_LENGTH) {
-                sb.setLength(MAX_DETAILS_LENGTH);
+            if (sb.length() > maxDetailsLength) {
+                sb.setLength(maxDetailsLength);
                 break;
             }
         }

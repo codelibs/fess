@@ -220,6 +220,9 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSlackWebhookUrls(form.slackWebhookUrls);
         fessConfig.setGoogleChatWebhookUrls(form.googleChatWebhookUrls);
         fessConfig.setLogNotificationEnabled(isCheckboxEnabled(form.logNotificationEnabled));
+        if (StringUtil.isNotBlank(form.logNotificationLevel)) {
+            fessConfig.setLogNotificationLevel(form.logNotificationLevel);
+        }
         fessConfig.setStorageEndpoint(form.storageEndpoint);
         if (form.storageAccessKey != null && StringUtil.isNotBlank(form.storageAccessKey.replace("*", " "))) {
             fessConfig.setStorageAccessKey(form.storageAccessKey);
@@ -360,6 +363,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.slackWebhookUrls = fessConfig.getSlackWebhookUrls();
         form.googleChatWebhookUrls = fessConfig.getGoogleChatWebhookUrls();
         form.logNotificationEnabled = fessConfig.isLogNotificationEnabled() ? Constants.TRUE : Constants.FALSE;
+        form.logNotificationLevel = fessConfig.getLogNotificationLevel();
         form.storageEndpoint = fessConfig.getStorageEndpoint();
         form.storageAccessKey = StringUtil.isNotBlank(fessConfig.getStorageAccessKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;
         form.storageSecretKey = StringUtil.isNotBlank(fessConfig.getStorageSecretKey()) ? DUMMY_PASSWORD : StringUtil.EMPTY;

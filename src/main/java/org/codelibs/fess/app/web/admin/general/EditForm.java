@@ -430,6 +430,10 @@ public class EditForm {
     @Size(max = 10)
     public String logNotificationEnabled;
 
+    /** Log notification level (e.g. ERROR, WARN, INFO). */
+    @Size(max = 10)
+    public String logNotificationLevel;
+
     /** LDAP security authentication type. */
     @Size(max = 1000)
     public String ldapSecurityAuthentication;

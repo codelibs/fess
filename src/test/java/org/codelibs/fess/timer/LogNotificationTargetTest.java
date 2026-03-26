@@ -17,9 +17,10 @@ package org.codelibs.fess.timer;
 
 import java.util.List;
 
+import org.codelibs.fess.helper.LogNotificationHelper;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.LogNotificationBuffer;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -30,7 +31,8 @@ public class LogNotificationTargetTest extends UnitFessTestCase {
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
-        LogNotificationBuffer.getInstance().drainAll(); // clear for isolation
+        ComponentUtil.register(new LogNotificationHelper(), "logNotificationHelper");
+        ComponentUtil.getLogNotificationHelper().drainAll();
         logNotificationTarget = new LogNotificationTarget();
     }
 
@@ -55,25 +57,27 @@ public class LogNotificationTargetTest extends UnitFessTestCase {
     @Test
     public void test_expired_withEvents_drainsBuffer() {
         // Add events to buffer
-        LogNotificationBuffer.getInstance().offer(new LogNotificationEvent(System.currentTimeMillis(), "ERROR", "org.test", "msg1", null));
-        LogNotificationBuffer.getInstance().offer(new LogNotificationEvent(System.currentTimeMillis(), "WARN", "org.test", "msg2", null));
+        ComponentUtil.getLogNotificationHelper()
+                .offer(new LogNotificationEvent(System.currentTimeMillis(), "ERROR", "org.test", "msg1", null));
+        ComponentUtil.getLogNotificationHelper()
+                .offer(new LogNotificationEvent(System.currentTimeMillis(), "WARN", "org.test", "msg2", null));
 
         // expired() will drain buffer then fail on OpenSearch (not available) but should not throw
         logNotificationTarget.expired();
 
         // Buffer should be empty after expired() drained it
-        List<LogNotificationEvent> remaining = LogNotificationBuffer.getInstance().drainAll();
+        List<LogNotificationEvent> remaining = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, remaining.size());
     }
 
     @Test
     public void test_flush_withEvents_drainsBuffer() {
-        LogNotificationBuffer.getInstance()
+        ComponentUtil.getLogNotificationHelper()
                 .offer(new LogNotificationEvent(System.currentTimeMillis(), "ERROR", "org.test", "flush msg", null));
 
         logNotificationTarget.flush();
 
-        List<LogNotificationEvent> remaining = LogNotificationBuffer.getInstance().drainAll();
+        List<LogNotificationEvent> remaining = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, remaining.size());
     }
 

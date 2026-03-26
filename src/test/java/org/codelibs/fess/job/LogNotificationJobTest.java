@@ -22,7 +22,7 @@ import java.util.List;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -212,7 +212,7 @@ public class LogNotificationJobTest extends UnitFessTestCase {
 
     private static class TestableLogNotificationJob extends LogNotificationJob {
         public String testFormatDetails(List<LogNotificationEvent> events) {
-            return formatDetails(events);
+            return formatDetails(events, 3000, 50, 200);
         }
     }
 

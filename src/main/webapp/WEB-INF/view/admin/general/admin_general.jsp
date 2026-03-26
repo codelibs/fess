@@ -1000,7 +1000,27 @@ ${fe:html(true)}
                                             <la:checkbox styleId="logNotificationEnabled"
                                                          property="logNotificationEnabled"
                                                          styleClass="form-check-input"/>
+                                            <label for="logNotificationEnabled" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="logNotificationLevel"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.log_notification_level"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="logNotificationLevel"/>
+                                        <la:select styleId="logNotificationLevel"
+                                                   property="logNotificationLevel"
+                                                   styleClass="form-control">
+                                            <la:option value="ERROR">ERROR</la:option>
+                                            <la:option value="WARN">WARN</la:option>
+                                            <la:option value="INFO">INFO</la:option>
+                                            <la:option value="DEBUG">DEBUG</la:option>
+                                            <la:option value="TRACE">TRACE</la:option>
+                                        </la:select>
                                     </div>
                                 </div>
                                     <%-- Storage --%>

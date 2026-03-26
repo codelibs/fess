@@ -21,8 +21,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
+import org.codelibs.fess.helper.LogNotificationHelper;
+import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.LogNotificationBuffer.LogNotificationEvent;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -33,7 +35,8 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
-        LogNotificationBuffer.getInstance().drainAll();
+        ComponentUtil.register(new LogNotificationHelper(), "logNotificationHelper");
+        ComponentUtil.getLogNotificationHelper().drainAll();
         appender = LogNotificationAppender.createAppender("test", "ERROR", null, null);
     }
 
@@ -69,7 +72,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.test", "test error message");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals("ERROR", events.get(0).getLevel());
         assertEquals("org.codelibs.fess.test", events.get(0).getLoggerName());
@@ -82,7 +85,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.WARN, "org.codelibs.fess.test", "test warn message");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -92,7 +95,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.WARN, "org.codelibs.fess.test", "test warn message");
         warnAppender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals("WARN", events.get(0).getLevel());
         assertEquals("test warn message", events.get(0).getMessage());
@@ -103,7 +106,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.INFO, "org.codelibs.fess.test", "test info message");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -112,7 +115,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.helper.NotificationHelper", "should be excluded");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -121,7 +124,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.curl.CurlRequest", "should be excluded");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -130,7 +133,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.job.LogNotificationJob", "should be excluded");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -139,7 +142,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.helper.SystemHelper", "not excluded");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals("org.codelibs.fess.helper.SystemHelper", events.get(0).getLoggerName());
         assertEquals("not excluded", events.get(0).getMessage());
@@ -156,7 +159,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
                 .build();
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertNotNull(events.get(0).getThrowable());
         assertTrue(events.get(0).getThrowable().contains("RuntimeException"));
@@ -169,7 +172,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogEvent event = createLogEvent(Level.ERROR, null, "null logger message");
         appender.append(event);
 
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertNull(events.get(0).getLoggerName());
         assertEquals("null logger message", events.get(0).getMessage());
@@ -179,7 +182,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     public void test_append_excludedLogger_logNotificationTarget() {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.timer.LogNotificationTarget", "should be excluded");
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -187,7 +190,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     public void test_append_excludedLogger_logNotificationHelper() {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.helper.LogNotificationHelper", "should be excluded");
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -195,7 +198,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     public void test_append_fatalEvent() {
         final LogEvent event = createLogEvent(Level.FATAL, "org.codelibs.fess.test", "fatal error");
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals("FATAL", events.get(0).getLevel());
     }
@@ -205,7 +208,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         appender.append(createLogEvent(Level.ERROR, "org.codelibs.fess.a", "error 1"));
         appender.append(createLogEvent(Level.ERROR, "org.codelibs.fess.b", "error 2"));
         appender.append(createLogEvent(Level.ERROR, "org.codelibs.fess.c", "error 3"));
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(3, events.size());
         assertEquals("error 1", events.get(0).getMessage());
         assertEquals("error 2", events.get(1).getMessage());
@@ -217,7 +220,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
         final LogNotificationAppender warnAppender = LogNotificationAppender.createAppender("testWarn", "WARN", null, null);
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.test", "error captured by warn appender");
         warnAppender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals("ERROR", events.get(0).getLevel());
     }
@@ -226,7 +229,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     public void test_append_excludedLogger_logNotificationBuffer() {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.fess.util.LogNotificationBuffer", "should be excluded");
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -234,7 +237,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
     public void test_append_excludedLogger_subpackage() {
         final LogEvent event = createLogEvent(Level.ERROR, "org.codelibs.curl.CurlResponse", "should be excluded");
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(0, events.size());
     }
 
@@ -248,7 +251,7 @@ public class LogNotificationAppenderTest extends UnitFessTestCase {
                 .setTimeMillis(now)
                 .build();
         appender.append(event);
-        final List<LogNotificationEvent> events = LogNotificationBuffer.getInstance().drainAll();
+        final List<LogNotificationEvent> events = ComponentUtil.getLogNotificationHelper().drainAll();
         assertEquals(1, events.size());
         assertEquals(now, events.get(0).getTimestamp());
     }

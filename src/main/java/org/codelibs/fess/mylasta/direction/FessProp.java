@@ -546,6 +546,14 @@ public interface FessProp {
         return getSystemPropertyAsInt(Constants.LOG_NOTIFICATION_INTERVAL_PROPERTY, 300);
     }
 
+    default void setLogNotificationLevel(final String value) {
+        setSystemProperty(Constants.LOG_NOTIFICATION_LEVEL_PROPERTY, value);
+    }
+
+    default String getLogNotificationLevel() {
+        return getSystemProperty(Constants.LOG_NOTIFICATION_LEVEL_PROPERTY, "ERROR");
+    }
+
     default void setSuggestSearchLog(final boolean value) {
         setSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, value);
     }
