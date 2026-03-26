@@ -312,7 +312,7 @@ public class ChatApiManager extends BaseApiManager {
                 @Override
                 public void onChunk(final String content, final boolean done) {
                     try {
-                        if (!done && content != null && !content.isEmpty()) {
+                        if (content != null && !content.isEmpty()) {
                             sendSseEvent(writer, "chunk", Map.of("content", content));
                         }
                     } catch (final Exception e) {
