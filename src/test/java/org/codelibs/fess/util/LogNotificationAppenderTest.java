@@ -24,7 +24,6 @@ import org.apache.logging.log4j.message.SimpleMessage;
 import org.codelibs.fess.helper.LogNotificationHelper;
 import org.codelibs.fess.helper.LogNotificationHelper.LogNotificationEvent;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 

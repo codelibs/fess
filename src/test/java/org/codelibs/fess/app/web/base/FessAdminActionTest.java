@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;

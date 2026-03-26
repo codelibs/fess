@@ -205,7 +205,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         // In test environment resource files don't exist, so insertBulkData won't be called,
         // but the overall flow should still succeed.
         assertTrue(testClient.calledMethods.contains("addMapping"));
-        assertTrue(testClient.calledMethods.contains("switchAliases"));
+        assertTrue(testClient.calledMethods.contains("createAlias"));
     }
 
     @Test
@@ -269,7 +269,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
     // ==========================================================================
 
     @Test
-    public void test_reindexConfigIndices_callsSwitchAliases() {
+    public void test_reindexConfigIndices_callsCreateAlias() {
         testClient.existsIndexResult = true;
         testClient.createIndexResult = true;
         testClient.deleteIndexResult = true;
@@ -279,25 +279,9 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertTrue(result);
-        // Each of the 4 indices should have switchAliases called
-        assertEquals("switchAliases should be called for each index", 4, testClient.switchAliasesCalls.size());
-        assertTrue(testClient.calledMethods.contains("switchAliases"));
-    }
-
-    @Test
-    public void test_reindexConfigIndices_switchAliasesFailureCleanup() {
-        testClient.existsIndexResult = true;
-        testClient.createIndexResult = true;
-        testClient.deleteIndexResult = true;
-        testClient.reindexResult = true;
-        testClient.documentCount = 10;
-        testClient.switchAliasesResult = false;
-
-        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
-
-        assertFalse(result);
-        // New and backup indices should be cleaned up on switch failure
-        assertTrue(testClient.deletedIndices.size() > 0, "Should clean up on alias switch failure");
+        // Each of the 4 indices should have createAlias called
+        assertEquals("createAlias should be called for each index", 4, testClient.createAliasCalls.size());
+        assertTrue(testClient.calledMethods.contains("createAlias"));
     }
 
     // ==========================================================================
@@ -353,7 +337,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_reindexConfigIndices_deleteFailureAfterSwitch() {
+    public void test_reindexConfigIndices_deleteFailureAfterRebuild() {
         testClient.existsIndexResult = true;
         testClient.createIndexResult = true;
         testClient.reindexResult = true;
@@ -362,7 +346,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
 
         final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
-        // Even if delete fails, the rebuild itself succeeded (aliases are switched)
+        // Even if delete fails, the rebuild itself succeeded (aliases are recreated)
         assertTrue(result);
     }
 
@@ -398,6 +382,116 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         assertFalse(result);
         // New index and backup should be cleaned up
         assertTrue(testClient.deletedIndices.size() > 0);
+    }
+
+    // ==========================================================================
+    // reindexConfigIndices - same-name recreation flow
+    // ==========================================================================
+
+    @Test
+    public void test_reindexConfigIndices_recreatesWithSameName() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertTrue(result);
+        // Verify that each index is recreated with its original name (not .rebuild.xxx)
+        for (final String index : testClient.createdIndices) {
+            assertFalse(index.contains(".rebuild."), "Index should not contain .rebuild.: " + index);
+        }
+        // Verify reindex targets are original names (not .rebuild.xxx)
+        for (final String[] pair : testClient.reindexPairs) {
+            assertFalse(pair[1].contains(".rebuild."), "Reindex target should not contain .rebuild.: " + pair[1]);
+        }
+    }
+
+    @Test
+    public void test_reindexConfigIndices_deletesOldBeforeRecreate() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertTrue(result);
+        // For each of 4 indices: delete old + delete backup = 8 deletes
+        assertEquals(8, testClient.deletedIndices.size());
+        // Verify original index names appear in deleted list (old index deletion at step 3)
+        boolean foundOriginalDelete = false;
+        for (final String deleted : testClient.deletedIndices) {
+            if (!deleted.contains(".backup.") && !deleted.contains(".rebuild.")) {
+                foundOriginalDelete = true;
+                break;
+            }
+        }
+        assertTrue(foundOriginalDelete, "Original index should be deleted before recreate");
+    }
+
+    @Test
+    public void test_reindexConfigIndices_backupKeptOnRecreateFailure() {
+        testClient.existsIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.documentCount = 10;
+        // First createIndex (backup) succeeds, second (recreate) fails
+        testClient.createIndexFailOnNth = 2;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertFalse(result);
+        // Backup should NOT be deleted when recreate fails (kept for recovery)
+        boolean backupDeleted = false;
+        for (final String deleted : testClient.deletedIndices) {
+            if (deleted.contains(".backup.")) {
+                backupDeleted = true;
+                break;
+            }
+        }
+        assertFalse(backupDeleted, "Backup should be kept for recovery when recreate fails");
+    }
+
+    @Test
+    public void test_reindexConfigIndices_reindexFromBackupFailureDeletesBackup() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.documentCount = 10;
+        // First reindex (to backup) succeeds, second (from backup) fails
+        testClient.reindexFailOnNth = 2;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertFalse(result);
+        // Backup should be cleaned up when reindex from backup fails
+        boolean backupDeleted = false;
+        for (final String deleted : testClient.deletedIndices) {
+            if (deleted.contains(".backup.")) {
+                backupDeleted = true;
+                break;
+            }
+        }
+        assertTrue(backupDeleted, "Backup should be deleted when reindex from backup fails");
+    }
+
+    @Test
+    public void test_reindexConfigIndices_noSwitchAliasesCalled() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+
+        testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        // switchAliases should NOT be called in the new same-name recreation flow
+        assertEquals(0, testClient.switchAliasesCalls.size());
+        assertFalse(testClient.calledMethods.contains("switchAliases"));
     }
 
     // ==========================================================================

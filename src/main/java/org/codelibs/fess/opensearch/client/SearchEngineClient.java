@@ -78,6 +78,7 @@ import org.codelibs.fess.util.SearchEngineUtil;
 import org.codelibs.fess.util.SystemUtil;
 import org.codelibs.opensearch.runner.OpenSearchRunner;
 import org.codelibs.opensearch.runner.OpenSearchRunner.Configs;
+import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.core.message.UserMessages;
@@ -174,8 +175,6 @@ import org.opensearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.opensearch.threadpool.ThreadPool;
 import org.opensearch.transport.client.AdminClient;
 import org.opensearch.transport.client.Client;
-
-import org.codelibs.opensearch.runner.net.OpenSearchCurl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -641,7 +640,7 @@ public class SearchEngineClient implements Client {
             if (response.getHttpStatusCode() == 200) {
                 return true;
             }
-            logger.warn("Failed to reindex: fromIndex={}, toIndex={}", fromIndex, toIndex);
+            logger.warn("Failed to reindex: fromIndex={}, toIndex={}, response={}", fromIndex, toIndex, response.getContentAsString());
         } catch (final IOException e) {
             logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
         }
@@ -746,7 +745,7 @@ public class SearchEngineClient implements Client {
                     client.admin().indices().prepareDelete(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             return response.isAcknowledged();
         } catch (final Exception e) {
-            logger.debug("Failed to delete index: indexName={}", indexName, e);
+            logger.warn("Failed to delete index: indexName={}", indexName, e);
         }
         return false;
     }
@@ -819,7 +818,6 @@ public class SearchEngineClient implements Client {
             }
 
             final String backupIndex = indexName + ".backup." + timestamp;
-            final String newIndex = indexName + ".rebuild." + timestamp;
             logger.info("[Rebuild] Starting rebuild for {}", indexName);
 
             try {
@@ -851,70 +849,58 @@ public class SearchEngineClient implements Client {
                     }
                 }
 
-                // 3. Create new index with new mappings
-                if (!createIndex(configIndex, newIndex)) {
-                    logger.warn("[Rebuild] Failed to create new index: {}. Keeping backup: {}", newIndex, backupIndex);
-                    deleteIndex(backupIndex);
+                // 3. Delete old index and recreate with the same name (Bhv layer caches concrete index names)
+                deleteIndex(indexName);
+                if (!createIndex(configIndex, indexName)) {
+                    logger.warn("[Rebuild] Failed to recreate index: {}. Keeping backup: {}", indexName, backupIndex);
                     success = false;
                     continue;
                 }
-                addMapping(configIndex, configType, newIndex, false);
+                addMapping(configIndex, configType, indexName, false);
 
-                // 4. Reindex backup -> new index and verify document count
-                if (!reindex(backupIndex, newIndex, true)) {
-                    logger.warn("[Rebuild] Failed to reindex from {} to {}. Cleaning up.", backupIndex, newIndex);
-                    deleteIndex(newIndex);
+                // 4. Reindex backup -> recreated index and verify document count
+                if (!reindex(backupIndex, indexName, true)) {
+                    logger.warn("[Rebuild] Failed to reindex from {} to {}. Cleaning up.", backupIndex, indexName);
                     deleteIndex(backupIndex);
                     success = false;
                     continue;
                 }
                 if (sourceCount >= 0) {
-                    final long rebuiltCount = getDocumentCount(newIndex);
+                    final long rebuiltCount = getDocumentCount(indexName);
                     if (rebuiltCount != sourceCount) {
                         logger.warn("[Rebuild] Document count mismatch after rebuild: expected={}, actual={} for {}", sourceCount,
-                                rebuiltCount, newIndex);
-                        deleteIndex(newIndex);
+                                rebuiltCount, indexName);
                         deleteIndex(backupIndex);
                         success = false;
                         continue;
                     }
                 }
 
-                // 5. Optionally load bulk data with CREATE mode before alias cutover
+                // 5. Optionally load bulk data with CREATE mode
                 if (loadBulkData) {
                     final String dataPath =
                             getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/" + configType + ".bulk");
                     if (ResourceUtil.isExist(dataPath)) {
-                        insertBulkData(fessConfig, newIndex, dataPath, true);
+                        insertBulkData(fessConfig, indexName, dataPath, true);
                     }
                     split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
                         final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
                                 "/" + configIndex + "/" + configType + "_" + name + ".bulk");
                         if (ResourceUtil.isExist(bulkPath)) {
-                            insertBulkData(fessConfig, newIndex, bulkPath, true);
+                            insertBulkData(fessConfig, indexName, bulkPath, true);
                         }
                     }));
                 }
 
-                // 6. Atomic alias switch: old index -> new index
-                if (!switchAliases(configIndex, indexName, newIndex)) {
-                    logger.warn("[Rebuild] Failed to switch aliases from {} to {}. Keeping backup: {}", indexName, newIndex, backupIndex);
-                    deleteIndex(newIndex);
-                    deleteIndex(backupIndex);
-                    success = false;
-                    continue;
-                }
+                // 6. Recreate aliases on the rebuilt index
+                createAlias(configIndex, indexName);
 
-                // 7. Delete old index and backup
-                deleteIndex(indexName);
+                // 7. Delete backup
                 deleteIndex(backupIndex);
 
-                logger.info("[Rebuild] Completed rebuild for {} -> {}", indexName, newIndex);
+                logger.info("[Rebuild] Completed rebuild for {}", indexName);
             } catch (final Exception e) {
                 logger.warn("[Rebuild] Failed to rebuild index: {}", indexName, e);
-                if (existsIndex(newIndex)) {
-                    deleteIndex(newIndex);
-                }
                 if (existsIndex(backupIndex)) {
                     logger.info("[Rebuild] Backup index {} remains for recovery", backupIndex);
                 }
@@ -961,6 +947,8 @@ public class SearchEngineClient implements Client {
                     if ("{}".equals(source.trim())) {
                         source = null;
                     }
+                    logger.info("[Rebuild] Alias action: remove alias={} from index={}, add alias={} to index={}", aliasName, oldIndexName,
+                            aliasName, newIndexName);
                     builder.removeAlias(oldIndexName, aliasName);
                     if (source != null) {
                         builder.addAlias(newIndexName, aliasName, source);
@@ -976,7 +964,8 @@ public class SearchEngineClient implements Client {
                 logger.warn("[Rebuild] Alias switch not acknowledged from {} to {}", oldIndexName, newIndexName);
             }
         } catch (final ResourceNotFoundRuntimeException e) {
-            // No alias configuration found - create aliases normally
+            // No alias configuration found - create aliases normally (does NOT remove old aliases)
+            logger.warn("[Rebuild] No alias config found for {}, falling back to createAlias (old aliases NOT removed)", configIndex);
             createAlias(configIndex, newIndexName);
             return true;
         } catch (final Exception e) {

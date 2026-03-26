@@ -70,6 +70,7 @@ public class GroovyEngine extends AbstractScriptEngine {
     /** Maximum length of script text included in warning log messages. Configurable via DI. */
     protected int maxScriptLogLength = 200;
 
+    /** Whether to log script execution details for auditing purposes. Configurable via DI. */
     protected boolean scriptAuditLogEnabled;
 
     private Cache<String, CachedScript> scriptCache;
