@@ -404,6 +404,25 @@ public class AdminMaintenanceAction extends FessAdminAction {
     }
 
     /**
+     * Rebuilds all configuration indices with the latest mappings.
+     *
+     * @param form the action form containing the loadBulkData flag
+     * @return HTML response redirecting to the maintenance page
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse reindexConfigIndices(final ActionForm form) {
+        validate(form, messages -> {}, this::asIndexHtml);
+        verifyToken(this::asIndexHtml);
+        if (searchEngineClient.reindexConfigIndices(isCheckboxEnabled(form.loadBulkData))) {
+            saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
+        } else {
+            saveError(messages -> messages.addErrorsFailedToRebuildConfigIndex(GLOBAL));
+        }
+        return redirect(getClass());
+    }
+
+    /**
      * Starts a reindex operation with the specified parameters.
      *
      * @param replaceAliases whether to replace aliases after reindexing

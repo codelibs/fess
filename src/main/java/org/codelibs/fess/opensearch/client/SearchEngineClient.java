@@ -174,6 +174,8 @@ import org.opensearch.threadpool.ThreadPool;
 import org.opensearch.transport.client.AdminClient;
 import org.opensearch.transport.client.Client;
 
+import org.codelibs.opensearch.runner.net.OpenSearchCurl;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
@@ -521,6 +523,57 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Gets the document count of an index.
+     *
+     * @param indexName the name of the index
+     * @return the number of documents in the index, or -1 if the count could not be retrieved
+     */
+    public long getDocumentCount(final String indexName) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try {
+            client.admin().indices().prepareRefresh(indexName).execute().actionGet(fessConfig.getIndexIndicesTimeout());
+            try (CurlResponse response = ComponentUtil.getCurlHelper().get("/" + indexName + "/_count").execute()) {
+                if (response.getHttpStatusCode() == 200) {
+                    final Map<String, Object> contentMap = response.getContent(OpenSearchCurl.jsonParser());
+                    final Object count = contentMap.get("count");
+                    if (count instanceof Number) {
+                        return ((Number) count).longValue();
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            logger.debug("Failed to get document count: indexName={}", indexName, e);
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the number of aliases attached to the specified index.
+     *
+     * @param indexName the name of the index
+     * @return the number of aliases, or 0 if none found or an error occurred
+     */
+    public int getAliasCount(final String indexName) {
+        try (CurlResponse response =
+                ComponentUtil.getCurlHelper().get("/_cat/aliases").param("format", "json").param("h", "alias,index").execute()) {
+            if (response.getHttpStatusCode() == 200) {
+                final String content = response.getContentAsString();
+                final String target = "\"index\":\"" + indexName + "\"";
+                int count = 0;
+                int fromIndex = 0;
+                while ((fromIndex = content.indexOf(target, fromIndex)) != -1) {
+                    count++;
+                    fromIndex += target.length();
+                }
+                return count;
+            }
+        } catch (final Exception e) {
+            logger.debug("Failed to check aliases: indexName={}", indexName, e);
+        }
+        return 0;
+    }
+
+    /**
      * Copies documents from one index to another with optional transformation.
      *
      * @param fromIndex        the source index name
@@ -696,6 +749,177 @@ public class SearchEngineClient implements Client {
     }
 
     /**
+     * Rebuilds all configuration indices (fess_config.*, fess_user.*, fess_log.*) with the latest mappings.
+     * For each index: creates a backup with new mappings, reindexes data, deletes the original,
+     * recreates with new mappings, reindexes from backup, and deletes the backup.
+     *
+     * @param loadBulkData whether to load default bulk data after rebuilding (using OpType.CREATE to skip existing documents)
+     * @return true if all indices were rebuilt successfully, false if any index rebuild failed
+     */
+    public boolean reindexConfigIndices(final boolean loadBulkData) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String suffix = ".backup." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
+        boolean success = true;
+
+        for (final String configName : indexConfigList) {
+            final String[] values = configName.split("/");
+            if (values.length != 2) {
+                continue;
+            }
+
+            final String configIndex = values[0];
+            final String configType = values[1];
+
+            if (DOC_INDEX.equals(configIndex)) {
+                continue;
+            }
+
+            final String indexName;
+            if (configIndex.startsWith(CONFIG_INDEX_PREFIX)) {
+                indexName = configIndex.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), fessConfig.getIndexConfigIndex());
+            } else if (configIndex.startsWith(USER_INDEX_PREFIX)) {
+                indexName = configIndex.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), fessConfig.getIndexUserIndex());
+            } else if (configIndex.startsWith(LOG_INDEX_PREFIX)) {
+                indexName = configIndex.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), fessConfig.getIndexLogIndex());
+            } else {
+                logger.warn("[Rebuild] Unknown config index: {}", configIndex);
+                success = false;
+                continue;
+            }
+
+            if (!existsIndex(indexName)) {
+                logger.info("[Rebuild] Creating new index: {}", indexName);
+                if (!createIndex(configIndex, indexName)) {
+                    logger.warn("[Rebuild] Failed to create index: {}", indexName);
+                    success = false;
+                    continue;
+                }
+                try {
+                    addMapping(configIndex, configType, indexName, loadBulkData);
+                    createAlias(configIndex, indexName);
+                } catch (final Exception e) {
+                    logger.warn("[Rebuild] Failed to set up index: {}", indexName, e);
+                    success = false;
+                }
+                continue;
+            }
+
+            final String backupIndex = indexName + suffix;
+            logger.info("[Rebuild] Starting rebuild for {}", indexName);
+
+            try {
+                final long sourceCount = getDocumentCount(indexName);
+                final int expectedAliasCount = getAliasCount(indexName);
+
+                // 1. Create backup index with new mappings
+                if (!createIndex(configIndex, backupIndex)) {
+                    logger.warn("[Rebuild] Failed to create backup index: {}", backupIndex);
+                    success = false;
+                    continue;
+                }
+                addMapping(configIndex, configType, backupIndex, false);
+
+                // 2. Reindex current -> backup and verify document count
+                if (!reindex(indexName, backupIndex, true)) {
+                    logger.warn("[Rebuild] Failed to reindex from {} to {}", indexName, backupIndex);
+                    deleteIndex(backupIndex);
+                    success = false;
+                    continue;
+                }
+                if (sourceCount >= 0) {
+                    final long backupCount = getDocumentCount(backupIndex);
+                    if (backupCount != sourceCount) {
+                        logger.warn("[Rebuild] Document count mismatch after reindex: source={}, backup={} for {}", sourceCount,
+                                backupCount, indexName);
+                        deleteIndex(backupIndex);
+                        success = false;
+                        continue;
+                    }
+                }
+
+                // 3. Delete current index
+                if (!deleteIndex(indexName)) {
+                    logger.warn("[Rebuild] Failed to delete index: {}. Keeping backup: {}", indexName, backupIndex);
+                    success = false;
+                    continue;
+                }
+
+                // 4. Recreate current index with new mappings (no aliases yet)
+                if (!createIndex(configIndex, indexName)) {
+                    logger.warn("[Rebuild] Failed to recreate index: {}. Restoring aliases to backup: {}", indexName, backupIndex);
+                    createAlias(configIndex, backupIndex);
+                    success = false;
+                    continue;
+                }
+                addMapping(configIndex, configType, indexName, false);
+
+                // 5. Reindex backup -> current and verify document count
+                if (!reindex(backupIndex, indexName, true)) {
+                    logger.warn("[Rebuild] Failed to reindex from {} to {}. Restoring aliases to backup: {}", backupIndex, indexName,
+                            backupIndex);
+                    deleteIndex(indexName);
+                    createAlias(configIndex, backupIndex);
+                    success = false;
+                    continue;
+                }
+                if (sourceCount >= 0) {
+                    final long rebuiltCount = getDocumentCount(indexName);
+                    if (rebuiltCount != sourceCount) {
+                        logger.warn("[Rebuild] Document count mismatch after rebuild: expected={}, actual={} for {}", sourceCount,
+                                rebuiltCount, indexName);
+                        deleteIndex(indexName);
+                        createAlias(configIndex, backupIndex);
+                        success = false;
+                        continue;
+                    }
+                }
+
+                // 6. Optionally load bulk data with CREATE mode before alias cutover
+                if (loadBulkData) {
+                    final String dataPath =
+                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/" + configType + ".bulk");
+                    if (ResourceUtil.isExist(dataPath)) {
+                        insertBulkData(fessConfig, indexName, dataPath, true);
+                    }
+                    split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
+                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
+                                "/" + configIndex + "/" + configType + "_" + name + ".bulk");
+                        if (ResourceUtil.isExist(bulkPath)) {
+                            insertBulkData(fessConfig, indexName, bulkPath, true);
+                        }
+                    }));
+                }
+
+                // 7. Create aliases after all data is fully populated
+                createAlias(configIndex, indexName);
+
+                // 8. Verify alias attachment before deleting backup
+                final int actualAliasCount = getAliasCount(indexName);
+                if (expectedAliasCount <= 0 || actualAliasCount >= expectedAliasCount) {
+                    deleteIndex(backupIndex);
+                } else {
+                    logger.warn("[Rebuild] Alias count mismatch for {}: expected={}, actual={}. Restoring aliases to backup: {}", indexName,
+                            expectedAliasCount, actualAliasCount, backupIndex);
+                    createAlias(configIndex, backupIndex);
+                    success = false;
+                }
+
+                logger.info("[Rebuild] Completed rebuild for {}", indexName);
+            } catch (final Exception e) {
+                logger.warn("[Rebuild] Failed to rebuild index: {}", indexName, e);
+                if (existsIndex(backupIndex)) {
+                    if (!existsIndex(indexName)) {
+                        createAlias(configIndex, backupIndex);
+                    }
+                    logger.info("[Rebuild] Backup index {} remains for recovery", backupIndex);
+                }
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
      * Reads and processes index settings from configuration file.
      *
      * @param fesenType          the search engine type
@@ -755,6 +979,18 @@ public class SearchEngineClient implements Client {
      * @param indexName the actual index name
      */
     public void addMapping(final String index, final String docType, final String indexName) {
+        addMapping(index, docType, indexName, true);
+    }
+
+    /**
+     * Adds field mappings and optionally loads bulk data for an index.
+     *
+     * @param index        the index configuration name
+     * @param docType      the document type name
+     * @param indexName    the actual index name
+     * @param loadBulkData whether to load bulk data after applying mappings
+     */
+    public void addMapping(final String index, final String docType, final String indexName, final boolean loadBulkData) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final GetMappingsResponse getMappingsResponse =
@@ -786,17 +1022,20 @@ public class SearchEngineClient implements Client {
                     logger.warn("Failed to create {}/{} mapping.", indexName, docType);
                 }
 
-                final String dataPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
-                if (ResourceUtil.isExist(dataPath)) {
-                    insertBulkData(fessConfig, indexName, dataPath);
-                }
-                split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
-                    final String bulkPath =
-                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + "_" + name + ".bulk");
-                    if (ResourceUtil.isExist(bulkPath)) {
-                        insertBulkData(fessConfig, indexName, bulkPath);
+                if (loadBulkData) {
+                    final String dataPath =
+                            getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + index + "/" + docType + ".bulk");
+                    if (ResourceUtil.isExist(dataPath)) {
+                        insertBulkData(fessConfig, indexName, dataPath);
                     }
-                }));
+                    split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
+                        final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
+                                "/" + index + "/" + docType + "_" + name + ".bulk");
+                        if (ResourceUtil.isExist(bulkPath)) {
+                            insertBulkData(fessConfig, indexName, bulkPath);
+                        }
+                    }));
+                }
             } catch (final Exception e) {
                 logger.warn("Failed to create {}/{} mapping.", indexName, docType, e);
             }
@@ -994,6 +1233,18 @@ public class SearchEngineClient implements Client {
      * @param dataPath    the path to the bulk data file
      */
     protected void insertBulkData(final FessConfig fessConfig, final String configIndex, final String dataPath) {
+        insertBulkData(fessConfig, configIndex, dataPath, false);
+    }
+
+    /**
+     * Inserts bulk data from a file into an index.
+     *
+     * @param fessConfig  the Fess configuration
+     * @param configIndex the target index name
+     * @param dataPath    the path to the bulk data file
+     * @param createOnly  if true, uses OpType.CREATE to skip existing documents
+     */
+    protected void insertBulkData(final FessConfig fessConfig, final String configIndex, final String dataPath, final boolean createOnly) {
         try {
             final BulkRequestBuilder builder = client.prepareBulk();
             final ObjectMapper mapper = new ObjectMapper();
@@ -1030,6 +1281,9 @@ public class SearchEngineClient implements Client {
                                             .setIndex(configIndex)
                                             .setId(result.get("index").get("_id"))
                                             .setSource(source, XContentType.JSON);
+                                    if (createOnly) {
+                                        requestBuilder.setOpType(OpType.CREATE);
+                                    }
                                     builder.add(requestBuilder);
                                 }
                             }
@@ -1040,7 +1294,18 @@ public class SearchEngineClient implements Client {
                     });
             final BulkResponse response = builder.execute().actionGet(fessConfig.getIndexBulkTimeout());
             if (response.hasFailures()) {
-                logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
+                if (createOnly) {
+                    final long realFailures = Arrays.stream(response.getItems())
+                            .filter(item -> item.isFailed() && item.getFailure().getStatus() != RestStatus.CONFLICT)
+                            .count();
+                    if (realFailures > 0) {
+                        logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("Skipped existing documents in {}", dataPath);
+                    }
+                } else {
+                    logger.warn("Failed to register {}: {}", dataPath, response.buildFailureMessage());
+                }
             }
         } catch (final Exception e) {
             logger.warn("Failed to create {} mapping.", configIndex, e);

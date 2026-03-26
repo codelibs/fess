@@ -389,6 +389,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to start re-indexing from {0} to {1}. */
     public static final String ERRORS_failed_to_reindex = "{errors.failed_to_reindex}";
 
+    /** The key of the message: Failed to rebuild config indices. */
+    public static final String ERRORS_failed_to_rebuild_config_index = "{errors.failed_to_rebuild_config_index}";
+
     /** The key of the message: Failed to read a request file: {0} */
     public static final String ERRORS_failed_to_read_request_file = "{errors.failed_to_read_request_file}";
 
@@ -2303,6 +2306,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToReindex(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_reindex, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_rebuild_config_index' with parameters.
+     * <pre>
+     * message: Failed to rebuild config indices.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToRebuildConfigIndex(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_rebuild_config_index));
         return this;
     }
 

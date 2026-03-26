@@ -3357,6 +3357,15 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Reload */
     public static final String LABELS_reload_doc_index_button = "{labels.reload_doc_index_button}";
 
+    /** The key of the message: Rebuild Config Index */
+    public static final String LABELS_rebuild_config_index = "{labels.rebuild_config_index}";
+
+    /** The key of the message: Rebuild */
+    public static final String LABELS_rebuild_config_index_button = "{labels.rebuild_config_index_button}";
+
+    /** The key of the message: Load Default Data */
+    public static final String LABELS_load_bulk_data = "{labels.load_bulk_data}";
+
     /** The key of the message: Plugin */
     public static final String LABELS_plugin_title = "{labels.plugin_title}";
 

@@ -121,6 +121,38 @@ ${fe:html(true)}
                         <div class="card card-outline card-primary">
                             <div class="card-header">
                                 <h3 class="card-title">
+                                    <la:message key="labels.rebuild_config_index"/>
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.load_bulk_data"/></span>
+                                    <div class="form-inline col-sm-9">
+                                        <la:errors property="loadBulkData"/>
+                                        <div class="form-check">
+                                            <la:checkbox styleId="loadBulkData" styleClass="form-check-input" property="loadBulkData"/>
+                                            <label for="loadBulkData" class="form-check-label">
+                                                <la:message key="labels.enabled"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-warning ${f:h(editableClass)}"
+                                        name="reindexConfigIndices"
+                                        value="<la:message key="labels.rebuild_config_index_button"/>">
+                                    <i class="fa fa-sync" aria-hidden="true"></i>
+                                    <la:message key="labels.rebuild_config_index_button"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card card-outline card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">
                                     <la:message key="labels.clear_crawler_index"/>
                                 </h3>
                             </div>

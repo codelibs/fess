@@ -53,4 +53,10 @@ public class ActionForm {
      */
     @Size(max = 10)
     public String autoExpandReplicasForDoc = ComponentUtil.getFessConfig().getIndexAutoExpandReplicas();
+
+    /**
+     * The flag to load bulk data during config index rebuild.
+     */
+    @Size(max = 10)
+    public String loadBulkData;
 }
