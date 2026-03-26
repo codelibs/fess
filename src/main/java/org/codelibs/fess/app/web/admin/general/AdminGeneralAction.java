@@ -190,14 +190,14 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setDefaultSortValue(form.defaultSortValue);
         fessConfig.setVirtualHostValue(form.virtualHostValue);
         fessConfig.setAppendQueryParameter(isCheckboxEnabled(form.appendQueryParameter));
-        fessConfig.setIgnoreFailureType(form.ignoreFailureType);
+        fessConfig.setIgnoreFailureType(form.ignoreFailureType != null ? form.ignoreFailureType : StringUtil.EMPTY);
         fessConfig.setFailureCountThreshold(form.failureCountThreshold);
         fessConfig.setWebApiPopularWord(isCheckboxEnabled(form.popularWord));
         fessConfig.setCsvFileEncoding(form.csvFileEncoding);
         fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
         fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
         fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
-        fessConfig.setPurgeByBots(form.purgeByBots);
+        fessConfig.setPurgeByBots(form.purgeByBots != null ? form.purgeByBots : StringUtil.EMPTY);
         fessConfig.setNotificationTo(form.notificationTo);
         fessConfig.setSuggestSearchLog(isCheckboxEnabled(form.suggestSearchLog));
         fessConfig.setSuggestDocuments(isCheckboxEnabled(form.suggestDocuments));
@@ -211,9 +211,10 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setLdapBaseDn(form.ldapBaseDn);
         fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
         fessConfig.setLdapGroupFilter(form.ldapGroupFilter);
-        fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute);
-        fessConfig.setLdapSecurityAuthentication(form.ldapSecurityAuthentication);
-        fessConfig.setLdapInitialContextFactory(form.ldapInitialContextFactory);
+        fessConfig.setLdapMemberofAttribute(form.ldapMemberofAttribute != null ? form.ldapMemberofAttribute : StringUtil.EMPTY);
+        fessConfig.setLdapSecurityAuthentication(
+                form.ldapSecurityAuthentication != null ? form.ldapSecurityAuthentication : StringUtil.EMPTY);
+        fessConfig.setLdapInitialContextFactory(form.ldapInitialContextFactory != null ? form.ldapInitialContextFactory : StringUtil.EMPTY);
         fessConfig.setNotificationLogin(form.notificationLogin);
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
         fessConfig.setNotificationAdvanceSearch(form.notificationAdvanceSearch);
