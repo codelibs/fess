@@ -158,7 +158,7 @@ public class ProtocolHelper {
             } catch (final ClassNotFoundRuntimeException e) {
                 logger.debug("{}.{}.Handler does not exist.", basePackage, protocol, e);
             } catch (final NoSuchFieldRuntimeException e) {
-                logger.debug("{}.{}.Handler does not contain PROTOCOL_TYPE.", basePackage, protocol, e);
+                logger.debug("{}.{}.Handler does not contain PROTOCOL_TYPE.", basePackage, protocol);
             } catch (final Exception e) {
                 logger.warn("Cannot load Handler from {}.{}", basePackage, protocol, e);
             }
