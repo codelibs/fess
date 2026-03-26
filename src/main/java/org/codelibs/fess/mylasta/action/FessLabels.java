@@ -3366,6 +3366,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Load Default Data */
     public static final String LABELS_load_bulk_data = "{labels.load_bulk_data}";
 
+    /** The key of the message: Target Indices */
+    public static final String LABELS_rebuild_target_indices = "{labels.rebuild_target_indices}";
+
+    /** The key of the message: Are you sure you want to rebuild the selected configuration indices? This operation will run in the background. */
+    public static final String LABELS_rebuild_config_index_confirmation = "{labels.rebuild_config_index_confirmation}";
+
     /** The key of the message: Plugin */
     public static final String LABELS_plugin_title = "{labels.plugin_title}";
 

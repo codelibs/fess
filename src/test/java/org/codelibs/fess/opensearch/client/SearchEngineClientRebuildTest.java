@@ -30,6 +30,10 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
 
     private TestSearchEngineClient testClient;
 
+    private Set<String> allTargetPrefixes() {
+        return Set.of("fess_config", "fess_user", "fess_log");
+    }
+
     @Override
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
@@ -112,7 +116,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        testClient.reindexConfigIndices(false);
+        testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         // "fess" (DOC_INDEX) should never appear in created or reindexed indices
         for (final String index : testClient.createdIndices) {
@@ -125,7 +129,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.existsIndexResult = false;
         testClient.createIndexResult = true;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertTrue(result);
         // Should have created 4 indices (config x2, user x1, log x1)
@@ -147,16 +151,12 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertTrue(result);
-        // Each config index goes through: createIndex(backup), reindex(orig->backup),
-        // deleteIndex(orig), createIndex(orig), reindex(backup->orig), deleteIndex(backup)
-        // That is 3 createIndex calls and 2 reindex calls and 2 deleteIndex calls per index
-        // 4 indices x 3 creates = 12 creates, but we need to verify the flow
-        assertTrue(testClient.createdIndices.size() >= 8, "Should have multiple create calls");
-        assertTrue(testClient.reindexPairs.size() >= 8, "Should have reindex pairs for backup and restore");
-        assertTrue(testClient.deletedIndices.size() >= 8, "Should have delete calls for originals and backups");
+        assertEquals("4 indices × 2 creates each (backup + rebuild)", 8, testClient.createdIndices.size());
+        assertEquals("4 indices × 2 reindexes each (to backup + from backup)", 8, testClient.reindexPairs.size());
+        assertEquals("4 indices × 2 deletes each (old + backup)", 8, testClient.deletedIndices.size());
     }
 
     @Test
@@ -166,7 +166,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
     }
@@ -180,7 +180,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertTrue(result);
     }
@@ -192,14 +192,12 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.deleteIndexResult = true;
         testClient.reindexResult = true;
         testClient.documentCount = 10;
-        testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(true);
+        final boolean result = testClient.reindexConfigIndices(true, allTargetPrefixes());
 
         assertTrue(result);
         // During rebuild, addMapping is always called with loadBulkData=false
         // because bulk data is loaded separately with createOnly=true via insertBulkData.
-        // Verify that addMapping was called with false for rebuild steps.
         for (final String[] call : testClient.addMappingCalls) {
             assertNotNull(call);
         }
@@ -207,6 +205,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         // In test environment resource files don't exist, so insertBulkData won't be called,
         // but the overall flow should still succeed.
         assertTrue(testClient.calledMethods.contains("addMapping"));
+        assertTrue(testClient.calledMethods.contains("switchAliases"));
     }
 
     @Test
@@ -218,11 +217,87 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertTrue(result);
         // With loadBulkData=false, the bulk data loading block is skipped entirely
         assertEquals(0, testClient.insertBulkDataCalls.size());
+    }
+
+    // ==========================================================================
+    // reindexConfigIndices - index filtering
+    // ==========================================================================
+
+    @Test
+    public void test_reindexConfigIndices_onlyConfigTarget() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+        testClient.aliasCount = 2;
+
+        final Set<String> configOnly = Set.of("fess_config");
+        final boolean result = testClient.reindexConfigIndices(false, configOnly);
+
+        assertTrue(result);
+        // Only fess_config indices should be rebuilt (2 config indices: scheduled_job, access_token)
+        // Each creates 2 indices (backup + rebuild) = 4 creates
+        assertEquals("Only fess_config indices should be rebuilt", 4, testClient.createdIndices.size());
+        // Verify no user/log indices were touched
+        for (final String index : testClient.createdIndices) {
+            assertFalse(index.contains("fess_user"), "fess_user should not be rebuilt");
+            assertFalse(index.contains("fess_log"), "fess_log should not be rebuilt");
+        }
+    }
+
+    @Test
+    public void test_reindexConfigIndices_emptyTargetDoesNothing() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+
+        final Set<String> empty = Set.of();
+        final boolean result = testClient.reindexConfigIndices(false, empty);
+
+        assertTrue(result);
+        assertEquals("No indices should be created with empty targets", 0, testClient.createdIndices.size());
+        assertEquals("No reindex should occur with empty targets", 0, testClient.reindexPairs.size());
+    }
+
+    // ==========================================================================
+    // reindexConfigIndices - atomic alias switching
+    // ==========================================================================
+
+    @Test
+    public void test_reindexConfigIndices_callsSwitchAliases() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertTrue(result);
+        // Each of the 4 indices should have switchAliases called
+        assertEquals("switchAliases should be called for each index", 4, testClient.switchAliasesCalls.size());
+        assertTrue(testClient.calledMethods.contains("switchAliases"));
+    }
+
+    @Test
+    public void test_reindexConfigIndices_switchAliasesFailureCleanup() {
+        testClient.existsIndexResult = true;
+        testClient.createIndexResult = true;
+        testClient.deleteIndexResult = true;
+        testClient.reindexResult = true;
+        testClient.documentCount = 10;
+        testClient.switchAliasesResult = false;
+
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
+
+        assertFalse(result);
+        // New and backup indices should be cleaned up on switch failure
+        assertTrue(testClient.deletedIndices.size() > 0, "Should clean up on alias switch failure");
     }
 
     // ==========================================================================
@@ -237,7 +312,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         // First createIndex (backup) fails
         testClient.createIndexResult = false;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
         // Should still attempt all indices (4 config indices)
@@ -252,7 +327,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
         // Should delete backup indices when reindex fails
@@ -270,7 +345,7 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         testClient.backupDocumentCount = 5;
         testClient.useBackupDocumentCount = true;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
         // Backup indices should be cleaned up on count mismatch
@@ -278,39 +353,38 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_reindexConfigIndices_deleteOriginalFailureKeepsBackup() {
+    public void test_reindexConfigIndices_deleteFailureAfterSwitch() {
         testClient.existsIndexResult = true;
         testClient.createIndexResult = true;
         testClient.reindexResult = true;
         testClient.deleteIndexResult = false;
         testClient.documentCount = 10;
-        testClient.aliasCount = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
-        assertFalse(result);
-        // Backup should not be deleted since original delete failed
+        // Even if delete fails, the rebuild itself succeeded (aliases are switched)
+        assertTrue(result);
     }
 
     @Test
-    public void test_reindexConfigIndices_recreateFailureRestoresAliases() {
+    public void test_reindexConfigIndices_newIndexCreationFailureCleansUp() {
         testClient.existsIndexResult = true;
         testClient.reindexResult = true;
         testClient.deleteIndexResult = true;
         testClient.documentCount = 10;
         testClient.aliasCount = 2;
-        // First createIndex (backup) succeeds, second (recreate) fails
+        // First createIndex (backup) succeeds, second (new) fails
         testClient.createIndexFailOnNth = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
-        // Aliases should be restored to backup
-        assertTrue(testClient.createAliasCalls.size() > 0, "Aliases should be restored to backup");
+        // Backup should be cleaned up
+        assertTrue(testClient.deletedIndices.size() > 0, "Backup indices should be cleaned up");
     }
 
     @Test
-    public void test_reindexConfigIndices_reindexFromBackupFailureRestoresAliases() {
+    public void test_reindexConfigIndices_reindexFromBackupFailureCleansUp() {
         testClient.existsIndexResult = true;
         testClient.createIndexResult = true;
         testClient.deleteIndexResult = true;
@@ -319,30 +393,11 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         // First reindex (to backup) succeeds, second (from backup) fails
         testClient.reindexFailOnNth = 2;
 
-        final boolean result = testClient.reindexConfigIndices(false);
+        final boolean result = testClient.reindexConfigIndices(false, allTargetPrefixes());
 
         assertFalse(result);
-        // Should delete failed index and restore aliases to backup
-        assertTrue(testClient.createAliasCalls.size() > 0);
-    }
-
-    @Test
-    public void test_reindexConfigIndices_aliasVerificationFailureRestoresAliases() {
-        testClient.existsIndexResult = true;
-        testClient.createIndexResult = true;
-        testClient.deleteIndexResult = true;
-        testClient.reindexResult = true;
-        testClient.documentCount = 10;
-        // Expected alias count is 2, but actual returns 0 after rebuild
-        testClient.aliasCount = 2;
-        testClient.postRebuildAliasCount = 0;
-        testClient.usePostRebuildAliasCount = true;
-
-        final boolean result = testClient.reindexConfigIndices(false);
-
-        assertFalse(result);
-        // Aliases should be restored to backup when verification fails
-        assertTrue(testClient.createAliasCalls.size() > 0);
+        // New index and backup should be cleaned up
+        assertTrue(testClient.deletedIndices.size() > 0);
     }
 
     // ==========================================================================
@@ -412,6 +467,8 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         List<String[]> insertBulkDataCalls = new ArrayList<>();
         boolean lastLoadBulkData = false;
         boolean lastCreateOnly = false;
+        boolean switchAliasesResult = true;
+        List<String[]> switchAliasesCalls = new ArrayList<>();
 
         // Track which indices "exist" for fine-grained control
         Set<String> existingIndices = new HashSet<>();
@@ -519,6 +576,13 @@ public class SearchEngineClientRebuildTest extends UnitFessTestCase {
         protected void createAlias(final String index, final String createdIndexName) {
             calledMethods.add("createAlias");
             createAliasCalls.add(new String[] { index, createdIndexName });
+        }
+
+        @Override
+        protected boolean switchAliases(final String configIndex, final String oldIndexName, final String newIndexName) {
+            calledMethods.add("switchAliases");
+            switchAliasesCalls.add(new String[] { configIndex, oldIndexName, newIndexName });
+            return switchAliasesResult;
         }
 
         @Override

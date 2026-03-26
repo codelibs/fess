@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -558,12 +559,14 @@ public class SearchEngineClient implements Client {
                 ComponentUtil.getCurlHelper().get("/_cat/aliases").param("format", "json").param("h", "alias,index").execute()) {
             if (response.getHttpStatusCode() == 200) {
                 final String content = response.getContentAsString();
-                final String target = "\"index\":\"" + indexName + "\"";
+                final ObjectMapper mapper = new ObjectMapper();
+                final List<Map<String, String>> aliases = mapper.readValue(content, new TypeReference<List<Map<String, String>>>() {
+                });
                 int count = 0;
-                int fromIndex = 0;
-                while ((fromIndex = content.indexOf(target, fromIndex)) != -1) {
-                    count++;
-                    fromIndex += target.length();
+                for (final Map<String, String> entry : aliases) {
+                    if (indexName.equals(entry.get("index"))) {
+                        count++;
+                    }
                 }
                 return count;
             }
@@ -749,16 +752,18 @@ public class SearchEngineClient implements Client {
     }
 
     /**
-     * Rebuilds all configuration indices (fess_config.*, fess_user.*, fess_log.*) with the latest mappings.
-     * For each index: creates a backup with new mappings, reindexes data, deletes the original,
-     * recreates with new mappings, reindexes from backup, and deletes the backup.
+     * Rebuilds configuration indices with the latest mappings using atomic alias switching.
+     * Only indices matching the specified target prefixes are rebuilt.
+     * For each index: creates a backup, reindexes data, creates a new index, reindexes from backup,
+     * atomically switches aliases, then cleans up old and backup indices.
      *
-     * @param loadBulkData whether to load default bulk data after rebuilding (using OpType.CREATE to skip existing documents)
-     * @return true if all indices were rebuilt successfully, false if any index rebuild failed
+     * @param loadBulkData    whether to load default bulk data after rebuilding (using OpType.CREATE to skip existing documents)
+     * @param targetPrefixes  the set of index prefixes to rebuild (e.g., "fess_config", "fess_user", "fess_log")
+     * @return true if all targeted indices were rebuilt successfully, false if any index rebuild failed
      */
-    public boolean reindexConfigIndices(final boolean loadBulkData) {
+    public boolean reindexConfigIndices(final boolean loadBulkData, final Set<String> targetPrefixes) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String suffix = ".backup." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
+        final String timestamp = new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
         boolean success = true;
 
         for (final String configName : indexConfigList) {
@@ -776,10 +781,19 @@ public class SearchEngineClient implements Client {
 
             final String indexName;
             if (configIndex.startsWith(CONFIG_INDEX_PREFIX)) {
+                if (!targetPrefixes.contains(CONFIG_INDEX_PREFIX)) {
+                    continue;
+                }
                 indexName = configIndex.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), fessConfig.getIndexConfigIndex());
             } else if (configIndex.startsWith(USER_INDEX_PREFIX)) {
+                if (!targetPrefixes.contains(USER_INDEX_PREFIX)) {
+                    continue;
+                }
                 indexName = configIndex.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), fessConfig.getIndexUserIndex());
             } else if (configIndex.startsWith(LOG_INDEX_PREFIX)) {
+                if (!targetPrefixes.contains(LOG_INDEX_PREFIX)) {
+                    continue;
+                }
                 indexName = configIndex.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), fessConfig.getIndexLogIndex());
             } else {
                 logger.warn("[Rebuild] Unknown config index: {}", configIndex);
@@ -804,12 +818,12 @@ public class SearchEngineClient implements Client {
                 continue;
             }
 
-            final String backupIndex = indexName + suffix;
+            final String backupIndex = indexName + ".backup." + timestamp;
+            final String newIndex = indexName + ".rebuild." + timestamp;
             logger.info("[Rebuild] Starting rebuild for {}", indexName);
 
             try {
                 final long sourceCount = getDocumentCount(indexName);
-                final int expectedAliasCount = getAliasCount(indexName);
 
                 // 1. Create backup index with new mappings
                 if (!createIndex(configIndex, backupIndex)) {
@@ -837,86 +851,138 @@ public class SearchEngineClient implements Client {
                     }
                 }
 
-                // 3. Delete current index
-                if (!deleteIndex(indexName)) {
-                    logger.warn("[Rebuild] Failed to delete index: {}. Keeping backup: {}", indexName, backupIndex);
+                // 3. Create new index with new mappings
+                if (!createIndex(configIndex, newIndex)) {
+                    logger.warn("[Rebuild] Failed to create new index: {}. Keeping backup: {}", newIndex, backupIndex);
+                    deleteIndex(backupIndex);
                     success = false;
                     continue;
                 }
+                addMapping(configIndex, configType, newIndex, false);
 
-                // 4. Recreate current index with new mappings (no aliases yet)
-                if (!createIndex(configIndex, indexName)) {
-                    logger.warn("[Rebuild] Failed to recreate index: {}. Restoring aliases to backup: {}", indexName, backupIndex);
-                    createAlias(configIndex, backupIndex);
-                    success = false;
-                    continue;
-                }
-                addMapping(configIndex, configType, indexName, false);
-
-                // 5. Reindex backup -> current and verify document count
-                if (!reindex(backupIndex, indexName, true)) {
-                    logger.warn("[Rebuild] Failed to reindex from {} to {}. Restoring aliases to backup: {}", backupIndex, indexName,
-                            backupIndex);
-                    deleteIndex(indexName);
-                    createAlias(configIndex, backupIndex);
+                // 4. Reindex backup -> new index and verify document count
+                if (!reindex(backupIndex, newIndex, true)) {
+                    logger.warn("[Rebuild] Failed to reindex from {} to {}. Cleaning up.", backupIndex, newIndex);
+                    deleteIndex(newIndex);
+                    deleteIndex(backupIndex);
                     success = false;
                     continue;
                 }
                 if (sourceCount >= 0) {
-                    final long rebuiltCount = getDocumentCount(indexName);
+                    final long rebuiltCount = getDocumentCount(newIndex);
                     if (rebuiltCount != sourceCount) {
                         logger.warn("[Rebuild] Document count mismatch after rebuild: expected={}, actual={} for {}", sourceCount,
-                                rebuiltCount, indexName);
-                        deleteIndex(indexName);
-                        createAlias(configIndex, backupIndex);
+                                rebuiltCount, newIndex);
+                        deleteIndex(newIndex);
+                        deleteIndex(backupIndex);
                         success = false;
                         continue;
                     }
                 }
 
-                // 6. Optionally load bulk data with CREATE mode before alias cutover
+                // 5. Optionally load bulk data with CREATE mode before alias cutover
                 if (loadBulkData) {
                     final String dataPath =
                             getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/" + configType + ".bulk");
                     if (ResourceUtil.isExist(dataPath)) {
-                        insertBulkData(fessConfig, indexName, dataPath, true);
+                        insertBulkData(fessConfig, newIndex, dataPath, true);
                     }
                     split(fessConfig.getAppExtensionNames(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(name -> {
                         final String bulkPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(),
                                 "/" + configIndex + "/" + configType + "_" + name + ".bulk");
                         if (ResourceUtil.isExist(bulkPath)) {
-                            insertBulkData(fessConfig, indexName, bulkPath, true);
+                            insertBulkData(fessConfig, newIndex, bulkPath, true);
                         }
                     }));
                 }
 
-                // 7. Create aliases after all data is fully populated
-                createAlias(configIndex, indexName);
-
-                // 8. Verify alias attachment before deleting backup
-                final int actualAliasCount = getAliasCount(indexName);
-                if (expectedAliasCount <= 0 || actualAliasCount >= expectedAliasCount) {
+                // 6. Atomic alias switch: old index -> new index
+                if (!switchAliases(configIndex, indexName, newIndex)) {
+                    logger.warn("[Rebuild] Failed to switch aliases from {} to {}. Keeping backup: {}", indexName, newIndex, backupIndex);
+                    deleteIndex(newIndex);
                     deleteIndex(backupIndex);
-                } else {
-                    logger.warn("[Rebuild] Alias count mismatch for {}: expected={}, actual={}. Restoring aliases to backup: {}", indexName,
-                            expectedAliasCount, actualAliasCount, backupIndex);
-                    createAlias(configIndex, backupIndex);
                     success = false;
+                    continue;
                 }
 
-                logger.info("[Rebuild] Completed rebuild for {}", indexName);
+                // 7. Delete old index and backup
+                deleteIndex(indexName);
+                deleteIndex(backupIndex);
+
+                logger.info("[Rebuild] Completed rebuild for {} -> {}", indexName, newIndex);
             } catch (final Exception e) {
                 logger.warn("[Rebuild] Failed to rebuild index: {}", indexName, e);
+                if (existsIndex(newIndex)) {
+                    deleteIndex(newIndex);
+                }
                 if (existsIndex(backupIndex)) {
-                    if (!existsIndex(indexName)) {
-                        createAlias(configIndex, backupIndex);
-                    }
                     logger.info("[Rebuild] Backup index {} remains for recovery", backupIndex);
                 }
                 success = false;
             }
         }
         return success;
+    }
+
+    /**
+     * Atomically switches aliases from one index to another.
+     * Reads alias configuration files, removes aliases from the old index, and adds them to the new index
+     * in a single atomic operation.
+     *
+     * @param configIndex  the index configuration name
+     * @param oldIndexName the current index name to remove aliases from
+     * @param newIndexName the new index name to add aliases to
+     * @return true if all aliases were switched successfully, false otherwise
+     */
+    protected boolean switchAliases(final String configIndex, final String oldIndexName, final String newIndexName) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String aliasConfigDirPath = getResourcePath(indexConfigPath, fessConfig.getFesenType(), "/" + configIndex + "/alias");
+        try {
+            final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+            if (aliasConfigDir.isDirectory()) {
+                final IndicesAliasesRequestBuilder builder = client.admin().indices().prepareAliases();
+                stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(stream -> stream.forEach(f -> {
+                    String aliasName = f.getName().replaceFirst(".json$", "");
+                    if (configIndex.startsWith(CONFIG_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexConfigIndex();
+                        if ("fess_basic_config".equals(aliasName) && !CONFIG_INDEX_PREFIX.equals(name)) {
+                            aliasName = aliasName.replaceFirst("fess_basic_config", "basic_" + name);
+                        } else {
+                            aliasName = aliasName.replaceFirst(Pattern.quote(CONFIG_INDEX_PREFIX), name);
+                        }
+                    } else if (configIndex.startsWith(USER_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexUserIndex();
+                        aliasName = aliasName.replaceFirst(Pattern.quote(USER_INDEX_PREFIX), name);
+                    } else if (configIndex.startsWith(LOG_INDEX_PREFIX)) {
+                        final String name = fessConfig.getIndexLogIndex();
+                        aliasName = aliasName.replaceFirst(Pattern.quote(LOG_INDEX_PREFIX), name);
+                    }
+                    String source = FileUtil.readUTF8(f);
+                    if ("{}".equals(source.trim())) {
+                        source = null;
+                    }
+                    builder.removeAlias(oldIndexName, aliasName);
+                    if (source != null) {
+                        builder.addAlias(newIndexName, aliasName, source);
+                    } else {
+                        builder.addAlias(newIndexName, aliasName);
+                    }
+                }));
+                final AcknowledgedResponse response = builder.execute().actionGet(fessConfig.getIndexIndicesTimeout());
+                if (response.isAcknowledged()) {
+                    logger.info("[Rebuild] Switched aliases from {} to {}", oldIndexName, newIndexName);
+                    return true;
+                }
+                logger.warn("[Rebuild] Alias switch not acknowledged from {} to {}", oldIndexName, newIndexName);
+            }
+        } catch (final ResourceNotFoundRuntimeException e) {
+            // No alias configuration found - create aliases normally
+            createAlias(configIndex, newIndexName);
+            return true;
+        } catch (final Exception e) {
+            logger.warn("[Rebuild] Failed to switch aliases from {} to {}", oldIndexName, newIndexName, e);
+        }
+        return false;
     }
 
     /**

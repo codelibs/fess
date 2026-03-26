@@ -59,4 +59,22 @@ public class ActionForm {
      */
     @Size(max = 10)
     public String loadBulkData;
+
+    /**
+     * The flag to rebuild fess_config indices.
+     */
+    @Size(max = 10)
+    public String rebuildConfigIndex;
+
+    /**
+     * The flag to rebuild fess_user indices.
+     */
+    @Size(max = 10)
+    public String rebuildUserIndex;
+
+    /**
+     * The flag to rebuild fess_log indices.
+     */
+    @Size(max = 10)
+    public String rebuildLogIndex;
 }

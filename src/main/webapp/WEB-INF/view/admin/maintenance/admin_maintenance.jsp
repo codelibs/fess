@@ -127,6 +127,24 @@ ${fe:html(true)}
                             <div class="card-body">
                                 <div class="form-group row">
                                     <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.rebuild_target_indices"/></span>
+                                    <div class="col-sm-9">
+                                        <div class="form-check form-check-inline">
+                                            <la:checkbox styleId="rebuildConfigIndex" styleClass="form-check-input" property="rebuildConfigIndex"/>
+                                            <label for="rebuildConfigIndex" class="form-check-label">fess_config</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <la:checkbox styleId="rebuildUserIndex" styleClass="form-check-input" property="rebuildUserIndex"/>
+                                            <label for="rebuildUserIndex" class="form-check-label">fess_user</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <la:checkbox styleId="rebuildLogIndex" styleClass="form-check-input" property="rebuildLogIndex"/>
+                                            <label for="rebuildLogIndex" class="form-check-label">fess_log</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <span class="font-weight-bold col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.load_bulk_data"/></span>
                                     <div class="form-inline col-sm-9">
                                         <la:errors property="loadBulkData"/>
@@ -140,12 +158,44 @@ ${fe:html(true)}
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-warning ${f:h(editableClass)}"
-                                        name="reindexConfigIndices"
-                                        value="<la:message key="labels.rebuild_config_index_button"/>">
+                                <button type="button" class="btn btn-warning ${f:h(editableClass)}"
+                                        data-toggle="modal" data-target="#confirmToRebuildConfigIndex">
                                     <i class="fa fa-sync" aria-hidden="true"></i>
                                     <la:message key="labels.rebuild_config_index_button"/>
                                 </button>
+                                <div class="modal fade" id="confirmToRebuildConfigIndex"
+                                     tabindex="-1" role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content bg-warning">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">
+                                                    <la:message key="labels.rebuild_config_index"/>
+                                                </h4>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>
+                                                    <la:message key="labels.rebuild_config_index_confirmation"/>
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer justify-content-between">
+                                                <button type="button" class="btn btn-outline-dark"
+                                                        data-dismiss="modal">
+                                                    <la:message key="labels.crud_button_cancel"/>
+                                                </button>
+                                                <button type="submit" class="btn btn-outline-dark"
+                                                        name="reindexConfigIndices"
+                                                        value="<la:message key="labels.rebuild_config_index_button"/>">
+                                                    <i class="fa fa-sync" aria-hidden="true"></i>
+                                                    <la:message key="labels.rebuild_config_index_button"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
