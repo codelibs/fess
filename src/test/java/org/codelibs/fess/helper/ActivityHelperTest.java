@@ -300,25 +300,25 @@ public class ActivityHelperTest extends UnitFessTestCase {
 
     @Test
     public void test_normalizeScript_longScript() {
-        // Create a script longer than 1000 characters
+        // Create a script longer than 100 characters (default max length)
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 1100; i++) {
+        for (int i = 0; i < 120; i++) {
             sb.append("a");
         }
         String longScript = sb.toString();
 
         String result = activityHelper.normalizeScript(longScript);
 
-        // Should be truncated to 1000 characters (997 + "...")
-        assertEquals(1000, result.length());
+        // Should be truncated to 100 characters (97 + "...")
+        assertEquals(100, result.length());
         assertTrue(result.endsWith("..."));
     }
 
     @Test
     public void test_normalizeScript_exactlyMaxLength() {
-        // Create a script of exactly 1000 characters
+        // Create a script of exactly 100 characters (default max length)
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             sb.append("b");
         }
         String exactScript = sb.toString();
@@ -326,15 +326,15 @@ public class ActivityHelperTest extends UnitFessTestCase {
         String result = activityHelper.normalizeScript(exactScript);
 
         // Should not be truncated
-        assertEquals(1000, result.length());
+        assertEquals(100, result.length());
         assertFalse(result.endsWith("..."));
     }
 
     @Test
     public void test_normalizeScript_lessThanMaxLength() {
-        // Create a script of 999 characters
+        // Create a script of 99 characters (one less than default max length)
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 999; i++) {
+        for (int i = 0; i < 99; i++) {
             sb.append("c");
         }
         String shortScript = sb.toString();
@@ -342,8 +342,24 @@ public class ActivityHelperTest extends UnitFessTestCase {
         String result = activityHelper.normalizeScript(shortScript);
 
         // Should not be truncated
-        assertEquals(999, result.length());
+        assertEquals(99, result.length());
         assertFalse(result.endsWith("..."));
+    }
+
+    @Test
+    public void test_normalizeScript_truncateBeforeReplace() {
+        // Script with control chars beyond the truncation point
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 97; i++) {
+            sb.append("x");
+        }
+        for (int i = 0; i < 53; i++) {
+            sb.append("\n");
+        }
+        String result = activityHelper.normalizeScript(sb.toString());
+        assertEquals(100, result.length());
+        assertTrue(result.endsWith("..."));
+        assertEquals("x".repeat(97) + "...", result);
     }
 
     OptionalThing<FessUserBean> createUser(String name, String[] permissions) {
