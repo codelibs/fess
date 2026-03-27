@@ -15,9 +15,12 @@
  */
 package org.codelibs.fess.app.web.admin.searchlist;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +75,10 @@ public class AdminSearchlistAction extends FessAdminAction {
     //
     private static final Logger logger = LogManager.getLogger(AdminSearchlistAction.class);
 
+    private static final Set<String> STANDARD_EDIT_FIELDS = Set.of("url", "title", "role", "boost", "label", "lang", "mimetype", "filetype",
+            "filename", "content", "has_cache", "cache", "digest", "host", "site", "segment", "config_id", "parent_id", "content_length",
+            "favorite_count", "click_count", "created", "timestamp", "last_modified", "expires", "virtual_host", "doc_id");
+
     // ===================================================================================
     // Attribute
     // =========
@@ -91,6 +98,9 @@ public class AdminSearchlistAction extends FessAdminAction {
     /** HTTP servlet request for accessing request parameters. */
     @Resource
     protected HttpServletRequest request;
+
+    /** Current form reference for rendering extra fields on the edit page. */
+    private CreateForm currentForm;
 
     /** List of document items returned from search */
     public List<Map<String, Object>> documentItems;
@@ -331,6 +341,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         getDoc(form).ifPresent(entity -> {
             form.doc = fessConfig.convertToEditableDoc(entity);
         });
+        currentForm = form;
         return asEditHtml();
     }
 
@@ -352,6 +363,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), this::asListHtml);
         });
+        currentForm = form;
         saveToken();
         return asEditHtml();
     }
@@ -365,6 +377,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse create(final CreateForm form) {
+        currentForm = form;
         verifyCrudMode(form.crudMode, CrudMode.CREATE, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         validateFields(form.doc, v -> throwValidationError(v, this::asEditHtml));
@@ -399,6 +412,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse update(final EditForm form) {
+        currentForm = form;
         verifyCrudMode(form.crudMode, CrudMode.EDIT, this::asListHtml);
         validate(form, messages -> {}, this::asEditHtml);
         validateFields(form.doc, v -> throwValidationError(v, this::asEditHtml));
@@ -449,45 +463,38 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (!fessConfig.validateIndexRequiredFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexRequiredFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyRequired("doc." + s, s)));
             }
 
             if (!fessConfig.validateIndexArrayFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexArrayFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyRequired(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeArray("doc." + s, s)));
             }
             if (!fessConfig.validateIndexDateFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexDateFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyTypeDate(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeDate("doc." + s, s)));
             }
             if (!fessConfig.validateIndexIntegerFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexIntegerFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyTypeInteger(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeInteger("doc." + s, s)));
             }
             if (!fessConfig.validateIndexLongFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexLongFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyTypeLong(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeLong("doc." + s, s)));
             }
             if (!fessConfig.validateIndexFloatFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexFloatFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyTypeFloat(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeFloat("doc." + s, s)));
             }
             if (!fessConfig.validateIndexDoubleFields(doc)) {
                 throwError.accept(messages -> fessConfig.invalidIndexDoubleFields(doc)
                         .stream()
-                        .map(s -> "doc." + s)
-                        .forEach(s -> messages.addErrorsPropertyTypeDouble(s, s)));
+                        .forEach(s -> messages.addErrorsPropertyTypeDouble("doc." + s, s)));
             }
         } catch (final Exception e) {
             throwError.accept(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, e.getMessage()));
@@ -537,7 +544,43 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp);
+        return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp).renderWith(data -> {
+            registerExtraFields(data);
+        });
+    }
+
+    private void registerExtraFields(final RenderData data) {
+        final Map<String, Object> doc = currentForm != null ? currentForm.doc : null;
+        if (doc == null) {
+            return;
+        }
+
+        final Set<String> arrayFieldSet = fessConfig.getIndexAdminArrayFieldSet();
+        final Set<String> dateFieldSet = fessConfig.getIndexAdminDateFieldSet();
+        final Set<String> integerFieldSet = fessConfig.getIndexAdminIntegerFieldSet();
+        final Set<String> longFieldSet = fessConfig.getIndexAdminLongFieldSet();
+        final Set<String> floatFieldSet = fessConfig.getIndexAdminFloatFieldSet();
+        final Set<String> doubleFieldSet = fessConfig.getIndexAdminDoubleFieldSet();
+
+        final List<String> extraFieldNames = new ArrayList<>();
+        final Map<String, String> extraFieldTypes = new TreeMap<>();
+        doc.keySet().stream().sorted().filter(key -> !STANDARD_EDIT_FIELDS.contains(key)).forEach(key -> {
+            final String type;
+            if (arrayFieldSet.contains(key)) {
+                type = "array";
+            } else if (dateFieldSet.contains(key)) {
+                type = "date";
+            } else if (integerFieldSet.contains(key) || longFieldSet.contains(key) || floatFieldSet.contains(key)
+                    || doubleFieldSet.contains(key)) {
+                type = "number";
+            } else {
+                type = "text";
+            }
+            extraFieldNames.add(key);
+            extraFieldTypes.put(key, type);
+        });
+        RenderDataUtil.register(data, "extraFieldNames", extraFieldNames);
+        RenderDataUtil.register(data, "extraFieldTypes", extraFieldTypes);
     }
 
     /**

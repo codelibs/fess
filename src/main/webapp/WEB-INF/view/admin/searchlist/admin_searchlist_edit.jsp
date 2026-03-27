@@ -326,6 +326,44 @@ ${fe:html(true)}
                                         <la:textarea styleId="doc.virtual_host" property="doc.virtual_host" styleClass="form-control"/>
                                     </div>
                                 </div>
+                                <%-- Extra Fields --%>
+                                <c:forEach var="fieldName" items="${extraFieldNames}">
+                                    <div class="form-group row">
+                                        <label for="doc.${f:h(fieldName)}" class="col-sm-3 text-sm-right col-form-label">${f:h(fieldName)}</label>
+                                        <div class="col-sm-9">
+                                            <la:errors property="doc.${f:h(fieldName)}"/>
+                                            <c:choose>
+                                                <c:when test="${extraFieldTypes[fieldName] == 'array'}">
+                                                    <la:textarea styleId="doc.${f:h(fieldName)}"
+                                                                 property="doc.${f:h(fieldName)}"
+                                                                 styleClass="form-control"/>
+                                                </c:when>
+                                                <c:when test="${extraFieldTypes[fieldName] == 'date'}">
+                                                    <la:text styleId="doc.${f:h(fieldName)}"
+                                                             property="doc.${f:h(fieldName)}"
+                                                             styleClass="form-control"
+                                                             title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                                                             data-validation="custom"
+                                                             data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
+                                                             data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"/>
+                                                </c:when>
+                                                <c:when test="${extraFieldTypes[fieldName] == 'number'}">
+                                                    <la:text styleId="doc.${f:h(fieldName)}"
+                                                             property="doc.${f:h(fieldName)}"
+                                                             styleClass="form-control"
+                                                             data-validation="custom"
+                                                             data-validation-regexp="^[\d\.\-\+eE]*$"
+                                                             data-validation-help="number"/>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <la:text styleId="doc.${f:h(fieldName)}"
+                                                             property="doc.${f:h(fieldName)}"
+                                                             styleClass="form-control"/>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                </c:forEach>
                             </div>
                             <div class="card-footer">
                                 <c:if test="${crudMode == 1}">

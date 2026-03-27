@@ -443,6 +443,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {0} must be a date. */
     public static final String ERRORS_property_type_date = "{errors.property_type_date}";
 
+    /** The key of the message: {0} must be an array. */
+    public static final String ERRORS_property_type_array = "{errors.property_type_array}";
+
     /** The key of the message: Failed to upload {0}. */
     public static final String ERRORS_storage_file_upload_failure = "{errors.storage_file_upload_failure}";
 
@@ -2573,6 +2576,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsPropertyTypeDate(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_property_type_date, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.property_type_array' with parameters.
+     * <pre>
+     * message: {0} must be an array.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPropertyTypeArray(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_property_type_array, arg0));
         return this;
     }
 
