@@ -1548,6 +1548,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 7200000 */
     String COORDINATOR_OPERATION_TTL = "coordinator.operation.ttl";
 
+    /** The key of the configuration. e.g. 3 */
+    String COORDINATOR_OPERATION_RETRY = "coordinator.operation.retry";
+
     /** The key of the configuration. e.g. 600000 */
     String COORDINATOR_EVENT_TTL = "coordinator.event.ttl";
 
@@ -7915,6 +7918,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCoordinatorOperationTtlAsInteger();
 
     /**
+     * Get the value for the key 'coordinator.operation.retry'. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Maximum number of retries for acquiring an operation lock.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCoordinatorOperationRetry();
+
+    /**
+     * Get the value for the key 'coordinator.operation.retry' as {@link Integer}. <br>
+     * The value is, e.g. 3 <br>
+     * comment: Maximum number of retries for acquiring an operation lock.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCoordinatorOperationRetryAsInteger();
+
+    /**
      * Get the value for the key 'coordinator.event.ttl'. <br>
      * The value is, e.g. 600000 <br>
      * comment: Time-to-live (ms) for event notification documents.
@@ -12377,6 +12397,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.COORDINATOR_OPERATION_TTL);
         }
 
+        public String getCoordinatorOperationRetry() {
+            return get(FessConfig.COORDINATOR_OPERATION_RETRY);
+        }
+
+        public Integer getCoordinatorOperationRetryAsInteger() {
+            return getAsInteger(FessConfig.COORDINATOR_OPERATION_RETRY);
+        }
+
         public String getCoordinatorEventTtl() {
             return get(FessConfig.COORDINATOR_EVENT_TTL);
         }
@@ -13683,6 +13711,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.COORDINATOR_POLL_INTERVAL, "60");
             defaultMap.put(FessConfig.COORDINATOR_HEARTBEAT_TTL, "180000");
             defaultMap.put(FessConfig.COORDINATOR_OPERATION_TTL, "7200000");
+            defaultMap.put(FessConfig.COORDINATOR_OPERATION_RETRY, "3");
             defaultMap.put(FessConfig.COORDINATOR_EVENT_TTL, "600000");
             defaultMap.put(FessConfig.ONLINE_HELP_BASE_LINK, "https://fess.codelibs.org/{lang}/{version}/admin/");
             defaultMap.put(FessConfig.ONLINE_HELP_INSTALLATION, "https://fess.codelibs.org/{lang}/{version}/install/install.html");

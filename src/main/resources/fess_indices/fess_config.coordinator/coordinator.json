@@ -22,9 +22,6 @@
         "type": "text",
         "index": false
       },
-      "createdBy": {
-        "type": "keyword"
-      },
       "createdTime": {
         "type": "long"
       },

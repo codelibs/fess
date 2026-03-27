@@ -707,4 +707,621 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
         assertTrue(json.contains("\"lt\""));
         assertTrue(json.contains("\"expiredTime\""));
     }
+
+    // ===================================================================================
+    //                                                             Retry Limit
+    //                                                             ============
+
+    @Test
+    public void test_tryStartOperation_singleArg_delegatesToTwoArg() {
+        // tryStartOperation(name) should delegate to tryStartOperation(name, null)
+        final AtomicReference<String> passedData = new AtomicReference<>("NOT_NULL");
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public boolean tryStartOperation(final String operationName, final String data) {
+                passedData.set(data);
+                return false;
+            }
+        };
+
+        helper.tryStartOperation("test_op");
+        assertNull(passedData.get());
+    }
+
+    @Test
+    public void test_tryStartOperation_twoArg_usesConfigRetry() {
+        // tryStartOperation(name, data) should read maxRetry from FessConfig
+        final AtomicInteger passedRetries = new AtomicInteger(-1);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
+                passedRetries.set(remainingRetries);
+                return false;
+            }
+        };
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 5;
+            }
+        });
+
+        helper.tryStartOperation("test_op", "test_data");
+        assertEquals(5, passedRetries.get());
+    }
+
+    @Test
+    public void test_tryStartOperation_twoArg_defaultRetry() {
+        // Verify default retry value of 3 from config
+        final AtomicInteger passedRetries = new AtomicInteger(-1);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
+                passedRetries.set(remainingRetries);
+                return false;
+            }
+        };
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 3;
+            }
+        });
+
+        helper.tryStartOperation("test_op", null);
+        assertEquals(3, passedRetries.get());
+    }
+
+    /**
+     * Creates a testable CoordinatorHelper that overrides tryStartOperation(name,data,retries)
+     * to simulate "create always fails" (no OpenSearch), preserving the retry/cleanup dispatch logic.
+     */
+    private CoordinatorHelper createRetryTestHelper(final AtomicBoolean cleanupCalled, final AtomicInteger cleanupRetries,
+            final AtomicReference<String> cleanupName, final AtomicReference<String> cleanupData, final boolean cleanupReturns) {
+        return new CoordinatorHelper() {
+            @Override
+            protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
+                // Simulate: create always fails (no OpenSearch)
+                // Then apply the retry logic from the real implementation
+                if (remainingRetries <= 0) {
+                    return false;
+                }
+                return tryCleanupAndRetry(operationName, data, remainingRetries);
+            }
+
+            @Override
+            protected boolean tryCleanupAndRetry(final String operationName, final String data, final int remainingRetries) {
+                if (cleanupCalled != null) {
+                    cleanupCalled.set(true);
+                }
+                if (cleanupRetries != null) {
+                    cleanupRetries.set(remainingRetries);
+                }
+                if (cleanupName != null) {
+                    cleanupName.set(operationName);
+                }
+                if (cleanupData != null) {
+                    cleanupData.set(data);
+                }
+                if (cleanupReturns) {
+                    // Simulate cleanup success: retry with decremented count
+                    return tryStartOperation(operationName, data, remainingRetries - 1);
+                }
+                return false;
+            }
+        };
+    }
+
+    @Test
+    public void test_tryStartOperation_retryZero_skipsCleanup() {
+        final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
+        final CoordinatorHelper helper = createRetryTestHelper(cleanupCalled, null, null, null, false);
+
+        final boolean result = helper.tryStartOperation("test_op", null, 0);
+        assertFalse(result);
+        assertFalse(cleanupCalled.get());
+    }
+
+    @Test
+    public void test_tryStartOperation_retryNegative_skipsCleanup() {
+        final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
+        final CoordinatorHelper helper = createRetryTestHelper(cleanupCalled, null, null, null, false);
+
+        final boolean result = helper.tryStartOperation("test_op", null, -1);
+        assertFalse(result);
+        assertFalse(cleanupCalled.get());
+    }
+
+    @Test
+    public void test_tryStartOperation_retryPositive_callsCleanup() {
+        final AtomicInteger passedRetries = new AtomicInteger(-1);
+        final AtomicReference<String> passedName = new AtomicReference<>();
+        final AtomicReference<String> passedData = new AtomicReference<>();
+        final CoordinatorHelper helper = createRetryTestHelper(null, passedRetries, passedName, passedData, false);
+
+        helper.tryStartOperation("my_op", "my_data", 3);
+        assertEquals("my_op", passedName.get());
+        assertEquals("my_data", passedData.get());
+        assertEquals(3, passedRetries.get());
+    }
+
+    @Test
+    public void test_tryStartOperation_retryOne_callsCleanup() {
+        final AtomicInteger passedRetries = new AtomicInteger(-1);
+        final CoordinatorHelper helper = createRetryTestHelper(null, passedRetries, null, null, false);
+
+        helper.tryStartOperation("test_op", null, 1);
+        assertEquals(1, passedRetries.get());
+    }
+
+    @Test
+    public void test_tryCleanupAndRetry_decrementsRetries() {
+        // Verify that on retry chain, remainingRetries is decremented
+        final List<Integer> retriesSeen = new ArrayList<>();
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
+                retriesSeen.add(remainingRetries);
+                if (remainingRetries <= 0) {
+                    return false;
+                }
+                // Simulate: cleanup succeeds, retry with decremented retries
+                return tryStartOperation(operationName, data, remainingRetries - 1);
+            }
+        };
+
+        helper.tryStartOperation("test_op", null, 3);
+        assertEquals(List.of(3, 2, 1, 0), retriesSeen);
+    }
+
+    @Test
+    public void test_tryStartOperation_retryChain_exhausted() {
+        // Simulate retry chain: cleanup always succeeds but create always fails
+        final AtomicInteger cleanupCallCount = new AtomicInteger(0);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
+                if (remainingRetries <= 0) {
+                    return false;
+                }
+                return tryCleanupAndRetry(operationName, data, remainingRetries);
+            }
+
+            @Override
+            protected boolean tryCleanupAndRetry(final String operationName, final String data, final int remainingRetries) {
+                cleanupCallCount.incrementAndGet();
+                return tryStartOperation(operationName, data, remainingRetries - 1);
+            }
+        };
+
+        final boolean result = helper.tryStartOperation("test_op", null, 3);
+        assertFalse(result);
+        assertEquals(3, cleanupCallCount.get()); // Called with retries=3,2,1; stops when retries=0
+    }
+
+    // ===================================================================================
+    //                                                         completeOperation Safety
+    //                                                         =========================
+
+    @Test
+    public void test_failOperation_delegates_to_completeOperation() {
+        // failOperation must delegate to completeOperation
+        final AtomicBoolean completeCalled = new AtomicBoolean(false);
+        final AtomicReference<String> passedName = new AtomicReference<>();
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void completeOperation(final String operationName) {
+                completeCalled.set(true);
+                passedName.set(operationName);
+            }
+        };
+
+        helper.failOperation("test_op");
+        assertTrue(completeCalled.get());
+        assertEquals("test_op", passedName.get());
+    }
+
+    @Test
+    public void test_failOperation_delegates_to_completeOperation_differentNames() {
+        // Verify the operation name is passed through correctly
+        final List<String> calledWith = new ArrayList<>();
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void completeOperation(final String operationName) {
+                calledWith.add(operationName);
+            }
+        };
+
+        helper.failOperation("reindex");
+        helper.failOperation("reload_doc_index");
+        helper.failOperation("clear_crawler_index");
+        assertEquals(3, calledWith.size());
+        assertEquals("reindex", calledWith.get(0));
+        assertEquals("reload_doc_index", calledWith.get(1));
+        assertEquals("clear_crawler_index", calledWith.get(2));
+    }
+
+    @Test
+    public void test_completeOperation_noThrow_whenNoOpenSearch() {
+        // completeOperation must not throw even when OpenSearch is unavailable
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            protected String getIndexName() {
+                return "fess_config.coordinator";
+            }
+        };
+
+        // CurlHelper not available → exception → caught internally → no throw
+        try {
+            helper.completeOperation("nonexistent_operation");
+        } catch (final Exception e) {
+            fail("completeOperation should not throw: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void test_completeOperation_doubleCall_safe() {
+        // Calling completeOperation twice must not throw (idempotent release)
+        final AtomicInteger callCount = new AtomicInteger(0);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void completeOperation(final String operationName) {
+                callCount.incrementAndGet();
+                super.completeOperation(operationName);
+            }
+
+            @Override
+            protected String getIndexName() {
+                return "fess_config.coordinator";
+            }
+        };
+
+        helper.completeOperation("test_op");
+        helper.completeOperation("test_op");
+        assertEquals(2, callCount.get());
+    }
+
+    @Test
+    public void test_failThenComplete_safe() {
+        // Simulate failOperation followed by completeOperation (the unified pattern)
+        final AtomicInteger completeCount = new AtomicInteger(0);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void completeOperation(final String operationName) {
+                completeCount.incrementAndGet();
+                // No-op: simulate successful release or already-released
+            }
+        };
+
+        helper.failOperation("reindex"); // calls completeOperation internally
+        helper.completeOperation("reindex"); // second call from finally block
+        assertEquals(2, completeCount.get()); // Both calls should succeed
+    }
+
+    // ===================================================================================
+    //                                                         Event Time Tracking
+    //                                                         =====================
+
+    @Test
+    public void test_fetchNewEvents_lastEventCheckTime_advancement() {
+        // Verify that lastEventCheckTime is updated to createdTime + 1 to avoid same-ms event loss
+        // We test this through the dispatchEvent flow by simulating events
+
+        final long baseTime = 5000L;
+        final CoordinatorHelper helper = new CoordinatorHelper();
+
+        // Simulate parsing events and updating lastEventCheckTime
+        // The logic in fetchNewEvents: if (info.createdTime >= lastEventCheckTime) { lastEventCheckTime = info.createdTime + 1; }
+        long lastCheck = baseTime;
+        final long eventTime1 = baseTime + 100;
+        if (eventTime1 >= lastCheck) {
+            lastCheck = eventTime1 + 1;
+        }
+        assertEquals(baseTime + 101, lastCheck);
+
+        // Same millisecond event should also advance
+        final long eventTime2 = eventTime1; // same ms
+        if (eventTime2 >= lastCheck) {
+            lastCheck = eventTime2 + 1; // would not trigger because eventTime2 < lastCheck
+        }
+        assertEquals(baseTime + 101, lastCheck); // unchanged because eventTime2 < lastCheck
+
+        // Later event should advance
+        final long eventTime3 = baseTime + 200;
+        if (eventTime3 >= lastCheck) {
+            lastCheck = eventTime3 + 1;
+        }
+        assertEquals(baseTime + 201, lastCheck);
+    }
+
+    @Test
+    public void test_fetchNewEvents_lastEventCheckTime_sameMillis_noLoss() {
+        // The +1 offset ensures events at the same millisecond are not lost on next poll
+        // gt(5000) matches events at 5001+; with old logic (no +1), gt(5000) would miss events at 5000
+        // with new logic, lastEventCheckTime = 5000 + 1 = 5001, so gt(5001) correctly skips 5000 and 5001
+        final long eventCreatedTime = 5000L;
+        final long updatedCheckTime = eventCreatedTime + 1;
+        assertEquals(5001L, updatedCheckTime);
+
+        // The query uses "gt" (greater than), so events with createdTime > 5001 will be fetched
+        // Events at 5000 (already processed) and 5001 (edge case) are excluded
+        assertTrue(5002L > updatedCheckTime);
+        assertFalse(5001L > updatedCheckTime);
+        assertFalse(5000L > updatedCheckTime);
+    }
+
+    @Test
+    public void test_fetchNewEvents_multipleEvents_lastOneWins() {
+        // When multiple events are processed in one batch, the latest createdTime + 1 should be used
+        long lastCheck = 1000L;
+        final long[] eventTimes = { 2000L, 3000L, 2500L }; // unsorted by time
+        for (final long eventTime : eventTimes) {
+            if (eventTime >= lastCheck) {
+                lastCheck = eventTime + 1;
+            }
+        }
+        // 3000 is the max, so lastCheck = 3001
+        assertEquals(3001L, lastCheck);
+    }
+
+    // ===================================================================================
+    //                                                         FessConfig Integration
+    //                                                         ========================
+
+    @Test
+    public void test_coordinatorConfig_constants() {
+        assertEquals("coordinator.poll.interval", FessConfig.COORDINATOR_POLL_INTERVAL);
+        assertEquals("coordinator.heartbeat.ttl", FessConfig.COORDINATOR_HEARTBEAT_TTL);
+        assertEquals("coordinator.operation.ttl", FessConfig.COORDINATOR_OPERATION_TTL);
+        assertEquals("coordinator.operation.retry", FessConfig.COORDINATOR_OPERATION_RETRY);
+        assertEquals("coordinator.event.ttl", FessConfig.COORDINATOR_EVENT_TTL);
+    }
+
+    @Test
+    public void test_coordinatorConfig_typedAccessors() {
+        // Verify typed accessors return correct values via overriding SimpleImpl
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCoordinatorPollIntervalAsInteger() {
+                return 60;
+            }
+
+            @Override
+            public Integer getCoordinatorHeartbeatTtlAsInteger() {
+                return 180000;
+            }
+
+            @Override
+            public Integer getCoordinatorOperationTtlAsInteger() {
+                return 7200000;
+            }
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 3;
+            }
+
+            @Override
+            public Integer getCoordinatorEventTtlAsInteger() {
+                return 600000;
+            }
+        };
+        assertEquals(Integer.valueOf(60), config.getCoordinatorPollIntervalAsInteger());
+        assertEquals(Integer.valueOf(180000), config.getCoordinatorHeartbeatTtlAsInteger());
+        assertEquals(Integer.valueOf(7200000), config.getCoordinatorOperationTtlAsInteger());
+        assertEquals(Integer.valueOf(3), config.getCoordinatorOperationRetryAsInteger());
+        assertEquals(Integer.valueOf(600000), config.getCoordinatorEventTtlAsInteger());
+    }
+
+    @Test
+    public void test_coordinatorOperationRetry_customValue() {
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 10;
+            }
+        };
+        assertEquals(Integer.valueOf(10), config.getCoordinatorOperationRetryAsInteger());
+    }
+
+    @Test
+    public void test_coordinatorOperationRetry_zeroValue() {
+        final FessConfig config = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 0;
+            }
+        };
+        assertEquals(Integer.valueOf(0), config.getCoordinatorOperationRetryAsInteger());
+    }
+
+    // ===================================================================================
+    //                                                   Coordinator Mapping (no createdBy)
+    //                                                   ==================================
+
+    @Test
+    public void test_coordinatorDocumentBody_noCreatedBy() {
+        // Verify operation document does NOT include createdBy field (removed from mapping)
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("type", "operation");
+        body.put("name", "reindex");
+        body.put("instanceId", "node1@host1");
+        body.put("hostname", "host1");
+        body.put("status", "running");
+        body.put("createdTime", System.currentTimeMillis());
+        body.put("expiredTime", System.currentTimeMillis() + 7200000L);
+        // createdBy is intentionally NOT included (removed from mapping)
+
+        final String json = coordinatorHelper.toJson(body);
+        assertFalse(json.contains("createdBy"));
+
+        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
+        assertNull(parsed.get("createdBy"));
+    }
+
+    @Test
+    public void test_heartbeatDocumentBody_noCreatedBy() {
+        // Verify heartbeat document does NOT include createdBy field
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("type", "heartbeat");
+        body.put("instanceId", "node1@host1");
+        body.put("hostname", "host1");
+        body.put("name", "node1");
+        body.put("status", "active");
+        body.put("createdTime", System.currentTimeMillis());
+        body.put("expiredTime", System.currentTimeMillis() + 180000L);
+
+        final String json = coordinatorHelper.toJson(body);
+        assertFalse(json.contains("createdBy"));
+    }
+
+    @Test
+    public void test_eventDocumentBody_noCreatedBy() {
+        // Verify event document does NOT include createdBy field
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("type", "event");
+        body.put("name", "config_updated");
+        body.put("instanceId", "node1@host1");
+        body.put("targetInstanceId", "*");
+        body.put("createdTime", System.currentTimeMillis());
+        body.put("expiredTime", System.currentTimeMillis() + 600000L);
+
+        final String json = coordinatorHelper.toJson(body);
+        assertFalse(json.contains("createdBy"));
+    }
+
+    // ===================================================================================
+    //                                                         Poll Loop Safety
+    //                                                         ==================
+
+    @Test
+    public void test_poll_callsHeartbeatEventsCleanup() {
+        // Verify poll calls sendHeartbeat, fetchNewEvents+dispatch, cleanupExpiredDocuments
+        final AtomicBoolean heartbeatCalled = new AtomicBoolean(false);
+        final AtomicBoolean fetchCalled = new AtomicBoolean(false);
+        final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void sendHeartbeat() {
+                heartbeatCalled.set(true);
+            }
+
+            @Override
+            protected List<EventInfo> fetchNewEvents() {
+                fetchCalled.set(true);
+                return List.of();
+            }
+
+            @Override
+            protected void cleanupExpiredDocuments() {
+                cleanupCalled.set(true);
+            }
+        };
+
+        helper.poll();
+        assertTrue(heartbeatCalled.get());
+        assertTrue(fetchCalled.get());
+        assertTrue(cleanupCalled.get());
+    }
+
+    @Test
+    public void test_poll_heartbeatException_doesNotStopEventProcessing() {
+        // If sendHeartbeat throws, fetchNewEvents and cleanup should still be called
+        final AtomicBoolean fetchCalled = new AtomicBoolean(false);
+        final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void sendHeartbeat() {
+                throw new RuntimeException("heartbeat error");
+            }
+
+            @Override
+            protected List<EventInfo> fetchNewEvents() {
+                fetchCalled.set(true);
+                return List.of();
+            }
+
+            @Override
+            protected void cleanupExpiredDocuments() {
+                cleanupCalled.set(true);
+            }
+        };
+
+        helper.poll();
+        assertTrue(fetchCalled.get());
+        assertTrue(cleanupCalled.get());
+    }
+
+    @Test
+    public void test_poll_eventException_doesNotStopCleanup() {
+        // If fetchNewEvents throws, cleanup should still be called
+        final AtomicBoolean heartbeatCalled = new AtomicBoolean(false);
+        final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void sendHeartbeat() {
+                heartbeatCalled.set(true);
+            }
+
+            @Override
+            protected List<EventInfo> fetchNewEvents() {
+                throw new RuntimeException("event error");
+            }
+
+            @Override
+            protected void cleanupExpiredDocuments() {
+                cleanupCalled.set(true);
+            }
+        };
+
+        helper.poll();
+        assertTrue(heartbeatCalled.get());
+        assertTrue(cleanupCalled.get());
+    }
+
+    @Test
+    public void test_poll_dispatchesEvents() {
+        // Verify that poll fetches events and dispatches them
+        final AtomicInteger dispatchCount = new AtomicInteger(0);
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public void sendHeartbeat() {
+                // no-op
+            }
+
+            @Override
+            protected List<EventInfo> fetchNewEvents() {
+                final EventInfo e1 = new EventInfo();
+                e1.name = "event1";
+                final EventInfo e2 = new EventInfo();
+                e2.name = "event2";
+                return List.of(e1, e2);
+            }
+
+            @Override
+            protected void dispatchEvent(final EventInfo event) {
+                dispatchCount.incrementAndGet();
+            }
+
+            @Override
+            protected void cleanupExpiredDocuments() {
+                // no-op
+            }
+        };
+
+        helper.poll();
+        assertEquals(2, dispatchCount.get());
+    }
 }

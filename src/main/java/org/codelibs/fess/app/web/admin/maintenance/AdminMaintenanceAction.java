@@ -172,15 +172,15 @@ public class AdminMaintenanceAction extends FessAdminAction {
                         coordinator.completeOperation("reload_doc_index");
                     }, e -> {
                         logger.warn("Failed to open index: {}", docIndex, e);
-                        coordinator.failOperation("reload_doc_index");
+                        coordinator.completeOperation("reload_doc_index");
                     }));
                 }, e -> {
                     logger.warn("Failed to close index: {}", docIndex, e);
-                    coordinator.failOperation("reload_doc_index");
+                    coordinator.completeOperation("reload_doc_index");
                 }));
             });
         } catch (final Exception e) {
-            coordinator.failOperation("reload_doc_index");
+            coordinator.completeOperation("reload_doc_index");
             throw e;
         }
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -216,10 +216,10 @@ public class AdminMaintenanceAction extends FessAdminAction {
                         coordinator.completeOperation("clear_crawler_index");
                     }, e -> {
                         logger.warn("Failed to delete .crawler.* indices.", e);
-                        coordinator.failOperation("clear_crawler_index");
+                        coordinator.completeOperation("clear_crawler_index");
                     }));
         } catch (final Exception e) {
-            coordinator.failOperation("clear_crawler_index");
+            coordinator.completeOperation("clear_crawler_index");
             throw e;
         }
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
@@ -529,16 +529,16 @@ public class AdminMaintenanceAction extends FessAdminAction {
                                 coordinator.completeOperation("reindex");
                             }
                         }, e -> {
-                            coordinator.failOperation("reindex");
+                            coordinator.completeOperation("reindex");
                             logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
                         }));
             } catch (final Exception e) {
-                coordinator.failOperation("reindex");
+                coordinator.completeOperation("reindex");
                 throw e;
             }
             return true;
         }
-        coordinator.failOperation("reindex");
+        coordinator.completeOperation("reindex");
         saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));
         return false;
     }

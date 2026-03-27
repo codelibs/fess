@@ -37,6 +37,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+/**
+ * Helper for inter-instance coordination via OpenSearch.
+ * Provides heartbeat registration, distributed operation locking, and event notification
+ * to prevent concurrent execution of maintenance operations across multiple Fess instances.
+ */
 public class CoordinatorHelper {
 
     private static final Logger logger = LogManager.getLogger(CoordinatorHelper.class);
@@ -65,10 +70,16 @@ public class CoordinatorHelper {
 
     private final Map<String, List<Consumer<EventInfo>>> eventHandlers = new ConcurrentHashMap<>();
 
+    /**
+     * Default constructor.
+     */
     public CoordinatorHelper() {
         // Default constructor
     }
 
+    /**
+     * Initializes the coordinator by sending an initial heartbeat and starting the poll loop.
+     */
     @PostConstruct
     public void init() {
         instanceId = ComponentUtil.getSystemHelper().getInstanceId();
@@ -77,7 +88,7 @@ public class CoordinatorHelper {
         sendHeartbeat();
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int interval = Integer.parseInt(fessConfig.get("coordinator.poll.interval"));
+        final int interval = fessConfig.getCoordinatorPollIntervalAsInteger();
         pollTask = TimeoutManager.getInstance().addTimeoutTarget(this::poll, interval, true);
 
         if (logger.isInfoEnabled()) {
@@ -85,6 +96,9 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Stops the poll loop and removes the heartbeat document on shutdown.
+     */
     @PreDestroy
     public void destroy() {
         if (pollTask != null) {
@@ -104,9 +118,12 @@ public class CoordinatorHelper {
     //                                                                           Heartbeat
     //                                                                           =========
 
+    /**
+     * Sends a heartbeat document to OpenSearch to indicate this instance is active.
+     */
     public void sendHeartbeat() {
         final long now = System.currentTimeMillis();
-        final long ttl = Long.parseLong(ComponentUtil.getFessConfig().get("coordinator.heartbeat.ttl"));
+        final long ttl = ComponentUtil.getFessConfig().getCoordinatorHeartbeatTtlAsInteger().longValue();
         final String hostname = ComponentUtil.getSystemHelper().getHostname();
         final String targetName = ComponentUtil.getFessConfig().getSchedulerTargetName();
 
@@ -120,7 +137,7 @@ public class CoordinatorHelper {
                 "expiredTime", now + ttl));
 
         try (CurlResponse response = ComponentUtil.getCurlHelper() //
-                .put("/" + getIndexName() + "/_doc/" + instanceId) //
+                .put("/" + getIndexName() + "/_doc/" + instanceId + "?refresh=true") //
                 .body(body)
                 .execute()) {
             if (response.getHttpStatusCode() != 200 && response.getHttpStatusCode() != 201) {
@@ -131,6 +148,9 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Removes the heartbeat document for this instance from OpenSearch.
+     */
     protected void removeHeartbeat() {
         try (CurlResponse response = ComponentUtil.getCurlHelper() //
                 .delete("/" + getIndexName() + "/_doc/" + instanceId + "?refresh=true") //
@@ -143,6 +163,11 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Returns a list of currently active instances based on non-expired heartbeat documents.
+     *
+     * @return the list of active instances.
+     */
     public List<InstanceInfo> getActiveInstances() {
         final List<InstanceInfo> instances = new ArrayList<>();
         final long now = System.currentTimeMillis();
@@ -182,6 +207,12 @@ public class CoordinatorHelper {
         return instances;
     }
 
+    /**
+     * Checks whether the specified instance is currently active.
+     *
+     * @param targetInstanceId the instance ID to check.
+     * @return {@code true} if the instance is active.
+     */
     public boolean isInstanceActive(final String targetInstanceId) {
         return getActiveInstances().stream().anyMatch(i -> i.instanceId.equals(targetInstanceId));
     }
@@ -190,13 +221,39 @@ public class CoordinatorHelper {
     //                                                                    Operation State
     //                                                                    ================
 
+    /**
+     * Attempts to acquire a distributed lock for the specified operation.
+     *
+     * @param operationName the operation name used as the lock document ID.
+     * @return {@code true} if the lock was acquired.
+     */
     public boolean tryStartOperation(final String operationName) {
         return tryStartOperation(operationName, null);
     }
 
+    /**
+     * Attempts to acquire a distributed lock for the specified operation with optional data.
+     *
+     * @param operationName the operation name used as the lock document ID.
+     * @param data optional data to store with the operation document.
+     * @return {@code true} if the lock was acquired.
+     */
     public boolean tryStartOperation(final String operationName, final String data) {
+        final int maxRetry = ComponentUtil.getFessConfig().getCoordinatorOperationRetryAsInteger();
+        return tryStartOperation(operationName, data, maxRetry);
+    }
+
+    /**
+     * Internal method to acquire a distributed lock with retry control.
+     *
+     * @param operationName the operation name used as the lock document ID.
+     * @param data optional data to store with the operation document.
+     * @param remainingRetries the number of remaining retry attempts for stale lock cleanup.
+     * @return {@code true} if the lock was acquired.
+     */
+    protected boolean tryStartOperation(final String operationName, final String data, final int remainingRetries) {
         final long now = System.currentTimeMillis();
-        final long ttl = Long.parseLong(ComponentUtil.getFessConfig().get("coordinator.operation.ttl"));
+        final long ttl = ComponentUtil.getFessConfig().getCoordinatorOperationTtlAsInteger().longValue();
         final String hostname = ComponentUtil.getSystemHelper().getHostname();
 
         final Map<String, Object> bodyMap = new java.util.LinkedHashMap<>();
@@ -225,11 +282,26 @@ public class CoordinatorHelper {
             logger.debug("Failed to create operation document: operation={}", operationName, e);
         }
 
+        if (remainingRetries <= 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No remaining retries for operation lock: operation={}", operationName);
+            }
+            return false;
+        }
+
         // Document already exists - check if it's stale
-        return tryCleanupAndRetry(operationName, data);
+        return tryCleanupAndRetry(operationName, data, remainingRetries);
     }
 
-    protected boolean tryCleanupAndRetry(final String operationName, final String data) {
+    /**
+     * Checks if the existing operation lock is stale (expired or owner inactive) and retries acquisition.
+     *
+     * @param operationName the operation name.
+     * @param data optional data for the operation.
+     * @param remainingRetries the number of remaining retry attempts.
+     * @return {@code true} if the lock was acquired after cleanup.
+     */
+    protected boolean tryCleanupAndRetry(final String operationName, final String data, final int remainingRetries) {
         try (CurlResponse response = ComponentUtil.getCurlHelper() //
                 .get("/" + getIndexName() + "/_doc/" + operationName) //
                 .execute()) {
@@ -262,7 +334,7 @@ public class CoordinatorHelper {
                             logger.info("Cleaned up stale operation: operation={}, previousOwner={}", operationName, ownerInstanceId);
                         }
                         // Retry creation
-                        return tryStartOperation(operationName, data);
+                        return tryStartOperation(operationName, data, remainingRetries - 1);
                     }
                 }
             }
@@ -272,6 +344,12 @@ public class CoordinatorHelper {
         return false;
     }
 
+    /**
+     * Releases the operation lock by deleting the operation document.
+     * Safe to call multiple times; does nothing if the document is already deleted.
+     *
+     * @param operationName the operation name whose lock should be released.
+     */
     public void completeOperation(final String operationName) {
         try (CurlResponse getResponse = ComponentUtil.getCurlHelper() //
                 .get("/" + getIndexName() + "/_doc/" + operationName) //
@@ -315,10 +393,21 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Releases the operation lock on failure. Delegates to {@link #completeOperation(String)}.
+     *
+     * @param operationName the operation name whose lock should be released.
+     */
     public void failOperation(final String operationName) {
         completeOperation(operationName);
     }
 
+    /**
+     * Checks whether the specified operation is currently running (lock held by an active instance).
+     *
+     * @param operationName the operation name to check.
+     * @return {@code true} if the operation is running.
+     */
     public boolean isOperationRunning(final String operationName) {
         try (CurlResponse response = ComponentUtil.getCurlHelper() //
                 .get("/" + getIndexName() + "/_doc/" + operationName) //
@@ -351,6 +440,12 @@ public class CoordinatorHelper {
         return false;
     }
 
+    /**
+     * Retrieves information about the specified operation.
+     *
+     * @param operationName the operation name to look up.
+     * @return an {@link Optional} containing the operation info, or empty if not found.
+     */
     public Optional<OperationInfo> getOperationInfo(final String operationName) {
         try (CurlResponse response = ComponentUtil.getCurlHelper() //
                 .get("/" + getIndexName() + "/_doc/" + operationName) //
@@ -382,13 +477,26 @@ public class CoordinatorHelper {
     //                                                                              Event
     //                                                                              ======
 
+    /**
+     * Publishes an event to all instances.
+     *
+     * @param eventName the event name.
+     * @param data optional event data.
+     */
     public void publishEvent(final String eventName, final String data) {
         publishEvent(eventName, TARGET_ALL, data);
     }
 
+    /**
+     * Publishes an event to a specific instance or all instances.
+     *
+     * @param eventName the event name.
+     * @param targetInstanceId the target instance ID, or {@code "*"} for all instances.
+     * @param data optional event data.
+     */
     public void publishEvent(final String eventName, final String targetInstanceId, final String data) {
         final long now = System.currentTimeMillis();
-        final long ttl = Long.parseLong(ComponentUtil.getFessConfig().get("coordinator.event.ttl"));
+        final long ttl = ComponentUtil.getFessConfig().getCoordinatorEventTtlAsInteger().longValue();
 
         final Map<String, Object> bodyMap = new java.util.LinkedHashMap<>();
         bodyMap.put("type", TYPE_EVENT);
@@ -413,10 +521,21 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Registers an event handler for the specified event name.
+     *
+     * @param eventName the event name to handle.
+     * @param handler the consumer to invoke when the event is received.
+     */
     public void addEventHandler(final String eventName, final Consumer<EventInfo> handler) {
         eventHandlers.computeIfAbsent(eventName, k -> new ArrayList<>()).add(handler);
     }
 
+    /**
+     * Fetches new events from OpenSearch that were created after the last check time.
+     *
+     * @return the list of new events.
+     */
     protected List<EventInfo> fetchNewEvents() {
         final List<EventInfo> events = new ArrayList<>();
         final String query = toJson(Map.of( //
@@ -454,8 +573,8 @@ public class CoordinatorHelper {
                                 info.data = getStringValue(source, "data");
                                 events.add(info);
 
-                                if (info.createdTime > lastEventCheckTime) {
-                                    lastEventCheckTime = info.createdTime;
+                                if (info.createdTime >= lastEventCheckTime) {
+                                    lastEventCheckTime = info.createdTime + 1;
                                 }
                             }
                         }
@@ -472,6 +591,9 @@ public class CoordinatorHelper {
     //                                                                         Poll Loop
     //                                                                         ===========
 
+    /**
+     * Periodic poll that sends a heartbeat, processes new events, and cleans up expired documents.
+     */
     protected void poll() {
         try {
             sendHeartbeat();
@@ -495,6 +617,11 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Dispatches an event to all registered handlers for the event name.
+     *
+     * @param event the event to dispatch.
+     */
     protected void dispatchEvent(final EventInfo event) {
         final List<Consumer<EventInfo>> handlers = eventHandlers.get(event.name);
         if (handlers != null) {
@@ -508,6 +635,9 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Deletes expired heartbeat, operation, and event documents from the coordinator index.
+     */
     protected void cleanupExpiredDocuments() {
         final long now = System.currentTimeMillis();
         final String query = toJson(Map.of( //
@@ -533,6 +663,11 @@ public class CoordinatorHelper {
     //                                                                        Index Name
     //                                                                        ============
 
+    /**
+     * Returns the coordinator index name, adjusted for the configured index prefix.
+     *
+     * @return the coordinator index name.
+     */
     protected String getIndexName() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return INDEX_NAME.replaceFirst("fess_config", fessConfig.getIndexConfigIndex());
@@ -542,6 +677,12 @@ public class CoordinatorHelper {
     //                                                                         JSON Util
     //                                                                         ===========
 
+    /**
+     * Serializes a map to a JSON string.
+     *
+     * @param map the map to serialize.
+     * @return the JSON string, or {@code "{}"} on failure.
+     */
     protected String toJson(final Map<String, Object> map) {
         try {
             return objectMapper.writeValueAsString(map);
@@ -551,6 +692,12 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Parses a JSON string into a map.
+     *
+     * @param json the JSON string to parse.
+     * @return the parsed map, or an empty map on failure.
+     */
     protected Map<String, Object> parseJson(final String json) {
         try {
             return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
@@ -561,6 +708,13 @@ public class CoordinatorHelper {
         }
     }
 
+    /**
+     * Gets a nested map value from the given map.
+     *
+     * @param map the source map.
+     * @param key the key to look up.
+     * @return the map value, or {@code null} if not found or not a map.
+     */
     @SuppressWarnings("unchecked")
     protected Map<String, Object> getMapValue(final Map<String, Object> map, final String key) {
         final Object value = map.get(key);
@@ -570,6 +724,13 @@ public class CoordinatorHelper {
         return null;
     }
 
+    /**
+     * Gets a list value from the given map.
+     *
+     * @param map the source map.
+     * @param key the key to look up.
+     * @return the list value, or {@code null} if not found or not a list.
+     */
     @SuppressWarnings("unchecked")
     protected List<Map<String, Object>> getListValue(final Map<String, Object> map, final String key) {
         final Object value = map.get(key);
@@ -579,6 +740,13 @@ public class CoordinatorHelper {
         return null;
     }
 
+    /**
+     * Gets a string value from the given map.
+     *
+     * @param map the source map.
+     * @param key the key to look up.
+     * @return the string value, or {@code null} if not found.
+     */
     protected String getStringValue(final Map<String, Object> map, final String key) {
         final Object value = map.get(key);
         if (value != null) {
@@ -587,6 +755,13 @@ public class CoordinatorHelper {
         return null;
     }
 
+    /**
+     * Gets a long value from the given map.
+     *
+     * @param map the source map.
+     * @param key the key to look up.
+     * @return the long value, or {@code 0L} if not found or not a number.
+     */
     protected long getLongValue(final Map<String, Object> map, final String key) {
         final Object value = map.get(key);
         if (value instanceof Number) {
@@ -599,27 +774,63 @@ public class CoordinatorHelper {
     //                                                                         Data Class
     //                                                                         ===========
 
+    /**
+     * Represents an active Fess instance discovered via heartbeat.
+     */
     public static class InstanceInfo {
+        /** Default constructor. */
+        public InstanceInfo() {
+        }
+
+        /** The unique instance ID. */
         public String instanceId;
+        /** The hostname of the instance. */
         public String hostname;
+        /** The display name of the instance. */
         public String name;
+        /** The timestamp when the instance was last seen. */
         public long lastSeen;
     }
 
+    /**
+     * Represents the state of a distributed operation lock.
+     */
     public static class OperationInfo {
+        /** Default constructor. */
+        public OperationInfo() {
+        }
+
+        /** The operation name. */
         public String name;
+        /** The instance ID that owns the lock. */
         public String instanceId;
+        /** The hostname of the lock owner. */
         public String hostname;
+        /** The operation status. */
         public String status;
+        /** The time when the operation was started. */
         public long createdTime;
+        /** Optional data associated with the operation. */
         public String data;
     }
 
+    /**
+     * Represents an inter-instance event notification.
+     */
     public static class EventInfo {
+        /** Default constructor. */
+        public EventInfo() {
+        }
+
+        /** The event name. */
         public String name;
+        /** The instance ID that published the event. */
         public String instanceId;
+        /** The target instance ID, or {@code "*"} for all instances. */
         public String targetInstanceId;
+        /** The time when the event was created. */
         public long createdTime;
+        /** Optional data associated with the event. */
         public String data;
     }
 }
