@@ -395,6 +395,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Please select at least one target index to rebuild. */
     public static final String ERRORS_no_target_index_selected = "{errors.no_target_index_selected}";
 
+    /** The key of the message: The operation is already running on {0}. */
+    public static final String ERRORS_operation_already_running = "{errors.operation_already_running}";
+
     /** The key of the message: Failed to read a request file: {0} */
     public static final String ERRORS_failed_to_read_request_file = "{errors.failed_to_read_request_file}";
 
@@ -2337,6 +2340,21 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsNoTargetIndexSelected(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_no_target_index_selected));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.operation_already_running' with parameters.
+     * <pre>
+     * message: The operation is already running on {0}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsOperationAlreadyRunning(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_operation_already_running, arg0));
         return this;
     }
 

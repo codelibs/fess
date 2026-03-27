@@ -216,6 +216,93 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_getInstanceId_withoutTargetName() {
+        // When scheduler.target.name is blank, instanceId is hostname:pid
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "";
+            }
+        });
+        final String hostname = systemHelper.getHostname();
+        final long pid = ProcessHandle.current().pid();
+        assertEquals(hostname + ":" + pid, systemHelper.getInstanceId());
+    }
+
+    @Test
+    public void test_getInstanceId_withTargetName() {
+        // When scheduler.target.name is set, instanceId is targetName@hostname:pid
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "node1";
+            }
+        });
+        final String hostname = systemHelper.getHostname();
+        final long pid = ProcessHandle.current().pid();
+        assertEquals("node1@" + hostname + ":" + pid, systemHelper.getInstanceId());
+    }
+
+    @Test
+    public void test_getInstanceId_withHostnameEnv() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "fess-server";
+            }
+        });
+        try {
+            envMap.put("HOSTNAME", "myhost");
+            final long pid = ProcessHandle.current().pid();
+            assertEquals("fess-server@myhost:" + pid, systemHelper.getInstanceId());
+        } finally {
+            envMap.remove("HOSTNAME");
+        }
+    }
+
+    @Test
+    public void test_getInstanceId_withComputerNameEnv() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "";
+            }
+        });
+        try {
+            envMap.put("COMPUTERNAME", "winhost");
+            final long pid = ProcessHandle.current().pid();
+            assertEquals("winhost:" + pid, systemHelper.getInstanceId());
+        } finally {
+            envMap.remove("COMPUTERNAME");
+        }
+    }
+
+    @Test
+    public void test_getInstanceId_uniquePerProcess() {
+        // Verify that instanceId contains PID for process uniqueness
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "";
+            }
+        });
+        final String instanceId = systemHelper.getInstanceId();
+        assertTrue(instanceId.contains(":"), "instanceId should contain ':' separator for PID");
+        final String pidPart = instanceId.substring(instanceId.lastIndexOf(':') + 1);
+        assertTrue(Long.parseLong(pidPart) > 0, "PID should be a positive number");
+    }
+
+    @Test
     public void test_isEoled() {
         assertEquals(systemHelper.getCurrentTimeAsLong() > systemHelper.eolTime, systemHelper.isEoled());
         final SystemHelper helper1 = new SystemHelper() {

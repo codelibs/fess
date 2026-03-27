@@ -41,6 +41,7 @@ import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.AccessTokenHelper;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlerStatsHelper;
+import org.codelibs.fess.helper.CoordinatorHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.CurlHelper;
@@ -130,6 +131,8 @@ public final class ComponentUtil {
     private static final String LANGUAGE_HELPER = "languageHelper";
 
     private static final String CURL_HELPER = "curlHelper";
+
+    private static final String COORDINATOR_HELPER = "coordinatorHelper";
 
     private static final String QUERY_STRING_BUILDER = "queryStringBuilder";
 
@@ -744,6 +747,14 @@ public final class ComponentUtil {
      */
     public static CurlHelper getCurlHelper() {
         return getComponent(CURL_HELPER);
+    }
+
+    /**
+     * Gets the coordinator helper component.
+     * @return The coordinator helper.
+     */
+    public static CoordinatorHelper getCoordinatorHelper() {
+        return getComponent(COORDINATOR_HELPER);
     }
 
     /**

@@ -632,6 +632,23 @@ public class SystemHelper {
     }
 
     /**
+     * Gets the instance ID for this Fess instance.
+     * Combines scheduler.target.name (if configured), hostname, and PID
+     * to ensure uniqueness across multiple JVMs on the same host.
+     *
+     * @return The instance ID.
+     */
+    public String getInstanceId() {
+        final String targetName = ComponentUtil.getFessConfig().getSchedulerTargetName();
+        final String hostname = getHostname();
+        final long pid = ProcessHandle.current().pid();
+        if (StringUtil.isNotBlank(targetName)) {
+            return targetName + "@" + hostname + ":" + pid;
+        }
+        return hostname + ":" + pid;
+    }
+
+    /**
      * Sets up administrative HTML data for a given action.
      *
      * @param action  The action to set up data for.
