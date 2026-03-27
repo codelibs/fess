@@ -1295,7 +1295,7 @@ public class SearchApiManager extends BaseApiManager {
             message = escapeJsonKeyValue("error_code:", errorCode);
             if (logger.isDebugEnabled()) {
                 logger.debug("[{}] {}", errorCode, stacktraceString.get().replace("\n", "\\n"));
-            } else {
+            } else if (status >= 500) {
                 logger.warn("[{}] {}", errorCode, t.getMessage());
             }
         }
