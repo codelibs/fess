@@ -157,6 +157,36 @@ public class ApiResult {
     }
 
     /**
+     * Represents an API response for a start job operation.
+     */
+    public static class ApiStartJobResponse extends ApiResponse {
+        /** The pre-generated job log ID. Null when job logging is disabled. */
+        protected String jobLogId;
+
+        /**
+         * Default constructor for ApiStartJobResponse.
+         */
+        public ApiStartJobResponse() {
+            super();
+        }
+
+        /**
+         * Sets the job log ID.
+         * @param jobLogId The job log ID to set. Null when job logging is disabled.
+         * @return This ApiStartJobResponse instance.
+         */
+        public ApiStartJobResponse jobLogId(final String jobLogId) {
+            this.jobLogId = jobLogId;
+            return this;
+        }
+
+        @Override
+        public ApiResult result() {
+            return new ApiResult(this);
+        }
+    }
+
+    /**
      * Represents an API response for a delete operation.
      */
     public static class ApiDeleteResponse extends ApiResponse {
