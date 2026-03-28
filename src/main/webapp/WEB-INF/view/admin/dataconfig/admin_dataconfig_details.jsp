@@ -118,6 +118,11 @@ ${fe:html(true)}
                             </div>
                             <div class="card-footer">
                                 <jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+                                <c:if test="${editable}"><la:link styleClass="btn btn-info"
+                                                                  href="/admin/dataconfig/duplicate/${f:u(id)}">
+                                    <i class="fa fa-copy" aria-hidden="true"></i>
+                                    <la:message key="labels.crud_button_duplicate"/>
+                                </la:link></c:if>
                                 <c:if test="${fe:permission('admin-scheduler')}">
                                     <la:link styleClass="btn btn-success"
                                              href="/admin/scheduler/createnewjob/data_crawling/${f:u(id)}/${fe:base64(name)}">
