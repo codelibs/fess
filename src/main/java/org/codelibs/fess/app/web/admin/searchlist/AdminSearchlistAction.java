@@ -550,11 +550,6 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     private void registerExtraFields(final RenderData data) {
-        final Map<String, Object> doc = currentForm != null ? currentForm.doc : null;
-        if (doc == null) {
-            return;
-        }
-
         final Set<String> arrayFieldSet = fessConfig.getIndexAdminArrayFieldSet();
         final Set<String> dateFieldSet = fessConfig.getIndexAdminDateFieldSet();
         final Set<String> integerFieldSet = fessConfig.getIndexAdminIntegerFieldSet();
@@ -562,9 +557,25 @@ public class AdminSearchlistAction extends FessAdminAction {
         final Set<String> floatFieldSet = fessConfig.getIndexAdminFloatFieldSet();
         final Set<String> doubleFieldSet = fessConfig.getIndexAdminDoubleFieldSet();
 
+        final Set<String> reservedFields = Set.of(fessConfig.getIndexFieldId(), fessConfig.getIndexFieldVersion(),
+                fessConfig.getIndexFieldSeqNo(), fessConfig.getIndexFieldPrimaryTerm());
+
+        // Collect candidate fields from config definitions and document keys
+        final Set<String> candidateFields = new java.util.TreeSet<>();
+        candidateFields.addAll(arrayFieldSet);
+        candidateFields.addAll(dateFieldSet);
+        candidateFields.addAll(integerFieldSet);
+        candidateFields.addAll(longFieldSet);
+        candidateFields.addAll(floatFieldSet);
+        candidateFields.addAll(doubleFieldSet);
+        final Map<String, Object> doc = currentForm != null ? currentForm.doc : null;
+        if (doc != null) {
+            candidateFields.addAll(doc.keySet());
+        }
+
         final List<String> extraFieldNames = new ArrayList<>();
         final Map<String, String> extraFieldTypes = new TreeMap<>();
-        doc.keySet().stream().sorted().filter(key -> !STANDARD_EDIT_FIELDS.contains(key)).forEach(key -> {
+        candidateFields.stream().filter(key -> !STANDARD_EDIT_FIELDS.contains(key) && !reservedFields.contains(key)).forEach(key -> {
             final String type;
             if (arrayFieldSet.contains(key)) {
                 type = "array";

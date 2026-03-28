@@ -72,6 +72,26 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
             public String getIndexAdminDoubleFields() {
                 return "";
             }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldVersion() {
+                return "_version";
+            }
+
+            @Override
+            public String getIndexFieldSeqNo() {
+                return "_seq_no";
+            }
+
+            @Override
+            public String getIndexFieldPrimaryTerm() {
+                return "_primary_term";
+            }
         });
     }
 
@@ -479,7 +499,12 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
 
         @SuppressWarnings("unchecked")
         final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
-        assertTrue(extraFieldNames == null || extraFieldNames.isEmpty());
+        assertNotNull(extraFieldNames);
+        // Config-defined field "anchor" is not in STANDARD_EDIT_FIELDS, so it appears as extra
+        assertTrue(extraFieldNames.contains("anchor"));
+        // Standard field "url" should not appear
+        assertFalse(extraFieldNames.contains("url"));
+        assertFalse(extraFieldNames.contains("title"));
     }
 
     @Test
@@ -511,9 +536,10 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         @SuppressWarnings("unchecked")
         final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
         assertNotNull(extraFieldNames);
-        assertEquals(2, extraFieldNames.size());
         assertTrue(extraFieldNames.contains("custom_metadata"));
         assertTrue(extraFieldNames.contains("department"));
+        // Config-defined "anchor" also appears as extra field
+        assertTrue(extraFieldNames.contains("anchor"));
 
         @SuppressWarnings("unchecked")
         final Map<String, String> extraFieldTypes = (Map<String, String>) renderData.getDataMap().get("extraFieldTypes");
@@ -550,31 +576,19 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         @SuppressWarnings("unchecked")
         final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
         assertNotNull(extraFieldNames);
-        assertEquals(3, extraFieldNames.size());
-        assertEquals("aaa_field", extraFieldNames.get(0));
-        assertEquals("mmm_field", extraFieldNames.get(1));
-        assertEquals("zzz_field", extraFieldNames.get(2));
+        assertTrue(extraFieldNames.contains("aaa_field"));
+        assertTrue(extraFieldNames.contains("mmm_field"));
+        assertTrue(extraFieldNames.contains("zzz_field"));
+        // Verify sorted order among the custom fields
+        final int aIdx = extraFieldNames.indexOf("aaa_field");
+        final int mIdx = extraFieldNames.indexOf("mmm_field");
+        final int zIdx = extraFieldNames.indexOf("zzz_field");
+        assertTrue(aIdx < mIdx);
+        assertTrue(mIdx < zIdx);
     }
 
     @Test
-    public void test_registerExtraFields_nullCurrentForm() throws Exception {
-        final AdminSearchlistAction action = new AdminSearchlistAction();
-
-        final java.lang.reflect.Field fessConfigField = findField(action.getClass(), "fessConfig");
-        fessConfigField.setAccessible(true);
-        fessConfigField.set(action, ComponentUtil.getFessConfig());
-
-        final java.lang.reflect.Method method = AdminSearchlistAction.class.getDeclaredMethod("registerExtraFields", RenderData.class);
-        method.setAccessible(true);
-
-        final RenderData renderData = new RenderData();
-        method.invoke(action, renderData);
-
-        assertNull(renderData.getDataMap().get("extraFieldNames"));
-    }
-
-    @Test
-    public void test_registerExtraFields_nullDoc() throws Exception {
+    public void test_registerExtraFields_nullDoc_showsConfigFields() throws Exception {
         final AdminSearchlistAction action = new AdminSearchlistAction();
 
         final CreateForm form = new CreateForm();
@@ -594,7 +608,200 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
         final RenderData renderData = new RenderData();
         method.invoke(action, renderData);
 
-        assertNull(renderData.getDataMap().get("extraFieldNames"));
+        // Config fields that are not in STANDARD_EDIT_FIELDS should still appear
+        @SuppressWarnings("unchecked")
+        final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
+        assertNotNull(extraFieldNames);
+        assertTrue(extraFieldNames.contains("anchor"));
+    }
+
+    @Test
+    public void test_registerExtraFields_excludesReservedFields() throws Exception {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexAdminArrayFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminDateFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminLongFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminFloatFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminIntegerFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminDoubleFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminRequiredFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldVersion() {
+                return "_version";
+            }
+
+            @Override
+            public String getIndexFieldSeqNo() {
+                return "_seq_no";
+            }
+
+            @Override
+            public String getIndexFieldPrimaryTerm() {
+                return "_primary_term";
+            }
+        });
+
+        final AdminSearchlistAction action = new AdminSearchlistAction();
+
+        final CreateForm form = new CreateForm();
+        form.doc = new HashMap<>();
+        form.doc.put("url", "https://example.com");
+        form.doc.put("custom_field", "value");
+        form.doc.put("_id", "abc123");
+        form.doc.put("_version", "1");
+        form.doc.put("_seq_no", "5");
+        form.doc.put("_primary_term", "1");
+
+        final java.lang.reflect.Field currentFormField = AdminSearchlistAction.class.getDeclaredField("currentForm");
+        currentFormField.setAccessible(true);
+        currentFormField.set(action, form);
+
+        final java.lang.reflect.Field fessConfigField = findField(action.getClass(), "fessConfig");
+        fessConfigField.setAccessible(true);
+        fessConfigField.set(action, ComponentUtil.getFessConfig());
+
+        final java.lang.reflect.Method method = AdminSearchlistAction.class.getDeclaredMethod("registerExtraFields", RenderData.class);
+        method.setAccessible(true);
+
+        final RenderData renderData = new RenderData();
+        method.invoke(action, renderData);
+
+        @SuppressWarnings("unchecked")
+        final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
+        assertNotNull(extraFieldNames);
+        assertTrue(extraFieldNames.contains("custom_field"));
+        assertFalse(extraFieldNames.contains("_id"), "Reserved field _id should be excluded");
+        assertFalse(extraFieldNames.contains("_version"), "Reserved field _version should be excluded");
+        assertFalse(extraFieldNames.contains("_seq_no"), "Reserved field _seq_no should be excluded");
+        assertFalse(extraFieldNames.contains("_primary_term"), "Reserved field _primary_term should be excluded");
+    }
+
+    @Test
+    public void test_registerExtraFields_configFieldsAppearedWithoutDoc() throws Exception {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexAdminArrayFields() {
+                return "custom_tags";
+            }
+
+            @Override
+            public String getIndexAdminDateFields() {
+                return "custom_publish_date";
+            }
+
+            @Override
+            public String getIndexAdminLongFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminFloatFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminIntegerFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminDoubleFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexAdminRequiredFields() {
+                return "";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldVersion() {
+                return "_version";
+            }
+
+            @Override
+            public String getIndexFieldSeqNo() {
+                return "_seq_no";
+            }
+
+            @Override
+            public String getIndexFieldPrimaryTerm() {
+                return "_primary_term";
+            }
+        });
+
+        final AdminSearchlistAction action = new AdminSearchlistAction();
+
+        // Empty doc (create mode) — no custom fields in document
+        final CreateForm form = new CreateForm();
+        form.doc = new HashMap<>();
+
+        final java.lang.reflect.Field currentFormField = AdminSearchlistAction.class.getDeclaredField("currentForm");
+        currentFormField.setAccessible(true);
+        currentFormField.set(action, form);
+
+        final java.lang.reflect.Field fessConfigField = findField(action.getClass(), "fessConfig");
+        fessConfigField.setAccessible(true);
+        fessConfigField.set(action, ComponentUtil.getFessConfig());
+
+        final java.lang.reflect.Method method = AdminSearchlistAction.class.getDeclaredMethod("registerExtraFields", RenderData.class);
+        method.setAccessible(true);
+
+        final RenderData renderData = new RenderData();
+        method.invoke(action, renderData);
+
+        @SuppressWarnings("unchecked")
+        final List<String> extraFieldNames = (List<String>) renderData.getDataMap().get("extraFieldNames");
+        assertNotNull(extraFieldNames);
+        assertTrue(extraFieldNames.contains("custom_tags"), "Config-defined array field should appear even without doc data");
+        assertTrue(extraFieldNames.contains("custom_publish_date"), "Config-defined date field should appear even without doc data");
+
+        @SuppressWarnings("unchecked")
+        final Map<String, String> extraFieldTypes = (Map<String, String>) renderData.getDataMap().get("extraFieldTypes");
+        assertEquals("array", extraFieldTypes.get("custom_tags"));
+        assertEquals("date", extraFieldTypes.get("custom_publish_date"));
     }
 
     @Test
@@ -635,6 +842,26 @@ public class AdminSearchlistActionTest extends UnitFessTestCase {
             @Override
             public String getIndexAdminRequiredFields() {
                 return "";
+            }
+
+            @Override
+            public String getIndexFieldId() {
+                return "_id";
+            }
+
+            @Override
+            public String getIndexFieldVersion() {
+                return "_version";
+            }
+
+            @Override
+            public String getIndexFieldSeqNo() {
+                return "_seq_no";
+            }
+
+            @Override
+            public String getIndexFieldPrimaryTerm() {
+                return "_primary_term";
             }
         });
 
