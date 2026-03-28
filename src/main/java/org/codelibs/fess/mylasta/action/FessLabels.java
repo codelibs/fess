@@ -2697,6 +2697,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Cancel */
     public static final String LABELS_crud_button_cancel = "{labels.crud_button_cancel}";
 
+    /** The key of the message: Duplicate */
+    public static final String LABELS_crud_button_duplicate = "{labels.crud_button_duplicate}";
+
     /** The key of the message: Create New */
     public static final String LABELS_crud_link_create = "{labels.crud_link_create}";
 

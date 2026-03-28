@@ -212,6 +212,41 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     /**
+     * Displays the form for duplicating an existing web crawler configuration.
+     *
+     * @param id the ID of the web config to duplicate
+     * @return HTML response for the web config creation form pre-populated with duplicated values
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse duplicate(final String id) {
+        saveToken();
+        return asEditHtml().useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                webConfigService.getWebConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                        copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                                Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n]));
+                    });
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .collect(Collectors.joining("\n")));
+                    form.virtualHosts = stream(entity.getVirtualHosts())
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+                    form.name = null;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+                });
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    /**
      * Displays the form for editing an existing web crawler configuration.
      *
      * @param form the edit form containing web config ID

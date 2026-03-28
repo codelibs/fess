@@ -207,6 +207,41 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     /**
+     * Displays the form for duplicating an existing data store configuration.
+     *
+     * @param id the ID of the data config to duplicate
+     * @return HTML response for the data config creation form pre-populated with duplicated values
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse duplicate(final String id) {
+        saveToken();
+        return asEditHtml().useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                        copyOp.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                                Stream.of(Constants.PERMISSIONS, Constants.VIRTUAL_HOSTS)).toArray(n -> new String[n]));
+                    });
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    form.permissions = stream(entity.getPermissions()).get(stream -> stream.map(s -> permissionHelper.decode(s))
+                            .filter(StringUtil::isNotBlank)
+                            .distinct()
+                            .collect(Collectors.joining("\n")));
+                    form.virtualHosts = stream(entity.getVirtualHosts())
+                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(String::trim).collect(Collectors.joining("\n")));
+                    form.name = null;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), this::asListHtml);
+                });
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    /**
      * Show the edit page.
      * @param form The edit form.
      * @return The HTML response.
