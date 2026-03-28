@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.opensearch.config.exentity;
 
+import java.util.Map;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.JobNotFoundException;
@@ -58,6 +60,20 @@ public class ScheduledJob extends BsScheduledJob {
     public void start() {
         ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
             job.launchNow();
+        }).orElse(() -> {
+            throw new JobNotFoundException(this);
+        });
+    }
+
+    public void start(final Map<String, Object> params) {
+        ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
+            if (params != null && !params.isEmpty()) {
+                job.launchNow(op -> {
+                    params.forEach(op::param);
+                });
+            } else {
+                job.launchNow();
+            }
         }).orElse(() -> {
             throw new JobNotFoundException(this);
         });

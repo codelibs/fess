@@ -537,6 +537,9 @@ public class Constants extends CoreLibConstants {
     /** Scheduled job identifier. */
     public static final String SCHEDULED_JOB = "scheduledJob";
 
+    /** Job log ID parameter key for passing pre-generated ID to job execution. */
+    public static final String JOB_LOG_ID = "jobLogId";
+
     /** Default job target value (all configurations). */
     public static final String DEFAULT_JOB_TARGET = "all";
 

@@ -84,6 +84,10 @@ public class ScriptExecutorJob implements LaJob {
         }
 
         final JobLog jobLog = new JobLog(scheduledJob);
+        final String jobLogId = (String) runtime.getParameterMap().get(Constants.JOB_LOG_ID);
+        if (jobLogId != null) {
+            jobLog.setId(jobLogId);
+        }
         final String scriptType = scheduledJob.getScriptType();
         final String script = scheduledJob.getScriptData();
 

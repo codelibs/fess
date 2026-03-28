@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.api.admin.scheduler;
 import static org.codelibs.fess.app.web.admin.scheduler.AdminSchedulerAction.getScheduledJob;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -75,13 +77,16 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
 
     /**
      * Starts a scheduled job by ID.
+     * When job logging is enabled, a pre-generated job log ID is returned in the response
+     * as {@code jobLogId}. When job logging is disabled, {@code jobLogId} is {@code null}.
      *
      * @param id the ID of the scheduled job to start
-     * @return JSON response indicating success or failure
+     * @return JSON response with {@code jobLogId} (nullable) and status
      */
     // PUT /api/admin/scheduler/{id}/start
     @Execute(urlPattern = "{}/@word")
     public JsonResponse<ApiResult> put$start(final String id) {
+        final String[] jobLogId = { null };
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             if (!entity.isEnabled() || entity.isRunning()) {
                 throwValidationErrorApi(messages -> {
@@ -89,7 +94,12 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
                 });
             }
             try {
-                entity.start();
+                if (entity.isLoggingEnabled()) {
+                    jobLogId[0] = UUID.randomUUID().toString().replace("-", "");
+                    entity.start(Map.of(Constants.JOB_LOG_ID, jobLogId[0]));
+                } else {
+                    entity.start();
+                }
             } catch (final Exception e) {
                 throwValidationErrorApi(messages -> {
                     messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
@@ -100,7 +110,7 @@ public class ApiAdminSchedulerAction extends FessApiAdminAction {
                 messages.addErrorsFailedToStartJob(GLOBAL, id);
             });
         });
-        return asJson(new ApiResponse().status(Status.OK).result());
+        return asJson(new ApiResult.ApiStartJobResponse().jobLogId(jobLogId[0]).status(Status.OK).result());
     }
 
     /**
