@@ -15,15 +15,21 @@
  */
 package org.codelibs.fess.helper;
 
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.codelibs.curl.CurlRequest;
+import org.codelibs.curl.CurlResponse;
+import org.codelibs.curl.io.ContentCache;
 import org.codelibs.fess.helper.CoordinatorHelper.EventInfo;
 import org.codelibs.fess.helper.CoordinatorHelper.InstanceInfo;
 import org.codelibs.fess.helper.CoordinatorHelper.OperationInfo;
@@ -41,6 +47,143 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
     protected void setUp(TestInfo testInfo) throws Exception {
         super.setUp(testInfo);
         coordinatorHelper = new CoordinatorHelper();
+    }
+
+    // ===================================================================================
+    //                                                                     Test Helpers
+    //                                                                     =============
+
+    private CurlResponse createMockResponse(final int statusCode, final String body) {
+        final CurlResponse response = new CurlResponse();
+        response.setHttpStatusCode(statusCode);
+        response.setEncoding("UTF-8");
+        response.setContentCache(new ContentCache(body.getBytes(StandardCharsets.UTF_8)));
+        return response;
+    }
+
+    private void setupMockFessConfig() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexConfigIndex() {
+                return "fess_config";
+            }
+
+            @Override
+            public Integer getCoordinatorPollIntervalAsInteger() {
+                return 60;
+            }
+
+            @Override
+            public Integer getCoordinatorHeartbeatTtlAsInteger() {
+                return 180000;
+            }
+
+            @Override
+            public Integer getCoordinatorOperationTtlAsInteger() {
+                return 7200000;
+            }
+
+            @Override
+            public Integer getCoordinatorOperationRetryAsInteger() {
+                return 3;
+            }
+
+            @Override
+            public Integer getCoordinatorEventTtlAsInteger() {
+                return 600000;
+            }
+
+            @Override
+            public String getSchedulerTargetName() {
+                return "";
+            }
+        });
+    }
+
+    /**
+     * Creates a CoordinatorHelper that captures request bodies sent via CurlHelper.
+     * The mock CurlHelper records the last request path and body for assertion.
+     */
+    private CoordinatorHelper createCapturingHelper(final String testInstanceId, final AtomicReference<String> capturedPath,
+            final AtomicReference<String> capturedBody, final CurlResponse mockResponse) {
+        final CurlHelper mockCurlHelper = new CurlHelper() {
+            @Override
+            public CurlRequest get(final String path) {
+                return createCapturingRequest(path);
+            }
+
+            @Override
+            public CurlRequest post(final String path) {
+                return createCapturingRequest(path);
+            }
+
+            @Override
+            public CurlRequest put(final String path) {
+                return createCapturingRequest(path);
+            }
+
+            @Override
+            public CurlRequest delete(final String path) {
+                return createCapturingRequest(path);
+            }
+
+            private CurlRequest createCapturingRequest(final String path) {
+                if (capturedPath != null) {
+                    capturedPath.set(path);
+                }
+                return new CurlRequest(org.codelibs.curl.Curl.Method.GET, "http://localhost:9200") {
+                    @Override
+                    public CurlRequest body(final String body) {
+                        if (capturedBody != null) {
+                            capturedBody.set(body);
+                        }
+                        return this;
+                    }
+
+                    @Override
+                    public CurlResponse execute() {
+                        if (mockResponse != null) {
+                            return mockResponse;
+                        }
+                        return createMockResponse(200, "{}");
+                    }
+                };
+            }
+        };
+        ComponentUtil.register(mockCurlHelper, "curlHelper");
+        ComponentUtil.register(new SystemHelper(), "systemHelper");
+
+        final CoordinatorHelper helper = new CoordinatorHelper();
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("instanceId");
+            field.setAccessible(true);
+            field.set(helper, testInstanceId);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+        return helper;
+    }
+
+    private void setLastEventCheckTime(final CoordinatorHelper helper, final long time) {
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("lastEventCheckTime");
+            field.setAccessible(true);
+            field.set(helper, time);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private long getLastEventCheckTime(final CoordinatorHelper helper) {
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("lastEventCheckTime");
+            field.setAccessible(true);
+            return (long) field.get(helper);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ===================================================================================
@@ -454,77 +597,64 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
-    //                                                               Heartbeat Body Build
-    //                                                               =====================
+    //                                                       Actual Document Body Build
+    //                                                       ===========================
 
     @Test
-    public void test_heartbeatDocumentStructure() {
-        // Verify that a heartbeat document body can be built and parsed correctly
-        final long now = System.currentTimeMillis();
-        final long ttl = 180000L;
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "heartbeat");
-        body.put("instanceId", "node1@host1");
-        body.put("hostname", "host1");
-        body.put("name", "node1");
-        body.put("status", "active");
-        body.put("createdTime", now);
-        body.put("expiredTime", now + ttl);
+    public void test_sendHeartbeat_documentBody() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final AtomicReference<String> capturedPath = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", capturedPath, capturedBody, createMockResponse(200, "{}"));
 
-        final String json = coordinatorHelper.toJson(body);
-        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
+        helper.sendHeartbeat();
 
-        assertEquals("heartbeat", parsed.get("type"));
-        assertEquals("node1@host1", parsed.get("instanceId"));
-        assertEquals("host1", parsed.get("hostname"));
-        assertEquals("node1", parsed.get("name"));
-        assertEquals("active", parsed.get("status"));
-        assertTrue(((Number) parsed.get("expiredTime")).longValue() > ((Number) parsed.get("createdTime")).longValue());
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        assertEquals("heartbeat", body.get("type"));
+        assertEquals("node1@host1", body.get("instanceId"));
+        assertNotNull(body.get("hostname"));
+        assertEquals("active", body.get("status"));
+        assertNotNull(body.get("createdTime"));
+        assertNotNull(body.get("expiredTime"));
+        assertTrue(capturedPath.get().contains("/_doc/node1@host1"));
     }
 
     @Test
-    public void test_operationDocumentStructure() {
-        final long now = System.currentTimeMillis();
-        final long ttl = 7200000L;
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "operation");
-        body.put("name", "reindex");
-        body.put("instanceId", "node1@host1");
-        body.put("hostname", "host1");
-        body.put("status", "running");
-        body.put("createdTime", now);
-        body.put("expiredTime", now + ttl);
-        body.put("data", "fess");
+    public void test_tryStartOperation_documentBody() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final AtomicReference<String> capturedPath = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", capturedPath, capturedBody, createMockResponse(201, "{}"));
 
-        final String json = coordinatorHelper.toJson(body);
-        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
+        helper.tryStartOperation("reindex", "fess");
 
-        assertEquals("operation", parsed.get("type"));
-        assertEquals("reindex", parsed.get("name"));
-        assertEquals("running", parsed.get("status"));
-        assertEquals("fess", parsed.get("data"));
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        assertEquals("operation", body.get("type"));
+        assertEquals("reindex", body.get("name"));
+        assertEquals("node1@host1", body.get("instanceId"));
+        assertNotNull(body.get("hostname"));
+        assertEquals("running", body.get("status"));
+        assertEquals("fess", body.get("data"));
+        assertTrue(capturedPath.get().contains("/_create/reindex"));
     }
 
     @Test
-    public void test_eventDocumentStructure() {
-        final long now = System.currentTimeMillis();
-        final long ttl = 600000L;
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "event");
-        body.put("name", "config_updated");
-        body.put("instanceId", "node1@host1");
-        body.put("targetInstanceId", "*");
-        body.put("createdTime", now);
-        body.put("expiredTime", now + ttl);
-        body.put("data", "web_config");
+    public void test_publishEvent_documentBody() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(201, "{}"));
 
-        final String json = coordinatorHelper.toJson(body);
-        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
+        helper.publishEvent("config_updated", "node2@host2", "web_config");
 
-        assertEquals("event", parsed.get("type"));
-        assertEquals("config_updated", parsed.get("name"));
-        assertEquals("*", parsed.get("targetInstanceId"));
-        assertEquals("web_config", parsed.get("data"));
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        assertEquals("event", body.get("type"));
+        assertEquals("config_updated", body.get("name"));
+        assertEquals("node1@host1", body.get("instanceId"));
+        assertEquals("node2@host2", body.get("targetInstanceId"));
+        assertEquals("web_config", body.get("data"));
     }
 
     // ===================================================================================
@@ -532,55 +662,31 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
     //                                                              ====================
 
     @Test
-    public void test_operationDocumentWithoutData() {
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "operation");
-        body.put("name", "reindex_config");
-        body.put("instanceId", "node1@host1");
-        body.put("hostname", "host1");
-        body.put("status", "running");
-        body.put("createdTime", System.currentTimeMillis());
-        body.put("expiredTime", System.currentTimeMillis() + 7200000L);
-        // data is intentionally not set
+    public void test_tryStartOperation_withoutData() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(201, "{}"));
 
-        final String json = coordinatorHelper.toJson(body);
-        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
+        helper.tryStartOperation("reindex_config", null);
 
-        assertNull(coordinatorHelper.getStringValue(parsed, "data"));
+        assertNotNull(capturedBody.get());
+        assertFalse(capturedBody.get().contains("\"data\""));
     }
 
     // ===================================================================================
-    //                                                             Active Instance Parse
-    //                                                             ======================
+    //                                                             getActiveInstances
+    //                                                             ====================
 
     @Test
-    public void test_parseActiveInstancesResponse() {
-        // Simulate OpenSearch _search response for heartbeats
-        final String json = "{\"hits\":{\"total\":{\"value\":2},\"hits\":["
+    public void test_getActiveInstances_parsesResponse() {
+        setupMockFessConfig();
+        final String searchResponse = "{\"hits\":{\"total\":{\"value\":2},\"hits\":["
                 + "{\"_source\":{\"type\":\"heartbeat\",\"instanceId\":\"node1@host1\",\"hostname\":\"host1\",\"name\":\"node1\",\"createdTime\":1000}},"
                 + "{\"_source\":{\"type\":\"heartbeat\",\"instanceId\":\"node2@host2\",\"hostname\":\"host2\",\"name\":\"node2\",\"createdTime\":2000}}"
                 + "]}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, searchResponse));
 
-        final Map<String, Object> result = coordinatorHelper.parseJson(json);
-        final Map<String, Object> hits = coordinatorHelper.getMapValue(result, "hits");
-        assertNotNull(hits);
-
-        final List<Map<String, Object>> hitList = coordinatorHelper.getListValue(hits, "hits");
-        assertNotNull(hitList);
-        assertEquals(2, hitList.size());
-
-        final List<InstanceInfo> instances = new ArrayList<>();
-        for (final Map<String, Object> hit : hitList) {
-            final Map<String, Object> source = coordinatorHelper.getMapValue(hit, "_source");
-            if (source != null) {
-                final InstanceInfo info = new InstanceInfo();
-                info.instanceId = coordinatorHelper.getStringValue(source, "instanceId");
-                info.hostname = coordinatorHelper.getStringValue(source, "hostname");
-                info.name = coordinatorHelper.getStringValue(source, "name");
-                info.lastSeen = coordinatorHelper.getLongValue(source, "createdTime");
-                instances.add(info);
-            }
-        }
+        final List<InstanceInfo> instances = helper.getActiveInstances();
 
         assertEquals(2, instances.size());
         assertEquals("node1@host1", instances.get(0).instanceId);
@@ -592,120 +698,151 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
     }
 
     // ===================================================================================
-    //                                                             Operation Info Parse
-    //                                                             ======================
+    //                                                             getOperationInfo
+    //                                                             ==================
 
     @Test
-    public void test_parseOperationInfoResponse_found() {
+    public void test_getOperationInfo_found() {
+        setupMockFessConfig();
         final String json = "{\"_index\":\"fess_config.coordinator\",\"_id\":\"reindex\","
                 + "\"found\":true,\"_seq_no\":10,\"_primary_term\":1," + "\"_source\":{\"type\":\"operation\",\"name\":\"reindex\","
                 + "\"instanceId\":\"node1@host1\",\"hostname\":\"host1\","
-                + "\"status\":\"running\",\"createdTime\":5000,\"expiredTime\":9999999}}";
+                + "\"status\":\"running\",\"createdTime\":5000,\"expiredTime\":9999999,\"data\":\"fess\"}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, json));
 
-        final Map<String, Object> result = coordinatorHelper.parseJson(json);
-        final Boolean found = (Boolean) result.get("found");
-        assertTrue(found);
+        final Optional<OperationInfo> result = helper.getOperationInfo("reindex");
 
-        final Map<String, Object> source = coordinatorHelper.getMapValue(result, "_source");
-        assertNotNull(source);
-
-        final OperationInfo info = new OperationInfo();
-        info.name = coordinatorHelper.getStringValue(source, "name");
-        info.instanceId = coordinatorHelper.getStringValue(source, "instanceId");
-        info.hostname = coordinatorHelper.getStringValue(source, "hostname");
-        info.status = coordinatorHelper.getStringValue(source, "status");
-        info.createdTime = coordinatorHelper.getLongValue(source, "createdTime");
-
+        assertTrue(result.isPresent());
+        final OperationInfo info = result.get();
         assertEquals("reindex", info.name);
         assertEquals("node1@host1", info.instanceId);
         assertEquals("host1", info.hostname);
         assertEquals("running", info.status);
         assertEquals(5000L, info.createdTime);
+        assertEquals("fess", info.data);
     }
 
     @Test
-    public void test_parseOperationInfoResponse_notFound() {
+    public void test_getOperationInfo_notFound() {
+        setupMockFessConfig();
         final String json = "{\"_index\":\"fess_config.coordinator\",\"_id\":\"reindex\",\"found\":false}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, json));
 
-        final Map<String, Object> result = coordinatorHelper.parseJson(json);
-        final Boolean found = (Boolean) result.get("found");
-        assertFalse(found);
+        final Optional<OperationInfo> result = helper.getOperationInfo("reindex");
+
+        assertFalse(result.isPresent());
     }
 
     // ===================================================================================
-    //                                                           Expiry Check Logic
-    //                                                           ====================
+    //                                                        isOperationRunning
+    //                                                        ====================
 
     @Test
-    public void test_expiryCheck_expired() {
+    public void test_isOperationRunning_expired() {
+        setupMockFessConfig();
         final long now = System.currentTimeMillis();
-        final long expiredTime = now - 1000L; // expired 1 second ago
-        assertTrue(expiredTime < now);
+        final String opJson = "{\"found\":true,\"_source\":{\"type\":\"operation\",\"name\":\"reindex\","
+                + "\"instanceId\":\"node1@host1\",\"status\":\"running\"," + "\"expiredTime\":" + (now - 1000L) + "}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, opJson));
+
+        assertFalse(helper.isOperationRunning("reindex"));
     }
 
     @Test
-    public void test_expiryCheck_notExpired() {
+    public void test_isOperationRunning_notExpired_activeOwner() {
+        setupMockFessConfig();
         final long now = System.currentTimeMillis();
-        final long expiredTime = now + 3600000L; // expires in 1 hour
-        assertFalse(expiredTime < now);
+        final String opJson = "{\"found\":true,\"_source\":{\"type\":\"operation\",\"name\":\"reindex\","
+                + "\"instanceId\":\"node1@host1\",\"status\":\"running\"," + "\"expiredTime\":" + (now + 3600000L) + "}}";
+        final CurlResponse mockResponse = createMockResponse(200, opJson);
+
+        // Use a subclass to mock both CurlHelper access and getActiveInstances
+        final CoordinatorHelper helper = new CoordinatorHelper() {
+            @Override
+            public List<InstanceInfo> getActiveInstances() {
+                final InstanceInfo info = new InstanceInfo();
+                info.instanceId = "node1@host1";
+                return List.of(info);
+            }
+        };
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("instanceId");
+            field.setAccessible(true);
+            field.set(helper, "node1@host1");
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Register mock CurlHelper that returns the operation document
+        ComponentUtil.register(new CurlHelper() {
+            @Override
+            public CurlRequest get(final String path) {
+                return new CurlRequest(org.codelibs.curl.Curl.Method.GET, "http://localhost:9200") {
+                    @Override
+                    public CurlResponse execute() {
+                        return mockResponse;
+                    }
+                };
+            }
+        }, "curlHelper");
+
+        assertTrue(helper.isOperationRunning("reindex"));
     }
 
     // ===================================================================================
-    //                                                         Search Query Structure
-    //                                                         =======================
+    //                                                         Query Structure via Methods
+    //                                                         ===========================
 
     @Test
-    public void test_heartbeatSearchQuery() {
-        final long now = System.currentTimeMillis();
-        final Map<String, Object> query = Map.of( //
-                "query", Map.of("bool", Map.of("must", List.of( //
-                        Map.of("term", Map.of("type", "heartbeat")), //
-                        Map.of("range", Map.of("expiredTime", Map.of("gte", now)))))), //
-                "size", 100);
+    public void test_getActiveInstances_queryStructure() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final AtomicReference<String> capturedPath = new AtomicReference<>();
+        final CoordinatorHelper helper =
+                createCapturingHelper("node1@host1", capturedPath, capturedBody, createMockResponse(200, "{\"hits\":{\"hits\":[]}}"));
 
-        final String json = coordinatorHelper.toJson(query);
-        assertNotNull(json);
-        assertTrue(json.contains("\"heartbeat\""));
-        assertTrue(json.contains("\"expiredTime\""));
-        assertTrue(json.contains("\"gte\""));
-        assertTrue(json.contains("\"size\":100"));
+        helper.getActiveInstances();
+
+        assertNotNull(capturedBody.get());
+        assertTrue(capturedBody.get().contains("\"heartbeat\""));
+        assertTrue(capturedBody.get().contains("\"expiredTime\""));
+        assertTrue(capturedBody.get().contains("\"gte\""));
+        assertTrue(capturedBody.get().contains("\"size\":100"));
+        assertTrue(capturedPath.get().contains("/_search"));
     }
 
     @Test
-    public void test_eventSearchQuery() {
-        final long lastCheckTime = 1000L;
-        final String instanceId = "node1@host1";
-        final Map<String, Object> query = Map.of( //
-                "query", Map.of("bool", Map.of( //
-                        "must", List.of( //
-                                Map.of("term", Map.of("type", "event")), //
-                                Map.of("range", Map.of("createdTime", Map.of("gt", lastCheckTime)))), //
-                        "should", List.of( //
-                                Map.of("term", Map.of("targetInstanceId", "*")), //
-                                Map.of("term", Map.of("targetInstanceId", instanceId))), //
-                        "minimum_should_match", 1, //
-                        "must_not", List.of( //
-                                Map.of("term", Map.of("instanceId", instanceId))))), //
-                "size", 100, //
-                "sort", List.of(Map.of("createdTime", "asc")));
+    public void test_fetchNewEvents_queryStructure() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper =
+                createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(200, "{\"hits\":{\"hits\":[]}}"));
+        setLastEventCheckTime(helper, 1000L);
 
-        final String json = coordinatorHelper.toJson(query);
-        assertNotNull(json);
-        assertTrue(json.contains("\"event\""));
-        assertTrue(json.contains("\"minimum_should_match\":1"));
-        assertTrue(json.contains("\"must_not\""));
+        helper.fetchNewEvents();
+
+        assertNotNull(capturedBody.get());
+        assertTrue(capturedBody.get().contains("\"event\""));
+        assertTrue(capturedBody.get().contains("\"minimum_should_match\":1"));
+        assertTrue(capturedBody.get().contains("\"must_not\""));
+        assertTrue(capturedBody.get().contains("\"targetInstanceId\""));
+        assertTrue(capturedBody.get().contains("\"node1@host1\""));
     }
 
     @Test
-    public void test_cleanupQuery() {
-        final long now = System.currentTimeMillis();
-        final Map<String, Object> query = Map.of( //
-                "query", Map.of("range", Map.of("expiredTime", Map.of("lt", now))));
+    public void test_cleanupExpiredDocuments_queryStructure() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final AtomicReference<String> capturedPath = new AtomicReference<>();
+        final CoordinatorHelper helper =
+                createCapturingHelper("node1@host1", capturedPath, capturedBody, createMockResponse(200, "{\"deleted\":0}"));
 
-        final String json = coordinatorHelper.toJson(query);
-        assertNotNull(json);
-        assertTrue(json.contains("\"lt\""));
-        assertTrue(json.contains("\"expiredTime\""));
+        helper.cleanupExpiredDocuments();
+
+        assertNotNull(capturedBody.get());
+        assertTrue(capturedBody.get().contains("\"lt\""));
+        assertTrue(capturedBody.get().contains("\"expiredTime\""));
+        assertTrue(capturedPath.get().contains("/_delete_by_query"));
     }
 
     // ===================================================================================
@@ -910,44 +1047,6 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
     //                                                         =========================
 
     @Test
-    public void test_failOperation_delegates_to_completeOperation() {
-        // failOperation must delegate to completeOperation
-        final AtomicBoolean completeCalled = new AtomicBoolean(false);
-        final AtomicReference<String> passedName = new AtomicReference<>();
-        final CoordinatorHelper helper = new CoordinatorHelper() {
-            @Override
-            public void completeOperation(final String operationName) {
-                completeCalled.set(true);
-                passedName.set(operationName);
-            }
-        };
-
-        helper.failOperation("test_op");
-        assertTrue(completeCalled.get());
-        assertEquals("test_op", passedName.get());
-    }
-
-    @Test
-    public void test_failOperation_delegates_to_completeOperation_differentNames() {
-        // Verify the operation name is passed through correctly
-        final List<String> calledWith = new ArrayList<>();
-        final CoordinatorHelper helper = new CoordinatorHelper() {
-            @Override
-            public void completeOperation(final String operationName) {
-                calledWith.add(operationName);
-            }
-        };
-
-        helper.failOperation("reindex");
-        helper.failOperation("reload_doc_index");
-        helper.failOperation("clear_crawler_index");
-        assertEquals(3, calledWith.size());
-        assertEquals("reindex", calledWith.get(0));
-        assertEquals("reload_doc_index", calledWith.get(1));
-        assertEquals("clear_crawler_index", calledWith.get(2));
-    }
-
-    @Test
     public void test_completeOperation_noThrow_whenNoOpenSearch() {
         // completeOperation must not throw even when OpenSearch is unavailable
         final CoordinatorHelper helper = new CoordinatorHelper() {
@@ -987,219 +1086,237 @@ public class CoordinatorHelperTest extends UnitFessTestCase {
         assertEquals(2, callCount.get());
     }
 
-    @Test
-    public void test_failThenComplete_safe() {
-        // Simulate failOperation followed by completeOperation (the unified pattern)
-        final AtomicInteger completeCount = new AtomicInteger(0);
-        final CoordinatorHelper helper = new CoordinatorHelper() {
-            @Override
-            public void completeOperation(final String operationName) {
-                completeCount.incrementAndGet();
-                // No-op: simulate successful release or already-released
-            }
-        };
+    // ===================================================================================
+    //                                                         fetchNewEvents
+    //                                                         ================
 
-        helper.failOperation("reindex"); // calls completeOperation internally
-        helper.completeOperation("reindex"); // second call from finally block
-        assertEquals(2, completeCount.get()); // Both calls should succeed
+    @Test
+    public void test_fetchNewEvents_parsesEventsCorrectly() {
+        setupMockFessConfig();
+        final String searchResponse =
+                "{\"hits\":{\"hits\":[" + "{\"_source\":{\"type\":\"event\",\"name\":\"config_updated\",\"instanceId\":\"node2@host2\","
+                        + "\"targetInstanceId\":\"*\",\"createdTime\":5000,\"data\":\"web_config\"}},"
+                        + "{\"_source\":{\"type\":\"event\",\"name\":\"dict_updated\",\"instanceId\":\"node3@host3\","
+                        + "\"targetInstanceId\":\"node1@host1\",\"createdTime\":6000}}" + "]}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, searchResponse));
+        setLastEventCheckTime(helper, 4000L);
+
+        final List<EventInfo> events = helper.fetchNewEvents();
+
+        assertEquals(2, events.size());
+        assertEquals("config_updated", events.get(0).name);
+        assertEquals("node2@host2", events.get(0).instanceId);
+        assertEquals("*", events.get(0).targetInstanceId);
+        assertEquals(5000L, events.get(0).createdTime);
+        assertEquals("web_config", events.get(0).data);
+        assertEquals("dict_updated", events.get(1).name);
+        assertEquals("node3@host3", events.get(1).instanceId);
+        assertEquals(6000L, events.get(1).createdTime);
+    }
+
+    @Test
+    public void test_fetchNewEvents_updatesLastEventCheckTime() {
+        setupMockFessConfig();
+        final String searchResponse = "{\"hits\":{\"hits\":[" + "{\"_source\":{\"type\":\"event\",\"name\":\"e1\",\"instanceId\":\"node2\","
+                + "\"targetInstanceId\":\"*\",\"createdTime\":5000}},"
+                + "{\"_source\":{\"type\":\"event\",\"name\":\"e2\",\"instanceId\":\"node3\","
+                + "\"targetInstanceId\":\"*\",\"createdTime\":7000}},"
+                + "{\"_source\":{\"type\":\"event\",\"name\":\"e3\",\"instanceId\":\"node4\","
+                + "\"targetInstanceId\":\"*\",\"createdTime\":6000}}" + "]}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, searchResponse));
+        setLastEventCheckTime(helper, 4000L);
+
+        helper.fetchNewEvents();
+
+        // lastEventCheckTime should be max(createdTime) + 1 = 7001
+        assertEquals(7001L, getLastEventCheckTime(helper));
+    }
+
+    @Test
+    public void test_fetchNewEvents_emptyResponse() {
+        setupMockFessConfig();
+        final String searchResponse = "{\"hits\":{\"hits\":[]}}";
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(200, searchResponse));
+        setLastEventCheckTime(helper, 4000L);
+
+        final List<EventInfo> events = helper.fetchNewEvents();
+
+        assertTrue(events.isEmpty());
+        assertEquals(4000L, getLastEventCheckTime(helper));
     }
 
     // ===================================================================================
-    //                                                         Event Time Tracking
-    //                                                         =====================
+    //                                                     Config Integration via Methods
+    //                                                     ==============================
 
     @Test
-    public void test_fetchNewEvents_lastEventCheckTime_advancement() {
-        // Verify that lastEventCheckTime is updated to createdTime + 1 to avoid same-ms event loss
-        // We test this through the dispatchEvent flow by simulating events
+    public void test_sendHeartbeat_usesConfigTtl() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(200, "{}"));
 
-        final long baseTime = 5000L;
+        final long before = System.currentTimeMillis();
+        helper.sendHeartbeat();
+        final long after = System.currentTimeMillis();
+
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        final long createdTime = ((Number) body.get("createdTime")).longValue();
+        final long expiredTime = ((Number) body.get("expiredTime")).longValue();
+        assertTrue(createdTime >= before);
+        assertTrue(createdTime <= after);
+        // heartbeat TTL = 180000
+        assertEquals(180000L, expiredTime - createdTime);
+    }
+
+    @Test
+    public void test_publishEvent_usesConfigTtl() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(201, "{}"));
+
+        helper.publishEvent("config_updated", "web_config");
+
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        final long createdTime = ((Number) body.get("createdTime")).longValue();
+        final long expiredTime = ((Number) body.get("expiredTime")).longValue();
+        // event TTL = 600000
+        assertEquals(600000L, expiredTime - createdTime);
+    }
+
+    @Test
+    public void test_tryStartOperation_usesConfigTtl() {
+        setupMockFessConfig();
+        final AtomicReference<String> capturedBody = new AtomicReference<>();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, capturedBody, createMockResponse(201, "{}"));
+
+        helper.tryStartOperation("reindex", "fess");
+
+        assertNotNull(capturedBody.get());
+        final Map<String, Object> body = coordinatorHelper.parseJson(capturedBody.get());
+        final long createdTime = ((Number) body.get("createdTime")).longValue();
+        final long expiredTime = ((Number) body.get("expiredTime")).longValue();
+        // operation TTL = 7200000
+        assertEquals(7200000L, expiredTime - createdTime);
+    }
+
+    @Test
+    public void test_getIndexName_emptyPrefix() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getIndexConfigIndex() {
+                return "fess_config";
+            }
+        });
+        // Verify that the index name pattern uses config prefix correctly
+        final String indexName = coordinatorHelper.getIndexName();
+        assertTrue(indexName.endsWith(".coordinator"));
+        assertTrue(indexName.startsWith("fess_config"));
+    }
+
+    // ===================================================================================
+    //                                                   completeOperation Ownership
+    //                                                   =============================
+
+    @Test
+    public void test_completeOperation_ownInstance_deletesDoc() {
+        setupMockFessConfig();
+        final String getResponse = "{\"found\":true,\"_seq_no\":5,\"_primary_term\":1,"
+                + "\"_source\":{\"type\":\"operation\",\"name\":\"reindex\"," + "\"instanceId\":\"node1@host1\",\"status\":\"running\"}}";
+        final AtomicBoolean deleteCalled = new AtomicBoolean(false);
+
+        final CurlHelper mockCurlHelper = new CurlHelper() {
+            @Override
+            public CurlRequest get(final String path) {
+                return new CurlRequest(org.codelibs.curl.Curl.Method.GET, "http://localhost:9200") {
+                    @Override
+                    public CurlResponse execute() {
+                        return createMockResponse(200, getResponse);
+                    }
+                };
+            }
+
+            @Override
+            public CurlRequest delete(final String path) {
+                deleteCalled.set(true);
+                return new CurlRequest(org.codelibs.curl.Curl.Method.DELETE, "http://localhost:9200") {
+                    @Override
+                    public CurlResponse execute() {
+                        return createMockResponse(200, "{\"result\":\"deleted\"}");
+                    }
+                };
+            }
+        };
+        ComponentUtil.register(mockCurlHelper, "curlHelper");
+
         final CoordinatorHelper helper = new CoordinatorHelper();
-
-        // Simulate parsing events and updating lastEventCheckTime
-        // The logic in fetchNewEvents: if (info.createdTime >= lastEventCheckTime) { lastEventCheckTime = info.createdTime + 1; }
-        long lastCheck = baseTime;
-        final long eventTime1 = baseTime + 100;
-        if (eventTime1 >= lastCheck) {
-            lastCheck = eventTime1 + 1;
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("instanceId");
+            field.setAccessible(true);
+            field.set(helper, "node1@host1");
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
-        assertEquals(baseTime + 101, lastCheck);
 
-        // Same millisecond event should also advance
-        final long eventTime2 = eventTime1; // same ms
-        if (eventTime2 >= lastCheck) {
-            lastCheck = eventTime2 + 1; // would not trigger because eventTime2 < lastCheck
-        }
-        assertEquals(baseTime + 101, lastCheck); // unchanged because eventTime2 < lastCheck
-
-        // Later event should advance
-        final long eventTime3 = baseTime + 200;
-        if (eventTime3 >= lastCheck) {
-            lastCheck = eventTime3 + 1;
-        }
-        assertEquals(baseTime + 201, lastCheck);
+        helper.completeOperation("reindex");
+        assertTrue(deleteCalled.get());
     }
 
     @Test
-    public void test_fetchNewEvents_lastEventCheckTime_sameMillis_noLoss() {
-        // The +1 offset ensures events at the same millisecond are not lost on next poll
-        // gt(5000) matches events at 5001+; with old logic (no +1), gt(5000) would miss events at 5000
-        // with new logic, lastEventCheckTime = 5000 + 1 = 5001, so gt(5001) correctly skips 5000 and 5001
-        final long eventCreatedTime = 5000L;
-        final long updatedCheckTime = eventCreatedTime + 1;
-        assertEquals(5001L, updatedCheckTime);
+    public void test_completeOperation_otherInstance_doesNotDelete() {
+        setupMockFessConfig();
+        final String getResponse = "{\"found\":true,\"_seq_no\":5,\"_primary_term\":1,"
+                + "\"_source\":{\"type\":\"operation\",\"name\":\"reindex\"," + "\"instanceId\":\"node2@host2\",\"status\":\"running\"}}";
+        final AtomicBoolean deleteCalled = new AtomicBoolean(false);
 
-        // The query uses "gt" (greater than), so events with createdTime > 5001 will be fetched
-        // Events at 5000 (already processed) and 5001 (edge case) are excluded
-        assertTrue(5002L > updatedCheckTime);
-        assertFalse(5001L > updatedCheckTime);
-        assertFalse(5000L > updatedCheckTime);
-    }
-
-    @Test
-    public void test_fetchNewEvents_multipleEvents_lastOneWins() {
-        // When multiple events are processed in one batch, the latest createdTime + 1 should be used
-        long lastCheck = 1000L;
-        final long[] eventTimes = { 2000L, 3000L, 2500L }; // unsorted by time
-        for (final long eventTime : eventTimes) {
-            if (eventTime >= lastCheck) {
-                lastCheck = eventTime + 1;
-            }
-        }
-        // 3000 is the max, so lastCheck = 3001
-        assertEquals(3001L, lastCheck);
-    }
-
-    // ===================================================================================
-    //                                                         FessConfig Integration
-    //                                                         ========================
-
-    @Test
-    public void test_coordinatorConfig_constants() {
-        assertEquals("coordinator.poll.interval", FessConfig.COORDINATOR_POLL_INTERVAL);
-        assertEquals("coordinator.heartbeat.ttl", FessConfig.COORDINATOR_HEARTBEAT_TTL);
-        assertEquals("coordinator.operation.ttl", FessConfig.COORDINATOR_OPERATION_TTL);
-        assertEquals("coordinator.operation.retry", FessConfig.COORDINATOR_OPERATION_RETRY);
-        assertEquals("coordinator.event.ttl", FessConfig.COORDINATOR_EVENT_TTL);
-    }
-
-    @Test
-    public void test_coordinatorConfig_typedAccessors() {
-        // Verify typed accessors return correct values via overriding SimpleImpl
-        final FessConfig config = new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
+        final CurlHelper mockCurlHelper = new CurlHelper() {
             @Override
-            public Integer getCoordinatorPollIntervalAsInteger() {
-                return 60;
+            public CurlRequest get(final String path) {
+                return new CurlRequest(org.codelibs.curl.Curl.Method.GET, "http://localhost:9200") {
+                    @Override
+                    public CurlResponse execute() {
+                        return createMockResponse(200, getResponse);
+                    }
+                };
             }
 
             @Override
-            public Integer getCoordinatorHeartbeatTtlAsInteger() {
-                return 180000;
-            }
-
-            @Override
-            public Integer getCoordinatorOperationTtlAsInteger() {
-                return 7200000;
-            }
-
-            @Override
-            public Integer getCoordinatorOperationRetryAsInteger() {
-                return 3;
-            }
-
-            @Override
-            public Integer getCoordinatorEventTtlAsInteger() {
-                return 600000;
+            public CurlRequest delete(final String path) {
+                deleteCalled.set(true);
+                return new CurlRequest(org.codelibs.curl.Curl.Method.DELETE, "http://localhost:9200") {
+                    @Override
+                    public CurlResponse execute() {
+                        return createMockResponse(200, "{}");
+                    }
+                };
             }
         };
-        assertEquals(Integer.valueOf(60), config.getCoordinatorPollIntervalAsInteger());
-        assertEquals(Integer.valueOf(180000), config.getCoordinatorHeartbeatTtlAsInteger());
-        assertEquals(Integer.valueOf(7200000), config.getCoordinatorOperationTtlAsInteger());
-        assertEquals(Integer.valueOf(3), config.getCoordinatorOperationRetryAsInteger());
-        assertEquals(Integer.valueOf(600000), config.getCoordinatorEventTtlAsInteger());
+        ComponentUtil.register(mockCurlHelper, "curlHelper");
+
+        final CoordinatorHelper helper = new CoordinatorHelper();
+        try {
+            final Field field = CoordinatorHelper.class.getDeclaredField("instanceId");
+            field.setAccessible(true);
+            field.set(helper, "node1@host1");
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        helper.completeOperation("reindex");
+        // Should NOT delete because owner is node2@host2, not node1@host1
+        assertFalse(deleteCalled.get());
     }
 
     @Test
-    public void test_coordinatorOperationRetry_customValue() {
-        final FessConfig config = new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
+    public void test_completeOperation_notFound() {
+        setupMockFessConfig();
+        final CoordinatorHelper helper = createCapturingHelper("node1@host1", null, null, createMockResponse(404, "{}"));
 
-            @Override
-            public Integer getCoordinatorOperationRetryAsInteger() {
-                return 10;
-            }
-        };
-        assertEquals(Integer.valueOf(10), config.getCoordinatorOperationRetryAsInteger());
-    }
-
-    @Test
-    public void test_coordinatorOperationRetry_zeroValue() {
-        final FessConfig config = new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Integer getCoordinatorOperationRetryAsInteger() {
-                return 0;
-            }
-        };
-        assertEquals(Integer.valueOf(0), config.getCoordinatorOperationRetryAsInteger());
-    }
-
-    // ===================================================================================
-    //                                                   Coordinator Mapping (no createdBy)
-    //                                                   ==================================
-
-    @Test
-    public void test_coordinatorDocumentBody_noCreatedBy() {
-        // Verify operation document does NOT include createdBy field (removed from mapping)
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "operation");
-        body.put("name", "reindex");
-        body.put("instanceId", "node1@host1");
-        body.put("hostname", "host1");
-        body.put("status", "running");
-        body.put("createdTime", System.currentTimeMillis());
-        body.put("expiredTime", System.currentTimeMillis() + 7200000L);
-        // createdBy is intentionally NOT included (removed from mapping)
-
-        final String json = coordinatorHelper.toJson(body);
-        assertFalse(json.contains("createdBy"));
-
-        final Map<String, Object> parsed = coordinatorHelper.parseJson(json);
-        assertNull(parsed.get("createdBy"));
-    }
-
-    @Test
-    public void test_heartbeatDocumentBody_noCreatedBy() {
-        // Verify heartbeat document does NOT include createdBy field
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "heartbeat");
-        body.put("instanceId", "node1@host1");
-        body.put("hostname", "host1");
-        body.put("name", "node1");
-        body.put("status", "active");
-        body.put("createdTime", System.currentTimeMillis());
-        body.put("expiredTime", System.currentTimeMillis() + 180000L);
-
-        final String json = coordinatorHelper.toJson(body);
-        assertFalse(json.contains("createdBy"));
-    }
-
-    @Test
-    public void test_eventDocumentBody_noCreatedBy() {
-        // Verify event document does NOT include createdBy field
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("type", "event");
-        body.put("name", "config_updated");
-        body.put("instanceId", "node1@host1");
-        body.put("targetInstanceId", "*");
-        body.put("createdTime", System.currentTimeMillis());
-        body.put("expiredTime", System.currentTimeMillis() + 600000L);
-
-        final String json = coordinatorHelper.toJson(body);
-        assertFalse(json.contains("createdBy"));
+        // Should complete safely without throwing
+        helper.completeOperation("nonexistent_op");
     }
 
     // ===================================================================================

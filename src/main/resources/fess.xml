@@ -12,8 +12,6 @@
 
 	<component name="curlHelper" class="org.codelibs.fess.helper.CurlHelper">
 	</component>
-	<component name="coordinatorHelper" class="org.codelibs.fess.helper.CoordinatorHelper">
-	</component>
 	<component name="languageHelper" class="org.codelibs.fess.helper.LanguageHelper">
 		<property name="detector">
 			<component class="org.apache.tika.langdetect.optimaize.OptimaizeLangDetector">

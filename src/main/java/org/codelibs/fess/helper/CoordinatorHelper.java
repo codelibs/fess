@@ -394,15 +394,6 @@ public class CoordinatorHelper {
     }
 
     /**
-     * Releases the operation lock on failure. Delegates to {@link #completeOperation(String)}.
-     *
-     * @param operationName the operation name whose lock should be released.
-     */
-    public void failOperation(final String operationName) {
-        completeOperation(operationName);
-    }
-
-    /**
      * Checks whether the specified operation is currently running (lock held by an active instance).
      *
      * @param operationName the operation name to check.
