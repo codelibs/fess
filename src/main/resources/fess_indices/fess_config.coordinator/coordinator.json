@@ -1,0 +1,32 @@
+{
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "instanceId": {
+        "type": "keyword"
+      },
+      "hostname": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "targetInstanceId": {
+        "type": "keyword"
+      },
+      "data": {
+        "type": "text",
+        "index": false
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "expiredTime": {
+        "type": "long"
+      }
+    }
+}

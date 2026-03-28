@@ -39,6 +39,7 @@ import org.codelibs.curl.CurlResponse;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.helper.CoordinatorHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl;
 import org.codelibs.fess.opensearch.client.SearchEngineClient;
 import org.codelibs.fess.util.ComponentUtil;
@@ -155,17 +156,33 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse reloadDocIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        searchEngineClient.flushConfigFiles(() -> {
-            final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
-            searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
-                logger.info("Closing index: {}", docIndex);
-                searchEngineClient.admin()
-                        .indices()
-                        .prepareOpen(docIndex)
-                        .execute(ActionListener.wrap(res2 -> logger.info("Opened index: {}", docIndex),
-                                e -> logger.warn("Failed to open index: {}", docIndex, e)));
-            }, e -> logger.warn("Failed to close index: {}", docIndex, e)));
-        });
+        final CoordinatorHelper coordinator = ComponentUtil.getCoordinatorHelper();
+        if (!coordinator.tryStartOperation("reload_doc_index")) {
+            saveError(messages -> messages.addErrorsOperationAlreadyRunning(GLOBAL,
+                    coordinator.getOperationInfo("reload_doc_index").map(o -> o.hostname).orElse("unknown")));
+            return redirect(getClass());
+        }
+        try {
+            searchEngineClient.flushConfigFiles(() -> {
+                final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+                searchEngineClient.admin().indices().prepareClose(docIndex).execute(ActionListener.wrap(res -> {
+                    logger.info("Closing index: {}", docIndex);
+                    searchEngineClient.admin().indices().prepareOpen(docIndex).execute(ActionListener.wrap(res2 -> {
+                        logger.info("Opened index: {}", docIndex);
+                        coordinator.completeOperation("reload_doc_index");
+                    }, e -> {
+                        logger.warn("Failed to open index: {}", docIndex, e);
+                        coordinator.completeOperation("reload_doc_index");
+                    }));
+                }, e -> {
+                    logger.warn("Failed to close index: {}", docIndex, e);
+                    coordinator.completeOperation("reload_doc_index");
+                }));
+            });
+        } catch (final Exception e) {
+            coordinator.completeOperation("reload_doc_index");
+            throw e;
+        }
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
@@ -181,14 +198,30 @@ public class AdminMaintenanceAction extends FessAdminAction {
     public HtmlResponse clearCrawlerIndex(final ActionForm form) {
         validate(form, messages -> {}, this::asIndexHtml);
         verifyToken(this::asIndexHtml);
-        searchEngineClient.admin()
-                .indices()
-                .prepareDelete(//
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
-                        fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
-                .execute(ActionListener.wrap(res -> logger.info("Deleted .crawler indices."),
-                        e -> logger.warn("Failed to delete .crawler.* indices.", e)));
+        final CoordinatorHelper coordinator = ComponentUtil.getCoordinatorHelper();
+        if (!coordinator.tryStartOperation("clear_crawler_index")) {
+            saveError(messages -> messages.addErrorsOperationAlreadyRunning(GLOBAL,
+                    coordinator.getOperationInfo("clear_crawler_index").map(o -> o.hostname).orElse("unknown")));
+            return redirect(getClass());
+        }
+        try {
+            searchEngineClient.admin()
+                    .indices()
+                    .prepareDelete(//
+                            fessConfig.getIndexDocumentCrawlerIndex() + ".queue", //
+                            fessConfig.getIndexDocumentCrawlerIndex() + ".data", //
+                            fessConfig.getIndexDocumentCrawlerIndex() + ".filter")
+                    .execute(ActionListener.wrap(res -> {
+                        logger.info("Deleted .crawler indices.");
+                        coordinator.completeOperation("clear_crawler_index");
+                    }, e -> {
+                        logger.warn("Failed to delete .crawler.* indices.", e);
+                        coordinator.completeOperation("clear_crawler_index");
+                    }));
+        } catch (final Exception e) {
+            coordinator.completeOperation("clear_crawler_index");
+            throw e;
+        }
         saveInfo(messages -> messages.addSuccessStartedDataUpdate(GLOBAL));
         return redirect(getClass());
     }
@@ -435,6 +468,13 @@ public class AdminMaintenanceAction extends FessAdminAction {
             return redirect(getClass());
         }
 
+        final CoordinatorHelper coordinator = ComponentUtil.getCoordinatorHelper();
+        if (!coordinator.tryStartOperation("reindex_config")) {
+            saveError(messages -> messages.addErrorsOperationAlreadyRunning(GLOBAL,
+                    coordinator.getOperationInfo("reindex_config").map(o -> o.hostname).orElse("unknown")));
+            return redirect(getClass());
+        }
+
         new Thread(() -> {
             try {
                 if (!searchEngineClient.reindexConfigIndices(loadBulkData, targetPrefixes)) {
@@ -442,6 +482,8 @@ public class AdminMaintenanceAction extends FessAdminAction {
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to rebuild config indices", e);
+            } finally {
+                coordinator.completeOperation("reindex_config");
             }
         }, "rebuild-config-indices").start();
 
@@ -460,19 +502,43 @@ public class AdminMaintenanceAction extends FessAdminAction {
      */
     protected boolean startReindex(final boolean replaceAliases, final boolean resetDictionaries, final String numberOfShards,
             final String autoExpandReplicas) {
+        final CoordinatorHelper coordinator = ComponentUtil.getCoordinatorHelper();
+        if (!coordinator.tryStartOperation("reindex")) {
+            saveError(messages -> messages.addErrorsOperationAlreadyRunning(GLOBAL,
+                    coordinator.getOperationInfo("reindex").map(o -> o.hostname).orElse("unknown")));
+            return false;
+        }
+
         final String docIndex = "fess";
         final String fromIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String toIndex = docIndex + "." + new SimpleDateFormat(Constants.DOCUMENT_INDEX_SUFFIX_PATTERN).format(new Date());
         if (searchEngineClient.createIndex(docIndex, toIndex, numberOfShards, autoExpandReplicas, resetDictionaries)) {
-            searchEngineClient.admin().cluster().prepareHealth(toIndex).setWaitForYellowStatus().execute(ActionListener.wrap(response -> {
-                searchEngineClient.addMapping(docIndex, "doc", toIndex);
-                if (searchEngineClient.copyDocIndex(fromIndex, toIndex, replaceAliases) && replaceAliases
-                        && !searchEngineClient.updateAlias(toIndex)) {
-                    logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
-                }
-            }, e -> logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e)));
+            try {
+                searchEngineClient.admin()
+                        .cluster()
+                        .prepareHealth(toIndex)
+                        .setWaitForYellowStatus()
+                        .execute(ActionListener.wrap(response -> {
+                            try {
+                                searchEngineClient.addMapping(docIndex, "doc", toIndex);
+                                if (searchEngineClient.copyDocIndex(fromIndex, toIndex, replaceAliases) && replaceAliases
+                                        && !searchEngineClient.updateAlias(toIndex)) {
+                                    logger.warn("Failed to update aliases for {} and {}", fromIndex, toIndex);
+                                }
+                            } finally {
+                                coordinator.completeOperation("reindex");
+                            }
+                        }, e -> {
+                            coordinator.completeOperation("reindex");
+                            logger.warn("Failed to reindex from {} to {}", fromIndex, toIndex, e);
+                        }));
+            } catch (final Exception e) {
+                coordinator.completeOperation("reindex");
+                throw e;
+            }
             return true;
         }
+        coordinator.completeOperation("reindex");
         saveError(messages -> messages.addErrorsFailedToReindex(GLOBAL, fromIndex, toIndex));
         return false;
     }
