@@ -23,7 +23,7 @@
 		</postConstruct>
 	</component>
 
-	<component name="sitemapsRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
+	<component name="sitemapsRule" class="org.codelibs.fess.crawler.rule.impl.SitemapsRule" >
 		<property name="ruleId">"sitemapsRule"</property>
 		<property name="responseProcessor">
 			<component class="org.codelibs.fess.crawler.processor.impl.SitemapsResponseProcessor">
