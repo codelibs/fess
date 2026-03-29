@@ -280,6 +280,147 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
         processor.close();
     }
 
+    // ===== toFloat tests =====
+
+    @Test
+    public void test_toFloat_withFloat() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(1.5f, processor.toFloat(Float.valueOf(1.5f)));
+            assertEquals(0.0f, processor.toFloat(Float.valueOf(0.0f)));
+            assertEquals(-1.0f, processor.toFloat(Float.valueOf(-1.0f)));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withDouble() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(1.5f, processor.toFloat(Double.valueOf(1.5)));
+            assertEquals(0.0f, processor.toFloat(Double.valueOf(0.0)));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withInteger() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(1.0f, processor.toFloat(Integer.valueOf(1)));
+            assertEquals(0.0f, processor.toFloat(Integer.valueOf(0)));
+            assertEquals(42.0f, processor.toFloat(Integer.valueOf(42)));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withLong() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(100.0f, processor.toFloat(Long.valueOf(100L)));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withValidString() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(1.5f, processor.toFloat("1.5"));
+            assertEquals(0.0f, processor.toFloat("0.0"));
+            assertEquals(-1.0f, processor.toFloat("-1.0"));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withInvalidString() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(0.0f, processor.toFloat("not_a_number"));
+            assertEquals(0.0f, processor.toFloat(""));
+            assertEquals(0.0f, processor.toFloat("abc123"));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withNull() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(0.0f, processor.toFloat(null));
+        }
+    }
+
+    @Test
+    public void test_toFloat_withUnsupportedType() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            assertEquals(0.0f, processor.toFloat(Boolean.TRUE));
+            assertEquals(0.0f, processor.toFloat(new Object()));
+        }
+    }
+
+    // ===== extractList tests =====
+
+    @Test
+    public void test_extractList_emptyList() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> result = processor.extractList(List.of(), 10, 0);
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Test
+    public void test_extractList_startPositionBeyondSize() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs = List.of(Map.of("id", "1"), Map.of("id", "2"), Map.of("id", "3"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 10, 100);
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Test
+    public void test_extractList_startPositionEqualsSize() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs = List.of(Map.of("id", "1"), Map.of("id", "2"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 10, 2);
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Test
+    public void test_extractList_normalPagination() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs =
+                    List.of(Map.of("id", "0"), Map.of("id", "1"), Map.of("id", "2"), Map.of("id", "3"), Map.of("id", "4"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 2, 0);
+            assertEquals(2, result.size());
+            assertEquals("0", result.get(0).get("id"));
+            assertEquals("1", result.get(1).get("id"));
+        }
+    }
+
+    @Test
+    public void test_extractList_secondPage() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs =
+                    List.of(Map.of("id", "0"), Map.of("id", "1"), Map.of("id", "2"), Map.of("id", "3"), Map.of("id", "4"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 2, 2);
+            assertEquals(2, result.size());
+            assertEquals("2", result.get(0).get("id"));
+            assertEquals("3", result.get(1).get("id"));
+        }
+    }
+
+    @Test
+    public void test_extractList_lastPagePartial() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs =
+                    List.of(Map.of("id", "0"), Map.of("id", "1"), Map.of("id", "2"), Map.of("id", "3"), Map.of("id", "4"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 3, 3);
+            assertEquals(2, result.size());
+            assertEquals("3", result.get(0).get("id"));
+            assertEquals("4", result.get(1).get("id"));
+        }
+    }
+
+    @Test
+    public void test_extractList_pageSizeExceedsRemaining() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs = List.of(Map.of("id", "0"), Map.of("id", "1"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 100, 0);
+            assertEquals(2, result.size());
+        }
+    }
+
     /**
      * Test searcher that returns configurable number of documents.
      */

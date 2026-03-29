@@ -178,6 +178,9 @@ public class RankFusionProcessor implements AutoCloseable {
     public List<Map<String, Object>> search(final String query, final SearchRequestParams params,
             final OptionalThing<FessUserBean> userBean) {
         final RankFusionSearcher[] availableSearchers = getAvailableSearchers();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Searching with {} available searchers for query={}", availableSearchers.length, query);
+        }
         if (availableSearchers.length == 0) {
             logger.warn("No searchers available for query: {}", query);
             return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
@@ -235,6 +238,10 @@ public class RankFusionProcessor implements AutoCloseable {
         final int pageSize = params.getPageSize();
         final int startPosition = params.getStartPosition();
         if (startPosition * 2 >= windowSize) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deep pagination detected: startPosition={}, windowSize={}, falling back to main searcher", startPosition,
+                        windowSize);
+            }
             int offset = params.getOffset();
             if (offset < 0) {
                 offset = 0;
@@ -264,15 +271,9 @@ public class RankFusionProcessor implements AutoCloseable {
         final OptionalThing<HttpServletResponse> responseOpt = LaResponseUtil.getOptionalResponse();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int rankConstant = fessConfig.getRankFusionRankConstantAsInteger();
-        // Guard against division by zero (should not happen due to caller checks, but defensive)
-        if (searchers.length == 0) {
-            logger.warn("searchWithMultipleSearchers called with empty searcher array");
-            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
-                    params.getPageSize(), 0);
-        }
         final int size = windowSize / searchers.length;
         if (logger.isDebugEnabled()) {
-            logger.debug("Search parameters: windowSize={}, rankConstant={}", size, rankConstant);
+            logger.debug("Search parameters: windowSize={}, sizePerSearcher={}, rankConstant={}", windowSize, size, rankConstant);
         }
         final List<Future<SearchResult>> resultList = new ArrayList<>();
         for (int i = 0; i < searchers.length; i++) {
@@ -368,6 +369,11 @@ public class RankFusionProcessor implements AutoCloseable {
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Calculated offset: {}, total fused documents: {}", offset, fusedDocs.size());
+            final int logLimit = Math.min(10, fusedDocs.size());
+            for (int i = 0; i < logLimit; i++) {
+                final Map<String, Object> doc = fusedDocs.get(i);
+                logger.debug("Fused rank[{}]: id={}, score={}", i, doc.get(idField), doc.get(scoreField));
+            }
         }
         final SearchResult mainResult = results[0];
         long allRecordCount = mainResult.getAllRecordCount();
@@ -389,13 +395,10 @@ public class RankFusionProcessor implements AutoCloseable {
      */
     protected List<Map<String, Object>> extractList(final List<Map<String, Object>> docs, final int pageSize, final int startPosition) {
         final int size = docs.size();
-        if (size == 0) {
-            return docs; // empty
+        if (size == 0 || startPosition >= size) {
+            return Collections.emptyList();
         }
         int fromIndex = startPosition;
-        if (fromIndex >= size) {
-            fromIndex = size - 1;
-        }
         int toIndex = startPosition + pageSize;
         if (toIndex >= size) {
             toIndex = size;
@@ -464,11 +467,18 @@ public class RankFusionProcessor implements AutoCloseable {
      * @return float representation of the value, or 0.0f if conversion fails
      */
     protected float toFloat(final Object value) {
-        if (value instanceof final Float f) {
-            return f;
+        if (value instanceof final Number n) {
+            return n.floatValue();
         }
         if (value instanceof final String s) {
-            return Float.parseFloat(s);
+            try {
+                return Float.parseFloat(s);
+            } catch (final NumberFormatException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to parse float value: {}", s);
+                }
+                return 0.0f;
+            }
         }
         return 0.0f;
     }
@@ -639,7 +649,7 @@ public class RankFusionProcessor implements AutoCloseable {
      */
     public void register(final RankFusionSearcher searcher) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Registering searcher: {}", searcher.getClass().getSimpleName());
+            logger.debug("Registering searcher: class={}, name={}", searcher.getClass().getSimpleName(), searcher.getName());
         }
         searchers.add(searcher);
         synchronized (this) {
