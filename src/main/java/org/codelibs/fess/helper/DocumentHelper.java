@@ -331,11 +331,12 @@ public class DocumentHelper {
      */
     public String decodeSimilarDocHash(final String hash) {
         if (hash != null && hash.startsWith(SIMILAR_DOC_HASH_PREFIX) && hash.length() > SIMILAR_DOC_HASH_PREFIX.length()) {
-            final byte[] decode = Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length()));
-            try (BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(decode)), Constants.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new GZIPInputStream(
+                            new ByteArrayInputStream(Base64.getUrlDecoder().decode(hash.substring(SIMILAR_DOC_HASH_PREFIX.length())))),
+                    Constants.UTF_8))) {
                 return ReaderUtil.readText(reader);
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to decode similar document hash: hash={}", hash, e);
                 }
