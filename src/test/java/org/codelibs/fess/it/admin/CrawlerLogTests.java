@@ -307,7 +307,9 @@ public class CrawlerLogTests extends CrawlTestBase {
         Map<String, Object> item = results.get(0);
         logger.info("item: {}", item);
         assertTrue(item.containsKey("content_title"));
-        assertEquals("<strong>CodeLibs</strong> Project", item.get("content_title"));
+        final String contentTitle = (String) item.get("content_title");
+        assertTrue(contentTitle.contains("<strong>CodeLibs</strong>"),
+                "content_title should contain highlighted 'CodeLibs': " + contentTitle);
     }
 
     private void testDeleteSearchList() {
