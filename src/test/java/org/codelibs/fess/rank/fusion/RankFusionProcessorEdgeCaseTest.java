@@ -421,6 +421,16 @@ public class RankFusionProcessorEdgeCaseTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_extractList_negativeStartPosition() throws Exception {
+        try (RankFusionProcessor processor = new RankFusionProcessor()) {
+            final List<Map<String, Object>> docs = List.of(Map.of("id", "0"), Map.of("id", "1"));
+            final List<Map<String, Object>> result = processor.extractList(docs, 10, -1);
+            assertEquals(2, result.size());
+            assertEquals("0", result.get(0).get("id"));
+        }
+    }
+
     /**
      * Test searcher that returns configurable number of documents.
      */

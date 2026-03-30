@@ -271,6 +271,11 @@ public class RankFusionProcessor implements AutoCloseable {
         final OptionalThing<HttpServletResponse> responseOpt = LaResponseUtil.getOptionalResponse();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final int rankConstant = fessConfig.getRankFusionRankConstantAsInteger();
+        if (searchers.length == 0) {
+            logger.warn("searchWithMultipleSearchers called with empty searcher array");
+            return createResponseList(Collections.emptyList(), 0, Relation.EQUAL_TO.toString(), 0, false, null, params.getStartPosition(),
+                    params.getPageSize(), 0);
+        }
         final int size = windowSize / searchers.length;
         if (logger.isDebugEnabled()) {
             logger.debug("Search parameters: windowSize={}, sizePerSearcher={}, rankConstant={}", windowSize, size, rankConstant);
@@ -398,8 +403,8 @@ public class RankFusionProcessor implements AutoCloseable {
         if (size == 0 || startPosition >= size) {
             return Collections.emptyList();
         }
-        int fromIndex = startPosition;
-        int toIndex = startPosition + pageSize;
+        int fromIndex = Math.max(0, startPosition);
+        int toIndex = fromIndex + pageSize;
         if (toIndex >= size) {
             toIndex = size;
         }
