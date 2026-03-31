@@ -88,7 +88,9 @@ public class ProcessHelperTest extends UnitFessTestCase {
     @Test
     public void test_startProcess_basicCommand() {
         String sessionId = "test_session";
-        List<String> cmdList = Arrays.asList("echo", "hello");
+        // Use "sleep 10" instead of "echo hello" to keep the process alive long enough
+        // to verify isProcessRunning(). The process is destroyed immediately after assertions.
+        List<String> cmdList = Arrays.asList("sleep", "10");
         Consumer<ProcessBuilder> pbCall = pb -> {
             pb.redirectErrorStream(true);
         };
@@ -101,9 +103,6 @@ public class ProcessHelperTest extends UnitFessTestCase {
 
             Set<String> sessionIds = processHelper.getRunningSessionIdSet();
             assertTrue(sessionIds.contains(sessionId));
-
-            // Wait a bit for the process to complete
-            Thread.sleep(100);
 
             // Clean up
             processHelper.destroyProcess(sessionId);
@@ -264,26 +263,20 @@ public class ProcessHelperTest extends UnitFessTestCase {
     public void test_destroy_allProcesses() {
         String sessionId1 = "test_destroy_all1";
         String sessionId2 = "test_destroy_all2";
-        List<String> cmdList = Arrays.asList("echo", "hello");
+        // Use "sleep 10" to keep processes alive for verification; destroyed immediately after.
+        List<String> cmdList = Arrays.asList("sleep", "10");
         Consumer<ProcessBuilder> pbCall = pb -> {
             pb.redirectErrorStream(true);
         };
 
         try {
-            // Start multiple processes
             processHelper.startProcess(sessionId1, cmdList, pbCall);
             processHelper.startProcess(sessionId2, cmdList, pbCall);
 
             assertTrue(processHelper.isProcessRunning());
 
-            // Wait a bit for the processes to start
-            Thread.sleep(50);
-
             // Destroy all processes
             processHelper.destroy();
-
-            // Wait a bit for destruction to complete
-            Thread.sleep(100);
 
             assertFalse(processHelper.isProcessRunning());
         } catch (Exception e) {
@@ -409,22 +402,23 @@ public class ProcessHelperTest extends UnitFessTestCase {
     @Test
     public void test_processHelper_synchronization() {
         String sessionId = "test_sync";
-        List<String> cmdList = Arrays.asList("echo", "hello");
+        // Use "sleep 10" to keep processes alive for synchronization verification.
+        List<String> cmdList = Arrays.asList("sleep", "10");
         Consumer<ProcessBuilder> pbCall = pb -> {
             pb.redirectErrorStream(true);
         };
 
         try {
-            // Test that multiple calls to startProcess with same sessionId work correctly
+            // Start two processes with the same session ID (second should replace first)
             JobProcess jobProcess1 = processHelper.startProcess(sessionId, cmdList, pbCall);
             JobProcess jobProcess2 = processHelper.startProcess(sessionId, cmdList, pbCall);
 
             assertNotNull(jobProcess1);
             assertNotNull(jobProcess2);
 
-            // Only one process should be running for the session
             assertTrue(processHelper.isProcessRunning(sessionId));
 
+            // Only one process should be registered for the session
             Set<String> sessionIds = processHelper.getRunningSessionIdSet();
             assertEquals(1, sessionIds.size());
             assertTrue(sessionIds.contains(sessionId));
