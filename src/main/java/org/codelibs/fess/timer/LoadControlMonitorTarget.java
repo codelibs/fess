@@ -70,9 +70,9 @@ public class LoadControlMonitorTarget implements TimeoutTarget {
             systemHelper.setSearchEngineCpuPercent((short) 0);
             consecutiveFailures++;
             if (consecutiveFailures <= 3) {
-                logger.warn("Failed to get search engine CPU stats.", e);
+                logger.warn("Failed to get search engine CPU stats: {}", e.getMessage(), e);
             } else if (logger.isDebugEnabled()) {
-                logger.debug("Failed to get search engine CPU stats.", e);
+                logger.debug("Failed to get search engine CPU stats: {}", e.getMessage(), e);
             }
         }
     }
