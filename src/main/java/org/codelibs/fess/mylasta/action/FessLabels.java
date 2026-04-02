@@ -3654,8 +3654,32 @@ public class FessLabels extends UserMessages {
     /** The key of the message: SAML */
     public static final String LABELS_general_menu_saml = "{labels.general_menu_saml}";
 
+    /** The key of the message: IdP Entity ID */
+    public static final String LABELS_saml_idp_entityid = "{labels.saml_idp_entityid}";
+
+    /** The key of the message: IdP SSO URL */
+    public static final String LABELS_saml_idp_single_sign_on_service_url = "{labels.saml_idp_single_sign_on_service_url}";
+
+    /** The key of the message: IdP SLO URL */
+    public static final String LABELS_saml_idp_single_logout_service_url = "{labels.saml_idp_single_logout_service_url}";
+
+    /** The key of the message: IdP X.509 Certificate */
+    public static final String LABELS_saml_idp_x509cert = "{labels.saml_idp_x509cert}";
+
     /** The key of the message: SP Base URL */
     public static final String LABELS_saml_sp_base_url = "{labels.saml_sp_base_url}";
+
+    /** The key of the message: SP Entity ID */
+    public static final String LABELS_saml_sp_entityid = "{labels.saml_sp_entityid}";
+
+    /** The key of the message: SP ACS URL */
+    public static final String LABELS_saml_sp_assertion_consumer_service_url = "{labels.saml_sp_assertion_consumer_service_url}";
+
+    /** The key of the message: SP SLO URL */
+    public static final String LABELS_saml_sp_single_logout_service_url = "{labels.saml_sp_single_logout_service_url}";
+
+    /** The key of the message: SP NameID Format */
+    public static final String LABELS_saml_sp_nameidformat = "{labels.saml_sp_nameidformat}";
 
     /** The key of the message: Group Attribute Name */
     public static final String LABELS_saml_attribute_group_name = "{labels.saml_attribute_group_name}";
@@ -3708,6 +3732,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Exclude Directories */
     public static final String LABELS_spnego_exclude_dirs = "{labels.spnego_exclude_dirs}";
 
+    /** The key of the message: Logger Level */
+    public static final String LABELS_spnego_logger_level = "{labels.spnego_logger_level}";
+
     /** The key of the message: Entra ID */
     public static final String LABELS_general_menu_entraid = "{labels.general_menu_entraid}";
 
@@ -3717,7 +3744,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Client Secret */
     public static final String LABELS_entraid_client_secret = "{labels.entraid_client_secret}";
 
-    /** The key of the message: Tenant */
+    /** The key of the message: Tenant (ID or Domain) */
     public static final String LABELS_entraid_tenant = "{labels.entraid_tenant}";
 
     /** The key of the message: Authority */

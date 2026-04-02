@@ -256,7 +256,15 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("oic.default.roles", form.oicDefaultRoles);
 
         // SAML
+        fessConfig.setSystemProperty("saml.idp.entityid", form.samlIdpEntityid);
+        fessConfig.setSystemProperty("saml.idp.single_sign_on_service.url", form.samlIdpSingleSignOnServiceUrl);
+        fessConfig.setSystemProperty("saml.idp.single_logout_service.url", form.samlIdpSingleLogoutServiceUrl);
+        fessConfig.setSystemProperty("saml.idp.x509cert", form.samlIdpX509cert);
         fessConfig.setSystemProperty("saml.sp.base.url", form.samlSpBaseUrl);
+        fessConfig.setSystemProperty("saml.sp.entityid", form.samlSpEntityid);
+        fessConfig.setSystemProperty("saml.sp.assertion_consumer_service.url", form.samlSpAssertionConsumerServiceUrl);
+        fessConfig.setSystemProperty("saml.sp.single_logout_service.url", form.samlSpSingleLogoutServiceUrl);
+        fessConfig.setSystemProperty("saml.sp.nameidformat", form.samlSpNameidformat);
         fessConfig.setSystemProperty("saml.attribute.group.name", form.samlAttributeGroupName);
         fessConfig.setSystemProperty("saml.attribute.role.name", form.samlAttributeRoleName);
         fessConfig.setSystemProperty("saml.default.groups", form.samlDefaultGroups);
@@ -277,6 +285,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setSystemProperty("spnego.allow.localhost", String.valueOf(isCheckboxEnabled(form.spnegoAllowLocalhost)));
         fessConfig.setSystemProperty("spnego.allow.delegation", String.valueOf(isCheckboxEnabled(form.spnegoAllowDelegation)));
         fessConfig.setSystemProperty("spnego.exclude.dirs", form.spnegoExcludeDirs);
+        fessConfig.setSystemProperty("spnego.logger.level", form.spnegoLoggerLevel);
 
         // Entra ID
         if (form.entraidClientId != null && StringUtil.isNotBlank(form.entraidClientId.replace("*", " "))) {
@@ -389,7 +398,15 @@ public class AdminGeneralAction extends FessAdminAction {
         form.oicDefaultRoles = fessConfig.getSystemProperty("oic.default.roles", StringUtil.EMPTY);
 
         // SAML
+        form.samlIdpEntityid = fessConfig.getSystemProperty("saml.idp.entityid", StringUtil.EMPTY);
+        form.samlIdpSingleSignOnServiceUrl = fessConfig.getSystemProperty("saml.idp.single_sign_on_service.url", StringUtil.EMPTY);
+        form.samlIdpSingleLogoutServiceUrl = fessConfig.getSystemProperty("saml.idp.single_logout_service.url", StringUtil.EMPTY);
+        form.samlIdpX509cert = fessConfig.getSystemProperty("saml.idp.x509cert", StringUtil.EMPTY);
         form.samlSpBaseUrl = fessConfig.getSystemProperty("saml.sp.base.url", "http://localhost:8080");
+        form.samlSpEntityid = fessConfig.getSystemProperty("saml.sp.entityid", StringUtil.EMPTY);
+        form.samlSpAssertionConsumerServiceUrl = fessConfig.getSystemProperty("saml.sp.assertion_consumer_service.url", StringUtil.EMPTY);
+        form.samlSpSingleLogoutServiceUrl = fessConfig.getSystemProperty("saml.sp.single_logout_service.url", StringUtil.EMPTY);
+        form.samlSpNameidformat = fessConfig.getSystemProperty("saml.sp.nameidformat", StringUtil.EMPTY);
         form.samlAttributeGroupName = fessConfig.getSystemProperty("saml.attribute.group.name", "memberOf");
         form.samlAttributeRoleName = fessConfig.getSystemProperty("saml.attribute.role.name", StringUtil.EMPTY);
         form.samlDefaultGroups = fessConfig.getSystemProperty("saml.default.groups", StringUtil.EMPTY);
@@ -420,6 +437,7 @@ public class AdminGeneralAction extends FessAdminAction {
                 Constants.TRUE.equalsIgnoreCase(fessConfig.getSystemProperty("spnego.allow.delegation", Constants.FALSE)) ? Constants.TRUE
                         : Constants.FALSE;
         form.spnegoExcludeDirs = fessConfig.getSystemProperty("spnego.exclude.dirs", StringUtil.EMPTY);
+        form.spnegoLoggerLevel = fessConfig.getSystemProperty("spnego.logger.level", StringUtil.EMPTY);
 
         // Entra ID
         form.entraidClientId = StringUtil.isNotBlank(fessConfig.getSystemProperty("entraid.client.id")) ? DUMMY_PASSWORD : StringUtil.EMPTY;
