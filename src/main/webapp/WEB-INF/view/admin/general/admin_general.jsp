@@ -628,12 +628,92 @@ ${fe:html(true)}
                                     <%-- SAML --%>
                                 <h4><la:message key="labels.general_menu_saml"/></h4>
                                 <div class="form-group row">
+                                    <label for="samlIdpEntityid"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_idp_entityid"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlIdpEntityid"/>
+                                        <la:text styleId="samlIdpEntityid" property="samlIdpEntityid"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlIdpSingleSignOnServiceUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_idp_single_sign_on_service_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlIdpSingleSignOnServiceUrl"/>
+                                        <la:text styleId="samlIdpSingleSignOnServiceUrl" property="samlIdpSingleSignOnServiceUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlIdpSingleLogoutServiceUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_idp_single_logout_service_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlIdpSingleLogoutServiceUrl"/>
+                                        <la:text styleId="samlIdpSingleLogoutServiceUrl" property="samlIdpSingleLogoutServiceUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlIdpX509cert"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_idp_x509cert"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlIdpX509cert"/>
+                                        <la:textarea styleId="samlIdpX509cert" property="samlIdpX509cert"
+                                                     styleClass="form-control" rows="5"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="samlSpBaseUrl"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.saml_sp_base_url"/></label>
                                     <div class="col-sm-9">
                                         <la:errors property="samlSpBaseUrl"/>
                                         <la:text styleId="samlSpBaseUrl" property="samlSpBaseUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlSpEntityid"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_sp_entityid"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlSpEntityid"/>
+                                        <la:text styleId="samlSpEntityid" property="samlSpEntityid"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlSpAssertionConsumerServiceUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_sp_assertion_consumer_service_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlSpAssertionConsumerServiceUrl"/>
+                                        <la:text styleId="samlSpAssertionConsumerServiceUrl" property="samlSpAssertionConsumerServiceUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlSpSingleLogoutServiceUrl"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_sp_single_logout_service_url"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlSpSingleLogoutServiceUrl"/>
+                                        <la:text styleId="samlSpSingleLogoutServiceUrl" property="samlSpSingleLogoutServiceUrl"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="samlSpNameidformat"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.saml_sp_nameidformat"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="samlSpNameidformat"/>
+                                        <la:text styleId="samlSpNameidformat" property="samlSpNameidformat"
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
@@ -814,28 +894,18 @@ ${fe:html(true)}
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label for="spnegoLoggerLevel"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.spnego_logger_level"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="spnegoLoggerLevel"/>
+                                        <la:text styleId="spnegoLoggerLevel" property="spnegoLoggerLevel"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
                                     <%-- Entra ID --%>
                                 <h4><la:message key="labels.general_menu_entraid"/></h4>
-                                <div class="form-group row">
-                                    <label for="entraidClientId"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.entraid_client_id"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="entraidClientId"/>
-                                        <la:password styleId="entraidClientId" property="entraidClientId"
-                                                     styleClass="form-control" autocomplete="new-password"/>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label for="entraidClientSecret"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.entraid_client_secret"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="entraidClientSecret"/>
-                                        <la:password styleId="entraidClientSecret" property="entraidClientSecret"
-                                                     styleClass="form-control" autocomplete="new-password"/>
-                                    </div>
-                                </div>
                                 <div class="form-group row">
                                     <label for="entraidTenant"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
@@ -854,6 +924,26 @@ ${fe:html(true)}
                                         <la:errors property="entraidAuthority"/>
                                         <la:text styleId="entraidAuthority" property="entraidAuthority"
                                                  styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidClientId"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_client_id"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidClientId"/>
+                                        <la:password styleId="entraidClientId" property="entraidClientId"
+                                                     styleClass="form-control" autocomplete="new-password"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="entraidClientSecret"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_client_secret"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidClientSecret"/>
+                                        <la:password styleId="entraidClientSecret" property="entraidClientSecret"
+                                                     styleClass="form-control" autocomplete="new-password"/>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -877,6 +967,16 @@ ${fe:html(true)}
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="entraidPermissionFields"
+                                           class="col-sm-3 text-sm-right col-form-label"><la:message
+                                            key="labels.entraid_permission_fields"/></label>
+                                    <div class="col-sm-9">
+                                        <la:errors property="entraidPermissionFields"/>
+                                        <la:text styleId="entraidPermissionFields" property="entraidPermissionFields"
+                                                 styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="entraidDefaultGroups"
                                            class="col-sm-3 text-sm-right col-form-label"><la:message
                                             key="labels.entraid_default_groups"/></label>
@@ -893,16 +993,6 @@ ${fe:html(true)}
                                     <div class="col-sm-9">
                                         <la:errors property="entraidDefaultRoles"/>
                                         <la:text styleId="entraidDefaultRoles" property="entraidDefaultRoles"
-                                                 styleClass="form-control"/>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label for="entraidPermissionFields"
-                                           class="col-sm-3 text-sm-right col-form-label"><la:message
-                                            key="labels.entraid_permission_fields"/></label>
-                                    <div class="col-sm-9">
-                                        <la:errors property="entraidPermissionFields"/>
-                                        <la:text styleId="entraidPermissionFields" property="entraidPermissionFields"
                                                  styleClass="form-control"/>
                                     </div>
                                 </div>

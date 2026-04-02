@@ -478,9 +478,41 @@ public class EditForm {
     @Size(max = 1000)
     public String oicDefaultRoles;
 
+    /** SAML Identity Provider Entity ID. */
+    @Size(max = 1000)
+    public String samlIdpEntityid;
+
+    /** SAML Identity Provider Single Sign-On Service URL. */
+    @Size(max = 1000)
+    public String samlIdpSingleSignOnServiceUrl;
+
+    /** SAML Identity Provider Single Logout Service URL. */
+    @Size(max = 1000)
+    public String samlIdpSingleLogoutServiceUrl;
+
+    /** SAML Identity Provider X.509 Certificate. */
+    @Size(max = 10000)
+    public String samlIdpX509cert;
+
     /** SAML service provider base URL. */
     @Size(max = 1000)
     public String samlSpBaseUrl;
+
+    /** SAML Service Provider Entity ID. */
+    @Size(max = 1000)
+    public String samlSpEntityid;
+
+    /** SAML Assertion Consumer Service URL. */
+    @Size(max = 1000)
+    public String samlSpAssertionConsumerServiceUrl;
+
+    /** SAML Service Provider Single Logout Service URL. */
+    @Size(max = 1000)
+    public String samlSpSingleLogoutServiceUrl;
+
+    /** SAML Service Provider NameID Format. */
+    @Size(max = 1000)
+    public String samlSpNameidformat;
 
     /** SAML attribute name for group membership. */
     @Size(max = 1000)
@@ -545,6 +577,10 @@ public class EditForm {
     /** SPNEGO directories to exclude from authentication. */
     @Size(max = 1000)
     public String spnegoExcludeDirs;
+
+    /** SPNEGO logger level (0-7, auto-detected if empty). */
+    @Size(max = 10)
+    public String spnegoLoggerLevel;
 
     /** Entra ID application client ID. */
     @Size(max = 1000)
