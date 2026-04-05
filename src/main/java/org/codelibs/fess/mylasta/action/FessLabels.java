@@ -2853,7 +2853,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Credentials Path */
     public static final String LABELS_storage_credentials_path = "{labels.storage_credentials_path}";
 
-    /** The key of the message: AI Mode */
+    /** The key of the message: AI Search */
     public static final String LABELS_general_rag = "{labels.general_rag}";
 
     /** The key of the message: LLM Provider */
@@ -3465,7 +3465,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Update */
     public static final String LABELS_LOGIN_UPDATE = "{labels.login.update}";
 
-    /** The key of the message: AI Search Mode - Fess */
+    /** The key of the message: AI Search - Fess */
     public static final String LABELS_chat_title = "{labels.chat_title}";
 
     /** The key of the message: New Chat */
@@ -3507,7 +3507,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Sources */
     public static final String LABELS_chat_sources = "{labels.chat_sources}";
 
-    /** The key of the message: AI Mode */
+    /** The key of the message: AI Search */
     public static final String LABELS_chat_ai_mode = "{labels.chat_ai_mode}";
 
     /** The key of the message: AI Assistant */
