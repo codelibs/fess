@@ -42,11 +42,15 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
         final long[] crawlingInfoDeletedBeforeTime = { 0 };
         final int[] searchLogDeletedDays = { 0 };
+        final int[] clickLogDeletedDays = { 0 };
+        final int[] favoriteLogDeletedDays = { 0 };
         final int[] jobLogDeletedDays = { 0 };
         final int[] userInfoDeletedDays = { 0 };
         final long[] expectedTime = { 0 };
@@ -65,6 +69,18 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
                 searchLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+                clickLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
+                favoriteLogDeletedDays[0] = days;
             }
         };
 
@@ -131,6 +147,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert all services were called
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
@@ -138,6 +156,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert correct parameters were passed - verify that time passed is greater than 0
         assertTrue(crawlingInfoDeletedBeforeTime[0] > 0);
         assertEquals(30, searchLogDeletedDays[0]);
+        assertEquals(30, clickLogDeletedDays[0]);
+        assertEquals(30, favoriteLogDeletedDays[0]);
         assertEquals(14, jobLogDeletedDays[0]);
         assertEquals(7, userInfoDeletedDays[0]);
 
@@ -151,6 +171,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
@@ -167,6 +189,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -230,11 +262,15 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         // Assert other services were not called
         assertFalse(deleteSearchLogCalled[0]);
+        assertFalse(deleteClickLogCalled[0]);
+        assertFalse(deleteFavoriteLogCalled[0]);
         assertFalse(deleteJobLogCalled[0]);
         assertFalse(deleteUserInfoCalled[0]);
 
         // Assert result contains skip messages
         assertTrue(result.contains("Skipped to purge search logs"));
+        assertTrue(result.contains("Skipped to purge click logs"));
+        assertTrue(result.contains("Skipped to purge favorite logs"));
         assertTrue(result.contains("Skipped to purge job logs"));
         assertTrue(result.contains("Skipped to purge user info logs"));
     }
@@ -244,6 +280,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     public void test_execute_crawlingInfoException() {
         // Setup tracking variables
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
@@ -260,6 +298,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -319,6 +367,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         // Assert other services were still called
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
@@ -333,10 +383,14 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
         final int[] searchLogDeletedDays = { -1 };
+        final int[] clickLogDeletedDays = { -1 };
+        final int[] favoriteLogDeletedDays = { -1 };
         final int[] jobLogDeletedDays = { -1 };
         final int[] userInfoDeletedDays = { -1 };
 
@@ -353,6 +407,18 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
                 searchLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+                clickLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
+                favoriteLogDeletedDays[0] = days;
             }
         };
 
@@ -415,11 +481,15 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert all services were called with zero days
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
 
         assertEquals(0, searchLogDeletedDays[0]);
+        assertEquals(0, clickLogDeletedDays[0]);
+        assertEquals(0, favoriteLogDeletedDays[0]);
         assertEquals(0, jobLogDeletedDays[0]);
         assertEquals(0, userInfoDeletedDays[0]);
 
@@ -450,6 +520,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 throw new RuntimeException("Search error");
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                throw new RuntimeException("Click error");
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                throw new RuntimeException("Favorite error");
             }
         };
 
@@ -510,6 +590,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert all error messages in result
         assertTrue(result.contains("Crawling error"));
         assertTrue(result.contains("Search error"));
+        assertTrue(result.contains("Click error"));
+        assertTrue(result.contains("Favorite error"));
         assertTrue(result.contains("Job error"));
         assertTrue(result.contains("Status error"));
     }
@@ -520,10 +602,14 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
         final int[] searchLogDeletedDays = { -1 };
+        final int[] clickLogDeletedDays = { -1 };
+        final int[] favoriteLogDeletedDays = { -1 };
         final int[] userInfoDeletedDays = { -1 };
 
         // Create mock services
@@ -539,6 +625,18 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
                 searchLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+                clickLogDeletedDays[0] = days;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
+                favoriteLogDeletedDays[0] = days;
             }
         };
 
@@ -600,17 +698,23 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert services were called appropriately
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertFalse(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
 
         // Assert correct days were passed
         assertEquals(10, searchLogDeletedDays[0]);
+        assertEquals(10, clickLogDeletedDays[0]);
+        assertEquals(10, favoriteLogDeletedDays[0]);
         assertEquals(5, userInfoDeletedDays[0]);
 
         // Assert skip message for job logs only
         assertTrue(result.contains("Skipped to purge job logs"));
         assertFalse(result.contains("Skipped to purge search logs"));
+        assertFalse(result.contains("Skipped to purge click logs"));
+        assertFalse(result.contains("Skipped to purge favorite logs"));
         assertFalse(result.contains("Skipped to purge user info logs"));
     }
 
@@ -619,6 +723,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
     public void test_execute_searchLogException() {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
@@ -635,6 +741,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 throw new RuntimeException("Search log deletion failed");
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -694,6 +810,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
 
         // Assert other services were still called
         assertTrue(deleteCrawlingInfoCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
@@ -708,6 +826,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
 
@@ -723,6 +843,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -783,6 +913,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert other services were still called
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
 
@@ -796,6 +928,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] updateJobLogStatusCalled = { false };
 
@@ -811,6 +945,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -871,6 +1015,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert other services were still called
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(updateJobLogStatusCalled[0]);
 
@@ -884,6 +1030,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Setup tracking variables
         final boolean[] deleteCrawlingInfoCalled = { false };
         final boolean[] deleteSearchLogCalled = { false };
+        final boolean[] deleteClickLogCalled = { false };
+        final boolean[] deleteFavoriteLogCalled = { false };
         final boolean[] deleteJobLogCalled = { false };
         final boolean[] deleteUserInfoCalled = { false };
 
@@ -899,6 +1047,16 @@ public class PurgeLogJobTest extends UnitFessTestCase {
             @Override
             public void deleteBefore(int days) {
                 deleteSearchLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteClickLogBefore(int days) {
+                deleteClickLogCalled[0] = true;
+            }
+
+            @Override
+            public void deleteFavoriteLogBefore(int days) {
+                deleteFavoriteLogCalled[0] = true;
             }
         };
 
@@ -959,6 +1117,8 @@ public class PurgeLogJobTest extends UnitFessTestCase {
         // Assert all delete services were called
         assertTrue(deleteCrawlingInfoCalled[0]);
         assertTrue(deleteSearchLogCalled[0]);
+        assertTrue(deleteClickLogCalled[0]);
+        assertTrue(deleteFavoriteLogCalled[0]);
         assertTrue(deleteJobLogCalled[0]);
         assertTrue(deleteUserInfoCalled[0]);
 

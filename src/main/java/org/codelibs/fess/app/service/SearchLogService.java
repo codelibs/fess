@@ -135,6 +135,28 @@ public class SearchLogService {
     }
 
     /**
+     * Deletes click logs older than the specified number of days.
+     *
+     * @param days Number of days to keep (logs older than this will be deleted)
+     */
+    public void deleteClickLogBefore(final int days) {
+        clickLogBhv.queryDelete(cb -> {
+            cb.query().setRequestedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+        });
+    }
+
+    /**
+     * Deletes favorite logs older than the specified number of days.
+     *
+     * @param days Number of days to keep (logs older than this will be deleted)
+     */
+    public void deleteFavoriteLogBefore(final int days) {
+        favoriteLogBhv.queryDelete(cb -> {
+            cb.query().setCreatedAt_LessEqual(systemHelper.getCurrentTimeAsLocalDateTime().minusDays(days));
+        });
+    }
+
+    /**
      * Retrieves a list of search logs based on the specified pager criteria.
      *
      * This method supports various log types including search logs, click logs,

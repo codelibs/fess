@@ -84,6 +84,32 @@ public class PurgeLogJob {
             resultBuf.append(e.getMessage()).append("\n");
         }
 
+        // purge click logs
+        try {
+            final int days = ComponentUtil.getFessConfig().getPurgeSearchLogDay();
+            if (days >= 0) {
+                searchLogService.deleteClickLogBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge click logs.\n");
+            }
+        } catch (final Exception e) {
+            logger.error("Failed to purge click logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
+        // purge favorite logs
+        try {
+            final int days = ComponentUtil.getFessConfig().getPurgeSearchLogDay();
+            if (days >= 0) {
+                searchLogService.deleteFavoriteLogBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge favorite logs.\n");
+            }
+        } catch (final Exception e) {
+            logger.error("Failed to purge favorite logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
         // purge job logs
         try {
             final int days = ComponentUtil.getFessConfig().getPurgeJobLogDay();
