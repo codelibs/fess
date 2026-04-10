@@ -3510,7 +3510,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: AI Search */
     public static final String LABELS_chat_ai_mode = "{labels.chat_ai_mode}";
 
-    /** The key of the message: AI Assistant */
+    /** The key of the message: AI Search Mode */
     public static final String LABELS_chat_status_ready = "{labels.chat_status_ready}";
 
     /** The key of the message: Processing */
