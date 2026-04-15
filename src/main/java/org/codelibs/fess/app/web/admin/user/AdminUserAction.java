@@ -386,7 +386,7 @@ public class AdminUserAction extends FessAdminAction {
             copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
             if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
-                final String encodedPassword = ComponentUtil.getPasswordManager().encode(form.password);
+                final String encodedPassword = ComponentUtil.getPasswordHelper().encode(form.password);
                 entity.setOriginalPassword(form.password);
                 entity.setPassword(encodedPassword);
             }

@@ -1328,7 +1328,7 @@ public class SearchEngineClient implements Client {
                                     String source = line;
                                     if (userIndex.equals(configIndex)) {
                                         source = source.replace("${fess.index.initial_password}",
-                                                ComponentUtil.getPasswordManager().encode(fessConfig.getIndexUserInitialPassword()));
+                                                ComponentUtil.getPasswordHelper().encode(fessConfig.getIndexUserInitialPassword()));
                                     }
                                     final IndexRequestBuilder requestBuilder = client.prepareIndex()
                                             .setIndex(configIndex)

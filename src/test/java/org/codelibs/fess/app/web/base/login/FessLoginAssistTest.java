@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.entity.FessUser;
-import org.codelibs.fess.helper.PasswordManager;
+import org.codelibs.fess.helper.PasswordHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
@@ -42,11 +42,11 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
     private FessLoginAssist loginAssist;
 
-    private PasswordManager passwordManager;
+    private PasswordHelper passwordHelper;
 
     private TestFessConfig testConfig;
 
-    private CountingPasswordManager countingPm;
+    private CountingPasswordHelper countingPm;
 
     @Override
     protected void setUp(final TestInfo testInfo) throws Exception {
@@ -54,17 +54,17 @@ public class FessLoginAssistTest extends UnitFessTestCase {
         testConfig = new TestFessConfig();
         ComponentUtil.setFessConfig(testConfig);
 
-        passwordManager = new PasswordManager();
+        passwordHelper = new PasswordHelper();
         try {
-            final java.lang.reflect.Field f = PasswordManager.class.getDeclaredField("fessConfig");
+            final java.lang.reflect.Field f = PasswordHelper.class.getDeclaredField("fessConfig");
             f.setAccessible(true);
-            f.set(passwordManager, testConfig);
+            f.set(passwordHelper, testConfig);
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
-        countingPm = new CountingPasswordManager(passwordManager);
-        // Register PasswordManager and (by default) a no-op UserService.
-        ComponentUtil.register(countingPm, "passwordManager");
+        countingPm = new CountingPasswordHelper(passwordHelper);
+        // Register PasswordHelper and (by default) a no-op UserService.
+        ComponentUtil.register(countingPm, "passwordHelper");
         ComponentUtil.register(new RecordingUserService(), UserService.class.getCanonicalName());
 
         loginAssist = new FessLoginAssist();
@@ -81,11 +81,11 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     // ---------------------------------------------------------------------
 
     @Test
-    public void test_encryptPassword_delegatesToPasswordManager() {
+    public void test_encryptPassword_delegatesToPasswordHelper() {
         final String encoded = loginAssist.encryptPassword("secret");
         assertNotNull(encoded);
         assertTrue(encoded.startsWith("{bcrypt}$2a$"));
-        assertTrue(passwordManager.matches("secret", encoded));
+        assertTrue(passwordHelper.matches("secret", encoded));
     }
 
     // ---------------------------------------------------------------------
@@ -96,7 +96,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     public void test_doAuthenticateLocal_validPassword_returnsUser() {
         final User stored = new User();
         stored.setName("alice");
-        stored.setPassword(passwordManager.encode("wonderland"));
+        stored.setPassword(passwordHelper.encode("wonderland"));
         installUserBhv(stored);
 
         final OptionalEntity<FessUser> result = loginAssist.doAuthenticateLocal("alice", "wonderland");
@@ -106,7 +106,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
     @Test
     public void test_doAuthenticateLocal_wrongPassword_returnsEmpty_noRehash() {
-        final String originalHash = passwordManager.encode("wonderland");
+        final String originalHash = passwordHelper.encode("wonderland");
         final User stored = new User();
         stored.setName("alice");
         stored.setPassword(originalHash);
@@ -156,7 +156,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     public void test_timing_failWithBcryptHash_noExtraPadding() {
         // {bcrypt} stored + wrong password -> matches() already paid a BCrypt
         // cost. Padding again would double the cost and leak info.
-        final String bcryptHash = passwordManager.encode("wonderland");
+        final String bcryptHash = passwordHelper.encode("wonderland");
         final User stored = new User();
         stored.setName("alice");
         stored.setPassword(bcryptHash);
@@ -293,7 +293,7 @@ public class FessLoginAssistTest extends UnitFessTestCase {
 
     @Test
     public void test_doAuthenticateLocal_newFormatSameCost_noRehash() {
-        final String bcryptHash = passwordManager.encode("wonderland");
+        final String bcryptHash = passwordHelper.encode("wonderland");
         final User stored = new User();
         stored.setName("alice");
         stored.setPassword(bcryptHash);
@@ -408,16 +408,16 @@ public class FessLoginAssistTest extends UnitFessTestCase {
     }
 
     /**
-     * Wraps a real {@link PasswordManager} and counts {@code matches} calls so
+     * Wraps a real {@link PasswordHelper} and counts {@code matches} calls so
      * tests can assert the dummy-bcrypt timing-countermeasure behaviour.
      */
-    private static class CountingPasswordManager extends PasswordManager {
-        private final PasswordManager delegate;
+    private static class CountingPasswordHelper extends PasswordHelper {
+        private final PasswordHelper delegate;
         final AtomicInteger matchesCalls = new AtomicInteger(0);
         final AtomicInteger paddingCalls = new AtomicInteger(0);
         final AtomicReference<String> lastStored = new AtomicReference<>();
 
-        CountingPasswordManager(final PasswordManager delegate) {
+        CountingPasswordHelper(final PasswordHelper delegate) {
             this.delegate = delegate;
         }
 

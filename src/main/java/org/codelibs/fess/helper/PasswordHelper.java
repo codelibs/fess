@@ -43,10 +43,10 @@ import jakarta.annotation.Resource;
  * still verifiable via {@code app.digest.algorithm} (sha256/sha512/md5 hex
  * lower-case, no salt).
  */
-public class PasswordManager {
+public class PasswordHelper {
 
     /** Logger instance for this class. */
-    private static final Logger logger = LogManager.getLogger(PasswordManager.class);
+    private static final Logger logger = LogManager.getLogger(PasswordHelper.class);
 
     /** Prefix marker (start) of the encoder id. */
     protected static final String PREFIX = "{";
@@ -90,7 +90,7 @@ public class PasswordManager {
     /**
      * Default constructor.
      */
-    public PasswordManager() {
+    public PasswordHelper() {
         // no-op
     }
 

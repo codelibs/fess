@@ -161,7 +161,7 @@ public class UserService {
             final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
             if (changed) {
                 userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
-                    final String encodedPassword = ComponentUtil.getPasswordManager().encode(password);
+                    final String encodedPassword = ComponentUtil.getPasswordHelper().encode(password);
                     entity.setPassword(encodedPassword);
                     userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
 

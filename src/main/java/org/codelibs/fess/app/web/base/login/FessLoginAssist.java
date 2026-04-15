@@ -27,7 +27,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.exception.UserRoleLoginException;
-import org.codelibs.fess.helper.PasswordManager;
+import org.codelibs.fess.helper.PasswordHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
@@ -307,14 +307,14 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
 
     /**
      * Authenticates a local user by username and plaintext password using the
-     * {@link PasswordManager} (BCrypt with legacy hex-digest fallback) and
+     * {@link PasswordHelper} (BCrypt with legacy hex-digest fallback) and
      * performs best-effort lazy re-hashing for credentials stored in an older
      * format.
      *
      * <p>Timing-attack countermeasure: every failure path must pay
      * approximately one BCrypt verification worth of CPU, regardless of
      * whether the user exists and regardless of the stored hash format.
-     * When {@link PasswordManager#matches} already consumed a BCrypt cost
+     * When {@link PasswordHelper#matches} already consumed a BCrypt cost
      * (stored value carries a {@code {bcrypt}} prefix), no additional padding
      * is applied — otherwise the failure branch would pay <em>two</em>
      * BCrypt costs and become distinguishable from unknown-user failures.</p>
@@ -325,13 +325,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      *         otherwise
      */
     protected OptionalEntity<FessUser> doAuthenticateLocal(final String username, final String plainPassword) {
-        final PasswordManager passwordManager = ComponentUtil.getPasswordManager();
+        final PasswordHelper passwordHelper = ComponentUtil.getPasswordHelper();
         final OptionalEntity<FessUser> userOpt = doFindLoginUser(username);
         if (userOpt.isPresent()) {
             final FessUser user = userOpt.get();
             final String stored = (user instanceof User) ? ((User) user).getPassword() : null;
-            if (stored != null && passwordManager.matches(plainPassword, stored)) {
-                lazyUpgradePassword(username, plainPassword, stored, passwordManager);
+            if (stored != null && passwordHelper.matches(plainPassword, stored)) {
+                lazyUpgradePassword(username, plainPassword, stored, passwordHelper);
                 return userOpt;
             }
             // Failure path: pad with dummy BCrypt UNLESS the matches() call
@@ -339,13 +339,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             // {bcrypt} form). Paying it twice would make this branch visibly
             // slower than the unknown-user branch and re-introduce the
             // enumeration oracle we are trying to close.
-            if (!passwordManager.isTimingSafeHash(stored)) {
-                passwordManager.applyTimingPadding();
+            if (!passwordHelper.isTimingSafeHash(stored)) {
+                passwordHelper.applyTimingPadding();
             }
             return OptionalEntity.empty();
         }
         // User does not exist: pay one BCrypt pass to equalise timing.
-        passwordManager.applyTimingPadding();
+        passwordHelper.applyTimingPadding();
         return OptionalEntity.empty();
     }
 
@@ -359,15 +359,15 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      * @param username the user whose stored hash is being upgraded
      * @param plainPassword the plaintext password (already verified to match)
      * @param currentStored the currently stored hash value
-     * @param passwordManager the password manager to use
+     * @param passwordHelper the password manager to use
      */
     protected void lazyUpgradePassword(final String username, final String plainPassword, final String currentStored,
-            final PasswordManager passwordManager) {
-        if (!passwordManager.upgradeEncoding(currentStored)) {
+            final PasswordHelper passwordHelper) {
+        if (!passwordHelper.upgradeEncoding(currentStored)) {
             return;
         }
         try {
-            final String newEncoded = passwordManager.encode(plainPassword);
+            final String newEncoded = passwordHelper.encode(plainPassword);
             final boolean updated =
                     ComponentUtil.getComponent(UserService.class).updateStoredPasswordHash(username, currentStored, newEncoded);
             if (updated) {
@@ -386,13 +386,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
 
     /**
      * Overrides the default cipher-based encryption to delegate to
-     * {@link PasswordManager#encode}. This override exists solely so that any
+     * {@link PasswordHelper#encode}. This override exists solely so that any
      * internal LastaFlute login path that still calls
      * {@code encryptPassword} produces a hash in the new
      * <code>{bcrypt}$2a$...</code> format. All Fess write paths (user
      * creation, password change, initial admin bootstrap) call
-     * {@link PasswordManager#encode(String)} directly via
-     * {@link ComponentUtil#getPasswordManager()}; do not add new callers of
+     * {@link PasswordHelper#encode(String)} directly via
+     * {@link ComponentUtil#getPasswordHelper()}; do not add new callers of
      * this method from outside the login framework.
      *
      * @param plainText the plaintext password
@@ -400,7 +400,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
      */
     @Override
     public String encryptPassword(final String plainText) {
-        return ComponentUtil.getPasswordManager().encode(plainText);
+        return ComponentUtil.getPasswordHelper().encode(plainText);
     }
 
     /**

@@ -24,9 +24,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-public class PasswordManagerTest extends UnitFessTestCase {
+public class PasswordHelperTest extends UnitFessTestCase {
 
-    private PasswordManager passwordManager;
+    private PasswordHelper passwordHelper;
 
     private TestFessConfig testConfig;
 
@@ -35,8 +35,8 @@ public class PasswordManagerTest extends UnitFessTestCase {
         super.setUp(testInfo);
         testConfig = new TestFessConfig();
         ComponentUtil.setFessConfig(testConfig);
-        passwordManager = new PasswordManager();
-        passwordManager.fessConfig = testConfig;
+        passwordHelper = new PasswordHelper();
+        passwordHelper.fessConfig = testConfig;
     }
 
     @Override
@@ -47,111 +47,111 @@ public class PasswordManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_encode_matches_bcrypt() {
-        final String encoded = passwordManager.encode("secret");
-        assertTrue(passwordManager.matches("secret", encoded));
+        final String encoded = passwordHelper.encode("secret");
+        assertTrue(passwordHelper.matches("secret", encoded));
     }
 
     @Test
     public void test_encode_matches_wrongPassword() {
-        final String encoded = passwordManager.encode("secret");
-        assertFalse(passwordManager.matches("Secret", encoded));
-        assertFalse(passwordManager.matches("", encoded));
+        final String encoded = passwordHelper.encode("secret");
+        assertFalse(passwordHelper.matches("Secret", encoded));
+        assertFalse(passwordHelper.matches("", encoded));
     }
 
     @Test
     public void test_encode_containsBcryptPrefix() {
-        final String encoded = passwordManager.encode("secret");
+        final String encoded = passwordHelper.encode("secret");
         assertTrue(encoded.startsWith("{bcrypt}$2a$"));
     }
 
     @Test
     public void test_encode_saltedUniqueness() {
-        final String a = passwordManager.encode("samepass");
-        final String b = passwordManager.encode("samepass");
+        final String a = passwordHelper.encode("samepass");
+        final String b = passwordHelper.encode("samepass");
         assertFalse(a.equals(b));
-        assertTrue(passwordManager.matches("samepass", a));
-        assertTrue(passwordManager.matches("samepass", b));
+        assertTrue(passwordHelper.matches("samepass", a));
+        assertTrue(passwordHelper.matches("samepass", b));
     }
 
     @Test
     public void test_matches_legacySha256() throws Exception {
         testConfig.digestAlgorithm = "sha256";
         final String legacy = hex("SHA-256", "hunter2");
-        assertTrue(passwordManager.matches("hunter2", legacy));
-        assertFalse(passwordManager.matches("wrong", legacy));
+        assertTrue(passwordHelper.matches("hunter2", legacy));
+        assertFalse(passwordHelper.matches("wrong", legacy));
     }
 
     @Test
     public void test_matches_legacySha512() throws Exception {
         testConfig.digestAlgorithm = "sha512";
         final String legacy = hex("SHA-512", "hunter2");
-        assertTrue(passwordManager.matches("hunter2", legacy));
-        assertFalse(passwordManager.matches("wrong", legacy));
+        assertTrue(passwordHelper.matches("hunter2", legacy));
+        assertFalse(passwordHelper.matches("wrong", legacy));
     }
 
     @Test
     public void test_matches_legacyMd5() throws Exception {
         testConfig.digestAlgorithm = "md5";
         final String legacy = hex("MD5", "hunter2");
-        assertTrue(passwordManager.matches("hunter2", legacy));
-        assertFalse(passwordManager.matches("wrong", legacy));
+        assertTrue(passwordHelper.matches("hunter2", legacy));
+        assertFalse(passwordHelper.matches("wrong", legacy));
     }
 
     @Test
     public void test_matches_nullOrEmpty() {
-        assertFalse(passwordManager.matches(null, "{bcrypt}$2a$10$abc"));
-        assertFalse(passwordManager.matches("secret", null));
-        assertFalse(passwordManager.matches("secret", ""));
-        assertFalse(passwordManager.matches(null, null));
+        assertFalse(passwordHelper.matches(null, "{bcrypt}$2a$10$abc"));
+        assertFalse(passwordHelper.matches("secret", null));
+        assertFalse(passwordHelper.matches("secret", ""));
+        assertFalse(passwordHelper.matches(null, null));
     }
 
     @Test
     public void test_matches_unknownPrefix() {
-        assertFalse(passwordManager.matches("secret", "{unknown}ffffff"));
-        assertFalse(passwordManager.matches("secret", "{noop}secret"));
+        assertFalse(passwordHelper.matches("secret", "{unknown}ffffff"));
+        assertFalse(passwordHelper.matches("secret", "{noop}secret"));
     }
 
     @Test
     public void test_upgradeEncoding_legacyHash() {
         // hex SHA-256 of "hunter2"
         final String legacy = "f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7";
-        assertTrue(passwordManager.upgradeEncoding(legacy));
+        assertTrue(passwordHelper.upgradeEncoding(legacy));
     }
 
     @Test
     public void test_upgradeEncoding_newFormatSameCost() {
-        final String encoded = passwordManager.encode("secret");
-        assertFalse(passwordManager.upgradeEncoding(encoded));
+        final String encoded = passwordHelper.encode("secret");
+        assertFalse(passwordHelper.upgradeEncoding(encoded));
     }
 
     @Test
     public void test_upgradeEncoding_newFormatOldCost() {
         testConfig.bcryptCost = 4;
-        final String lowCost = passwordManager.encode("secret");
+        final String lowCost = passwordHelper.encode("secret");
         assertTrue(lowCost.startsWith("{bcrypt}$2a$04$"));
         // Now raise target cost above the stored hash's cost.
         testConfig.bcryptCost = 10;
-        assertTrue(passwordManager.upgradeEncoding(lowCost));
+        assertTrue(passwordHelper.upgradeEncoding(lowCost));
     }
 
     @Test
     public void test_upgradeEncoding_disabled() {
         testConfig.upgradeEnabled = false;
         final String legacy = "f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7";
-        assertFalse(passwordManager.upgradeEncoding(legacy));
+        assertFalse(passwordHelper.upgradeEncoding(legacy));
         // Even when the stored cost is below target.
         testConfig.bcryptCost = 4;
         testConfig.upgradeEnabled = true;
-        final String lowCost = passwordManager.encode("secret");
+        final String lowCost = passwordHelper.encode("secret");
         testConfig.bcryptCost = 10;
         testConfig.upgradeEnabled = false;
-        assertFalse(passwordManager.upgradeEncoding(lowCost));
+        assertFalse(passwordHelper.upgradeEncoding(lowCost));
     }
 
     @Test
     public void test_upgradeEncoding_nullOrEmpty() {
-        assertFalse(passwordManager.upgradeEncoding(null));
-        assertFalse(passwordManager.upgradeEncoding(""));
+        assertFalse(passwordHelper.upgradeEncoding(null));
+        assertFalse(passwordHelper.upgradeEncoding(""));
     }
 
     // ---------------------------------------------------------------------
@@ -162,7 +162,7 @@ public class PasswordManagerTest extends UnitFessTestCase {
     public void test_init_failsFast_withUnknownAlgorithm() {
         testConfig.passwordAlgorithm = "unknown-algo";
         try {
-            passwordManager.init();
+            passwordHelper.init();
             fail("init() must throw IllegalStateException for unknown algorithm");
         } catch (final IllegalStateException expected) {
             assertTrue(
@@ -174,14 +174,14 @@ public class PasswordManagerTest extends UnitFessTestCase {
     public void test_init_failsFast_withBlankAlgorithm() {
         testConfig.passwordAlgorithm = "";
         try {
-            passwordManager.init();
+            passwordHelper.init();
             fail("init() must throw IllegalStateException for blank algorithm");
         } catch (final IllegalStateException expected) {
             // expected
         }
         testConfig.passwordAlgorithm = "   ";
         try {
-            passwordManager.init();
+            passwordHelper.init();
             fail("init() must throw IllegalStateException for whitespace-only algorithm");
         } catch (final IllegalStateException expected) {
             // expected
@@ -191,7 +191,7 @@ public class PasswordManagerTest extends UnitFessTestCase {
     @Test
     public void test_init_succeeds_withBcrypt() {
         // sanity: default config is valid
-        passwordManager.init();
+        passwordHelper.init();
     }
 
     // ---------------------------------------------------------------------
@@ -202,8 +202,8 @@ public class PasswordManagerTest extends UnitFessTestCase {
     public void test_upgradeEncoding_unknownPrefix_returnsFalse() {
         // Minor-sec-2 fix: a stored value carrying an unknown {id} prefix
         // cannot be verified via matches(), so it must NOT be up-hashed.
-        assertFalse(passwordManager.upgradeEncoding("{unknown}ffffff"));
-        assertFalse(passwordManager.upgradeEncoding("{noop}secret"));
+        assertFalse(passwordHelper.upgradeEncoding("{unknown}ffffff"));
+        assertFalse(passwordHelper.upgradeEncoding("{noop}secret"));
     }
 
     @Test
@@ -211,14 +211,14 @@ public class PasswordManagerTest extends UnitFessTestCase {
         // "{}..." - the encoder id between the braces is empty, which is not a
         // registered encoder. This must be treated as an unknown prefix, not
         // a legacy hash.
-        assertFalse(passwordManager.upgradeEncoding("{}ffffff"));
+        assertFalse(passwordHelper.upgradeEncoding("{}ffffff"));
     }
 
     @Test
     public void test_upgradeEncoding_unclosedBrace_treatedAsLegacy() {
         // "{bcrypt" with no closing brace -> extractId() returns null -> legacy path
         // Legacy path: with upgrade enabled, legacy hashes are upgraded -> true
-        assertTrue(passwordManager.upgradeEncoding("{bcryptNoCloseBrace"));
+        assertTrue(passwordHelper.upgradeEncoding("{bcryptNoCloseBrace"));
     }
 
     @Test
@@ -226,8 +226,8 @@ public class PasswordManagerTest extends UnitFessTestCase {
         // A value with the expected prefix but an unparseable cost field must
         // not be re-encoded solely due to cost parsing failure. parseBcryptCost
         // returns -1, so the cost-upgrade branch is skipped.
-        assertFalse(passwordManager.upgradeEncoding("{bcrypt}$2a$"));
-        assertFalse(passwordManager.upgradeEncoding("{bcrypt}garbage"));
+        assertFalse(passwordHelper.upgradeEncoding("{bcrypt}$2a$"));
+        assertFalse(passwordHelper.upgradeEncoding("{bcrypt}garbage"));
     }
 
     // ---------------------------------------------------------------------
@@ -237,14 +237,14 @@ public class PasswordManagerTest extends UnitFessTestCase {
     @Test
     public void test_matches_prefixWithEmptyPayload() {
         // "{bcrypt}" with no payload - encoder.matches receives "" and returns false.
-        assertFalse(passwordManager.matches("secret", "{bcrypt}"));
+        assertFalse(passwordHelper.matches("secret", "{bcrypt}"));
     }
 
     @Test
     public void test_matches_prefixedUpperCase_treatedAsUnknown() {
         // Policy: prefix ids are case-sensitive. "{BCRYPT}" is unknown.
         // Real stored values from encode() are always lower-case ({bcrypt}).
-        assertFalse(passwordManager.matches("secret", "{BCRYPT}$2a$10$abcdefghijklmnopqrstuu"));
+        assertFalse(passwordHelper.matches("secret", "{BCRYPT}$2a$10$abcdefghijklmnopqrstuu"));
     }
 
     @Test
@@ -255,7 +255,7 @@ public class PasswordManagerTest extends UnitFessTestCase {
         testConfig.digestAlgorithm = "md5";
         try {
             final String legacy = hex("MD5", "hunter2");
-            assertTrue(passwordManager.matches("hunter2", legacy));
+            assertTrue(passwordHelper.matches("hunter2", legacy));
         } catch (final Exception e) {
             fail("matches() must not throw: " + e);
         }
@@ -267,21 +267,21 @@ public class PasswordManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_parseBcryptCost_malformed() {
-        assertEquals(-1, passwordManager.parseBcryptCost(null));
-        assertEquals(-1, passwordManager.parseBcryptCost(""));
-        assertEquals(-1, passwordManager.parseBcryptCost("$2a$"));
-        assertEquals(-1, passwordManager.parseBcryptCost("short"));
-        assertEquals(-1, passwordManager.parseBcryptCost("$2a$xx$abcdefghijklmnopqrstuvwxyz0123456789012345678901234"));
-        assertEquals(-1, passwordManager.parseBcryptCost("2a$10$abc")); // missing leading $
-        assertEquals(-1, passwordManager.parseBcryptCost("$2a10$abc")); // missing second $
+        assertEquals(-1, passwordHelper.parseBcryptCost(null));
+        assertEquals(-1, passwordHelper.parseBcryptCost(""));
+        assertEquals(-1, passwordHelper.parseBcryptCost("$2a$"));
+        assertEquals(-1, passwordHelper.parseBcryptCost("short"));
+        assertEquals(-1, passwordHelper.parseBcryptCost("$2a$xx$abcdefghijklmnopqrstuvwxyz0123456789012345678901234"));
+        assertEquals(-1, passwordHelper.parseBcryptCost("2a$10$abc")); // missing leading $
+        assertEquals(-1, passwordHelper.parseBcryptCost("$2a10$abc")); // missing second $
     }
 
     @Test
     public void test_parseBcryptCost_validHash() {
         // Cost must be parseable from a real BCrypt encode output.
-        final String encoded = passwordManager.encode("secret");
+        final String encoded = passwordHelper.encode("secret");
         final String payload = encoded.substring("{bcrypt}".length());
-        assertEquals(10, passwordManager.parseBcryptCost(payload));
+        assertEquals(10, passwordHelper.parseBcryptCost(payload));
     }
 
     // ---------------------------------------------------------------------
@@ -293,7 +293,7 @@ public class PasswordManagerTest extends UnitFessTestCase {
         // Smoke test: applyTimingPadding must never surface exceptions to the
         // caller, even under repeated invocation.
         for (int i = 0; i < 3; i++) {
-            passwordManager.applyTimingPadding();
+            passwordHelper.applyTimingPadding();
         }
     }
 
@@ -301,18 +301,18 @@ public class PasswordManagerTest extends UnitFessTestCase {
     public void test_applyTimingPadding_initBuildsDummyEagerly() {
         // init() is expected to eagerly generate the dummy hash so the first
         // login does not pay the generation cost. Assert it is cached.
-        passwordManager.init();
+        passwordHelper.init();
         final String first;
         final String second;
         try {
-            final java.lang.reflect.Field f = PasswordManager.class.getDeclaredField("dummyBcryptHash");
+            final java.lang.reflect.Field f = PasswordHelper.class.getDeclaredField("dummyBcryptHash");
             f.setAccessible(true);
-            first = (String) f.get(passwordManager);
+            first = (String) f.get(passwordHelper);
             assertNotNull("init() must populate dummyBcryptHash eagerly", first);
             assertTrue("dummy must be bcrypt-formatted: " + first, first.startsWith("{bcrypt}$2a$"));
             // Second access must reuse the cached reference.
-            passwordManager.applyTimingPadding();
-            second = (String) f.get(passwordManager);
+            passwordHelper.applyTimingPadding();
+            second = (String) f.get(passwordHelper);
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
@@ -322,11 +322,11 @@ public class PasswordManagerTest extends UnitFessTestCase {
     @Test
     public void test_applyTimingPadding_reflectsConfiguredCost() {
         testConfig.bcryptCost = 4;
-        passwordManager.init();
+        passwordHelper.init();
         try {
-            final java.lang.reflect.Field f = PasswordManager.class.getDeclaredField("dummyBcryptHash");
+            final java.lang.reflect.Field f = PasswordHelper.class.getDeclaredField("dummyBcryptHash");
             f.setAccessible(true);
-            final String dummy = (String) f.get(passwordManager);
+            final String dummy = (String) f.get(passwordHelper);
             assertTrue("dummy must use configured cost: " + dummy, dummy.startsWith("{bcrypt}$2a$04$"));
         } catch (final Exception e) {
             throw new IllegalStateException(e);
@@ -335,14 +335,14 @@ public class PasswordManagerTest extends UnitFessTestCase {
 
     @Test
     public void test_isTimingSafeHash() {
-        assertTrue(passwordManager.isTimingSafeHash("{bcrypt}$2a$10$abcdefghijklmnopqrstuu"));
-        assertFalse(passwordManager.isTimingSafeHash(null));
-        assertFalse(passwordManager.isTimingSafeHash(""));
-        assertFalse(passwordManager.isTimingSafeHash("f52fbd32b2b3b86ff88ef6c490628285"));
-        assertFalse(passwordManager.isTimingSafeHash("{unknown}whatever"));
-        assertFalse(passwordManager.isTimingSafeHash("{sha256}abcd"));
+        assertTrue(passwordHelper.isTimingSafeHash("{bcrypt}$2a$10$abcdefghijklmnopqrstuu"));
+        assertFalse(passwordHelper.isTimingSafeHash(null));
+        assertFalse(passwordHelper.isTimingSafeHash(""));
+        assertFalse(passwordHelper.isTimingSafeHash("f52fbd32b2b3b86ff88ef6c490628285"));
+        assertFalse(passwordHelper.isTimingSafeHash("{unknown}whatever"));
+        assertFalse(passwordHelper.isTimingSafeHash("{sha256}abcd"));
         // Case-sensitivity: "{BCRYPT}" is not registered.
-        assertFalse(passwordManager.isTimingSafeHash("{BCRYPT}$2a$10$abc"));
+        assertFalse(passwordHelper.isTimingSafeHash("{BCRYPT}$2a$10$abc"));
     }
 
     private static String hex(final String jca, final String input) throws Exception {
