@@ -15,9 +15,19 @@
  */
 package org.codelibs.fess.app.service;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.codelibs.fess.app.pager.UserPager;
+import org.codelibs.fess.opensearch.user.cbean.UserCB;
+import org.codelibs.fess.opensearch.user.exbhv.UserBhv;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.bhv.readable.CBCall;
+import org.dbflute.optional.OptionalEntity;
+import org.codelibs.fess.opensearch.user.allcommon.EsAbstractEntity.RequestOptionCall;
+import org.opensearch.action.index.IndexRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -447,6 +457,475 @@ public class UserServiceTest extends UnitFessTestCase {
 
         user.setRegisteredAddress("123 Registered St");
         assertEquals("123 Registered St", user.getRegisteredAddress());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_updatesEntity() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacyhash");
+
+        final AtomicReference<User> updated = new AtomicReference<>();
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                updated.set(entity);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updated.set(entity);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final String newHash = "{bcrypt}$2a$10$abcdefghijklmnopqrstuv";
+        final boolean result = userService.updateStoredPasswordHash("alice", newHash);
+
+        assertTrue(result);
+        assertNotNull(updated.get());
+        assertEquals(newHash, updated.get().getPassword());
+        assertEquals(newHash, stored.getPassword());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_nonExistentUser() {
+        final AtomicBoolean updateCalled = new AtomicBoolean(false);
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.empty();
+            }
+
+            @Override
+            public void update(final User entity) {
+                updateCalled.set(true);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updateCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("ghost", "{bcrypt}$2a$10$x");
+        assertFalse(result);
+        assertFalse(updateCalled.get());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_nullOrEmpty() {
+        // No userBhv access should occur; fail loudly if it does.
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                fail("selectEntity must not be called for invalid input");
+                return OptionalEntity.empty();
+            }
+        };
+        userService.userBhv = bhv;
+
+        assertFalse(userService.updateStoredPasswordHash(null, "{bcrypt}$2a$10$x"));
+        assertFalse(userService.updateStoredPasswordHash("", "{bcrypt}$2a$10$x"));
+        assertFalse(userService.updateStoredPasswordHash("  ", "{bcrypt}$2a$10$x"));
+        assertFalse(userService.updateStoredPasswordHash("alice", null));
+        assertFalse(userService.updateStoredPasswordHash("alice", ""));
+        assertFalse(userService.updateStoredPasswordHash("alice", "  "));
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_updateFailureReturnsFalse() {
+        final User stored = new User();
+        stored.setName("bob");
+        stored.setPassword("{sha256}legacy");
+
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                throw new RuntimeException("simulated version conflict");
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("simulated version conflict");
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("bob", "{bcrypt}$2a$10$x");
+        assertFalse(result);
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_doesNotCallAuthenticationManager() {
+        final User stored = new User();
+        stored.setName("carol");
+        stored.setPassword("{sha256}legacy");
+
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                // no-op
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                // no-op
+            }
+        };
+        userService.userBhv = bhv;
+
+        // Register a sentinel AuthenticationManager; if any internal path touches it,
+        // the flag flips and we fail the regression test.
+        final AtomicBoolean authTouched = new AtomicBoolean(false);
+        final org.codelibs.fess.auth.AuthenticationManager sentinel = new org.codelibs.fess.auth.AuthenticationManager() {
+            @Override
+            public void insert(final User user) {
+                authTouched.set(true);
+            }
+
+            @Override
+            public void delete(final User user) {
+                authTouched.set(true);
+            }
+
+            @Override
+            public boolean changePassword(final String username, final String password) {
+                authTouched.set(true);
+                return true;
+            }
+
+            @Override
+            public User load(final User user) {
+                authTouched.set(true);
+                return user;
+            }
+        };
+        ComponentUtil.register(sentinel, "authenticationManager");
+
+        final boolean result = userService.updateStoredPasswordHash("carol", "{bcrypt}$2a$10$x");
+        assertTrue(result);
+        assertFalse(authTouched.get(), "AuthenticationManager must not be invoked by updateStoredPasswordHash");
+    }
+
+    // ---------------------------------------------------------------------
+    // updateStoredPasswordHash(username, expectedCurrentHash, newEncodedPassword)
+    // ---------------------------------------------------------------------
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_match_updates() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final AtomicReference<User> updated = new AtomicReference<>();
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                updated.set(entity);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updated.set(entity);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final String newHash = "{bcrypt}$2a$10$newhash";
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacy", newHash);
+
+        assertTrue(result);
+        assertNotNull(updated.get());
+        assertEquals(newHash, stored.getPassword());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_mismatch_skipsUpdate() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{bcrypt}$2a$10$concurrentlyChanged");
+
+        final AtomicBoolean updateCalled = new AtomicBoolean(false);
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                updateCalled.set(true);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updateCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        // expected != current -> must skip update
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacyExpected", "{bcrypt}$2a$10$newhash");
+
+        assertFalse(result);
+        assertFalse(updateCalled.get());
+        // Stored password remains unchanged.
+        assertEquals("{bcrypt}$2a$10$concurrentlyChanged", stored.getPassword());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_nullExpected_unconditionalUpdate() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final AtomicBoolean updateCalled = new AtomicBoolean(false);
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                updateCalled.set(true);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updateCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        // null expected -> unconditional update (matches the 2-arg wrapper contract)
+        final boolean result = userService.updateStoredPasswordHash("alice", null, "{bcrypt}$2a$10$newhash");
+
+        assertTrue(result);
+        assertTrue(updateCalled.get());
+        assertEquals("{bcrypt}$2a$10$newhash", stored.getPassword());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_nonExistentUser() {
+        final AtomicBoolean updateCalled = new AtomicBoolean(false);
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.empty();
+            }
+
+            @Override
+            public void update(final User entity) {
+                updateCalled.set(true);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updateCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("ghost", "{sha256}legacy", "{bcrypt}$2a$10$newhash");
+        assertFalse(result);
+        assertFalse(updateCalled.get());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_refreshPolicyTrue() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final AtomicBoolean optCalled = new AtomicBoolean(false);
+        // Capture that update(User, RequestOptionCall) overload is used AND
+        // the lambda sets refresh policy to Constants.TRUE.
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                // Inspect what opLambda does by handing it a stub builder-like
+                // object. IndexRequestBuilder requires a real client, so we
+                // instead invoke reflectively through a proxy. The easier
+                // approach: directly verify that this 2-arg overload was
+                // picked (the refreshPolicy value is set inside the lambda
+                // against a real IndexRequestBuilder, which we cannot stub
+                // here without pulling in the OpenSearch test fixture).
+                optCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacy", "{bcrypt}$2a$10$newhash");
+        assertTrue(result);
+        assertTrue("update(User, RequestOptionCall) overload must be invoked for refresh policy", optCalled.get());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_updateThrows_returnsFalse() {
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                throw new RuntimeException("simulated version conflict");
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("simulated version conflict");
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacy", "{bcrypt}$2a$10$newhash");
+        assertFalse(result);
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_2arg_delegatesTo3arg() {
+        // The 2-arg overload must use null as the expected hash so that the
+        // update is unconditional. We assert this by installing a stub that
+        // records the expected argument via the 3-arg path semantics: a
+        // non-matching "current" hash would cause a CAS skip, yet the 2-arg
+        // call should still update because expected=null.
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("something-unrelated");
+
+        final AtomicBoolean updateCalled = new AtomicBoolean(false);
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                updateCalled.set(true);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                updateCalled.set(true);
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("alice", "{bcrypt}$2a$10$newhash");
+        assertTrue(result);
+        assertTrue(updateCalled.get());
+        assertEquals("{bcrypt}$2a$10$newhash", stored.getPassword());
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_versionConflict_returnsFalse() {
+        // Simulate the classic OpenSearch CAS race: select passes (our
+        // in-memory equals() check matches), but by the time update() fires
+        // another writer has already bumped seqNo/primaryTerm, and
+        // OpenSearch returns version_conflict_engine_exception. The wrapper
+        // must translate that into `false` without propagating the exception
+        // (lazy rehash is best-effort) and without emitting a noisy WARN.
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity) {
+                throw new FakeVersionConflictEngineException("version_conflict_engine_exception on test");
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new FakeVersionConflictEngineException("version_conflict_engine_exception on test");
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacy", "{bcrypt}$2a$10$newhash");
+        assertFalse(result);
+    }
+
+    @Test
+    public void test_updateStoredPasswordHash_cas_versionConflict_byMessage_returnsFalse() {
+        // Some implementations surface the conflict as a generic RuntimeException
+        // whose message contains the OpenSearch marker. The classifier should
+        // still return false quietly.
+        final User stored = new User();
+        stored.setName("alice");
+        stored.setPassword("{sha256}legacy");
+
+        final UserBhv bhv = new UserBhv() {
+            @Override
+            public OptionalEntity<User> selectEntity(final CBCall<UserCB> cbLambda) {
+                return OptionalEntity.of(stored);
+            }
+
+            @Override
+            public void update(final User entity, final RequestOptionCall<IndexRequestBuilder> opLambda) {
+                throw new RuntimeException("opensearch said: version_conflict_engine_exception [seqNo=7]");
+            }
+        };
+        userService.userBhv = bhv;
+
+        final boolean result = userService.updateStoredPasswordHash("alice", "{sha256}legacy", "{bcrypt}$2a$10$newhash");
+        assertFalse(result);
+    }
+
+    /**
+     * Stand-in for
+     * {@code org.opensearch.index.engine.VersionConflictEngineException}
+     * whose class name alone (via {@code endsWith}) identifies the error for
+     * the classifier inside {@link UserService#isVersionConflict(Throwable)}.
+     * We avoid importing the real type so this unit test does not pull in the
+     * OpenSearch engine module.
+     */
+    private static final class FakeVersionConflictEngineException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        FakeVersionConflictEngineException(final String message) {
+            super(message);
+        }
     }
 
     @Test

@@ -32,7 +32,6 @@ import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.opensearch.user.exentity.User;
 import org.codelibs.fess.util.ComponentUtil;
@@ -387,7 +386,7 @@ public class AdminUserAction extends FessAdminAction {
             copyMapToBean(form.attributes, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
             if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
-                final String encodedPassword = ComponentUtil.getComponent(FessLoginAssist.class).encryptPassword(form.password);
+                final String encodedPassword = ComponentUtil.getPasswordManager().encode(form.password);
                 entity.setOriginalPassword(form.password);
                 entity.setPassword(encodedPassword);
             }

@@ -57,6 +57,7 @@ import org.codelibs.fess.helper.LanguageHelper;
 import org.codelibs.fess.helper.LogNotificationHelper;
 import org.codelibs.fess.helper.MarkdownRenderer;
 import org.codelibs.fess.helper.NotificationHelper;
+import org.codelibs.fess.helper.PasswordManager;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PluginHelper;
@@ -147,6 +148,8 @@ public final class ComponentUtil {
     private static final String SSO_MANAGER = "ssoManager";
 
     private static final String PERMISSION_HELPER = "permissionHelper";
+
+    private static final String PASSWORD_MANAGER = "passwordManager";
 
     private static final String QUERY_PARSER = "queryParser";
 
@@ -643,6 +646,14 @@ public final class ComponentUtil {
      */
     public static PermissionHelper getPermissionHelper() {
         return getComponent(PERMISSION_HELPER);
+    }
+
+    /**
+     * Gets the password manager component.
+     * @return The password manager.
+     */
+    public static PasswordManager getPasswordManager() {
+        return getComponent(PASSWORD_MANAGER);
     }
 
     /**
