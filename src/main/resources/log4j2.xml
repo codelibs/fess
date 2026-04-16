@@ -69,7 +69,7 @@
 		</RollingFile>
 		<RollingFile name="LlmFile" fileName="${log.file.basedir}/fess-llm.log"
 			filePattern="${log.file.basedir}/fess-llm${backup.date.suffix}-%i.log.gz">
-			<PatternLayout><Pattern>${log.pattern}</Pattern></PatternLayout>
+			<PatternLayout><Pattern>${log.pattern}</Pattern></PatternLayout><!-- <EcsLayout serviceName="fess" eventDataset="app" /> -->
 			<Policies>
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />
