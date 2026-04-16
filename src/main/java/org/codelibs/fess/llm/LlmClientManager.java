@@ -134,8 +134,8 @@ public class LlmClientManager {
      * @param client The LLM client to register
      */
     public void register(final LlmClient client) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Loaded LlmClient: {}", client.getClass().getSimpleName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Loaded LlmClient: {}", client.getClass().getSimpleName());
         }
         clientList.add(client);
     }

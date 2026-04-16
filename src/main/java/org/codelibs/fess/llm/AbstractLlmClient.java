@@ -145,8 +145,10 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized {} with timeout: {}ms", getClass().getSimpleName(), timeout);
         }
-        logger.info("[LLM] {} initialized. model={}, timeout={}ms, maxConcurrent={}", getName(), getModel(), getTimeout(),
-                getMaxConcurrentRequests());
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] {} initialized. model={}, timeout={}ms, maxConcurrent={}", getName(), getModel(), getTimeout(),
+                    getMaxConcurrentRequests());
+        }
 
         concurrencyLimiter = new Semaphore(getMaxConcurrentRequests());
 
@@ -157,7 +159,9 @@ public abstract class AbstractLlmClient implements LlmClient {
      * Cleans up resources.
      */
     public void destroy() {
-        logger.info("[LLM] {} shutting down.", getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] {} shutting down.", getName());
+        }
         if (availabilityCheckTask != null && !availabilityCheckTask.isCanceled()) {
             availabilityCheckTask.cancel();
             if (logger.isDebugEnabled()) {
@@ -211,7 +215,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         cachedAvailability = currentState;
 
         if (previousState != currentState) {
-            logger.info("{} availability changed: {} -> {}", getName(), previousState, currentState);
+            logger.debug("{} availability changed: {} -> {}", getName(), previousState, currentState);
         } else if (logger.isDebugEnabled()) {
             logger.debug("{} availability check completed. available={}", getName(), currentState);
         }
