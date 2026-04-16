@@ -28,9 +28,9 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crypto.bcrypt.BCrypt;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 
 /**
  * Facade for password hashing and verification.
@@ -43,10 +43,10 @@ import jakarta.annotation.Resource;
  * still verifiable via {@code app.digest.algorithm} (sha256/sha512/md5 hex
  * lower-case, no salt).
  */
-public class PasswordHelper {
+public class PasswordHashHelper {
 
     /** Logger instance for this class. */
-    private static final Logger logger = LogManager.getLogger(PasswordHelper.class);
+    private static final Logger logger = LogManager.getLogger(PasswordHashHelper.class);
 
     /** Prefix marker (start) of the encoder id. */
     protected static final String PREFIX = "{";
@@ -68,10 +68,6 @@ public class PasswordHelper {
      */
     protected static final String DUMMY_BCRYPT_SEED = "__fess_timing_guard__";
 
-    /** Injected Fess configuration. */
-    @Resource
-    protected FessConfig fessConfig;
-
     /** Registered encoders keyed by id. Populated lazily and read-only after init. */
     protected volatile Map<String, PasswordEncoder> encoders;
 
@@ -90,7 +86,7 @@ public class PasswordHelper {
     /**
      * Default constructor.
      */
-    public PasswordHelper() {
+    public PasswordHashHelper() {
         // no-op
     }
 
@@ -192,7 +188,7 @@ public class PasswordHelper {
      * @return the effective BCrypt cost in the range [4, 30]
      */
     protected int resolveBcryptCost() {
-        final Integer cost = fessConfig.getAppPasswordBcryptCostAsInteger();
+        final Integer cost = ComponentUtil.getFessConfig().getAppPasswordBcryptCostAsInteger();
         if (cost == null) {
             return 10;
         }
@@ -271,6 +267,7 @@ public class PasswordHelper {
      * @return {@code true} if re-encoding is recommended
      */
     public boolean upgradeEncoding(final String storedPassword) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isAppPasswordUpgradeEnabled()) {
             return false;
         }
@@ -311,7 +308,7 @@ public class PasswordHelper {
      * @return the configured encoder id (lower-cased)
      */
     protected String resolveIdForEncode() {
-        final String configured = fessConfig.getAppPasswordAlgorithm();
+        final String configured = ComponentUtil.getFessConfig().getAppPasswordAlgorithm();
         if (StringUtil.isBlank(configured)) {
             throw new IllegalStateException("app.password.algorithm is not configured");
         }
@@ -376,7 +373,7 @@ public class PasswordHelper {
      * @return {@code true} if matched
      */
     protected boolean matchesLegacy(final String rawPassword, final String storedPassword) {
-        final String algorithm = fessConfig.getAppDigestAlgorithm();
+        final String algorithm = ComponentUtil.getFessConfig().getAppDigestAlgorithm();
         if (StringUtil.isBlank(algorithm)) {
             return false;
         }
