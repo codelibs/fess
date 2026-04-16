@@ -176,10 +176,30 @@
 			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseSets>
+						<licenseSet>
+							<header>https://www.codelibs.org/assets/license/header.txt</header>
+							<includes>
+								<include>src/**/*.java</include>
+							</includes>
+							<excludes>
+								<!-- vendored jBCrypt: keep original BSD-2-Clause header -->
+								<exclude>src/main/java/org/codelibs/fess/crypto/bcrypt/BCrypt.java</exclude>
+							</excludes>
+						</licenseSet>
+					</licenseSets>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<!-- vendored jBCrypt: preserve upstream formatting and license header -->
+						<exclude>**/crypto/bcrypt/BCrypt.java</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codelibs.maven</groupId>

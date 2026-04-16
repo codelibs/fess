@@ -52,6 +52,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. sha256 */
     String APP_DIGEST_ALGORITHM = "app.digest.algorithm";
 
+    /** The key of the configuration. e.g. bcrypt */
+    String APP_PASSWORD_ALGORITHM = "app.password.algorithm";
+
+    /** The key of the configuration. e.g. 10 */
+    String APP_PASSWORD_BCRYPT_COST = "app.password.bcrypt.cost";
+
+    /** The key of the configuration. e.g. true */
+    String APP_PASSWORD_UPGRADE_ENABLED = "app.password.upgrade.enabled";
+
     /** The key of the configuration. e.g. .*password|.*key|.*token|.*secret */
     String APP_ENCRYPT_PROPERTY_PATTERN = "app.encrypt.property.pattern";
 
@@ -2169,9 +2178,55 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getAppDigestAlgorithm();
 
     /**
+     * Get the value for the key 'app.password.algorithm'. <br>
+     * The value is, e.g. bcrypt <br>
+     * comment: <br>
+     * Password hashing (new mechanism, Spring Security v5.8 compatible)<br>
+     * Supported: bcrypt (only, as of now)
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppPasswordAlgorithm();
+
+    /**
+     * Get the value for the key 'app.password.bcrypt.cost'. <br>
+     * The value is, e.g. 10 <br>
+     * comment: BCrypt cost (log rounds). 10 matches Spring Security v5.8 default. Range: 4-31.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppPasswordBcryptCost();
+
+    /**
+     * Get the value for the key 'app.password.bcrypt.cost' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * comment: BCrypt cost (log rounds). 10 matches Spring Security v5.8 default. Range: 4-31.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getAppPasswordBcryptCostAsInteger();
+
+    /**
+     * Get the value for the key 'app.password.upgrade.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: Lazy re-hashing on successful login for legacy hashes.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppPasswordUpgradeEnabled();
+
+    /**
+     * Is the property for the key 'app.password.upgrade.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: Lazy re-hashing on successful login for legacy hashes.
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isAppPasswordUpgradeEnabled();
+
+    /**
      * Get the value for the key 'app.encrypt.property.pattern'. <br>
      * The value is, e.g. .*password|.*key|.*token|.*secret <br>
-     * comment: Regex pattern for properties to encrypt.
+     * comment: <br>
+     * NOTE: app.digest.algorithm is kept for LEGACY password verification only<br>
+     * (pre-upgrade hashes that have no {id} prefix). Do not use for new passwords.<br>
+     * Regex pattern for properties to encrypt.
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppEncryptPropertyPattern();
@@ -9733,6 +9788,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.APP_DIGEST_ALGORITHM);
         }
 
+        public String getAppPasswordAlgorithm() {
+            return get(FessConfig.APP_PASSWORD_ALGORITHM);
+        }
+
+        public String getAppPasswordBcryptCost() {
+            return get(FessConfig.APP_PASSWORD_BCRYPT_COST);
+        }
+
+        public Integer getAppPasswordBcryptCostAsInteger() {
+            return getAsInteger(FessConfig.APP_PASSWORD_BCRYPT_COST);
+        }
+
+        public String getAppPasswordUpgradeEnabled() {
+            return get(FessConfig.APP_PASSWORD_UPGRADE_ENABLED);
+        }
+
+        public boolean isAppPasswordUpgradeEnabled() {
+            return is(FessConfig.APP_PASSWORD_UPGRADE_ENABLED);
+        }
+
         public String getAppEncryptPropertyPattern() {
             return get(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN);
         }
@@ -13270,6 +13345,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.APP_CIPHER_ALGORITHM, "aes");
             defaultMap.put(FessConfig.APP_CIPHER_KEY, "___change__me___");
             defaultMap.put(FessConfig.APP_DIGEST_ALGORITHM, "sha256");
+            defaultMap.put(FessConfig.APP_PASSWORD_ALGORITHM, "bcrypt");
+            defaultMap.put(FessConfig.APP_PASSWORD_BCRYPT_COST, "10");
+            defaultMap.put(FessConfig.APP_PASSWORD_UPGRADE_ENABLED, "true");
             defaultMap.put(FessConfig.APP_ENCRYPT_PROPERTY_PATTERN, ".*password|.*key|.*token|.*secret");
             defaultMap.put(FessConfig.APP_LOG_SENSITIVE_PROPERTY_PATTERN,
                     ".*password.*|.*secret.*|.*key.*|.*token.*|.*credential.*|.*auth.*|.*private.*");

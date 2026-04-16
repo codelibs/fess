@@ -151,7 +151,9 @@ opensearch/{index}/
 - `@Secured` annotation with role array (`"admin-user"`, `"admin-user-view"`)
 - Role-based query filtering via `RoleQueryHelper`
 - Authentication: Local (UserService), LDAP, OIDC, SAML, SPNEGO, Entra ID
-- Security features: AES encryption, SHA256 digest, LDAP injection prevention, password policy, rate limiting
+- Security features: AES encryption, LDAP injection prevention, password policy, rate limiting
+- Password hashing: BCrypt (`{bcrypt}$2a$10$...`, Spring Security v5.8 compatible) via `PasswordHashHelper` helper. Configure with `app.password.algorithm` / `app.password.bcrypt.cost`. Legacy SHA-256/512/MD5 hashes without prefix are verified via `app.digest.algorithm` for backward compatibility and re-hashed on next successful login when `app.password.upgrade.enabled=true` (default). **Downgrading to a pre-BCrypt Fess release will invalidate `{bcrypt}`-encoded passwords** — document this in release notes and plan for admin password reset.
+- Password write paths (`UserService.changePassword`, `AdminUserAction`, `SearchEngineClient` initial admin) must call `ComponentUtil.getPasswordHashHelper().encode(plain)` — do not call `FessLoginAssist.encryptPassword` from new code.
 
 ## Naming Conventions
 

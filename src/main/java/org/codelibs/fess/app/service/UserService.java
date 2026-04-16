@@ -23,7 +23,6 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.exception.FessUserNotFoundException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.opensearch.user.cbean.UserCB;
@@ -55,10 +54,6 @@ public class UserService {
     /** User behavior for database operations */
     @Resource
     protected UserBhv userBhv;
-
-    /** Login assistance for authentication operations */
-    @Resource
-    protected FessLoginAssist fessLoginAssist;
 
     /** Fess configuration for system settings */
     @Resource
@@ -166,7 +161,7 @@ public class UserService {
             final boolean changed = ComponentUtil.getAuthenticationManager().changePassword(username, password);
             if (changed) {
                 userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
-                    final String encodedPassword = fessLoginAssist.encryptPassword(password);
+                    final String encodedPassword = ComponentUtil.getPasswordHashHelper().encode(password);
                     entity.setPassword(encodedPassword);
                     userBhv.insertOrUpdate(entity, op -> op.setRefreshPolicy(Constants.TRUE));
 
@@ -188,6 +183,130 @@ public class UserService {
             logger.warn("Failed to change password for user: username={}, error={}", username, e.getMessage(), e);
             throw e;
         }
+    }
+
+    /**
+     * Updates the stored password hash directly, bypassing AuthenticationManager chain.
+     * Used by lazy re-hashing on successful login when the current stored hash
+     * is in a legacy format. The input value MUST already be an encoded hash
+     * (e.g., "{bcrypt}$2a$10$...") - this method does NOT hash it again.
+     *
+     * Does NOT propagate to LDAP/SSO backends because we do not have the plaintext
+     * (and LDAP manages its own credential).
+     *
+     * <p>This overload performs an unconditional update. Prefer
+     * {@link #updateStoredPasswordHash(String, String, String)} when a race with
+     * concurrent password changes must be avoided.</p>
+     *
+     * @param username target user (must exist)
+     * @param encodedPassword already-hashed password value
+     * @return true if updated; false if user not found or update failed
+     */
+    public boolean updateStoredPasswordHash(final String username, final String encodedPassword) {
+        return updateStoredPasswordHash(username, null, encodedPassword);
+    }
+
+    /**
+     * Updates the stored password hash with an optional compare-and-set guard.
+     * When {@code expectedCurrentHash} is non-null, the update is only applied
+     * if the latest stored value equals that expected hash, mitigating a race
+     * where another code path (e.g. explicit password change) writes a new hash
+     * while this lazy re-hash is computing the new encoded value.
+     *
+     * @param username target user (must exist)
+     * @param expectedCurrentHash the hash value observed at match time, or
+     *        {@code null} to perform an unconditional update
+     * @param newEncodedPassword already-hashed password value to store
+     * @return {@code true} if the update was applied; {@code false} if the user
+     *         was not found, the guard did not match, or the update failed
+     */
+    public boolean updateStoredPasswordHash(final String username, final String expectedCurrentHash, final String newEncodedPassword) {
+        if (StringUtil.isBlank(username) || StringUtil.isBlank(newEncodedPassword)) {
+            return false;
+        }
+
+        try {
+            final OptionalEntity<User> optEntity = userBhv.selectEntity(cb -> cb.query().setName_Equal(username));
+            if (!optEntity.isPresent()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("User not found for stored password hash update: username={}", username);
+                }
+                return false;
+            }
+            final User entity = optEntity.get();
+            if (expectedCurrentHash != null && !expectedCurrentHash.equals(entity.getPassword())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Stored password hash changed concurrently; skipping lazy upgrade: username={}", username);
+                }
+                return false;
+            }
+            entity.setPassword(newEncodedPassword);
+            // Propagate the seqNo/primaryTerm observed at select time into the
+            // index request itself so that OpenSearch rejects the update with a
+            // version_conflict_engine_exception if another writer (e.g. an
+            // explicit password change) landed between our select and update.
+            // DBFlute's ESBhv update path does NOT do this automatically for
+            // us; see EsAbstractBehavior.createUpdateRequest which only copies
+            // the values back onto the entity. This is the atomic half of the
+            // CAS — the in-memory equals() check above remains as a first-line
+            // filter that avoids a wasted round-trip on the common case.
+            final Long seqNo = entity.asDocMeta().seqNo();
+            final Long primaryTerm = entity.asDocMeta().primaryTerm();
+            userBhv.update(entity, op -> {
+                op.setRefreshPolicy(Constants.TRUE);
+                if (seqNo != null && seqNo.longValue() >= 0L) {
+                    op.setIfSeqNo(seqNo.longValue());
+                }
+                if (primaryTerm != null && primaryTerm.longValue() >= 0L) {
+                    op.setIfPrimaryTerm(primaryTerm.longValue());
+                }
+            });
+            if (logger.isDebugEnabled()) {
+                logger.debug("Upgraded stored password hash for user: username={}", username);
+            }
+            return true;
+        } catch (final Exception e) {
+            if (isVersionConflict(e)) {
+                // A concurrent writer won the race; lazy rehash is best-effort
+                // and the next successful login will retry, so a noisy WARN is
+                // not warranted here.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Version conflict while upgrading password hash; skipping. username={}", username, e);
+                }
+                return false;
+            }
+            logger.warn("Failed to upgrade password hash for user. username={}", username, e);
+            return false;
+        }
+    }
+
+    /**
+     * Tests whether the given throwable (or any of its causes) represents an
+     * OpenSearch optimistic-concurrency conflict. Walks the cause chain and
+     * inspects class name / message so we do not have to depend on a specific
+     * OpenSearch exception type from the DBFlute layer above.
+     *
+     * @param t the throwable to inspect
+     * @return {@code true} if {@code t} looks like a version-conflict
+     */
+    protected boolean isVersionConflict(final Throwable t) {
+        Throwable cur = t;
+        while (cur != null) {
+            final String name = cur.getClass().getName();
+            if (name.endsWith("VersionConflictEngineException")) {
+                return true;
+            }
+            final String msg = cur.getMessage();
+            if (msg != null && msg.contains("version_conflict_engine_exception")) {
+                return true;
+            }
+            final Throwable next = cur.getCause();
+            if (next == cur) {
+                break;
+            }
+            cur = next;
+        }
+        return false;
     }
 
     /**

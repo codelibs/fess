@@ -51,6 +51,12 @@ public class FessConfigTest extends UnitFessTestCase {
                     return "___change__me___";
                 case FessConfig.APP_ENCRYPT_PROPERTY_PATTERN:
                     return ".*password|.*key|.*token|.*secret";
+                case FessConfig.APP_PASSWORD_ALGORITHM:
+                    return "bcrypt";
+                case FessConfig.APP_PASSWORD_BCRYPT_COST:
+                    return "10";
+                case FessConfig.APP_PASSWORD_UPGRADE_ENABLED:
+                    return "true";
                 case FessConfig.APP_EXTENSION_NAMES:
                     return "jpg,jpeg,gif,png";
 
@@ -247,6 +253,13 @@ public class FessConfigTest extends UnitFessTestCase {
     @Test
     public void test_appEncryptPropertyPattern() {
         assertEquals(".*password|.*key|.*token|.*secret", fessConfig.getAppEncryptPropertyPattern());
+    }
+
+    @Test
+    public void test_appPasswordAlgorithm() {
+        assertEquals("bcrypt", fessConfig.getAppPasswordAlgorithm());
+        assertEquals(Integer.valueOf(10), fessConfig.getAppPasswordBcryptCostAsInteger());
+        assertTrue(fessConfig.isAppPasswordUpgradeEnabled());
     }
 
     @Test
