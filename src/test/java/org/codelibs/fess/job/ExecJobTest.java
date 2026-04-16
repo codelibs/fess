@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -665,31 +666,53 @@ public class ExecJobTest extends UnitFessTestCase {
         }
     }
 
-    // Test concurrent modification of jvmOptions
+    // ExecJob is designed to be owned by a single thread in production; this test
+    // verifies jvmOptions() is safely usable from parallel threads as long as
+    // each thread operates on its own ExecJob instance.
     @Test
     public void test_jvmOptions_concurrent() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final TestExecJob job1 = new TestExecJob();
+        final TestExecJob job2 = new TestExecJob();
+        final CountDownLatch latch = new CountDownLatch(2);
+        final List<Throwable> errors = new CopyOnWriteArrayList<>();
 
-        Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 100; i++) {
-                execJob.jvmOptions("-Xmx" + i + "m");
+        final Thread t1 = new Thread(() -> {
+            try {
+                for (int i = 0; i < 100; i++) {
+                    job1.jvmOptions("-Xmx" + i + "m");
+                }
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                latch.countDown();
             }
-            latch.countDown();
         });
 
-        Thread t2 = new Thread(() -> {
-            for (int i = 0; i < 100; i++) {
-                execJob.jvmOptions("-Xms" + i + "m");
+        final Thread t2 = new Thread(() -> {
+            try {
+                for (int i = 0; i < 100; i++) {
+                    job2.jvmOptions("-Xms" + i + "m");
+                }
+            } catch (Throwable e) {
+                errors.add(e);
+            } finally {
+                latch.countDown();
             }
-            latch.countDown();
         });
 
         t1.start();
         t2.start();
 
         assertTrue(latch.await(5, TimeUnit.SECONDS));
-        // The exact size may vary due to concurrent modifications, just check it's not empty
-        assertTrue(execJob.jvmOptions.size() > 0);
+        if (!errors.isEmpty()) {
+            throw new AssertionError("unexpected errors: " + errors, errors.get(0));
+        }
+        assertEquals(100, job1.jvmOptions.size());
+        assertEquals(100, job2.jvmOptions.size());
+        assertEquals("-Xmx0m", job1.jvmOptions.get(0));
+        assertEquals("-Xmx99m", job1.jvmOptions.get(99));
+        assertEquals("-Xms0m", job2.jvmOptions.get(0));
+        assertEquals("-Xms99m", job2.jvmOptions.get(99));
     }
 
     // Test pattern matching in custom properties
