@@ -650,8 +650,7 @@ public class FessFunctions {
      * @return localized message or default value
      */
     public static String getMessage(final String key, final String defaultValue) {
-        final Locale locale = LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
-        return ComponentUtil.getMessageManager().findMessage(locale, key).orElse(defaultValue);
+        return ComponentUtil.getMessageManager().findMessage(getUserLocale(), key).orElse(defaultValue);
     }
 
     /**
