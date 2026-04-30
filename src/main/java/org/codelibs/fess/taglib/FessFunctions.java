@@ -293,11 +293,13 @@ public class FessFunctions {
      * @return the user's locale, or Locale.ROOT if not available
      */
     private static Locale getUserLocale() {
-        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
-        if (locale == null) {
-            return Locale.ROOT;
+        if (ComponentUtil.hasRequestManager()) {
+            final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
+            if (locale != null) {
+                return locale;
+            }
         }
-        return locale;
+        return Locale.ROOT;
     }
 
     /**
