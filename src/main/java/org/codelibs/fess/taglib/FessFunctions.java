@@ -293,11 +293,13 @@ public class FessFunctions {
      * @return the user's locale, or Locale.ROOT if not available
      */
     private static Locale getUserLocale() {
-        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
-        if (locale == null) {
-            return Locale.ROOT;
+        if (ComponentUtil.hasRequestManager()) {
+            final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
+            if (locale != null) {
+                return locale;
+            }
         }
-        return locale;
+        return Locale.ROOT;
     }
 
     /**
@@ -568,6 +570,20 @@ public class FessFunctions {
     }
 
     /**
+     * Escapes a string so it can be safely embedded inside a JavaScript string literal.
+     * Single quotes, double quotes, backslashes, and control characters are escaped.
+     *
+     * @param input the input string to escape
+     * @return JavaScript-safe escaped string, or empty string if input is null
+     */
+    public static String escapeJs(final String input) {
+        if (input == null) {
+            return StringUtil.EMPTY;
+        }
+        return StringEscapeUtils.escapeEcmaScript(input);
+    }
+
+    /**
      * Replaces all occurrences of a regular expression pattern in the input string.
      *
      * @param input the input object to process
@@ -636,8 +652,7 @@ public class FessFunctions {
      * @return localized message or default value
      */
     public static String getMessage(final String key, final String defaultValue) {
-        final Locale locale = LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
-        return ComponentUtil.getMessageManager().findMessage(locale, key).orElse(defaultValue);
+        return ComponentUtil.getMessageManager().findMessage(getUserLocale(), key).orElse(defaultValue);
     }
 
     /**

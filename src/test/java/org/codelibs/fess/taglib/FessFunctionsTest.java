@@ -150,4 +150,29 @@ public class FessFunctionsTest extends UnitFessTestCase {
         value = FessFunctions.maskEmail("<aaa@bbb.ccc>");
         assertEquals("<******@****.***>", value);
     }
+
+    @Test
+    public void test_escapeJs() {
+        assertEquals("", FessFunctions.escapeJs(null));
+        assertEquals("", FessFunctions.escapeJs(""));
+        assertEquals("plain text", FessFunctions.escapeJs("plain text"));
+        assertEquals("It\\'s currently busy.", FessFunctions.escapeJs("It's currently busy."));
+        assertEquals("say \\\"hi\\\"", FessFunctions.escapeJs("say \"hi\""));
+        assertEquals("a\\\\b", FessFunctions.escapeJs("a\\b"));
+        assertEquals("line1\\nline2", FessFunctions.escapeJs("line1\nline2"));
+        assertEquals("L\\'authentification a \\u00E9chou\\u00E9.", FessFunctions.escapeJs("L'authentification a échoué."));
+
+        // Forward slash must be escaped so a label can never close the surrounding inline <script> block.
+        assertEquals("a\\/b", FessFunctions.escapeJs("a/b"));
+        final String breakout = FessFunctions.escapeJs("</script><script>alert(1)</script>");
+        assertEquals("<\\/script><script>alert(1)<\\/script>", breakout);
+        assertFalse("escapeJs output must not contain a literal </script>", breakout.contains("</script>"));
+
+        // Control characters and NUL get unicode-escaped, never passed through raw.
+        assertEquals("\\u0000", FessFunctions.escapeJs("\0"));
+        assertEquals("a\\tb\\rc", FessFunctions.escapeJs("a\tb\rc"));
+
+        // Supplementary code points (here a robot emoji, U+1F916) are emitted as escaped surrogate pairs.
+        assertEquals("\\uD83E\\uDD16", FessFunctions.escapeJs("🤖"));
+    }
 }

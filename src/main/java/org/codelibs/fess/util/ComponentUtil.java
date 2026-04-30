@@ -955,6 +955,21 @@ public final class ComponentUtil {
     }
 
     /**
+     * Checks if the request manager is available in the container.
+     * Useful for callers that may run outside a web-request scope (e.g. unit
+     * tests or background jobs) and need to avoid {@link ComponentNotFoundException}
+     * or {@link NullPointerException} from {@link #getRequestManager()}.
+     * @return True if the request manager component is registered, false otherwise.
+     */
+    public static boolean hasRequestManager() {
+        try {
+            return SingletonLaContainerFactory.getContainer().hasComponentDef(RequestManager.class);
+        } catch (final NullPointerException e) {
+            return false;
+        }
+    }
+
+    /**
      * Checks if view helper is available.
      * @return True if view helper is available, false otherwise.
      */
