@@ -27,11 +27,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -135,13 +140,14 @@ public abstract class AbstractLlmClient implements LlmClient {
                 .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
                 .setResponseTimeout(Timeout.ofMilliseconds(timeout))
                 .build();
-        httpClient = HttpClients.custom()
+        final HttpClientBuilder builder = HttpClients.custom()
                 .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
                         .setDefaultConnectionConfig(ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(timeout)).build())
                         .build())
                 .setDefaultRequestConfig(requestConfig)
-                .disableAutomaticRetries()
-                .build();
+                .disableAutomaticRetries();
+        configureProxy(builder);
+        httpClient = builder.build();
         if (logger.isDebugEnabled()) {
             logger.debug("Initialized {} with timeout: {}ms", getClass().getSimpleName(), timeout);
         }
@@ -153,6 +159,72 @@ public abstract class AbstractLlmClient implements LlmClient {
         concurrencyLimiter = new Semaphore(getMaxConcurrentRequests());
 
         startAvailabilityCheck();
+    }
+
+    /**
+     * Configures proxy settings on the HTTP client builder if a proxy is configured.
+     * Reads proxy configuration via {@link #getProxyHost()}, {@link #getProxyPort()},
+     * {@link #getProxyUsername()}, and {@link #getProxyPassword()}. When username is
+     * provided, registers a {@link BasicCredentialsProvider} for proxy authentication.
+     *
+     * @param builder the HTTP client builder to configure
+     */
+    protected void configureProxy(final HttpClientBuilder builder) {
+        final String proxyHost = getProxyHost();
+        final Integer proxyPort = getProxyPort();
+        if (StringUtil.isBlank(proxyHost) || proxyPort == null) {
+            return;
+        }
+        final HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+        builder.setProxy(proxy);
+        final String proxyUsername = getProxyUsername();
+        if (StringUtil.isNotBlank(proxyUsername)) {
+            final String proxyPassword = getProxyPassword();
+            final BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
+                    new UsernamePasswordCredentials(proxyUsername, proxyPassword != null ? proxyPassword.toCharArray() : new char[0]));
+            builder.setDefaultCredentialsProvider(credsProvider);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("[LLM] {} using proxy. host={}, port={}, authenticated={}", getName(), proxyHost, proxyPort,
+                    StringUtil.isNotBlank(proxyUsername));
+        }
+    }
+
+    /**
+     * Gets the HTTP proxy host. Defaults to {@code http.proxy.host} from FessConfig.
+     *
+     * @return the proxy host, or null/blank if no proxy is configured
+     */
+    protected String getProxyHost() {
+        return ComponentUtil.getFessConfig().getHttpProxyHost();
+    }
+
+    /**
+     * Gets the HTTP proxy port. Defaults to {@code http.proxy.port} from FessConfig.
+     *
+     * @return the proxy port, or null if no proxy is configured
+     */
+    protected Integer getProxyPort() {
+        return ComponentUtil.getFessConfig().getHttpProxyPortAsInteger();
+    }
+
+    /**
+     * Gets the HTTP proxy username. Defaults to {@code http.proxy.username} from FessConfig.
+     *
+     * @return the proxy username, or null/blank if no proxy authentication is required
+     */
+    protected String getProxyUsername() {
+        return ComponentUtil.getFessConfig().getHttpProxyUsername();
+    }
+
+    /**
+     * Gets the HTTP proxy password. Defaults to {@code http.proxy.password} from FessConfig.
+     *
+     * @return the proxy password, or null if no proxy authentication is required
+     */
+    protected String getProxyPassword() {
+        return ComponentUtil.getFessConfig().getHttpProxyPassword();
     }
 
     /**

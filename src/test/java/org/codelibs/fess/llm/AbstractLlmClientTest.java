@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -1014,6 +1017,99 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         assertEquals("Q3", request.getMessages().get(1).getContent());
     }
 
+    // ========== Proxy configuration tests ==========
+
+    @Test
+    public void test_proxyGetters_defaultDelegatesToFessConfig() {
+        // Default impls read from FessConfig. In the test environment, http.proxy.host
+        // is empty (the property exists with a default empty value), so the getters
+        // return empty/default values without throwing.
+        assertNotNull(client.getProxyHost(), "getProxyHost() should not return null");
+        // Empty by default in test FessConfig.
+        assertEquals("", client.getProxyHost());
+        // http.proxy.port has a default of 8080.
+        assertEquals(Integer.valueOf(8080), client.getProxyPort());
+        assertNotNull(client.getProxyUsername(), "getProxyUsername() should not return null");
+        assertEquals("", client.getProxyUsername());
+        assertNotNull(client.getProxyPassword(), "getProxyPassword() should not return null");
+        assertEquals("", client.getProxyPassword());
+    }
+
+    @Test
+    public void test_configureProxy_noOpWhenHostBlank() {
+        // Blank host -> no-op (no proxy applied, no exception). Build the client to confirm.
+        client.setTestProxy("", 8080, "", "");
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client without proxy should not throw: " + e);
+        }
+    }
+
+    @Test
+    public void test_configureProxy_noOpWhenHostNull() {
+        client.setTestProxy(null, 8080, null, null);
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client with null host should not throw: " + e);
+        }
+    }
+
+    @Test
+    public void test_configureProxy_noOpWhenPortNull() {
+        // Host set but port null -> still no-op (both required).
+        client.setTestProxy("proxy.example.com", null, "", "");
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client with null port should not throw: " + e);
+        }
+    }
+
+    @Test
+    public void test_configureProxy_appliesProxyWithoutAuth() {
+        client.setTestProxy("proxy.example.com", 8080, "", "");
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client with proxy should not throw: " + e);
+        }
+    }
+
+    @Test
+    public void test_configureProxy_appliesProxyWithBasicAuth() {
+        client.setTestProxy("proxy.example.com", 8080, "user", "pass");
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client with authenticated proxy should not throw: " + e);
+        }
+    }
+
+    @Test
+    public void test_configureProxy_handlesNullPasswordWithUsername() {
+        // Null password but non-blank username -> uses empty password char[], no NPE.
+        client.setTestProxy("proxy.example.com", 8080, "user", null);
+        final HttpClientBuilder builder = HttpClients.custom();
+        client.testConfigureProxy(builder);
+        try (CloseableHttpClient http = builder.build()) {
+            assertNotNull(http);
+        } catch (final Exception e) {
+            fail("Building client with null password should not throw: " + e);
+        }
+    }
+
     // ========== Testable subclass ==========
 
     @FunctionalInterface
@@ -1036,6 +1132,43 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         private int testHistoryMaxChars = 4000;
         private int testHistoryAssistantMaxChars = 500;
         private int testHistoryAssistantSummaryMaxChars = 500;
+        private boolean overrideProxy = false;
+        private String testProxyHost;
+        private Integer testProxyPort;
+        private String testProxyUsername;
+        private String testProxyPassword;
+
+        void setTestProxy(final String host, final Integer port, final String username, final String password) {
+            this.overrideProxy = true;
+            this.testProxyHost = host;
+            this.testProxyPort = port;
+            this.testProxyUsername = username;
+            this.testProxyPassword = password;
+        }
+
+        @Override
+        protected String getProxyHost() {
+            return overrideProxy ? testProxyHost : super.getProxyHost();
+        }
+
+        @Override
+        protected Integer getProxyPort() {
+            return overrideProxy ? testProxyPort : super.getProxyPort();
+        }
+
+        @Override
+        protected String getProxyUsername() {
+            return overrideProxy ? testProxyUsername : super.getProxyUsername();
+        }
+
+        @Override
+        protected String getProxyPassword() {
+            return overrideProxy ? testProxyPassword : super.getProxyPassword();
+        }
+
+        void testConfigureProxy(final HttpClientBuilder builder) {
+            configureProxy(builder);
+        }
 
         void setTestIntentDetectionPrompt(final String prompt) {
             this.testIntentDetectionPrompt = prompt;
