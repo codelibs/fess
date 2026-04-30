@@ -299,7 +299,7 @@ public class FessFunctions {
                 return locale;
             }
         }
-        return LaRequestUtil.getOptionalRequest().map(HttpServletRequest::getLocale).orElse(Locale.ROOT);
+        return Locale.ROOT;
     }
 
     /**
