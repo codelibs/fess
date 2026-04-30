@@ -568,6 +568,20 @@ public class FessFunctions {
     }
 
     /**
+     * Escapes a string so it can be safely embedded inside a JavaScript string literal.
+     * Single quotes, double quotes, backslashes, and control characters are escaped.
+     *
+     * @param input the input string to escape
+     * @return JavaScript-safe escaped string, or empty string if input is null
+     */
+    public static String escapeJs(final String input) {
+        if (input == null) {
+            return StringUtil.EMPTY;
+        }
+        return StringEscapeUtils.escapeEcmaScript(input);
+    }
+
+    /**
      * Replaces all occurrences of a regular expression pattern in the input string.
      *
      * @param input the input object to process

@@ -287,6 +287,14 @@
   </function>
 
   <function>
+    <description>Escape a string for safe embedding inside a JavaScript string literal.</description>
+    <name>escapeJs</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String escapeJs(java.lang.String)</function-signature>
+    <example>${fe:escapeJs(value)}</example>
+  </function>
+
+  <function>
     <description>Format a content as code.</description>
     <name>formatCode</name>
     <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>

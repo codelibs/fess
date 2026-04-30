@@ -150,4 +150,16 @@ public class FessFunctionsTest extends UnitFessTestCase {
         value = FessFunctions.maskEmail("<aaa@bbb.ccc>");
         assertEquals("<******@****.***>", value);
     }
+
+    @Test
+    public void test_escapeJs() {
+        assertEquals("", FessFunctions.escapeJs(null));
+        assertEquals("", FessFunctions.escapeJs(""));
+        assertEquals("plain text", FessFunctions.escapeJs("plain text"));
+        assertEquals("It\\'s currently busy.", FessFunctions.escapeJs("It's currently busy."));
+        assertEquals("say \\\"hi\\\"", FessFunctions.escapeJs("say \"hi\""));
+        assertEquals("a\\\\b", FessFunctions.escapeJs("a\\b"));
+        assertEquals("line1\\nline2", FessFunctions.escapeJs("line1\nline2"));
+        assertEquals("L\\'authentification a \\u00E9chou\\u00E9.", FessFunctions.escapeJs("L'authentification a échoué."));
+    }
 }

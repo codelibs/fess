@@ -168,32 +168,32 @@ ${fe:html(true)}
 				apiUrl: '${fe:url('/api/v1/chat')}',
 				streamUrl: '${fe:url('/api/v1/chat/stream')}',
 				labels: {
-					thinking: '<la:message key="labels.chat_thinking" />',
-					waiting: '<la:message key="labels.chat_waiting" />',
-					error: '<la:message key="labels.chat_error" />',
-					sources: '<la:message key="labels.chat_sources" />',
-					statusReady: '<la:message key="labels.chat_status_ready" />',
-					statusThinking: '<la:message key="labels.chat_status_thinking" />',
-					statusError: '<la:message key="labels.chat_status_error" />',
-					copied: '<la:message key="labels.chat_copied" />',
-					copyFailed: '<la:message key="labels.chat_copy_failed" />',
+					thinking: '${fe:escapeJs(fe:message("labels.chat_thinking", ""))}',
+					waiting: '${fe:escapeJs(fe:message("labels.chat_waiting", ""))}',
+					error: '${fe:escapeJs(fe:message("labels.chat_error", ""))}',
+					sources: '${fe:escapeJs(fe:message("labels.chat_sources", ""))}',
+					statusReady: '${fe:escapeJs(fe:message("labels.chat_status_ready", ""))}',
+					statusThinking: '${fe:escapeJs(fe:message("labels.chat_status_thinking", ""))}',
+					statusError: '${fe:escapeJs(fe:message("labels.chat_status_error", ""))}',
+					copied: '${fe:escapeJs(fe:message("labels.chat_copied", ""))}',
+					copyFailed: '${fe:escapeJs(fe:message("labels.chat_copy_failed", ""))}',
 					phases: {
-						intent: '<la:message key="labels.chat_phase_intent" />',
-						search: '<la:message key="labels.chat_phase_search" />',
-						evaluate: '<la:message key="labels.chat_phase_evaluate" />',
-						fetch: '<la:message key="labels.chat_phase_fetch" />',
-						answer: '<la:message key="labels.chat_phase_answer" />'
+						intent: '${fe:escapeJs(fe:message("labels.chat_phase_intent", ""))}',
+						search: '${fe:escapeJs(fe:message("labels.chat_phase_search", ""))}',
+						evaluate: '${fe:escapeJs(fe:message("labels.chat_phase_evaluate", ""))}',
+						fetch: '${fe:escapeJs(fe:message("labels.chat_phase_fetch", ""))}',
+						answer: '${fe:escapeJs(fe:message("labels.chat_phase_answer", ""))}'
 					},
 					errors: {
-						rate_limit: '<la:message key="labels.chat_error_rate_limit" />',
-						auth_error: '<la:message key="labels.chat_error_auth" />',
-						service_unavailable: '<la:message key="labels.chat_error_service_unavailable" />',
-						timeout: '<la:message key="labels.chat_error_timeout" />',
-						context_length_exceeded: '<la:message key="labels.chat_error_context_length_exceeded" />',
-						model_not_found: '<la:message key="labels.chat_error_model_not_found" />',
-						invalid_response: '<la:message key="labels.chat_error_invalid_response" />',
-						connection_error: '<la:message key="labels.chat_error_connection" />',
-						unknown: '<la:message key="labels.chat_error" />'
+						rate_limit: '${fe:escapeJs(fe:message("labels.chat_error_rate_limit", ""))}',
+						auth_error: '${fe:escapeJs(fe:message("labels.chat_error_auth", ""))}',
+						service_unavailable: '${fe:escapeJs(fe:message("labels.chat_error_service_unavailable", ""))}',
+						timeout: '${fe:escapeJs(fe:message("labels.chat_error_timeout", ""))}',
+						context_length_exceeded: '${fe:escapeJs(fe:message("labels.chat_error_context_length_exceeded", ""))}',
+						model_not_found: '${fe:escapeJs(fe:message("labels.chat_error_model_not_found", ""))}',
+						invalid_response: '${fe:escapeJs(fe:message("labels.chat_error_invalid_response", ""))}',
+						connection_error: '${fe:escapeJs(fe:message("labels.chat_error_connection", ""))}',
+						unknown: '${fe:escapeJs(fe:message("labels.chat_error", ""))}'
 					}
 				}
 			});
