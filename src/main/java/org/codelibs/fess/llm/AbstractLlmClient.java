@@ -735,10 +735,20 @@ public abstract class AbstractLlmClient implements LlmClient {
             logger.debug("[LLM] Acquiring concurrency permit. name={}, availablePermits={}, maxConcurrent={}", getName(),
                     concurrencyLimiter.availablePermits(), getMaxConcurrentRequests());
         }
+        final long waitTimeoutMs = getConcurrencyWaitTimeoutMs();
+        if (callback != null && concurrencyLimiter.availablePermits() == 0) {
+            try {
+                callback.onWaiting("concurrency_limit", 0L, waitTimeoutMs);
+            } catch (final Exception cbEx) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[LLM] onWaiting callback threw. error={}", cbEx.getMessage());
+                }
+            }
+        }
         try {
-            if (!concurrencyLimiter.tryAcquire(getConcurrencyWaitTimeoutMs(), TimeUnit.MILLISECONDS)) {
+            if (!concurrencyLimiter.tryAcquire(waitTimeoutMs, TimeUnit.MILLISECONDS)) {
                 logger.warn("[LLM] Concurrency limit exceeded. name={}, maxConcurrent={}, waitTimeout={}ms", getName(),
-                        getMaxConcurrentRequests(), getConcurrencyWaitTimeoutMs());
+                        getMaxConcurrentRequests(), waitTimeoutMs);
                 throw new LlmException("Too many concurrent requests", LlmException.ERROR_RATE_LIMIT);
             }
             try {
