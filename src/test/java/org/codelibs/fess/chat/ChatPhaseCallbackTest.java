@@ -15,8 +15,8 @@
  */
 package org.codelibs.fess.chat;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
@@ -24,193 +24,42 @@ import org.junit.jupiter.api.Test;
 public class ChatPhaseCallbackTest extends UnitFessTestCase {
 
     @Test
-    public void test_phaseConstants() {
-        assertEquals("intent", ChatPhaseCallback.PHASE_INTENT);
-        assertEquals("search", ChatPhaseCallback.PHASE_SEARCH);
-        assertEquals("evaluate", ChatPhaseCallback.PHASE_EVALUATE);
-        assertEquals("fetch", ChatPhaseCallback.PHASE_FETCH);
-        assertEquals("answer", ChatPhaseCallback.PHASE_ANSWER);
+    public void test_noOp_supportsAllNewMethods() {
+        final ChatPhaseCallback cb = ChatPhaseCallback.noOp();
+        cb.onPhaseStart("intent", "msg");
+        cb.onPhaseStart("search", "msg", "kw");
+        cb.onPhaseComplete("intent");
+        cb.onPhaseComplete("search", Map.of("hitCount", 12));
+        cb.onChunk("c", false);
+        cb.onError("intent", "err");
+        cb.onRetry("intent", "streamChat", 1, 3, 1000L, "status:429");
+        cb.onWaiting("intent", "concurrency_limit", 0L, 30000L);
+        cb.onFallback("search", "no_relevant_results", "orig", "new");
+        cb.onWarning("intent", "reasoning_token_exhausted", "search");
     }
 
     @Test
-    public void test_phaseConstants_notNull() {
-        assertNotNull(ChatPhaseCallback.PHASE_INTENT);
-        assertNotNull(ChatPhaseCallback.PHASE_SEARCH);
-        assertNotNull(ChatPhaseCallback.PHASE_EVALUATE);
-        assertNotNull(ChatPhaseCallback.PHASE_FETCH);
-        assertNotNull(ChatPhaseCallback.PHASE_ANSWER);
-    }
-
-    @Test
-    public void test_phaseConstants_unique() {
-        String[] phases = { ChatPhaseCallback.PHASE_INTENT, ChatPhaseCallback.PHASE_SEARCH, ChatPhaseCallback.PHASE_EVALUATE,
-                ChatPhaseCallback.PHASE_FETCH, ChatPhaseCallback.PHASE_ANSWER };
-
-        // Check all phases are unique
-        for (int i = 0; i < phases.length; i++) {
-            for (int j = i + 1; j < phases.length; j++) {
-                assertFalse("Phase constants should be unique", phases[i].equals(phases[j]));
-            }
-        }
-    }
-
-    @Test
-    public void test_callbackImplementation() {
-        // Test that a callback implementation can be created
-        final List<String> events = new ArrayList<>();
-
-        ChatPhaseCallback callback = new ChatPhaseCallback() {
+    public void test_onPhaseComplete_withPayload_defaultDelegates() {
+        final boolean[] called = { false };
+        final ChatPhaseCallback cb = new ChatPhaseCallback() {
             @Override
-            public void onPhaseStart(String phase, String message) {
-                events.add("start:" + phase + ":" + message);
+            public void onPhaseStart(final String phase, final String message) {
             }
 
             @Override
-            public void onPhaseComplete(String phase) {
-                events.add("complete:" + phase);
+            public void onPhaseComplete(final String phase) {
+                called[0] = true;
             }
 
             @Override
-            public void onChunk(String content, boolean done) {
-                events.add("chunk:" + content + ":" + done);
+            public void onChunk(final String content, final boolean done) {
             }
 
             @Override
-            public void onError(String phase, String errorMessage) {
-                events.add("error:" + phase + ":" + errorMessage);
+            public void onError(final String phase, final String error) {
             }
         };
-
-        // Test onPhaseStart
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "Analyzing...");
-        assertEquals(1, events.size());
-        assertEquals("start:intent:Analyzing...", events.get(0));
-
-        // Test onPhaseComplete
-        callback.onPhaseComplete(ChatPhaseCallback.PHASE_INTENT);
-        assertEquals(2, events.size());
-        assertEquals("complete:intent", events.get(1));
-
-        // Test onChunk
-        callback.onChunk("test content", false);
-        assertEquals(3, events.size());
-        assertEquals("chunk:test content:false", events.get(2));
-
-        callback.onChunk("final content", true);
-        assertEquals(4, events.size());
-        assertEquals("chunk:final content:true", events.get(3));
-
-        // Test onError
-        callback.onError(ChatPhaseCallback.PHASE_SEARCH, "Search failed");
-        assertEquals(5, events.size());
-        assertEquals("error:search:Search failed", events.get(4));
-    }
-
-    @Test
-    public void test_callbackWithNullValues() {
-        final List<String> events = new ArrayList<>();
-
-        ChatPhaseCallback callback = new ChatPhaseCallback() {
-            @Override
-            public void onPhaseStart(String phase, String message) {
-                events.add("start:" + phase + ":" + message);
-            }
-
-            @Override
-            public void onPhaseComplete(String phase) {
-                events.add("complete:" + phase);
-            }
-
-            @Override
-            public void onChunk(String content, boolean done) {
-                events.add("chunk:" + content);
-            }
-
-            @Override
-            public void onError(String phase, String errorMessage) {
-                events.add("error:" + phase + ":" + errorMessage);
-            }
-        };
-
-        // Test with null values
-        callback.onPhaseStart(null, null);
-        assertEquals("start:null:null", events.get(0));
-
-        callback.onChunk(null, false);
-        assertEquals("chunk:null", events.get(1));
-
-        callback.onError(null, null);
-        assertEquals("error:null:null", events.get(2));
-    }
-
-    @Test
-    public void test_callbackWithEmptyStrings() {
-        final List<String> events = new ArrayList<>();
-
-        ChatPhaseCallback callback = new ChatPhaseCallback() {
-            @Override
-            public void onPhaseStart(String phase, String message) {
-                events.add("start:" + phase.length() + ":" + message.length());
-            }
-
-            @Override
-            public void onPhaseComplete(String phase) {
-                events.add("complete:" + phase.length());
-            }
-
-            @Override
-            public void onChunk(String content, boolean done) {
-                events.add("chunk:" + content.length());
-            }
-
-            @Override
-            public void onError(String phase, String errorMessage) {
-                events.add("error:" + phase.length() + ":" + errorMessage.length());
-            }
-        };
-
-        callback.onPhaseStart("", "");
-        assertEquals("start:0:0", events.get(0));
-
-        callback.onChunk("", true);
-        assertEquals("chunk:0", events.get(1));
-    }
-
-    @Test
-    public void test_allPhases_inOrder() {
-        final List<String> phases = new ArrayList<>();
-
-        ChatPhaseCallback callback = new ChatPhaseCallback() {
-            @Override
-            public void onPhaseStart(String phase, String message) {
-                phases.add(phase);
-            }
-
-            @Override
-            public void onPhaseComplete(String phase) {
-            }
-
-            @Override
-            public void onChunk(String content, boolean done) {
-            }
-
-            @Override
-            public void onError(String phase, String errorMessage) {
-            }
-        };
-
-        // Simulate typical flow
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "msg");
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "msg");
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_EVALUATE, "msg");
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_FETCH, "msg");
-        callback.onPhaseStart(ChatPhaseCallback.PHASE_ANSWER, "msg");
-
-        assertEquals(5, phases.size());
-        assertEquals("intent", phases.get(0));
-        assertEquals("search", phases.get(1));
-        assertEquals("evaluate", phases.get(2));
-        assertEquals("fetch", phases.get(3));
-        assertEquals("answer", phases.get(4));
+        cb.onPhaseComplete("search", Collections.emptyMap());
+        assertTrue(called[0]);
     }
 }

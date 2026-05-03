@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.chat;
 
+import java.util.Map;
+
 /**
  * Callback interface for receiving notifications about chat processing phases.
  * Used for SSE streaming to notify clients about the current processing state.
@@ -63,6 +65,17 @@ public interface ChatPhaseCallback {
     void onPhaseComplete(String phase);
 
     /**
+     * Called when a processing phase completes with metadata payload (e.g., hit counts).
+     * Default implementation delegates to {@link #onPhaseComplete(String)} ignoring the payload.
+     *
+     * @param phase the phase name that completed
+     * @param payload optional metadata such as {@code hitCount}; never null
+     */
+    default void onPhaseComplete(final String phase, final Map<String, Object> payload) {
+        onPhaseComplete(phase);
+    }
+
+    /**
      * Called when a chunk of the response is available during streaming.
      *
      * @param content the content chunk
@@ -77,6 +90,56 @@ public interface ChatPhaseCallback {
      * @param error the error message
      */
     void onError(String phase, String error);
+
+    /**
+     * Called when the underlying LLM call is being retried.
+     *
+     * @param phase the phase where the retry occurs
+     * @param operation log label for the LLM operation (e.g., "streamChat")
+     * @param attempt 1-based attempt index that just failed
+     * @param maxAttempts total attempts including the first
+     * @param sleepMs milliseconds the client will sleep before the next attempt
+     * @param cause short cause description (e.g., "status:429" or "exception:IOException")
+     */
+    default void onRetry(final String phase, final String operation, final int attempt, final int maxAttempts, final long sleepMs,
+            final String cause) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when the request is waiting for a concurrency permit.
+     *
+     * @param phase the phase where waiting occurs
+     * @param reason short reason code (currently always "concurrency_limit")
+     * @param elapsedMs milliseconds already spent waiting
+     * @param timeoutMs maximum milliseconds the client will wait
+     */
+    default void onWaiting(final String phase, final String reason, final long elapsedMs, final long timeoutMs) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when the search query is regenerated due to no or no-relevant results.
+     *
+     * @param phase the phase where fallback occurs (typically "search")
+     * @param reason short reason code (e.g., "no_results", "no_relevant_results")
+     * @param originalQuery the query that produced no useful results
+     * @param newQuery the regenerated query that will be retried
+     */
+    default void onFallback(final String phase, final String reason, final String originalQuery, final String newQuery) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when an internal silent fallback occurs (e.g., reasoning model token exhaustion).
+     *
+     * @param phase the phase where the warning occurred
+     * @param code short machine-readable warning code (e.g., "reasoning_token_exhausted")
+     * @param detail short human-readable detail or related fallback action
+     */
+    default void onWarning(final String phase, final String code, final String detail) {
+        // Default implementation does nothing
+    }
 
     /**
      * Returns a no-op callback implementation.
