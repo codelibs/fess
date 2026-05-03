@@ -194,6 +194,16 @@ ${fe:html(true)}
 						invalid_response: '${fe:escapeJs(fe:message("labels.chat_error_invalid_response", ""))}',
 						connection_error: '${fe:escapeJs(fe:message("labels.chat_error_connection", ""))}',
 						unknown: '${fe:escapeJs(fe:message("labels.chat_error", ""))}'
+					},
+					retrying: '${fe:escapeJs(fe:message("labels.chat_retrying", ""))}',
+					waitingQueue: '${fe:escapeJs(fe:message("labels.chat_waiting_queue", ""))}',
+					hitCount: '${fe:escapeJs(fe:message("labels.chat_hit_count", ""))}',
+					fallback: {
+						no_results: '${fe:escapeJs(fe:message("labels.chat_fallback_no_results", ""))}',
+						no_relevant_results: '${fe:escapeJs(fe:message("labels.chat_fallback_no_relevant_results", ""))}'
+					},
+					warning: {
+						reasoning_token_exhausted: '${fe:escapeJs(fe:message("labels.chat_warning_token_exhausted", ""))}'
 					}
 				}
 			});
