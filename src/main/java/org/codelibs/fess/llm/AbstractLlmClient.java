@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -858,10 +859,11 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:INTENT] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
                         response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
             }
-            if (isEmptyContentWithLengthFinish(response)) {
+            if (isTruncatedFinish(response.getFinishReason())) {
                 logger.warn(
-                        "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
-                        userMessage);
+                        "[RAG:INTENT] Response truncated by output token limit (finishReason={}, contentLength={}, userMessageLength={}); cannot trust intent JSON. Falling back to search.",
+                        response.getFinishReason(), response.getContent() != null ? response.getContent().length() : 0,
+                        userMessage != null ? userMessage.length() : 0);
                 return IntentDetectionResult.fallbackSearch(userMessage);
             }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
@@ -905,10 +907,11 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:INTENT] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
                         response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
             }
-            if (isEmptyContentWithLengthFinish(response)) {
+            if (isTruncatedFinish(response.getFinishReason())) {
                 logger.warn(
-                        "[RAG:INTENT] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to search. userMessage={}",
-                        userMessage);
+                        "[RAG:INTENT] Response truncated by output token limit (finishReason={}, contentLength={}, userMessageLength={}); cannot trust intent JSON. Falling back to search.",
+                        response.getFinishReason(), response.getContent() != null ? response.getContent().length() : 0,
+                        userMessage != null ? userMessage.length() : 0);
                 return IntentDetectionResult.fallbackSearch(userMessage);
             }
             final IntentDetectionResult result = parseIntentResponse(response.getContent(), userMessage);
@@ -957,10 +960,11 @@ public abstract class AbstractLlmClient implements LlmClient {
                 logger.debug("[RAG:EVAL] LLM response. promptTokens={}, completionTokens={}, totalTokens={}, finishReason={}",
                         response.getPromptTokens(), response.getCompletionTokens(), response.getTotalTokens(), response.getFinishReason());
             }
-            if (isEmptyContentWithLengthFinish(response)) {
+            if (isTruncatedFinish(response.getFinishReason())) {
                 logger.warn(
-                        "[RAG:EVAL] Empty content with finish_reason=length detected (possible reasoning model token exhaustion). Falling back to all relevant. userMessage={}",
-                        userMessage);
+                        "[RAG:EVAL] Response truncated by output token limit (finishReason={}, contentLength={}, userMessageLength={}); cannot trust evaluation JSON. Falling back to all relevant.",
+                        response.getFinishReason(), response.getContent() != null ? response.getContent().length() : 0,
+                        userMessage != null ? userMessage.length() : 0);
                 final List<String> allDocIds = searchResults.stream()
                         .map(doc -> getStringValue(doc, "doc_id"))
                         .filter(StringUtil::isNotBlank)
@@ -1027,6 +1031,17 @@ public abstract class AbstractLlmClient implements LlmClient {
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG:REGEN] LLM response. content={}, promptTokens={}, completionTokens={}", response.getContent(),
                         response.getPromptTokens(), response.getCompletionTokens());
+            }
+            if (isTruncatedFinish(response.getFinishReason())) {
+                // The "query" field is atomic and the JSON regex requires a closing
+                // quote, so a truncated response often still yields a valid query.
+                // Surface the truncation as a WARN for diagnostics but continue
+                // extraction; if the field was the truncated part, extractJsonString
+                // returns blank and the existing failedQuery fallback runs below.
+                logger.warn(
+                        "[RAG:REGEN] Response truncated by output token limit (finishReason={}, contentLength={}, userMessageLength={}); attempting extraction anyway.",
+                        response.getFinishReason(), response.getContent() != null ? response.getContent().length() : 0,
+                        userMessage != null ? userMessage.length() : 0);
             }
 
             final String newQuery = extractJsonString(response.getContent(), "query");
@@ -1531,7 +1546,25 @@ public abstract class AbstractLlmClient implements LlmClient {
     protected IntentDetectionResult parseIntentResponse(final String response, final String userMessage) {
         try {
             final String intentStr = extractJsonString(response, "intent");
+            if (StringUtil.isBlank(intentStr)) {
+                // Missing or blank intent field is treated as a parse failure rather than
+                // a confident UNCLEAR. This commonly indicates a truncated or malformed
+                // JSON response that happened to be syntactically parseable.
+                logger.warn(
+                        "[RAG:INTENT] Missing or blank intent field in LLM response; falling back to search. responseLength={}, responseHead={}",
+                        response != null ? response.length() : 0, truncateForLog(response));
+                return IntentDetectionResult.fallbackSearch(userMessage);
+            }
             final ChatIntent intent = ChatIntent.fromValue(intentStr);
+            // ChatIntent.fromValue maps unknown strings to UNCLEAR by design. Reserve
+            // UNCLEAR for an explicit "intent":"unclear" from the model so unknown
+            // values are routed to fallbackSearch instead.
+            if (intent == ChatIntent.UNCLEAR && !ChatIntent.UNCLEAR.getValue().equalsIgnoreCase(intentStr.trim())) {
+                logger.warn(
+                        "[RAG:INTENT] Unknown intent value in LLM response; falling back to search. intentLength={}, intentHead={}, responseLength={}, responseHead={}",
+                        intentStr.length(), truncateForLog(intentStr), response != null ? response.length() : 0, truncateForLog(response));
+                return IntentDetectionResult.fallbackSearch(userMessage);
+            }
             final String query = extractJsonString(response, "query");
             final String reasoning = extractJsonString(response, "reasoning");
 
@@ -1546,7 +1579,8 @@ public abstract class AbstractLlmClient implements LlmClient {
                 return IntentDetectionResult.unclear(reasoning);
             }
         } catch (final Exception e) {
-            logger.warn("[RAG:INTENT] Failed to parse intent response, falling back to search. response={}", response, e);
+            logger.warn("[RAG:INTENT] Failed to parse intent response, falling back to search. responseLength={}, responseHead={}",
+                    response != null ? response.length() : 0, truncateForLog(response), e);
             return IntentDetectionResult.fallbackSearch(userMessage);
         }
     }
@@ -1574,7 +1608,8 @@ public abstract class AbstractLlmClient implements LlmClient {
 
             return RelevanceEvaluationResult.withRelevantDocs(docIds, indexes);
         } catch (final Exception e) {
-            logger.warn("[RAG:EVAL] Failed to parse evaluation response, falling back to all relevant. response={}", response, e);
+            logger.warn("[RAG:EVAL] Failed to parse evaluation response, falling back to all relevant. responseLength={}, responseHead={}",
+                    response != null ? response.length() : 0, truncateForLog(response), e);
             final List<String> allDocIds = searchResults.stream()
                     .map(doc -> getStringValue(doc, "doc_id"))
                     .filter(StringUtil::isNotBlank)
@@ -1776,16 +1811,61 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     // --- Utility methods ---
 
+    /** Maximum length of an LLM response prefix surfaced in WARN-level operator logs. */
+    protected static final int LOG_RESPONSE_HEAD_MAX_CHARS = 200;
+
     /**
-     * Checks if the LLM response has empty/blank content with a "length" finish reason.
-     * This typically indicates that a reasoning model consumed all tokens for internal
-     * reasoning, leaving no tokens for actual output content.
+     * Returns a bounded prefix of an LLM response suitable for WARN-level logging.
+     * Limits operator log volume and reduces accidental exposure of user-supplied
+     * text or retrieved context that may appear inside a malformed response. The
+     * full payload remains available at DEBUG via the surrounding callers.
+     *
+     * @param response the raw LLM response (may be null)
+     * @return a truncated, log-safe prefix; "null" when response is null
+     */
+    protected String truncateForLog(final String response) {
+        if (response == null) {
+            return "null";
+        }
+        if (response.length() <= LOG_RESPONSE_HEAD_MAX_CHARS) {
+            return response;
+        }
+        return response.substring(0, LOG_RESPONSE_HEAD_MAX_CHARS) + "...(truncated)";
+    }
+
+    /**
+     * Provider-specific finish-reason values that indicate the LLM stopped because
+     * it ran out of output token budget (truncated response). Includes:
+     * <ul>
+     * <li>{@code length} - OpenAI / Ollama</li>
+     * <li>{@code MAX_TOKENS} - Gemini</li>
+     * <li>{@code max_tokens} - Anthropic</li>
+     * <li>{@code model_length} - some self-hosted endpoints</li>
+     * </ul>
+     */
+    protected static final Set<String> TRUNCATION_FINISH_REASONS = Set.of("length", "MAX_TOKENS", "max_tokens", "model_length");
+
+    /**
+     * Checks if a finish reason indicates that the LLM response was truncated
+     * by the output token limit (provider-agnostic).
+     *
+     * @param finishReason the finish reason reported by the LLM provider
+     * @return true if the reason indicates truncation
+     */
+    protected boolean isTruncatedFinish(final String finishReason) {
+        return finishReason != null && TRUNCATION_FINISH_REASONS.contains(finishReason);
+    }
+
+    /**
+     * Checks if the LLM response has empty/blank content combined with a truncation
+     * finish reason. This typically indicates that a reasoning model consumed all
+     * tokens for internal reasoning, leaving no tokens for actual output content.
      *
      * @param response the LLM chat response
-     * @return true if content is empty/blank and finish reason is "length"
+     * @return true if content is empty/blank and finish reason indicates truncation
      */
     protected boolean isEmptyContentWithLengthFinish(final LlmChatResponse response) {
-        return StringUtil.isBlank(response.getContent()) && "length".equals(response.getFinishReason());
+        return StringUtil.isBlank(response.getContent()) && isTruncatedFinish(response.getFinishReason());
     }
 
     /**

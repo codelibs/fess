@@ -481,6 +481,570 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         assertTrue(sentPrompt.contains("More details please"));
     }
 
+    // ========== Truncation handling tests (issue #3125) ==========
+
+    @Test
+    public void test_isTruncatedFinish_recognisesAllProviderVariants() {
+        assertTrue(client.testIsTruncatedFinish("length"));
+        assertTrue(client.testIsTruncatedFinish("MAX_TOKENS"));
+        assertTrue(client.testIsTruncatedFinish("max_tokens"));
+        assertTrue(client.testIsTruncatedFinish("model_length"));
+    }
+
+    @Test
+    public void test_isTruncatedFinish_rejectsNormalAndUnknownReasons() {
+        assertFalse(client.testIsTruncatedFinish(null));
+        assertFalse(client.testIsTruncatedFinish(""));
+        assertFalse(client.testIsTruncatedFinish("stop"));
+        assertFalse(client.testIsTruncatedFinish("STOP"));
+        assertFalse(client.testIsTruncatedFinish("end_turn"));
+        assertFalse(client.testIsTruncatedFinish("done"));
+    }
+
+    @Test
+    public void test_isEmptyContentWithLengthFinish_acceptsAllProviderTruncationReasons() {
+        // OpenAI / Ollama
+        final LlmChatResponse openai = new LlmChatResponse("");
+        openai.setFinishReason("length");
+        assertTrue(client.testIsEmptyContentWithLengthFinish(openai));
+        // Gemini
+        final LlmChatResponse gemini = new LlmChatResponse("   ");
+        gemini.setFinishReason("MAX_TOKENS");
+        assertTrue(client.testIsEmptyContentWithLengthFinish(gemini));
+        // Anthropic
+        final LlmChatResponse anthropic = new LlmChatResponse(null);
+        anthropic.setFinishReason("max_tokens");
+        assertTrue(client.testIsEmptyContentWithLengthFinish(anthropic));
+    }
+
+    @Test
+    public void test_isEmptyContentWithLengthFinish_rejectsNonEmptyOrNonTruncated() {
+        // Non-empty content: not "empty" anymore
+        final LlmChatResponse withContent = new LlmChatResponse("partial");
+        withContent.setFinishReason("MAX_TOKENS");
+        assertFalse(client.testIsEmptyContentWithLengthFinish(withContent));
+        // Empty content but normal finish
+        final LlmChatResponse normal = new LlmChatResponse("");
+        normal.setFinishReason("stop");
+        assertFalse(client.testIsEmptyContentWithLengthFinish(normal));
+    }
+
+    @Test
+    public void test_detectIntent_geminiMaxTokens_nonEmptyTruncatedContent_fallsBackToSearch() {
+        // Reproduces issue #3125: 19-char truncated JSON fragment from Gemini gemini-3-flash-preview.
+        // Before the fix this slipped through into parseIntentResponse and yielded UNCLEAR.
+        client.setChatResponse("{\"reasoning\":\"the", "MAX_TOKENS");
+
+        final IntentDetectionResult result = client.detectIntent("AI検索モードの設定方法を教えて");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("AI検索モードの設定方法を教えて", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_openAiLength_emptyContent_fallsBackToSearch() {
+        client.setChatResponse("", "length");
+
+        final IntentDetectionResult result = client.detectIntent("how do I configure search?");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("how do I configure search?", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_anthropicMaxTokens_emptyContent_fallsBackToSearch() {
+        client.setChatResponse("", "max_tokens");
+
+        final IntentDetectionResult result = client.detectIntent("explain plugins");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("explain plugins", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_modelLength_truncated_fallsBackToSearch() {
+        client.setChatResponse("{\"intent\":\"sea", "model_length");
+
+        final IntentDetectionResult result = client.detectIntent("query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("query", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_normalFinish_unclear_remainsUnclear() {
+        // Sanity: explicit "unclear" with normal finish still maps to UNCLEAR.
+        client.setChatResponse("{\"intent\":\"unclear\",\"reasoning\":\"too vague\"}", "stop");
+
+        final IntentDetectionResult result = client.detectIntent("hi");
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+    }
+
+    @Test
+    public void test_detectIntent_withHistory_geminiMaxTokens_fallsBackToSearch() {
+        // Same regression coverage on the with-history overload.
+        client.setChatResponse("{\"reasoning\":\"th", "MAX_TOKENS");
+
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Earlier question"));
+        history.add(LlmMessage.assistant("Earlier answer"));
+
+        final IntentDetectionResult result = client.detectIntent("follow-up", history);
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("follow-up", result.getQuery());
+    }
+
+    // ========== parseIntentResponse hardening tests (issue #3125) ==========
+
+    @Test
+    public void test_parseIntentResponse_missingIntentField_fallsBackToSearch() {
+        // Lucky-balanced JSON without an intent field: previously yielded UNCLEAR.
+        final IntentDetectionResult result = client.testParseIntentResponse("{\"reasoning\":\"some text\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_emptyJson_fallsBackToSearch() {
+        final IntentDetectionResult result = client.testParseIntentResponse("{}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_blankIntentValue_fallsBackToSearch() {
+        final IntentDetectionResult result = client.testParseIntentResponse("{\"intent\":\"\",\"reasoning\":\"x\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_unknownIntentValue_fallsBackToSearch() {
+        // Unknown intent value should not be silently coerced to UNCLEAR.
+        final IntentDetectionResult result = client.testParseIntentResponse("{\"intent\":\"weather\",\"reasoning\":\"x\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_explicitUnclear_returnsUnclear() {
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"unclear\",\"reasoning\":\"too vague\"}", "user query");
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+        assertEquals("too vague", result.getReasoning());
+    }
+
+    @Test
+    public void test_parseIntentResponse_explicitUnclear_caseInsensitive() {
+        final IntentDetectionResult result = client.testParseIntentResponse("{\"intent\":\"UNCLEAR\",\"reasoning\":\"x\"}", "user query");
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+    }
+
+    @Test
+    public void test_parseIntentResponse_explicitSearch_returnsSearch() {
+        // Sanity: positive paths continue to work.
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"search\",\"query\":\"q\",\"reasoning\":\"r\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("q", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_explicitFaq_returnsFaq() {
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"faq\",\"query\":\"q\",\"reasoning\":\"r\"}", "user query");
+
+        assertEquals(ChatIntent.FAQ, result.getIntent());
+        assertEquals("q", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_explicitSummary_returnsSummary() {
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"summary\",\"url\":\"http://x\",\"reasoning\":\"r\"}", "user query");
+
+        assertEquals(ChatIntent.SUMMARY, result.getIntent());
+        assertEquals("http://x", result.getDocumentUrl());
+    }
+
+    @Test
+    public void test_parseIntentResponse_jsonNullIntent_fallsBackToSearch() {
+        // Pin behavior: explicit JSON null for "intent" must not be treated as confident UNCLEAR.
+        final IntentDetectionResult result = client.testParseIntentResponse("{\"intent\":null,\"reasoning\":\"x\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_normalFinish_blankIntent_fallsBackToSearch() {
+        // End-to-end: normal stop with a JSON that lacks the intent field still falls back.
+        client.setChatResponse("{\"reasoning\":\"only reasoning, no intent field\"}", "stop");
+
+        final IntentDetectionResult result = client.detectIntent("how do plugins work?");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("how do plugins work?", result.getQuery());
+    }
+
+    // ========== evaluateResults truncation tests (issue #3125 follow-up) ==========
+
+    @Test
+    public void test_evaluateResults_geminiMaxTokens_truncatedJson_fallsBackToAllRelevant() {
+        // Reproduces the same lucky-parse failure mode for evaluation:
+        // truncated `{"has_relevant": false` would otherwise be regex-matched and
+        // misclassified as "no relevant results", silently dropping all hits.
+        client.setChatResponse("{\"has_relevant\": false", "MAX_TOKENS");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "doc-1");
+        searchResults.add(doc1);
+        final Map<String, Object> doc2 = new HashMap<>();
+        doc2.put("doc_id", "doc-2");
+        searchResults.add(doc2);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("question", "query", searchResults);
+
+        assertTrue(result.isHasRelevantResults());
+        assertEquals(2, result.getRelevantDocIds().size());
+        assertTrue(result.getRelevantDocIds().contains("doc-1"));
+        assertTrue(result.getRelevantDocIds().contains("doc-2"));
+    }
+
+    @Test
+    public void test_evaluateResults_openAiLength_emptyContent_fallsBackToAllRelevant() {
+        client.setChatResponse("", "length");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "doc-1");
+        searchResults.add(doc1);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("question", "query", searchResults);
+
+        assertTrue(result.isHasRelevantResults());
+        assertEquals(1, result.getRelevantDocIds().size());
+    }
+
+    @Test
+    public void test_evaluateResults_normalFinish_explicitNoRelevant_remainsNoRelevant() {
+        // Sanity: explicit no-relevant with normal finish must NOT be coerced to fallback.
+        client.setChatResponse("{\"has_relevant\":false,\"relevant_indexes\":[]}", "stop");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "doc-1");
+        searchResults.add(doc1);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("question", "query", searchResults);
+
+        assertFalse(result.isHasRelevantResults());
+        assertEquals(0, result.getRelevantDocIds().size());
+    }
+
+    // ========== regenerateQuery truncation logging (issue #3125 follow-up) ==========
+
+    @Test
+    public void test_regenerateQuery_truncatedAndQueryAlsoTruncated_returnsFailedQuery() {
+        // Truncation lands inside the "query" string itself: extraction fails, the
+        // existing failedQuery fallback runs, plus the new truncation WARN is emitted.
+        client.setChatResponse("{\"query\":\"par", "MAX_TOKENS");
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("original query", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_truncatedButQueryFieldComplete_returnsExtractedQuery() {
+        // Truncation lands AFTER a complete "query" field (e.g. inside reasoning).
+        // The atomic field is fully extractable — Option B preserves it instead of
+        // discarding a usable refinement. WARN is emitted for diagnostics only.
+        client.setChatResponse("{\"query\":\"refined query value\",\"reasoning\":\"part", "MAX_TOKENS");
+
+        final String result = client.regenerateQuery("test question", "original query", "no_results", Collections.emptyList());
+
+        assertEquals("refined query value", result);
+    }
+
+    @Test
+    public void test_regenerateQuery_truncatedAtopenAiLength_completeQuery_returnsExtractedQuery() {
+        // Provider variant: OpenAI-style "length" with extractable query.
+        client.setChatResponse("{\"query\":\"good\",\"reasoning\":\"trun", "length");
+
+        final String result = client.regenerateQuery("q", "fail", "no_results", Collections.emptyList());
+
+        assertEquals("good", result);
+    }
+
+    // ========== Symmetry: detectIntent with-history hardening (issue #3125 follow-up) ==========
+
+    @Test
+    public void test_detectIntent_withHistory_blankIntent_fallsBackToSearch() {
+        client.setChatResponse("{\"reasoning\":\"only reasoning, no intent\"}", "stop");
+
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Earlier"));
+
+        final IntentDetectionResult result = client.detectIntent("follow-up question", history);
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("follow-up question", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_withHistory_unknownIntent_fallsBackToSearch() {
+        client.setChatResponse("{\"intent\":\"weather\",\"reasoning\":\"x\"}", "stop");
+
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Earlier"));
+
+        final IntentDetectionResult result = client.detectIntent("follow-up", history);
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("follow-up", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_withHistory_explicitUnclear_remainsUnclear() {
+        client.setChatResponse("{\"intent\":\"unclear\",\"reasoning\":\"too vague\"}", "stop");
+
+        final List<LlmMessage> history = new ArrayList<>();
+        history.add(LlmMessage.user("Earlier"));
+
+        final IntentDetectionResult result = client.detectIntent("hi", history);
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+    }
+
+    // ========== parseIntentResponse case/whitespace robustness ==========
+
+    @Test
+    public void test_parseIntentResponse_explicitUnclearWithWhitespace_returnsUnclear() {
+        // Trim handling: whitespace-padded "unclear" must still map to UNCLEAR,
+        // not be treated as an unknown value.
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"  unclear  \",\"reasoning\":\"x\"}", "user query");
+
+        assertEquals(ChatIntent.UNCLEAR, result.getIntent());
+    }
+
+    @Test
+    public void test_parseIntentResponse_uppercaseSearch_returnsSearch() {
+        // Case-insensitive matching of intent values.
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"SEARCH\",\"query\":\"q\",\"reasoning\":\"r\"}", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("q", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_mixedCaseFaq_returnsFaq() {
+        final IntentDetectionResult result =
+                client.testParseIntentResponse("{\"intent\":\"Faq\",\"query\":\"q\",\"reasoning\":\"r\"}", "user query");
+
+        assertEquals(ChatIntent.FAQ, result.getIntent());
+    }
+
+    @Test
+    public void test_parseIntentResponse_invalidJson_fallsBackToSearch() {
+        // Severely malformed JSON triggers Jackson then regex fallback; both fail to
+        // find an intent string -> blank -> fallbackSearch.
+        final IntentDetectionResult result = client.testParseIntentResponse("not json at all", "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    @Test
+    public void test_parseIntentResponse_nullResponse_fallsBackToSearch() {
+        final IntentDetectionResult result = client.testParseIntentResponse(null, "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    // ========== evaluateResults regression and provider coverage ==========
+
+    @Test
+    public void test_evaluateResults_anthropicMaxTokens_truncated_fallsBackToAllRelevant() {
+        client.setChatResponse("{\"has_relevant\":true,\"relevant_indexes\":[1", "max_tokens");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "d1");
+        searchResults.add(doc1);
+        final Map<String, Object> doc2 = new HashMap<>();
+        doc2.put("doc_id", "d2");
+        searchResults.add(doc2);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("q", "q", searchResults);
+
+        assertTrue(result.isHasRelevantResults());
+        assertEquals(2, result.getRelevantDocIds().size());
+    }
+
+    @Test
+    public void test_evaluateResults_modelLength_truncated_fallsBackToAllRelevant() {
+        client.setChatResponse("", "model_length");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "d1");
+        searchResults.add(doc1);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("q", "q", searchResults);
+
+        assertTrue(result.isHasRelevantResults());
+        assertEquals(1, result.getRelevantDocIds().size());
+    }
+
+    @Test
+    public void test_evaluateResults_normalFinish_explicitRelevant_returnsRelevantSubset() {
+        // Happy path sanity: the new truncation gate must NOT interfere with normal
+        // evaluation responses. Indexes are 1-based.
+        client.setChatResponse("{\"has_relevant\":true,\"relevant_indexes\":[1,3]}", "stop");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            final Map<String, Object> doc = new HashMap<>();
+            doc.put("doc_id", "d" + i);
+            searchResults.add(doc);
+        }
+
+        final RelevanceEvaluationResult result = client.evaluateResults("q", "q", searchResults);
+
+        assertTrue(result.isHasRelevantResults());
+        assertEquals(2, result.getRelevantDocIds().size());
+        assertTrue(result.getRelevantDocIds().contains("d1"));
+        assertTrue(result.getRelevantDocIds().contains("d3"));
+    }
+
+    @Test
+    public void test_evaluateResults_normalFinish_emptyContent_doesNotTriggerTruncationGate() {
+        // Sanity: empty content with finishReason="stop" (or null) must NOT be
+        // mistaken for truncation. Falls through to parseEvaluationResponse which
+        // will fail Jackson, fall to regex (no match), and return noRelevantResults.
+        client.setChatResponse("", "stop");
+
+        final List<Map<String, Object>> searchResults = new ArrayList<>();
+        final Map<String, Object> doc1 = new HashMap<>();
+        doc1.put("doc_id", "d1");
+        searchResults.add(doc1);
+
+        final RelevanceEvaluationResult result = client.evaluateResults("q", "q", searchResults);
+
+        // Empty content + normal finish => parseEvaluationResponse extracts has_relevant=false
+        // => noRelevantResults (NOT fallbackAllRelevant, which would carry doc IDs).
+        assertFalse(result.isHasRelevantResults());
+        assertEquals(0, result.getRelevantDocIds().size());
+    }
+
+    // ========== truncateForLog tests ==========
+
+    @Test
+    public void test_truncateForLog_null_returnsLiteralNull() {
+        assertEquals("null", client.testTruncateForLog(null));
+    }
+
+    @Test
+    public void test_truncateForLog_emptyString_returnsEmptyString() {
+        assertEquals("", client.testTruncateForLog(""));
+    }
+
+    @Test
+    public void test_truncateForLog_shortString_returnsAsIs() {
+        final String input = "short response";
+        assertEquals(input, client.testTruncateForLog(input));
+    }
+
+    @Test
+    public void test_truncateForLog_atBoundary_returnsAsIs() {
+        // 200 chars exactly -> not truncated
+        final String input = "a".repeat(200);
+        assertEquals(input, client.testTruncateForLog(input));
+    }
+
+    @Test
+    public void test_truncateForLog_overBoundary_isTruncated() {
+        // 201 chars -> truncated
+        final String input = "a".repeat(201);
+        final String truncated = client.testTruncateForLog(input);
+        assertTrue(truncated.startsWith("a".repeat(200)));
+        assertTrue(truncated.endsWith("...(truncated)"));
+        assertEquals(200 + "...(truncated)".length(), truncated.length());
+    }
+
+    @Test
+    public void test_parseIntentResponse_largeResponse_doesNotLeakFullContent() {
+        // Sanity: a long malformed response should still fall back without throwing,
+        // and the truncation helper handles arbitrarily long inputs.
+        final StringBuilder sb = new StringBuilder("{\"reasoning\":\"");
+        for (int i = 0; i < 5000; i++) {
+            sb.append('x');
+        }
+        sb.append("\"}");
+
+        final IntentDetectionResult result = client.testParseIntentResponse(sb.toString(), "user query");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user query", result.getQuery());
+    }
+
+    // ========== isTruncatedFinish defensive edge cases ==========
+
+    @Test
+    public void test_isTruncatedFinish_emptyString_returnsFalse() {
+        assertFalse(client.testIsTruncatedFinish(""));
+    }
+
+    @Test
+    public void test_isTruncatedFinish_caseSensitive_returnsFalseForOtherCases() {
+        // Set lookup is case-sensitive by design — provider values are canonical.
+        // "Length" / "max_TOKENS" etc. are not real provider outputs and must NOT match.
+        assertFalse(client.testIsTruncatedFinish("Length"));
+        assertFalse(client.testIsTruncatedFinish("MAX_tokens"));
+        assertFalse(client.testIsTruncatedFinish("Max_Tokens"));
+    }
+
+    // ========== detectIntent normal-finish + edge content ==========
+
+    @Test
+    public void test_detectIntent_normalFinish_emptyContent_handlesGracefully() {
+        // Empty content + normal finish (e.g. content filter or zero-token output) must
+        // not trigger the truncation gate. Falls through to parseIntentResponse which
+        // sees blank intent and triggers the parser-side fallbackSearch.
+        client.setChatResponse("", "stop");
+
+        final IntentDetectionResult result = client.detectIntent("user msg");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("user msg", result.getQuery());
+    }
+
+    @Test
+    public void test_detectIntent_nullFinishReason_normalContent_parsesNormally() {
+        // No finish reason set (older provider integrations or tests) must parse
+        // normally; truncation gate is skipped.
+        client.setChatResponse("{\"intent\":\"search\",\"query\":\"q\",\"reasoning\":\"r\"}");
+
+        final IntentDetectionResult result = client.detectIntent("user msg");
+
+        assertEquals(ChatIntent.SEARCH, result.getIntent());
+        assertEquals("q", result.getQuery());
+    }
+
     @Test
     public void test_buildIntentRequest_withHistory() {
         // History messages are added as structured messages
@@ -1124,6 +1688,7 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
         private String testSummarySystemPrompt = "{{systemPrompt}}\n{{documentContent}}\n{{languageInstruction}}";
         private int testContextMaxChars = 50000;
         private String chatResponseContent;
+        private String chatResponseFinishReason;
         private String lastChatPrompt;
         private LlmChatRequest lastChatRequest;
         private StreamChatCapture streamChatCapture;
@@ -1188,6 +1753,12 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
 
         void setChatResponse(final String content) {
             this.chatResponseContent = content;
+            this.chatResponseFinishReason = null;
+        }
+
+        void setChatResponse(final String content, final String finishReason) {
+            this.chatResponseContent = content;
+            this.chatResponseFinishReason = finishReason;
         }
 
         void setStreamChatCapture(final StreamChatCapture capture) {
@@ -1256,7 +1827,28 @@ public class AbstractLlmClientTest extends UnitFessTestCase {
             if (chatResponseContent == null) {
                 throw new LlmException("Test: no response configured");
             }
-            return new LlmChatResponse(chatResponseContent);
+            final LlmChatResponse response = new LlmChatResponse(chatResponseContent);
+            if (chatResponseFinishReason != null) {
+                response.setFinishReason(chatResponseFinishReason);
+            }
+            return response;
+        }
+
+        // Expose protected helpers for tests
+        boolean testIsTruncatedFinish(final String finishReason) {
+            return isTruncatedFinish(finishReason);
+        }
+
+        boolean testIsEmptyContentWithLengthFinish(final LlmChatResponse response) {
+            return isEmptyContentWithLengthFinish(response);
+        }
+
+        IntentDetectionResult testParseIntentResponse(final String response, final String userMessage) {
+            return parseIntentResponse(response, userMessage);
+        }
+
+        String testTruncateForLog(final String response) {
+            return truncateForLog(response);
         }
 
         @Override
