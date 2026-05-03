@@ -35,6 +35,16 @@ var FessChat = (function() {
                 invalid_response: 'Received an invalid response from the AI service. Please try again.',
                 connection_error: 'Unable to connect to the AI service. Please check the network connection.',
                 unknown: 'An error occurred. Please try again.'
+            },
+            retrying: 'Retrying... ({attempt}/{max}, next attempt in {seconds}s)',
+            waitingQueue: 'Waiting for an available slot...',
+            hitCount: '{count} documents found',
+            fallback: {
+                no_results: 'No documents found. Refining the query and searching again...',
+                no_relevant_results: 'No relevant documents found. Refining the query and searching again...'
+            },
+            warning: {
+                reasoning_token_exhausted: 'The model ran out of reasoning tokens; falling back. Result accuracy may be reduced.'
             }
         }
     };
@@ -346,6 +356,10 @@ var FessChat = (function() {
                     }
                 } else if (data.status === 'complete') {
                     updatePhase(data.phase, 'completed');
+                    if (data.phase === 'search' && typeof data.hitCount === 'number') {
+                        var hitMsg = (config.labels.hitCount || '{count} documents found').replace('{count}', data.hitCount);
+                        updateProgressMessage(hitMsg);
+                    }
                 }
             }
         });
@@ -408,6 +422,66 @@ var FessChat = (function() {
 
             handleError(thinkingId, messageElement, errorMessage);
             eventSource.close();
+        });
+
+        eventSource.addEventListener('retry', function(e) {
+            try {
+                var data = JSON.parse(e.data);
+                var seconds = Math.max(1, Math.round((data.sleepMs || 0) / 1000));
+                var msg = (config.labels.retrying || 'Retrying... ({attempt}/{max}, next attempt in {seconds}s)')
+                    .replace('{attempt}', data.attempt)
+                    .replace('{max}', data.maxAttempts)
+                    .replace('{seconds}', seconds);
+                updateProgressMessage(msg);
+                if (messageElement) {
+                    messageElement.find('.message-text').text(msg);
+                    scrollToBottom();
+                }
+            } catch (err) {
+                // ignore parse errors
+            }
+        });
+
+        eventSource.addEventListener('waiting', function(e) {
+            try {
+                JSON.parse(e.data); // payload reserved for future use
+                var msg = config.labels.waitingQueue || 'Waiting for an available slot...';
+                updateProgressMessage(msg);
+                if (messageElement) {
+                    messageElement.find('.message-text').text(msg);
+                    scrollToBottom();
+                }
+            } catch (err) {
+                // ignore parse errors
+            }
+        });
+
+        eventSource.addEventListener('fallback', function(e) {
+            try {
+                var data = JSON.parse(e.data);
+                var fallbackLabels = config.labels.fallback || {};
+                var msg = fallbackLabels[data.reason] || fallbackLabels.no_results || 'Refining the query and searching again...';
+                updateProgressMessage(msg);
+                if (messageElement) {
+                    messageElement.find('.message-text').text(msg);
+                    scrollToBottom();
+                }
+            } catch (err) {
+                // ignore parse errors
+            }
+        });
+
+        eventSource.addEventListener('warning', function(e) {
+            try {
+                var data = JSON.parse(e.data);
+                var warningLabels = config.labels.warning || {};
+                var msg = warningLabels[data.code];
+                if (msg) {
+                    updateProgressMessage(msg);
+                }
+            } catch (err) {
+                // ignore parse errors
+            }
         });
 
         eventSource.onerror = function() {
