@@ -37,4 +37,38 @@ public interface LlmStreamCallback {
     default void onError(final Throwable error) {
         // Default implementation does nothing
     }
+
+    /**
+     * Called when the LLM HTTP call is being retried.
+     *
+     * @param operation log label for the operation (e.g., "chat", "streamChat")
+     * @param attempt 1-based current attempt index that just failed
+     * @param maxAttempts total attempts including the first
+     * @param sleepMs milliseconds the client will sleep before the next attempt
+     * @param cause the cause of the retry (RetryableHttpException or IOException)
+     */
+    default void onRetry(final String operation, final int attempt, final int maxAttempts, final long sleepMs, final Throwable cause) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when the request is waiting for a concurrency permit.
+     *
+     * @param reason short reason code, currently always "concurrency_limit"
+     * @param elapsedMs milliseconds already spent waiting (0 on the first call)
+     * @param timeoutMs maximum milliseconds the client will wait before giving up
+     */
+    default void onWaiting(final String reason, final long elapsedMs, final long timeoutMs) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when an internal silent fallback occurs (e.g., reasoning model token exhaustion).
+     *
+     * @param code short machine-readable warning code (e.g., "reasoning_token_exhausted")
+     * @param detail human-readable detail (free-form)
+     */
+    default void onWarning(final String code, final String detail) {
+        // Default implementation does nothing
+    }
 }
