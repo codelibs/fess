@@ -366,6 +366,7 @@ public class ChatClient {
                     final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", history);
                     if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
                         logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
+                        callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, "no_results", query, newQuery);
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
                         final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
                         searchResults = fallbackResult.getDocuments();
@@ -411,6 +412,7 @@ public class ChatClient {
 
                         boolean fallbackSucceeded = false;
                         if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
+                            callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, "no_relevant_results", query, newQuery);
                             callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
                             final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
                             final List<Map<String, Object>> fallbackSearchResults = fallbackResult.getDocuments();
