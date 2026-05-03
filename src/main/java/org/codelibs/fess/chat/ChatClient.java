@@ -289,7 +289,7 @@ public class ChatClient {
                 final List<Map<String, Object>> urlResults = urlSearchResult.getDocuments();
                 searchQueryId = urlSearchResult.getQueryId();
                 searchRequestedTime = urlSearchResult.getRequestedTime();
-                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, java.util.Map.of("hitCount", urlResults.size()));
                 if (logger.isDebugEnabled()) {
                     logger.debug("[RAG] Phase {} completed. documentUrl={}, resultCount={}, phaseElapsedTime={}ms",
                             ChatPhaseCallback.PHASE_SEARCH, documentUrl, urlResults.size(), System.currentTimeMillis() - phaseStartTime);
@@ -351,7 +351,7 @@ public class ChatClient {
                 List<Map<String, Object>> searchResults = querySearchResult.getDocuments();
                 searchQueryId = querySearchResult.getQueryId();
                 searchRequestedTime = querySearchResult.getRequestedTime();
-                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, java.util.Map.of("hitCount", searchResults.size()));
 
                 logger.info("[RAG] Search completed. query={}, resultCount={}, elapsedTime={}ms", query, searchResults.size(),
                         System.currentTimeMillis() - phaseStartTime);
@@ -372,7 +372,7 @@ public class ChatClient {
                         searchResults = fallbackResult.getDocuments();
                         searchQueryId = fallbackResult.getQueryId();
                         searchRequestedTime = fallbackResult.getRequestedTime();
-                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                        callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, java.util.Map.of("hitCount", searchResults.size()));
                     }
                 }
 
@@ -416,7 +416,8 @@ public class ChatClient {
                             callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
                             final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
                             final List<Map<String, Object>> fallbackSearchResults = fallbackResult.getDocuments();
-                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH);
+                            callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH,
+                                    java.util.Map.of("hitCount", fallbackSearchResults.size()));
 
                             if (!fallbackSearchResults.isEmpty()) {
                                 // Re-evaluate fallback results
