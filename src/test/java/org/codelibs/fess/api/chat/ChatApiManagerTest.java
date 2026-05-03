@@ -346,6 +346,60 @@ public class ChatApiManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_sendSseEvent_retry_writesEventAndJson() {
+        final ChatApiManager mgr = new ChatApiManager();
+        final StringWriter sw = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(sw)) {
+            mgr.sendSseEvent(pw, "retry", Map.of("phase", "answer", "attempt", 2, "maxAttempts", 5, "sleepMs", 4000L));
+        }
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: retry\n"));
+        assertTrue(out.contains("\"phase\":\"answer\""));
+        assertTrue(out.contains("\"attempt\":2"));
+        assertTrue(out.contains("\"maxAttempts\":5"));
+        assertTrue(out.contains("\"sleepMs\":4000"));
+        assertTrue(out.endsWith("\n\n"));
+    }
+
+    @Test
+    public void test_sendSseEvent_waiting_writesPayload() {
+        final ChatApiManager mgr = new ChatApiManager();
+        final StringWriter sw = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(sw)) {
+            mgr.sendSseEvent(pw, "waiting", Map.of("phase", "answer", "reason", "concurrency_limit", "timeoutMs", 30000L));
+        }
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: waiting\n"));
+        assertTrue(out.contains("\"reason\":\"concurrency_limit\""));
+    }
+
+    @Test
+    public void test_sendSseEvent_fallback_writesPayload() {
+        final ChatApiManager mgr = new ChatApiManager();
+        final StringWriter sw = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(sw)) {
+            mgr.sendSseEvent(pw, "fallback",
+                    Map.of("phase", "search", "reason", "no_relevant_results", "originalQuery", "a", "newQuery", "b"));
+        }
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: fallback\n"));
+        assertTrue(out.contains("\"reason\":\"no_relevant_results\""));
+        assertTrue(out.contains("\"originalQuery\":\"a\""));
+    }
+
+    @Test
+    public void test_sendSseEvent_warning_writesPayload() {
+        final ChatApiManager mgr = new ChatApiManager();
+        final StringWriter sw = new StringWriter();
+        try (PrintWriter pw = new PrintWriter(sw)) {
+            mgr.sendSseEvent(pw, "warning", Map.of("phase", "intent", "code", "reasoning_token_exhausted", "detail", "search"));
+        }
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: warning\n"));
+        assertTrue(out.contains("\"code\":\"reasoning_token_exhausted\""));
+    }
+
+    @Test
     public void test_chatSource_properties() {
         final ChatSource source = new ChatSource();
 
