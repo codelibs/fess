@@ -25,12 +25,19 @@ public class IntentDetectionResult {
     private final String query;
     private final String documentUrl;
     private final String reasoning;
+    private final boolean fallback;
 
     private IntentDetectionResult(final ChatIntent intent, final String query, final String documentUrl, final String reasoning) {
+        this(intent, query, documentUrl, reasoning, false);
+    }
+
+    private IntentDetectionResult(final ChatIntent intent, final String query, final String documentUrl, final String reasoning,
+            final boolean fallback) {
         this.intent = intent;
         this.query = query;
         this.documentUrl = documentUrl;
         this.reasoning = reasoning;
+        this.fallback = fallback;
     }
 
     /**
@@ -67,6 +74,17 @@ public class IntentDetectionResult {
      */
     public String getReasoning() {
         return reasoning;
+    }
+
+    /**
+     * Returns whether this result was produced by an internal fallback path
+     * (e.g., the model returned no usable structured intent and the original
+     * user message was used as the search query).
+     *
+     * @return true if this is a fallback result
+     */
+    public boolean isFallback() {
+        return fallback;
     }
 
     /**
@@ -119,12 +137,12 @@ public class IntentDetectionResult {
      * @return the fallback search intent result
      */
     public static IntentDetectionResult fallbackSearch(final String originalMessage) {
-        return new IntentDetectionResult(ChatIntent.SEARCH, originalMessage, null, "Fallback: using original message as query");
+        return new IntentDetectionResult(ChatIntent.SEARCH, originalMessage, null, "Fallback: using original message as query", true);
     }
 
     @Override
     public String toString() {
         return "IntentDetectionResult{intent=" + intent + ", query=" + query + ", documentUrl=" + documentUrl + ", reasoning=" + reasoning
-                + "}";
+                + ", fallback=" + fallback + "}";
     }
 }

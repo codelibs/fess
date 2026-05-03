@@ -256,6 +256,9 @@ public class ChatClient {
             long phaseStartTime = System.currentTimeMillis();
             callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "Analyzing your question...");
             final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
+            if (intentResult.isFallback() && callback != null) {
+                callback.onWarning(ChatPhaseCallback.PHASE_INTENT, "reasoning_token_exhausted", "search");
+            }
             callback.onPhaseComplete(ChatPhaseCallback.PHASE_INTENT);
 
             if (logger.isDebugEnabled()) {
