@@ -297,10 +297,25 @@ public class ChatApiManager extends BaseApiManager {
 
                 @Override
                 public void onPhaseComplete(final String phase) {
+                    onPhaseComplete(phase, java.util.Collections.emptyMap());
+                }
+
+                @Override
+                public void onPhaseComplete(final String phase, final Map<String, Object> payload) {
                     try {
-                        sendSseEvent(writer, "phase", Map.of("phase", phase, "status", "complete"));
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("status", "complete");
+                        if (payload != null) {
+                            payload.forEach((k, v) -> {
+                                if (v != null && !"phase".equals(k) && !"status".equals(k)) {
+                                    data.put(k, v);
+                                }
+                            });
+                        }
+                        sendSseEvent(writer, "phase", data);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("SSE phase complete event sent. phase={}", phase);
+                            logger.debug("SSE phase complete event sent. phase={}, payload={}", phase, payload);
                         }
                     } catch (final Exception e) {
                         if (logger.isDebugEnabled()) {
@@ -332,6 +347,92 @@ public class ChatApiManager extends BaseApiManager {
                     } catch (final Exception e) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Failed to send error event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onRetry(final String phase, final String operation, final int attempt, final int maxAttempts,
+                        final long sleepMs, final String cause) {
+                    try {
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("operation", operation);
+                        data.put("attempt", attempt);
+                        data.put("maxAttempts", maxAttempts);
+                        data.put("sleepMs", sleepMs);
+                        if (cause != null) {
+                            data.put("cause", cause);
+                        }
+                        sendSseEvent(writer, "retry", data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE retry event sent. phase={}, attempt={}/{}, sleepMs={}", phase, attempt, maxAttempts, sleepMs);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send retry event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onWaiting(final String phase, final String reason, final long elapsedMs, final long timeoutMs) {
+                    try {
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("reason", reason);
+                        data.put("elapsedMs", elapsedMs);
+                        data.put("timeoutMs", timeoutMs);
+                        sendSseEvent(writer, "waiting", data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE waiting event sent. phase={}, reason={}, timeoutMs={}", phase, reason, timeoutMs);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send waiting event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onFallback(final String phase, final String reason, final String originalQuery, final String newQuery) {
+                    try {
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("reason", reason);
+                        if (originalQuery != null) {
+                            data.put("originalQuery", originalQuery);
+                        }
+                        if (newQuery != null) {
+                            data.put("newQuery", newQuery);
+                        }
+                        sendSseEvent(writer, "fallback", data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE fallback event sent. phase={}, reason={}", phase, reason);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send fallback event. phase={}, error={}", phase, e.getMessage());
+                        }
+                    }
+                }
+
+                @Override
+                public void onWarning(final String phase, final String code, final String detail) {
+                    try {
+                        final Map<String, Object> data = new HashMap<>();
+                        data.put("phase", phase);
+                        data.put("code", code);
+                        if (detail != null) {
+                            data.put("detail", detail);
+                        }
+                        sendSseEvent(writer, "warning", data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SSE warning event sent. phase={}, code={}", phase, code);
+                        }
+                    } catch (final Exception e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Failed to send warning event. phase={}, error={}", phase, e.getMessage());
                         }
                     }
                 }
