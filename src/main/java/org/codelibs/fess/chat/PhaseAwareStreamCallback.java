@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.chat;
 
+import java.util.Objects;
+
 import org.codelibs.fess.llm.LlmStreamCallback;
 
 /**
@@ -37,7 +39,7 @@ public class PhaseAwareStreamCallback implements LlmStreamCallback {
     public PhaseAwareStreamCallback(final String phase, final ChatPhaseCallback phaseCallback, final LlmStreamCallback inner) {
         this.phase = phase;
         this.phaseCallback = phaseCallback != null ? phaseCallback : ChatPhaseCallback.noOp();
-        this.inner = inner;
+        this.inner = Objects.requireNonNull(inner, "inner must not be null");
     }
 
     @Override
