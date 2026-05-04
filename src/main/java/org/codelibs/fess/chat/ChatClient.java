@@ -744,6 +744,96 @@ public class ChatClient {
         return suffix.substring(0, maxSuffixLength);
     }
 
+    /**
+     * Renders a single assistant turn for the Intent Detection prompt history.
+     * Format: {@code searched: "<query>" -> found: [Title1, Title2, ... (+N more)]}.
+     * Returns null when there is neither a search query nor any titles.
+     *
+     * @param assistantMsg the assistant message
+     * @param titlesMaxCount the maximum number of titles to include
+     * @return the rendered line or null
+     */
+    protected String renderIntentHistoryTurn(final ChatMessage assistantMsg, final int titlesMaxCount) {
+        final String escapedQuery = escapeForLine(assistantMsg.getSearchQuery());
+        final String titles = renderTitlesList(assistantMsg.getSources(), titlesMaxCount);
+        final boolean hasQuery = StringUtil.isNotBlank(escapedQuery);
+        final boolean hasTitles = !titles.isEmpty();
+        if (!hasQuery && !hasTitles) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder();
+        if (hasQuery) {
+            sb.append("searched: \"").append(escapedQuery).append("\"");
+        }
+        if (hasTitles) {
+            if (hasQuery) {
+                sb.append(" -> ");
+            }
+            sb.append("found: [").append(titles).append("]");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Renders a single (user, assistant) turn for the Answer Generation prompt history.
+     * Format: {@code Q: "<userQuery>" (searched: "<query>", refs: [Title1, Title2])}.
+     *
+     * @param userQuery the user's question for that turn
+     * @param assistantMsg the assistant message
+     * @param titlesMaxCount the maximum number of titles to include
+     * @return the rendered line, or null if userQuery is blank
+     */
+    protected String renderAnswerHistoryTurn(final String userQuery, final ChatMessage assistantMsg, final int titlesMaxCount) {
+        if (StringUtil.isBlank(userQuery)) {
+            return null;
+        }
+        final String escapedUser = escapeForLine(userQuery);
+        final String escapedQuery = escapeForLine(assistantMsg.getSearchQuery());
+        final String titles = renderTitlesList(assistantMsg.getSources(), titlesMaxCount);
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Q: \"").append(escapedUser).append("\"");
+        final boolean hasQuery = StringUtil.isNotBlank(escapedQuery);
+        final boolean hasTitles = !titles.isEmpty();
+        if (hasQuery || hasTitles) {
+            sb.append(" (");
+            if (hasQuery) {
+                sb.append("searched: \"").append(escapedQuery).append("\"");
+                if (hasTitles) {
+                    sb.append(", ");
+                }
+            }
+            if (hasTitles) {
+                sb.append("refs: [").append(titles).append("]");
+            }
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
+    private String renderTitlesList(final List<ChatSource> sources, final int titlesMaxCount) {
+        if (sources == null || sources.isEmpty()) {
+            return "";
+        }
+        final List<String> titles =
+                sources.stream().map(ChatSource::getTitle).filter(t -> t != null && !t.isEmpty()).collect(Collectors.toList());
+        if (titles.isEmpty()) {
+            return "";
+        }
+        if (titles.size() <= titlesMaxCount) {
+            return String.join(", ", titles);
+        }
+        final List<String> head = titles.subList(0, titlesMaxCount);
+        final int remaining = titles.size() - titlesMaxCount;
+        return String.join(", ", head) + ", ... (+" + remaining + " more)";
+    }
+
+    private String escapeForLine(final String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace('"', '\'').replace('\n', ' ').replace('\r', ' ');
+    }
+
     private static final int MAX_QUERY_LENGTH = 1000;
 
     private static final Pattern DANGEROUS_QUERY_PATTERN = Pattern.compile("\\*:\\*");

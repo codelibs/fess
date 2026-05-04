@@ -877,6 +877,92 @@ public class ChatClientTest extends UnitFessTestCase {
         assertTrue(chatClient.wasSearchDocumentsCalled());
     }
 
+    // ========== Phase-specific render helper tests ==========
+
+    @Test
+    public void test_renderIntentHistoryTurn_full() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("Fess install");
+        addTitle(msg, "Installation Guide");
+        addTitle(msg, "Quick Start");
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, 5);
+        assertEquals("searched: \"Fess install\" -> found: [Installation Guide, Quick Start]", result);
+    }
+
+    @Test
+    public void test_renderIntentHistoryTurn_titlesOverflow() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q");
+        for (int i = 1; i <= 7; i++) {
+            addTitle(msg, "T" + i);
+        }
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, 3);
+        assertEquals("searched: \"q\" -> found: [T1, T2, T3, ... (+4 more)]", result);
+    }
+
+    @Test
+    public void test_renderIntentHistoryTurn_noSearchQuery() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        addTitle(msg, "T1");
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, 5);
+        assertEquals("found: [T1]", result);
+    }
+
+    @Test
+    public void test_renderIntentHistoryTurn_empty() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, 5);
+        assertNull(result);
+    }
+
+    @Test
+    public void test_renderAnswerHistoryTurn_full() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("Fess install");
+        addTitle(msg, "Installation Guide");
+        addTitle(msg, "Quick Start");
+        final String result = chatClient.testRenderAnswerHistoryTurn("Fessのインストール方法は？", msg, 5);
+        assertEquals("Q: \"Fessのインストール方法は？\" (searched: \"Fess install\", refs: [Installation Guide, Quick Start])", result);
+    }
+
+    @Test
+    public void test_renderAnswerHistoryTurn_noTitles() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q");
+        final String result = chatClient.testRenderAnswerHistoryTurn("Hi", msg, 5);
+        assertEquals("Q: \"Hi\" (searched: \"q\")", result);
+    }
+
+    @Test
+    public void test_renderAnswerHistoryTurn_noSearchQuery() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        addTitle(msg, "T1");
+        final String result = chatClient.testRenderAnswerHistoryTurn("Hi", msg, 5);
+        assertEquals("Q: \"Hi\" (refs: [T1])", result);
+    }
+
+    @Test
+    public void test_renderAnswerHistoryTurn_userQueryEscapesQuoteAndNewline() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q");
+        final String result = chatClient.testRenderAnswerHistoryTurn("a\"b\nc", msg, 5);
+        assertEquals("Q: \"a'b c\" (searched: \"q\")", result);
+    }
+
+    @Test
+    public void test_renderAnswerHistoryTurn_searchQueryEscapesQuoteAndNewline() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q1\"q2\nq3");
+        final String result = chatClient.testRenderAnswerHistoryTurn("Hi", msg, 5);
+        assertEquals("Q: \"Hi\" (searched: \"q1'q2 q3\")", result);
+    }
+
+    private void addTitle(final ChatMessage msg, final String title) {
+        final java.util.Map<String, Object> doc = new java.util.HashMap<>();
+        doc.put("title", title);
+        msg.addSource(new ChatSource(msg.getSources().size() + 1, doc));
+    }
+
     // ========== searchWithQuery tracks queries ==========
 
     @Test
@@ -1014,6 +1100,14 @@ public class ChatClientTest extends UnitFessTestCase {
         String testBuildGoUrl(final String contextPath, final String docId, final String queryId, final long requestedTime,
                 final int order) {
             return buildGoUrl(contextPath, docId, queryId, requestedTime, order);
+        }
+
+        String testRenderIntentHistoryTurn(final ChatMessage msg, final int titlesMaxCount) {
+            return renderIntentHistoryTurn(msg, titlesMaxCount);
+        }
+
+        String testRenderAnswerHistoryTurn(final String userQuery, final ChatMessage assistantMsg, final int titlesMaxCount) {
+            return renderAnswerHistoryTurn(userQuery, assistantMsg, titlesMaxCount);
         }
 
         List<Map<String, Object>> testSearchWithQueryFiltered(final String query, final Map<String, String[]> fields,
