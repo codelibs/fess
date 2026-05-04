@@ -1195,7 +1195,6 @@ public class ChatClientTest extends UnitFessTestCase {
             return extractHistoryForAnswer(session);
         }
 
-        @Override
         protected List<LlmMessage> extractHistory(final ChatSession session) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "smart_summary");

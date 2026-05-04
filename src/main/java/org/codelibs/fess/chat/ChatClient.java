@@ -656,36 +656,6 @@ public class ChatClient {
     }
 
     /**
-     * Extracts conversation history from a chat session as LlmMessage list.
-     * The assistant message content in history is controlled by the
-     * {@code rag.chat.history.assistant.content} configuration property.
-     *
-     * @param session the chat session
-     * @return the list of LlmMessages representing the conversation history
-     */
-    protected List<LlmMessage> extractHistory(final ChatSession session) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "smart_summary");
-
-        final LlmClient client = llmClientManager.getClient();
-        final int assistantMaxChars = client != null ? client.getHistoryAssistantMaxChars() : 800;
-        final int summaryMaxChars = client != null ? client.getHistoryAssistantSummaryMaxChars() : 800;
-
-        final List<LlmMessage> history = new ArrayList<>();
-        for (final ChatMessage msg : session.getMessages()) {
-            if (msg.isUser()) {
-                history.add(LlmMessage.user(msg.getContent()));
-            } else if (msg.isAssistant()) {
-                final String content = buildAssistantHistoryContent(msg, assistantContentMode, assistantMaxChars, summaryMaxChars);
-                if (content != null) {
-                    history.add(LlmMessage.assistant(content));
-                }
-            }
-        }
-        return history;
-    }
-
-    /**
      * Builds the assistant message content for history based on the specified mode.
      *
      * @param msg the assistant chat message
@@ -700,7 +670,9 @@ public class ChatClient {
         case "full":
             return msg.getContent();
         case "smart_summary":
-            return buildSmartSummaryContent(msg, summaryMaxChars);
+            // smart_summary is handled by extractHistoryForIntent / extractHistoryForAnswer;
+            // it must never reach this per-message renderer.
+            throw new IllegalStateException("smart_summary mode is not handled per-message");
         case "source_titles":
             return buildSourceTitlesContent(msg, summaryMaxChars);
         case "source_titles_and_urls":
@@ -791,37 +763,6 @@ public class ChatClient {
             return content;
         }
         return content.substring(0, maxChars) + "...";
-    }
-
-    /**
-     * Builds a smart summary of the assistant message for history.
-     * Preserves the beginning (direct answer) and end (conclusion) of long responses,
-     * omitting the middle section, and appends source titles.
-     *
-     * @param msg the assistant chat message
-     * @param maxChars the maximum characters for the summary
-     * @return the summarized content with source titles
-     */
-    protected String buildSmartSummaryContent(final ChatMessage msg, final int maxChars) {
-        final String content = msg.getContent();
-        if (content == null) {
-            return null;
-        }
-        final String omitMarker = "\n...[omitted]...\n";
-        final int maxSuffixLen = Math.max(0, maxChars / 4);
-        final String suffix = buildSourceTitlesSuffix(msg.getSources(), maxSuffixLen);
-        final int bodyBudget = Math.max(0, maxChars - suffix.length() - omitMarker.length());
-        if (content.length() <= bodyBudget) {
-            return content + suffix;
-        }
-        if (bodyBudget <= 0) {
-            return suffix.isEmpty() ? content.substring(0, Math.min(content.length(), maxChars)) : suffix;
-        }
-        final int headChars = (int) (bodyBudget * 0.6);
-        final int tailChars = bodyBudget - headChars;
-        final String head = content.substring(0, headChars);
-        final String tail = content.substring(content.length() - tailChars);
-        return head + omitMarker + tail + suffix;
     }
 
     /**
