@@ -901,6 +901,25 @@ public class ChatClientTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_renderIntentHistoryTurn_titlesMaxCountZero() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q");
+        addTitle(msg, "T1");
+        addTitle(msg, "T2");
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, 0);
+        assertEquals("searched: \"q\"", result);
+    }
+
+    @Test
+    public void test_renderIntentHistoryTurn_titlesMaxCountNegative() {
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("q");
+        addTitle(msg, "T1");
+        final String result = chatClient.testRenderIntentHistoryTurn(msg, -3);
+        assertEquals("searched: \"q\"", result);
+    }
+
+    @Test
     public void test_renderIntentHistoryTurn_noSearchQuery() {
         final ChatMessage msg = ChatMessage.assistantMessage("body");
         addTitle(msg, "T1");

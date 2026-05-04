@@ -811,7 +811,7 @@ public class ChatClient {
     }
 
     private String renderTitlesList(final List<ChatSource> sources, final int titlesMaxCount) {
-        if (sources == null || sources.isEmpty()) {
+        if (sources == null || sources.isEmpty() || titlesMaxCount <= 0) {
             return "";
         }
         final List<String> titles =
