@@ -982,6 +982,109 @@ public class ChatClientTest extends UnitFessTestCase {
         msg.addSource(new ChatSource(msg.getSources().size() + 1, doc));
     }
 
+    // ========== Phase-specific extractHistory tests (smart_summary) ==========
+
+    @Test
+    public void test_extractHistoryForIntent_smartSummary() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.history.assistant.content".equals(key)) {
+                    return "smart_summary";
+                }
+                if ("rag.chat.history.titles.max.count".equals(key)) {
+                    return "5";
+                }
+                return super.getOrDefault(key, defaultValue);
+            }
+        });
+        final ChatSession session = new ChatSession();
+        session.addMessage(ChatMessage.userMessage("Fessのインストール方法は？"));
+        final ChatMessage a1 = ChatMessage.assistantMessage("body1");
+        a1.setSearchQuery("Fess install");
+        addTitle(a1, "Installation Guide");
+        session.addMessage(a1);
+        session.addMessage(ChatMessage.userMessage("Dockerの場合は？"));
+
+        final List<LlmMessage> result = chatClient.testExtractHistoryForIntent(session);
+
+        assertEquals(2, result.size());
+        // user turn passes through
+        assertEquals("user", result.get(0).getRole());
+        assertEquals("Fessのインストール方法は？", result.get(0).getContent());
+        // assistant turn rendered minimally
+        assertEquals("assistant", result.get(1).getRole());
+        assertEquals("searched: \"Fess install\" -> found: [Installation Guide]", result.get(1).getContent());
+    }
+
+    @Test
+    public void test_extractHistoryForAnswer_smartSummary_pairsUserWithAssistant() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.history.assistant.content".equals(key)) {
+                    return "smart_summary";
+                }
+                if ("rag.chat.history.titles.max.count".equals(key)) {
+                    return "5";
+                }
+                return super.getOrDefault(key, defaultValue);
+            }
+        });
+        final ChatSession session = new ChatSession();
+        session.addMessage(ChatMessage.userMessage("Fessのインストール方法は？"));
+        final ChatMessage a1 = ChatMessage.assistantMessage("body1");
+        a1.setSearchQuery("Fess install");
+        addTitle(a1, "Installation Guide");
+        session.addMessage(a1);
+
+        final List<LlmMessage> result = chatClient.testExtractHistoryForAnswer(session);
+
+        assertEquals(1, result.size());
+        assertEquals("assistant", result.get(0).getRole());
+        assertEquals("Q: \"Fessのインストール方法は？\" (searched: \"Fess install\", refs: [Installation Guide])", result.get(0).getContent());
+    }
+
+    @Test
+    public void test_extractHistoryForAnswer_smartSummary_skipsOrphanAssistant() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.history.assistant.content".equals(key)) {
+                    return "smart_summary";
+                }
+                return super.getOrDefault(key, defaultValue);
+            }
+        });
+        final ChatSession session = new ChatSession();
+        final ChatMessage orphan = ChatMessage.assistantMessage("body");
+        orphan.setSearchQuery("q");
+        session.addMessage(orphan);
+
+        final List<LlmMessage> result = chatClient.testExtractHistoryForAnswer(session);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void test_extractHistoryForIntent_fullMode_unchanged() {
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            @Override
+            public String getOrDefault(final String key, final String defaultValue) {
+                if ("rag.chat.history.assistant.content".equals(key)) {
+                    return "full";
+                }
+                return super.getOrDefault(key, defaultValue);
+            }
+        });
+        final ChatSession session = new ChatSession();
+        session.addMessage(ChatMessage.userMessage("Q"));
+        session.addMessage(ChatMessage.assistantMessage("Long answer body here."));
+
+        final List<LlmMessage> result = chatClient.testExtractHistoryForIntent(session);
+        assertEquals(2, result.size());
+        assertEquals("Long answer body here.", result.get(1).getContent());
+    }
+
     // ========== searchWithQuery tracks queries ==========
 
     @Test
@@ -1082,6 +1185,14 @@ public class ChatClientTest extends UnitFessTestCase {
 
         List<LlmMessage> testExtractHistory(final ChatSession session) {
             return extractHistory(session);
+        }
+
+        List<LlmMessage> testExtractHistoryForIntent(final ChatSession session) {
+            return extractHistoryForIntent(session);
+        }
+
+        List<LlmMessage> testExtractHistoryForAnswer(final ChatSession session) {
+            return extractHistoryForAnswer(session);
         }
 
         @Override

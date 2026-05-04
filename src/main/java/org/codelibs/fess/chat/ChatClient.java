@@ -546,6 +546,108 @@ public class ChatClient {
     }
 
     /**
+     * Extracts conversation history shaped for the Intent Detection prompt.
+     * For {@code smart_summary} mode each assistant turn is rendered as a single
+     * {@code searched: "..." -> found: [...]} line. For other modes, this delegates
+     * to the per-message {@link #buildAssistantHistoryContent} logic.
+     *
+     * @param session the chat session
+     * @return the list of LlmMessages for Intent Detection
+     */
+    protected List<LlmMessage> extractHistoryForIntent(final ChatSession session) {
+        return extractHistoryWithMode(session, /* forIntent */ true);
+    }
+
+    /**
+     * Extracts conversation history shaped for the Answer Generation prompt.
+     * For {@code smart_summary} mode each (user, assistant) turn is rendered as a single
+     * {@code Q: "..." (searched: "...", refs: [...])} line. For other modes, this delegates
+     * to the per-message {@link #buildAssistantHistoryContent} logic.
+     *
+     * @param session the chat session
+     * @return the list of LlmMessages for Answer Generation
+     */
+    protected List<LlmMessage> extractHistoryForAnswer(final ChatSession session) {
+        return extractHistoryWithMode(session, /* forIntent */ false);
+    }
+
+    private List<LlmMessage> extractHistoryWithMode(final ChatSession session, final boolean forIntent) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "smart_summary");
+
+        if ("smart_summary".equals(assistantContentMode)) {
+            return extractHistorySmartSummary(session, forIntent, getHistoryTitlesMaxCount(fessConfig));
+        }
+
+        // Other modes: per-message rendering, identical for both phases.
+        final LlmClient client = llmClientManager != null ? llmClientManager.getClient() : null;
+        final int assistantMaxChars = client != null ? client.getHistoryAssistantMaxChars() : 800;
+        final int summaryMaxChars = client != null ? client.getHistoryAssistantSummaryMaxChars() : 800;
+        final List<LlmMessage> history = new ArrayList<>();
+        for (final ChatMessage msg : session.getMessages()) {
+            if (msg.isUser()) {
+                history.add(LlmMessage.user(msg.getContent()));
+            } else if (msg.isAssistant()) {
+                final String content = buildAssistantHistoryContent(msg, assistantContentMode, assistantMaxChars, summaryMaxChars);
+                if (content != null) {
+                    history.add(LlmMessage.assistant(content));
+                }
+            }
+        }
+        return history;
+    }
+
+    private List<LlmMessage> extractHistorySmartSummary(final ChatSession session, final boolean forIntent, final int titlesMaxCount) {
+        final List<LlmMessage> history = new ArrayList<>();
+        final List<ChatMessage> messages = session.getMessages();
+        if (forIntent) {
+            // Intent phase: include only completed (user, assistant) pairs; skip trailing user without response.
+            String pendingUser = null;
+            for (final ChatMessage msg : messages) {
+                if (msg.isUser()) {
+                    pendingUser = msg.getContent();
+                } else if (msg.isAssistant()) {
+                    if (pendingUser != null) {
+                        history.add(LlmMessage.user(pendingUser));
+                        pendingUser = null;
+                    }
+                    final String line = renderIntentHistoryTurn(msg, titlesMaxCount);
+                    if (line != null) {
+                        history.add(LlmMessage.assistant(line));
+                    }
+                }
+            }
+        } else {
+            // Answer phase: pair each assistant with its preceding user, emit one rendered line per pair.
+            String pendingUser = null;
+            for (final ChatMessage msg : messages) {
+                if (msg.isUser()) {
+                    pendingUser = msg.getContent();
+                } else if (msg.isAssistant()) {
+                    if (pendingUser == null) {
+                        // Orphan assistant — skip defensively.
+                        continue;
+                    }
+                    final String line = renderAnswerHistoryTurn(pendingUser, msg, titlesMaxCount);
+                    if (line != null) {
+                        history.add(LlmMessage.assistant(line));
+                    }
+                    pendingUser = null;
+                }
+            }
+        }
+        return history;
+    }
+
+    private int getHistoryTitlesMaxCount(final FessConfig fessConfig) {
+        try {
+            return Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.titles.max.count", "5"));
+        } catch (final Exception e) {
+            return 5;
+        }
+    }
+
+    /**
      * Extracts conversation history from a chat session as LlmMessage list.
      * The assistant message content in history is controlled by the
      * {@code rag.chat.history.assistant.content} configuration property.
