@@ -133,8 +133,9 @@ public class ChatClient {
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        // Extract history snapshot before adding current user message to avoid duplication
-        final List<LlmMessage> history = extractHistory(session);
+        // Extract phase-specific history snapshots before adding current user message.
+        final List<LlmMessage> historyForIntent = extractHistoryForIntent(session);
+        final List<LlmMessage> historyForAnswer = extractHistoryForAnswer(session);
         // Add user message immediately for session integrity under concurrent access
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
@@ -142,14 +143,14 @@ public class ChatClient {
         try {
             String finalSearchQuery = null;
             // Intent detection
-            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
+            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, historyForIntent);
             if (logger.isDebugEnabled()) {
                 logger.debug("[RAG] Intent detected. intent={}, query={}", intentResult.getIntent(), intentResult.getQuery());
             }
 
             if (intentResult.getIntent() == ChatIntent.UNCLEAR) {
                 // Unclear intent - generate answer with empty documents to ask for clarification
-                final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, Collections.emptyList(), history);
+                final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, Collections.emptyList(), historyForAnswer);
                 final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
                 session.addMessage(assistantMessage);
                 logger.info("[RAG] Chat completed (unclear). sessionId={}, elapsedTime={}ms", session.getSessionId(),
@@ -169,7 +170,7 @@ public class ChatClient {
                 // Fallback: regenerate query if no results
                 if (searchResult.getDocuments().isEmpty()) {
                     logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
-                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", history);
+                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", historyForIntent);
                     if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
                         logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
                         searchResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
@@ -179,7 +180,7 @@ public class ChatClient {
             }
 
             final List<Map<String, Object>> searchResults = searchResult.getDocuments();
-            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, history);
+            final LlmChatResponse llmResponse = llmClientManager.generateAnswer(userMessage, searchResults, historyForAnswer);
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
             addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
@@ -245,8 +246,10 @@ public class ChatClient {
         }
 
         final ChatSession session = chatSessionManager.getOrCreateSession(sessionId, userId);
-        // Extract history snapshot before adding current user message to avoid duplication
-        final List<LlmMessage> history = extractHistory(session);
+        // Extract phase-specific history snapshots before adding current user message.
+        // Intent phase uses minimal context; answer phase pairs user/assistant turns.
+        final List<LlmMessage> historyForIntent = extractHistoryForIntent(session);
+        final List<LlmMessage> historyForAnswer = extractHistoryForAnswer(session);
         // Add user message immediately for session integrity under concurrent access
         final ChatMessage userChatMessage = ChatMessage.userMessage(userMessage);
         session.addMessage(userChatMessage);
@@ -260,7 +263,7 @@ public class ChatClient {
             // Phase 1: Intent Detection
             long phaseStartTime = System.currentTimeMillis();
             callback.onPhaseStart(ChatPhaseCallback.PHASE_INTENT, "Analyzing your question...");
-            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
+            final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, historyForIntent);
             if (intentResult.isFallback()) {
                 callback.onWarning(ChatPhaseCallback.PHASE_INTENT, "reasoning_token_exhausted", "search");
             }
@@ -282,7 +285,7 @@ public class ChatClient {
                 };
                 final LlmStreamCallback unclearCallback =
                         new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawUnclearCallback);
-                llmClientManager.generateUnclearIntentResponse(userMessage, history, unclearCallback);
+                llmClientManager.generateUnclearIntentResponse(userMessage, historyForAnswer, unclearCallback);
                 callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                 if (logger.isDebugEnabled()) {
                     logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
@@ -313,7 +316,7 @@ public class ChatClient {
                     };
                     final LlmStreamCallback docNotFoundCallback =
                             new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawDocNotFoundCallback);
-                    llmClientManager.generateDocumentNotFoundResponse(userMessage, documentUrl, history, docNotFoundCallback);
+                    llmClientManager.generateDocumentNotFoundResponse(userMessage, documentUrl, historyForAnswer, docNotFoundCallback);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                     if (logger.isDebugEnabled()) {
                         logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
@@ -343,7 +346,7 @@ public class ChatClient {
                     };
                     final LlmStreamCallback summaryCallback =
                             new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawSummaryCallback);
-                    llmClientManager.generateSummaryResponse(userMessage, fullDocs, history, summaryCallback);
+                    llmClientManager.generateSummaryResponse(userMessage, fullDocs, historyForAnswer, summaryCallback);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                     if (logger.isDebugEnabled()) {
                         logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
@@ -372,7 +375,7 @@ public class ChatClient {
                 // Fallback: regenerate query if no results
                 if (searchResults.isEmpty()) {
                     logger.info("[RAG] Primary search returned 0 results, regenerating query. originalQuery={}", query);
-                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", history);
+                    final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_results", historyForIntent);
                     if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
                         logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
                         callback.onFallback(ChatPhaseCallback.PHASE_SEARCH, "no_results", query, newQuery);
@@ -396,7 +399,7 @@ public class ChatClient {
                     };
                     final LlmStreamCallback noResultsCallback =
                             new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawNoResultsCallback);
-                    llmClientManager.generateNoResultsResponse(userMessage, history, noResultsCallback);
+                    llmClientManager.generateNoResultsResponse(userMessage, historyForAnswer, noResultsCallback);
                     callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                     if (logger.isDebugEnabled()) {
                         logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms", ChatPhaseCallback.PHASE_ANSWER,
@@ -418,7 +421,8 @@ public class ChatClient {
                     // Fallback: regenerate query if no relevant results
                     if (!evalResult.isHasRelevantResults()) {
                         logger.info("[RAG] No relevant results in evaluation, regenerating query. originalQuery={}", query);
-                        final String newQuery = llmClientManager.regenerateQuery(userMessage, query, "no_relevant_results", history);
+                        final String newQuery =
+                                llmClientManager.regenerateQuery(userMessage, query, "no_relevant_results", historyForIntent);
 
                         boolean fallbackSucceeded = false;
                         if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
@@ -456,7 +460,7 @@ public class ChatClient {
                             };
                             final LlmStreamCallback fallbackNoResultsCallback =
                                     new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawFallbackNoResultsCallback);
-                            llmClientManager.generateNoResultsResponse(userMessage, history, fallbackNoResultsCallback);
+                            llmClientManager.generateNoResultsResponse(userMessage, historyForAnswer, fallbackNoResultsCallback);
                             callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                             if (logger.isDebugEnabled()) {
                                 logger.debug("[RAG] Phase {} completed. responseLength={}, phaseElapsedTime={}ms",
@@ -489,9 +493,9 @@ public class ChatClient {
                         final LlmStreamCallback answerCallback =
                                 new PhaseAwareStreamCallback(ChatPhaseCallback.PHASE_ANSWER, callback, rawAnswerCallback);
                         if (intentResult.getIntent() == ChatIntent.FAQ) {
-                            llmClientManager.generateFaqAnswerResponse(userMessage, fullDocs, history, answerCallback);
+                            llmClientManager.generateFaqAnswerResponse(userMessage, fullDocs, historyForAnswer, answerCallback);
                         } else {
-                            llmClientManager.streamGenerateAnswer(userMessage, fullDocs, history, answerCallback);
+                            llmClientManager.streamGenerateAnswer(userMessage, fullDocs, historyForAnswer, answerCallback);
                         }
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_ANSWER);
                         if (logger.isDebugEnabled()) {
