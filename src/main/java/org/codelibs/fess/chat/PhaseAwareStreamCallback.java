@@ -32,6 +32,9 @@ public class PhaseAwareStreamCallback implements LlmStreamCallback {
     private final LlmStreamCallback inner;
 
     /**
+     * Creates a callback that forwards chunk/error events to {@code inner} and
+     * retry/waiting/warning events to {@code phaseCallback} tagged with {@code phase}.
+     *
      * @param phase the phase name to attach to phase callback events
      * @param phaseCallback the phase callback to forward retry/waiting/warning events to (may be null)
      * @param inner the LlmStreamCallback to forward chunk/error events to (never null)
