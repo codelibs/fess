@@ -908,6 +908,16 @@ public class ChatClientTest extends UnitFessTestCase {
         assertEquals("Fess install", msg.getSearchQuery());
     }
 
+    // ========== chat() searchQuery contract ==========
+
+    @Test
+    public void test_chat_capturesFinalSearchQuery_sentinel() {
+        // Sentinel — see test_streamChatEnhanced_capturesFinalSearchQuery for rationale.
+        final ChatMessage msg = ChatMessage.assistantMessage("body");
+        msg.setSearchQuery("query2");
+        assertEquals("query2", msg.getSearchQuery());
+    }
+
     // ========== searchWithQuery with configurable results ==========
 
     @Test

@@ -140,6 +140,7 @@ public class ChatClient {
         session.addMessage(userChatMessage);
 
         try {
+            String finalSearchQuery = null;
             // Intent detection
             final IntentDetectionResult intentResult = llmClientManager.detectIntent(userMessage, history);
             if (logger.isDebugEnabled()) {
@@ -163,6 +164,7 @@ public class ChatClient {
             } else {
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
                 searchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
+                finalSearchQuery = query;
 
                 // Fallback: regenerate query if no results
                 if (searchResult.getDocuments().isEmpty()) {
@@ -171,6 +173,7 @@ public class ChatClient {
                     if (StringUtil.isNotBlank(newQuery) && !newQuery.equals(query)) {
                         logger.info("[RAG] Regenerated query. newQuery={}", newQuery);
                         searchResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
+                        finalSearchQuery = newQuery;
                     }
                 }
             }
@@ -180,6 +183,7 @@ public class ChatClient {
 
             final ChatMessage assistantMessage = ChatMessage.assistantMessage(llmResponse.getContent());
             addSourcesToMessage(assistantMessage, searchResults, contextPath, searchResult.getQueryId(), searchResult.getRequestedTime());
+            assistantMessage.setSearchQuery(finalSearchQuery);
 
             session.addMessage(assistantMessage);
 
