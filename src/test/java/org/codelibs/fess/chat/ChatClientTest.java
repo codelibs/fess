@@ -995,7 +995,7 @@ public class ChatClientTest extends UnitFessTestCase {
                 if ("rag.chat.history.titles.max.count".equals(key)) {
                     return "5";
                 }
-                return super.getOrDefault(key, defaultValue);
+                return defaultValue;
             }
         });
         final ChatSession session = new ChatSession();
@@ -1028,7 +1028,7 @@ public class ChatClientTest extends UnitFessTestCase {
                 if ("rag.chat.history.titles.max.count".equals(key)) {
                     return "5";
                 }
-                return super.getOrDefault(key, defaultValue);
+                return defaultValue;
             }
         });
         final ChatSession session = new ChatSession();
@@ -1053,7 +1053,7 @@ public class ChatClientTest extends UnitFessTestCase {
                 if ("rag.chat.history.assistant.content".equals(key)) {
                     return "smart_summary";
                 }
-                return super.getOrDefault(key, defaultValue);
+                return defaultValue;
             }
         });
         final ChatSession session = new ChatSession();
@@ -1073,7 +1073,7 @@ public class ChatClientTest extends UnitFessTestCase {
                 if ("rag.chat.history.assistant.content".equals(key)) {
                     return "full";
                 }
-                return super.getOrDefault(key, defaultValue);
+                return defaultValue;
             }
         });
         final ChatSession session = new ChatSession();

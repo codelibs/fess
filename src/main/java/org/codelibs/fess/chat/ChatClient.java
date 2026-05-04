@@ -640,9 +640,13 @@ public class ChatClient {
     }
 
     private int getHistoryTitlesMaxCount(final FessConfig fessConfig) {
+        final String value = fessConfig.getOrDefault("rag.chat.history.titles.max.count", "5");
+        if (value == null) {
+            return 5;
+        }
         try {
-            return Integer.parseInt(fessConfig.getOrDefault("rag.chat.history.titles.max.count", "5"));
-        } catch (final Exception e) {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
             return 5;
         }
     }
