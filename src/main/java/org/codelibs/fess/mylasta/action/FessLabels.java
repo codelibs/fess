@@ -3588,6 +3588,24 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Clear */
     public static final String LABELS_chat_clear = "{labels.chat_clear}";
 
+    /** The key of the message: Retrying... ({attempt}/{max}, next attempt in {seconds}s) */
+    public static final String LABELS_chat_retrying = "{labels.chat_retrying}";
+
+    /** The key of the message: Waiting for an available slot... */
+    public static final String LABELS_chat_waiting_queue = "{labels.chat_waiting_queue}";
+
+    /** The key of the message: {count} documents found */
+    public static final String LABELS_chat_hit_count = "{labels.chat_hit_count}";
+
+    /** The key of the message: No documents found. Refining the query and searching again... */
+    public static final String LABELS_chat_fallback_no_results = "{labels.chat_fallback_no_results}";
+
+    /** The key of the message: No relevant documents found. Refining the query and searching again... */
+    public static final String LABELS_chat_fallback_no_relevant_results = "{labels.chat_fallback_no_relevant_results}";
+
+    /** The key of the message: The model ran out of reasoning tokens; falling back. Result accuracy may be reduced. */
+    public static final String LABELS_chat_warning_token_exhausted = "{labels.chat_warning_token_exhausted}";
+
     /** The key of the message: Search File Proxy */
     public static final String LABELS_search_file_proxy_enabled = "{labels.search_file_proxy_enabled}";
 

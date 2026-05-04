@@ -2010,6 +2010,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. smart_summary */
     String RAG_CHAT_HISTORY_ASSISTANT_CONTENT = "rag.chat.history.assistant.content";
 
+    /** The key of the configuration. e.g. 5 */
+    String RAG_CHAT_HISTORY_TITLES_MAX_COUNT = "rag.chat.history.titles.max.count";
+
     /** The key of the configuration. e.g. /var/lib/fess/export */
     String INDEX_EXPORT_PATH = "index.export.path";
 
@@ -9558,10 +9561,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'rag.chat.history.assistant.content'. <br>
      * The value is, e.g. smart_summary <br>
-     * comment: History content mode for assistant messages (full, smart_summary, source_titles, source_titles_and_urls, truncated, none).
+     * comment: <br>
+     * History content mode for assistant messages.<br>
+     * smart_summary           - drop assistant body, keep only past search query + referenced titles per turn (default, recommended)<br>
+     * full                    - send the whole assistant response<br>
+     * source_titles           - body + referenced titles suffix<br>
+     * source_titles_and_urls  - "[References: title (url), ...]" only<br>
+     * truncated               - truncate assistant response at history.assistant.max.chars<br>
+     * none                    - drop assistant turns from history
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRagChatHistoryAssistantContent();
+
+    /**
+     * Get the value for the key 'rag.chat.history.titles.max.count'. <br>
+     * The value is, e.g. 5 <br>
+     * comment: Maximum number of referenced document titles included per turn in smart_summary history mode.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRagChatHistoryTitlesMaxCount();
+
+    /**
+     * Get the value for the key 'rag.chat.history.titles.max.count' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * comment: Maximum number of referenced document titles included per turn in smart_summary history mode.
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRagChatHistoryTitlesMaxCountAsInteger();
 
     /**
      * Get the value for the key 'index.export.path'. <br>
@@ -13256,6 +13283,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT);
         }
 
+        public String getRagChatHistoryTitlesMaxCount() {
+            return get(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT);
+        }
+
+        public Integer getRagChatHistoryTitlesMaxCountAsInteger() {
+            return getAsInteger(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT);
+        }
+
         public String getIndexExportPath() {
             return get(FessConfig.INDEX_EXPORT_PATH);
         }
@@ -13941,6 +13976,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_FRAGMENT_SIZE, "500");
             defaultMap.put(FessConfig.RAG_CHAT_HIGHLIGHT_NUMBER_OF_FRAGMENTS, "3");
             defaultMap.put(FessConfig.RAG_CHAT_HISTORY_ASSISTANT_CONTENT, "smart_summary");
+            defaultMap.put(FessConfig.RAG_CHAT_HISTORY_TITLES_MAX_COUNT, "5");
             defaultMap.put(FessConfig.INDEX_EXPORT_PATH, "/var/lib/fess/export");
             defaultMap.put(FessConfig.INDEX_EXPORT_EXCLUDE_FIELDS, "cache");
             defaultMap.put(FessConfig.INDEX_EXPORT_SCROLL_SIZE, "100");
