@@ -278,4 +278,17 @@ public class ChatMessageTest extends UnitFessTestCase {
 
         assertEquals(htmlContent, message.getHtmlContent());
     }
+
+    @Test
+    public void test_searchQuery_defaultIsNull() {
+        final ChatMessage msg = ChatMessage.assistantMessage("hello");
+        assertNull(msg.getSearchQuery());
+    }
+
+    @Test
+    public void test_searchQuery_setAndGet() {
+        final ChatMessage msg = ChatMessage.assistantMessage("hello");
+        msg.setSearchQuery("Fess install");
+        assertEquals("Fess install", msg.getSearchQuery());
+    }
 }

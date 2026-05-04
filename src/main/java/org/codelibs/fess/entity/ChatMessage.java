@@ -54,6 +54,9 @@ public class ChatMessage implements Serializable {
     /** The HTML-rendered content for display. */
     private String htmlContent;
 
+    /** The final search query that produced the references in this assistant turn. Null for user messages or if no search was performed. */
+    private String searchQuery;
+
     /**
      * Default constructor.
      */
@@ -230,6 +233,24 @@ public class ChatMessage implements Serializable {
      */
     public void setHtmlContent(final String htmlContent) {
         this.htmlContent = htmlContent;
+    }
+
+    /**
+     * Gets the final search query for this assistant turn.
+     *
+     * @return the search query, or null
+     */
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    /**
+     * Sets the final search query for this assistant turn.
+     *
+     * @param searchQuery the search query
+     */
+    public void setSearchQuery(final String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 
     /**
