@@ -250,6 +250,7 @@ public class ChatClient {
         List<Map<String, Object>> sources = new ArrayList<>();
         String searchQueryId = null;
         long searchRequestedTime = 0L;
+        String finalSearchQuery = null;
 
         try {
             // Phase 1: Intent Detection
@@ -348,6 +349,7 @@ public class ChatClient {
             } else {
                 // Phase 2: Search with query
                 final String query = StringUtil.isBlank(intentResult.getQuery()) ? userMessage : intentResult.getQuery();
+                finalSearchQuery = query;
                 phaseStartTime = System.currentTimeMillis();
                 callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching documents...", query);
                 ChatSearchResult querySearchResult = searchWithQueryAndMetadata(query, safeFields, safeExtraQueries);
@@ -373,6 +375,7 @@ public class ChatClient {
                         callback.onPhaseStart(ChatPhaseCallback.PHASE_SEARCH, "Searching with refined query...", newQuery);
                         final ChatSearchResult fallbackResult = searchWithQueryAndMetadata(newQuery, safeFields, safeExtraQueries);
                         searchResults = fallbackResult.getDocuments();
+                        finalSearchQuery = newQuery;
                         searchQueryId = fallbackResult.getQueryId();
                         searchRequestedTime = fallbackResult.getRequestedTime();
                         callback.onPhaseComplete(ChatPhaseCallback.PHASE_SEARCH, Map.of("hitCount", searchResults.size()));
@@ -433,6 +436,7 @@ public class ChatClient {
                                     searchQueryId = fallbackResult.getQueryId();
                                     searchRequestedTime = fallbackResult.getRequestedTime();
                                     evalResult = fallbackEvalResult;
+                                    finalSearchQuery = newQuery;
                                     fallbackSucceeded = true;
                                 }
                             }
@@ -512,6 +516,7 @@ public class ChatClient {
             }
             addSourcesToMessage(assistantMessage, sources, contextPath, searchQueryId, searchRequestedTime);
 
+            assistantMessage.setSearchQuery(finalSearchQuery);
             session.addMessage(assistantMessage);
 
             logger.info(
