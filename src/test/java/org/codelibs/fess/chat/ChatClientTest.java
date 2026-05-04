@@ -139,7 +139,7 @@ public class ChatClientTest extends UnitFessTestCase {
         session.addUserMessage("Q2");
         session.addAssistantMessage("A2");
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertEquals(4, history.size());
         assertEquals("user", history.get(0).getRole());
         assertEquals("Q1", history.get(0).getContent());
@@ -171,7 +171,7 @@ public class ChatClientTest extends UnitFessTestCase {
         session.addUserMessage("Q2");
         session.addAssistantMessage("A2");
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         // none mode: assistant messages are skipped, only user messages remain
         assertEquals(2, history.size());
         assertEquals("user", history.get(0).getRole());
@@ -198,7 +198,7 @@ public class ChatClientTest extends UnitFessTestCase {
         session.addUserMessage("Q1");
         session.addAssistantMessage("A1");
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertEquals(1, history.size());
         assertEquals("user", history.get(0).getRole());
         assertEquals("Q1", history.get(0).getContent());
@@ -227,7 +227,7 @@ public class ChatClientTest extends UnitFessTestCase {
         assistantMsg.addSource(new ChatSource(1, doc));
         session.addMessage(assistantMsg);
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertEquals(2, history.size());
         assertEquals("user", history.get(0).getRole());
         assertEquals("assistant", history.get(1).getRole());
@@ -250,7 +250,7 @@ public class ChatClientTest extends UnitFessTestCase {
 
         final ChatSession session = new ChatSession();
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertTrue(history.isEmpty());
     }
 
@@ -274,7 +274,7 @@ public class ChatClientTest extends UnitFessTestCase {
             session.addAssistantMessage("A" + i);
         }
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         // 5 user messages, 0 assistant messages
         assertEquals(5, history.size());
         for (int i = 0; i < 5; i++) {
@@ -306,7 +306,7 @@ public class ChatClientTest extends UnitFessTestCase {
         assistantMsg.addSource(new ChatSource(1, doc));
         session.addMessage(assistantMsg);
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertEquals(2, history.size());
         assertEquals("assistant", history.get(1).getRole());
         assertEquals("[References: Guide (http://example.com/guide)]", history.get(1).getContent());
@@ -314,161 +314,9 @@ public class ChatClientTest extends UnitFessTestCase {
 
     @Test
     public void test_extractHistory_truncatedMode() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String getOrDefault(final String key, final String defaultValue) {
-                if ("rag.chat.history.assistant.content".equals(key)) {
-                    return "truncated";
-                }
-                return defaultValue;
-            }
-        });
-
-        chatClient.setTestAssistantMaxChars(10);
-        final ChatSession session = new ChatSession();
-        session.addUserMessage("Q1");
-        session.addAssistantMessage("This is a very long response text that should be truncated");
-
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
-        assertEquals(2, history.size());
-        assertEquals("assistant", history.get(1).getRole());
-        assertEquals("This is a ...", history.get(1).getContent());
-    }
-
-    // ========== smart_summary tests ==========
-
-    @Test
-    public void test_buildAssistantHistoryContent_smartSummary() {
-        final ChatMessage msg = ChatMessage.assistantMessage("A".repeat(1000));
-        final Map<String, Object> doc = new HashMap<>();
-        doc.put("title", "Test Doc");
-        msg.addSource(new ChatSource(1, doc));
-
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertTrue(result.contains("...[omitted]..."));
-        assertTrue(result.contains("[Referenced documents: Test Doc]"));
-        // Head (300) + omitted marker + tail (200) + source titles
-        assertTrue(result.length() < 1000);
-    }
-
-    @Test
-    public void test_buildAssistantHistoryContent_smartSummary_shortContent() {
-        final ChatMessage msg = ChatMessage.assistantMessage("Short response");
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertEquals("Short response", result);
-    }
-
-    @Test
-    public void test_buildAssistantHistoryContent_smartSummary_noSources() {
-        final ChatMessage msg = ChatMessage.assistantMessage("A".repeat(1000));
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertTrue(result.contains("...[omitted]..."));
-        assertFalse(result.contains("[Referenced documents:"));
-    }
-
-    @Test
-    public void test_extractHistory_smartSummaryMode() {
-        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String getOrDefault(final String key, final String defaultValue) {
-                if ("rag.chat.history.assistant.content".equals(key)) {
-                    return "smart_summary";
-                }
-                return defaultValue;
-            }
-        });
-
-        chatClient.setTestSummaryMaxChars(20);
-        final ChatSession session = new ChatSession();
-        session.addUserMessage("Q1");
-        session.addAssistantMessage("This is a fairly long response that should be summarized using smart summary mode.");
-
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
-        assertEquals(2, history.size());
-        assertEquals("assistant", history.get(1).getRole());
-        assertTrue(history.get(1).getContent().contains("...[omitted]..."));
-    }
-
-    // ========== additional smart_summary tests ==========
-
-    @Test
-    public void test_smartSummary_nullContent() {
-        final ChatMessage msg = ChatMessage.assistantMessage(null);
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertNull(result);
-    }
-
-    @Test
-    public void test_smartSummary_exactlyAtBudget() {
-        // omitMarker = "\n...[omitted]...\n" (18 chars), suffix="" (no sources), bodyBudget = 500 - 0 - 18 = 482
-        // Content of 482 chars is <= bodyBudget, so returned with suffix (empty) appended as-is
-        final String content = "X".repeat(482);
-        final ChatMessage msg = ChatMessage.assistantMessage(content);
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertEquals(content, result);
-    }
-
-    @Test
-    public void test_smartSummary_headTailRatio() {
-        // Use 1000-char content with summaryMaxChars=500, no sources
-        // omitMarker="\n...[omitted]...\n" (17 chars), suffix="", bodyBudget=500-0-17=483
-        // headChars = (int)(483 * 0.6) = 289, tailChars = 483 - 289 = 194
-        final String content = "A".repeat(1000);
-        final ChatMessage msg = ChatMessage.assistantMessage(content);
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        final String omitMarker = "\n...[omitted]...\n";
-        final int omitIdx = result.indexOf(omitMarker);
-        assertTrue(omitIdx > 0);
-        final String head = result.substring(0, omitIdx);
-        final String tail = result.substring(omitIdx + omitMarker.length());
-        // Verify 60/40 ratio: head=289, tail=194
-        assertEquals(289, head.length());
-        assertEquals(194, tail.length());
-        // Head should be ~60% of bodyBudget
-        final double headRatio = (double) head.length() / (head.length() + tail.length());
-        assertTrue(headRatio > 0.55 && headRatio < 0.65);
-    }
-
-    @Test
-    public void test_smartSummary_withMultipleSources() {
-        final ChatMessage msg = createAssistantWithSources("A".repeat(1000), "Guide A", "Guide B", "Guide C");
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        assertTrue(result.contains("[Referenced documents: Guide A, Guide B, Guide C]"));
-        assertTrue(result.contains("...[omitted]..."));
-    }
-
-    @Test
-    public void test_smartSummary_budgetEnforcesMaxChars() {
-        final ChatMessage msg = createAssistantWithSources("A".repeat(5000), "Title1", "Title2");
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 500, 500);
-        // Result should not exceed summaryMaxChars by much (suffix may push slightly, but the body is budgeted)
-        assertTrue(result.length() <= 500 + 50, "result length " + result.length() + " exceeds reasonable bound");
-    }
-
-    @Test
-    public void test_smartSummary_longSourceTitlesExceedBudget() {
-        // When source titles alone are very long, suffix is truncated to maxChars/4
-        final String longTitle = "T".repeat(1000);
-        final ChatMessage msg = createAssistantWithSources("A".repeat(500), longTitle);
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 200, 200);
-        // maxSuffixLen = 200/4 = 50, suffix is truncated to 50 chars
-        assertNotNull(result);
-        // The suffix portion should not exceed maxSuffixLen
-        assertTrue(result.length() <= 250, "result length " + result.length() + " exceeds reasonable bound");
-    }
-
-    @Test
-    public void test_smartSummary_verySmallBudget() {
-        final ChatMessage msg = createAssistantWithSources("Hello world, this is some content.", "Doc");
-        final String result = chatClient.testBuildAssistantHistoryContent(msg, "smart_summary", 10, 10);
-        // Should not crash; maxSuffixLen=10/4=2, suffix gets truncated severely
-        // bodyBudget may be 0 or negative => suffix or truncated content returned
-        assertNotNull(result);
-        assertTrue(result.length() > 0);
+        final ChatMessage msg = ChatMessage.assistantMessage("This is a very long response text that should be truncated");
+        final String result = chatClient.testBuildAssistantHistoryContent(msg, "truncated", 10, 800);
+        assertEquals("This is a ...", result);
     }
 
     // ========== additional source_titles tests ==========
@@ -554,24 +402,26 @@ public class ChatClientTest extends UnitFessTestCase {
     @Test
     public void test_extractHistory_defaultMode_isSmartSummary() {
         ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
-            private static final long serialVersionUID = 1L;
-
             @Override
             public String getOrDefault(final String key, final String defaultValue) {
-                // Do not override the key — let it use defaultValue
                 return defaultValue;
             }
         });
-
-        chatClient.setTestSummaryMaxChars(50);
         final ChatSession session = new ChatSession();
-        session.addUserMessage("Q1");
-        session.addAssistantMessage("A".repeat(200));
+        session.addMessage(ChatMessage.userMessage("Q1"));
+        final ChatMessage a = ChatMessage.assistantMessage("Some long body that we no longer keep verbatim.");
+        a.setSearchQuery("Q1");
+        session.addMessage(a);
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
-        assertEquals(2, history.size());
-        // Default mode is smart_summary, so long content should be summarized
-        assertTrue(history.get(1).getContent().contains("...[omitted]..."));
+        // Default mode is smart_summary => intent rendering drops the body.
+        final List<LlmMessage> intent = chatClient.testExtractHistoryForIntent(session);
+        assertEquals(2, intent.size());
+        assertEquals("searched: \"Q1\"", intent.get(1).getContent());
+
+        // Default mode is smart_summary => answer rendering pairs user with rendered turn.
+        final List<LlmMessage> answer = chatClient.testExtractHistoryForAnswer(session);
+        assertEquals(1, answer.size());
+        assertEquals("Q: \"Q1\" (searched: \"Q1\")", answer.get(0).getContent());
     }
 
     @Test
@@ -592,7 +442,7 @@ public class ChatClientTest extends UnitFessTestCase {
         session.addUserMessage("Q1");
         session.addAssistantMessage("Full content here");
 
-        final List<LlmMessage> history = chatClient.testExtractHistory(session);
+        final List<LlmMessage> history = chatClient.testExtractHistoryForAnswer(session);
         assertEquals(2, history.size());
         assertEquals("Full content here", history.get(1).getContent());
     }
@@ -1159,8 +1009,6 @@ public class ChatClientTest extends UnitFessTestCase {
         private boolean searchDocumentsCalled = false;
         private final List<String> searchedQueries = new ArrayList<>();
         private List<Map<String, Object>> searchResultsToReturn = Collections.emptyList();
-        private int testAssistantMaxChars = 800;
-        private int testSummaryMaxChars = 800;
 
         void setSearchResults(final List<Map<String, Object>> results) {
             this.searchResultsToReturn = results;
@@ -1170,21 +1018,9 @@ public class ChatClientTest extends UnitFessTestCase {
             return searchedQueries;
         }
 
-        void setTestAssistantMaxChars(final int maxChars) {
-            testAssistantMaxChars = maxChars;
-        }
-
-        void setTestSummaryMaxChars(final int maxChars) {
-            testSummaryMaxChars = maxChars;
-        }
-
         String testBuildAssistantHistoryContent(final ChatMessage msg, final String mode, final int assistantMaxChars,
                 final int summaryMaxChars) {
             return buildAssistantHistoryContent(msg, mode, assistantMaxChars, summaryMaxChars);
-        }
-
-        List<LlmMessage> testExtractHistory(final ChatSession session) {
-            return extractHistory(session);
         }
 
         List<LlmMessage> testExtractHistoryForIntent(final ChatSession session) {
@@ -1193,25 +1029,6 @@ public class ChatClientTest extends UnitFessTestCase {
 
         List<LlmMessage> testExtractHistoryForAnswer(final ChatSession session) {
             return extractHistoryForAnswer(session);
-        }
-
-        protected List<LlmMessage> extractHistory(final ChatSession session) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final String assistantContentMode = fessConfig.getOrDefault("rag.chat.history.assistant.content", "smart_summary");
-
-            final List<LlmMessage> history = new ArrayList<>();
-            for (final ChatMessage msg : session.getMessages()) {
-                if (msg.isUser()) {
-                    history.add(LlmMessage.user(msg.getContent()));
-                } else if (msg.isAssistant()) {
-                    final String content =
-                            buildAssistantHistoryContent(msg, assistantContentMode, testAssistantMaxChars, testSummaryMaxChars);
-                    if (content != null) {
-                        history.add(LlmMessage.assistant(content));
-                    }
-                }
-            }
-            return history;
         }
 
         String testEscapeQueryValue(final String value) {
