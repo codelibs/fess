@@ -21,23 +21,26 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -117,6 +120,13 @@ public class SearchApiManager extends BaseApiManager {
      */
     protected String mimeType = "application/json";
 
+    private static final DateTimeFormatter ISO_8601_EXTEND_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT);
+
+    private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/+");
+
+    private static final Pattern CALLBACK_NAME_INVALID_CHARS = Pattern.compile("[^0-9a-zA-Z_$.]");
+
     /**
      * Constructor.
      */
@@ -138,7 +148,7 @@ public class SearchApiManager extends BaseApiManager {
     @Override
     protected FormatType detectFormatType(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
-        final String[] values = servletPath.replaceAll("/+", "/").split("/");
+        final String[] values = MULTIPLE_SLASHES.split(servletPath);
         final String value = values.length > 3 ? values[3] : null;
         if (value == null) {
             return FormatType.SEARCH;
@@ -417,10 +427,10 @@ public class SearchApiManager extends BaseApiManager {
             buf.append(escapeJson(searchQuery));
             buf.append(",\"requested_time\":");
             buf.append(requestedTime);
-            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(params.getQuery());
+            final String[] relatedQueries = relatedQueryHelper.getRelatedQueries(query);
             buf.append(",\"related_query\":");
             buf.append(escapeJson(relatedQueries));
-            final String[] relatedContents = relatedContentHelper.getRelatedContents(params.getQuery());
+            final String[] relatedContents = relatedContentHelper.getRelatedContents(query);
             buf.append(",\"related_contents\":");
             buf.append(escapeJson(relatedContents));
             buf.append(',');
@@ -703,14 +713,7 @@ public class SearchApiManager extends BaseApiManager {
                             throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, "URL is null.");
                         }
 
-                        boolean found = false;
-                        for (final String id : docIds) {
-                            if (docId.equals(id)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
+                        if (!ArrayUtils.contains(docIds, docId)) {
                             throw new WebApiException(HttpServletResponse.SC_NOT_FOUND, "Not found: " + favoriteUrl);
                         }
 
@@ -800,11 +803,11 @@ public class SearchApiManager extends BaseApiManager {
                     urlList.add(urlObj);
                 }
             }
-            urlList = favoriteLogService.getUrlList(userCode, urlList);
-            final List<String> docIdList = new ArrayList<>(urlList.size());
+            final Set<String> favoriteUrls = new HashSet<>(favoriteLogService.getUrlList(userCode, urlList));
+            final List<String> docIdList = new ArrayList<>(favoriteUrls.size());
             for (final Map<String, Object> doc : docList) {
                 final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-                if (urlObj != null && urlList.contains(urlObj)) {
+                if (urlObj != null && favoriteUrls.contains(urlObj)) {
                     final String docIdObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                     if (docIdObj != null) {
                         docIdList.add(docIdObj);
@@ -1352,7 +1355,7 @@ public class SearchApiManager extends BaseApiManager {
      * @return The escaped callback name.
      */
     protected String escapeCallbackName(final String callbackName) {
-        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
+        return "/**/" + CALLBACK_NAME_INVALID_CHARS.matcher(callbackName).replaceAll(StringUtil.EMPTY);
     }
 
     /**
@@ -1407,8 +1410,10 @@ public class SearchApiManager extends BaseApiManager {
         } else if (obj instanceof Boolean) {
             buf.append(obj.toString());
         } else if (obj instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
-            buf.append('\"').append(StringEscapeUtils.escapeJson(sdf.format(obj))).append('\"');
+            buf.append('\"')
+                    .append(StringEscapeUtils
+                            .escapeJson(ISO_8601_EXTEND_FORMATTER.withZone(ZoneId.systemDefault()).format(((Date) obj).toInstant())))
+                    .append('\"');
         } else {
             buf.append('\"').append(StringEscapeUtils.escapeJson(obj.toString())).append('\"');
         }

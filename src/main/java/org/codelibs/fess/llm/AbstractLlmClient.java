@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -69,6 +70,10 @@ public abstract class AbstractLlmClient implements LlmClient {
 
     /** Buffer size reserved when truncating context to fit within max chars limit. */
     protected static final int CONTEXT_TRUNCATION_BUFFER = 100;
+
+    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]+>");
+
+    private static final Pattern CONTROL_WHITESPACE_PATTERN = Pattern.compile("[\\r\\n\\t]");
 
     /** The HTTP client used for API communication. */
     protected CloseableHttpClient httpClient;
@@ -1128,7 +1133,8 @@ public abstract class AbstractLlmClient implements LlmClient {
             final LlmStreamCallback callback) {
         final LlmChatRequest request = new LlmChatRequest();
 
-        final String sanitizedUrl = sanitizeDocumentContent(documentUrl != null ? documentUrl.replaceAll("[\\r\\n\\t]", "") : "");
+        final String sanitizedUrl =
+                sanitizeDocumentContent(documentUrl != null ? CONTROL_WHITESPACE_PATTERN.matcher(documentUrl).replaceAll("") : "");
         final String resolvedPrompt =
                 resolveLanguageInstruction(getDocumentNotFoundSystemPrompt().replace("{{documentUrl}}", sanitizedUrl));
         if (logger.isDebugEnabled()) {
@@ -1262,8 +1268,10 @@ public abstract class AbstractLlmClient implements LlmClient {
      * @return the wrapped user input
      */
     protected String wrapUserInput(final String userMessage) {
-        final String escaped = userMessage.replace("</user_input>", "&lt;/user_input&gt;");
-        return "<user_input>" + escaped + "</user_input>";
+        if (userMessage.indexOf("</user_input>") < 0) {
+            return "<user_input>" + userMessage + "</user_input>";
+        }
+        return "<user_input>" + userMessage.replace("</user_input>", "&lt;/user_input&gt;") + "</user_input>";
     }
 
     /**
@@ -1355,7 +1363,7 @@ public abstract class AbstractLlmClient implements LlmClient {
         if (StringUtil.isBlank(text)) {
             return text;
         }
-        return text.replaceAll("<[^>]+>", "");
+        return HTML_TAG_PATTERN.matcher(text).replaceAll("");
     }
 
     /**

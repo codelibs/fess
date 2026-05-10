@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +74,12 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
     }
 
     private static final Logger logger = LogManager.getLogger(AbstractFessFileTransformer.class);
+
+    private static final Pattern CACHE_WHITESPACE_PATTERN = Pattern.compile("[ \\t\\x0B\\f]+");
+
+    private static final Pattern TRAILING_SLASHES_PATTERN = Pattern.compile("/+$");
+
+    private static final Pattern SMB_SCHEME_PREFIX_PATTERN = Pattern.compile("^smb.?:/+");
 
     /**
      * The mapping for meta content.
@@ -261,7 +268,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
 
-                final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
+                final String cache = CACHE_WHITESPACE_PATTERN.matcher(content.trim()).replaceAll(" ");
 
                 // text cache
                 putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), cache);
@@ -422,18 +429,15 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
      * @return The parameters for extraction.
      */
     protected Map<String, String> createExtractParams(final ResponseData responseData, final CrawlingConfig crawlingConfig) {
-        final Map<String, String> params = new HashMap<>(crawlingConfig.getConfigParameterMap(ConfigName.CONFIG));
+        final Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
+        final Map<String, String> params = new HashMap<>(configParam);
         params.put(ExtractData.RESOURCE_NAME_KEY, getResourceName(responseData));
         params.put(ExtractData.CONTENT_TYPE, responseData.getMimeType());
         params.put(ExtractData.CONTENT_ENCODING, responseData.getCharSet());
         params.put(ExtractData.URL, responseData.getUrl());
-        final Map<String, String> configParam = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
-        if (configParam != null) {
-            final String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
-            if (StringUtil.isNotBlank(keepOriginalBody)) {
-                params.put(TikaExtractor.NORMALIZE_TEXT,
-                        Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE : Constants.TRUE);
-            }
+        final String keepOriginalBody = configParam.get(Config.KEEP_ORIGINAL_BODY);
+        if (StringUtil.isNotBlank(keepOriginalBody)) {
+            params.put(TikaExtractor.NORMALIZE_TEXT, Constants.TRUE.equalsIgnoreCase(keepOriginalBody) ? Constants.FALSE : Constants.TRUE);
         }
         return params;
     }
@@ -472,7 +476,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             return null;
         }
 
-        name = name.replaceAll("/+$", StringUtil.EMPTY);
+        name = TRAILING_SLASHES_PATTERN.matcher(name).replaceAll(StringUtil.EMPTY);
         final int idx = name.lastIndexOf('/');
         if (idx >= 0) {
             name = name.substring(idx + 1);
@@ -553,7 +557,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             return abbreviateSite(value);
         }
         if (url.startsWith("smb:") || url.startsWith("smb1:")) {
-            final String value = url.replaceFirst("^smb.?:/+", StringUtil.EMPTY);
+            final String value = SMB_SCHEME_PREFIX_PATTERN.matcher(url).replaceFirst(StringUtil.EMPTY);
             return abbreviateSite("\\\\" + value.replace('/', '\\'));
         }
 

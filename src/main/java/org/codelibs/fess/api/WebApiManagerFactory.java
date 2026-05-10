@@ -15,9 +15,7 @@
  */
 package org.codelibs.fess.api;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +35,6 @@ public class WebApiManagerFactory {
      * Default constructor.
      */
     public WebApiManagerFactory() {
-        // Default constructor
     }
 
     /**
@@ -54,10 +51,9 @@ public class WebApiManagerFactory {
         if (logger.isDebugEnabled()) {
             logger.debug("Adding WebApiManager. class={}", webApiManager.getClass().getSimpleName());
         }
-        final List<WebApiManager> list = new ArrayList<>();
-        Collections.addAll(list, webApiManagers);
-        list.add(webApiManager);
-        webApiManagers = list.toArray(new WebApiManager[list.size()]);
+        final WebApiManager[] updated = Arrays.copyOf(webApiManagers, webApiManagers.length + 1);
+        updated[webApiManagers.length] = webApiManager;
+        webApiManagers = updated;
         if (logger.isDebugEnabled()) {
             logger.debug("WebApiManager added. totalManagers={}", webApiManagers.length);
         }

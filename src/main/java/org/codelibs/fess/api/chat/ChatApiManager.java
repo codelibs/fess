@@ -72,7 +72,6 @@ public class ChatApiManager extends BaseApiManager {
      * Default constructor.
      */
     public ChatApiManager() {
-        // Default constructor
     }
 
     /**

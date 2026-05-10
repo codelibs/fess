@@ -21,7 +21,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.logging.log4j.LogManager;
@@ -57,6 +59,16 @@ public class SearchEngineApiManager extends BaseApiManager {
     private static final String ADMIN_SERVER = "/admin/server_";
 
     private static final Logger logger = LogManager.getLogger(SearchEngineApiManager.class);
+
+    private static final Pattern DOTS = Pattern.compile("\\.\\.+");
+
+    private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/+");
+
+    private static final Map<String, String> EXTENSION_CONTENT_TYPES = Map.ofEntries(Map.entry(".html", "text/html;charset=utf-8"),
+            Map.entry(".css", "text/css"), Map.entry(".eot", "application/vnd.ms-fontobject"),
+            Map.entry(".ico", "image/vnd.microsoft.icon"), Map.entry(".js", "text/javascript"), Map.entry(".json", "application/json"),
+            Map.entry(".otf", "font/otf"), Map.entry(".svg", "image/svg+xml"), Map.entry(".ttf", "font/ttf"),
+            Map.entry(".txt", "text/plain"), Map.entry(".woff", "font/woff"), Map.entry(".woff2", "font/woff2"));
 
     /** Roles that are allowed to access the search engine API */
     protected String[] acceptedRoles = { "admin" };
@@ -214,36 +226,20 @@ public class SearchEngineApiManager extends BaseApiManager {
     protected void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         if (StringUtil.isNotBlank(path)) {
             final String lowerPath = path.toLowerCase(Locale.ROOT);
-            if (lowerPath.endsWith(".html")) {
+            if (lowerPath.endsWith("/")) {
                 response.setContentType("text/html;charset=utf-8");
-            } else if (lowerPath.endsWith(".css")) {
-                response.setContentType("text/css");
-            } else if (lowerPath.endsWith(".eot")) {
-                response.setContentType("application/vnd.ms-fontobject");
-            } else if (lowerPath.endsWith(".ico")) {
-                response.setContentType("image/vnd.microsoft.icon");
-            } else if (lowerPath.endsWith(".js")) {
-                response.setContentType("text/javascript");
-            } else if (lowerPath.endsWith(".json")) {
-                response.setContentType("application/json");
-            } else if (lowerPath.endsWith(".otf")) {
-                response.setContentType("font/otf");
-            } else if (lowerPath.endsWith(".svg")) {
-                response.setContentType("image/svg+xml");
-            } else if (lowerPath.endsWith(".ttf")) {
-                response.setContentType("font/ttf");
-            } else if (lowerPath.endsWith(".txt")) {
-                response.setContentType("text/plain");
-            } else if (lowerPath.endsWith(".woff")) {
-                response.setContentType("font/woff");
-            } else if (lowerPath.endsWith(".woff2")) {
-                response.setContentType("font/woff2");
-            } else if (lowerPath.endsWith("/")) {
-                response.setContentType("text/html;charset=utf-8");
+            } else {
+                final int dot = lowerPath.lastIndexOf('.');
+                if (dot >= 0) {
+                    final String contentType = EXTENSION_CONTENT_TYPES.get(lowerPath.substring(dot));
+                    if (contentType != null) {
+                        response.setContentType(contentType);
+                    }
+                }
             }
         }
 
-        Path filePath = ResourceUtil.getSitePath(path.replaceAll("\\.\\.+", StringUtil.EMPTY).replaceAll("/+", "/").split("/"));
+        Path filePath = ResourceUtil.getSitePath(MULTIPLE_SLASHES.split(DOTS.matcher(path).replaceAll(StringUtil.EMPTY)));
         if (Files.isDirectory(filePath)) {
             filePath = filePath.resolve("index.html");
         }

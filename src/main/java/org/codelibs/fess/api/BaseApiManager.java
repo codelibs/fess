@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.fess.Constants;
@@ -35,6 +36,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public abstract class BaseApiManager implements WebApiManager {
 
     private static final String API_FORMAT_TYPE = "apiFormatType";
+
+    private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/+");
 
     /** Path prefix for API endpoints. */
     protected String pathPrefix;
@@ -67,7 +70,6 @@ public abstract class BaseApiManager implements WebApiManager {
      * Default constructor for BaseApiManager.
      */
     public BaseApiManager() {
-        // Default constructor
     }
 
     /**
@@ -111,7 +113,7 @@ public abstract class BaseApiManager implements WebApiManager {
         String value = request.getParameter("type");
         if (value == null) {
             final String servletPath = request.getServletPath();
-            final String[] values = servletPath.replaceAll("/+", "/").split("/");
+            final String[] values = MULTIPLE_SLASHES.split(servletPath);
             if (values.length > 2) {
                 value = values[2];
             }
@@ -119,34 +121,11 @@ public abstract class BaseApiManager implements WebApiManager {
         if (value == null) {
             return FormatType.SEARCH;
         }
-        final String type = value.toUpperCase(Locale.ROOT);
-        if (FormatType.SEARCH.name().equals(type)) {
-            return FormatType.SEARCH;
+        try {
+            return FormatType.valueOf(value.toUpperCase(Locale.ROOT));
+        } catch (final IllegalArgumentException e) {
+            return FormatType.OTHER;
         }
-        if (FormatType.LABEL.name().equals(type)) {
-            return FormatType.LABEL;
-        }
-        if (FormatType.POPULARWORD.name().equals(type)) {
-            return FormatType.POPULARWORD;
-        }
-        if (FormatType.FAVORITE.name().equals(type)) {
-            return FormatType.FAVORITE;
-        }
-        if (FormatType.FAVORITES.name().equals(type)) {
-            return FormatType.FAVORITES;
-        }
-        if (FormatType.PING.name().equals(type)) {
-            return FormatType.PING;
-        }
-        if (FormatType.SCROLL.name().equals(type)) {
-            return FormatType.SCROLL;
-        }
-        if (FormatType.SUGGEST.name().equals(type)) {
-            return FormatType.SUGGEST;
-        }
-
-        // default
-        return FormatType.OTHER;
     }
 
     /**

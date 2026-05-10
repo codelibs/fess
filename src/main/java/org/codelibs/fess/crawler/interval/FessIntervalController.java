@@ -119,29 +119,21 @@ public class FessIntervalController extends DefaultIntervalController {
      */
     @Override
     protected void delayForWaitingNewUrl() {
-        try {
-            ComponentUtil.getSystemHelper().calibrateCpuLoad();
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to calibrate CPU load", e);
-            }
-        }
-
-        try {
+        runQuietly("calibrate CPU load", () -> ComponentUtil.getSystemHelper().calibrateCpuLoad());
+        runQuietly("apply interval control rules", () -> {
             final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.checkCrawlerStatus();
             intervalControlHelper.delayByRules();
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to apply interval control rules", e);
-            }
-        }
+        });
+        runQuietly("execute parent delay logic", super::delayForWaitingNewUrl);
+    }
 
+    private void runQuietly(final String description, final Runnable action) {
         try {
-            super.delayForWaitingNewUrl();
+            action.run();
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to execute parent delay logic", e);
+                logger.debug("Failed to {}", description, e);
             }
         }
     }

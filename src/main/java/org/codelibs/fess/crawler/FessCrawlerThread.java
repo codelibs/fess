@@ -90,12 +90,6 @@ public class FessCrawlerThread extends CrawlerThread {
     /** Configuration key for crawler clients used in parameter maps */
     protected static final String CRAWLER_CLIENTS = "crawlerClients";
 
-    /** HTTP status code for Not Found */
-    private static final int HTTP_STATUS_NOT_FOUND = 404;
-
-    /** HTTP status code for OK */
-    private static final int HTTP_STATUS_OK = 200;
-
     /**
      * Cache for client rules mapping client names to their corresponding URL patterns.
      * This cache improves performance by avoiding repeated parsing of client configuration rules.
@@ -195,24 +189,24 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Accessing document: url={}, status={}", url, httpStatusCode);
                 }
-                if (httpStatusCode == HTTP_STATUS_NOT_FOUND) {
+                if (httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     if (!indexingHelper.deleteDocument(searchEngineClient, id)) {
-                        logger.debug("Failed to delete document: status={}, url={}", HTTP_STATUS_NOT_FOUND, url);
+                        logger.debug("Failed to delete document: status={}, url={}", Constants.NOT_FOUND_STATUS_CODE, url);
                     }
                     return false;
                 }
                 if (responseData.getLastModified() == null) {
                     return true;
                 }
-                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == HTTP_STATUS_OK) {
+                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == Constants.OK_STATUS_CODE) {
 
                     log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 
                     responseData.setExecutionTime(systemHelper.getCurrentTimeAsLong() - startTime);
                     responseData.setParentUrl(urlQueue.getParentUrl());
                     responseData.setSessionId(crawlerContext.getSessionId());
-                    responseData.setHttpStatusCode(org.codelibs.fess.crawler.Constants.NOT_MODIFIED_STATUS);
+                    responseData.setHttpStatusCode(Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));

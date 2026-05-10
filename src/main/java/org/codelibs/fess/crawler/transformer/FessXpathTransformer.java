@@ -32,7 +32,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -134,10 +136,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected boolean useGoogleOffOn = true;
 
     /** Map storing field pruning rules */
-    protected Map<String, Boolean> fieldPrunedRuleMap = new HashMap<>();
+    protected Map<String, Boolean> fieldPrunedRuleMap = new ConcurrentHashMap<>();
 
     /** Cache for storing parsed pruned tags by configuration ID */
-    protected Map<String, PrunedTag[]> prunedTagsCache = new HashMap<>();
+    protected Map<String, PrunedTag[]> prunedTagsCache = new ConcurrentHashMap<>();
+
+    /** Compiled regex cache for {@link #convertUrlMap} entries */
+    private final Map<String, Pattern> convertUrlPatternCache = new ConcurrentHashMap<>();
 
     /**
      * Default constructor.
@@ -277,52 +282,18 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @param document the parsed HTML document
      */
     protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
-        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
-        if (ignore == null) {
-            if (fessConfig.isCrawlerIgnoreRobotsTags()) {
-                return;
-            }
-        } else if (Boolean.parseBoolean(ignore)) {
+        if (isRobotsTagsIgnored(responseData)) {
             return;
         }
 
-        // meta tag
         try {
             final Node value = getXPathAPI().selectSingleNode(document, META_NAME_ROBOTS_CONTENT);
             if (value != null) {
-                boolean noindex = false;
-                boolean nofollow = false;
-                final String content = value.getTextContent().toLowerCase(Locale.ROOT);
-                if (content.contains(ROBOTS_TAG_NONE)) {
-                    noindex = true;
-                    nofollow = true;
-                } else {
-                    if (content.contains(ROBOTS_TAG_NOINDEX)) {
-                        noindex = true;
-                    }
-                    if (content.contains(ROBOTS_TAG_NOFOLLOW)) {
-                        nofollow = true;
-                    }
-                }
-                if (noindex && nofollow) {
-                    logger.info("META(robots=noindex,nofollow): {}", responseData.getUrl());
-                    throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots");
-                }
-                if (noindex) {
-                    logger.info("META(robots=noindex): {}", responseData.getUrl());
-                    storeChildUrls(responseData, resultData);
-                    throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots");
-                }
-                if (nofollow) {
-                    logger.info("META(robots=nofollow): {}", responseData.getUrl());
-                    responseData.setNoFollow(true);
-                }
+                applyRobotsDirective(value.getTextContent(), "META", "#processMetaRobots", responseData, resultData);
             }
         } catch (final XPathExpressionException e) {
             logger.warn("Could not parse a value of {}", META_NAME_ROBOTS_CONTENT, e);
         }
-
     }
 
     /**
@@ -333,50 +304,55 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @param resultData the result data to store processed information
      */
     protected void processXRobotsTag(final ResponseData responseData, final ResultData resultData) {
-        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
-        final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
-        if (ignore == null) {
-            if (fessConfig.isCrawlerIgnoreRobotsTags()) {
-                return;
-            }
-        } else if (Boolean.parseBoolean(ignore)) {
+        if (isRobotsTagsIgnored(responseData)) {
             return;
         }
 
-        // X-Robots-Tag
         responseData.getMetaDataMap()
                 .entrySet()
                 .stream()
                 .filter(e -> X_ROBOTS_TAG.equalsIgnoreCase(e.getKey()) && e.getValue() != null)
-                .forEach(e -> {
-                    boolean noindex = false;
-                    boolean nofollow = false;
-                    final String value = e.getValue().toString().toLowerCase(Locale.ROOT);
-                    if (value.contains(ROBOTS_TAG_NONE)) {
-                        noindex = true;
-                        nofollow = true;
-                    } else {
-                        if (value.contains(ROBOTS_TAG_NOINDEX)) {
-                            noindex = true;
-                        }
-                        if (value.contains(ROBOTS_TAG_NOFOLLOW)) {
-                            nofollow = true;
-                        }
-                    }
-                    if (noindex && nofollow) {
-                        logger.info("HEADER(robots=noindex,nofollow): {}", responseData.getUrl());
-                        throw new ChildUrlsException(Collections.emptySet(), "#processXRobotsTag");
-                    }
-                    if (noindex) {
-                        logger.info("HEADER(robots=noindex): {}", responseData.getUrl());
-                        storeChildUrls(responseData, resultData);
-                        throw new ChildUrlsException(resultData.getChildUrlSet(), "#processXRobotsTag");
-                    }
-                    if (nofollow) {
-                        logger.info("HEADER(robots=nofollow): {}", responseData.getUrl());
-                        responseData.setNoFollow(true);
-                    }
-                });
+                .forEach(e -> applyRobotsDirective(e.getValue().toString(), "HEADER", "#processXRobotsTag", responseData, resultData));
+    }
+
+    private boolean isRobotsTagsIgnored(final ResponseData responseData) {
+        final Map<String, String> configMap = getConfigPrameterMap(responseData, ConfigName.CONFIG);
+        final String ignore = configMap.get(Config.IGNORE_ROBOTS_TAGS);
+        if (ignore == null) {
+            return fessConfig.isCrawlerIgnoreRobotsTags();
+        }
+        return Boolean.parseBoolean(ignore);
+    }
+
+    private void applyRobotsDirective(final String rawValue, final String label, final String source, final ResponseData responseData,
+            final ResultData resultData) {
+        final String content = rawValue.toLowerCase(Locale.ROOT);
+        boolean noindex = false;
+        boolean nofollow = false;
+        if (content.contains(ROBOTS_TAG_NONE)) {
+            noindex = true;
+            nofollow = true;
+        } else {
+            if (content.contains(ROBOTS_TAG_NOINDEX)) {
+                noindex = true;
+            }
+            if (content.contains(ROBOTS_TAG_NOFOLLOW)) {
+                nofollow = true;
+            }
+        }
+        if (noindex && nofollow) {
+            logger.info("{}(robots=noindex,nofollow): {}", label, responseData.getUrl());
+            throw new ChildUrlsException(Collections.emptySet(), source);
+        }
+        if (noindex) {
+            logger.info("{}(robots=noindex): {}", label, responseData.getUrl());
+            storeChildUrls(responseData, resultData);
+            throw new ChildUrlsException(resultData.getChildUrlSet(), source);
+        }
+        if (nofollow) {
+            logger.info("{}(robots=nofollow): {}", label, responseData.getUrl());
+            responseData.setNoFollow(true);
+        }
     }
 
     /**
@@ -865,26 +841,24 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
      * @return the pruned node
      */
     protected Node pruneNode(final Node node, final CrawlingConfig crawlingConfig) {
-        PrunedTag[] prunedTags = null;
+        final PrunedTag[] prunedTags;
         if (crawlingConfig != null) {
-            final String configId = crawlingConfig.getConfigId();
-            prunedTags = prunedTagsCache.get(configId);
-            if (prunedTags == null) {
-                final Map<String, String> configMap = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG);
-                final String value = configMap.get(CrawlingConfig.Param.Config.HTML_PRUNED_TAGS);
-                if (StringUtil.isNotBlank(value)) {
-                    prunedTags = PrunedTag.parse(value);
-                }
-                if (prunedTags == null) {
-                    prunedTags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
-                }
-                prunedTagsCache.put(configId, prunedTags);
-            }
-        }
-        if (prunedTags == null) {
+            prunedTags = prunedTagsCache.computeIfAbsent(crawlingConfig.getConfigId(), id -> resolvePrunedTags(crawlingConfig));
+        } else {
             prunedTags = fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
         }
         return pruneNodeByTags(node, prunedTags);
+    }
+
+    private PrunedTag[] resolvePrunedTags(final CrawlingConfig crawlingConfig) {
+        final String value = crawlingConfig.getConfigParameterMap(ConfigName.CONFIG).get(CrawlingConfig.Param.Config.HTML_PRUNED_TAGS);
+        if (StringUtil.isNotBlank(value)) {
+            final PrunedTag[] parsed = PrunedTag.parse(value);
+            if (parsed != null) {
+                return parsed;
+            }
+        }
+        return fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
     }
 
     /**
@@ -1050,7 +1024,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             for (final RequestData requestData : urlList) {
                 String url = requestData.getUrl();
                 for (final Map.Entry<String, String> entry : convertUrlMap.entrySet()) {
-                    url = url.replaceAll(entry.getKey(), entry.getValue());
+                    final Pattern pattern = convertUrlPatternCache.computeIfAbsent(entry.getKey(), Pattern::compile);
+                    url = pattern.matcher(url).replaceAll(entry.getValue());
                 }
                 url = pathMappingHelper.replaceUrl(url);
                 requestData.setUrl(replaceDuplicateHost(url));
