@@ -16,7 +16,6 @@
 package org.codelibs.fess.crawler;
 
 import static org.codelibs.core.stream.StreamUtil.split;
-import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,10 +25,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,12 +107,12 @@ public class FessCrawlerThread extends CrawlerThread {
      */
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
-        if (ComponentUtil.getFessConfig().isIncrementalCrawling()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isIncrementalCrawling()) {
 
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final long startTime = systemHelper.getCurrentTimeAsLong();
 
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
@@ -126,7 +125,10 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<>();
-                stream(crawlingConfig.getPermissions()).of(stream -> stream.forEach(p -> roleTypeList.add(p)));
+                final String[] permissions = crawlingConfig.getPermissions();
+                if (permissions != null) {
+                    Collections.addAll(roleTypeList, permissions);
+                }
                 if (ComponentUtil.getProtocolHelper().isFilePathProtocol(url)) {
                     if (url.endsWith("/")) {
                         // directory
@@ -164,7 +166,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
                 if (expires != null && expires.getTime() < systemHelper.getCurrentTimeAsLong()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
-                    if (idValue != null && !indexingHelper.deleteDocument(searchEngineClient, idValue.toString())) {
+                    if (idValue != null && !indexingHelper.deleteDocument(searchEngineClient, idValue.toString())
+                            && logger.isDebugEnabled()) {
                         logger.debug("Failed to delete expired document: {}", url);
                     }
                     return true;
@@ -191,15 +194,16 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
                 if (httpStatusCode == Constants.NOT_FOUND_STATUS_CODE) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
-                    if (!indexingHelper.deleteDocument(searchEngineClient, id)) {
+                    if (!indexingHelper.deleteDocument(searchEngineClient, id) && logger.isDebugEnabled()) {
                         logger.debug("Failed to delete document: status={}, url={}", Constants.NOT_FOUND_STATUS_CODE, url);
                     }
                     return false;
                 }
-                if (responseData.getLastModified() == null) {
+                final Date responseLastModified = responseData.getLastModified();
+                if (responseLastModified == null) {
                     return true;
                 }
-                if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == Constants.OK_STATUS_CODE) {
+                if (responseLastModified.getTime() <= lastModified.getTime() && httpStatusCode == Constants.OK_STATUS_CODE) {
 
                     log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 
@@ -213,7 +217,8 @@ public class FessCrawlerThread extends CrawlerThread {
 
                     final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
                     if (documentExpires != null
-                            && !indexingHelper.updateDocument(searchEngineClient, id, fessConfig.getIndexFieldExpires(), documentExpires)) {
+                            && !indexingHelper.updateDocument(searchEngineClient, id, fessConfig.getIndexFieldExpires(), documentExpires)
+                            && logger.isDebugEnabled()) {
                         logger.debug("Failed to update field: field={}, url={}", fessConfig.getIndexFieldExpires(), url);
                     }
 
@@ -230,17 +235,15 @@ public class FessCrawlerThread extends CrawlerThread {
 
     /**
      * Stores child URLs from the given set into the crawling queue for future processing.
-     * This method filters out blank URLs and increments the depth for child URLs.
+     * The crawling depth is incremented by 1 from the parent URL's depth.
      *
      * @param urlQueue the parent URL queue item
      * @param childUrlSet the set of child URLs to be queued for crawling
      */
     protected void storeChildUrlsToQueue(final UrlQueue<?> urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
-            // add an url
             try {
-                storeChildUrls(childUrlSet.stream().filter(rd -> StringUtil.isNotBlank(rd.getUrl())).collect(Collectors.toSet()),
-                        urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
+                storeChildUrls(childUrlSet, urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
             } catch (final Throwable t) {
                 if (!ComponentUtil.available()) {
                     throw new ContainerNotAvailableException(t);
@@ -406,6 +409,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     }
                     return new Pair<>(values[0], Pattern.compile(values[1]));
                 }))
+                .filter(Objects::nonNull)
                 .toList());
     }
 }
