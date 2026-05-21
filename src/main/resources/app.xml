@@ -61,6 +61,12 @@
 	</component>
 	<component name="themeHelper" class="org.codelibs.fess.helper.ThemeHelper">
 	</component>
+	<component name="themeRegistry" class="org.codelibs.fess.theme.ThemeRegistry">
+	</component>
+	<component name="staticThemeInstaller" class="org.codelibs.fess.theme.StaticThemeInstaller">
+	</component>
+	<component name="sessionCsrfTokenManager" class="org.codelibs.fess.helper.SessionCsrfTokenManager">
+	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.UserInfoHelper">
