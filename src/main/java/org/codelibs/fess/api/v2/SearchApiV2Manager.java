@@ -31,6 +31,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
+import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
@@ -86,6 +87,24 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // LogoutHandler is stateless — shared single instance is safe across concurrent requests.
     private final LogoutHandler logoutHandler = new LogoutHandler();
+
+    // LoginHandler depends on the DI-managed LoginRateLimiter, which is not yet available
+    // at field-init time. Lazy-init through loginHandler() defers the lookup to first request.
+    private volatile LoginHandler loginHandler;
+
+    private LoginHandler loginHandler() {
+        LoginHandler h = loginHandler;
+        if (h == null) {
+            synchronized (this) {
+                h = loginHandler;
+                if (h == null) {
+                    h = new LoginHandler(ComponentUtil.getLoginRateLimiter());
+                    loginHandler = h;
+                }
+            }
+        }
+        return h;
+    }
 
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
@@ -149,6 +168,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/labels" -> handleLabels(request, response);
             case "/popular-words" -> handlePopularWords(request, response);
             case "/auth/me" -> meHandler.handle(request, response);
+            case "/auth/login" -> loginHandler().handle(request, response);
             case "/auth/logout" -> logoutHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }

@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.api.v2.handlers.LoginRateLimiter;
 import org.codelibs.fess.auth.AuthenticationManager;
 import org.codelibs.fess.chat.ChatClient;
 import org.codelibs.fess.chat.ChatSessionManager;
@@ -140,6 +141,8 @@ public final class ComponentUtil {
     private static final String ACCESS_TOKEN_HELPER = "accessTokenHelper";
 
     private static final String RATE_LIMIT_HELPER = "rateLimitHelper";
+
+    private static final String LOGIN_RATE_LIMITER = "loginRateLimiter";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -742,6 +745,14 @@ public final class ComponentUtil {
      */
     public static RateLimitHelper getRateLimitHelper() {
         return getComponent(RATE_LIMIT_HELPER);
+    }
+
+    /**
+     * Gets the v2 login rate limiter component.
+     * @return The login rate limiter (shared singleton).
+     */
+    public static LoginRateLimiter getLoginRateLimiter() {
+        return getComponent(LOGIN_RATE_LIMITER);
     }
 
     /**
