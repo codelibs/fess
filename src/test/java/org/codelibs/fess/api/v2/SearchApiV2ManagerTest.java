@@ -82,6 +82,80 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertTrue(body.contains("endpoint not found"), body);
     }
 
+    @Test
+    public void test_process_suggestWordsReturnsEnvelopeShape() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "test" });
+        params.put("num", new String[] { "5" });
+        m.process(new StubRequest("/api/v2/suggest-words", params), res, new NopChain());
+        final String body = res.body();
+        // The suggest helper may fail without an OpenSearch instance — accept either a 200
+        // success envelope or a structured internal-error envelope, but assert the v2 wire
+        // shape is preserved either way.
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            assertTrue(body.contains("\"suggest_words\""), body);
+            assertTrue(body.contains("\"record_count\""), body);
+            assertTrue(body.contains("\"page_size\""), body);
+            assertTrue(body.contains("\"q\":\"test\""), body);
+        } else {
+            assertEquals(500, res.status);
+            assertTrue(body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_process_labelsReturnsEnvelopeShape() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/labels"), res, new NopChain());
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            assertTrue(body.contains("\"record_count\""), body);
+            assertTrue(body.contains("\"labels\""), body);
+        } else {
+            // Helper backed by the search engine; without a live engine the handler emits a
+            // structured error envelope. Verify the v2 wire shape rather than failing here.
+            assertEquals(500, res.status);
+            assertTrue(body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_process_popularWordsReturnsEnvelopeShape() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/popular-words"), res, new NopChain());
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            assertTrue(body.contains("\"popular_words\""), body);
+            assertTrue(body.contains("\"record_count\""), body);
+        } else {
+            // Either feature-disabled (invalid_request 400) or backend-unreachable (internal_error 500).
+            assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
+            assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_process_labelsRejectsNonGetMethod() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/labels").withMethod("POST"), res, new NopChain());
+        assertEquals(400, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("method not allowed"), body);
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override
@@ -271,9 +345,21 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     private static class StubRequest implements HttpServletRequest {
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
+        private final Map<String, String[]> params;
+        private String method = "GET";
 
         StubRequest(final String uri) {
+            this(uri, Collections.emptyMap());
+        }
+
+        StubRequest(final String uri, final Map<String, String[]> params) {
             this.uri = uri;
+            this.params = params == null ? Collections.emptyMap() : params;
+        }
+
+        StubRequest withMethod(final String m) {
+            this.method = m;
+            return this;
         }
 
         @Override
@@ -283,7 +369,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
         @Override
         public String getMethod() {
-            return "GET";
+            return method;
         }
 
         @Override
@@ -489,22 +575,23 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
         @Override
         public String getParameter(final String name) {
-            return null;
+            final String[] vals = params.get(name);
+            return vals == null || vals.length == 0 ? null : vals[0];
         }
 
         @Override
         public Enumeration<String> getParameterNames() {
-            return Collections.emptyEnumeration();
+            return Collections.enumeration(params.keySet());
         }
 
         @Override
         public String[] getParameterValues(final String name) {
-            return null;
+            return params.get(name);
         }
 
         @Override
         public Map<String, String[]> getParameterMap() {
-            return Collections.emptyMap();
+            return Collections.unmodifiableMap(params);
         }
 
         @Override
