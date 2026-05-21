@@ -68,6 +68,61 @@ public class SessionCsrfTokenManagerTest extends UnitFessTestCase {
         assertNotEquals(before, after);
     }
 
+    @Test
+    public void test_verify_rejectsNullToken() {
+        final SessionCsrfTokenManager m = new SessionCsrfTokenManager();
+        final HttpSession session = mockSession();
+        // Even with no token stored yet, a null provided value must short-circuit to false.
+        assertFalse(m.verify(session, null));
+        // And once a token IS issued, a null provided value still returns false.
+        m.issue(session);
+        assertFalse(m.verify(session, null));
+    }
+
+    @Test
+    public void test_verify_rejectsEmptyToken() {
+        final SessionCsrfTokenManager m = new SessionCsrfTokenManager();
+        final HttpSession session = mockSession();
+        // Empty token must be rejected before any session attribute lookup.
+        assertFalse(m.verify(session, ""));
+        m.issue(session);
+        assertFalse(m.verify(session, ""));
+    }
+
+    @Test
+    public void test_verify_rejectsWrongTokenOfSameLength() {
+        final SessionCsrfTokenManager m = new SessionCsrfTokenManager();
+        final HttpSession session = mockSession();
+        final String issued = m.issue(session);
+        // Construct a same-length but different string to exercise the constant-time
+        // path (length-equal branch) without depending on timing.
+        final char[] chars = issued.toCharArray();
+        // Flip every character to a guaranteed-different one in the urlsafe base64 alphabet
+        // (A-Z, a-z, 0-9, '-', '_').
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = chars[i] == 'A' ? 'B' : 'A';
+        }
+        final String wrong = new String(chars);
+        assertEquals(issued.length(), wrong.length());
+        assertNotEquals(issued, wrong);
+        assertFalse(m.verify(session, wrong));
+    }
+
+    @Test
+    public void test_rotate_invalidatesPreviousToken() {
+        final SessionCsrfTokenManager m = new SessionCsrfTokenManager();
+        final HttpSession session = mockSession();
+        final String a = m.issue(session);
+        assertTrue(m.verify(session, a));
+        m.rotate(session);
+        // Previous token must no longer verify.
+        assertFalse(m.verify(session, a));
+        // A freshly issued token must verify; it must differ from the previous one.
+        final String b = m.issue(session);
+        assertNotEquals(a, b);
+        assertTrue(m.verify(session, b));
+    }
+
     private static HttpSession mockSession() {
         return new StubHttpSession();
     }
