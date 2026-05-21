@@ -80,6 +80,8 @@ async function runSearch() {
     }
     const env = await api.get("/search", params);
     renderResults(env);
+    const labels = await loadLabels();
+    renderFacets(env, labels);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
     const meta = document.getElementById("results-meta");
@@ -163,8 +165,57 @@ export function attach() {
       form.dispatchEvent(new Event("submit"));
     });
   }
+  const clearBtn = document.getElementById("facet-clear");
+  if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; runSearch(); });
   const urlQ = new URLSearchParams(location.search).get("q");
   if (urlQ) { input.value = urlQ; state.q = urlQ; runSearch(); }
+}
+
+async function loadLabels() {
+  try {
+    const env = await api.get("/labels");
+    return env.labels || [];
+  } catch { return []; }
+}
+
+function buildFacetGroup(title, entries, fieldKey) {
+  const group = el("div", { className: "facet-group" });
+  group.appendChild(el("h3", { text: title }));
+  entries.forEach(entry => {
+    const item = el("div", { className: "facet-item" });
+    const active = (state.facets[fieldKey] || []).includes(entry.value);
+    if (active) item.classList.add("active");
+    item.appendChild(el("span", { text: entry.labelText }));
+    if (entry.count != null) {
+      item.appendChild(el("span", { className: "badge bg-secondary", text: String(entry.count) }));
+    }
+    item.addEventListener("click", () => {
+      state.facets[fieldKey] = state.facets[fieldKey] || [];
+      const arr = state.facets[fieldKey];
+      const idx = arr.indexOf(entry.value);
+      if (idx >= 0) arr.splice(idx, 1); else arr.push(entry.value);
+      runSearch();
+    });
+    group.appendChild(item);
+  });
+  return group;
+}
+
+function renderFacets(env, labels) {
+  const body = document.getElementById("facet-body");
+  const clearBtn = document.getElementById("facet-clear");
+  body.innerHTML = "";
+  if (labels.length > 0) {
+    const entries = labels.map(l => ({ labelText: l.label, value: l.value }));
+    body.appendChild(buildFacetGroup(t("facet.title"), entries, "label"));
+  }
+  const facetField = env.facet_field || [];
+  for (const field of facetField) {
+    const entries = (field.result || []).map(r => ({ labelText: r.value, value: r.value, count: r.count }));
+    body.appendChild(buildFacetGroup(field.name, entries, field.name));
+  }
+  const anyActive = Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0);
+  clearBtn.classList.toggle("d-none", !anyActive);
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
