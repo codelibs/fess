@@ -121,6 +121,92 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_activeTheme_includedInPayloadWhenThemeRegistryHasActiveStaticTheme() throws Exception {
+        // ThemeRegistry is not bound in test_app.xml. ComponentUtil.getComponent(class) first
+        // asks Lasta DI; on ComponentNotFoundException it falls back to its componentMap,
+        // which ComponentUtil.register(...) writes into. Registering a stub here under the
+        // canonical class name therefore makes the handler resolve our stub and exercise the
+        // populated-theme payload branch.
+        final String yaml = String.join("\n", //
+                "apiVersion: fess.codelibs.org/v1", //
+                "kind: StaticTheme", //
+                "name: bootstrap", //
+                "displayName: \"Bootstrap Theme\"", //
+                "version: \"1.2.3\"", //
+                "supportedLocales: [\"en\", \"ja\"]");
+        final org.codelibs.fess.theme.ThemeManifest manifest = org.codelibs.fess.theme.ThemeManifest
+                .parse(new java.io.ByteArrayInputStream(yaml.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        final org.codelibs.fess.theme.Theme theme = new org.codelibs.fess.theme.Theme(org.codelibs.fess.theme.ThemeType.STATIC, "bootstrap",
+                java.nio.file.Paths.get("/tmp/bootstrap"), manifest);
+        final StubThemeRegistry stub = new StubThemeRegistry(java.util.Optional.of(theme));
+        ComponentUtil.register(stub, org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        // VirtualHostHelper is configured in fess.xml which test_app.xml does not include, so
+        // its lookup throws and the handler's outer theme try/catch swallows the exception
+        // before it can call resolveActiveTheme. Register a no-op helper to keep the theme
+        // block alive until the registry call.
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            final String body = res.body();
+            // The theme block now carries the manifest fields the handler is supposed to surface,
+            // proving the active-theme branch of UiConfigHandler.handle ran.
+            assertTrue(body.contains("\"name\":\"bootstrap\""), body);
+            assertTrue(body.contains("\"type\":\"static\""), body);
+            assertTrue(body.contains("\"display_name\":\"Bootstrap Theme\""), body);
+            assertTrue(body.contains("\"version\":\"1.2.3\""), body);
+            // site_name should now reflect the manifest's display_name (handler line ~119).
+            assertTrue(body.contains("\"site_name\":\"Bootstrap Theme\""), body);
+        } finally {
+            // Reset to a known empty-registry state so neighbors that don't bring their own
+            // stub still see deterministic behavior.
+            ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                    org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void test_siteName_fallsBackToFessWhenThemeMetadataAbsent() throws Exception {
+        // Symmetric to the active-theme test: with no theme bound to the request the handler
+        // falls back to the literal "Fess" for site_name (UiConfigHandler.java line ~119).
+        // Register an empty-stub registry (and a no-op VirtualHostHelper, otherwise the
+        // handler's outer theme try-catch eats the missing-helper exception before reaching
+        // resolveActiveTheme — see the active-theme test's comment).
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+        assertTrue(res.body().contains("\"site_name\":\"Fess\""), res.body());
+    }
+
+    /** Minimal ThemeRegistry stub returning a fixed Optional from resolveActiveTheme. */
+    private static class StubThemeRegistry extends org.codelibs.fess.theme.ThemeRegistry {
+        private final java.util.Optional<org.codelibs.fess.theme.Theme> active;
+
+        StubThemeRegistry(final java.util.Optional<org.codelibs.fess.theme.Theme> active) {
+            this.active = active;
+        }
+
+        @Override
+        public java.util.Optional<org.codelibs.fess.theme.Theme> resolveActiveTheme(final String virtualHostKey) {
+            return active;
+        }
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
