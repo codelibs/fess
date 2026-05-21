@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -52,8 +53,20 @@ public class GcsStorageClient implements StorageClient {
 
     private static final Logger logger = LogManager.getLogger(GcsStorageClient.class);
 
+    private static final String DEFAULT_GCS_HOST = "storage.googleapis.com";
+
     private final Storage storage;
     private final String bucket;
+
+    /**
+     * Constructor for subclasses that customize behavior without initializing the GCS client.
+     * Subclasses using this constructor must override any method that depends on
+     * {@code storage} or {@code bucket}.
+     */
+    protected GcsStorageClient() {
+        this.storage = null;
+        this.bucket = null;
+    }
 
     /**
      * Creates a new GcsStorageClient instance.
@@ -72,7 +85,7 @@ public class GcsStorageClient implements StorageClient {
             builder.setProjectId(projectId);
         }
 
-        if (StringUtil.isNotBlank(endpoint)) {
+        if (StringUtil.isNotBlank(endpoint) && !isDefaultEndpoint(endpoint)) {
             // For fake-gcs-server or custom endpoint
             builder.setHost(endpoint);
             builder.setCredentials(NoCredentials.getInstance());
@@ -93,6 +106,28 @@ public class GcsStorageClient implements StorageClient {
         }
 
         this.storage = builder.build().getService();
+    }
+
+    /**
+     * Determines whether the given endpoint refers to the default GCS host
+     * ({@code storage.googleapis.com}). Subclasses may override this to
+     * recognize additional hosts as default.
+     *
+     * @param endpoint the endpoint to check (URL or host)
+     * @return {@code true} if the endpoint resolves to the default GCS host
+     */
+    protected boolean isDefaultEndpoint(final String endpoint) {
+        if (StringUtil.isBlank(endpoint)) {
+            return false;
+        }
+        final String value = endpoint.trim();
+        try {
+            final URI uri = URI.create(value.contains("://") ? value : "https://" + value);
+            return "https".equalsIgnoreCase(uri.getScheme()) && DEFAULT_GCS_HOST.equalsIgnoreCase(uri.getHost())
+                    && (uri.getPort() == -1 || uri.getPort() == 443);
+        } catch (final IllegalArgumentException e) {
+            return DEFAULT_GCS_HOST.equalsIgnoreCase(value);
+        }
     }
 
     @Override
@@ -243,6 +278,9 @@ public class GcsStorageClient implements StorageClient {
     public void close() {
         // GCS Storage client doesn't require explicit close
         // but we can try to close it if needed
+        if (storage == null) {
+            return;
+        }
         try {
             storage.close();
         } catch (final Exception e) {

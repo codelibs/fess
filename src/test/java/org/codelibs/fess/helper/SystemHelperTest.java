@@ -123,6 +123,38 @@ public class SystemHelperTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_isStorageEnabled() {
+        assertTrue(systemHelper.isStorageEnabled(storageConfig("https://s3.example.com", "bucket", "s3")));
+        assertTrue(systemHelper.isStorageEnabled(storageConfig("", "bucket", "gcs")));
+        assertTrue(systemHelper.isStorageEnabled(storageConfig("", "bucket", "GCS")));
+
+        assertFalse(systemHelper.isStorageEnabled(storageConfig("", "bucket", "auto")));
+        assertFalse(systemHelper.isStorageEnabled(storageConfig("", "", "gcs")));
+        assertFalse(systemHelper.isStorageEnabled(null));
+    }
+
+    private FessConfig storageConfig(final String endpoint, final String bucket, final String type) {
+        return new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getStorageEndpoint() {
+                return endpoint;
+            }
+
+            @Override
+            public String getStorageBucket() {
+                return bucket;
+            }
+
+            @Override
+            public String getStorageType() {
+                return type;
+            }
+        };
+    }
+
+    @Test
     public void test_getForumLink() {
         getMockRequest().setLocale(Locale.ENGLISH);
         assertEquals("https://discuss.codelibs.org/c/FessEN/", systemHelper.getForumLink());
