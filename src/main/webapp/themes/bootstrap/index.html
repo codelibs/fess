@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fess</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/themes/bootstrap/assets/styles.css">
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+  <header class="navbar navbar-expand-lg bg-body-tertiary border-bottom" role="banner">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="/" id="brand-link">Fess</a>
+      <form class="d-flex flex-grow-1 mx-3 position-relative" id="search-form" role="search" aria-label="Site search">
+        <input
+            id="search-input"
+            class="form-control"
+            type="search"
+            name="q"
+            autocomplete="off"
+            aria-label="Search query"
+            data-i18n-placeholder="search.placeholder">
+        <button class="btn btn-primary ms-2" type="submit" id="search-submit" data-i18n="search.button">Search</button>
+        <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
+      </form>
+      <div class="d-flex align-items-center gap-2" id="auth-controls">
+        <span class="navbar-text d-none" id="user-chip" aria-live="polite"></span>
+        <button class="btn btn-outline-secondary btn-sm d-none" type="button" id="logout-btn" data-i18n="auth.logout">Logout</button>
+        <button class="btn btn-outline-primary btn-sm" type="button" id="login-btn" data-bs-toggle="modal" data-bs-target="#login-modal" data-i18n="auth.login">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid py-3" role="main" id="page-root">
+    <div class="row">
+      <aside class="col-lg-3 col-md-4 mb-3" role="complementary" aria-label="Facets">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong data-i18n="facet.title">Facets</strong>
+            <button class="btn btn-link btn-sm p-0 d-none" id="facet-clear" data-i18n="facet.clear">Clear</button>
+          </div>
+          <div class="card-body" id="facet-body">
+            <p class="text-muted small mb-0" data-i18n="facet.empty">No facets yet — run a search.</p>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-lg-6 col-md-8" id="results-column">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="text-muted small" id="results-meta" aria-live="polite"></div>
+          <div>
+            <label for="sort-select" class="form-label me-2 mb-0 small" data-i18n="search.sort">Sort</label>
+            <select class="form-select form-select-sm d-inline-block w-auto" id="sort-select" aria-label="Sort order">
+              <option value="">—</option>
+              <option value="created.desc" data-i18n="search.sort.created_desc">Newest</option>
+              <option value="created.asc" data-i18n="search.sort.created_asc">Oldest</option>
+              <option value="content_length.desc" data-i18n="search.sort.length_desc">Length</option>
+            </select>
+          </div>
+        </div>
+        <ol class="list-unstyled" id="results" role="list" aria-live="polite"></ol>
+        <nav aria-label="Pagination" class="d-none" id="pagination-nav">
+          <ul class="pagination" id="pagination"></ul>
+        </nav>
+        <div class="text-center text-muted my-5 d-none" id="empty-state">
+          <p data-i18n="search.no_results">No results.</p>
+          <div id="popular-words"></div>
+        </div>
+      </section>
+
+      <aside class="col-lg-3 d-none" id="chat-column" role="complementary" aria-label="Chat"></aside>
+    </div>
+  </main>
+
+  <footer class="container-fluid py-3 border-top text-center text-muted small">
+    <span>Fess</span>
+  </footer>
+
+  <!-- Login modal -->
+  <div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" id="login-form">
+        <div class="modal-header">
+          <h5 class="modal-title" id="login-modal-title" data-i18n="auth.login">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-danger d-none" id="login-error" role="alert"></div>
+          <div class="mb-3">
+            <label for="login-username" class="form-label" data-i18n="auth.username">Username</label>
+            <input class="form-control" id="login-username" name="username" autocomplete="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="login-password" class="form-label" data-i18n="auth.password">Password</label>
+            <input class="form-control" id="login-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="auth.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="auth.login">Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.min.js" defer></script>
+  <script type="module" src="/themes/bootstrap/assets/app.js"></script>
+</body>
+</html>
