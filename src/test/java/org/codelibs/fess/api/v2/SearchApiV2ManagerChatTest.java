@@ -90,6 +90,24 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         assertNotEquals(403, res.status, res.body());
     }
 
+    @Test
+    public void test_chatStreamPostWithoutCsrf_returns403() throws Exception {
+        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(new StubRequest("POST", "/api/v2/chat/stream"), res, null);
+        assertEquals(403, res.status);
+        assertTrue(res.body().contains("\"code\":\"forbidden\""));
+    }
+
+    @Test
+    public void test_chatStreamGetIsExemptFromCsrf() throws Exception {
+        // GET /api/v2/chat/stream passes the CSRF gate (then handler rejects via SSE error event).
+        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(new StubRequest("GET", "/api/v2/chat/stream"), res, null);
+        assertNotEquals(403, res.status);
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override
@@ -291,6 +309,16 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         StubRequest(final String uri, final Map<String, String[]> params) {
             this.uri = uri;
             this.params = params == null ? Collections.emptyMap() : params;
+        }
+
+        /**
+         * Convenience constructor that takes method first so call sites can
+         * read {@code new StubRequest("POST", "/api/v2/chat/stream")} the same
+         * way the handler unit tests do.
+         */
+        StubRequest(final String method, final String uri) {
+            this(uri, Collections.emptyMap());
+            this.method = method;
         }
 
         StubRequest withMethod(final String m) {
