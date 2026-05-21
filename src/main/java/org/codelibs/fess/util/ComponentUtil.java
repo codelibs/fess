@@ -73,6 +73,7 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.ThemeHelper;
@@ -143,6 +144,8 @@ public final class ComponentUtil {
     private static final String RATE_LIMIT_HELPER = "rateLimitHelper";
 
     private static final String LOGIN_RATE_LIMITER = "loginRateLimiter";
+
+    private static final String SESSION_CSRF_TOKEN_MANAGER = "sessionCsrfTokenManager";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -753,6 +756,14 @@ public final class ComponentUtil {
      */
     public static LoginRateLimiter getLoginRateLimiter() {
         return getComponent(LOGIN_RATE_LIMITER);
+    }
+
+    /**
+     * Gets the session-scoped CSRF token manager component used by the v2 API.
+     * @return The session CSRF token manager (shared singleton).
+     */
+    public static SessionCsrfTokenManager getSessionCsrfTokenManager() {
+        return getComponent(SESSION_CSRF_TOKEN_MANAGER);
     }
 
     /**

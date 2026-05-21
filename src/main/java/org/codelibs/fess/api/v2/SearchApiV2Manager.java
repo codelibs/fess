@@ -149,7 +149,7 @@ public class SearchApiV2Manager extends BaseApiManager {
         if (ComponentUtil.getFessConfig().isThemeApiCsrfRequired() && CsrfRequirement.requiresCsrf(sub, request.getMethod())) {
             final HttpSession session = request.getSession(false);
             final String header = request.getHeader("X-Fess-CSRF-Token");
-            final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+            final SessionCsrfTokenManager csrf = ComponentUtil.getSessionCsrfTokenManager();
             if (session == null || !csrf.verify(session, header)) {
                 V2EnvelopeWriter.writeError(response, V2ErrorCode.FORBIDDEN, "invalid csrf token");
                 return;
