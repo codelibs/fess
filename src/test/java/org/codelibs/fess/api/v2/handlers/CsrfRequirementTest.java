@@ -51,4 +51,27 @@ public class CsrfRequirementTest {
     public void test_clickRequiresCsrf() {
         assertTrue(CsrfRequirement.requiresCsrf("/click", "POST"));
     }
+
+    @Test
+    public void test_chatPostRequiresCsrf() {
+        assertTrue(CsrfRequirement.requiresCsrf("/chat", "POST"));
+    }
+
+    @Test
+    public void test_chatStreamPostRequiresCsrf() {
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/stream", "POST"));
+    }
+
+    @Test
+    public void test_chatGetIsExemptFromCsrf() {
+        assertFalse(CsrfRequirement.requiresCsrf("/chat", "GET"));
+        assertFalse(CsrfRequirement.requiresCsrf("/chat/stream", "GET"));
+    }
+
+    @Test
+    public void test_chatTrailingSlashNotMatched() {
+        // Defensive: the manager normalizes paths so /chat/ would not reach here,
+        // but verify the rule table doesn't accidentally CSRF-gate the trailing slash.
+        assertFalse(CsrfRequirement.requiresCsrf("/chat/", "POST"));
+    }
 }

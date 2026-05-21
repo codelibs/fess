@@ -22,8 +22,8 @@ package org.codelibs.fess.api.v2.handlers;
  * the client cannot yet have a token. Everything else under POST/PUT/DELETE
  * is required to present {@code X-Fess-CSRF-Token}.</p>
  *
- * <p>{@code /chat} is intentionally absent here — Plan 4 owns the chat endpoint
- * and will add its own row.</p>
+ * <p>{@code /chat} POST and {@code /chat/stream} POST are CSRF-gated per spec §7.3.
+ * GET requests on either path are exempt (the rule table only checks state-changing methods).</p>
  */
 public final class CsrfRequirement {
 
@@ -54,6 +54,12 @@ public final class CsrfRequirement {
             return true;
         }
         if (subPath.startsWith("/documents/") && subPath.endsWith("/favorite")) {
+            return true;
+        }
+        if ("/chat".equals(subPath)) {
+            return true;
+        }
+        if ("/chat/stream".equals(subPath)) {
             return true;
         }
         return false;
