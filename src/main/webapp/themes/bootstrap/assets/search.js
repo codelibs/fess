@@ -87,15 +87,80 @@ async function runSearch() {
   }
 }
 
+let suggestTimer = null;
+let suggestIndex = -1;
+
+function renderSuggestItems(items) {
+  const dropdown = document.getElementById("suggest-dropdown");
+  dropdown.innerHTML = "";
+  items.forEach((it, i) => {
+    const li = el("li", {
+      className: "list-group-item",
+      text: it.text || "",
+      attrs: { role: "option" },
+      dataset: { idx: i, text: it.text || "" }
+    });
+    dropdown.appendChild(li);
+  });
+}
+
+async function showSuggest(q) {
+  const dropdown = document.getElementById("suggest-dropdown");
+  if (!q || q.length < 2) { dropdown.classList.add("d-none"); dropdown.innerHTML = ""; return; }
+  try {
+    const env = await api.get("/suggest-words", { q, num: 8 });
+    const items = env.suggest_words || [];
+    if (items.length === 0) { dropdown.classList.add("d-none"); return; }
+    renderSuggestItems(items);
+    dropdown.classList.remove("d-none");
+    suggestIndex = -1;
+  } catch { /* swallow — suggest is best-effort */ }
+}
+
+function hideSuggest() {
+  const dropdown = document.getElementById("suggest-dropdown");
+  dropdown.classList.add("d-none");
+  suggestIndex = -1;
+}
+
 export function attach() {
   const form = document.getElementById("search-form");
   const input = document.getElementById("search-input");
+  const dropdown = document.getElementById("suggest-dropdown");
   if (form) {
     form.addEventListener("submit", ev => {
       ev.preventDefault();
       state.q = input.value.trim();
       state.start = 0;
+      hideSuggest();
       runSearch();
+    });
+  }
+  if (input) {
+    input.addEventListener("input", () => {
+      if (suggestTimer) clearTimeout(suggestTimer);
+      const v = input.value.trim();
+      suggestTimer = setTimeout(() => showSuggest(v), 150);
+    });
+    input.addEventListener("keydown", ev => {
+      const items = dropdown.querySelectorAll(".list-group-item");
+      if (!items.length || dropdown.classList.contains("d-none")) return;
+      if (ev.key === "ArrowDown") { ev.preventDefault(); suggestIndex = Math.min(suggestIndex + 1, items.length - 1); }
+      else if (ev.key === "ArrowUp") { ev.preventDefault(); suggestIndex = Math.max(suggestIndex - 1, 0); }
+      else if (ev.key === "Enter" && suggestIndex >= 0) { ev.preventDefault(); input.value = items[suggestIndex].dataset.text; hideSuggest(); form.dispatchEvent(new Event("submit")); return; }
+      else if (ev.key === "Escape") { hideSuggest(); return; }
+      items.forEach((it, i) => it.classList.toggle("active", i === suggestIndex));
+    });
+    input.addEventListener("blur", () => setTimeout(hideSuggest, 150));
+  }
+  if (dropdown) {
+    dropdown.addEventListener("mousedown", ev => {
+      const li = ev.target.closest(".list-group-item");
+      if (!li) return;
+      ev.preventDefault();
+      input.value = li.dataset.text;
+      hideSuggest();
+      form.dispatchEvent(new Event("submit"));
     });
   }
   const urlQ = new URLSearchParams(location.search).get("q");
