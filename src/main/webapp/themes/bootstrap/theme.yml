@@ -1,0 +1,15 @@
+apiVersion: fess.codelibs.org/v1
+kind: StaticTheme
+name: bootstrap
+displayName: "Bootstrap"
+version: "1.0.0"
+author: "CodeLibs Project"
+description: "Reference static theme for Fess. Bootstrap 5-based vanilla-JS SPA exercising /api/v2/*."
+license: "Apache-2.0"
+homepage: "https://fess.codelibs.org/"
+minFessVersion: "15.7"
+supportedLocales:
+  - en
+  - ja
+entry: index.html
+spaFallback: true
