@@ -31,6 +31,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
+import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.entity.PingResponse;
@@ -78,6 +79,9 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // FavoriteGetHandler is stateless — same singleton pattern as the other v2 handlers.
     private final FavoriteGetHandler favoriteGetHandler = new FavoriteGetHandler();
+
+    // MeHandler is stateless — shared single instance is safe across concurrent requests.
+    private final MeHandler meHandler = new MeHandler();
 
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
@@ -140,6 +144,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/suggest-words" -> handleSuggestWords(request, response);
             case "/labels" -> handleLabels(request, response);
             case "/popular-words" -> handlePopularWords(request, response);
+            case "/auth/me" -> meHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
         } catch (final Exception e) {
