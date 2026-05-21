@@ -224,6 +224,100 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertTrue(body.contains("method not allowed"), body);
     }
 
+    @Test
+    public void test_process_healthDispatchesToHealthHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/health"), res, new NopChain());
+        // The /health route writes its envelope through handleHealth(). The engine may or
+        // may not be reachable from the unit harness; both success and internal_error are
+        // accepted as long as the v2 envelope shape is preserved and the engine.cluster_name
+        // field is present on the success branch.
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            assertTrue(body.contains("\"engine\""), body);
+            assertTrue(body.contains("\"cluster_name\""), body);
+        } else {
+            assertEquals(500, res.status);
+            assertTrue(body.contains("\"code\":\"internal_error\""), body);
+            assertTrue(body.contains("engine unreachable") || body.contains("\"status\":9"), body);
+        }
+    }
+
+    @Test
+    public void test_process_authMeRoutesToMeHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/auth/me"), res, new NopChain());
+        // MeHandler always emits a v2 success envelope (anonymous becomes
+        // {"authenticated":false}). The "authenticated" key is the smoking gun that proves
+        // dispatch landed on MeHandler rather than the not-found default branch.
+        assertEquals(200, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertTrue(body.contains("\"status\":0"), body);
+        assertTrue(body.contains("\"authenticated\""), body);
+    }
+
+    @Test
+    public void test_process_uiConfigRoutesToUiConfigHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        // The handler calls req.getSession(true); the existing StubRequest.getSession returns
+        // null, which makes the handler's downstream csrf.issue(session) path fall over —
+        // that lands in the structured-error branch. Either the success envelope shape or
+        // the structured 500 envelope is acceptable here; we just need to confirm dispatch.
+        m.process(new StubRequest("/api/v2/ui/config"), res, new NopChain());
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status " + res.status + ": " + body);
+        if (res.status == 200) {
+            // site_name is a UiConfigHandler-specific payload field — proves the dispatch
+            // landed on the right handler.
+            assertTrue(body.contains("\"site_name\""), body);
+            assertTrue(body.contains("\"login_required\""), body);
+            assertTrue(body.contains("\"theme\""), body);
+        } else {
+            assertTrue(body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_process_cachePathRoutesToCacheHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/cache/abc123"), res, new NopChain());
+        final String body = res.body();
+        // CacheHandler emits one of: not_found (doc missing), internal_error (helpers
+        // unavailable) — never the default not-found "endpoint not found" message that
+        // would indicate the route failed to dispatch. The wire-shape assertion ensures
+        // we are routing to CacheHandler rather than the default arm.
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertTrue(res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
+        assertTrue(body.contains("\"code\":\"not_found\"") || body.contains("\"code\":\"internal_error\""), body);
+        // The default-arm message would say "endpoint not found"; CacheHandler's not_found
+        // says "doc not found" / "no cache for". Asserting the absence of the default arm's
+        // marker proves we reached CacheHandler.
+        assertFalse(body.contains("endpoint not found"), "should not reach default arm: " + body);
+    }
+
+    @Test
+    public void test_process_unknownPathReturnsNotFound() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/this/path/does/not/exist"), res, new NopChain());
+        // Deeper unknown path still resolves to the default arm rather than crashing on
+        // any of the prefix matchers (/documents/, /cache/).
+        assertEquals(404, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertTrue(body.contains("\"status\":1"), body);
+        assertTrue(body.contains("\"code\":\"not_found\""), body);
+        assertTrue(body.contains("endpoint not found"), body);
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override
