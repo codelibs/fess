@@ -62,6 +62,11 @@
   </filter>
 
   <filter>
+    <filter-name>staticThemeFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.StaticThemeFilter</filter-class>
+  </filter>
+
+  <filter>
     <filter-name>lastaShowbaseFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
     <init-param>
@@ -111,6 +116,12 @@
   </filter-mapping>
 
   <filter-mapping>
+    <filter-name>staticThemeFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
     <filter-name>httpHeaderSecurity</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
@@ -150,6 +161,7 @@
     <filter-name>lastaToActionFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
   <!-- ================================================================================= -->
