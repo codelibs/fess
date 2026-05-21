@@ -133,6 +133,55 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         assertEquals("no", res.getHeader("X-Accel-Buffering"));
     }
 
+    @Test
+    public void test_sendSseEvent_emitsCorrectWireFormat() {
+        // sendSseEvent is protected and lives in the same package; exercise it directly
+        // against a StringWriter so we lock down the v1-compatible wire format the static
+        // theme JS parser depends on: "event: <name>\ndata: <json>\n\n".
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        new ChatStreamHandler().sendSseEvent(pw, "phase", new java.util.LinkedHashMap<>(Map.of("phase", "retrieval", "status", "start")));
+        pw.flush();
+        final String out = sw.toString();
+        // The event line is fixed; the data line is JSON whose key order depends on map
+        // iteration so we assert on its structural pieces rather than full equality.
+        assertTrue(out.startsWith("event: phase\n"), out);
+        assertTrue(out.endsWith("\n\n"), out);
+        assertTrue(out.contains("data: {"), out);
+        assertTrue(out.contains("\"phase\":\"retrieval\""), out);
+        assertTrue(out.contains("\"status\":\"start\""), out);
+    }
+
+    @Test
+    public void test_oversizedBodyEmitsSseErrorAndCloses() throws Exception {
+        // V2JsonBody caps the body at MAX_BODY_BYTES (32KiB for the streaming handler).
+        // Any larger payload must produce a single SSE error event with errorCode
+        // "invalid_request", and the stream is closed thereafter. Chat must be enabled so
+        // the request gets past the disabled gate and reaches the body-parse branch.
+        enableRagChat();
+        final String body = "{\"message\":\"" + "x".repeat(40 * 1024) + "\"}";
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody(body), res);
+        assertEquals("text/event-stream", contentTypeMimeOnly(res));
+        final String out = res.body();
+        assertTrue(out.contains("event: error"), out);
+        assertTrue(out.contains("\"errorCode\":\"invalid_request\""), out);
+        // The stream must end with the SSE record terminator and contain exactly one event
+        // (no second event after closing) — assert the record-terminator suffix.
+        assertTrue(out.endsWith("\n\n"), out);
+        org.junit.jupiter.api.Assertions.assertEquals(1, countOccurrences(out, "event: "), "expected exactly one SSE event: " + out);
+    }
+
+    private static int countOccurrences(final String haystack, final String needle) {
+        int n = 0;
+        int idx = 0;
+        while ((idx = haystack.indexOf(needle, idx)) >= 0) {
+            n++;
+            idx += needle.length();
+        }
+        return n;
+    }
+
     private static String contentTypeMimeOnly(final CapturingResponse res) {
         final String ct = res.contentType;
         if (ct == null) {
