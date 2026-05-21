@@ -2076,6 +2076,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String THEME_API_CSRF_REQUIRED = "theme.api.csrf.required";
 
+    /** The key of the configuration. e.g. 10 */
+    String THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE = "theme.api.login.rate.limit.per.ip.per.minute";
+
+    /** The key of the configuration. e.g. 5 */
+    String THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE = "theme.api.login.rate.limit.per.user.per.minute";
+
+    /** The key of the configuration. e.g. 900 */
+    String THEME_API_LOGIN_LOCKOUT_SECONDS = "theme.api.login.lockout.seconds";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9914,6 +9923,51 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThemeApiCsrfRequired();
 
     /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitPerIpPerMinute();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.ip.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitPerIpPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.user.per.minute'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitPerUserPerMinute();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.per.user.per.minute' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger();
+
+    /**
+     * Get the value for the key 'theme.api.login.lockout.seconds'. <br>
+     * The value is, e.g. 900 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginLockoutSeconds();
+
+    /**
+     * Get the value for the key 'theme.api.login.lockout.seconds' as {@link Integer}. <br>
+     * The value is, e.g. 900 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginLockoutSecondsAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -13602,6 +13656,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.THEME_API_CSRF_REQUIRED);
         }
 
+        public String getThemeApiLoginRateLimitPerIpPerMinute() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE);
+        }
+
+        public Integer getThemeApiLoginRateLimitPerIpPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE);
+        }
+
+        public String getThemeApiLoginRateLimitPerUserPerMinute() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE);
+        }
+
+        public Integer getThemeApiLoginRateLimitPerUserPerMinuteAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE);
+        }
+
+        public String getThemeApiLoginLockoutSeconds() {
+            return get(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS);
+        }
+
+        public Integer getThemeApiLoginLockoutSecondsAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -14233,6 +14311,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
             defaultMap.put(FessConfig.THEME_ASSETS_PRECOMPRESSED, "true");
             defaultMap.put(FessConfig.THEME_API_CSRF_REQUIRED, "true");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
