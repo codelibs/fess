@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.v2.handlers.CacheHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
@@ -103,6 +104,9 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // ClickHandler is stateless — shared single instance is safe across concurrent requests.
     private final ClickHandler clickHandler = new ClickHandler();
+
+    // CacheHandler is stateless — shared single instance is safe across concurrent requests.
+    private final CacheHandler cacheHandler = new CacheHandler();
 
     // LoginHandler depends on the DI-managed LoginRateLimiter, which is not yet available
     // at field-init time. Lazy-init through loginHandler() defers the lookup to first request.
@@ -179,6 +183,11 @@ public class SearchApiV2Manager extends BaseApiManager {
                 } else {
                     favoriteGetHandler.handle(request, response, docId);
                 }
+                return;
+            }
+            if (sub.startsWith("/cache/")) {
+                final String docId = sub.substring("/cache/".length());
+                cacheHandler.handle(request, response, docId);
                 return;
             }
             switch (sub) {
