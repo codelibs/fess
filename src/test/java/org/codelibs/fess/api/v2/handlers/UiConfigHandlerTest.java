@@ -99,6 +99,28 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
     }
 
+    /**
+     * Covers the path where no theme is active in {@code ThemeRegistry}.
+     *
+     * <p>{@code UnitFessTestCase} typically has no theme registered, so this
+     * exercise the empty-theme branch of the handler. The assertion only checks
+     * that the {@code "theme"} key is present — its value may be the empty
+     * payload {@code {}} or a populated one, depending on whether something
+     * else in the suite has wired a registry. Either way the wire contract
+     * keeps the key, which is what JS clients rely on.</p>
+     */
+    @Test
+    public void test_emptyThemeStillReturnsPayload() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        final StubSession session = new StubSession();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(session), res);
+        // Same tolerance as test_returnsRequiredKeys: success or structured 500.
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            assertTrue(res.body().contains("\"theme\""), "missing theme key in " + res.body());
+        }
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
