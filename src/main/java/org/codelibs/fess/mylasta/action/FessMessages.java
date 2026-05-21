@@ -1,18 +1,3 @@
-/*
- * Copyright 2012-2025 CodeLibs Project and the Others.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
 package org.codelibs.fess.mylasta.action;
 
 import org.lastaflute.core.message.UserMessage;
@@ -428,6 +413,27 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to process a request: {0} */
     public static final String ERRORS_failed_to_process_sso_request = "{errors.failed_to_process_sso_request}";
 
+    /** The key of the message: Failed to upload theme: {0} */
+    public static final String ERRORS_failed_to_upload_theme = "{errors.failed_to_upload_theme}";
+
+    /** The key of the message: Failed to delete theme: {0} */
+    public static final String ERRORS_failed_to_delete_theme = "{errors.failed_to_delete_theme}";
+
+    /** The key of the message: {0} is the active default theme and cannot be deleted */
+    public static final String ERRORS_theme_is_active = "{errors.theme_is_active}";
+
+    /** The key of the message: {0} is a JSP theme and cannot be deleted from the static theme installer */
+    public static final String ERRORS_theme_is_jsp_type = "{errors.theme_is_jsp_type}";
+
+    /** The key of the message: Invalid theme name: {0} */
+    public static final String ERRORS_theme_name_invalid = "{errors.theme_name_invalid}";
+
+    /** The key of the message: Theme not found: {0} */
+    public static final String ERRORS_theme_not_found = "{errors.theme_not_found}";
+
+    /** The key of the message: Failed to change the default theme */
+    public static final String ERRORS_failed_to_change_default_theme = "{errors.failed_to_change_default_theme}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -562,6 +568,18 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Updated tags of {0}. */
     public static final String SUCCESS_update_storage_tags = "{success.update_storage_tags}";
+
+    /** The key of the message: Theme uploaded: {0} */
+    public static final String SUCCESS_upload_theme = "{success.upload_theme}";
+
+    /** The key of the message: Theme deleted: {0} */
+    public static final String SUCCESS_delete_theme = "{success.delete_theme}";
+
+    /** The key of the message: Default theme changed to {0} */
+    public static final String SUCCESS_change_default_theme = "{success.change_default_theme}";
+
+    /** The key of the message: Theme registry reloaded */
+    public static final String SUCCESS_reload_theme = "{success.reload_theme}";
 
     /** The key of the message: Created the data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -2508,6 +2526,110 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_upload_theme' with parameters.
+     * <pre>
+     * message: Failed to upload theme: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUploadTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_upload_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_delete_theme' with parameters.
+     * <pre>
+     * message: Failed to delete theme: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDeleteTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_delete_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_is_active' with parameters.
+     * <pre>
+     * message: {0} is the active default theme and cannot be deleted
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeIsActive(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_is_active, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_is_jsp_type' with parameters.
+     * <pre>
+     * message: {0} is a JSP theme and cannot be deleted from the static theme installer
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeIsJspType(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_is_jsp_type, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_name_invalid' with parameters.
+     * <pre>
+     * message: Invalid theme name: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeNameInvalid(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_name_invalid, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_not_found' with parameters.
+     * <pre>
+     * message: Theme not found: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeNotFound(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_not_found, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_change_default_theme' with parameters.
+     * <pre>
+     * message: Failed to change the default theme
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToChangeDefaultTheme(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_change_default_theme));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.property_required' with parameters.
      * <pre>
      * message: {0} is required.
@@ -3155,6 +3277,65 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUpdateStorageTags(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_update_storage_tags, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upload_theme' with parameters.
+     * <pre>
+     * message: Theme uploaded: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_upload_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.delete_theme' with parameters.
+     * <pre>
+     * message: Theme deleted: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessDeleteTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_delete_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.change_default_theme' with parameters.
+     * <pre>
+     * message: Default theme changed to {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessChangeDefaultTheme(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_change_default_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.reload_theme' with parameters.
+     * <pre>
+     * message: Theme registry reloaded
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessReloadTheme(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_reload_theme));
         return this;
     }
 

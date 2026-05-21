@@ -1,18 +1,3 @@
-/*
- * Copyright 2012-2025 CodeLibs Project and the Others.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
 package org.codelibs.fess.mylasta.action;
 
 import org.lastaflute.web.response.next.HtmlNext;
@@ -363,6 +348,15 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/systeminfo/admin_systeminfo.jsp */
     HtmlNext path_AdminSysteminfo_AdminSysteminfoJsp = new HtmlNext("/admin/systeminfo/admin_systeminfo.jsp");
+
+    /** The path of the HTML: /admin/theme/admin_theme.jsp */
+    HtmlNext path_AdminTheme_AdminThemeJsp = new HtmlNext("/admin/theme/admin_theme.jsp");
+
+    /** The path of the HTML: /admin/theme/admin_theme_details.jsp */
+    HtmlNext path_AdminTheme_AdminThemeDetailsJsp = new HtmlNext("/admin/theme/admin_theme_details.jsp");
+
+    /** The path of the HTML: /admin/theme/admin_theme_upload.jsp */
+    HtmlNext path_AdminTheme_AdminThemeUploadJsp = new HtmlNext("/admin/theme/admin_theme_upload.jsp");
 
     /** The path of the HTML: /admin/user/admin_user.jsp */
     HtmlNext path_AdminUser_AdminUserJsp = new HtmlNext("/admin/user/admin_user.jsp");
