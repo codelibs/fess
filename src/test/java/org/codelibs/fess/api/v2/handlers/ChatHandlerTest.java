@@ -112,6 +112,13 @@ public class ChatHandlerTest extends UnitFessTestCase {
         assertTrue(body.contains("\"status\":"), body);
     }
 
+    @Test
+    @org.junit.jupiter.api.Disabled("TODO: needs DI container override for ChatClient stub — covered by Plan 6 integration tests")
+    public void test_happyPath_returnsSessionIdContentAndSources() throws Exception {
+        // Future implementation: stub ChatClient via FessTestContainerInitializer,
+        // invoke handler with valid POST, assert payload keys session_id, content, sources.
+    }
+
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
