@@ -16,15 +16,25 @@
 package org.codelibs.fess.theme;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Regression coverage for the bundled {@code bootstrap} static theme.
@@ -80,6 +90,54 @@ public class BundledBootstrapThemeTest {
     public void test_i18nBundlesArePresent() {
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.en.json")), "messages.en.json missing");
         assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.ja.json")), "messages.ja.json missing");
+    }
+
+    @Test
+    public void test_themeYml_versionIsValidSemverAndApiVersionMatches() throws Exception {
+        final Path yml = THEME_DIR.resolve("theme.yml");
+        try (InputStream in = Files.newInputStream(yml)) {
+            final ThemeManifest m = ThemeManifest.parse(in);
+            // version must be a valid semver string, optionally with pre-release/build metadata.
+            final Pattern semver = Pattern.compile("\\d+\\.\\d+\\.\\d+(?:[-+].*)?");
+            assertTrue(semver.matcher(m.getVersion()).matches(), "version is not valid semver: " + m.getVersion());
+            // apiVersion must match the canonical constant defined by ThemeManifest.
+            assertEquals(ThemeManifest.CURRENT_API_VERSION, m.getApiVersion());
+        }
+    }
+
+    @Test
+    public void test_i18nBundles_haveMatchingTopLevelKeysAcrossLocales() throws Exception {
+        final Path enPath = THEME_DIR.resolve("i18n/messages.en.json");
+        final Path jaPath = THEME_DIR.resolve("i18n/messages.ja.json");
+        final ObjectMapper mapper = new ObjectMapper();
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> en = mapper.readValue(Files.readAllBytes(enPath), LinkedHashMap.class);
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> ja = mapper.readValue(Files.readAllBytes(jaPath), LinkedHashMap.class);
+        // Compare top-level key sets — guards against drift between locales as new
+        // strings are added.
+        final Set<String> enKeys = new TreeSet<>(en.keySet());
+        final Set<String> jaKeys = new TreeSet<>(ja.keySet());
+        assertEquals(enKeys, jaKeys, "i18n top-level keys differ between en and ja bundles");
+    }
+
+    @Test
+    public void test_jsModules_containNoBackslashEscapedPaths() throws Exception {
+        // Guard against accidental \-escaped path strings sneaking into source —
+        // these often come from over-zealous JSON string interpolation and break URL
+        // resolution at runtime.
+        try (Stream<Path> walk = Files.walk(THEME_DIR.resolve("assets"))) {
+            walk.filter(p -> p.toString().endsWith(".js")).forEach(p -> {
+                final String text;
+                try {
+                    text = Files.readString(p, StandardCharsets.UTF_8);
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+                assertFalse(text.contains("\\\\"), "literal backslash sequence found in " + p);
+                assertFalse(text.contains("\\/themes\\/"), "escaped /themes/ path found in " + p);
+            });
+        }
     }
 
     @Test
