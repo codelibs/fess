@@ -31,6 +31,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CacheHandler;
 import org.codelibs.fess.api.v2.handlers.ChatHandler;
+import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
@@ -108,6 +109,10 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // ChatHandler is stateless — delegates to ComponentUtil.getChatClient() per request.
     private final ChatHandler chatHandler = new ChatHandler();
+
+    // ChatStreamHandler is stateless — the per-request PrintWriter and SSE callback
+    // are scoped to the handle() invocation, so a single shared instance is safe.
+    private final ChatStreamHandler chatStreamHandler = new ChatStreamHandler();
 
     // CacheHandler is stateless — shared single instance is safe across concurrent requests.
     private final CacheHandler cacheHandler = new CacheHandler();
@@ -207,6 +212,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/ui/config" -> uiConfigHandler.handle(request, response);
             case "/click" -> clickHandler.handle(request, response);
             case "/chat" -> chatHandler.handle(request, response);
+            case "/chat/stream" -> chatStreamHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
         } catch (final Exception e) {
