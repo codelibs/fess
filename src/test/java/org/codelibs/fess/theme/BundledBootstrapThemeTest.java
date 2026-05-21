@@ -1,0 +1,99 @@
+/*
+ * Copyright 2012-2025 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.theme;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.junit.jupiter.api.Test;
+
+/**
+ * Regression coverage for the bundled {@code bootstrap} static theme.
+ *
+ * <p>These assertions run directly against the source tree (no servlet
+ * container), so they verify the bundled artifact remains coherent even when
+ * the WAR has not yet been packaged.</p>
+ */
+public class BundledBootstrapThemeTest {
+
+    private static final Path THEME_DIR = Paths.get("src/main/webapp/themes/bootstrap");
+
+    @Test
+    public void test_themeDirectoryExists() {
+        assertTrue(Files.isDirectory(THEME_DIR), "Bundled bootstrap theme directory missing: " + THEME_DIR.toAbsolutePath());
+    }
+
+    @Test
+    public void test_themeYmlIsPresentAndParsesWithExpectedFields() throws Exception {
+        final Path yml = THEME_DIR.resolve("theme.yml");
+        assertTrue(Files.isRegularFile(yml), "theme.yml missing");
+        try (InputStream in = Files.newInputStream(yml)) {
+            final ThemeManifest m = ThemeManifest.parse(in);
+            assertEquals("bootstrap", m.getName());
+            assertEquals("fess.codelibs.org/v1", m.getApiVersion());
+            assertEquals("StaticTheme", m.getKind());
+            assertEquals("index.html", m.getEntry());
+            assertTrue(m.isSpaFallback());
+            assertTrue(m.getSupportedLocales().contains("en"));
+            assertTrue(m.getSupportedLocales().contains("ja"));
+            assertNotNull(m.getVersion());
+            assertNotNull(m.getDisplayName());
+        }
+    }
+
+    @Test
+    public void test_indexHtmlIsPresent() {
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("index.html")), "index.html missing");
+    }
+
+    @Test
+    public void test_coreAssetFilesArePresent() {
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/app.js")), "assets/app.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/api.js")), "assets/api.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/i18n.js")), "assets/i18n.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/auth.js")), "assets/auth.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/search.js")), "assets/search.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/chat.js")), "assets/chat.js missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("assets/styles.css")), "assets/styles.css missing");
+    }
+
+    @Test
+    public void test_i18nBundlesArePresent() {
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.en.json")), "messages.en.json missing");
+        assertTrue(Files.isRegularFile(THEME_DIR.resolve("i18n/messages.ja.json")), "messages.ja.json missing");
+    }
+
+    @Test
+    public void test_themeRegistryListsBundledThemeAfterReload() throws Exception {
+        final ThemeRegistry reg = new ThemeRegistry();
+        // resolve to the source-tree webapp/themes dir as the test seam input
+        reg.setThemesDirOverride(Paths.get("src/main/webapp/themes"));
+        reg.reload();
+        assertTrue(reg.getAllThemes().containsKey("bootstrap"),
+                "ThemeRegistry did not discover bundled bootstrap theme; got: " + reg.getAllThemes().keySet());
+        final Theme t = reg.getAllThemes().get("bootstrap");
+        assertEquals(ThemeType.STATIC, t.getType());
+        assertEquals("bootstrap", t.getName());
+        assertTrue(t.getManifest().isPresent());
+        assertEquals("Bootstrap", t.getManifest().map(ThemeManifest::getDisplayName).orElse(null));
+    }
+}
