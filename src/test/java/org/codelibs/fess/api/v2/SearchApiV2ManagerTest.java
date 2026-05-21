@@ -166,6 +166,53 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_process_documentsAllDispatchesToScrollHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "*" });
+        m.process(new StubRequest("/api/v2/documents/all", params), res, new NopChain());
+        // Either the scroll handler streamed NDJSON or fell back to a structured envelope —
+        // the manager just needs to confirm the dispatch reached the right handler. Detailed
+        // shape is asserted in ScrollSearchHandlerTest.
+        if ("application/x-ndjson; charset=UTF-8".equals(res.contentType)) {
+            // Streaming branch reached — body may be empty or contain "data" lines.
+            assertTrue(res.body() == null || res.body().isEmpty() || res.body().contains("\"data\""), res.body());
+        } else {
+            final String body = res.body();
+            assertTrue(body.contains("\"version\":\"v2\""), body);
+            assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
+            assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
+        }
+    }
+
+    @Test
+    public void test_process_documentsFavoriteDispatchesToFavoriteHandler() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/abc123/favorite"), res, new NopChain());
+        final String body = res.body();
+        // The manager only needs to confirm the dispatch reached the favorite-get handler.
+        // Either the feature is disabled (invalid_request), the doc isn't indexed (not_found),
+        // or the backend is unreachable (internal_error). The v2 envelope shape is required.
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertTrue(res.status == 400 || res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
+        assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"not_found\"")
+                || body.contains("\"code\":\"internal_error\""), body);
+    }
+
+    @Test
+    public void test_process_documentsFavoriteRejectsMalformedDocId() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/has spaces/favorite"), res, new NopChain());
+        assertEquals(400, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("invalid doc_id"), body);
+    }
+
+    @Test
     public void test_process_labelsRejectsNonGetMethod() throws Exception {
         final SearchApiV2Manager m = new SearchApiV2Manager();
         final CapturingResponse res = new CapturingResponse();

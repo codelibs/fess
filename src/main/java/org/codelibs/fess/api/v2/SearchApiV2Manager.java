@@ -29,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
+import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -67,6 +69,13 @@ public class SearchApiV2Manager extends BaseApiManager {
     // and keeps the manager small as more handler classes are extracted in later batches.
     private final SearchHandler searchHandler = new SearchHandler();
 
+    // ScrollSearchHandler is stateless aside from the per-request Jackson mapper it
+    // allocates internally; safe to share a single instance across concurrent requests.
+    private final ScrollSearchHandler scrollSearchHandler = new ScrollSearchHandler();
+
+    // FavoriteGetHandler is stateless — same singleton pattern as the other v2 handlers.
+    private final FavoriteGetHandler favoriteGetHandler = new FavoriteGetHandler();
+
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
      */
@@ -100,6 +109,19 @@ public class SearchApiV2Manager extends BaseApiManager {
             throws IOException, ServletException {
         final String sub = subPath(request);
         try {
+            // Path components that vary (docId) are matched before the static switch so the
+            // exhaustive switch below can keep its readable shape. Order is important:
+            // /documents/all takes precedence over the generic /documents/{id}/favorite
+            // pattern because "all" would otherwise be interpreted as a doc id.
+            if ("/documents/all".equals(sub)) {
+                scrollSearchHandler.handle(request, response);
+                return;
+            }
+            if (sub.startsWith("/documents/") && sub.endsWith("/favorite")) {
+                final String docId = sub.substring("/documents/".length(), sub.length() - "/favorite".length());
+                favoriteGetHandler.handle(request, response, docId);
+                return;
+            }
             switch (sub) {
             case "/health" -> handleHealth(response);
             case "/search" -> searchHandler.handle(request, response);
