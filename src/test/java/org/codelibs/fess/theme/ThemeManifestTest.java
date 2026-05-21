@@ -40,4 +40,36 @@ public class ThemeManifestTest extends UnitFessTestCase {
         assertEquals("index.html", m.getEntry());
         assertTrue(m.isSpaFallback());
     }
+
+    @Test
+    public void test_parse_rejectsMissingApiVersion() {
+        final String yaml = "name: a\nkind: StaticTheme\ndisplayName: x\nversion: 1.0.0";
+        final ThemeManifestException e =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(e.getMessage().contains("apiVersion"));
+    }
+
+    @Test
+    public void test_parse_rejectsBadNameRegex() {
+        final String yaml = "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: Bad_NAME\ndisplayName: x\nversion: 1.0.0";
+        assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+    }
+
+    @Test
+    public void test_parse_rejectsBadSemver() {
+        final String yaml = "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: x\nversion: v1";
+        assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+    }
+
+    @Test
+    public void test_parse_rejectsEntryPathTraversal() {
+        final String yaml =
+                "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: x\nversion: 1.0.0\nentry: \"../etc/passwd\"";
+        assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+    }
+
+    @Test
+    public void test_parse_emptyInput() {
+        assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(new byte[0])));
+    }
 }
