@@ -16,6 +16,7 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -82,6 +83,63 @@ public class LoginHandlerTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("GET", "/api/v2/auth/login"), res);
         assertEquals(400, res.status);
+    }
+
+    @Test
+    public void test_perUserRateLimit_triggersAfterConfiguredFailuresAcrossIps() throws Exception {
+        // The USER bucket is shared across all source IPs, so an attacker can't bypass it
+        // by rotating IPs. We feed the handler the same username from many distinct IPs
+        // and assert that the (limit+1)-th attempt is rejected with 429 — proving the
+        // per-user gate fires independently of the per-IP gate. The default
+        // fess_config.properties limits are ip=10/min, user=5/min — six requests with
+        // distinct IPs leave the IP buckets unsaturated while the USER bucket overflows.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        final LoginHandler handler = new LoginHandler(rl);
+        // First 5 attempts: all should pass the rate gates. Downstream the unit-DI harness
+        // can't bind FessLoginAssist, so the call throws an AutoBindingFailureException;
+        // catch it here because the rate limiter already recorded the attempt before the
+        // crash. The important property under test is that none of these first 5 attempts
+        // are short-circuited by the USER gate (status would be 429 if they were).
+        for (int i = 0; i < 5; i++) {
+            final CapturingResponse res = new CapturingResponse();
+            try {
+                handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                        .withRemoteAddr("10.0.0." + (i + 1)), res);
+            } catch (final RuntimeException expected) {
+                // FessLoginAssist auto-binding fails in the unit harness; the rate-limit
+                // bucket has already been incremented at this point, which is all we need.
+            }
+            assertTrue(res.status != 429,
+                    "attempt " + (i + 1) + " unexpectedly rate-limited: status=" + res.status + " body=" + res.body());
+        }
+        // 6th attempt — same username from a fresh IP — should now be blocked by the USER gate.
+        final CapturingResponse limited = new CapturingResponse();
+        handler.handle(new StubRequest("POST", "/api/v2/auth/login").withJsonBody("{\"username\":\"bob\",\"password\":\"p\"}")
+                .withRemoteAddr("10.0.0.99"), limited);
+        assertEquals(429, limited.status);
+        assertTrue(limited.body().contains("\"code\":\"rate_limited\""), limited.body());
+        assertTrue(limited.body().contains("(user)"), limited.body());
+    }
+
+    @Test
+    public void test_userLockoutResetsAfterWindowExpires() {
+        // Mirror LoginRateLimiterTest.test_lockoutPreventsAttemptsEvenAfterWindowExpires
+        // but specifically for the USER scope, which the existing test does not cover.
+        // The handler stamps USER lockouts when the user gate trips; clients must regain
+        // access once the lockout window elapses, otherwise transient overload would
+        // perma-lock a user.
+        final long[] now = { 1_000_000L };
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0]);
+        // Burn through the bucket, then explicitly lock out for 900s — same lock duration
+        // the handler applies via fessConfig.getThemeApiLoginLockoutSecondsAsInteger().
+        for (int i = 0; i < 5; i++) {
+            rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60);
+        }
+        rl.lockOut(LoginRateLimiter.Scope.USER, "bob", 900);
+        assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
+        // Advance past the lockout window — the next allow() must succeed.
+        now[0] += 901_000L;
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "bob", 5, 60));
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
