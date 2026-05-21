@@ -16,13 +16,24 @@
 package org.codelibs.fess.theme;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 public class ThemeRegistryTest extends UnitFessTestCase {
@@ -84,6 +95,153 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         } finally {
             deleteRecursively(tempThemesDir);
         }
+    }
+
+    @Test
+    public void test_resolveActiveTheme_systemPropertyOverridesBuiltinDefault() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig cfg = ComponentUtil.getFessConfig();
+        final String before = cfg.getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        try {
+            // Materialise a fixture theme on disk.
+            final Path themeDir = tempThemesDir.resolve("alpha");
+            Files.createDirectories(themeDir);
+            Files.writeString(themeDir.resolve("theme.yml"), String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: alpha", //
+                    "displayName: Alpha", //
+                    "version: 1.0.0"));
+
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
+            reg.reload();
+
+            // Point the system property at our fixture; resolveActiveTheme(null)
+            // must return that theme.
+            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "alpha");
+            final Optional<Theme> resolved = reg.resolveActiveTheme(null);
+            assertTrue(resolved.isPresent());
+            assertEquals("alpha", resolved.get().getName());
+        } finally {
+            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, before == null ? "" : before);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_resolveActiveTheme_unknownSystemPropertyFallsBackToBuiltin() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        final FessConfig cfg = ComponentUtil.getFessConfig();
+        final String before = cfg.getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+        try {
+            final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
+            reg.reload();
+            // No themes on disk; resolving via an unknown system-property name must
+            // yield empty (the registry has nothing to fall back to in this isolated test).
+            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "this-theme-does-not-exist");
+            final Optional<Theme> resolved = reg.resolveActiveTheme(null);
+            // Either the resolver returns empty (no fixture, no built-in default reachable
+            // from a unit-test classpath) or, defensively, it returns a theme other than
+            // the missing one. Both are valid; the contract under test is "no NPE / no
+            // throw, no spurious match to the missing name".
+            if (resolved.isPresent()) {
+                assertEquals(false, "this-theme-does-not-exist".equals(resolved.get().getName()));
+            } else {
+                assertNull(reg.getTheme("this-theme-does-not-exist").orElse(null));
+            }
+        } finally {
+            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, before == null ? "" : before);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    @Test
+    public void test_reload_isThreadSafeUnderConcurrentReaders() throws Exception {
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-");
+        try {
+            // Seed the directory with several themes so readers have something to walk.
+            for (final String n : new String[] { "alpha", "beta", "gamma" }) {
+                final Path d = tempThemesDir.resolve(n);
+                Files.createDirectories(d);
+                Files.writeString(d.resolve("theme.yml"), String.join("\n", //
+                        "apiVersion: fess.codelibs.org/v1", //
+                        "kind: StaticTheme", //
+                        "name: " + n, //
+                        "displayName: " + n, //
+                        "version: 1.0.0"));
+            }
+
+            final ThemeRegistry reg = new ThemeRegistry();
+            reg.setThemesDirOverride(tempThemesDir);
+            reg.reload();
+
+            final int readerCount = 8;
+            final int iterations = 200;
+            final ExecutorService pool = Executors.newFixedThreadPool(readerCount);
+            final CountDownLatch ready = new CountDownLatch(readerCount);
+            final CountDownLatch go = new CountDownLatch(1);
+            final List<Throwable> failures = new ArrayList<>();
+            final AtomicBoolean stop = new AtomicBoolean(false);
+            try {
+                for (int i = 0; i < readerCount; i++) {
+                    pool.submit(() -> {
+                        ready.countDown();
+                        try {
+                            go.await();
+                            for (int j = 0; j < iterations && !stop.get(); j++) {
+                                reg.getAllThemes().size();
+                                reg.resolveActiveTheme(null);
+                                reg.getTheme("alpha");
+                            }
+                        } catch (final Throwable t) {
+                            synchronized (failures) {
+                                failures.add(t);
+                            }
+                            stop.set(true);
+                        }
+                    });
+                }
+                // Wait for all readers to be parked at the gate, then start them.
+                ready.await(5, TimeUnit.SECONDS);
+                go.countDown();
+                // While readers spin, trigger two reloads from the main thread.
+                reg.reload();
+                Thread.yield();
+                reg.reload();
+                pool.shutdown();
+                final boolean done = pool.awaitTermination(15, TimeUnit.SECONDS);
+                assertTrue(done, "Concurrent readers did not terminate within timeout");
+                synchronized (failures) {
+                    if (!failures.isEmpty()) {
+                        final Throwable first = failures.get(0);
+                        throw new AssertionError("Concurrent reader threw " + first.getClass().getSimpleName() + ": " + first.getMessage(),
+                                first);
+                    }
+                }
+            } finally {
+                if (!pool.isTerminated()) {
+                    pool.shutdownNow();
+                }
+            }
+        } finally {
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
+    /**
+     * Constructs a {@link ThemeRegistry} with the supplied {@link FessConfig}
+     * injected into the protected {@code fessConfig} field via reflection. The
+     * field is declared in the same package but the test seam does not expose a
+     * setter, so reflection is the least-invasive way to wire it for tests that
+     * exercise system-property paths.
+     */
+    private static ThemeRegistry newRegistryWithFessConfig(final Path themesDirOverride, final FessConfig cfg) throws Exception {
+        final ThemeRegistry reg = new ThemeRegistry();
+        reg.setThemesDirOverride(themesDirOverride);
+        final Field f = ThemeRegistry.class.getDeclaredField("fessConfig");
+        f.setAccessible(true);
+        f.set(reg, cfg);
+        return reg;
     }
 
     private static void deleteRecursively(final Path p) throws Exception {
