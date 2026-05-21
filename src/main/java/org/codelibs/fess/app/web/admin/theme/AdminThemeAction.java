@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.theme;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -58,6 +61,9 @@ public class AdminThemeAction extends FessAdminAction {
 
     @Resource
     private ThemeRegistry themeRegistry;
+
+    @Resource
+    private StaticThemeInstaller staticThemeInstaller;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -120,6 +126,113 @@ public class AdminThemeAction extends FessAdminAction {
             saveInfo(m -> m.addSuccessReloadTheme(GLOBAL));
         } catch (final Exception e) {
             logger.warn("Failed to reload ThemeRegistry", e);
+            throwValidationError(m -> m.addErrorsFailedToChangeDefaultTheme(GLOBAL), () -> asListHtml(form));
+        }
+        return redirect(getClass());
+    }
+
+    /**
+     * Displays the theme upload form page.
+     *
+     * @return HTML response for the upload form
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse uploadpage() {
+        saveToken();
+        return asHtml(path_AdminTheme_AdminThemeUploadJsp).useForm(ThemeUploadForm.class, op -> op.setup(f -> {}));
+    }
+
+    /**
+     * Handles a static-theme ZIP upload. The file extension and size guard
+     * here are pre-flight checks; the installer enforces structural and size
+     * limits authoritatively.
+     *
+     * @param form the multipart upload form
+     * @return redirect to the theme index on success
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse upload(final ThemeUploadForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        final String fileName = form.themeFile.getFileName();
+        if (fileName == null || !fileName.toLowerCase().endsWith(".zip")) {
+            throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, String.valueOf(fileName)),
+                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        }
+        try (InputStream in = form.themeFile.getInputStream()) {
+            staticThemeInstaller.installZip(in);
+            saveInfo(m -> m.addSuccessUploadTheme(GLOBAL, fileName));
+        } catch (final StaticThemeInstaller.InstallException ex) {
+            logger.warn("Theme upload rejected: {}", ex.getMessage());
+            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, ex.getMessage()),
+                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        } catch (final IOException ex) {
+            logger.warn("Failed to read upload stream", ex);
+            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, ex.getMessage()),
+                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        }
+        return redirect(getClass());
+    }
+
+    /**
+     * Deletes a static theme via the installer. The installer enforces that
+     * the theme is not the active default and is not a JSP-typed theme.
+     *
+     * @param form the delete form containing the theme name
+     * @return redirect to the theme index
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse delete(final ThemeDeleteForm form) {
+        validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
+        verifyToken(() -> asListHtml(new ThemeListForm()));
+        try {
+            staticThemeInstaller.delete(form.name);
+            saveInfo(m -> m.addSuccessDeleteTheme(GLOBAL, form.name));
+        } catch (final StaticThemeInstaller.InstallException ex) {
+            logger.warn("Theme delete rejected: {}", ex.getMessage());
+            final String msg = ex.getMessage();
+            if (msg != null && msg.contains("active")) {
+                throwValidationError(m -> m.addErrorsThemeIsActive(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+            } else if (msg != null && (msg.contains("JSP") || msg.contains("Refusing"))) {
+                throwValidationError(m -> m.addErrorsThemeIsJspType(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+            } else if (msg != null && msg.contains("not found")) {
+                throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+            } else {
+                throwValidationError(m -> m.addErrorsFailedToDeleteTheme(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+            }
+        }
+        return redirect(getClass());
+    }
+
+    /**
+     * Sets the default theme by writing to the {@link ThemeRegistry#SYSPROP_DEFAULT_THEME}
+     * system property. An empty value clears the default. The registry is
+     * reloaded synchronously so the new default takes effect immediately.
+     *
+     * @param form the list form carrying the selected default theme name
+     * @return redirect to the theme index
+     */
+    @Execute
+    @Secured({ ROLE })
+    public HtmlResponse setdefault(final ThemeListForm form) {
+        validate(form, messages -> {}, () -> asListHtml(form));
+        verifyToken(() -> asListHtml(form));
+        final String name = form.defaultTheme == null ? "" : form.defaultTheme.trim();
+        if (!name.isEmpty()) {
+            // existence check — refuse to point theme.default at a missing theme
+            if (themeRegistry.getTheme(name).isEmpty()) {
+                throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, name), () -> asListHtml(form));
+            }
+        }
+        try {
+            ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, name);
+            themeRegistry.reload(); // re-resolve in case the new default needs to take effect immediately
+            saveInfo(m -> m.addSuccessChangeDefaultTheme(GLOBAL, name.isEmpty() ? "(none)" : name));
+        } catch (final Exception e) {
+            logger.warn("Failed to change default theme", e);
             throwValidationError(m -> m.addErrorsFailedToChangeDefaultTheme(GLOBAL), () -> asListHtml(form));
         }
         return redirect(getClass());
