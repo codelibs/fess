@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
@@ -37,6 +38,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
+import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -49,6 +51,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Web API manager for the {@code /api/v2} surface.
@@ -108,6 +111,15 @@ public class SearchApiV2Manager extends BaseApiManager {
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final String sub = subPath(request);
+        if (ComponentUtil.getFessConfig().isThemeApiCsrfRequired() && CsrfRequirement.requiresCsrf(sub, request.getMethod())) {
+            final HttpSession session = request.getSession(false);
+            final String header = request.getHeader("X-Fess-CSRF-Token");
+            final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+            if (session == null || !csrf.verify(session, header)) {
+                V2EnvelopeWriter.writeError(response, V2ErrorCode.FORBIDDEN, "invalid csrf token");
+                return;
+            }
+        }
         try {
             // Path components that vary (docId) are matched before the static switch so the
             // exhaustive switch below can keep its readable shape. Order is important:
