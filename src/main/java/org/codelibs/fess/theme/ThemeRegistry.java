@@ -213,8 +213,20 @@ public class ThemeRegistry {
         }
     }
 
-    // ---- Test seam ----
+    // ---- Test seams ----
     void setThemesDirOverride(final Path p) {
         this.themesDirOverride = p;
+    }
+
+    /**
+     * Inserts (or replaces) a single theme entry in the current snapshot
+     * without scanning the filesystem. Intended for unit tests that need to
+     * exercise type-specific branches (e.g. JSP-vs-static deletion guards)
+     * without materialising real fixtures.
+     */
+    void injectThemeForTest(final Theme theme) {
+        final Map<String, Theme> next = new HashMap<>(snapshot);
+        next.put(theme.getName(), theme);
+        snapshot = Collections.unmodifiableMap(next);
     }
 }

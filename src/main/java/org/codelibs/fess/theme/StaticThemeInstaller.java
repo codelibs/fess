@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -66,6 +68,12 @@ public class StaticThemeInstaller {
     private long maxExtractedSize = 209_715_200L;
     private int maxEntries = 1000;
     private int maxCompressionRatio = 100;
+
+    /** Pattern from spec §4.2: theme names must match this regex. */
+    private static final Pattern NAME_RE = Pattern.compile("^[a-z0-9][a-z0-9_-]{0,63}$");
+
+    /** Test seam: returns the currently active default theme name, or {@code null}. */
+    private Supplier<String> activeDefaultProbe;
 
     /** Raised on any failure during ZIP validation or extraction. */
     public static class InstallException extends RuntimeException {
@@ -140,6 +148,59 @@ public class StaticThemeInstaller {
         } catch (final Exception ex) {
             deleteRecursivelyQuiet(staging);
             throw new InstallException("Install failed: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Removes the static-theme directory atomically.
+     *
+     * <p>Refuses when (a) the name fails the spec §4.2 regex
+     * ({@code ^[a-z0-9][a-z0-9_-]{0,63}$}), (b) the theme is the currently
+     * active default (per the configured probe or
+     * {@link ThemeRegistry#resolveActiveTheme(String)}), (c) the resolved
+     * registry entry is a {@link ThemeType#JSP JSP} theme (deletion only
+     * applies to static themes the installer owns), or (d) the directory does
+     * not exist under the themes root.</p>
+     *
+     * <p>Successful deletion atomically renames the directory to
+     * {@code themes/.attic-<name>-<timestamp>/} — preserving the §4.4 7-day
+     * retention semantics — and reloads the {@link ThemeRegistry}.</p>
+     *
+     * @param name the theme directory name; must match
+     *        {@code ^[a-z0-9][a-z0-9_-]{0,63}$}
+     * @throws InstallException on validation, lookup, or rename failure
+     */
+    public void delete(final String name) {
+        if (name == null || !NAME_RE.matcher(name).matches()) {
+            throw new InstallException("Invalid theme name: " + name);
+        }
+        final String active = activeDefaultProbe != null ? activeDefaultProbe.get()
+                : (themeRegistry == null ? null : themeRegistry.resolveActiveTheme(null).map(Theme::getName).orElse(null));
+        if (name.equals(active)) {
+            throw new InstallException("Cannot delete active default theme: " + name);
+        }
+        if (themeRegistry != null) {
+            final Theme t = themeRegistry.getAllThemes().get(name);
+            if (t != null && t.getType() == ThemeType.JSP) {
+                throw new InstallException("Refusing to delete JSP theme via static installer: " + name);
+            }
+        }
+        final Path themesDir = resolveThemesDir();
+        final Path target = themesDir.resolve(name);
+        if (!Files.isDirectory(target)) {
+            throw new InstallException("Theme not found: " + name);
+        }
+        final Path attic = themesDir.resolve(".attic-" + name + "-" + System.currentTimeMillis());
+        try {
+            moveDir(target, attic);
+        } catch (final IOException e) {
+            throw new InstallException("Failed to atticize theme " + name, e);
+        }
+        if (themeRegistry != null) {
+            themeRegistry.reload();
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Deleted static theme name={} attic={}", name, attic);
         }
     }
 
@@ -256,5 +317,13 @@ public class StaticThemeInstaller {
 
     void setMaxCompressionRatio(final int v) {
         this.maxCompressionRatio = v;
+    }
+
+    void setThemeRegistry(final ThemeRegistry r) {
+        this.themeRegistry = r;
+    }
+
+    void setActiveDefaultProbe(final Supplier<String> probe) {
+        this.activeDefaultProbe = probe;
     }
 }
