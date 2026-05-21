@@ -37,6 +37,7 @@ import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
 import org.codelibs.fess.api.v2.handlers.MeHandler;
 import org.codelibs.fess.api.v2.handlers.ScrollSearchHandler;
 import org.codelibs.fess.api.v2.handlers.SearchHandler;
+import org.codelibs.fess.api.v2.handlers.UiConfigHandler;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -91,6 +92,9 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // PasswordChangeHandler is stateless — shared single instance is safe across concurrent requests.
     private final PasswordChangeHandler passwordChangeHandler = new PasswordChangeHandler();
+
+    // UiConfigHandler is stateless — shared single instance is safe across concurrent requests.
+    private final UiConfigHandler uiConfigHandler = new UiConfigHandler();
 
     // LoginHandler depends on the DI-managed LoginRateLimiter, which is not yet available
     // at field-init time. Lazy-init through loginHandler() defers the lookup to first request.
@@ -175,6 +179,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/auth/login" -> loginHandler().handle(request, response);
             case "/auth/logout" -> logoutHandler.handle(request, response);
             case "/auth/password" -> passwordChangeHandler.handle(request, response);
+            case "/ui/config" -> uiConfigHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
         } catch (final Exception e) {
