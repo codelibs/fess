@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
@@ -95,6 +96,9 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // UiConfigHandler is stateless — shared single instance is safe across concurrent requests.
     private final UiConfigHandler uiConfigHandler = new UiConfigHandler();
+
+    // ClickHandler is stateless — shared single instance is safe across concurrent requests.
+    private final ClickHandler clickHandler = new ClickHandler();
 
     // LoginHandler depends on the DI-managed LoginRateLimiter, which is not yet available
     // at field-init time. Lazy-init through loginHandler() defers the lookup to first request.
@@ -180,6 +184,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/auth/logout" -> logoutHandler.handle(request, response);
             case "/auth/password" -> passwordChangeHandler.handle(request, response);
             case "/ui/config" -> uiConfigHandler.handle(request, response);
+            case "/click" -> clickHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
         } catch (final Exception e) {
