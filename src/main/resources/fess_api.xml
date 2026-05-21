@@ -16,4 +16,7 @@
 	</component>
 	<component name="searchEngineApiManager" class="org.codelibs.fess.api.engine.SearchEngineApiManager">
 	</component>
+
+	<component name="searchApiV2Manager" class="org.codelibs.fess.api.v2.SearchApiV2Manager">
+	</component>
 </components>
