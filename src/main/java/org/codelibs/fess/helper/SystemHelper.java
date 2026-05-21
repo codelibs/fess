@@ -71,6 +71,7 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.storage.StorageType;
 import org.codelibs.fess.timer.LoadControlMonitorTarget;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GsaConfigParser;
@@ -659,14 +660,32 @@ public class SystemHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String installationLink = fessConfig.getOnlineHelpInstallation();
         runtime.registerData("installationLink", getHelpUrl(installationLink));
-        runtime.registerData("storageEnabled",
-                StringUtil.isNotBlank(fessConfig.getStorageEndpoint()) && StringUtil.isNotBlank(fessConfig.getStorageBucket()));
+        runtime.registerData("storageEnabled", isStorageEnabled(fessConfig));
         final boolean eoled = isEoled();
         runtime.registerData("eoled", eoled);
         if (eoled) {
             final String eolLink = fessConfig.getOnlineHelpEol();
             runtime.registerData("eolLink", getHelpUrl(eolLink));
         }
+    }
+
+    /**
+     * Determines whether object storage is enabled for the given configuration.
+     * Storage is considered enabled when a bucket is configured and either a
+     * custom endpoint is set or the storage type is {@link StorageType#GCS}
+     * (which has an implicit default endpoint).
+     *
+     * @param fessConfig the configuration to inspect (may be {@code null})
+     * @return {@code true} if storage is enabled, {@code false} otherwise
+     */
+    public boolean isStorageEnabled(final FessConfig fessConfig) {
+        if (fessConfig == null || StringUtil.isBlank(fessConfig.getStorageBucket())) {
+            return false;
+        }
+        if (StringUtil.isNotBlank(fessConfig.getStorageEndpoint())) {
+            return true;
+        }
+        return StorageType.GCS.name().equalsIgnoreCase(fessConfig.getStorageType());
     }
 
     /**
