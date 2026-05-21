@@ -73,6 +73,13 @@ function renderResults(env) {
     const link = li.querySelector("a[data-result-link]");
     if (link) link.addEventListener("click", () => logClick(li.dataset.docId, li.dataset.queryId, idx + 1));
   });
+  list.querySelectorAll("li.result-card").forEach(li => {
+    const btn = li.querySelector(".favorite-btn");
+    const docId = li.dataset.docId;
+    if (!btn || !docId) return;
+    refreshFavorite(docId, btn);
+    btn.addEventListener("click", () => toggleFavorite(docId, btn));
+  });
 }
 
 async function runSearch() {
@@ -293,6 +300,34 @@ async function logClick(docId, queryId, rank) {
   if (!docId) return;
   try { await api.post("/click", { doc_id: docId, query_id: queryId || "", rank: rank || 0 }); }
   catch { /* fire-and-forget */ }
+}
+
+async function refreshFavorite(docId, btn) {
+  try {
+    const env = await api.get("/documents/" + encodeURIComponent(docId) + "/favorite");
+    setFavoriteUi(btn, !!env.favorite, env.count || 0);
+  } catch (e) {
+    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) btn.classList.add("d-none");
+  }
+}
+
+function setFavoriteUi(btn, on, count) {
+  btn.setAttribute("aria-pressed", on ? "true" : "false");
+  btn.setAttribute("aria-label", on ? t("result.favorite_remove") : t("result.favorite_add"));
+  const icon = btn.querySelector("i");
+  if (icon) icon.className = on ? "fa fa-star" : "fa fa-star-o";
+  btn.dataset.count = String(count);
+}
+
+async function toggleFavorite(docId, btn) {
+  try {
+    const env = await api.post("/documents/" + encodeURIComponent(docId) + "/favorite", {});
+    setFavoriteUi(btn, !!env.favorite, env.count || 0);
+  } catch (e) {
+    if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
+    }
+  }
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
