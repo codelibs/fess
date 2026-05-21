@@ -80,6 +80,7 @@ async function runSearch() {
     }
     const env = await api.get("/search", params);
     renderResults(env);
+    renderPagination(env);
     const labels = await loadLabels();
     renderFacets(env, labels);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
@@ -167,6 +168,12 @@ export function attach() {
   }
   const clearBtn = document.getElementById("facet-clear");
   if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; runSearch(); });
+  const sortSelect = document.getElementById("sort-select");
+  if (sortSelect) sortSelect.addEventListener("change", () => {
+    state.sort = sortSelect.value || "";
+    state.start = 0;
+    runSearch();
+  });
   const urlQ = new URLSearchParams(location.search).get("q");
   if (urlQ) { input.value = urlQ; state.q = urlQ; runSearch(); }
   if (!urlQ) loadPopularWords();
@@ -245,6 +252,37 @@ async function loadPopularWords() {
       target.appendChild(btn);
     });
   } catch { /* best-effort */ }
+}
+
+function renderPagination(env) {
+  const nav = document.getElementById("pagination-nav");
+  const ul = document.getElementById("pagination");
+  ul.innerHTML = "";
+  if (!env.record_count || env.record_count <= state.num) { nav.classList.add("d-none"); return; }
+  nav.classList.remove("d-none");
+
+  const buildPageItem = (label, opts) => {
+    const li = el("li", { className: "page-item" + (opts.disabled ? " disabled" : "") + (opts.active ? " active" : "") });
+    const btn = el("button", { className: "page-link", text: label, attrs: { type: "button" } });
+    if (opts.onClick) btn.addEventListener("click", opts.onClick);
+    li.appendChild(btn);
+    return li;
+  };
+
+  ul.appendChild(buildPageItem(t("pagination.prev"), {
+    disabled: !env.prev_page,
+    onClick: () => { if (env.prev_page) { state.start = Math.max(0, state.start - state.num); runSearch(); } }
+  }));
+  (env.page_numbers || []).forEach(n => {
+    ul.appendChild(buildPageItem(String(n), {
+      active: n === env.page_number,
+      onClick: () => { state.start = (n - 1) * state.num; runSearch(); }
+    }));
+  });
+  ul.appendChild(buildPageItem(t("pagination.next"), {
+    disabled: !env.next_page,
+    onClick: () => { if (env.next_page) { state.start = state.start + state.num; runSearch(); } }
+  }));
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
