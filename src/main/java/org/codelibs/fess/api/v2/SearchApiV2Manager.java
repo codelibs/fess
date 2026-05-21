@@ -32,6 +32,7 @@ import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
 import org.codelibs.fess.api.v2.handlers.FavoriteGetHandler;
+import org.codelibs.fess.api.v2.handlers.FavoritePostHandler;
 import org.codelibs.fess.api.v2.handlers.LoginHandler;
 import org.codelibs.fess.api.v2.handlers.LogoutHandler;
 import org.codelibs.fess.api.v2.handlers.PasswordChangeHandler;
@@ -84,6 +85,9 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     // FavoriteGetHandler is stateless — same singleton pattern as the other v2 handlers.
     private final FavoriteGetHandler favoriteGetHandler = new FavoriteGetHandler();
+
+    // FavoritePostHandler is stateless — shared single instance is safe across concurrent requests.
+    private final FavoritePostHandler favoritePostHandler = new FavoritePostHandler();
 
     // MeHandler is stateless — shared single instance is safe across concurrent requests.
     private final MeHandler meHandler = new MeHandler();
@@ -170,7 +174,11 @@ public class SearchApiV2Manager extends BaseApiManager {
             }
             if (sub.startsWith("/documents/") && sub.endsWith("/favorite")) {
                 final String docId = sub.substring("/documents/".length(), sub.length() - "/favorite".length());
-                favoriteGetHandler.handle(request, response, docId);
+                if ("POST".equalsIgnoreCase(request.getMethod())) {
+                    favoritePostHandler.handle(request, response, docId);
+                } else {
+                    favoriteGetHandler.handle(request, response, docId);
+                }
                 return;
             }
             switch (sub) {
