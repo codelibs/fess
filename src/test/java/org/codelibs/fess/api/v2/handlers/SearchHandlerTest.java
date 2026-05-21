@@ -13,10 +13,9 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.api.v2;
+package org.codelibs.fess.api.v2.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletInputStream;
@@ -44,132 +42,34 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
-public class SearchApiV2ManagerTest extends UnitFessTestCase {
+public class SearchHandlerTest extends UnitFessTestCase {
 
     @Test
-    public void test_matches_acceptsV2Path() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        // web.api.json defaults to true in fess_config.properties, so matches() should
-        // only depend on the request path.
-        assertTrue(m.matches(new StubRequest("/api/v2/health")));
-        assertTrue(m.matches(new StubRequest("/api/v2/")));
-    }
-
-    @Test
-    public void test_matches_rejectsV1Path() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        assertFalse(m.matches(new StubRequest("/api/v1/search")));
-        assertFalse(m.matches(new StubRequest("/admin/dashboard")));
-    }
-
-    @Test
-    public void test_subPath_extractsAfterPrefix() {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        assertEquals("/health", m.subPath(new StubRequest("/api/v2/health")));
-        assertEquals("/foo/bar", m.subPath(new StubRequest("/api/v2/foo/bar")));
-        assertEquals("", m.subPath(new StubRequest("/api/v2")));
-    }
-
-    @Test
-    public void test_process_unknownSubPathReturnsNotFoundEnvelope() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/does-not-exist"), res, new NopChain());
-        assertEquals(404, res.status);
-        final String body = res.body();
-        assertTrue(body.contains("\"status\":1"), body);
-        assertTrue(body.contains("\"code\":\"not_found\""), body);
-        assertTrue(body.contains("endpoint not found"), body);
-    }
-
-    @Test
-    public void test_process_suggestWordsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+    public void test_search_emptyIndexReturnsEmptyData() throws Exception {
+        final SearchHandler handler = new SearchHandler();
         final CapturingResponse res = new CapturingResponse();
         final Map<String, String[]> params = new HashMap<>();
-        params.put("q", new String[] { "test" });
-        params.put("num", new String[] { "5" });
-        m.process(new StubRequest("/api/v2/suggest-words", params), res, new NopChain());
+        params.put("q", new String[] { "*" });
+        handler.handle(new StubRequest("/api/v2/search", params), res);
         final String body = res.body();
-        // The suggest helper may fail without an OpenSearch instance — accept either a 200
-        // success envelope or a structured internal-error envelope, but assert the v2 wire
-        // shape is preserved either way.
+        // The v2 envelope wraps both happy-path and failure paths — assert the shape stays
+        // consistent regardless of whether the search helper is wired up in this test JVM.
         assertTrue(body.contains("\"version\":\"v2\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
-            assertTrue(body.contains("\"suggest_words\""), body);
-            assertTrue(body.contains("\"record_count\""), body);
-            assertTrue(body.contains("\"page_size\""), body);
-            assertTrue(body.contains("\"q\":\"test\""), body);
+            assertTrue(body.contains("\"record_count\":0"), body);
+            assertTrue(body.contains("\"data\":[]"), body);
         } else {
-            assertEquals(500, res.status);
-            assertTrue(body.contains("\"code\":\"internal_error\""), body);
-        }
-    }
-
-    @Test
-    public void test_process_labelsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/labels"), res, new NopChain());
-        final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
-        if (res.status == 200) {
-            assertTrue(body.contains("\"status\":0"), body);
-            assertTrue(body.contains("\"record_count\""), body);
-            assertTrue(body.contains("\"labels\""), body);
-        } else {
-            // Helper backed by the search engine; without a live engine the handler emits a
-            // structured error envelope. Verify the v2 wire shape rather than failing here.
-            assertEquals(500, res.status);
-            assertTrue(body.contains("\"code\":\"internal_error\""), body);
-        }
-    }
-
-    @Test
-    public void test_process_popularWordsReturnsEnvelopeShape() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/popular-words"), res, new NopChain());
-        final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
-        if (res.status == 200) {
-            assertTrue(body.contains("\"status\":0"), body);
-            assertTrue(body.contains("\"popular_words\""), body);
-            assertTrue(body.contains("\"record_count\""), body);
-        } else {
-            // Either feature-disabled (invalid_request 400) or backend-unreachable (internal_error 500).
             assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
             assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
         }
     }
 
     @Test
-    public void test_process_searchEndpointDispatchesToHandler() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
+    public void test_search_methodGate_rejectsPost() throws Exception {
+        final SearchHandler handler = new SearchHandler();
         final CapturingResponse res = new CapturingResponse();
-        final Map<String, String[]> params = new HashMap<>();
-        params.put("q", new String[] { "test" });
-        m.process(new StubRequest("/api/v2/search", params), res, new NopChain());
-        // The manager only needs to confirm dispatch: the v2 envelope shape must be present
-        // regardless of whether the search backend is up. Detailed shape is asserted in
-        // SearchHandlerTest — here we just verify the route reached the handler.
-        final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
-        assertTrue(res.status == 200 || res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
-        if (res.status == 200) {
-            assertTrue(body.contains("\"status\":0"), body);
-            assertTrue(body.contains("\"data\""), body);
-        } else {
-            assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
-        }
-    }
-
-    @Test
-    public void test_process_labelsRejectsNonGetMethod() throws Exception {
-        final SearchApiV2Manager m = new SearchApiV2Manager();
-        final CapturingResponse res = new CapturingResponse();
-        m.process(new StubRequest("/api/v2/labels").withMethod("POST"), res, new NopChain());
+        handler.handle(new StubRequest("/api/v2/search").withMethod("POST"), res);
         assertEquals(400, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"status\":1"), body);
@@ -177,15 +77,32 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertTrue(body.contains("method not allowed"), body);
     }
 
-    /** A FilterChain that does nothing — the v2 manager never delegates further. */
-    private static class NopChain implements FilterChain {
-        @Override
-        public void doFilter(final ServletRequest request, final ServletResponse response) {
-            // no-op
+    @Test
+    public void test_search_envelopeShape() throws Exception {
+        final SearchHandler handler = new SearchHandler();
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, String[]> params = new HashMap<>();
+        params.put("q", new String[] { "foo" });
+        handler.handle(new StubRequest("/api/v2/search", params), res);
+        final String body = res.body();
+        assertTrue(body.contains("\"version\":\"v2\""), body);
+        if (res.status == 200) {
+            assertTrue(body.contains("\"status\":0"), body);
+            // Every top-level snake_case key from the spec should be present in a success
+            // envelope, even when the underlying values are nulls or empty arrays.
+            for (final String key : new String[] { "\"q\"", "\"query_id\"", "\"exec_time\"", "\"query_time\"", "\"page_size\"",
+                    "\"page_number\"", "\"record_count\"", "\"record_count_relation\"", "\"page_count\"", "\"highlight_params\"",
+                    "\"next_page\"", "\"prev_page\"", "\"start_record_number\"", "\"end_record_number\"", "\"page_numbers\"", "\"partial\"",
+                    "\"search_query\"", "\"requested_time\"", "\"related_query\"", "\"related_contents\"", "\"data\"" }) {
+                assertTrue(body.contains(key), "missing key " + key + " in body: " + body);
+            }
+        } else {
+            assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
+            assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
         }
     }
 
-    /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
+    /** Minimal HttpServletResponse stub — local copy of SearchApiV2ManagerTest.CapturingResponse. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
@@ -362,7 +279,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         }
     }
 
-    /** Adapted from StaticThemeFilterTest.StubRequest — narrow surface, getServletPath is what matters. */
+    /** Minimal HttpServletRequest stub — local copy of SearchApiV2ManagerTest.StubRequest. */
     private static class StubRequest implements HttpServletRequest {
         private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();

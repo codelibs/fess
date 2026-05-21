@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.v2.handlers.SearchHandler;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
@@ -61,6 +62,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SearchApiV2Manager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(SearchApiV2Manager.class);
+
+    // SearchHandler is stateless — a single shared instance avoids per-request allocation
+    // and keeps the manager small as more handler classes are extracted in later batches.
+    private final SearchHandler searchHandler = new SearchHandler();
 
     /**
      * Constructor — pins the path prefix to {@code /api/v2}.
@@ -97,6 +102,7 @@ public class SearchApiV2Manager extends BaseApiManager {
         try {
             switch (sub) {
             case "/health" -> handleHealth(response);
+            case "/search" -> searchHandler.handle(request, response);
             case "/suggest-words" -> handleSuggestWords(request, response);
             case "/labels" -> handleLabels(request, response);
             case "/popular-words" -> handlePopularWords(request, response);
