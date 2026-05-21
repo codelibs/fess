@@ -115,6 +115,93 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_install_rejectsExceedingMaxExtractedSize() throws Exception {
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Set a small cap so we can exceed it without huge payloads.
+            installer.setMaxExtractedSize(4096L);
+            // Use a high allowed compression ratio so this test is isolated to size, not ratio.
+            installer.setMaxCompressionRatio(Integer.MAX_VALUE);
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                // a minimal manifest first so an early entry doesn't trip ratio
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: bigtheme",
+                        "displayName: \"bigtheme\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                // a 16KB random-ish payload — well over the 4KB extracted-size cap
+                final byte[] payload = new byte[16 * 1024];
+                for (int i = 0; i < payload.length; i++) {
+                    payload[i] = (byte) (i & 0xFF);
+                }
+                putEntry(zos, "big.bin", payload);
+            }
+            assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            // No theme directory should have been promoted under themes dir.
+            assertTrue(!Files.exists(themesDir.resolve("bigtheme")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_rejectsExceedingCompressionRatio() throws Exception {
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Allow the absolute extracted size; constrain only the ratio.
+            installer.setMaxExtractedSize(64L * 1024L * 1024L);
+            installer.setMaxCompressionRatio(10);
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: ratiotheme",
+                        "displayName: \"ratiotheme\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                // 1MB of zero bytes will compress extremely well — well over a 10:1 ratio.
+                final byte[] payload = new byte[1024 * 1024];
+                putEntry(zos, "bomb.bin", payload);
+            }
+            assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            assertTrue(!Files.exists(themesDir.resolve("ratiotheme")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_corruptZipDoesNotCorruptPreviousVersion() throws Exception {
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Install a clean v1 first.
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("rollbackme", "<html>v1</html>")));
+            final Path themeDir = themesDir.resolve("rollbackme");
+            assertTrue(Files.exists(themeDir.resolve("theme.yml")));
+            final String manifestBefore = Files.readString(themeDir.resolve("theme.yml"));
+            assertTrue(manifestBefore.contains("version: 1.0.0"));
+
+            // Attempt to "install" a ZIP missing its manifest — installer must abort cleanly
+            // without overwriting the previous directory. This exercises the same staging
+            // failure path that a corrupt archive would, but in a deterministic way.
+            final ByteArrayOutputStream noManifest = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(noManifest)) {
+                putEntry(zos, "index.html", "<html>v2</html>".getBytes(StandardCharsets.UTF_8));
+            }
+            assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(noManifest.toByteArray())));
+
+            // The previous v1 directory and manifest must still be intact.
+            assertTrue(Files.exists(themeDir.resolve("theme.yml")));
+            final String manifestAfter = Files.readString(themeDir.resolve("theme.yml"));
+            assertEquals(manifestBefore, manifestAfter);
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
     private static StaticThemeInstaller newInstaller(final Path themesDir) {
         final StaticThemeInstaller installer = new StaticThemeInstaller();
         installer.setThemesDirOverride(themesDir);
