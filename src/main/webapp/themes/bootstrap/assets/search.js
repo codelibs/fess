@@ -169,6 +169,7 @@ export function attach() {
   if (clearBtn) clearBtn.addEventListener("click", () => { state.facets = {}; runSearch(); });
   const urlQ = new URLSearchParams(location.search).get("q");
   if (urlQ) { input.value = urlQ; state.q = urlQ; runSearch(); }
+  if (!urlQ) loadPopularWords();
 }
 
 async function loadLabels() {
@@ -216,6 +217,34 @@ function renderFacets(env, labels) {
   }
   const anyActive = Object.values(state.facets).some(arr => Array.isArray(arr) && arr.length > 0);
   clearBtn.classList.toggle("d-none", !anyActive);
+}
+
+async function loadPopularWords() {
+  const target = document.getElementById("popular-words");
+  if (!target) return;
+  try {
+    const env = await api.get("/popular-words");
+    const words = env.popular_words || [];
+    if (words.length === 0) return;
+    target.innerHTML = "";
+    target.appendChild(el("p", { className: "mt-3", text: t("search.popular_searches") }));
+    words.slice(0, 10).forEach(w => {
+      const btn = el("button", {
+        className: "btn btn-sm btn-outline-secondary me-1 mb-1",
+        text: w,
+        attrs: { type: "button" },
+        dataset: { popular: w }
+      });
+      btn.addEventListener("click", () => {
+        const input = document.getElementById("search-input");
+        input.value = w;
+        state.q = w;
+        state.start = 0;
+        runSearch();
+      });
+      target.appendChild(btn);
+    });
+  } catch { /* best-effort */ }
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
