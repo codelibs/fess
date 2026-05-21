@@ -69,6 +69,10 @@ function renderResults(env) {
   empty.classList.add("d-none");
   meta.textContent = `${env.record_count} (${env.exec_time}ms)`;
   for (const d of data) list.appendChild(buildResultCard(d, env.query_id));
+  list.querySelectorAll("li.result-card").forEach((li, idx) => {
+    const link = li.querySelector("a[data-result-link]");
+    if (link) link.addEventListener("click", () => logClick(li.dataset.docId, li.dataset.queryId, idx + 1));
+  });
 }
 
 async function runSearch() {
@@ -283,6 +287,12 @@ function renderPagination(env) {
     disabled: !env.next_page,
     onClick: () => { if (env.next_page) { state.start = state.start + state.num; runSearch(); } }
   }));
+}
+
+async function logClick(docId, queryId, rank) {
+  if (!docId) return;
+  try { await api.post("/click", { doc_id: docId, query_id: queryId || "", rank: rank || 0 }); }
+  catch { /* fire-and-forget */ }
 }
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
