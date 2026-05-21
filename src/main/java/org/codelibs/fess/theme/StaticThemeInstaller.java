@@ -43,7 +43,7 @@ import jakarta.annotation.Resource;
  * extractions are promoted into the active themes directory via an atomic
  * directory rename so partial installs never become visible to readers.</p>
  *
- * <p>Lifecycle:
+ * <p>Lifecycle:</p>
  * <ol>
  *   <li>Stream the archive into a staging directory under
  *       {@code themes/.staging-&lt;uuid&gt;}.</li>
@@ -52,7 +52,7 @@ import jakarta.annotation.Resource;
  *       backup so a failed promotion can roll back.</li>
  *   <li>Atomically rename the staging directory to {@code themes/&lt;name&gt;}
  *       and reload the {@link ThemeRegistry}.</li>
- * </ol></p>
+ * </ol>
  */
 public class StaticThemeInstaller {
 

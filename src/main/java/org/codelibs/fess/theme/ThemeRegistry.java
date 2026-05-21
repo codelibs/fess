@@ -174,13 +174,13 @@ public class ThemeRegistry {
     /**
      * Resolves the theme to apply for the current request.
      *
-     * <p>Selection order:
+     * <p>Selection order:</p>
      * <ol>
      *   <li>If {@code virtualHostKey} resolves to a known theme, use it.</li>
      *   <li>Otherwise fall back to the global default theme stored under the
      *       {@code theme.default} system property.</li>
      *   <li>Return empty when neither lookup succeeds.</li>
-     * </ol></p>
+     * </ol>
      *
      * @param virtualHostKey theme name derived from the request's virtual host
      *        (may be {@code null} or blank)
