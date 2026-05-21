@@ -63,6 +63,14 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"code\":\"not_found\""));
     }
 
+    @Test
+    public void test_writeError_forbiddenSetsHttpStatus403() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.FORBIDDEN, "no permission");
+        assertEquals(403, res.status);
+        assertTrue(res.body().contains("\"code\":\"forbidden\""));
+    }
+
     /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();

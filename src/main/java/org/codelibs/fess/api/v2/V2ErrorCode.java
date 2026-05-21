@@ -31,6 +31,9 @@ public enum V2ErrorCode {
     /** The endpoint requires authentication and none was supplied. */
     AUTH_REQUIRED("auth_required", 401),
 
+    /** The caller is authenticated but not permitted to perform the action. */
+    FORBIDDEN("forbidden", 403),
+
     /** The requested resource or endpoint does not exist. */
     NOT_FOUND("not_found", 404),
 
