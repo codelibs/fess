@@ -106,11 +106,15 @@ public class ThemeViewAction extends FessSearchAction {
         if (!indexFile.startsWith(theme.getBasePath()) || !Files.isRegularFile(indexFile)) {
             return notFound();
         }
-        return new StreamResponse("index.html").contentType("text/html; charset=UTF-8").header("Cache-Control", "no-cache").stream(out -> {
-            try (InputStream in = Files.newInputStream(indexFile)) {
-                in.transferTo(out.stream());
-            }
-        });
+        return new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
+                .header("Cache-Control", "no-cache")
+                .header("X-Content-Type-Options", "nosniff")
+                .header("Referrer-Policy", "same-origin")
+                .stream(out -> {
+                    try (InputStream in = Files.newInputStream(indexFile)) {
+                        in.transferTo(out.stream());
+                    }
+                });
     }
 
     /**
@@ -166,6 +170,8 @@ public class ThemeViewAction extends FessSearchAction {
         final String contentType = contentTypeFor(file.getFileName().toString());
         return new StreamResponse(file.getFileName().toString()).contentType(contentType)
                 .header("Cache-Control", "public, max-age=86400")
+                .header("X-Content-Type-Options", "nosniff")
+                .header("Referrer-Policy", "same-origin")
                 .stream(out -> {
                     try (InputStream in = Files.newInputStream(file)) {
                         in.transferTo(out.stream());

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -195,6 +196,96 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
             assertTrue(Files.exists(themeDir.resolve("theme.yml")));
             final String manifestAfter = Files.readString(themeDir.resolve("theme.yml"));
             assertEquals(manifestBefore, manifestAfter);
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_rejectsDotfileEntries() throws Exception {
+        // Files whose path starts with '.' (e.g. .env, .htaccess) must be rejected so a
+        // crafted archive cannot smuggle hidden files into a theme directory.
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: dotfile",
+                        "displayName: \"dotfile\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                putEntry(zos, ".env", "SECRET=1".getBytes(StandardCharsets.UTF_8));
+            }
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            assertTrue(ex.getMessage().contains("Hidden"));
+            assertTrue(!Files.exists(themesDir.resolve("dotfile")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_rejectsDotPrefixedDirectories() throws Exception {
+        // Any path segment that begins with '.' is rejected — guards against archives
+        // that embed a hidden directory such as .git/HEAD anywhere in the tree.
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: dotdir",
+                        "displayName: \"dotdir\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
+                putEntry(zos, ".git/HEAD", "ref: refs/heads/main".getBytes(StandardCharsets.UTF_8));
+            }
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            assertTrue(ex.getMessage().contains("Hidden"));
+            assertTrue(!Files.exists(themesDir.resolve("dotdir")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_chainsRollbackExceptionAsSuppressed() throws Exception {
+        // Force BOTH the staging->target move and the attic->target rollback to fail,
+        // and assert the rollback IOException is chained onto the original failure
+        // via addSuppressed so operators don't lose the rollback diagnostic.
+        final Path themesDir = Files.createTempDirectory("themes-installer-");
+        try {
+            // Pre-install v1 so a target directory exists; the next install path will
+            // exercise the attic-create + promote sequence we want to break.
+            final StaticThemeInstaller seed = newInstaller(themesDir);
+            seed.installZip(new ByteArrayInputStream(buildValidZipWithIndex("rollback", "<html>v1</html>")));
+            assertTrue(Files.exists(themesDir.resolve("rollback/theme.yml")));
+
+            final AtomicInteger calls = new AtomicInteger();
+            final StaticThemeInstaller installer = new StaticThemeInstaller() {
+                @Override
+                protected void moveDir(final Path source, final Path dest) throws IOException {
+                    final int n = calls.incrementAndGet();
+                    // 1st call: target -> attic (must succeed so attic != null).
+                    // 2nd call: staging -> target (force the initial move failure).
+                    // 3rd call: attic -> target (force the rollback failure).
+                    if (n == 1) {
+                        super.moveDir(source, dest);
+                        return;
+                    }
+                    throw new IOException("forced failure #" + n);
+                }
+            };
+            installer.setThemesDirOverride(themesDir);
+            installer.setMaxEntries(100);
+            installer.setMaxExtractedSize(1024L * 1024L);
+            installer.setMaxCompressionRatio(100);
+
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("rollback", "<html>v2</html>"))));
+            final Throwable cause = ex.getCause();
+            assertNotNull(cause);
+            assertTrue(cause.getSuppressed().length >= 1, "expected rollback IOException to be chained via addSuppressed");
+            assertTrue(cause.getSuppressed()[0] instanceof IOException);
         } finally {
             deleteRecursively(themesDir);
         }

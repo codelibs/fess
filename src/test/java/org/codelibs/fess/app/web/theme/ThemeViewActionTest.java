@@ -20,12 +20,18 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
 
+import org.codelibs.fess.helper.VirtualHostHelper;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
+import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.StreamResponse;
 
 public class ThemeViewActionTest extends UnitFessTestCase {
 
@@ -112,6 +118,84 @@ public class ThemeViewActionTest extends UnitFessTestCase {
                 } catch (final Exception ignore) {}
             });
         }
+    }
+
+    @Test
+    public void test_serveIndex_setsSecurityHeaders() throws Exception {
+        // The HTML entry response must always carry X-Content-Type-Options: nosniff
+        // and a Referrer-Policy header so themed UIs don't leak referer to third parties.
+        final Path tmp = Files.createTempDirectory("tva-headers-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertEquals("nosniff", headers.get("X-Content-Type-Options")[0]);
+            assertEquals("same-origin", headers.get("Referrer-Policy")[0]);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveAsset_setsSecurityHeaders() throws Exception {
+        // Static asset responses share the same minimum-header baseline as the
+        // index response so a sniffing or hot-linking attack cannot bypass them.
+        final Path tmp = Files.createTempDirectory("tva-headers-");
+        try {
+            Files.createDirectories(tmp.resolve("assets"));
+            Files.writeString(tmp.resolve("assets/app.js"), "console.log(1);");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveAsset("assets/app.js");
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertEquals("nosniff", headers.get("X-Content-Type-Options")[0]);
+            assertEquals("same-origin", headers.get("Referrer-Policy")[0]);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    private static ThemeViewAction newActionWith(final Theme theme) {
+        final ThemeViewAction action = new ThemeViewAction();
+        action.themeRegistry = new ThemeRegistry() {
+            @Override
+            public Optional<Theme> resolveActiveTheme(final String hostKey) {
+                return Optional.ofNullable(theme);
+            }
+        };
+        action.virtualHostHelper = new VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        };
+        return action;
     }
 
     private static String invokeContentTypeFor(final String name) throws Exception {

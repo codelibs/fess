@@ -208,7 +208,7 @@ public class ThemeRegistry {
     private String lookupDefaultThemeName() {
         try {
             return fessConfig.getSystemProperty(SYSPROP_DEFAULT_THEME, null);
-        } catch (final Throwable ignore) {
+        } catch (final Exception ignore) {
             return null;
         }
     }

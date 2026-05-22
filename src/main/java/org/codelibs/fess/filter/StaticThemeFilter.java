@@ -17,6 +17,7 @@ package org.codelibs.fess.filter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,6 +71,13 @@ public class StaticThemeFilter implements Filter {
 
     /** Overridable registry reference; production code uses the container lookup. */
     private ThemeRegistry themeRegistry;
+
+    /**
+     * Latches on the first failed {@link ThemeRegistry} lookup so the operator
+     * sees a single WARN instead of one per request when the DI container is not
+     * yet ready (or has been torn down). Subsequent failures degrade to DEBUG.
+     */
+    private static final AtomicBoolean firstFailure = new AtomicBoolean(false);
 
     /**
      * Default constructor.
@@ -178,8 +186,10 @@ public class StaticThemeFilter implements Filter {
         try {
             return ComponentUtil.getComponent(ThemeRegistry.class);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("ThemeRegistry not available yet", e);
+            if (firstFailure.compareAndSet(false, true)) {
+                logger.warn("ThemeRegistry not available; static-theme routing disabled", e);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("ThemeRegistry not available", e);
             }
             return null;
         }

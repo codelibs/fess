@@ -127,14 +127,17 @@ public class StaticThemeInstaller {
                     try {
                         moveDir(attic, target);
                     } catch (final IOException rollbackErr) {
+                        moveErr.addSuppressed(rollbackErr);
                         logger.error("Failed to roll back attic to target after move failure; "
                                 + "manual recovery required: attic={}, target={}", attic, target, rollbackErr);
                     }
                 }
                 throw new InstallException("Failed to finalize install", moveErr);
             }
-            if (attic != null) {
-                deleteRecursivelyQuiet(attic);
+            if (attic != null && !deleteRecursivelyBestEffort(attic) && logger.isWarnEnabled()) {
+                logger.warn(
+                        "Failed to clean up previous attic directory after successful install; " + "manual cleanup recommended: attic={}",
+                        attic);
             }
             if (themeRegistry != null) {
                 themeRegistry.reload();
@@ -218,6 +221,11 @@ public class StaticThemeInstaller {
                 if (name.contains("\0") || name.contains("..") || name.startsWith("/") || name.startsWith("\\")) {
                     throw new InstallException("Unsafe entry name: " + name);
                 }
+                for (final String seg : name.split("/")) {
+                    if (seg.startsWith(".")) {
+                        throw new InstallException("Hidden entry not allowed: " + name);
+                    }
+                }
                 final Path resolved = target.resolve(name).normalize();
                 if (!resolved.startsWith(target)) {
                     throw new InstallException("ZipSlip blocked: " + name);
@@ -255,7 +263,19 @@ public class StaticThemeInstaller {
         }
     }
 
-    private static void moveDir(final Path source, final Path dest) throws IOException {
+    /**
+     * Atomically moves {@code source} to {@code dest}. Falls back to a plain
+     * replacing move on filesystems that do not support {@code ATOMIC_MOVE}.
+     *
+     * <p>Exposed as an instance method (rather than a {@code static} helper) so
+     * unit tests can subclass and inject failure modes to exercise the
+     * promotion/rollback paths in {@link #installZip(InputStream)}.</p>
+     *
+     * @param source path to move
+     * @param dest destination path
+     * @throws IOException if the move fails on the underlying filesystem
+     */
+    protected void moveDir(final Path source, final Path dest) throws IOException {
         try {
             Files.move(source, dest, StandardCopyOption.ATOMIC_MOVE);
         } catch (final java.nio.file.AtomicMoveNotSupportedException ex) {
@@ -300,6 +320,23 @@ public class StaticThemeInstaller {
         } catch (final Exception ignore) {
             // best effort cleanup
         }
+    }
+
+    /**
+     * Recursively deletes {@code p} on a best-effort basis, returning whether the
+     * tree is fully gone afterwards. Used by the success path of {@link #installZip}
+     * so the caller can log a WARN if the previous attic could not be cleaned.
+     *
+     * @param p path to remove; {@code null} or non-existent paths are treated as
+     *        success ({@code true})
+     * @return {@code true} if {@code p} no longer exists, {@code false} otherwise
+     */
+    private static boolean deleteRecursivelyBestEffort(final Path p) {
+        if (p == null || !Files.exists(p)) {
+            return true;
+        }
+        deleteRecursivelyQuiet(p);
+        return !Files.exists(p);
     }
 
     // ---- Test seams ----
