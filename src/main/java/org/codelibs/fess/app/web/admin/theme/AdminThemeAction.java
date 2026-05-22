@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -157,7 +158,7 @@ public class AdminThemeAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         final String fileName = form.themeFile.getFileName();
-        if (fileName == null || !fileName.toLowerCase().endsWith(".zip")) {
+        if (!hasZipExtension(fileName)) {
             throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, String.valueOf(fileName)),
                     () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         }
@@ -252,6 +253,19 @@ public class AdminThemeAction extends FessAdminAction {
 
     private String currentDefault() {
         return ComponentUtil.getFessConfig().getSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "");
+    }
+
+    /**
+     * Locale-independent ZIP extension check. Uses {@link Locale#ROOT} so the
+     * lower-case conversion is unaffected by the JVM's default locale (e.g.
+     * the Turkish locale's dotless-{@code i} would otherwise corrupt the
+     * comparison).
+     *
+     * @param filename the candidate file name (may be {@code null})
+     * @return {@code true} when {@code filename} ends with {@code .zip} case-insensitively
+     */
+    static boolean hasZipExtension(final String filename) {
+        return filename != null && filename.toLowerCase(Locale.ROOT).endsWith(".zip");
     }
 
     private static Map<String, Object> asThemeRow(final Theme t, final String currentDefault) {

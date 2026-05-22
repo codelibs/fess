@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.ThemeRegistry;
@@ -189,6 +190,29 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         assertEquals("generic", classifyDeleteError(otherEx.getMessage()));
         // null message defensive path also routes to the generic bucket
         assertEquals("generic", classifyDeleteError(null));
+    }
+
+    @Test
+    public void test_zipExtensionCheckIsLocaleIndependent() {
+        // Regression: a Turkish locale would otherwise turn "ZIP" into "zıp"
+        // (dotless-i) when calling toLowerCase() without a Locale argument,
+        // causing legitimate uploads to be rejected.
+        final Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            // Mixed-case extensions must pass under the Turkish locale.
+            assertTrue(AdminThemeAction.hasZipExtension("theme.ZIP"), "uppercase .ZIP must be accepted under Turkish locale");
+            assertTrue(AdminThemeAction.hasZipExtension("Theme.Zip"), "mixed-case .Zip must be accepted under Turkish locale");
+            assertTrue(AdminThemeAction.hasZipExtension("bootstrap.zip"));
+            assertTrue(AdminThemeAction.hasZipExtension("BOOTSTRAP.ZIP"));
+            // Negative cases must still be rejected.
+            assertFalse(AdminThemeAction.hasZipExtension(null));
+            assertFalse(AdminThemeAction.hasZipExtension(""));
+            assertFalse(AdminThemeAction.hasZipExtension("theme.tar.gz"));
+            assertFalse(AdminThemeAction.hasZipExtension("zip"));
+        } finally {
+            Locale.setDefault(original);
+        }
     }
 
     /**
