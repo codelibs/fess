@@ -82,18 +82,23 @@ public class ChatStreamHandler {
         // over the same channel the SPA is listening on.
         setSseHeaders(res);
 
+        // Acquire the writer exactly once. The servlet container manages its lifecycle for
+        // the duration of the request; using try-with-resources here would prematurely close
+        // the writer and prevent the outer error path from emitting a final SSE event.
+        final PrintWriter writer = res.getWriter();
+        // Tracks whether the inner phase callback (or any pre-LLM gate) has already emitted
+        // an "error" SSE event. The outer catch consults it to avoid emitting a duplicate
+        // error event after the callback's onError has fired.
+        final boolean[] errorEmittedHolder = { false };
+
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            try (final PrintWriter writer = res.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", "method not allowed", "errorCode", "method_not_allowed"));
-            }
+            sendSseEvent(writer, "error", Map.of("message", "method not allowed", "errorCode", "method_not_allowed"));
             return;
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
-            try (final PrintWriter writer = res.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", "chat is not enabled", "errorCode", "chat_disabled"));
-            }
+            sendSseEvent(writer, "error", Map.of("message", "chat is not enabled", "errorCode", "chat_disabled"));
             return;
         }
 
@@ -102,9 +107,7 @@ public class ChatStreamHandler {
             raw = V2JsonBody.read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException | V2JsonBody.MalformedJsonException
                 | V2JsonBody.UnsupportedMediaTypeException e) {
-            try (final PrintWriter writer = res.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "invalid_request"));
-            }
+            sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "invalid_request"));
             return;
         }
 
@@ -113,25 +116,39 @@ public class ChatStreamHandler {
         try {
             body = ChatRequestBody.from(raw, maxLen);
         } catch (final ChatRequestBody.MessageTooLongException e) {
-            try (final PrintWriter writer = res.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "message_too_long"));
-            }
+            sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "message_too_long"));
             return;
         }
 
         if (StringUtil.isBlank(body.message())) {
-            try (final PrintWriter writer = res.getWriter()) {
-                sendSseEvent(writer, "error", Map.of("message", "message is required", "errorCode", "missing_message"));
-            }
+            sendSseEvent(writer, "error", Map.of("message", "message is required", "errorCode", "missing_message"));
+            return;
+        }
+
+        final String userId = getUserId(req);
+        // Per-user chat rate limit. SSE has no envelope, so on rejection we emit a
+        // dedicated `event: error` with errorCode=rate_limited and close the stream.
+        final LoginRateLimiter limiter;
+        try {
+            limiter = ComponentUtil.getLoginRateLimiter();
+        } catch (final RuntimeException e) {
+            // Limiter DI not available (e.g. slim test harness); skip rate limiting rather
+            // than failing the request. Production wires it via app.xml.
+            sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
+            logger.warn("[RAG] /api/v2/chat/stream rate-limit lookup failed. error={}", e.getMessage());
+            return;
+        }
+        final int chatLimit = getChatRateLimitPerMinute(fessConfig);
+        if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+            sendSseEvent(writer, "error", Map.of("message", "too many chat requests", "errorCode", "rate_limited"));
             return;
         }
 
         // Tag the request for the search-log access-type column, same as v1.
         req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
 
-        try (final PrintWriter writer = res.getWriter()) {
-            final String userId = getUserId(req);
-            final ChatPhaseCallback phaseCallback = newPhaseCallback(writer);
+        try {
+            final ChatPhaseCallback phaseCallback = newPhaseCallback(writer, errorEmittedHolder);
 
             final ChatResult result;
             if (body.fields().isEmpty() && body.extraQueries().length == 0) {
@@ -158,8 +175,12 @@ public class ChatStreamHandler {
             logger.warn("[RAG] /api/v2/chat/stream LLM error. sessionId={}, errorCode={}", body.sessionId(), e.getErrorCode());
         } catch (final Exception e) {
             logger.warn("[RAG] /api/v2/chat/stream failed. error={}", e.getMessage(), e);
-            if (!res.isCommitted()) {
-                try (final PrintWriter writer = res.getWriter()) {
+            // Avoid double-emitting an error event when the callback already wrote one,
+            // and avoid writing to a closed response body. Reuse the same writer we
+            // acquired at the top — do NOT call res.getWriter() again here because the
+            // container may have already closed it.
+            if (!errorEmittedHolder[0] && !res.isCommitted()) {
+                try {
                     sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
                 } catch (final Exception ioe) {
                     logger.warn("Failed to send SSE error after exception. cause={}", ioe.getMessage());
@@ -191,6 +212,22 @@ public class ChatStreamHandler {
      * @return a callback bound to the writer
      */
     protected ChatPhaseCallback newPhaseCallback(final PrintWriter writer) {
+        return newPhaseCallback(writer, new boolean[1]);
+    }
+
+    /**
+     * Builds a {@link ChatPhaseCallback} that emits SSE events using the same
+     * wire shape v1 emits, so the static theme JS can share a single parser.
+     * The supplied {@code errorEmittedHolder} flag is set whenever onError is
+     * invoked so the surrounding handler can avoid double-emitting an error
+     * event from its outer catch.
+     *
+     * @param writer the per-request servlet writer to emit events to
+     * @param errorEmittedHolder single-element boolean array; element 0 is set to true
+     *                           after the first onError emission
+     * @return a callback bound to the writer
+     */
+    protected ChatPhaseCallback newPhaseCallback(final PrintWriter writer, final boolean[] errorEmittedHolder) {
         return new ChatPhaseCallback() {
             @Override
             public void onPhaseStart(final String phase, final String message) {
@@ -236,6 +273,7 @@ public class ChatStreamHandler {
 
             @Override
             public void onError(final String phase, final String errorCode) {
+                errorEmittedHolder[0] = true;
                 emitSafely(writer, "error", Map.of("phase", phase, "message", errorCode, "errorCode", errorCode));
             }
 
@@ -361,6 +399,23 @@ public class ChatStreamHandler {
             return Integer.parseInt(fessConfig.getSystemProperty("rag.chat.message.max.length", "4000"));
         } catch (final NumberFormatException e) {
             return 4000;
+        }
+    }
+
+    /**
+     * Resolve {@code api.v2.chat.rate.limit.per.user.per.minute} from fess_config system
+     * properties, defaulting to 30 on parse failure. A return value &lt;= 0 disables the
+     * rate limit entirely. The system-property indirection avoids regenerating the
+     * LastaFlute-managed FessConfig accessors for a single value.
+     *
+     * @param fessConfig active Fess config
+     * @return max chat requests per minute per user, or {@code <= 0} to disable
+     */
+    protected int getChatRateLimitPerMinute(final FessConfig fessConfig) {
+        try {
+            return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
+        } catch (final NumberFormatException e) {
+            return 30;
         }
     }
 }

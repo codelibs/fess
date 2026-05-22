@@ -141,6 +141,65 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
         assertFalse(res.body().contains("\"code\":\"forbidden\""), res.body());
     }
 
+    @Test
+    public void searchApiV2Manager_handlerThrows_doesNotLeakMessage() throws Exception {
+        // Verify the outer catch's sanitization by directly inspecting the source. The
+        // fix replaced `V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage())`
+        // with `V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error")`.
+        // The simplest verifiable invariant from a unit test: read the source file (under
+        // src/main) and confirm the broad catch no longer passes `e.getMessage()`. This is
+        // a static-assertion-style test that protects against future regressions where a
+        // developer adds the leak back.
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
+                "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
+        final String source = java.nio.file.Files.readString(src);
+        final int catchIdx = source.indexOf("/api/v2 handler failed for");
+        assertTrue(catchIdx >= 0, "broad-catch log statement not found — has the file been restructured?");
+        // Inspect the small window of source immediately after the log call.
+        final String window = source.substring(catchIdx, Math.min(source.length(), catchIdx + 2000));
+        // Find the actual V2EnvelopeWriter.writeError call inside the broad catch and assert
+        // its arguments — the window also contains a "do not leak e.getMessage()" comment we
+        // intentionally keep, so scope the leak check to the function-call expression.
+        final int writeErrorCall = window.indexOf("V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR");
+        assertTrue(writeErrorCall >= 0, "broad-catch writeError call missing: " + window);
+        final int callEnd = window.indexOf(");", writeErrorCall);
+        final String call = window.substring(writeErrorCall, callEnd >= 0 ? callEnd : window.length());
+        assertFalse(call.contains("e.getMessage()"),
+                "SearchApiV2Manager broad catch still leaks e.getMessage() in writeError args: " + call);
+        assertTrue(call.contains("\"internal error\""), "expected sanitized message constant in broad catch writeError args: " + call);
+        assertTrue(window.contains("isCommitted()"), "expected isCommitted() short-circuit in broad catch: " + window);
+    }
+
+    @Test
+    public void searchApiV2Manager_handlerThrowsAfterCommit_doesNotWriteEnvelope() throws Exception {
+        // Companion to the message-leak test: assert that when the response is already
+        // committed, the broad catch performs an early-return rather than calling writeError
+        // on top of the in-flight body. Source-level assertion for the same reason as the
+        // sibling test: every reachable runtime trigger goes through a handler-level catch
+        // first, so a behavior-level test can't reliably observe the manager's branch.
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
+                "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
+        final String source = java.nio.file.Files.readString(src);
+        final int catchIdx = source.indexOf("/api/v2 handler failed for");
+        assertTrue(catchIdx >= 0, "broad-catch log statement not found");
+        // The fix uses `if (response.isCommitted()) { return; }` immediately after the log
+        // call but BEFORE writeError. Verify both ordering invariants by checking string
+        // positions in the window.
+        final String window = source.substring(catchIdx, Math.min(source.length(), catchIdx + 2000));
+        final int committedIdx = window.indexOf("isCommitted()");
+        final int writeErrorIdx = window.indexOf("V2EnvelopeWriter.writeError");
+        assertTrue(committedIdx > 0, "isCommitted() guard missing: " + window);
+        assertTrue(writeErrorIdx > 0, "writeError call missing: " + window);
+        assertTrue(committedIdx < writeErrorIdx, "isCommitted() guard must precede writeError() in the broad catch: " + window);
+        // The guard must early-return; assert the keyword "return" appears between the
+        // isCommitted check and writeError.
+        final String betweenGuardAndWrite = window.substring(committedIdx, writeErrorIdx);
+        assertTrue(betweenGuardAndWrite.contains("return"),
+                "isCommitted() branch must early-return before reaching writeError: " + betweenGuardAndWrite);
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override

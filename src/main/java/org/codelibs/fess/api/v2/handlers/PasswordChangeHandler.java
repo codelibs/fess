@@ -23,8 +23,11 @@ import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.app.web.base.login.LocalUserCredential;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,11 +37,24 @@ import jakarta.servlet.http.HttpServletResponse;
  * Handles {@code POST /api/v2/auth/password}.
  *
  * <p>Changes the current user's password. The handler requires an active
- * session ({@code 401 auth_required} otherwise), validates the new password
- * against the system's password policy ({@code SystemHelper#validatePassword}),
- * and delegates the actual store to {@link UserService#changePassword}.
+ * session ({@code 401 auth_required} otherwise) and the caller's
+ * {@code current_password} — when blank the response is
+ * {@code 400 invalid_request}, when wrong the response is
+ * {@code 401 auth_required}. The new password is validated against the
+ * system's password policy ({@code SystemHelper#validatePassword}), and the
+ * actual store is delegated to {@link UserService#changePassword}.
  * Confirm-password mismatch and a blank new password both yield
  * {@code 400 invalid_request}.</p>
+ *
+ * <p>Request body shape:</p>
+ * <pre>{@code
+ * { "current_password": "...", "new_password": "...", "confirm_password": "..." }
+ * }</pre>
+ *
+ * <p>All three fields are required. The {@code current_password} check follows the
+ * same {@link FessLoginAssist#findLoginUser} pattern used by
+ * {@code ProfileAction.changePassword}; it intentionally does <em>not</em>
+ * consume a rate-limit slot because the user is already authenticated.</p>
  */
 public class PasswordChangeHandler {
 
@@ -69,10 +85,31 @@ public class PasswordChangeHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
+        final String currentPw = stringOrNull(body.get("current_password"));
         final String newPw = stringOrNull(body.get("new_password"));
         final String confirm = stringOrNull(body.get("confirm_password"));
+        if (StringUtil.isBlank(currentPw)) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "current_password is required");
+            return;
+        }
         if (StringUtil.isBlank(newPw) || !newPw.equals(confirm)) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match");
+            return;
+        }
+        final String userId = userBean.get().getUserId();
+        // Re-authenticate the current user with the supplied current_password. We mirror
+        // ProfileAction.validatePasswordForm — findLoginUser performs the same hash compare
+        // that the login flow uses, so we get an early reject for wrong-password without
+        // leaking timing differences vs. a hand-rolled compare.
+        final OptionalEntity<? extends FessUser> verified;
+        try {
+            verified = ComponentUtil.getComponent(FessLoginAssist.class).findLoginUser(new LocalUserCredential(userId, currentPw));
+        } catch (final Exception e) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
+            return;
+        }
+        if (verified == null || !verified.isPresent()) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid current password");
             return;
         }
         final String validationError = ComponentUtil.getSystemHelper().validatePassword(newPw);
@@ -81,7 +118,7 @@ public class PasswordChangeHandler {
             return;
         }
         try {
-            ComponentUtil.getComponent(UserService.class).changePassword(userBean.get().getUserId(), newPw);
+            ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
         } catch (final Exception e) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;

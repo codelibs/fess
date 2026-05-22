@@ -25,7 +25,9 @@ import java.util.function.LongSupplier;
  * In-memory, per-instance rate limiter for /api/v2/auth/login (and /auth/password).
  *
  * <p>Maintains a sliding window of attempt timestamps per (scope, key) pair plus
- * an optional lockout-until timestamp. Two scopes are recognized: IP and USER.
+ * an optional lockout-until timestamp. Three scopes are recognized: IP, USER
+ * and CHAT. {@link Scope#CHAT} is used by the v2 chat endpoints to throttle
+ * per-user chat invocations independently of the login buckets.
  * Thresholds are passed in per call so the manager can read FessConfig once and
  * forward the values; this keeps the helper test-friendly (no static config).</p>
  *
@@ -38,7 +40,7 @@ import java.util.function.LongSupplier;
 public class LoginRateLimiter {
 
     public enum Scope {
-        IP, USER
+        IP, USER, CHAT
     }
 
     private static final class Entry {
@@ -80,6 +82,49 @@ public class LoginRateLimiter {
             }
             e.hits.addLast(now);
             return true;
+        }
+    }
+
+    /**
+     * Returns true when a fresh attempt against (scope, key) would currently be admitted by
+     * {@link #allow}, but without consuming a bucket slot. Use this to short-circuit work
+     * (e.g. credential verification) when the bucket is already exhausted, then call
+     * {@link #allow} only on the failure path so success and system-error paths do not
+     * count against the legitimate user's quota.
+     *
+     * @param scope rate-limit scope (e.g. IP, USER, CHAT)
+     * @param key bucket key (e.g. IP address or username)
+     * @param maxPerWindow upper bound of attempts permitted within {@code windowSeconds}
+     * @param windowSeconds sliding-window width
+     * @return true if a subsequent {@link #allow} would currently succeed
+     */
+    public boolean peek(final Scope scope, final String key, final int maxPerWindow, final int windowSeconds) {
+        if (maxPerWindow <= 0) {
+            return true;
+        }
+        if (key == null || key.isEmpty()) {
+            return true;
+        }
+        final String mapKey = scope.name() + ":" + key;
+        final long now = clock.getAsLong();
+        final long windowMs = windowSeconds * 1_000L;
+        final Entry e = entries.get(mapKey);
+        if (e == null) {
+            return true;
+        }
+        synchronized (e) {
+            if (now < e.lockUntilEpochMs) {
+                return false;
+            }
+            // Note: we intentionally do not evict expired hits here — peek is a side-effect-free
+            // check; the next allow() will evict them. This keeps peek() cheap and predictable.
+            int active = 0;
+            for (final long t : e.hits) {
+                if (t >= now - windowMs) {
+                    active++;
+                }
+            }
+            return active < maxPerWindow;
         }
     }
 

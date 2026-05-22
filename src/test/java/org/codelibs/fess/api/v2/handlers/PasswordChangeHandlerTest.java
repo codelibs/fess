@@ -28,8 +28,16 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.app.web.base.login.LocalUserCredential;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -98,6 +106,168 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         new PasswordChangeHandler().handle(
                 new StubRequest("POST", "/api/v2/auth/password").withJsonBody("{\"new_password\":\"\",\"confirm_password\":\"\"}"), res);
         assertEquals(401, res.status);
+    }
+
+    /**
+     * Registers a stub {@link FessLoginAssist} that pretends a user named {@code alice} is
+     * logged in. {@code findLoginUser} returns a populated entity only when the supplied
+     * password equals {@code expectedCurrentPw}; otherwise it returns an empty optional so
+     * the handler must short-circuit to {@code AUTH_REQUIRED}.
+     */
+    private static void registerStubLoginAssist(final String userId, final String expectedCurrentPw) {
+        final StubFessLoginAssist stub = new StubFessLoginAssist(userId, expectedCurrentPw);
+        ComponentUtil.register(stub, "fessLoginAssist");
+        ComponentUtil.register(stub, FessLoginAssist.class.getCanonicalName());
+    }
+
+    @Test
+    public void passwordChange_rejectsWhenCurrentPasswordMissing() throws Exception {
+        // A logged-in caller posts new_password but omits current_password — the handler
+        // must respond 400/invalid_request before consulting findLoginUser.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password")
+                    .withJsonBody("{\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("current_password"), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_rejectsWhenCurrentPasswordWrong() throws Exception {
+        // The handler must respond 401/auth_required when current_password does not match —
+        // matching the LoginHandler contract for wrong credentials.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
+            assertEquals(401, res.status);
+            assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_succeedsOnCorrectCurrentPassword() throws Exception {
+        // Happy path: the stubbed login assist accepts the supplied current_password, and the
+        // handler proceeds through the validation gate and delegates to a stub UserService.
+        // We assert the wire envelope contains "ok":true and the call-tracker recorded the
+        // change so we know the path executed end-to-end.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        // SystemHelper is not bound in test_app.xml; register a stub that always treats the
+        // password as valid so the validation gate does not short-circuit before
+        // changePassword is invoked.
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertTrue(changedCalled[0], "expected UserService.changePassword to be invoked");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /**
+     * Stub FessLoginAssist that returns a populated entity only when the supplied
+     * LocalUserCredential carries {@code expectedPw}. Used by the password-change
+     * tests above to exercise the wrong/right current-password branches without
+     * pulling in the full LDAP/DBFlute stack.
+     */
+    private static class StubFessLoginAssist extends FessLoginAssist {
+        private static final long serialVersionUID = 1L;
+        private final String userId;
+        private final String expectedPw;
+
+        StubFessLoginAssist(final String userId, final String expectedPw) {
+            this.userId = userId;
+            this.expectedPw = expectedPw;
+        }
+
+        @Override
+        public OptionalThing<FessUserBean> getSavedUserBean() {
+            // Pretend a user is logged in so the handler proceeds past the auth gate.
+            return OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
+        }
+
+        @Override
+        public OptionalEntity<FessUser> findLoginUser(final LoginCredential credential) {
+            // The handler always passes a LocalUserCredential; defensive-cast and check.
+            if (credential instanceof final LocalUserCredential local && expectedPw.equals(local.getPassword())) {
+                return OptionalEntity.of(new StubFessUser(local.getUserId()));
+            }
+            return OptionalEntity.empty();
+        }
+    }
+
+    /** Minimal {@link FessUser} for stub use; the handler only reads getName() / getUserId(). */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
+    }
+
+    /**
+     * Stub UserService that records when {@link #changePassword} is invoked. The lookup
+     * methods are unused by the handler, so the parent implementations can stand.
+     */
+    private static class StubUserService extends org.codelibs.fess.app.service.UserService {
+        private final boolean[] changedCalled;
+
+        StubUserService(final boolean[] changedCalled) {
+            this.changedCalled = changedCalled;
+        }
+
+        @Override
+        public void changePassword(final String username, final String password) {
+            changedCalled[0] = true;
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type and body. */

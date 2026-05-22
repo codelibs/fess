@@ -96,22 +96,59 @@ public class LoginHandler {
             return;
         }
 
-        if (!limiter.allow(LoginRateLimiter.Scope.USER, username, userLimit, 60)) {
+        // USER-scope pre-validation uses peek() so the bucket is NOT consumed yet. The slot is
+        // taken only on credential failure below, so that a system-error path (e.g. login
+        // subsystem down) does not count against the legitimate user's bucket. IP-scope
+        // check above stays pre-validation because it is the cheap bot/scanner gate.
+        if (!limiter.peek(LoginRateLimiter.Scope.USER, username, userLimit, 60)) {
             limiter.lockOut(LoginRateLimiter.Scope.USER, username, lockoutSec);
             res.setHeader("Retry-After", Integer.toString(lockoutSec));
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (user)");
             return;
         }
 
-        final FessLoginAssist assist = ComponentUtil.getComponent(FessLoginAssist.class);
+        // Acquire the login assist component INSIDE the try so an early DI binding failure
+        // (which only happens in slim test harnesses, but defense in depth) is treated as a
+        // system error rather than a credential failure — the user bucket must not be
+        // consumed for DI breakage.
+        final FessLoginAssist assist;
         try {
+            assist = ComponentUtil.getComponent(FessLoginAssist.class);
             assist.login(new LocalUserCredential(username, password), op -> {});
         } catch (final LoginFailureException e) {
+            // Credential rejection consumes the USER slot exactly once, on the failure path.
+            // The post-consume check decides whether to also lock the bucket — when the user
+            // has just exhausted the window, we stamp a lockUntil so subsequent requests are
+            // refused even after the sliding window expires (parity with the existing IP
+            // gate's lockOut behavior).
+            if (!limiter.allow(LoginRateLimiter.Scope.USER, username, userLimit, 60)) {
+                limiter.lockOut(LoginRateLimiter.Scope.USER, username, lockoutSec);
+                res.setHeader("Retry-After", Integer.toString(lockoutSec));
+                V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many login attempts (user)");
+                return;
+            }
             V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "invalid credentials");
+            return;
+        } catch (final RuntimeException e) {
+            // Anything else (DI binding failure, transient lookup error, etc.) is a system
+            // error and must NOT count against the user bucket — otherwise a misconfigured
+            // server would lock real users out. We surface INTERNAL_ERROR with a generic
+            // message; the exception detail goes to the log only.
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
 
-        // Successful login — rotate CSRF token, return new token + user bean.
+        // Successful login — rotate the session id to defeat session fixation, then issue
+        // a fresh CSRF token. changeSessionId() throws IllegalStateException if no session
+        // exists yet; for the v2 API path that can happen when the SPA POSTs without first
+        // making a GET — the catch swallows it because the subsequent getSession(true) will
+        // create a fresh session anyway.
+        try {
+            req.changeSessionId();
+        } catch (final IllegalStateException ignore) {
+            // no session was associated with the request yet — getSession(true) below
+            // will create a new one, which is itself unfixable from the outside.
+        }
         final HttpSession session = req.getSession(true);
         final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
         csrf.rotate(session);

@@ -217,7 +217,16 @@ public class SearchApiV2Manager extends BaseApiManager {
             }
         } catch (final Exception e) {
             logger.warn("/api/v2 handler failed for {}", sub, e);
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            if (response.isCommitted()) {
+                // SSE / NDJSON handlers have already started flushing; the v2 envelope can no
+                // longer be written without producing a malformed wire frame. The exception
+                // detail is in the log; the wire transcript ends where it last flushed.
+                return;
+            }
+            // Do not leak e.getMessage() to the wire — message content from upstream
+            // libraries can include connection strings, stack-trace fragments, or other
+            // information the SPA must not see.
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error");
         }
     }
 

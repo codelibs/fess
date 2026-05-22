@@ -112,11 +112,29 @@ public class ChatHandler {
             return;
         }
 
+        final String userId = getUserId(req);
+        // Per-user chat rate limit. We resolve the limiter lazily so the slim test harness
+        // (no DI binding for it) degrades gracefully.
+        LoginRateLimiter limiter = null;
+        try {
+            limiter = ComponentUtil.getLoginRateLimiter();
+        } catch (final RuntimeException e) {
+            // Limiter DI not available; skip rate limiting rather than failing the request.
+            // Production wires it via app.xml.
+            if (logger.isDebugEnabled()) {
+                logger.debug("LoginRateLimiter unavailable; skipping rate limit. error={}", e.getMessage());
+            }
+        }
+        final int chatLimit = getChatRateLimitPerMinute(fessConfig);
+        if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
+            return;
+        }
+
         // Tag the request for the search-log access-type column, same as v1.
         req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
 
         try {
-            final String userId = getUserId(req);
             final ChatResult result;
             if (body.fields().isEmpty() && body.extraQueries().length == 0) {
                 result = ComponentUtil.getChatClient().chat(body.sessionId(), body.message(), userId);
@@ -167,6 +185,23 @@ public class ChatHandler {
             return Integer.parseInt(fessConfig.getSystemProperty("rag.chat.message.max.length", "4000"));
         } catch (final NumberFormatException e) {
             return 4000;
+        }
+    }
+
+    /**
+     * Resolve {@code api.v2.chat.rate.limit.per.user.per.minute} from fess_config system
+     * properties, defaulting to 30 on parse failure. A return value &lt;= 0 disables the
+     * rate limit entirely. The system-property indirection avoids regenerating the
+     * LastaFlute-managed FessConfig accessors for a single value.
+     *
+     * @param fessConfig active Fess config
+     * @return max chat requests per minute per user, or {@code <= 0} to disable
+     */
+    protected int getChatRateLimitPerMinute(final FessConfig fessConfig) {
+        try {
+            return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
+        } catch (final NumberFormatException e) {
+            return 30;
         }
     }
 }
