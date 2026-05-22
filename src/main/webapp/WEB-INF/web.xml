@@ -161,6 +161,11 @@
     <filter-name>lastaToActionFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>lastaToActionFilter</filter-name>
+    <url-pattern>/theme-view</url-pattern>
     <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
