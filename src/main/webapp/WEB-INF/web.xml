@@ -187,11 +187,37 @@
   <!-- ================================================================================= -->
   <!--                                                                    Session Config -->
   <!--                                                                    ============== -->
-<!--
-    <session-config>
-        <session-timeout>1</session-timeout>
-    </session-config>
+  <!--
+    SECURITY: Session cookie hardening (MJ-3 / PR #3136).
+
+    HttpOnly  - blocks JavaScript access to JSESSIONID, mitigating XSS-based session theft.
+    Secure    - restricts cookie transmission to HTTPS only.
+
+    PRODUCTION REQUIREMENT: Fess MUST be served over HTTPS (TLS termination at the
+    container, a reverse proxy, or a load balancer).  If you run HTTP-only (e.g. plain
+    `bin/fess` on port 8080 without TLS), the browser will silently drop the Secure cookie
+    and sessions will not persist.  For HTTP-only local development either:
+      (a) front Fess with an HTTPS reverse proxy (nginx/Caddy with a self-signed cert), or
+      (b) temporarily remove the <secure> element — but do NOT do this in production.
+
+    SameSite policy cannot be set via web.xml in Servlet 6.1 / Jakarta EE 10.
+    To enforce SameSite=Lax (recommended) configure the Tomcat CookieProcessor at the
+    deployment level in one of:
+      - META-INF/context.xml  (per-webapp, checked into the WAR):
+            <Context>
+              <CookieProcessor sameSiteCookies="lax"/>
+            </Context>
+      - $CATALINA_HOME/conf/context.xml  (global, all webapps)
+      - A reverse proxy that rewrites Set-Cookie headers.
+    See https://tomcat.apache.org/tomcat-10.1-doc/config/cookie-processor.html
   -->
+  <session-config>
+    <cookie-config>
+      <http-only>true</http-only>
+      <secure>true</secure>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
 
   <!-- ================================================================================= -->
   <!--                                                                      Welcome File -->
