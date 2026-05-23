@@ -88,6 +88,61 @@ public class V2JsonBodyTest {
         assertThrows(V2JsonBody.MalformedJsonException.class, () -> V2JsonBody.read(req, 1024));
     }
 
+    @Test
+    public void test_rejectsNullContentType() {
+        // A null Content-Type (header absent) must be rejected — callers cannot assume JSON.
+        final HttpServletRequest req = stub("{\"k\":1}", null);
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+    }
+
+    @Test
+    public void test_rejectsNonUtf8Charset() {
+        // application/json with an explicit non-UTF-8 charset must be rejected.
+        final HttpServletRequest req = stub("{\"k\":1}", "application/json; charset=Shift_JIS");
+        assertThrows(V2JsonBody.UnsupportedMediaTypeException.class, () -> V2JsonBody.read(req, 1024));
+    }
+
+    @Test
+    public void test_acceptsExplicitUtf8Charset() throws Exception {
+        // Explicit charset=utf-8 is acceptable (common from curl/Postman).
+        final HttpServletRequest req = stub("{\"k\":\"v\"}", "application/json; charset=utf-8");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals("v", body.get("k"));
+    }
+
+    @Test
+    public void test_stripsLeadingBom() throws Exception {
+        // A body prefixed with the UTF-8 BOM (EF BB BF) should parse successfully after stripping.
+        final byte[] json = "{\"bom\":true}".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        final byte[] withBom = new byte[json.length + 3];
+        withBom[0] = (byte) 0xEF;
+        withBom[1] = (byte) 0xBB;
+        withBom[2] = (byte) 0xBF;
+        System.arraycopy(json, 0, withBom, 3, json.length);
+        final HttpServletRequest req = stubBytes(withBom, "application/json");
+        final Map<String, Object> body = V2JsonBody.read(req, 1024);
+        assertEquals(Boolean.TRUE, body.get("bom"));
+    }
+
+    @Test
+    public void test_rejectsDeeplyNestedJson() {
+        // A 33-deep nesting exceeds the maxNestingDepth(32) constraint in the MAPPER.
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 33; i++) {
+            sb.append("{\"a\":");
+        }
+        sb.append("1");
+        for (int i = 0; i < 33; i++) {
+            sb.append("}");
+        }
+        final HttpServletRequest req = stub(sb.toString(), "application/json");
+        assertThrows(V2JsonBody.MalformedJsonException.class, () -> V2JsonBody.read(req, 1 << 20));
+    }
+
+    private static HttpServletRequest stubBytes(final byte[] body, final String contentType) {
+        return new StubBytesRequest(body, contentType);
+    }
+
     private static HttpServletRequest stub(final String body, final String contentType) {
         return new StubRequest(body, contentType);
     }
@@ -501,6 +556,59 @@ public class V2JsonBodyTest {
         @Override
         public jakarta.servlet.ServletConnection getServletConnection() {
             return null;
+        }
+    }
+
+    /**
+     * A variant of {@link StubRequest} that accepts a raw {@code byte[]} body directly,
+     * used for BOM-stripping tests where the bytes cannot be round-tripped through a String.
+     */
+    private static class StubBytesRequest extends StubRequest {
+        private final byte[] rawBytes;
+
+        StubBytesRequest(final byte[] rawBytes, final String contentType) {
+            super("", contentType); // delegate to superclass but override body via stream
+            this.rawBytes = rawBytes;
+        }
+
+        @Override
+        public ServletInputStream getInputStream() {
+            final ByteArrayInputStream bais = new ByteArrayInputStream(rawBytes);
+            return new ServletInputStream() {
+                private boolean eof = false;
+
+                @Override
+                public int read() throws IOException {
+                    final int v = bais.read();
+                    if (v < 0) {
+                        eof = true;
+                    }
+                    return v;
+                }
+
+                @Override
+                public byte[] readNBytes(final int len) throws IOException {
+                    final byte[] out = bais.readNBytes(len);
+                    if (bais.available() == 0) {
+                        eof = true;
+                    }
+                    return out;
+                }
+
+                @Override
+                public boolean isFinished() {
+                    return eof;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setReadListener(final ReadListener listener) {
+                }
+            };
         }
     }
 }

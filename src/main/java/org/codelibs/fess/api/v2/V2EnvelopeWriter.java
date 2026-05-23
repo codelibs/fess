@@ -60,17 +60,45 @@ public final class V2EnvelopeWriter {
     }
 
     /**
+     * Reserved keys that the envelope always owns and that a caller-supplied payload must
+     * not contain. If a payload map contains either key the envelope's {@code status} integer
+     * or {@code version} string would be silently overwritten, breaking the wire contract for
+     * every client that branches on those fields.
+     *
+     * <p>Call sites that accidentally include these keys represent a programming error, so
+     * the method throws {@link IllegalStateException} rather than silently discarding or
+     * overriding the value — this surfaces the mistake at development/test time rather than
+     * in production.</p>
+     */
+    private static final java.util.Set<String> RESERVED_KEYS = java.util.Set.of("status", "version");
+
+    /**
      * Writes a successful v2 envelope wrapping the supplied payload.
      *
      * <p>Does not change the HTTP status (defaults to whatever the container set,
      * normally {@code 200 OK}). Sets the response content type to
      * {@code application/json; charset=UTF-8}.</p>
      *
+     * <p><strong>Reserved keys:</strong> the payload must not contain the keys
+     * {@code "status"} or {@code "version"}; both are owned by the envelope itself.
+     * Passing a map that contains either key will throw {@link IllegalStateException}
+     * so the mistake is caught at development/test time.</p>
+     *
      * @param res the HTTP response to write to
      * @param payload key/value fields to merge into the envelope; {@code null} is treated as empty
      * @throws IOException if writing to the response fails
+     * @throws IllegalStateException if {@code payload} contains a reserved envelope key
+     *         ({@code "status"} or {@code "version"})
      */
     public static void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
+        if (payload != null) {
+            for (final String reserved : RESERVED_KEYS) {
+                if (payload.containsKey(reserved)) {
+                    throw new IllegalStateException(
+                            "payload must not contain reserved envelope key '" + reserved + "': use a different key name");
+                }
+            }
+        }
         res.setCharacterEncoding("UTF-8");
         res.setContentType(CONTENT_TYPE);
         final Map<String, Object> envelope = new LinkedHashMap<>();

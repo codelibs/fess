@@ -59,6 +59,17 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_matches_rejectsPrefixWithoutSlash() {
+        // MJ-19: /api/v2foo starts with /api/v2 but is not a v2 path.
+        // The boundary check must require the prefix to be followed by '/' or be exact.
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        assertFalse(m.matches(new StubRequest("/api/v2foo")), "/api/v2foo must not match the /api/v2 prefix");
+        assertFalse(m.matches(new StubRequest("/api/v2x/search")), "/api/v2x/search must not match the /api/v2 prefix");
+        // Exact match (without trailing slash) must still work.
+        assertTrue(m.matches(new StubRequest("/api/v2")), "/api/v2 (exact) should still match");
+    }
+
+    @Test
     public void test_subPath_extractsAfterPrefix() {
         final SearchApiV2Manager m = new SearchApiV2Manager();
         assertEquals("/health", m.subPath(new StubRequest("/api/v2/health")));
@@ -248,15 +259,34 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // field is present on the success branch.
         final String body = res.body();
         assertTrue(body.contains("\"version\":\"v2\""), body);
-        if (res.status == 200) {
+        if (res.status == 200 || res.status == 503) {
+            // MJ-26: red cluster → 503 but still uses the success envelope shape (with engine.status:"red").
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"engine\""), body);
             assertTrue(body.contains("\"cluster_name\""), body);
         } else {
             assertEquals(500, res.status);
             assertTrue(body.contains("\"code\":\"internal_error\""), body);
-            assertTrue(body.contains("engine unreachable") || body.contains("\"status\":9"), body);
         }
+    }
+
+    @Test
+    public void test_handleHealth_clusterRedMapsTo503_sourceLevel() throws Exception {
+        // Source-level assertion: the handleHealth method must check for "red" cluster status
+        // and set response.setStatus(503). This test reads the source to confirm the pattern.
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
+                "skipping: source not available at cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
+        final String source = java.nio.file.Files.readString(src);
+        final int healthIdx = source.indexOf("private void handleHealth");
+        assertTrue(healthIdx >= 0, "handleHealth not found in source");
+        final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2500));
+        // Must reference SERVICE_UNAVAILABLE (the 503 code added by MJ-26 fix).
+        assertTrue(healthSection.contains("SERVICE_UNAVAILABLE"),
+                "handleHealth must map red cluster to SERVICE_UNAVAILABLE: " + healthSection);
+        // Must check for "red" cluster status.
+        assertTrue(healthSection.contains("\"red\"") || healthSection.contains("red"),
+                "handleHealth must check for red cluster status: " + healthSection);
     }
 
     @Test

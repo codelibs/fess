@@ -15,9 +15,7 @@
  */
 package org.codelibs.fess.api.v2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -110,6 +108,34 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         final CapturingResponse res2 = new CapturingResponse();
         V2EnvelopeWriter.writeError(res2, V2ErrorCode.INVALID_REQUEST, "bad request");
         assertTrue(res2.body().contains("\"status\":1"), res2.body());
+    }
+
+    @Test
+    public void test_writeSuccess_throwsOnReservedKey_status() {
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("status", 99); // reserved — must be rejected
+        assertThrows(IllegalStateException.class, () -> V2EnvelopeWriter.writeSuccess(res, payload),
+                "payload containing 'status' should throw IllegalStateException");
+    }
+
+    @Test
+    public void test_writeSuccess_throwsOnReservedKey_version() {
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("version", "evil"); // reserved — must be rejected
+        assertThrows(IllegalStateException.class, () -> V2EnvelopeWriter.writeSuccess(res, payload),
+                "payload containing 'version' should throw IllegalStateException");
+    }
+
+    @Test
+    public void test_writeSuccess_nullPayloadIsAllowed() throws Exception {
+        // null payload is documented as "treated as empty"; must not throw.
+        final CapturingResponse res = new CapturingResponse();
+        V2EnvelopeWriter.writeSuccess(res, null);
+        final String body = res.body();
+        assertTrue(body.contains("\"status\":0"), body);
+        assertTrue(body.contains("\"version\":\"v2\""), body);
     }
 
     @Test

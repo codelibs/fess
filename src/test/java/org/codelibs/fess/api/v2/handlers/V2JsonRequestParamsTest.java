@@ -16,6 +16,7 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -82,12 +83,33 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getPageSize_nonPositiveValuesClampToMax() {
-        // Per the impl, num<=0 also routes to the max (NumberFormatException branch sets
-        // pageSize back to the default — but the explicit "0" path goes through the > 0
-        // check and lands at max). This locks down that intentional behavior.
+    public void test_getPageSize_zeroThrowsInvalidPageSizeException() {
+        // num=0 is invalid — the handler should reject it with INVALID_REQUEST.
         final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "0" }));
+        assertThrows(V2JsonRequestParams.InvalidPageSizeException.class, params::getPageSize, "num=0 must throw InvalidPageSizeException");
+    }
+
+    @Test
+    public void test_getPageSize_negativeThrowsInvalidPageSizeException() {
+        // num=-1 is equally invalid.
+        final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "-1" }));
+        assertThrows(V2JsonRequestParams.InvalidPageSizeException.class, params::getPageSize, "num=-1 must throw InvalidPageSizeException");
+    }
+
+    @Test
+    public void test_getPageSize_aboveMaxClampsAndSetsFlag() {
+        // num=99999 exceeds the configured max (100); should clamp and set the clamped flag.
+        final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "99999" }));
         assertEquals(100, params.getPageSize());
+        assertTrue(params.isPageSizeClamped(), "isPageSizeClamped() should be true after clamping");
+    }
+
+    @Test
+    public void test_getPageSize_validValueDoesNotSetClampedFlag() {
+        // num=5 is within range; the clamped flag must stay false.
+        final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "5" }));
+        assertEquals(5, params.getPageSize());
+        assertFalse(params.isPageSizeClamped(), "isPageSizeClamped() must be false for a valid page size");
     }
 
     @Test

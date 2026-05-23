@@ -56,6 +56,14 @@ public class V2ErrorCodeTest {
         expectedStatus.put(V2ErrorCode.METHOD_NOT_ALLOWED, new int[] { 405 });
         expectedCode.put(V2ErrorCode.RATE_LIMITED, "rate_limited");
         expectedStatus.put(V2ErrorCode.RATE_LIMITED, new int[] { 429 });
+        expectedCode.put(V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, "unsupported_media_type");
+        expectedStatus.put(V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, new int[] { 415 });
+        expectedCode.put(V2ErrorCode.PAYLOAD_TOO_LARGE, "payload_too_large");
+        expectedStatus.put(V2ErrorCode.PAYLOAD_TOO_LARGE, new int[] { 413 });
+        expectedCode.put(V2ErrorCode.SERVICE_UNAVAILABLE, "service_unavailable");
+        expectedStatus.put(V2ErrorCode.SERVICE_UNAVAILABLE, new int[] { 503 });
+        expectedCode.put(V2ErrorCode.NOT_ACCEPTABLE, "not_acceptable");
+        expectedStatus.put(V2ErrorCode.NOT_ACCEPTABLE, new int[] { 406 });
         expectedCode.put(V2ErrorCode.INTERNAL_ERROR, "internal_error");
         expectedStatus.put(V2ErrorCode.INTERNAL_ERROR, new int[] { 500 });
 
@@ -79,6 +87,30 @@ public class V2ErrorCodeTest {
     public void test_conflict_mapsTo_409() {
         assertEquals(409, V2ErrorCode.CONFLICT.defaultHttpStatus());
         assertEquals("conflict", V2ErrorCode.CONFLICT.code());
+    }
+
+    @Test
+    public void test_unsupportedMediaType_mapsTo_415() {
+        assertEquals(415, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE.defaultHttpStatus());
+        assertEquals("unsupported_media_type", V2ErrorCode.UNSUPPORTED_MEDIA_TYPE.code());
+    }
+
+    @Test
+    public void test_payloadTooLarge_mapsTo_413() {
+        assertEquals(413, V2ErrorCode.PAYLOAD_TOO_LARGE.defaultHttpStatus());
+        assertEquals("payload_too_large", V2ErrorCode.PAYLOAD_TOO_LARGE.code());
+    }
+
+    @Test
+    public void test_serviceUnavailable_mapsTo_503() {
+        assertEquals(503, V2ErrorCode.SERVICE_UNAVAILABLE.defaultHttpStatus());
+        assertEquals("service_unavailable", V2ErrorCode.SERVICE_UNAVAILABLE.code());
+    }
+
+    @Test
+    public void test_notAcceptable_mapsTo_406() {
+        assertEquals(406, V2ErrorCode.NOT_ACCEPTABLE.defaultHttpStatus());
+        assertEquals("not_acceptable", V2ErrorCode.NOT_ACCEPTABLE.code());
     }
 
     @Test

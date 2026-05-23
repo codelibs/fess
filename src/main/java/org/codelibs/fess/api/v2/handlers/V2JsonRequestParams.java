@@ -18,6 +18,7 @@ package org.codelibs.fess.api.v2.handlers;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -53,6 +54,14 @@ public class V2JsonRequestParams extends SearchRequestParams {
     private int offset = -1;
 
     private int pageSize = -1;
+
+    /**
+     * Set to {@code true} when the requested {@code num} value exceeded the configured
+     * maximum page size and was silently clamped. Handlers that include this information
+     * in their response body should call {@link #isPageSizeClamped()} and, when
+     * {@code true}, add {@code page_size_clamped: true} to the envelope payload.
+     */
+    private final AtomicBoolean pageSizeClamped = new AtomicBoolean(false);
 
     /**
      * Constructs a v2 request-params adapter over an incoming HTTP request.
@@ -164,6 +173,25 @@ public class V2JsonRequestParams extends SearchRequestParams {
         return offset;
     }
 
+    /**
+     * Returns the requested page size, validated and bounded by the Fess configuration.
+     *
+     * <p>Contract:</p>
+     * <ul>
+     *   <li>Missing or blank {@code num}: returns the configured default page size.</li>
+     *   <li>Non-numeric {@code num}: returns the configured default page size.</li>
+     *   <li>{@code num <= 0}: throws {@link InvalidPageSizeException} — zero and negative
+     *       values are not meaningful and likely indicate a client bug; rejecting them early
+     *       prevents silent amplification to the configured maximum.</li>
+     *   <li>{@code num > max}: clamps to the configured maximum and sets the
+     *       {@link #isPageSizeClamped()} flag to {@code true} so the caller can include
+     *       {@code "page_size_clamped": true} in the response envelope.</li>
+     *   <li>{@code 1 <= num <= max}: returned unchanged.</li>
+     * </ul>
+     *
+     * @return validated page size in the range {@code [1, configuredMax]}
+     * @throws InvalidPageSizeException if {@code num} is present and {@code <= 0}
+     */
     @Override
     public int getPageSize() {
         if (pageSize != -1) {
@@ -175,15 +203,48 @@ public class V2JsonRequestParams extends SearchRequestParams {
             pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
         } else {
             try {
-                pageSize = Integer.parseInt(num);
-                if (pageSize > fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue() || pageSize <= 0) {
-                    pageSize = fessConfig.getPagingSearchPageMaxSizeAsInteger();
+                final int requested = Integer.parseInt(num);
+                if (requested <= 0) {
+                    // Zero and negative values are invalid — reject so the caller can return
+                    // INVALID_REQUEST rather than silently serving the maximum page.
+                    throw new InvalidPageSizeException("num must be positive, got: " + requested);
+                }
+                final int max = fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue();
+                if (requested > max) {
+                    pageSize = max;
+                    pageSizeClamped.set(true);
+                } else {
+                    pageSize = requested;
                 }
             } catch (final NumberFormatException e) {
                 pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
             }
         }
         return pageSize;
+    }
+
+    /**
+     * Returns {@code true} if the last {@link #getPageSize()} call clamped the requested
+     * value to the configured maximum. Handlers can use this to include
+     * {@code "page_size_clamped": true} in the v2 envelope payload.
+     *
+     * @return whether the page size was clamped
+     */
+    public boolean isPageSizeClamped() {
+        return pageSizeClamped.get();
+    }
+
+    /**
+     * Thrown by {@link #getPageSize()} when the {@code num} parameter is present but
+     * {@code <= 0}. Handlers should catch this and map it to
+     * {@link org.codelibs.fess.api.v2.V2ErrorCode#INVALID_REQUEST}.
+     */
+    public static class InvalidPageSizeException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public InvalidPageSizeException(final String message) {
+            super(message);
+        }
     }
 
     @Override

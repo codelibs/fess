@@ -37,7 +37,7 @@ public enum V2ErrorCode {
     /** The requested resource or endpoint does not exist. */
     NOT_FOUND("not_found", 404),
 
-    /** The HTTP method is not supported for this endpoint. */
+    /** The request conflicts with the current state of the resource (e.g., duplicate-key insert). */
     CONFLICT("conflict", 409),
 
     /** The HTTP method is not supported for this endpoint. */
@@ -45,6 +45,18 @@ public enum V2ErrorCode {
 
     /** The caller has exceeded a rate or quota threshold. */
     RATE_LIMITED("rate_limited", 429),
+
+    /** The request's {@code Content-Type} is not supported (e.g., not {@code application/json}). */
+    UNSUPPORTED_MEDIA_TYPE("unsupported_media_type", 415),
+
+    /** The request body exceeds the server's size limit. */
+    PAYLOAD_TOO_LARGE("payload_too_large", 413),
+
+    /** The server is temporarily unavailable (e.g., cluster health is red). */
+    SERVICE_UNAVAILABLE("service_unavailable", 503),
+
+    /** The requested response format is not available (e.g., unsupported {@code Accept} media type). */
+    NOT_ACCEPTABLE("not_acceptable", 406),
 
     /** Unhandled server-side failure. */
     INTERNAL_ERROR("internal_error", 500);

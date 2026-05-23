@@ -160,7 +160,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             return false;
         }
         final String servletPath = request.getServletPath();
-        return servletPath != null && servletPath.startsWith(pathPrefix);
+        return servletPath != null && (servletPath.equals(pathPrefix) || servletPath.startsWith(pathPrefix + "/"));
     }
 
     @Override
@@ -242,7 +242,14 @@ public class SearchApiV2Manager extends BaseApiManager {
         if (p == null) {
             return "";
         }
-        return p.length() > pathPrefix.length() ? p.substring(pathPrefix.length()) : "";
+        String sub = p.length() > pathPrefix.length() ? p.substring(pathPrefix.length()) : "";
+        // Strip a trailing slash so that /api/v2/health/ and /api/v2/health dispatch to
+        // the same switch arm. Preserve "/" alone (sub == "/") since that still maps to
+        // the empty prefix root case in practice — the switch default handles it.
+        if (sub.length() > 1 && sub.endsWith("/")) {
+            sub = sub.substring(0, sub.length() - 1);
+        }
+        return sub;
     }
 
     /**
@@ -259,11 +266,23 @@ public class SearchApiV2Manager extends BaseApiManager {
     private void handleHealth(final HttpServletResponse response) throws IOException {
         try {
             final PingResponse ping = ComponentUtil.getSearchEngineClient().ping();
+            final String clusterStatus = ping.getClusterStatus();
             final Map<String, Object> engine = new LinkedHashMap<>();
             engine.put("cluster_name", ping.getClusterName());
-            engine.put("status", ping.getClusterStatus());
+            engine.put("status", clusterStatus);
             engine.put("ping_status", ping.getStatus());
-            V2EnvelopeWriter.writeSuccess(response, Map.of("engine", engine));
+            // Map cluster health to HTTP status: red → 503 (service unavailable),
+            // yellow/green → 200. This allows monitoring tooling to use the HTTP status
+            // directly without parsing the envelope body.
+            if ("red".equalsIgnoreCase(clusterStatus)) {
+                response.setStatus(V2ErrorCode.SERVICE_UNAVAILABLE.defaultHttpStatus());
+                final Map<String, Object> payload = new LinkedHashMap<>();
+                payload.put("engine", engine);
+                V2EnvelopeWriter.writeSuccess(response, payload);
+            } else {
+                // yellow or green — both return 200; the engine.status field carries the detail.
+                V2EnvelopeWriter.writeSuccess(response, Map.of("engine", engine));
+            }
         } catch (final Exception e) {
             V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/health");
         }
