@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -26,7 +23,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -67,6 +69,77 @@ public class MeHandlerTest extends UnitFessTestCase {
         new MeHandler().handle(new StubRequest("POST", "/api/v2/auth/me"), res);
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+    }
+
+    // ── MJ-28: shape consistency — arrays are always JSON arrays, never null ────
+
+    @Test
+    public void test_authenticatedUser_rolesGroupsPermissionsAreAlwaysArrays() throws Exception {
+        // MJ-28: register a stub login assist that returns a user with null arrays for
+        // roles/groups/permissions. MeHandler must still emit JSON arrays (not null).
+        final StubFessLoginAssist stub = new StubFessLoginAssist("eve");
+        ComponentUtil.register(stub, "fessLoginAssist");
+        ComponentUtil.register(stub, FessLoginAssist.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new MeHandler().handle(new StubRequest("GET", "/api/v2/auth/me"), res);
+            assertEquals(res.body(), 200, res.status);
+            assertTrue(res.body(), res.body().contains("\"authenticated\":true"));
+            // The user shape must include roles/groups/permissions as JSON arrays.
+            assertTrue("roles must be [] not null: " + res.body(), res.body().contains("\"roles\":[]"));
+            assertTrue("groups must be [] not null: " + res.body(), res.body().contains("\"groups\":[]"));
+            assertTrue("permissions must be [] not null: " + res.body(), res.body().contains("\"permissions\":[]"));
+            // Sanity: null literal must not appear for these fields.
+            assertFalse(res.body(), res.body().contains("\"roles\":null"));
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    /** Stub FessLoginAssist that pretends a named user is logged in with null arrays. */
+    private static class StubFessLoginAssist extends FessLoginAssist {
+        private static final long serialVersionUID = 1L;
+        private final String userId;
+
+        StubFessLoginAssist(final String userId) {
+            this.userId = userId;
+        }
+
+        @Override
+        public OptionalThing<FessUserBean> getSavedUserBean() {
+            return OptionalThing.of(new FessUserBean(new StubFessUser(userId)));
+        }
+    }
+
+    /** Minimal FessUser with null role/group/permission arrays. */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return null; // intentionally null — UserPayloads.toJson must handle this
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return null; // intentionally null
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return null; // intentionally null
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type and body. */

@@ -119,6 +119,35 @@ public class SessionCsrfTokenManagerTest extends UnitFessTestCase {
         assertTrue(m.verify(session, b));
     }
 
+    // ── m-9: DEBUG log path does not throw ───────────────────────────────────────
+
+    @Test
+    public void test_debugLogPath_noException() {
+        // m-9: When DEBUG logging is enabled the issue/rotate/verify code paths emit
+        // sanitized log lines (length only, never token values). This test exercises
+        // all three paths and asserts they do not throw. We cannot force Log4j to DEBUG
+        // from a unit test without config changes, but at minimum calling through the
+        // methods with a real session ensures the conditional branches compile correctly
+        // and the logger calls are side-effect-free.
+        final SessionCsrfTokenManager m = new SessionCsrfTokenManager();
+        final HttpSession session = mockSession();
+        // issue — covers the "new token issued" branch.
+        final String token = m.issue(session);
+        // issue again — covers the "token already present" branch.
+        final String sameToken = m.issue(session);
+        assertEquals("issue is idempotent within the session", token, sameToken);
+        // verify — covers matched=true branch.
+        assertTrue(m.verify(session, token));
+        // verify — covers matched=false branch.
+        assertFalse(m.verify(session, "wrong-token-same-length-padding!!"));
+        // verify — covers null/empty branch.
+        assertFalse(m.verify(session, null));
+        assertFalse(m.verify(session, ""));
+        // rotate — covers removeAttribute + re-issue branch.
+        final String rotated = m.rotate(session);
+        assertNotEquals("rotated token must differ from original", token, rotated);
+    }
+
     private static HttpSession mockSession() {
         return new StubHttpSession();
     }

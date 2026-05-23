@@ -17,6 +17,7 @@ package org.codelibs.fess.api.v2.handlers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -60,5 +61,48 @@ public class ChatRequestBodyTest extends UnitFessTestCase {
         // is unavailable in the unit test the result must be empty, not null.
         final ChatRequestBody body = ChatRequestBody.from(Map.of("fields.label", java.util.List.of("nope")), 4000);
         assertNotNull(body.fields());
+    }
+
+    // ── MJ-29: warnings list reflects rejected values ────────────────────────────
+
+    @Test
+    public void test_warnings_emptyWhenNothingDropped() throws Exception {
+        // When no fields.label or ex_q are supplied, getWarnings() must return an empty map.
+        final ChatRequestBody body = ChatRequestBody.from(Map.of("message", "hi"), 4000);
+        assertNotNull(body.getWarnings(), "warnings must not be null");
+        assertTrue(body.getWarnings().isEmpty(), "warnings must be empty when nothing was dropped: " + body.getWarnings());
+    }
+
+    @Test
+    public void test_warnings_containsRejectedLabelValues() throws Exception {
+        // When the allowlist is empty (helper unavailable in unit tests), every supplied
+        // fields.label value is rejected and must appear in getWarnings()["fields.label"].
+        final ChatRequestBody body = ChatRequestBody.from(Map.of("fields.label", List.of("label-a", "label-b")), 4000);
+        assertNotNull(body.getWarnings(), "warnings must not be null");
+        // In unit test environment the LabelTypeHelper is unavailable, so all labels
+        // are rejected and must appear in the warnings map.
+        final List<String> warnedLabels = body.getWarnings().get("fields.label");
+        assertNotNull(warnedLabels, "rejected labels must be tracked in warnings");
+        // At least the submitted values should be recorded (subject to allowlist state).
+        // We assert non-empty rather than exact content to avoid depending on allowlist wiring.
+        assertFalse(warnedLabels.isEmpty(), "warnings for fields.label must contain the rejected values");
+    }
+
+    @Test
+    public void test_warnings_containsRejectedExtraQueryValues() throws Exception {
+        // Same as above but for ex_q.
+        final ChatRequestBody body = ChatRequestBody.from(Map.of("ex_q", List.of("q=foo", "q=bar")), 4000);
+        assertNotNull(body.getWarnings(), "warnings must not be null");
+        final List<String> warnedExQ = body.getWarnings().get("ex_q");
+        assertNotNull(warnedExQ, "rejected ex_q must be tracked in warnings");
+        assertFalse(warnedExQ.isEmpty(), "warnings for ex_q must contain the rejected values");
+    }
+
+    @Test
+    public void test_warnings_isUnmodifiable() throws Exception {
+        // getWarnings() must return an unmodifiable view.
+        final ChatRequestBody body = ChatRequestBody.from(Map.of("fields.label", List.of("x")), 4000);
+        final Map<String, List<String>> warnings = body.getWarnings();
+        assertThrows(UnsupportedOperationException.class, () -> warnings.put("new", List.of()), "warnings map must be unmodifiable");
     }
 }

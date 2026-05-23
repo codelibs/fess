@@ -17,9 +17,9 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +52,11 @@ import jakarta.servlet.http.HttpSession;
  * <p>Constructor-injected {@link LoginRateLimiter} keeps the handler easy to
  * test: production wires the DI-managed singleton via
  * {@link ComponentUtil#getLoginRateLimiter()}, tests pass a fresh instance.</p>
+ *
+ * <p>MJ-30 i18n contract: {@code error.message} values in this handler are
+ * developer-facing English strings. Clients MUST use {@code error.code}
+ * (the V2ErrorCode token) for user-facing i18n. This is intentional — the
+ * v2 wire spec explicitly separates machine-readable codes from human messages.</p>
  */
 public class LoginHandler {
 
@@ -61,6 +66,14 @@ public class LoginHandler {
 
     /** One-shot warning flag so we log only the first IP-resolve failure per JVM lifetime. */
     private static final AtomicBoolean ipResolveWarned = new AtomicBoolean(false);
+
+    /**
+     * MJ-8: Allowlist pattern for return_to values.
+     * Accepts only relative paths (starts with '/') containing URL-safe characters.
+     * Rejects protocol-relative URLs (//), backslashes, NUL bytes, and any
+     * ASCII control character (0x00–0x1F, 0x7F).
+     */
+    private static final Pattern SAFE_RETURN_TO = Pattern.compile("^/[A-Za-z0-9_\\-/.?&=%:@+~#*!,;]*$");
 
     private final LoginRateLimiter limiter;
 
@@ -122,6 +135,47 @@ public class LoginHandler {
         final FessLoginAssist assist;
         try {
             assist = ComponentUtil.getComponent(FessLoginAssist.class);
+        } catch (final RuntimeException e) {
+            logger.warn("login failed unexpectedly: could not acquire FessLoginAssist", e);
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            return;
+        }
+
+        // MJ-27: Already-authenticated path — check before calling assist.login().
+        // If the session already has a valid user bean, avoid unnecessary re-auth:
+        //  - same username: return early with existing bean + current CSRF token (no re-auth).
+        //  - different username: this is an explicit account-switch; log at INFO for audit
+        //    visibility, then proceed with full re-auth (no forced logout here — SPA UX).
+        final OptionalThing<FessUserBean> existingBean;
+        try {
+            existingBean = assist.getSavedUserBean();
+        } catch (final RuntimeException e) {
+            logger.warn("login: could not check existing session state", e);
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            return;
+        }
+        if (existingBean.isPresent()) {
+            final FessUserBean existing = existingBean.get();
+            if (username.equals(existing.getUserId())) {
+                // Same user is already authenticated — return success without re-auth so
+                // the SPA can refresh its token without triggering a redundant credential check.
+                final HttpSession existingSession = req.getSession(false);
+                final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+                final String existingToken;
+                if (existingSession != null) {
+                    existingToken = csrf.issue(existingSession);
+                } else {
+                    existingToken = csrf.issue(req.getSession(true));
+                }
+                final Map<String, Object> payload = buildUserPayload(existing, existingToken, returnTo);
+                V2EnvelopeWriter.writeSuccess(res, payload);
+                return;
+            }
+            // Different username: operator-visible audit log for account-switch path.
+            logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", existing.getUserId(), username);
+        }
+
+        try {
             assist.login(new LocalUserCredential(username, password), op -> {});
         } catch (final LoginFailureException e) {
             // Credential rejection consumes the USER slot exactly once, on the failure path.
@@ -163,24 +217,59 @@ public class LoginHandler {
         csrf.rotate(session);
         final String token = csrf.issue(session);
 
+        // MJ-5: clear both USER and IP rate-limit buckets on successful login so that a
+        // legitimate user who exhausted the window (e.g. typo run) is not penalized on
+        // their next attempt after providing the correct credentials.
+        limiter.clear(LoginRateLimiter.Scope.USER, username);
+        limiter.clear(LoginRateLimiter.Scope.IP, clientIp);
+
         final OptionalThing<FessUserBean> userBean = assist.getSavedUserBean();
-        final Map<String, Object> payload = new LinkedHashMap<>();
+        final Map<String, Object> payload;
         if (userBean.isPresent()) {
-            final FessUserBean u = userBean.get();
-            final Map<String, Object> userMap = new LinkedHashMap<>();
-            userMap.put("user_id", u.getUserId());
-            userMap.put("roles", arrayOrEmpty(u.getRoles()));
-            userMap.put("groups", arrayOrEmpty(u.getGroups()));
-            userMap.put("permissions", arrayOrEmpty(u.getPermissions()));
-            userMap.put("editable", u.isEditable());
-            payload.put("user", userMap);
-        }
-        payload.put("csrf_token", token);
-        if (returnTo != null && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.contains("\\")
-                && !returnTo.contains("\0")) {
-            payload.put("return_to", returnTo);
+            payload = buildUserPayload(userBean.get(), token, returnTo);
+        } else {
+            payload = new LinkedHashMap<>();
+            payload.put("csrf_token", token);
+            addReturnTo(payload, returnTo);
         }
         V2EnvelopeWriter.writeSuccess(res, payload);
+    }
+
+    /**
+     * Builds the standard success payload for a logged-in user.
+     * Uses {@link UserPayloads#toJson(FessUserBean)} to guarantee shape parity
+     * with MeHandler (MJ-28).
+     */
+    private static Map<String, Object> buildUserPayload(final FessUserBean u, final String token, final String returnTo) {
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("user", UserPayloads.toJson(u));
+        payload.put("csrf_token", token);
+        addReturnTo(payload, returnTo);
+        return payload;
+    }
+
+    /**
+     * MJ-8: Validates and adds return_to to the payload only when it passes the
+     * allowlist pattern. Rejects protocol-relative URLs, backslashes, NUL, and
+     * any ASCII control character. The pattern requires a leading '/' so relative
+     * paths below the app root are always safe.
+     */
+    private static void addReturnTo(final Map<String, Object> payload, final String returnTo) {
+        if (returnTo == null) {
+            return;
+        }
+        // Reject if it contains any ASCII control character (includes \r, \n, \t, NUL).
+        for (int i = 0; i < returnTo.length(); i++) {
+            final char c = returnTo.charAt(i);
+            if (c < 0x20 || c == 0x7F) {
+                return;
+            }
+        }
+        // Reject protocol-relative (//) and non-relative paths; apply character allowlist.
+        if (!returnTo.startsWith("/") || returnTo.startsWith("//") || !SAFE_RETURN_TO.matcher(returnTo).matches()) {
+            return;
+        }
+        payload.put("return_to", returnTo);
     }
 
     private static String stringOrNull(final Object v) {
@@ -203,7 +292,4 @@ public class LoginHandler {
         }
     }
 
-    private static List<String> arrayOrEmpty(final String[] arr) {
-        return arr == null ? List.of() : List.of(arr);
-    }
 }

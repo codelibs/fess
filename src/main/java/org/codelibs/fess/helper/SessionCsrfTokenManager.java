@@ -18,9 +18,14 @@ package org.codelibs.fess.helper;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import jakarta.servlet.http.HttpSession;
 
 public class SessionCsrfTokenManager {
+
+    private static final Logger logger = LogManager.getLogger(SessionCsrfTokenManager.class);
 
     public static final String SESSION_ATTR = "fess.csrf.token";
 
@@ -29,24 +34,45 @@ public class SessionCsrfTokenManager {
     public String issue(final HttpSession session) {
         final Object existing = session.getAttribute(SESSION_ATTR);
         if (existing instanceof String s && !s.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                // m-9: log token length only — NEVER log the token value itself.
+                logger.debug("[csrf.issue] token already present: sessionId={}, tokenLength={}", sessionId(session), s.length());
+            }
             return s;
         }
         final byte[] bytes = new byte[32];
         RNG.nextBytes(bytes);
         final String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         session.setAttribute(SESSION_ATTR, token);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[csrf.issue] new token issued: sessionId={}, tokenLength={}", sessionId(session), token.length());
+        }
         return token;
     }
 
     public boolean verify(final HttpSession session, final String provided) {
         if (provided == null || provided.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[csrf.verify] rejected: provided token is null or empty; sessionId={}",
+                        session != null ? sessionId(session) : "null");
+            }
             return false;
         }
         final Object stored = session.getAttribute(SESSION_ATTR);
         if (!(stored instanceof String s) || s.isEmpty()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("[csrf.verify] rejected: no stored token in session; sessionId={}", sessionId(session));
+            }
             return false;
         }
-        return constantTimeEquals(s, provided);
+        final boolean matched = constantTimeEquals(s, provided);
+        if (logger.isDebugEnabled()) {
+            // Log lengths only — never log token values. The matched flag is safe to log
+            // because it carries no token material; it only tells ops why a 403 occurred.
+            logger.debug("[csrf.verify] result: sessionId={}, storedLength={}, providedLength={}, matched={}", sessionId(session),
+                    s.length(), provided.length(), matched);
+        }
+        return matched;
     }
 
     /**
@@ -65,7 +91,22 @@ public class SessionCsrfTokenManager {
             return null;
         }
         session.removeAttribute(SESSION_ATTR);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[csrf.rotate] token removed, issuing fresh token: sessionId={}", sessionId(session));
+        }
         return issue(session);
+    }
+
+    /**
+     * Safe accessor for session id — some container implementations throw on {@code getId()}
+     * when the session has already been invalidated, so we catch and fall back to a literal.
+     */
+    private static String sessionId(final HttpSession session) {
+        try {
+            return session.getId();
+        } catch (final Exception e) {
+            return "(unavailable)";
+        }
     }
 
     private static boolean constantTimeEquals(final String a, final String b) {

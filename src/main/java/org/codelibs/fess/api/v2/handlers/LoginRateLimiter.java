@@ -17,9 +17,18 @@ package org.codelibs.fess.api.v2.handlers;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongSupplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.fess.util.ComponentUtil;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 /**
  * In-memory, per-instance rate limiter for /api/v2/auth/login (and /auth/password).
@@ -35,9 +44,31 @@ import java.util.function.LongSupplier;
  * from the head of the queue. Idle keys remain in the map until the next call;
  * {@link #sweep} can be invoked periodically to evict empty entries.</p>
  *
+ * <p>Memory cap: the entries map is bounded by {@link #effectiveCap}. When the cap
+ * is reached the oldest-inserted entry is evicted (FIFO). The cap defaults to
+ * {@link #DEFAULT_MAX_ENTRIES} (100,000) and can be tuned via the
+ * {@code theme.api.login.rate.limit.max.entries} property. A WARN log is emitted
+ * once per threshold crossing so operators detect unexpected traffic bursts before OOM.</p>
+ *
+ * <p>Sweep schedule: on DI init a {@link TimeoutManager} periodic task calls
+ * {@link #sweep()} every {@link #SWEEP_INTERVAL_SECONDS} seconds (default 300).
+ * This is the same background-task pattern used by CoordinatorHelper and
+ * LogNotificationHelper in this codebase.</p>
+ *
+ * <p>MJ-30 i18n note: error.message is developer-facing English. Clients MUST use
+ * error.code (the V2ErrorCode token) for user-facing i18n.</p>
+ *
  * <p>Multi-node deployments require LB-level rate limiting; see Plan 3 risks.</p>
  */
 public class LoginRateLimiter {
+
+    private static final Logger logger = LogManager.getLogger(LoginRateLimiter.class);
+
+    /** Default sweep interval in seconds; matches a 5-minute schedule. */
+    static final int SWEEP_INTERVAL_SECONDS = 300;
+
+    /** Default maximum number of distinct (scope, key) entries in the map. */
+    static final int DEFAULT_MAX_ENTRIES = 100_000;
 
     public enum Scope {
         IP, USER, CHAT
@@ -49,27 +80,121 @@ public class LoginRateLimiter {
     }
 
     private final LongSupplier clock;
-    private final Map<String, Entry> entries = new ConcurrentHashMap<>();
+
+    /**
+     * Effective cap — initialised to {@link #DEFAULT_MAX_ENTRIES} and updated from
+     * FessConfig in {@link #init()} if the property is configured. Using a volatile
+     * int rather than a final int allows the DI lifecycle to override the cap from
+     * config without requiring a per-test constructor parameter.
+     */
+    private volatile int effectiveCap;
+
+    /** Set to true once the map reaches effectiveCap to avoid flooding the log. */
+    private volatile boolean capWarnLogged = false;
+
+    /**
+     * Insertion-ordered map capped at {@link #effectiveCap}. Access-order=false so
+     * the eldest-inserted entry (i.e. the key that was created first and has not
+     * been touched since) is evicted when the map is full — a simple FIFO cap.
+     * All mutations and removals are guarded by synchronized(entries).
+     */
+    private final Map<String, Entry> entries;
+
+    private org.codelibs.core.timer.TimeoutTask sweepTask;
 
     public LoginRateLimiter() {
-        this(System::currentTimeMillis);
+        this(System::currentTimeMillis, DEFAULT_MAX_ENTRIES);
     }
 
     LoginRateLimiter(final LongSupplier clock) {
+        this(clock, DEFAULT_MAX_ENTRIES);
+    }
+
+    LoginRateLimiter(final LongSupplier clock, final int maxEntries) {
         this.clock = clock;
+        this.effectiveCap = maxEntries;
+        // accessOrder=false means removeEldestEntry evicts by insertion order (FIFO).
+        // removeEldestEntry reads effectiveCap (volatile) so it always uses the
+        // current cap even if init() updates it after construction.
+        this.entries = new LinkedHashMap<>(16, 0.75f, false) {
+            @Override
+            protected boolean removeEldestEntry(final Map.Entry<String, Entry> eldest) {
+                final int cap = effectiveCap;
+                if (size() > cap) {
+                    if (!capWarnLogged) {
+                        logger.warn(
+                                "LoginRateLimiter entries map reached cap={}; evicting oldest entry. "
+                                        + "Consider increasing theme.api.login.rate.limit.max.entries or investigating traffic anomaly.",
+                                cap);
+                        capWarnLogged = true;
+                    }
+                    return true;
+                }
+                // Reset the warning flag once usage drops back well below cap so it will
+                // fire again if a new burst arrives.
+                if (capWarnLogged && size() < cap / 2) {
+                    capWarnLogged = false;
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Called by Lasta Di after the component is bound. Reads the
+     * {@code theme.api.login.rate.limit.max.entries} property (if present) to
+     * override the default cap, then registers a periodic sweep task via
+     * {@link TimeoutManager} — the same pattern used by CoordinatorHelper and
+     * LogNotificationHelper. Sweep runs every {@link #SWEEP_INTERVAL_SECONDS}
+     * seconds to evict entries whose windows have expired.
+     */
+    @PostConstruct
+    public void init() {
+        try {
+            final Integer configCap = ComponentUtil.getFessConfig().getThemeApiLoginRateLimitMaxEntriesAsInteger();
+            if (configCap != null && configCap > 0) {
+                effectiveCap = configCap;
+            }
+        } catch (final Exception e) {
+            // FessConfig not available in slim test harnesses — keep DEFAULT_MAX_ENTRIES.
+            logger.debug("LoginRateLimiter: could not read max entries from FessConfig; using default={}", effectiveCap);
+        }
+        try {
+            sweepTask = TimeoutManager.getInstance().addTimeoutTarget(this::sweep, SWEEP_INTERVAL_SECONDS, true);
+            if (logger.isInfoEnabled()) {
+                logger.info("LoginRateLimiter sweep scheduled: intervalSeconds={}, maxEntries={}", SWEEP_INTERVAL_SECONDS, effectiveCap);
+            }
+        } catch (final Exception e) {
+            // TimeoutManager may be absent in slim test DI graphs — degrade gracefully.
+            logger.warn("LoginRateLimiter could not register sweep task; map will not be automatically evicted.", e);
+        }
+    }
+
+    /** Stops the background sweep task on shutdown. */
+    @PreDestroy
+    public void destroy() {
+        if (sweepTask != null) {
+            sweepTask.stop();
+        }
     }
 
     public boolean allow(final Scope scope, final String key, final int maxPerWindow, final int windowSeconds) {
         if (maxPerWindow <= 0) {
             return true;
         }
+        // MJ-6: empty or null key is denied rather than silently allowed.
+        // Defense-in-depth: an empty key usually means the caller failed to resolve
+        // the client IP or username; granting access would bypass the gate entirely.
         if (key == null || key.isEmpty()) {
-            return true;
+            return false;
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
         final long windowMs = (long) windowSeconds * 1_000L;
-        final Entry e = entries.computeIfAbsent(mapKey, k -> new Entry());
+        final Entry e;
+        synchronized (entries) {
+            e = entries.computeIfAbsent(mapKey, k -> new Entry());
+        }
         synchronized (e) {
             if (now < e.lockUntilEpochMs) {
                 return false;
@@ -92,6 +217,10 @@ public class LoginRateLimiter {
      * {@link #allow} only on the failure path so success and system-error paths do not
      * count against the legitimate user's quota.
      *
+     * <p>MJ-6: returns {@code false} (deny) when key is null or empty — defense in depth.
+     * Empty key means the caller could not resolve the identity; passing rather than denying
+     * would silently bypass the gate.</p>
+     *
      * @param scope rate-limit scope (e.g. IP, USER, CHAT)
      * @param key bucket key (e.g. IP address or username)
      * @param maxPerWindow upper bound of attempts permitted within {@code windowSeconds}
@@ -102,13 +231,17 @@ public class LoginRateLimiter {
         if (maxPerWindow <= 0) {
             return true;
         }
+        // MJ-6: empty/null key → deny (same rationale as allow()).
         if (key == null || key.isEmpty()) {
-            return true;
+            return false;
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
         final long windowMs = (long) windowSeconds * 1_000L;
-        final Entry e = entries.get(mapKey);
+        final Entry e;
+        synchronized (entries) {
+            e = entries.get(mapKey);
+        }
         if (e == null) {
             return true;
         }
@@ -128,32 +261,65 @@ public class LoginRateLimiter {
         }
     }
 
+    /**
+     * m-21: uses Math.max so that a shorter lockoutSeconds value supplied in a second
+     * call never shrinks an existing longer lockout — the stricter deadline always wins.
+     */
     public void lockOut(final Scope scope, final String key, final int lockoutSeconds) {
         if (key == null || key.isEmpty() || lockoutSeconds <= 0) {
             return;
         }
         final String mapKey = scope.name() + ":" + key;
-        final Entry e = entries.computeIfAbsent(mapKey, k -> new Entry());
+        final Entry e;
+        synchronized (entries) {
+            e = entries.computeIfAbsent(mapKey, k -> new Entry());
+        }
         synchronized (e) {
-            e.lockUntilEpochMs = clock.getAsLong() + (long) lockoutSeconds * 1_000L;
+            e.lockUntilEpochMs = Math.max(e.lockUntilEpochMs, clock.getAsLong() + (long) lockoutSeconds * 1_000L);
+        }
+    }
+
+    /**
+     * Clears the rate-limit bucket for (scope, key) after a successful login so that
+     * the user is not penalized for earlier failed attempts in the same window.
+     *
+     * <p>MJ-5: called by LoginHandler on the successful-login path for both Scope.USER
+     * (by username) and Scope.IP (by client IP). This prevents a legitimate user who
+     * previously exceeded the window from being locked out on their next login after
+     * the correct password is supplied.</p>
+     *
+     * @param scope the rate-limit scope
+     * @param key the bucket key (username or IP address)
+     */
+    public void clear(final Scope scope, final String key) {
+        if (key == null || key.isEmpty()) {
+            return;
+        }
+        final String mapKey = scope.name() + ":" + key;
+        synchronized (entries) {
+            entries.remove(mapKey);
         }
     }
 
     /** Removes empty entries; safe to call from any thread. */
     public void sweep() {
         final long now = clock.getAsLong();
-        for (final Map.Entry<String, Entry> en : entries.entrySet()) {
-            entries.compute(en.getKey(), (k, existing) -> {
-                if (existing == null) {
-                    return null;
-                }
+        synchronized (entries) {
+            final Iterator<Map.Entry<String, Entry>> it = entries.entrySet().iterator();
+            while (it.hasNext()) {
+                final Map.Entry<String, Entry> en = it.next();
+                final Entry existing = en.getValue();
                 synchronized (existing) {
                     if (existing.hits.isEmpty() && existing.lockUntilEpochMs < now) {
-                        return null; // remove
+                        it.remove();
                     }
                 }
-                return existing;
-            });
+            }
+        }
+        if (logger.isDebugEnabled()) {
+            synchronized (entries) {
+                logger.debug("LoginRateLimiter.sweep completed: remaining entries={}", entries.size());
+            }
         }
     }
 }

@@ -211,6 +211,59 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void passwordChange_successResponse_containsReLoginRequired() throws Exception {
+        // MJ-7: successful password change response MUST include re_login_required:true
+        // so the SPA knows to redirect to login. The current session is NOT invalidated
+        // (SPA UX decision), but the signal is there for SPAs that want to re-authenticate.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertTrue(res.body().contains("\"re_login_required\":true"),
+                    "response must contain re_login_required:true (MJ-7): " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_rejectsMismatch_whenAuthenticated() throws Exception {
+        // T-3 / MJ-29: an authenticated caller whose new_password != confirm_password
+        // must receive 400/invalid_request. This test exercises the mismatch gate for
+        // an actually-authenticated user (registerStubLoginAssist provides the session).
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"Pass1\",\"confirm_password\":\"Pass2\"}"), res);
+            org.junit.jupiter.api.Assertions.assertEquals(400, res.status,
+                    "mismatch passwords for authenticated user must return 400: " + res.body());
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("do not match"), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
     public void passwordChange_succeedsOnCorrectCurrentPassword() throws Exception {
         // Happy path: the stubbed login assist accepts the supplied current_password, and the
         // handler proceeds through the validation gate and delegates to a stub UserService.

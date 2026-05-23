@@ -46,6 +46,16 @@ import org.codelibs.fess.util.ComponentUtil;
  * a separate guard. Label and {@code ex_q} validation uses the same allowlist
  * helpers v1 calls — {@code LabelTypeHelper} for labels and {@code ViewHelper}
  * for facet queries — to prevent query injection.</p>
+ *
+ * <p>MJ-29: When supplied values are rejected by the allowlist, the rejected
+ * values are tracked in the {@link #warnings} list returned by
+ * {@link #getWarnings()}. Callers ({@link ChatHandler}, {@link ChatStreamHandler})
+ * should surface these in the response envelope. NOTE: ChatHandler/ChatStreamHandler
+ * do not yet surface the warnings field — this is a follow-up item for the wire
+ * spec. The structure is ready here so callers can opt in.</p>
+ *
+ * <p>MJ-30 i18n note: error.message is developer-facing English. Clients MUST use
+ * error.code (the V2ErrorCode token) for user-facing i18n.</p>
  */
 public final class ChatRequestBody {
 
@@ -57,13 +67,24 @@ public final class ChatRequestBody {
     private final Map<String, String[]> fields;
     private final String[] extraQueries;
 
+    /**
+     * MJ-29: Tracks values that were supplied by the caller but rejected by the
+     * allowlist. Indexed by field name (e.g. "fields.label", "ex_q") with a list
+     * of the rejected string values. Empty when nothing was dropped.
+     *
+     * <p>ChatHandler and ChatStreamHandler should include this map under a
+     * {@code "warnings"} key in the response envelope (follow-up item).</p>
+     */
+    private final Map<String, List<String>> warnings;
+
     private ChatRequestBody(final String message, final String sessionId, final boolean clear, final Map<String, String[]> fields,
-            final String[] extraQueries) {
+            final String[] extraQueries, final Map<String, List<String>> warnings) {
         this.message = message;
         this.sessionId = sessionId;
         this.clear = clear;
         this.fields = fields;
         this.extraQueries = extraQueries;
+        this.warnings = warnings;
     }
 
     public String message() {
@@ -86,6 +107,21 @@ public final class ChatRequestBody {
         return extraQueries;
     }
 
+    /**
+     * MJ-29: Returns a map of field names to rejected values.
+     * The map is empty (never null) when no values were dropped.
+     * Keys are the request field names: {@code "fields.label"} and {@code "ex_q"}.
+     *
+     * <p>ChatHandler / ChatStreamHandler follow-up: surface this under a
+     * {@code "warnings"} key in the response envelope so clients know which
+     * filter values were silently dropped by the allowlist.</p>
+     *
+     * @return unmodifiable map of rejected field→value-list pairs; empty if nothing was dropped
+     */
+    public Map<String, List<String>> getWarnings() {
+        return Collections.unmodifiableMap(warnings);
+    }
+
     public static ChatRequestBody from(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
         final String message = trimmedOrNull(raw.get("message"));
         final String sessionId = trimmedOrNull(raw.get("session_id"));
@@ -93,9 +129,10 @@ public final class ChatRequestBody {
         if (message != null && message.length() > maxMessageLength) {
             throw new MessageTooLongException("message exceeds max length: " + message.length() + " > " + maxMessageLength);
         }
-        final Map<String, String[]> fields = parseFields(raw);
-        final String[] extraQueries = parseExtraQueries(raw);
-        return new ChatRequestBody(message, sessionId, clear, fields, extraQueries);
+        final Map<String, List<String>> warnings = new HashMap<>();
+        final Map<String, String[]> fields = parseFields(raw, warnings);
+        final String[] extraQueries = parseExtraQueries(raw, warnings);
+        return new ChatRequestBody(message, sessionId, clear, fields, extraQueries, warnings);
     }
 
     private static String trimmedOrNull(final Object v) {
@@ -117,7 +154,7 @@ public final class ChatRequestBody {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, String[]> parseFields(final Map<String, Object> raw) {
+    private static Map<String, String[]> parseFields(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         final Object labelsRaw = raw.get("fields.label");
         if (labelsRaw == null) {
             return Collections.emptyMap();
@@ -148,10 +185,17 @@ public final class ChatRequestBody {
             logger.warn("chat allowlist load failed for labels", e);
         }
         final List<String> valid = new ArrayList<>();
+        final List<String> rejected = new ArrayList<>();
         for (final String v : labelValues) {
             if (v != null && allowed.contains(v)) {
                 valid.add(v);
+            } else if (v != null) {
+                // MJ-29: track the rejected value so callers can surface it as a warning.
+                rejected.add(v);
             }
+        }
+        if (!rejected.isEmpty()) {
+            warnings.put("fields.label", Collections.unmodifiableList(rejected));
         }
         if (valid.isEmpty()) {
             return Collections.emptyMap();
@@ -162,7 +206,7 @@ public final class ChatRequestBody {
     }
 
     @SuppressWarnings("unchecked")
-    private static String[] parseExtraQueries(final Map<String, Object> raw) {
+    private static String[] parseExtraQueries(final Map<String, Object> raw, final Map<String, List<String>> warnings) {
         final Object exqRaw = raw.get("ex_q");
         if (exqRaw == null) {
             return new String[0];
@@ -190,10 +234,17 @@ public final class ChatRequestBody {
             logger.warn("chat allowlist load failed for ex_q", e);
         }
         final List<String> valid = new ArrayList<>();
+        final List<String> rejected = new ArrayList<>();
         for (final String v : values) {
             if (v != null && allowed.contains(v)) {
                 valid.add(v);
+            } else if (v != null) {
+                // MJ-29: track the rejected value so callers can surface it as a warning.
+                rejected.add(v);
             }
+        }
+        if (!rejected.isEmpty()) {
+            warnings.put("ex_q", Collections.unmodifiableList(rejected));
         }
         return valid.toArray(new String[0]);
     }

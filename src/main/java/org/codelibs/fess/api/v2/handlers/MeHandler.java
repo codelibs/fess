@@ -39,6 +39,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * permissions, and editable flag; otherwise just {@code authenticated:false}
  * so anonymous callers receive a stable, well-formed envelope rather than a
  * 401 (the v2 contract treats "anonymous" as a valid state, not an error).</p>
+ *
+ * <p>MJ-28: The user shape is produced by {@link UserPayloads#toJson(FessUserBean)}
+ * to guarantee wire-identity with LoginHandler. All array fields are always JSON
+ * arrays, never null.</p>
+ *
+ * <p>MJ-30 i18n contract: {@code error.message} values in this handler are
+ * developer-facing English strings. Clients MUST use {@code error.code}
+ * (the V2ErrorCode token) for user-facing i18n.</p>
  */
 public class MeHandler {
 
@@ -62,14 +70,10 @@ public class MeHandler {
         final Map<String, Object> payload = new LinkedHashMap<>();
         if (userBean.isPresent()) {
             final FessUserBean u = userBean.get();
-            final Map<String, Object> user = new LinkedHashMap<>();
-            user.put("user_id", u.getUserId());
-            user.put("roles", u.getRoles());
-            user.put("groups", u.getGroups());
-            user.put("permissions", u.getPermissions());
-            user.put("editable", u.isEditable());
+            // MJ-28: use shared UserPayloads.toJson() to guarantee the same wire shape as
+            // LoginHandler — roles/groups/permissions are always arrays, never null.
             payload.put("authenticated", true);
-            payload.put("user", user);
+            payload.put("user", UserPayloads.toJson(u));
         } else {
             payload.put("authenticated", false);
         }

@@ -60,6 +60,18 @@ import jakarta.servlet.http.HttpSession;
  * same {@link FessLoginAssist#findLoginUser} pattern used by
  * {@code ProfileAction.changePassword}; it intentionally does <em>not</em>
  * consume a rate-limit slot because the user is already authenticated.</p>
+ *
+ * <p>MJ-7 session contract: This handler does NOT force-invalidate the current
+ * session after a password change (SPA UX choice — avoid interrupting the
+ * user mid-workflow). Instead, the response includes {@code re_login_required: true}
+ * so the SPA can redirect to the login page at its own discretion. The CSRF token
+ * is rotated in the current session as a minimum security measure. Invalidating
+ * other concurrent sessions for the same user is a follow-up item (requires a
+ * Fess-wide session registry, not available in this release).</p>
+ *
+ * <p>MJ-30 i18n contract: {@code error.message} values in this handler are
+ * developer-facing English strings. Clients MUST use {@code error.code}
+ * (the V2ErrorCode token) for user-facing i18n.</p>
  */
 public class PasswordChangeHandler {
 
@@ -139,8 +151,15 @@ public class PasswordChangeHandler {
         }
         // M-03: rotate the CSRF token so any previously exfiltrated token is immediately
         // invalidated, then issue a fresh one for the SPA to use on subsequent requests.
+        //
+        // MJ-7: re_login_required:true signals the SPA that the password has changed and it
+        // should redirect to the login page. We intentionally do NOT invalidate the current
+        // session here to preserve SPA UX (the user can decide when to re-login). Other
+        // concurrent sessions for this user are NOT invalidated — this is a known limitation
+        // documented in the class-level JavaDoc (requires a session registry, follow-up item).
         final Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("ok", true);
+        payload.put("re_login_required", true);
         final HttpSession session = req.getSession(false);
         if (session != null) {
             try {

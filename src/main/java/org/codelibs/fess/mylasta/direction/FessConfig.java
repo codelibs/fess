@@ -2085,6 +2085,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 900 */
     String THEME_API_LOGIN_LOCKOUT_SECONDS = "theme.api.login.lockout.seconds";
 
+    /** The key of the configuration. e.g. 100000 */
+    String THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES = "theme.api.login.rate.limit.max.entries";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -9968,6 +9971,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getThemeApiLoginLockoutSecondsAsInteger();
 
     /**
+     * Get the value for the key 'theme.api.login.rate.limit.max.entries'. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeApiLoginRateLimitMaxEntries();
+
+    /**
+     * Get the value for the key 'theme.api.login.rate.limit.max.entries' as {@link Integer}. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeApiLoginRateLimitMaxEntriesAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -13680,6 +13698,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS);
         }
 
+        public String getThemeApiLoginRateLimitMaxEntries() {
+            return get(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
+        }
+
+        public Integer getThemeApiLoginRateLimitMaxEntriesAsInteger() {
+            return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
+        }
+
         @Override
         protected java.util.Map<String, String> prepareGeneratedDefaultMap() {
             java.util.Map<String, String> defaultMap = super.prepareGeneratedDefaultMap();
@@ -14314,6 +14340,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_IP_PER_MINUTE, "10");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
+            defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES, "100000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");
