@@ -30,6 +30,11 @@
   "error.network": "Network error. Please check your connection.",
   "error.server": "Server error. Try again later.",
   "error.auth_required": "Please log in to continue.",
+  "error.rate_limit": "Too many requests. Please slow down.",
+  "error.invalid_request": "Invalid request.",
+  "error.feature_disabled": "This feature is not available.",
+  "error.payload_too_large": "Your message is too long.",
+  "error.internal_error": "An internal error occurred. Try again later.",
   "page.title": "Fess Search",
   "page.heading": "Fess Search"
 }

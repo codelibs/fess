@@ -30,6 +30,11 @@
   "error.network": "ネットワークエラーが発生しました。接続を確認してください。",
   "error.server": "サーバーエラーです。後ほど再試行してください。",
   "error.auth_required": "続行するにはログインしてください。",
+  "error.rate_limit": "リクエストが多すぎます。少し待ってからお試しください。",
+  "error.invalid_request": "無効なリクエストです。",
+  "error.feature_disabled": "この機能は利用できません。",
+  "error.payload_too_large": "メッセージが長すぎます。",
+  "error.internal_error": "内部エラーが発生しました。後ほど再試行してください。",
   "page.title": "Fess 検索",
   "page.heading": "Fess 検索"
 }

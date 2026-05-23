@@ -19,6 +19,26 @@ const state = {
 // document.createElement + textContent. No untrusted string is ever
 // passed to innerHTML.
 
+/**
+ * Return `url` only when its scheme is in the http/https/ftp/ftps allowlist.
+ * Any other scheme (e.g. javascript:, data:, vbscript:) returns "#" so that
+ * setAttribute("href", safeHref(u)) can never inject executable content.
+ */
+function safeHref(url) {
+  if (!url || typeof url !== "string") return "#";
+  try {
+    const u = new URL(url, location.href);
+    if (u.protocol === "https:" || u.protocol === "http:" ||
+        u.protocol === "ftp:" || u.protocol === "ftps:") {
+      return url;
+    }
+  } catch (e) {
+    // URL constructor failed — treat as unsafe.
+    return "#";
+  }
+  return "#";
+}
+
 function el(tag, opts) {
   const node = document.createElement(tag);
   if (!opts) return node;
@@ -33,7 +53,7 @@ function buildResultCard(d, queryId) {
   const li = el("li", { className: "result-card", dataset: { docId: d.doc_id || "", queryId: queryId || "" } });
 
   const h2 = el("h2");
-  const a = el("a", { text: d.title || d.url || "", attrs: { href: d.url_link || d.url || "#" }, dataset: { resultLink: "1" } });
+  const a = el("a", { text: d.title || d.url || "", attrs: { href: safeHref(d.url_link || d.url) }, dataset: { resultLink: "1" } });
   h2.appendChild(a);
   li.appendChild(h2);
 
@@ -121,12 +141,13 @@ let suggestIndex = -1;
 
 function renderSuggestItems(items) {
   const dropdown = document.getElementById("suggest-dropdown");
-  dropdown.innerHTML = "";
+  // Clear by removing child nodes — avoids innerHTML with any dynamic string.
+  while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
   items.forEach((it, i) => {
     const li = el("li", {
       className: "list-group-item",
       text: it.text || "",
-      attrs: { role: "option" },
+      attrs: { role: "option", id: "suggest-item-" + i, "aria-selected": "false" },
       dataset: { idx: i, text: it.text || "" }
     });
     dropdown.appendChild(li);
@@ -135,20 +156,33 @@ function renderSuggestItems(items) {
 
 async function showSuggest(q) {
   const dropdown = document.getElementById("suggest-dropdown");
-  if (!q || q.length < 2) { dropdown.classList.add("d-none"); dropdown.innerHTML = ""; return; }
+  const inp = document.getElementById("search-input");
+  if (!q || q.length < 2) {
+    dropdown.classList.add("d-none");
+    while (dropdown.firstChild) dropdown.removeChild(dropdown.firstChild);
+    if (inp) inp.setAttribute("aria-expanded", "false");
+    return;
+  }
   try {
     const env = await api.get("/suggest-words", { q, num: 8 });
     const items = env.suggest_words || [];
-    if (items.length === 0) { dropdown.classList.add("d-none"); return; }
+    if (items.length === 0) {
+      dropdown.classList.add("d-none");
+      if (inp) inp.setAttribute("aria-expanded", "false");
+      return;
+    }
     renderSuggestItems(items);
     dropdown.classList.remove("d-none");
+    if (inp) inp.setAttribute("aria-expanded", "true");
     suggestIndex = -1;
   } catch { /* swallow — suggest is best-effort */ }
 }
 
 function hideSuggest() {
   const dropdown = document.getElementById("suggest-dropdown");
+  const inp = document.getElementById("search-input");
   dropdown.classList.add("d-none");
+  if (inp) { inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); }
   suggestIndex = -1;
 }
 
@@ -187,11 +221,29 @@ export function attach() {
     input.addEventListener("keydown", ev => {
       const items = dropdown.querySelectorAll(".list-group-item");
       if (!items.length || dropdown.classList.contains("d-none")) return;
-      if (ev.key === "ArrowDown") { ev.preventDefault(); suggestIndex = Math.min(suggestIndex + 1, items.length - 1); }
-      else if (ev.key === "ArrowUp") { ev.preventDefault(); suggestIndex = Math.max(suggestIndex - 1, 0); }
-      else if (ev.key === "Enter" && suggestIndex >= 0) { ev.preventDefault(); input.value = items[suggestIndex].dataset.text; hideSuggest(); form.dispatchEvent(new Event("submit")); return; }
-      else if (ev.key === "Escape") { hideSuggest(); return; }
-      items.forEach((it, i) => it.classList.toggle("active", i === suggestIndex));
+      if (ev.key === "ArrowDown") {
+        ev.preventDefault();
+        suggestIndex = suggestIndex >= items.length - 1 ? 0 : suggestIndex + 1;
+      } else if (ev.key === "ArrowUp") {
+        ev.preventDefault();
+        suggestIndex = suggestIndex <= 0 ? items.length - 1 : suggestIndex - 1;
+      } else if (ev.key === "Enter" && suggestIndex >= 0) {
+        ev.preventDefault();
+        input.value = items[suggestIndex].dataset.text;
+        hideSuggest();
+        form.dispatchEvent(new Event("submit"));
+        return;
+      } else if (ev.key === "Escape") { hideSuggest(); return; }
+      items.forEach((it, i) => {
+        const active = i === suggestIndex;
+        it.classList.toggle("active", active);
+        it.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      if (suggestIndex >= 0 && items[suggestIndex]) {
+        input.setAttribute("aria-activedescendant", items[suggestIndex].id);
+      } else {
+        input.removeAttribute("aria-activedescendant");
+      }
     });
     input.addEventListener("blur", () => setTimeout(hideSuggest, 150));
   }
@@ -200,7 +252,7 @@ export function attach() {
       const li = ev.target.closest(".list-group-item");
       if (!li) return;
       ev.preventDefault();
-      input.value = li.dataset.text;
+      if (input) input.value = li.dataset.text;
       hideSuggest();
       form.dispatchEvent(new Event("submit"));
     });
@@ -214,7 +266,7 @@ export function attach() {
     runSearch();
   });
   const urlQ = new URLSearchParams(location.search).get("q");
-  if (urlQ) { input.value = urlQ; state.q = urlQ; runSearch(); }
+  if (urlQ && input) { input.value = urlQ; state.q = urlQ; runSearch(); }
   if (!urlQ) loadPopularWords();
 }
 

@@ -46,6 +46,17 @@ function buildPanel(column) {
   return { form, input, log };
 }
 
+// Abort any active SSE stream when the user navigates away.  A single
+// listener covers SPA hash changes, the back button, and full-page
+// navigation.  Registered once at module load — not inside attach() — so
+// it is always in place regardless of whether chat is enabled.
+window.addEventListener("pagehide", () => {
+  if (currentStream) {
+    try { currentStream.abort(); } catch (e) { /* ignore */ }
+    currentStream = null;
+  }
+});
+
 export function attach() {
   const cfg = api.getConfig();
   const enabled = !!(cfg && cfg.features && cfg.features.rag_chat_enabled);
@@ -81,7 +92,20 @@ export function attach() {
         return;
       }
       if (type === "error") {
-        bubble.textContent = (data && (data.message || data.error)) || t("error.server");
+        // Map server-supplied error codes to i18n keys via an explicit allowlist.
+        // Never surface raw server strings — they may contain stack traces or
+        // internal paths.
+        const KNOWN_ERROR_CODES = [
+          "error.rate_limit",
+          "error.invalid_request",
+          "error.auth_required",
+          "error.feature_disabled",
+          "error.payload_too_large",
+          "error.internal_error"
+        ];
+        const code = data && data.code;
+        const key = KNOWN_ERROR_CODES.includes("error." + code) ? "error." + code : "error.server";
+        bubble.textContent = t(key);
         if (currentStream) { currentStream.abort(); currentStream = null; }
         return;
       }

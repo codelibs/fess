@@ -13,3 +13,5 @@ supportedLocales:
   - ja
 entry: index.html
 spaFallback: true
+type: static
+thumbnail: thumbnail.png

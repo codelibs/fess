@@ -179,6 +179,10 @@ export function sseStream(path, body, onEvent, onError) {
           dispatchFrame(frame, onEvent);
         }
       }
+      // Flush any incomplete multi-byte sequence held by the TextDecoder after
+      // stream:true mode.  Calling decode() with no arguments (stream:false)
+      // releases any bytes buffered internally and appends them to buffer.
+      buffer += decoder.decode();
       // Flush any remaining partial frame (no trailing blank line).
       if (buffer.trim() !== "") dispatchFrame(buffer, onEvent);
     } catch (e) {

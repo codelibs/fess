@@ -2,7 +2,7 @@
 <html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fess</title>
@@ -25,7 +25,12 @@
             name="q"
             autocomplete="off"
             aria-label="Search query"
-            data-i18n-placeholder="search.placeholder">
+            data-i18n-placeholder="search.placeholder"
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="suggest-dropdown"
+            aria-autocomplete="list"
+            aria-haspopup="listbox">
         <button class="btn btn-primary ms-2" type="submit" id="search-submit" data-i18n="search.button">Search</button>
         <ul class="list-group position-absolute top-100 start-0 end-0 mt-1 d-none shadow-sm" id="suggest-dropdown" role="listbox" aria-label="Search suggestions"></ul>
       </form>
