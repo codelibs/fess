@@ -20,7 +20,13 @@ import org.lastaflute.web.validation.Required;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/** Form for the details inspector. */
+/**
+ * Form for the details inspector.
+ *
+ * <p>Note: {@code crudMode} is intentionally absent. Theme management is not a
+ * standard CRUD flow (there is no edit page; upload replaces create), so the
+ * CRUD-mode convention does not apply here.</p>
+ */
 public class ThemeDetailsForm {
 
     /** Theme directory name; same constraints as {@link ThemeDeleteForm}. */

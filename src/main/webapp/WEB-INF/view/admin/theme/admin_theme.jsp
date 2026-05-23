@@ -50,6 +50,8 @@ ${fe:html(true)}
                                     <div class="alert alert-success">${msg}</div>
                                 </la:info>
                                 <la:errors/>
+                                <la:errors property="_global"/>
+                                <la:errors property="name"/>
                             </div>
                             <%-- Default theme selector --%>
                             <c:if test="${editable}">
@@ -132,14 +134,14 @@ ${fe:html(true)}
                                                             <div class="text-center">
                                                                 <button type="button" class="btn btn-danger btn-xs"
                                                                         name="delete" data-toggle="modal"
-                                                                        data-target='#confirmToDelete-${f:h(t.name)}'
+                                                                        data-target='#confirmToDelete-${s.index}'
                                                                         value="<la:message key="labels.crud_button_delete"/>">
                                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                                     <la:message key="labels.crud_button_delete"/>
                                                                 </button>
                                                             </div>
                                                             <div class="modal fade"
-                                                                 id='confirmToDelete-${f:h(t.name)}'
+                                                                 id='confirmToDelete-${s.index}'
                                                                  tabindex="-1" role="dialog">
                                                                 <div class="modal-dialog">
                                                                     <div class="modal-content bg-danger">

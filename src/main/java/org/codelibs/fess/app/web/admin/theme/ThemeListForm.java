@@ -21,6 +21,10 @@ import jakarta.validation.constraints.Size;
 /**
  * Form for the theme list page. Carries the selected default theme name when
  * the administrator submits the "set default" dropdown.
+ *
+ * <p>Note: {@code crudMode} is intentionally absent. Theme management is not a
+ * standard CRUD flow (there is no edit page; upload replaces create), so the
+ * CRUD-mode convention does not apply here.</p>
  */
 public class ThemeListForm {
 

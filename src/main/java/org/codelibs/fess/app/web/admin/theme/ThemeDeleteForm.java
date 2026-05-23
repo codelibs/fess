@@ -20,7 +20,13 @@ import org.lastaflute.web.validation.Required;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/** Form posted from the delete-confirm modal. */
+/**
+ * Form posted from the delete-confirm modal.
+ *
+ * <p>Note: {@code crudMode} is intentionally absent. Theme management is not a
+ * standard CRUD flow (there is no edit page; upload replaces create), so the
+ * CRUD-mode convention does not apply here.</p>
+ */
 public class ThemeDeleteForm {
 
     /** Theme directory name; must match the spec §4.2 regex. */

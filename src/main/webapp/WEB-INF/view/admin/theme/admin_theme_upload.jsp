@@ -44,7 +44,9 @@ ${fe:html(true)}
                                         <la:message key="labels.theme_zip_file"/>
                                     </label>
                                     <div class="col-md-9 text-sm-right col-form-label">
-                                        <input id="themeFile" type="file" name="themeFile" accept=".zip" class="form-control-file"/>
+                                        <input id="themeFile" type="file" name="themeFile"
+                                       accept=".zip,application/zip,application/x-zip-compressed"
+                                       class="form-control-file"/>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-success" name="upload"
@@ -77,12 +79,13 @@ ${fe:html(true)}
         if (!form) {
             return;
         }
+        var maxBytes = ${fessConfig.themeUploadMaxSizeAsInteger};
+        var tooLargeMsg = '<la:message key="errors.failed_to_upload_theme" arg0="(file too large)"/>';
         form.addEventListener('submit', function (e) {
             var fileInput = document.getElementById('themeFile');
             if (fileInput && fileInput.files && fileInput.files[0]) {
-                var max = 10485760; // 10 MB default per fess_config.properties — server-side enforces actual limit
-                if (fileInput.files[0].size > max) {
-                    alert('File too large');
+                if (fileInput.files[0].size > maxBytes) {
+                    alert(tooLargeMsg);
                     e.preventDefault();
                 }
             }

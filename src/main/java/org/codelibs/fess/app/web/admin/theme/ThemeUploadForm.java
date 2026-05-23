@@ -20,6 +20,10 @@ import org.lastaflute.web.validation.Required;
 
 /**
  * Multipart form for the theme upload page.
+ *
+ * <p>Note: {@code crudMode} is intentionally absent. Theme management is not a
+ * standard CRUD flow (there is no edit page; upload replaces create), so the
+ * CRUD-mode convention does not apply here.</p>
  */
 public class ThemeUploadForm {
 

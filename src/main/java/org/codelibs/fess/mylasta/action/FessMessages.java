@@ -449,6 +449,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to change the default theme */
     public static final String ERRORS_failed_to_change_default_theme = "{errors.failed_to_change_default_theme}";
 
+    /** The key of the message: Failed to reload the theme registry */
+    public static final String ERRORS_failed_to_reload_theme = "{errors.failed_to_reload_theme}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -592,6 +595,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Default theme changed to {0} */
     public static final String SUCCESS_change_default_theme = "{success.change_default_theme}";
+
+    /** The key of the message: Default theme cleared */
+    public static final String SUCCESS_clear_default_theme = "{success.clear_default_theme}";
 
     /** The key of the message: Theme registry reloaded */
     public static final String SUCCESS_reload_theme = "{success.reload_theme}";
@@ -2645,6 +2651,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_reload_theme' with parameters.
+     * <pre>
+     * message: Failed to reload the theme registry
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToReloadTheme(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_failed_to_reload_theme));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.property_required' with parameters.
      * <pre>
      * message: {0} is required.
@@ -3337,6 +3357,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessChangeDefaultTheme(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(SUCCESS_change_default_theme, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.clear_default_theme' with parameters.
+     * <pre>
+     * message: Default theme cleared
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessClearDefaultTheme(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(SUCCESS_clear_default_theme));
         return this;
     }
 

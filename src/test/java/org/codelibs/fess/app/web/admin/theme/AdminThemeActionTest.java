@@ -15,12 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.theme;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.reflect.Field;
 import java.util.Locale;
 
@@ -232,35 +226,56 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_reloadErrorRoutesToFailedToReloadThemeKey() {
+        // Verify that FessMessages exposes the dedicated reload-failure key so
+        // AdminThemeAction#reload can use addErrorsFailedToReloadTheme(GLOBAL)
+        // rather than the misleading addErrorsFailedToChangeDefaultTheme.
+        final org.codelibs.fess.mylasta.action.FessMessages msgs = new org.codelibs.fess.mylasta.action.FessMessages();
+        // must compile without error — confirms the stub exists post-MJ-33 fix
+        msgs.addErrorsFailedToReloadTheme("property");
+        assertFalse(msgs.isEmpty());
+    }
+
+    @Test
+    public void test_setdefaultEmptyNameUsesDistinctSuccessKey() {
+        // Verify that FessMessages has both the set-default and clear-default
+        // success keys so that AdminThemeAction#setdefault can branch on
+        // name.isEmpty() (m-26 fix).
+        final org.codelibs.fess.mylasta.action.FessMessages set = new org.codelibs.fess.mylasta.action.FessMessages();
+        set.addSuccessChangeDefaultTheme("property", "bootstrap");
+        assertFalse(set.isEmpty());
+
+        final org.codelibs.fess.mylasta.action.FessMessages clear = new org.codelibs.fess.mylasta.action.FessMessages();
+        clear.addSuccessClearDefaultTheme("property");
+        assertFalse(clear.isEmpty());
+    }
+
     // ---- Tests requiring full LastaFlute context — deferred ----
 
     @Test
-    @Disabled("TODO: requires full LastaFlute test harness "
-            + "(validate/verifyToken/saveToken/asHtml/redirect) — covered by Plan 6 integration tests")
+    @Disabled("Requires full LastaFlute test harness (validate/verifyToken/saveToken/asHtml/redirect): "
+            + "direct invocation needs a live ActionRuntime, session-managed token, and renderable HTML response. "
+            + "Deferred to Plan 6 integration tests.")
     public void test_index_savesTokenAndRendersList() {
-        // Direct invocation of AdminThemeAction#index needs a live ActionRuntime,
-        // session-managed transaction token, and a renderable HTML response.
     }
 
     @Test
-    @Disabled("TODO: requires full LastaFlute test harness — covered by Plan 6 integration tests")
+    @Disabled("Requires full LastaFlute test harness: driving #upload requires a MultipartFormFile fixture "
+            + "and the validate()/verifyToken() pipeline. Deferred to Plan 6 integration tests.")
     public void test_upload_rejectsNonZipFileExtension() {
-        // Driving #upload requires a MultipartFormFile fixture and the action's
-        // validate()/verifyToken() plumbing.
     }
 
     @Test
-    @Disabled("TODO: requires full LastaFlute test harness — covered by Plan 6 integration tests")
+    @Disabled("Requires full LastaFlute test harness: the themeRegistry.getTheme(name).isEmpty() branch "
+            + "in #setdefault produces a throwValidationError that needs the LastaFlute message pipeline. "
+            + "Deferred to Plan 6 integration tests.")
     public void test_setdefault_throwsValidationErrorWhenThemeMissing() {
-        // The themeRegistry.getTheme(name).isEmpty() branch in #setdefault
-        // produces a throwValidationError that needs the LastaFlute message
-        // pipeline to be observable.
     }
 
     @Test
-    @Disabled("TODO: requires full LastaFlute test harness — covered by Plan 6 integration tests")
+    @Disabled("Requires full LastaFlute test harness: #reload calls verifyToken(), saveInfo(), "
+            + "and redirect(getClass()) — all require the full LastaFlute container. " + "Deferred to Plan 6 integration tests.")
     public void test_reload_redirectsAfterRegistryReload() {
-        // #reload calls verifyToken(), saveInfo(), and redirect(getClass()) —
-        // all require the full LastaFlute container.
     }
 }

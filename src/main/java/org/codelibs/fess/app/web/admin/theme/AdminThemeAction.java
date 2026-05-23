@@ -50,7 +50,15 @@ import jakarta.annotation.Resource;
  */
 public class AdminThemeAction extends FessAdminAction {
 
-    /** Role identifier for theme administration (spec §5.2). */
+    /**
+     * Role identifier for theme administration (spec §5.2).
+     *
+     * <p>The companion {@code admin-theme-view} role is derived by the framework's
+     * {@code ROLE + VIEW} convention (inherited from {@link FessAdminAction}).
+     * Both roles are granted to the default admin user via the standard Fess
+     * {@code Radmin-*} role derivation — no explicit seeding in
+     * {@code fess_config.properties} is required.</p>
+     */
     public static final String ROLE = "admin-theme";
 
     private static final Logger logger = LogManager.getLogger(AdminThemeAction.class);
@@ -128,7 +136,7 @@ public class AdminThemeAction extends FessAdminAction {
             saveInfo(m -> m.addSuccessReloadTheme(GLOBAL));
         } catch (final Exception e) {
             logger.warn("Failed to reload ThemeRegistry", e);
-            throwValidationError(m -> m.addErrorsFailedToChangeDefaultTheme(GLOBAL), () -> asListHtml(form));
+            throwValidationError(m -> m.addErrorsFailedToReloadTheme(GLOBAL), () -> asListHtml(form));
         }
         return redirect(getClass());
     }
@@ -239,7 +247,11 @@ public class AdminThemeAction extends FessAdminAction {
         try {
             ComponentUtil.getFessConfig().setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, name);
             themeRegistry.reload(); // re-resolve in case the new default needs to take effect immediately
-            saveInfo(m -> m.addSuccessChangeDefaultTheme(GLOBAL, name.isEmpty() ? "(none)" : name));
+            if (name.isEmpty()) {
+                saveInfo(m -> m.addSuccessClearDefaultTheme(GLOBAL));
+            } else {
+                saveInfo(m -> m.addSuccessChangeDefaultTheme(GLOBAL, name));
+            }
         } catch (final Exception e) {
             logger.warn("Failed to change default theme", e);
             throwValidationError(m -> m.addErrorsFailedToChangeDefaultTheme(GLOBAL), () -> asListHtml(form));
