@@ -81,7 +81,7 @@ public class ScrollSearchHandler {
      */
     public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -90,6 +90,10 @@ public class ScrollSearchHandler {
             return;
         }
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
+        // Tracks whether at least one NDJSON line was flushed. If an error occurs after
+        // the first write, we cannot emit a JSON error envelope without corrupting the
+        // in-flight NDJSON stream — so we just log and return.
+        final boolean[] wroteAnyLine = { false };
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
@@ -110,6 +114,7 @@ public class ScrollSearchHandler {
                     // streaming subsequent NDJSON lines.
                     mapper.writeValue(writer, line);
                     writer.write('\n');
+                    wroteAnyLine[0] = true;
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -128,10 +133,14 @@ public class ScrollSearchHandler {
             // Surface the underlying IOException so the servlet container can log/respond.
             throw e.getCause();
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("/api/v2/documents/all failed", e);
+            if (wroteAnyLine[0]) {
+                // Response body is partial NDJSON; writing a JSON envelope now would corrupt the
+                // stream for clients. Log WARN and return — the truncated stream is the best we
+                // can do at this point. Interrupting the in-flight LLM call is out of scope.
+                logger.warn("/api/v2/documents/all failed after partial write", e);
+            } else {
+                V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/documents/all");
             }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
         }
     }
 

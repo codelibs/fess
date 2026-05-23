@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -70,6 +71,7 @@ public final class V2EnvelopeWriter {
      * @throws IOException if writing to the response fails
      */
     public static void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
+        res.setCharacterEncoding("UTF-8");
         res.setContentType(CONTENT_TYPE);
         final Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("status", STATUS_OK);
@@ -95,17 +97,50 @@ public final class V2EnvelopeWriter {
      * @throws IOException if writing to the response fails
      */
     public static void writeError(final HttpServletResponse res, final V2ErrorCode code, final String message) throws IOException {
+        if (res.isCommitted()) {
+            return;
+        }
         res.setStatus(code.defaultHttpStatus());
+        res.setCharacterEncoding("UTF-8");
         res.setContentType(CONTENT_TYPE);
         final Map<String, Object> err = new LinkedHashMap<>();
         err.put("code", code.code());
         err.put("message", message == null ? "" : message);
-        final int statusValue = code == V2ErrorCode.INTERNAL_ERROR ? STATUS_SYSTEM_ERROR : STATUS_USER_ERROR;
+        final int statusValue = code.defaultHttpStatus() >= 500 ? STATUS_SYSTEM_ERROR : STATUS_USER_ERROR;
         final Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("status", statusValue);
         envelope.put("version", VERSION);
         envelope.put("error", err);
         final Map<String, Object> root = Map.of("response", envelope);
         MAPPER.writeValue(res.getWriter(), root);
+    }
+
+    /**
+     * Convenience method for internal error paths.
+     *
+     * <p>Safety policy: the cause message is never written to the wire. Instead,
+     * it is logged via the caller-supplied logger so the detail is available in
+     * server logs without leaking connection strings, stack fragments or other
+     * server-internal information to API consumers. If the response is already
+     * committed (e.g. SSE or NDJSON handlers that flushed before the failure),
+     * the method returns silently to avoid corrupting the in-flight body.</p>
+     *
+     * @param res the HTTP response to write to
+     * @param cause the cause to log (may be null; only logged, never written to wire)
+     * @param logger the caller's logger to use for WARN-level logging
+     * @param contextTag a brief tag identifying the call site (e.g. "/api/v2/health")
+     * @throws IOException if writing the envelope fails
+     */
+    public static void writeInternalError(final HttpServletResponse res, final Throwable cause, final Logger logger,
+            final String contextTag) throws IOException {
+        if (cause != null) {
+            logger.warn("v2 internal error: {}", contextTag, cause);
+        } else {
+            logger.warn("v2 internal error: {}", contextTag);
+        }
+        if (res.isCommitted()) {
+            return;
+        }
+        writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
     }
 }

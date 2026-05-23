@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
@@ -61,11 +63,13 @@ import jakarta.servlet.http.HttpSession;
  */
 public class PasswordChangeHandler {
 
+    private static final Logger logger = LogManager.getLogger(PasswordChangeHandler.class);
+
     private static final int MAX_BODY_BYTES = 4 * 1024;
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         OptionalThing<FessUserBean> userBean;
@@ -74,6 +78,7 @@ public class PasswordChangeHandler {
         } catch (final Exception e) {
             // Login subsystem not fully wired (e.g. unit test harness without DBFlute
             // behaviors). Treat as anonymous — production callers always have it resolvable.
+            logger.warn("/api/v2/auth/password: login subsystem lookup failed; treating as anonymous", e);
             userBean = OptionalThing.empty();
         }
         if (!userBean.isPresent()) {
@@ -95,7 +100,11 @@ public class PasswordChangeHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "current_password is required");
             return;
         }
-        if (StringUtil.isBlank(newPw) || !newPw.equals(confirm)) {
+        if (newPw == null || newPw.isBlank()) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "new_password is required");
+            return;
+        }
+        if (!newPw.equals(confirm)) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "passwords do not match");
             return;
         }
@@ -108,6 +117,7 @@ public class PasswordChangeHandler {
         try {
             verified = ComponentUtil.getComponent(FessLoginAssist.class).findLoginUser(new LocalUserCredential(userId, currentPw));
         } catch (final Exception e) {
+            logger.warn("/api/v2/auth/password: findLoginUser failed", e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;
         }
@@ -123,6 +133,7 @@ public class PasswordChangeHandler {
         try {
             ComponentUtil.getComponent(UserService.class).changePassword(userId, newPw);
         } catch (final Exception e) {
+            logger.warn("/api/v2/auth/password: changePassword failed", e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;
         }
@@ -139,6 +150,7 @@ public class PasswordChangeHandler {
             } catch (final Exception e) {
                 // CSRF manager not wired (e.g. slim test harness) — omit the token field
                 // rather than failing a successful password change.
+                logger.warn("/api/v2/auth/password: CSRF rotation failed; omitting csrf_token from response", e);
             }
         }
         V2EnvelopeWriter.writeSuccess(res, payload);

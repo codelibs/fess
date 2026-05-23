@@ -265,10 +265,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             engine.put("ping_status", ping.getStatus());
             V2EnvelopeWriter.writeSuccess(response, Map.of("engine", engine));
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process /api/v2/health.", e);
-            }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, "engine unreachable: " + e.getMessage());
+            V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/health");
         }
     }
 
@@ -296,7 +293,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handleSuggestWords(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -360,10 +357,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             payload.put("suggest_words", items);
             V2EnvelopeWriter.writeSuccess(response, payload);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process /api/v2/suggest-words.", e);
-            }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/suggest-words");
         }
     }
 
@@ -388,7 +382,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handleLabels(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -407,10 +401,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             payload.put("labels", labels);
             V2EnvelopeWriter.writeSuccess(response, payload);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process /api/v2/labels.", e);
-            }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/labels");
         }
     }
 
@@ -436,7 +427,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handlePopularWords(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         if (!ComponentUtil.getFessConfig().isWebApiPopularWord()) {
@@ -461,10 +452,7 @@ public class SearchApiV2Manager extends BaseApiManager {
             payload.put("popular_words", words);
             V2EnvelopeWriter.writeSuccess(response, payload);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process /api/v2/popular-words.", e);
-            }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/popular-words");
         }
     }
 

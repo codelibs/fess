@@ -213,11 +213,28 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final SearchApiV2Manager m = new SearchApiV2Manager();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/labels").withMethod("POST"), res, new NopChain());
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"status\":1"), body);
-        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
         assertTrue(body.contains("method not allowed"), body);
+    }
+
+    @Test
+    public void test_handleHealth_does_not_leak_exception_message() throws Exception {
+        // Source-level assertion: the handleHealth catch block must not pass e.getMessage()
+        // to writeError. Uses writeInternalError which logs and emits a generic message.
+        final java.nio.file.Path src = java.nio.file.Paths.get("src/main/java/org/codelibs/fess/api/v2/SearchApiV2Manager.java");
+        org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
+                "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
+        final String source = java.nio.file.Files.readString(src);
+        // Find handleHealth and look for the catch block
+        final int healthIdx = source.indexOf("private void handleHealth");
+        assertTrue(healthIdx >= 0, "handleHealth not found in source");
+        final String healthSection = source.substring(healthIdx, Math.min(source.length(), healthIdx + 2000));
+        // The catch must use writeInternalError, not writeError with e.getMessage()
+        assertTrue(healthSection.contains("writeInternalError"), "handleHealth catch must use writeInternalError: " + healthSection);
+        assertFalse(healthSection.contains("e.getMessage()"), "handleHealth must not leak e.getMessage(): " + healthSection);
     }
 
     @Test

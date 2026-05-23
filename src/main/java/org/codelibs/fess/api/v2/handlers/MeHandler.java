@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -40,18 +42,21 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class MeHandler {
 
+    private static final Logger logger = LogManager.getLogger(MeHandler.class);
+
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         OptionalThing<FessUserBean> userBean;
         try {
             userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
         } catch (final Exception e) {
-            // In environments where the login subsystem is not fully wired (e.g. unit test
-            // harness without DBFlute behaviors), treat the caller as anonymous rather than
-            // surfacing a 500. Production callers always have FessLoginAssist resolvable.
+            // In environments where the login subsystem is not fully wired (e.g. null session
+            // bean) treat the caller as anonymous. Log WARN for unexpected errors so ops can
+            // diagnose misconfigured servers. Production callers always have FessLoginAssist resolvable.
+            logger.warn("/api/v2/auth/me: login subsystem lookup failed; degrading to anonymous", e);
             userBean = OptionalThing.empty();
         }
         final Map<String, Object> payload = new LinkedHashMap<>();

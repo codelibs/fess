@@ -77,8 +77,8 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
     public void test_rejectsGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new FavoritePostHandler().handle(new StubRequest("GET", "/api/v2/documents/abc/favorite"), res, "abc");
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     @Test

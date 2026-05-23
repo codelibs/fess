@@ -78,7 +78,8 @@ public class LoginHandlerTest extends UnitFessTestCase {
     public void test_rejectsGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new LoginHandler(new LoginRateLimiter()).handle(new StubRequest("GET", "/api/v2/auth/login"), res);
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     @Test

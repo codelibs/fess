@@ -49,10 +49,10 @@ public class FavoriteGetHandlerTest extends UnitFessTestCase {
         final FavoriteGetHandler handler = new FavoriteGetHandler();
         final CapturingResponse res = new CapturingResponse();
         handler.handle(new StubRequest("/api/v2/documents/abc123/favorite").withMethod("POST"), res, "abc123");
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"status\":1"), body);
-        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
         assertTrue(body.contains("method not allowed"), body);
     }
 

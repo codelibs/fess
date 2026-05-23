@@ -18,6 +18,8 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
@@ -38,16 +40,19 @@ import jakarta.servlet.http.HttpSession;
  */
 public class LogoutHandler {
 
+    private static final Logger logger = LogManager.getLogger(LogoutHandler.class);
+
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
             ComponentUtil.getComponent(FessLoginAssist.class).logout();
         } catch (final Exception e) {
-            // logout is idempotent — even if there is no session (or the login subsystem
-            // is unavailable in this environment), the caller's intent is satisfied.
+            // logout is idempotent — no session or unavailable login subsystem; log WARN for
+            // actual logout failures but still respond 200 ok (caller's intent is satisfied).
+            logger.warn("logout call threw unexpectedly", e);
         }
         final HttpSession session = req.getSession(false);
         if (session != null) {

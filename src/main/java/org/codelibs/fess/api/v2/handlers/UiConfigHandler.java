@@ -57,7 +57,7 @@ public class UiConfigHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         try {
@@ -85,9 +85,7 @@ public class UiConfigHandler {
                     });
                 }
             } catch (final Exception themeEx) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Theme resolution failed; emitting empty theme payload", themeEx);
-                }
+                logger.warn("Theme resolution failed; emitting empty theme payload", themeEx);
                 // fall through with empty themePayload — the "theme" key is always present.
             }
 
@@ -125,10 +123,7 @@ public class UiConfigHandler {
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process /api/v2/ui/config", e);
-            }
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/ui/config");
         }
     }
 }

@@ -25,6 +25,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -46,6 +48,8 @@ import org.codelibs.fess.util.ComponentUtil;
  * for facet queries — to prevent query injection.</p>
  */
 public final class ChatRequestBody {
+
+    private static final Logger logger = LogManager.getLogger(ChatRequestBody.class);
 
     private final String message;
     private final String sessionId;
@@ -141,6 +145,7 @@ public final class ChatRequestBody {
                     .forEach(allowed::add);
         } catch (final Exception e) {
             // helper unavailable in unit tests — degrade to empty allowlist
+            logger.warn("chat allowlist load failed for labels", e);
         }
         final List<String> valid = new ArrayList<>();
         for (final String v : labelValues) {
@@ -182,6 +187,7 @@ public final class ChatRequestBody {
             }
         } catch (final Exception e) {
             // helper unavailable in unit tests — degrade to empty allowlist
+            logger.warn("chat allowlist load failed for ex_q", e);
         }
         final List<String> valid = new ArrayList<>();
         for (final String v : values) {

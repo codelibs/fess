@@ -50,6 +50,10 @@ public class V2ErrorCodeTest {
         expectedStatus.put(V2ErrorCode.FORBIDDEN, new int[] { 403 });
         expectedCode.put(V2ErrorCode.NOT_FOUND, "not_found");
         expectedStatus.put(V2ErrorCode.NOT_FOUND, new int[] { 404 });
+        expectedCode.put(V2ErrorCode.CONFLICT, "conflict");
+        expectedStatus.put(V2ErrorCode.CONFLICT, new int[] { 409 });
+        expectedCode.put(V2ErrorCode.METHOD_NOT_ALLOWED, "method_not_allowed");
+        expectedStatus.put(V2ErrorCode.METHOD_NOT_ALLOWED, new int[] { 405 });
         expectedCode.put(V2ErrorCode.RATE_LIMITED, "rate_limited");
         expectedStatus.put(V2ErrorCode.RATE_LIMITED, new int[] { 429 });
         expectedCode.put(V2ErrorCode.INTERNAL_ERROR, "internal_error");
@@ -63,6 +67,18 @@ public class V2ErrorCodeTest {
             assertEquals(expectedCode.get(v), v.code(), "code mismatch for " + v.name());
             assertEquals(expectedStatus.get(v)[0], v.defaultHttpStatus(), "http status mismatch for " + v.name());
         }
+    }
+
+    @Test
+    public void test_methodNotAllowed_mapsTo_405() {
+        assertEquals(405, V2ErrorCode.METHOD_NOT_ALLOWED.defaultHttpStatus());
+        assertEquals("method_not_allowed", V2ErrorCode.METHOD_NOT_ALLOWED.code());
+    }
+
+    @Test
+    public void test_conflict_mapsTo_409() {
+        assertEquals(409, V2ErrorCode.CONFLICT.defaultHttpStatus());
+        assertEquals("conflict", V2ErrorCode.CONFLICT.code());
     }
 
     @Test

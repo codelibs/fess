@@ -75,8 +75,8 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     public void test_rejectsGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new PasswordChangeHandler().handle(new StubRequest("GET", "/api/v2/auth/password"), res);
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     @Test

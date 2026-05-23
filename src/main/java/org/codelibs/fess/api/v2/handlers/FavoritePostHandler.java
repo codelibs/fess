@@ -90,9 +90,27 @@ public class FavoritePostHandler {
      * @param docId the document id extracted from the URL path
      * @throws IOException if writing the envelope fails
      */
+    /** Thrown when the document does not exist in the search index. */
+    private static class DocNotFoundException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        DocNotFoundException(final String msg) {
+            super(msg);
+        }
+    }
+
+    /** Thrown when the favorite URL could not be added to the log store. */
+    private static class FavoriteAddFailedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        FavoriteAddFailedException(final String msg) {
+            super(msg);
+        }
+    }
+
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
@@ -107,6 +125,7 @@ public class FavoritePostHandler {
         } catch (final Exception e) {
             // Same fallback as MeHandler / PasswordChangeHandler — in environments
             // where the login subsystem isn't fully wired, treat as anonymous.
+            logger.warn("/api/v2/documents/{}/favorite POST: login subsystem lookup failed", docId, e);
             userBean = OptionalThing.empty();
         }
         if (!userBean.isPresent()) {
@@ -163,7 +182,7 @@ public class FavoritePostHandler {
                     .ifPresent(doc -> {
                         final String favoriteUrl = DocumentUtil.getValue(doc, cfg.getIndexFieldUrl(), String.class);
                         if (StringUtil.isBlank(favoriteUrl)) {
-                            throw new RuntimeException("URL is null");
+                            throw new FavoriteAddFailedException("URL is null");
                         }
                         if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
                             favoriteLog.setUserInfoId(userInfo.getId());
@@ -172,7 +191,7 @@ public class FavoritePostHandler {
                             favoriteLog.setQueryId(queryId);
                             favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
                         })) {
-                            throw new RuntimeException("Failed to add url");
+                            throw new FavoriteAddFailedException("Failed to add url");
                         }
                         final String id = DocumentUtil.getValue(doc, cfg.getIndexFieldId(), String.class);
                         searchHelper.update(id, builder -> {
@@ -186,20 +205,18 @@ public class FavoritePostHandler {
                         });
                     })
                     .orElse(() -> {
-                        throw new RuntimeException("doc not found: " + docId);
+                        throw new DocNotFoundException("doc not found: " + docId);
                     });
+        } catch (final DocNotFoundException e) {
+            logger.warn("/api/v2/documents/{}/favorite POST: doc not found", docId, e);
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+            return;
+        } catch (final FavoriteAddFailedException e) {
+            logger.warn("/api/v2/documents/{}/favorite POST: add failed", docId, e);
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            return;
         } catch (final RuntimeException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("/api/v2/documents/{}/favorite POST failed", docId, e);
-            }
-            final String msg = e.getMessage() == null ? "" : e.getMessage();
-            // Map the verbatim-from-v1 exception messages onto v2 error codes so the
-            // wire shape stays consistent with the rest of the API surface.
-            if (msg.startsWith("doc not found")) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, msg);
-            } else {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, msg);
-            }
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
             return;
         }
 

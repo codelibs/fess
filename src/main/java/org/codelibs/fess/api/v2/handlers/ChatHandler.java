@@ -61,7 +61,7 @@ public class ChatHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -121,9 +121,7 @@ public class ChatHandler {
         } catch (final RuntimeException e) {
             // Limiter DI not available; skip rate limiting rather than failing the request.
             // Production wires it via app.xml.
-            if (logger.isDebugEnabled()) {
-                logger.debug("LoginRateLimiter unavailable; skipping rate limit. error={}", e.getMessage());
-            }
+            logger.warn("LoginRateLimiter unavailable; skipping rate limit", e);
         }
         final int chatLimit = getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {

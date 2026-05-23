@@ -37,6 +37,12 @@ public enum V2ErrorCode {
     /** The requested resource or endpoint does not exist. */
     NOT_FOUND("not_found", 404),
 
+    /** The HTTP method is not supported for this endpoint. */
+    CONFLICT("conflict", 409),
+
+    /** The HTTP method is not supported for this endpoint. */
+    METHOD_NOT_ALLOWED("method_not_allowed", 405),
+
     /** The caller has exceeded a rate or quota threshold. */
     RATE_LIMITED("rate_limited", 429),
 

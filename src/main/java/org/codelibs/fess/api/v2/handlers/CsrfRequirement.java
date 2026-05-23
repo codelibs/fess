@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
+import java.util.Locale;
+
 /**
  * Static decision table for spec §7.3 CSRF rules.
  *
@@ -34,7 +36,7 @@ public final class CsrfRequirement {
         if (method == null) {
             return false;
         }
-        final String m = method.toUpperCase();
+        final String m = method.toUpperCase(Locale.ROOT);
         if ("GET".equals(m) || "HEAD".equals(m) || "OPTIONS".equals(m)) {
             return false;
         }

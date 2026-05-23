@@ -81,9 +81,20 @@ public class ClickHandler {
      * @param res the HTTP response to write to
      * @throws IOException if writing the envelope fails
      */
+    private static String stringOrNull(final Map<String, Object> body, final String key) {
+        final Object v = body.get(key);
+        if (v == null) {
+            return null;
+        }
+        if (!(v instanceof String)) {
+            return null;
+        }
+        return (String) v;
+    }
+
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final Map<String, Object> body;
@@ -94,8 +105,8 @@ public class ClickHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
-        final String docId = (String) body.get("doc_id");
-        final String queryId = (String) body.get("query_id");
+        final String docId = stringOrNull(body, "doc_id");
+        final String queryId = stringOrNull(body, "query_id");
         if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
@@ -151,10 +162,7 @@ public class ClickHandler {
             }
             V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", true));
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("/api/v2/click failed", e);
-            }
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/click");
         }
     }
 }

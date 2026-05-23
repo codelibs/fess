@@ -18,6 +18,7 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,7 +45,7 @@ public final class V2JsonBody {
 
     public static Map<String, Object> read(final HttpServletRequest req, final int maxBytes) throws IOException {
         final String ct = req.getContentType();
-        if (ct != null && !ct.toLowerCase().startsWith("application/json")) {
+        if (ct != null && !ct.toLowerCase(Locale.ROOT).startsWith("application/json")) {
             throw new UnsupportedMediaTypeException("content-type must be application/json");
         }
         final byte[] buf = req.getInputStream().readNBytes(maxBytes + 1);

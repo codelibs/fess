@@ -69,8 +69,8 @@ public class ClickHandlerTest extends UnitFessTestCase {
     public void test_rejectsGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new ClickHandler().handle(new StubRequest("GET", "/api/v2/click"), res);
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     @Test

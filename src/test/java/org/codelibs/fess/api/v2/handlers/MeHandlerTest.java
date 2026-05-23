@@ -65,7 +65,8 @@ public class MeHandlerTest extends UnitFessTestCase {
     public void test_rejectsNonGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new MeHandler().handle(new StubRequest("POST", "/api/v2/auth/me"), res);
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type and body. */

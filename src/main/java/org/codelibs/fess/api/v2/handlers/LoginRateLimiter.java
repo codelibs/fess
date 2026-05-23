@@ -68,7 +68,7 @@ public class LoginRateLimiter {
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
-        final long windowMs = windowSeconds * 1_000L;
+        final long windowMs = (long) windowSeconds * 1_000L;
         final Entry e = entries.computeIfAbsent(mapKey, k -> new Entry());
         synchronized (e) {
             if (now < e.lockUntilEpochMs) {
@@ -107,7 +107,7 @@ public class LoginRateLimiter {
         }
         final String mapKey = scope.name() + ":" + key;
         final long now = clock.getAsLong();
-        final long windowMs = windowSeconds * 1_000L;
+        final long windowMs = (long) windowSeconds * 1_000L;
         final Entry e = entries.get(mapKey);
         if (e == null) {
             return true;
@@ -135,17 +135,25 @@ public class LoginRateLimiter {
         final String mapKey = scope.name() + ":" + key;
         final Entry e = entries.computeIfAbsent(mapKey, k -> new Entry());
         synchronized (e) {
-            e.lockUntilEpochMs = clock.getAsLong() + lockoutSeconds * 1_000L;
+            e.lockUntilEpochMs = clock.getAsLong() + (long) lockoutSeconds * 1_000L;
         }
     }
 
     /** Removes empty entries; safe to call from any thread. */
     public void sweep() {
-        entries.entrySet().removeIf(en -> {
-            synchronized (en.getValue()) {
-                final Entry e = en.getValue();
-                return e.hits.isEmpty() && e.lockUntilEpochMs < clock.getAsLong();
-            }
-        });
+        final long now = clock.getAsLong();
+        for (final Map.Entry<String, Entry> en : entries.entrySet()) {
+            entries.compute(en.getKey(), (k, existing) -> {
+                if (existing == null) {
+                    return null;
+                }
+                synchronized (existing) {
+                    if (existing.hits.isEmpty() && existing.lockUntilEpochMs < now) {
+                        return null; // remove
+                    }
+                }
+                return existing;
+            });
+        }
     }
 }

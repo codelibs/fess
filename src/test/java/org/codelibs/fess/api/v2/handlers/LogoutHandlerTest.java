@@ -64,7 +64,8 @@ public class LogoutHandlerTest extends UnitFessTestCase {
     public void test_rejectsGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("GET", "/api/v2/auth/logout"), res);
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type and body. */

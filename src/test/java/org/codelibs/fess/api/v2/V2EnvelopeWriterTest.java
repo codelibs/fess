@@ -16,6 +16,7 @@
 package org.codelibs.fess.api.v2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -71,12 +72,67 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         assertTrue(res.body().contains("\"code\":\"forbidden\""));
     }
 
+    @Test
+    public void test_writeError_sets_characterEncoding_to_UTF_8() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "bad");
+        assertEquals("UTF-8", res.characterEncoding);
+    }
+
+    @Test
+    public void test_writeError_isNoop_when_response_already_committed() throws Exception {
+        final CapturingResponse res = new CapturingResponse() {
+            @Override
+            public boolean isCommitted() {
+                return true;
+            }
+        };
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "should not appear");
+        // If response is committed, nothing should be written to the body
+        assertEquals("", res.body());
+        // Status should not be changed from initial 200
+        assertEquals(200, res.status);
+    }
+
+    @Test
+    public void test_writeError_mapsStatusSystemError_for_5xx_codes() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "err");
+        assertTrue(res.body().contains("\"status\":9"), res.body());
+    }
+
+    @Test
+    public void test_writeError_mapsStatusUserError_for_4xx_codes() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "not found");
+        assertTrue(res.body().contains("\"status\":1"), res.body());
+
+        final CapturingResponse res2 = new CapturingResponse();
+        V2EnvelopeWriter.writeError(res2, V2ErrorCode.INVALID_REQUEST, "bad request");
+        assertTrue(res2.body().contains("\"status\":1"), res2.body());
+    }
+
+    @Test
+    public void test_writeInternalError_does_not_leak_throwable_message() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        // Create a logger that does nothing (we just need to not throw)
+        final org.apache.logging.log4j.Logger noopLogger = org.apache.logging.log4j.LogManager.getLogger("test-noop");
+        final Exception secret = new RuntimeException("secret connection string: jdbc:postgresql://10.0.0.1:5432/prod");
+        V2EnvelopeWriter.writeInternalError(res, secret, noopLogger, "/test");
+        final String body = res.body();
+        // Must contain the safe message, not the secret
+        assertTrue(body.contains("internal error"), "expected 'internal error' in body: " + body);
+        assertFalse(body.contains("secret connection string"), "should not leak exception message: " + body);
+        assertFalse(body.contains("10.0.0.1"), "should not leak host details: " + body);
+    }
+
     /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        String characterEncoding;
 
         String body() {
             writer.flush();
@@ -112,11 +168,12 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         // for anything the test does not exercise, return sane defaults otherwise.
         @Override
         public String getCharacterEncoding() {
-            return "UTF-8";
+            return characterEncoding != null ? characterEncoding : "UTF-8";
         }
 
         @Override
         public void setCharacterEncoding(final String s) {
+            this.characterEncoding = s;
         }
 
         @Override

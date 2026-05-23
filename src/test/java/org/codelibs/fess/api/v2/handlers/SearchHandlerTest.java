@@ -70,10 +70,10 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final SearchHandler handler = new SearchHandler();
         final CapturingResponse res = new CapturingResponse();
         handler.handle(new StubRequest("/api/v2/search").withMethod("POST"), res);
-        assertEquals(400, res.status);
+        assertEquals(405, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"status\":1"), body);
-        assertTrue(body.contains("\"code\":\"invalid_request\""), body);
+        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
         assertTrue(body.contains("method not allowed"), body);
     }
 

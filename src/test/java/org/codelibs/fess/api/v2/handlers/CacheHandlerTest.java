@@ -61,8 +61,8 @@ public class CacheHandlerTest extends UnitFessTestCase {
     public void test_rejectsNonGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new CacheHandler().handle(new StubRequest("POST", "/api/v2/cache/abc"), res, "abc");
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     @Test

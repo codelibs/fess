@@ -131,6 +131,46 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_postClickRejectedWithoutCsrfToken_returns403() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/click").withMethod("POST"), res, new NopChain());
+        assertEquals(403, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"forbidden\""), body);
+    }
+
+    @Test
+    public void test_postFavoriteRejectedWithoutCsrfToken_returns403() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/documents/abc123/favorite").withMethod("POST"), res, new NopChain());
+        assertEquals(403, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"forbidden\""), body);
+    }
+
+    @Test
+    public void test_postChatRejectedWithoutCsrfToken_returns403() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/chat").withMethod("POST"), res, new NopChain());
+        assertEquals(403, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"forbidden\""), body);
+    }
+
+    @Test
+    public void test_postChatStreamRejectedWithoutCsrfToken_returns403() throws Exception {
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/chat/stream").withMethod("POST"), res, new NopChain());
+        assertEquals(403, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"forbidden\""), body);
+    }
+
+    @Test
     public void test_getAuthMeWithoutTokenIsExempt() throws Exception {
         final SearchApiV2Manager m = new SearchApiV2Manager();
         final CapturingResponse res = new CapturingResponse();

@@ -92,8 +92,8 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
     public void test_rejectsNonGet() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new UiConfigHandler().handle(new StubRequest("POST", "/api/v2/ui/config"), res);
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
     /**

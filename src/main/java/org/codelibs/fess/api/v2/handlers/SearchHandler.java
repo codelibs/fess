@@ -74,7 +74,7 @@ public class SearchHandler {
      */
     public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
@@ -93,10 +93,7 @@ public class SearchHandler {
             }
             V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("/api/v2/search failed", e);
-            }
-            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/search");
         }
     }
 

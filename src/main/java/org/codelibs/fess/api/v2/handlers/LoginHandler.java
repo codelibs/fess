@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
@@ -52,7 +55,12 @@ import jakarta.servlet.http.HttpSession;
  */
 public class LoginHandler {
 
+    private static final Logger logger = LogManager.getLogger(LoginHandler.class);
+
     private static final int MAX_BODY_BYTES = 4 * 1024;
+
+    /** One-shot warning flag so we log only the first IP-resolve failure per JVM lifetime. */
+    private static final AtomicBoolean ipResolveWarned = new AtomicBoolean(false);
 
     private final LoginRateLimiter limiter;
 
@@ -62,7 +70,7 @@ public class LoginHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -134,6 +142,7 @@ public class LoginHandler {
             // error and must NOT count against the user bucket — otherwise a misconfigured
             // server would lock real users out. We surface INTERNAL_ERROR with a generic
             // message; the exception detail goes to the log only.
+            logger.warn("login failed unexpectedly", e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
@@ -167,7 +176,8 @@ public class LoginHandler {
             payload.put("user", userMap);
         }
         payload.put("csrf_token", token);
-        if (returnTo != null && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+        if (returnTo != null && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.contains("\\")
+                && !returnTo.contains("\0")) {
             payload.put("return_to", returnTo);
         }
         V2EnvelopeWriter.writeSuccess(res, payload);
@@ -186,6 +196,9 @@ public class LoginHandler {
         try {
             return ComponentUtil.getRateLimitHelper().getClientIp(req);
         } catch (final RuntimeException e) {
+            if (ipResolveWarned.compareAndSet(false, true)) {
+                logger.warn("RateLimitHelper.getClientIp unavailable; falling back to getRemoteAddr", e);
+            }
             return req.getRemoteAddr();
         }
     }

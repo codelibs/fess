@@ -134,8 +134,8 @@ public class ChatStreamHandler {
         } catch (final RuntimeException e) {
             // Limiter DI not available (e.g. slim test harness); skip rate limiting rather
             // than failing the request. Production wires it via app.xml.
+            logger.warn("[RAG] /api/v2/chat/stream rate-limit lookup failed", e);
             sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
-            logger.warn("[RAG] /api/v2/chat/stream rate-limit lookup failed. error={}", e.getMessage());
             return;
         }
         final int chatLimit = getChatRateLimitPerMinute(fessConfig);
@@ -183,7 +183,7 @@ public class ChatStreamHandler {
                 try {
                     sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
                 } catch (final Exception ioe) {
-                    logger.warn("Failed to send SSE error after exception. cause={}", ioe.getMessage());
+                    logger.warn("Failed to send SSE error after exception", ioe);
                 }
             }
         }
@@ -197,8 +197,8 @@ public class ChatStreamHandler {
      * @param res the HTTP response to set headers on
      */
     protected void setSseHeaders(final HttpServletResponse res) {
-        res.setContentType("text/event-stream");
         res.setCharacterEncoding("UTF-8");
+        res.setContentType("text/event-stream; charset=UTF-8");
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
         res.setHeader("X-Accel-Buffering", "no");
@@ -334,9 +334,7 @@ public class ChatStreamHandler {
         try {
             sendSseEvent(writer, event, data);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to emit SSE event. event={}, error={}", event, e.getMessage());
-            }
+            logger.warn("Failed to emit SSE event. event={}", event, e);
         }
     }
 

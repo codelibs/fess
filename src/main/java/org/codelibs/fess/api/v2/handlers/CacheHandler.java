@@ -79,7 +79,7 @@ public class CacheHandler {
      */
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "method not allowed");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
         if (StringUtil.isBlank(docId) || !DOC_ID_PATTERN.matcher(docId).matches()) {
@@ -95,6 +95,7 @@ public class CacheHandler {
         try {
             userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
         } catch (final Exception e) {
+            logger.warn("/api/v2/cache: login subsystem lookup failed; treating as anonymous", e);
             userBean = OptionalThing.empty();
         }
         try {
@@ -122,10 +123,7 @@ public class CacheHandler {
             payload.put("content", content);
             V2EnvelopeWriter.writeSuccess(res, payload);
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("/api/v2/cache/{} GET failed", docId, e);
-            }
-            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, e.getMessage());
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
         }
     }
 }
