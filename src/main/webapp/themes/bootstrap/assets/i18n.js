@@ -30,17 +30,39 @@ export async function init() {
     }
   }
   document.documentElement.lang = locale;
+  // Update document.title from the page.title i18n key when available.
+  const pageTitle = messages["page.title"];
+  if (pageTitle) document.title = pageTitle;
   applyDom(document);
 }
 
+/**
+ * Translate a message key with optional parameter substitution.
+ *
+ * Substitution uses replaceAll so every occurrence of {key} is replaced.
+ *
+ * WARNING: substituted values are treated as plain text and must not contain
+ * curly-brace placeholder patterns themselves (e.g. "{n}"). If a value might
+ * contain braces, escape it before passing: val.replace(/\{/g, "&#123;").
+ *
+ * @param {string} key
+ * @param {object} [params] - key→value substitution map, e.g. { n: 42 }
+ * @returns {string}
+ */
 export function t(key, params) {
   let s = messages[key] || key;
-  if (params) for (const [k, v] of Object.entries(params)) s = s.replace("{" + k + "}", String(v));
+  if (params) for (const [k, v] of Object.entries(params)) s = s.replaceAll("{" + k + "}", String(v));
   return s;
 }
 
 export function getLocale() { return locale; }
 
+/**
+ * Apply i18n translations to all data-i18n* elements within root.
+ * Call this on any dynamically-inserted subtree to localise new content.
+ *
+ * @param {Document|Element} root
+ */
 export function applyDom(root) {
   root.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
   root.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder)); });

@@ -1,6 +1,12 @@
 import * as api from "./api.js";
 import { t } from "./i18n.js";
 
+/** Guard: prevent duplicate event-listener registration on hot-reload. */
+let attached = false;
+
+/** AbortController for the most-recent in-flight search; null when idle. */
+let currentSearchAbort = null;
+
 const state = {
   q: "",
   start: 0,
@@ -83,21 +89,30 @@ function renderResults(env) {
 }
 
 async function runSearch() {
+  // Cancel any in-flight request before issuing a new one.
+  if (currentSearchAbort) currentSearchAbort.abort();
+  currentSearchAbort = new AbortController();
+  const signal = currentSearchAbort.signal;
   try {
     const params = { q: state.q, start: state.start, num: state.num };
     if (state.sort) params.sort = state.sort;
     for (const [field, values] of Object.entries(state.facets)) {
       values.forEach(v => { (params["fields." + field] = params["fields." + field] || []).push(v); });
     }
-    const env = await api.get("/search", params);
+    const env = await api.get("/search", params, { signal });
     renderResults(env);
     renderPagination(env);
     const labels = await loadLabels();
     renderFacets(env, labels);
     document.dispatchEvent(new CustomEvent("fess:search:after", { detail: env }));
   } catch (e) {
+    if (e && e.name === "AbortError") return; // request superseded — silently ignore
     const meta = document.getElementById("results-meta");
-    meta.textContent = e.code === "AUTH_REQUIRED" ? t("error.auth_required") : t("error.server");
+    if (e && e.name === "NetworkError") {
+      meta.textContent = t("error.network");
+    } else {
+      meta.textContent = e.code === "AUTH_REQUIRED" ? t("error.auth_required") : t("error.server");
+    }
   }
 }
 
@@ -137,7 +152,20 @@ function hideSuggest() {
   suggestIndex = -1;
 }
 
+/**
+ * Trigger a fresh search with the current state without registering additional
+ * event listeners. Safe to call from app.js after auth changes.
+ */
+export function refresh() {
+  runSearch();
+}
+
 export function attach() {
+  if (attached) {
+    console.warn("search already attached — skipping duplicate attach()");
+    return;
+  }
+  attached = true;
   const form = document.getElementById("search-form");
   const input = document.getElementById("search-input");
   const dropdown = document.getElementById("suggest-dropdown");
@@ -332,4 +360,4 @@ async function toggleFavorite(docId, btn) {
 
 // Exported for later tasks (facets, pagination, etc.) to mutate state and re-run.
 export const _state = state;
-export { runSearch, el, buildResultCard };
+export { runSearch, el, buildResultCard, refresh };

@@ -27,7 +27,9 @@
   "chat.send": "Send",
   "chat.disabled": "Chat is disabled on this server.",
   "chat.thinking": "Thinking...",
-  "error.network": "Network error. Check your connection.",
+  "error.network": "Network error. Please check your connection.",
   "error.server": "Server error. Try again later.",
-  "error.auth_required": "Please log in to continue."
+  "error.auth_required": "Please log in to continue.",
+  "page.title": "Fess Search",
+  "page.heading": "Fess Search"
 }

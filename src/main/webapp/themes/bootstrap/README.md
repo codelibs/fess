@@ -37,13 +37,44 @@ of truth — third-party themes are encouraged to start by copying it.
 | `api.js` | `GET /ui/config` |
 | `auth.js` | `GET /auth/me`, `POST /auth/login`, `POST /auth/logout` |
 | `search.js` | `GET /search`, `GET /suggest-words`, `GET /labels`, `GET /popular-words`, `GET /documents/{id}/favorite`, `POST /documents/{id}/favorite`, `POST /click`, `GET /cache/{id}` (link target) |
-| `chat.js` | `POST /chat`, `GET /chat/stream` (SSE) |
+| `chat.js` | `POST /chat/stream` (streaming SSE via fetch — see below) |
+
+## Streaming chat (`/chat/stream`)
+
+The `/api/v2/chat/stream` endpoint is **POST-only** and requires the
+`X-Fess-CSRF-Token` header. The browser's native `EventSource` API only
+supports GET requests and cannot attach custom headers, so it is
+incompatible with this endpoint.
+
+Use `api.sseStream(path, body, onEvent, onError)` instead:
+
+```js
+import * as api from "./api.js";
+
+const ctrl = api.sseStream("/chat/stream", { q: "my question" }, (event) => {
+  // event.type — e.g. "message", "done", "error", "phase"
+  // event.data — JSON-parsed payload (or raw string if not valid JSON)
+  if (event.type === "message") bubble.textContent += event.data.token ?? "";
+  if (event.type === "done")    ctrl.abort(); // tidy up
+}, (err) => {
+  // err is ApiError (HTTP-level) or NetworkError (offline/DNS).
+  console.error(err);
+});
+
+// Cancel the stream at any time:
+ctrl.abort();
+```
+
+The function returns an `AbortController`. Call `.abort()` to cancel
+the fetch before the server sends a final `done` event (e.g. on user
+navigation or a new submission).
 
 ## CSRF
 
 All state-changing requests echo the token returned by `/ui/config` in
 the `X-Fess-CSRF-Token` HTTP header. The token rotates on login and
-logout; `auth.js` re-reads it from `/ui/config` after each change.
+logout; `auth.js` re-reads it from `/ui/config` after each change (or
+directly from the logout response body if the server embeds it there).
 
 ## XSS-safety
 

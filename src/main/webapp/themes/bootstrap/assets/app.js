@@ -14,7 +14,9 @@ async function main() {
   await auth.attach();
   search.attach();
   chat.attach(); // no-op when rag_chat_enabled is false
-  document.addEventListener("fess:auth:login", () => search.attach());
+  // After login, refresh results without re-attaching event listeners.
+  // search.attach() is idempotent but search.refresh() is semantically cleaner.
+  document.addEventListener("fess:auth:login", () => search.refresh());
 }
 
 if (document.readyState === "loading") {

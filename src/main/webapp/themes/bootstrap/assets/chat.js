@@ -3,6 +3,9 @@ import { t } from "./i18n.js";
 
 let mounted = false;
 
+/** AbortController for the active stream; null when idle. */
+let currentStream = null;
+
 function el(tag, opts) {
   const node = document.createElement(tag);
   if (!opts) return node;
@@ -20,7 +23,7 @@ function appendMsg(log, who, text) {
 }
 
 function buildPanel(column) {
-  // Build chat panel via DOM construction — no innerHTML with dynamic data.
+  // Build chat panel via DOM construction — no dynamic data in markup strings.
   column.innerHTML = "";
   const card = el("div", { className: "card shadow-sm" });
   const header = el("div", { className: "card-header" });
@@ -48,6 +51,7 @@ export function attach() {
   const enabled = !!(cfg && cfg.features && cfg.features.rag_chat_enabled);
   const column = document.getElementById("chat-column");
   if (!column || !enabled || mounted) return;
+  mounted = true;
   column.classList.remove("d-none");
   const { form, input, log } = buildPanel(column);
   form.addEventListener("submit", async ev => {
@@ -57,20 +61,46 @@ export function attach() {
     input.value = "";
     appendMsg(log, "user", q);
     const bubble = appendMsg(log, "assistant", t("chat.thinking"));
-    try {
-      let cleared = false;
-      // TODO Plan 6 follow-up: SSE over POST requires a custom fetch+ReadableStream impl.
-      // EventSource only supports GET, but the v2 /chat/stream endpoint is POST-only;
-      // a future batch must swap this EventSource call for a fetch+ReadableStream reader.
-      const es = api.sse("/chat/stream", { q }, chunk => {
-        if (chunk === "[[DONE]]") { es.close(); return; }
-        if (!cleared) { bubble.textContent = ""; cleared = true; }
-        bubble.textContent += chunk;       // textContent — no XSS
-        log.scrollTop = log.scrollHeight;
-      }, () => { bubble.textContent = t("error.server"); });
-    } catch {
-      bubble.textContent = t("error.server");
+
+    // Abort any in-flight stream before starting a new one.
+    if (currentStream) {
+      currentStream.abort();
+      currentStream = null;
     }
+
+    let cleared = false;
+
+    /**
+     * onEvent — receives parsed SSE frames from api.sseStream.
+     * The server emits typed events: "message" (token), "done", "error", "phase".
+     * All user-visible text is set via textContent — no XSS risk.
+     */
+    function onEvent({ type, data }) {
+      if (type === "done") {
+        currentStream = null;
+        return;
+      }
+      if (type === "error") {
+        bubble.textContent = (data && (data.message || data.error)) || t("error.server");
+        if (currentStream) { currentStream.abort(); currentStream = null; }
+        return;
+      }
+      // "message" (and unrecognised types) — append token to bubble.
+      if (!cleared) { bubble.textContent = ""; cleared = true; }
+      const token = (data && data.token != null) ? String(data.token) : String(data || "");
+      bubble.textContent += token;   // textContent — no XSS
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function onError(err) {
+      currentStream = null;
+      if (err && err.name === "NetworkError") {
+        bubble.textContent = t("error.network");
+      } else {
+        bubble.textContent = t("error.server");
+      }
+    }
+
+    currentStream = api.sseStream("/chat/stream", { q }, onEvent, onError);
   });
-  mounted = true;
 }

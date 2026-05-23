@@ -2,6 +2,8 @@
 <html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fess</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -10,6 +12,8 @@
   <link rel="icon" href="/favicon.ico">
 </head>
 <body>
+  <!-- Visually-hidden h1 for screen readers and SEO; text is updated by i18n.js. -->
+  <h1 class="visually-hidden" data-i18n="page.heading">Fess Search</h1>
   <header class="navbar navbar-expand-lg bg-body-tertiary border-bottom" role="banner">
     <div class="container-fluid">
       <a class="navbar-brand fw-semibold" href="/" id="brand-link">Fess</a>

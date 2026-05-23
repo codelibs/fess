@@ -37,7 +37,25 @@ function setLoggedOut() {
   if (logoutBtn) logoutBtn.classList.add("d-none");
 }
 
-async function rotateCsrf() {
+/**
+ * Attempt to obtain a fresh CSRF token after a session-boundary event (e.g. logout).
+ *
+ * Strategy:
+ *   1. If the server embeds csrf_token in the logout response body (future backend
+ *      enhancement), use that value directly — zero extra round-trip.
+ *   2. Fall back to GET /ui/config to rotate the token, which is what older server
+ *      versions return.
+ *
+ * @param {object|null} logoutEnv - the parsed response envelope from /auth/logout,
+ *   or null when not available. May carry a csrf_token field if the server is new.
+ */
+async function rotateCsrf(logoutEnv) {
+  // Prefer a token returned directly in the logout response body (no extra round-trip).
+  if (logoutEnv && logoutEnv.csrf_token) {
+    api.setCsrfToken(logoutEnv.csrf_token);
+    return;
+  }
+  // Fallback: re-fetch /ui/config to get a fresh token.
   try {
     const env = await api.get("/ui/config");
     api.setCsrfToken(env.csrf_token || "");
@@ -72,8 +90,10 @@ export function attach() {
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
-      try { await api.post("/auth/logout", {}); } catch { /* server may have already invalidated */ }
-      await rotateCsrf();
+      let logoutEnv = null;
+      try { logoutEnv = await api.post("/auth/logout", {}); } catch { /* server may have already invalidated */ }
+      // Pass logoutEnv so rotateCsrf can use an embedded csrf_token if present.
+      await rotateCsrf(logoutEnv);
       setLoggedOut();
       document.dispatchEvent(new CustomEvent("fess:auth:logout"));
     });

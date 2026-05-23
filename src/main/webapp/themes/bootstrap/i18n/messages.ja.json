@@ -27,7 +27,9 @@
   "chat.send": "送信",
   "chat.disabled": "このサーバーではチャットが無効です。",
   "chat.thinking": "考え中...",
-  "error.network": "ネットワークエラーです。接続を確認してください。",
+  "error.network": "ネットワークエラーが発生しました。接続を確認してください。",
   "error.server": "サーバーエラーです。後ほど再試行してください。",
-  "error.auth_required": "続行するにはログインしてください。"
+  "error.auth_required": "続行するにはログインしてください。",
+  "page.title": "Fess 検索",
+  "page.heading": "Fess 検索"
 }

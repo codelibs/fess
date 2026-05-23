@@ -18,7 +18,7 @@
 #chat-column .chat-msg { padding: .5rem .75rem; border-radius: .5rem; margin-bottom: .5rem; max-width: 90%; }
 #chat-column .chat-msg.user { background: var(--bs-primary-bg-subtle); margin-left: auto; }
 #chat-column .chat-msg.assistant { background: var(--bs-tertiary-bg); }
-*:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+#page-root *:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .result-card { transition: none; }
 }
