@@ -15,8 +15,7 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
@@ -149,6 +149,61 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                     "{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
             assertEquals(401, res.status);
             assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_successRotatesAndReturnsFreshCsrfToken() throws Exception {
+        // M-03: on a successful password change, the handler MUST rotate the CSRF token and
+        // return a freshly issued one in the response payload under "csrf_token". This forces
+        // SPA clients to refresh their stored token after the change, defending against an
+        // attacker who exfiltrated the old token via a separate vector (XSS, phishing kit).
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        // Install a real SessionCsrfTokenManager so the handler can rotate + issue.
+        final org.codelibs.fess.helper.SessionCsrfTokenManager csrf = new org.codelibs.fess.helper.SessionCsrfTokenManager();
+        ComponentUtil.register(csrf, "sessionCsrfTokenManager");
+        ComponentUtil.register(csrf, org.codelibs.fess.helper.SessionCsrfTokenManager.class.getCanonicalName());
+        try {
+            // Pre-seed the session with an existing CSRF token so we can verify rotation.
+            final StubSession session = new StubSession();
+            final String preCallToken = csrf.issue(session);
+            assertNotNull(preCallToken, "pre-call token must be non-null");
+
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertTrue(changedCalled[0], "expected UserService.changePassword to be invoked");
+
+            // The response must carry a fresh csrf_token.
+            assertTrue(res.body().contains("\"csrf_token\""), "response must contain csrf_token: " + res.body());
+
+            // The rotated token in the session must differ from the pre-call token.
+            final String freshToken = csrf.issue(session);
+            assertNotNull(freshToken, "fresh token must be non-null");
+            assertNotEquals(preCallToken, freshToken, "csrf_token must have been rotated after password change");
+
+            // The pre-call token must no longer verify — it was rotated out.
+            assertFalse(csrf.verify(session, preCallToken), "pre-call token must be invalid after rotation");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
@@ -457,6 +512,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         private final Map<String, Object> attrs = new HashMap<>();
         private byte[] body;
         private String contentType;
+        private HttpSession session;
 
         StubRequest(final String method, final String uri) {
             this.method = method;
@@ -466,6 +522,11 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         StubRequest withJsonBody(final String json) {
             this.body = json == null ? new byte[0] : json.getBytes(StandardCharsets.UTF_8);
             this.contentType = "application/json";
+            return this;
+        }
+
+        StubRequest withSession(final HttpSession s) {
+            this.session = s;
             return this;
         }
 
@@ -595,12 +656,12 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
         @Override
         public HttpSession getSession(final boolean create) {
-            return null;
+            return session;
         }
 
         @Override
         public HttpSession getSession() {
-            return null;
+            return session;
         }
 
         @Override
@@ -861,6 +922,79 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         @Override
         public jakarta.servlet.ServletConnection getServletConnection() {
             return null;
+        }
+    }
+
+    /**
+     * Minimal {@link HttpSession} stub backed by a {@link ConcurrentHashMap}.
+     * Only the attribute accessors and {@code getId()} are wired; everything
+     * else throws {@link UnsupportedOperationException} to keep the surface
+     * small and failures visible.
+     */
+    private static class StubSession implements HttpSession {
+        private final ConcurrentHashMap<String, Object> attributes = new ConcurrentHashMap<>();
+
+        @Override
+        public Object getAttribute(final String name) {
+            return attributes.get(name);
+        }
+
+        @Override
+        public void setAttribute(final String name, final Object value) {
+            if (value == null) {
+                attributes.remove(name);
+            } else {
+                attributes.put(name, value);
+            }
+        }
+
+        @Override
+        public void removeAttribute(final String name) {
+            attributes.remove(name);
+        }
+
+        @Override
+        public Enumeration<String> getAttributeNames() {
+            return Collections.enumeration(attributes.keySet());
+        }
+
+        @Override
+        public String getId() {
+            return "stub-session-id";
+        }
+
+        @Override
+        public long getCreationTime() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
+        public long getLastAccessedTime() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
+        public jakarta.servlet.ServletContext getServletContext() {
+            return null;
+        }
+
+        @Override
+        public void setMaxInactiveInterval(final int interval) {
+        }
+
+        @Override
+        public int getMaxInactiveInterval() {
+            return -1;
+        }
+
+        @Override
+        public void invalidate() {
+            attributes.clear();
+        }
+
+        @Override
+        public boolean isNew() {
+            return false;
         }
     }
 }

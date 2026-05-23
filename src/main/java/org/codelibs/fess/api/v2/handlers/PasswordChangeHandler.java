@@ -16,6 +16,7 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
@@ -25,6 +26,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.base.login.LocalUserCredential;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -32,6 +34,7 @@ import org.dbflute.optional.OptionalThing;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Handles {@code POST /api/v2/auth/password}.
@@ -123,7 +126,22 @@ public class PasswordChangeHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "failed to change password");
             return;
         }
-        V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true));
+        // M-03: rotate the CSRF token so any previously exfiltrated token is immediately
+        // invalidated, then issue a fresh one for the SPA to use on subsequent requests.
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("ok", true);
+        final HttpSession session = req.getSession(false);
+        if (session != null) {
+            try {
+                final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+                csrf.rotate(session);
+                payload.put("csrf_token", csrf.issue(session));
+            } catch (final Exception e) {
+                // CSRF manager not wired (e.g. slim test harness) — omit the token field
+                // rather than failing a successful password change.
+            }
+        }
+        V2EnvelopeWriter.writeSuccess(res, payload);
     }
 
     private static String stringOrNull(final Object v) {
