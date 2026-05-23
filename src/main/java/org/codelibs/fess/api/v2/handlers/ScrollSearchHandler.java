@@ -55,16 +55,39 @@ import jakarta.servlet.http.HttpServletResponse;
  * not a single object. Error paths still go through {@link V2EnvelopeWriter}
  * so client SDKs see structured failures in the usual shape.</p>
  *
+ * <p><strong>Wire contract — mid-stream error terminator (MJ-22):</strong>
+ * When an exception is thrown after at least one NDJSON line has been written,
+ * the handler emits a final NDJSON record:
+ * {@code {"error":{"code":"internal_error","message":"stream error"}}\n}
+ * and then flushes. Clients MUST check whether the final line contains an
+ * {@code "error"} key to distinguish "stream complete" from "server crashed
+ * mid-stream". If the final-line write itself fails, the stream terminates
+ * without a terminator — this is unavoidable and the client must treat
+ * unexpected EOF as an error.</p>
+ *
+ * <p><strong>Referer allowlist (MJ-21):</strong> v1's {@code SearchApiManager}
+ * enforced {@code isAcceptedSearchReferer} (~line 860) as a browser-driven
+ * scraping defence. v2 omits this check deliberately: idempotent GETs carry
+ * no side-effects that require Referer gating. CSRF protection covers
+ * state-changing endpoints. See {@link SearchHandler} for the same rationale.</p>
+ *
  * <p>The handler is stateless; the manager holds a single shared instance and
- * dispatches concurrent requests through it without locking. The streaming
- * {@link ObjectMapper} is allocated per-request so each writer-bound write
- * session is independent.</p>
+ * dispatches concurrent requests through it without locking. {@link #MAPPER}
+ * is a {@code static final} instance because {@code ObjectMapper} is thread-safe
+ * after configuration (m-11).</p>
  */
 public class ScrollSearchHandler {
 
     private static final Logger logger = LogManager.getLogger(ScrollSearchHandler.class);
 
     private static final String NDJSON_CONTENT_TYPE = "application/x-ndjson; charset=UTF-8";
+
+    /**
+     * Shared, thread-safe {@link ObjectMapper} instance (m-11).
+     * {@code ObjectMapper} is safe to share after construction; hoisting here
+     * avoids per-request allocation while keeping each write session independent.
+     */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * Processes one {@code /api/v2/documents/all} request.
@@ -81,6 +104,7 @@ public class ScrollSearchHandler {
      */
     public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -99,10 +123,6 @@ public class ScrollSearchHandler {
             final QueryFieldConfig queryFieldConfig = ComponentUtil.getQueryFieldConfig();
             response.setContentType(NDJSON_CONTENT_TYPE);
             final PrintWriter writer = response.getWriter();
-            // A single ObjectMapper per request is plenty — Jackson Maps the same shared
-            // SerializerProvider, and we never close the writer mid-stream so subsequent
-            // writes keep working until the helper finishes scrolling.
-            final ObjectMapper mapper = new ObjectMapper();
             final V2JsonRequestParams params = new V2JsonRequestParams(request, fessConfig);
             final long count = searchHelper.scrollSearch(params, doc -> {
                 final Map<String, Object> filtered = filterDoc(doc, queryFieldConfig);
@@ -112,7 +132,7 @@ public class ScrollSearchHandler {
                     // writeValue(writer, …) leaves the writer open between calls when the
                     // target is a Writer (not OutputStream) — required so we can keep
                     // streaming subsequent NDJSON lines.
-                    mapper.writeValue(writer, line);
+                    MAPPER.writeValue(writer, line);
                     writer.write('\n');
                     wroteAnyLine[0] = true;
                 } catch (final IOException e) {
@@ -134,10 +154,24 @@ public class ScrollSearchHandler {
             throw e.getCause();
         } catch (final Exception e) {
             if (wroteAnyLine[0]) {
-                // Response body is partial NDJSON; writing a JSON envelope now would corrupt the
-                // stream for clients. Log WARN and return — the truncated stream is the best we
-                // can do at this point. Interrupting the in-flight LLM call is out of scope.
+                // Response body is partial NDJSON — we cannot emit a JSON error envelope
+                // without corrupting the stream. Per the wire contract (MJ-22), emit a
+                // final NDJSON error-terminator line so clients can distinguish
+                // "stream complete" from "server crashed mid-stream".
                 logger.warn("/api/v2/documents/all failed after partial write", e);
+                try {
+                    final PrintWriter w = response.getWriter();
+                    final Map<String, Object> errLine = new LinkedHashMap<>();
+                    final Map<String, Object> errBody = new LinkedHashMap<>();
+                    errBody.put("code", "internal_error");
+                    errBody.put("message", "stream error");
+                    errLine.put("error", errBody);
+                    MAPPER.writeValue(w, errLine);
+                    w.write('\n');
+                    response.flushBuffer();
+                } catch (final Exception flushEx) {
+                    logger.warn("/api/v2/documents/all: could not write error terminator", flushEx);
+                }
             } else {
                 V2EnvelopeWriter.writeInternalError(response, e, logger, "/api/v2/documents/all");
             }

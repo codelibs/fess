@@ -16,7 +16,6 @@
 package org.codelibs.fess.api.v2.handlers;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -110,6 +109,7 @@ public class FavoritePostHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
+            res.setHeader("Allow", "POST");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -157,9 +157,14 @@ public class FavoritePostHandler {
             return;
         }
 
+        // MJ-23: query_id arrives in a JSON body — it is already plain text (not
+        // URL-encoded). Passing it through URLDecoder.decode would silently mangle
+        // values that legitimately contain '+' or '%xx' characters. The wire contract
+        // is that query_id is whatever the /search endpoint returned in its query_id
+        // field, treated as opaque. Pass it directly to getResultDocIds.
         final String[] docIds;
         try {
-            docIds = userInfoHelper.getResultDocIds(URLDecoder.decode(queryId, Constants.UTF_8));
+            docIds = userInfoHelper.getResultDocIds(queryId);
         } catch (final Exception e) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid query_id");
             return;

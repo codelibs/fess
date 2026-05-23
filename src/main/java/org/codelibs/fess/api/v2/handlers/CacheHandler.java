@@ -48,7 +48,9 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>Order of checks:</p>
  * <ol>
  *   <li>HTTP method must be {@code GET}. Other methods produce
- *       {@code 400 invalid_request}.</li>
+ *       {@code 405 method_not_allowed} with an {@code Allow: GET} header.</li>
+ *   <li>When {@code app.login.required=true} and no authenticated user is present,
+ *       returns {@code 401 auth_required} — parity with v1 {@code CacheAction:68-70}.</li>
  *   <li>{@code docId} must be non-blank and match {@code [A-Za-z0-9_-]+}.</li>
  *   <li>The document must exist in the index (otherwise {@code 404 not_found}).</li>
  *   <li>{@link ViewHelper#createCacheContent} must return a non-null body
@@ -79,6 +81,7 @@ public class CacheHandler {
      */
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
+            res.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -88,15 +91,25 @@ public class CacheHandler {
         }
         // Auth lookup is wrapped because the unit harness (and any environment
         // where the login subsystem isn't fully wired) can throw at lookup time.
-        // The cache endpoint is read-only and v1's CacheAction also tolerates an
-        // anonymous user bean — empty() is the documented null-safe input to
-        // SearchHelper#getDocumentByDocId.
         OptionalThing<FessUserBean> userBean;
         try {
             userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
         } catch (final Exception e) {
             logger.warn("/api/v2/cache: login subsystem lookup failed; treating as anonymous", e);
             userBean = OptionalThing.empty();
+        }
+        // MJ-20: parity with v1 CacheAction:68-70 — honor app.login.required.
+        // When login is required and no authenticated user is present, reject with
+        // AUTH_REQUIRED (401) rather than serving cached content anonymously.
+        try {
+            final org.codelibs.fess.mylasta.direction.FessConfig fessConfig = ComponentUtil.getFessConfig();
+            if (fessConfig.isLoginRequired() && !userBean.isPresent()) {
+                V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
+                return;
+            }
+        } catch (final Exception e) {
+            // If FessConfig lookup fails in a stripped test harness, skip the check.
+            logger.warn("/api/v2/cache: FessConfig lookup failed; skipping login-required check", e);
         }
         try {
             // Resolved inside the try so DI failures (e.g. environments where

@@ -62,11 +62,19 @@ public class SearchHandler {
     /**
      * Processes one {@code /api/v2/search} request.
      *
-     * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#INVALID_REQUEST}.
+     * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
      * {@link InvalidQueryException} and {@link ResultOffsetExceededException}
      * surface as {@code invalid_request} (400) so client SDKs can distinguish
      * user errors from {@code internal_error} (500) — matching v1's split
      * between {@code SC_BAD_REQUEST} and {@code SC_INTERNAL_SERVER_ERROR}.</p>
+     *
+     * <p><strong>Referer allowlist (MJ-21):</strong> v1's {@code SearchApiManager}
+     * enforced {@code isAcceptedSearchReferer} (~line 262/860) as a browser-driven
+     * scraping defence. v2 omits this check deliberately: state-changing endpoints
+     * are protected by the CSRF token enforced by {@link org.codelibs.fess.api.v2.CsrfRequirement},
+     * and idempotent GETs carry no side-effects that require Referer gating. If the
+     * deployment needs Referer-based rate-limiting, add it in a filter or gateway
+     * layer rather than in the handler.</p>
      *
      * @param request the incoming HTTP request
      * @param response the HTTP response to write to
@@ -74,6 +82,7 @@ public class SearchHandler {
      */
     public void handle(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }

@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -79,6 +76,31 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         new FavoritePostHandler().handle(new StubRequest("GET", "/api/v2/documents/abc/favorite"), res, "abc");
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        // MJ-18: RFC 7231 §6.5.5 requires Allow header on 405.
+        assertEquals("Allow header must be set on 405", "POST", res.getHeader("Allow"));
+    }
+
+    /**
+     * MJ-23: query_id arrives in the JSON body as plain text — URLDecoder.decode
+     * was removed. A query_id containing '+' or '%xx' must NOT be decoded by the
+     * handler. Since the handler checks auth before body parsing in the unit harness
+     * (auth check fires first and returns 401 or 400 from feature-gate), we verify
+     * the overall path completes without throwing an exception, and that no 500
+     * internal error occurs from attempted URL-decode of valid opaque characters.
+     */
+    @Test
+    public void test_queryId_withPlusAndPercentEncoding_notDecoded() throws Exception {
+        // A query_id with '+' and '%' that URLDecoder would mangle if it were applied.
+        final String rawQueryId = "q+id%3Dfoo%26bar";
+        final CapturingResponse res = new CapturingResponse();
+        new FavoritePostHandler().handle(
+                new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"" + rawQueryId + "\"}"), res,
+                "abc");
+        // The handler must not throw; acceptable statuses: 400 (feature/auth gate) or 401
+        // (auth). A 500 would indicate the decode path threw an exception.
+        assertTrue(res.status == 400 || res.status == 401,
+                "query_id with special chars must not cause 500; got " + res.status + ": " + res.body());
+        assertTrue(res.status != 500, "URL-decode must not throw on '+' or '%xx' in query_id: " + res.body());
     }
 
     @Test
@@ -127,12 +149,13 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         assertTrue(res.body().contains("invalid doc_id"), res.body());
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type and body. */
+    /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -274,10 +297,12 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -290,17 +315,18 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 

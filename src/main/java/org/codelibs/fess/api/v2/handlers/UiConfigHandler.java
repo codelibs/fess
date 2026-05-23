@@ -57,6 +57,7 @@ public class UiConfigHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
+            res.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -106,11 +107,21 @@ public class UiConfigHandler {
             // Server-wide supported language list, surfaced as plain JSON array of codes.
             final String[] langs = cfg.getSupportedLanguagesAsArray();
 
-            // Issue (or echo) a CSRF token so the SPA can immediately POST. Using
-            // getSession(true) ensures the session exists even on the very first request.
-            final HttpSession session = req.getSession(true);
-            final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
-            final String csrfToken = csrf == null ? "" : csrf.issue(session);
+            // m-14: expose whether CSRF is required so the SPA can decide whether to
+            // send the X-Fess-CSRF-Token header. When csrf_required=false the SPA MAY
+            // omit the header; when true it MUST include it for all state-changing
+            // requests. The csrf_token field is only populated when csrf_required=true
+            // (empty string otherwise) to avoid issuing a session-bound token that the
+            // SPA will never use.
+            final boolean csrfRequired = cfg.isThemeApiCsrfRequired();
+            String csrfToken = "";
+            if (csrfRequired) {
+                // Issue (or echo) a CSRF token so the SPA can immediately POST. Using
+                // getSession(true) ensures the session exists even on the very first request.
+                final HttpSession session = req.getSession(true);
+                final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
+                csrfToken = csrf == null ? "" : csrf.issue(session);
+            }
 
             final Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("site_name", siteName);
@@ -120,6 +131,7 @@ public class UiConfigHandler {
             payload.put("features", features);
             payload.put("page_size_default", cfg.getPagingSearchPageSizeAsInteger());
             payload.put("page_size_max", cfg.getPagingSearchPageMaxSizeAsInteger());
+            payload.put("csrf_required", csrfRequired);
             payload.put("csrf_token", csrfToken);
             V2EnvelopeWriter.writeSuccess(res, payload);
         } catch (final Exception e) {

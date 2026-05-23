@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,7 +25,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -59,10 +58,24 @@ public class ClickHandlerTest extends UnitFessTestCase {
 
     @Test
     public void test_missingDocIdReturnsInvalidRequest() throws Exception {
-        final CapturingResponse res = new CapturingResponse();
-        new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"query_id\":\"q\"}"), res);
-        assertEquals(400, res.status);
-        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        // The handler now checks user session BEFORE body parse (m-15). Register a stub
+        // UserInfoHelper that returns a non-null userCode so the handler proceeds to body
+        // validation. Without this stub the anonymous short-circuit fires first.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"query_id\":\"q\"}"), res);
+            assertEquals(400, res.status);
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
     }
 
     @Test
@@ -71,6 +84,38 @@ public class ClickHandlerTest extends UnitFessTestCase {
         new ClickHandler().handle(new StubRequest("GET", "/api/v2/click"), res);
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        // MJ-18: RFC 7231 §6.5.5 requires Allow header on 405.
+        assertEquals("Allow header must be set on 405", "POST", res.getHeader("Allow"));
+    }
+
+    /**
+     * m-15: anonymous callers (no user session) must short-circuit BEFORE body parse.
+     * A malformed-JSON body with an anonymous request MUST return 200 logged:false,
+     * NOT 400 invalid_request. This verifies the reorder places session check before
+     * JSON parsing.
+     *
+     * <p>In the unit harness getUserCode() typically returns null (no session),
+     * which is the anonymous branch. If isSearchLog() is also false the handler
+     * returns logged:false from the feature-flag gate before reaching the session
+     * check. Either way, a 400 from JSON parsing MUST NOT occur.</p>
+     */
+    @Test
+    public void test_anonymous_shortCircuitsBeforeBodyParse() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        // Supply a deliberately malformed JSON body. If the handler parses body before
+        // the anonymous check, this would yield 400. With correct ordering it yields
+        // 200 logged:false (feature disabled or no session).
+        new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{{{MALFORMED"), res);
+        final String body = res.body();
+        // Must not be 400 (which would mean body was parsed before the anonymous check).
+        assertTrue(res.status != 400, "anonymous with malformed body must not return 400; got " + res.status + ": " + body);
+        // The two acceptable success outcomes: feature disabled or anonymous short-circuit.
+        if (res.status == 200) {
+            assertTrue(body.contains("\"logged\":false"), "expected logged:false in: " + body);
+        } else {
+            // Any other status besides 400 and 200 is acceptable in edge cases.
+            assertTrue(res.status != 400, "must not yield 400 invalid_request for anonymous: " + body);
+        }
     }
 
     @Test
@@ -93,12 +138,13 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type and body. */
+    /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -240,10 +286,12 @@ public class ClickHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -256,17 +304,18 @@ public class ClickHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 

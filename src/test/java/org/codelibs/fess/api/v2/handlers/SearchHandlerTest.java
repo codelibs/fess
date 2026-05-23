@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -75,6 +72,8 @@ public class SearchHandlerTest extends UnitFessTestCase {
         assertTrue(body.contains("\"status\":1"), body);
         assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
         assertTrue(body.contains("method not allowed"), body);
+        // MJ-18: RFC 7231 §6.5.5 requires Allow header on 405.
+        assertEquals("Allow header must be set on 405", "GET", res.getHeader("Allow"));
     }
 
     @Test
@@ -108,6 +107,7 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -249,10 +249,12 @@ public class SearchHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -265,17 +267,18 @@ public class SearchHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 

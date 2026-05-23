@@ -57,6 +57,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * client doesn't need to branch on configuration. When the user has no session
  * (anonymous), the handler also returns {@code logged:false} because a click
  * log without a session id is meaningless.</p>
+ *
+ * <p><strong>Order of checks (m-15):</strong> HTTP method → feature flag →
+ * session check (anonymous short-circuits <em>before</em> body parse) → body
+ * parse → doc_id validation. This avoids wasting CPU on JSON parsing for
+ * anonymous callers or when the search-log feature is disabled.</p>
  */
 public class ClickHandler {
 
@@ -69,18 +74,6 @@ public class ClickHandler {
     // Conservative whitelist — see FavoriteGetHandler for rationale.
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
-    /**
-     * Processes one {@code /api/v2/click} request.
-     *
-     * <p>Order of checks: HTTP method must be POST, body must parse, doc_id
-     * must be present and match the safety regex. If the search-log feature
-     * is disabled the handler returns 200 with {@code logged:false} as a
-     * fire-and-forget contract for the client.</p>
-     *
-     * @param req the incoming HTTP request
-     * @param res the HTTP response to write to
-     * @throws IOException if writing the envelope fails
-     */
     private static String stringOrNull(final Map<String, Object> body, final String key) {
         final Object v = body.get(key);
         if (v == null) {
@@ -92,9 +85,38 @@ public class ClickHandler {
         return (String) v;
     }
 
+    /**
+     * Processes one {@code /api/v2/click} request.
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
+            res.setHeader("Allow", "POST");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            return;
+        }
+        final FessConfig cfg = ComponentUtil.getFessConfig();
+        if (!cfg.isSearchLog()) {
+            // Feature disabled — succeed without doing anything (fire-and-forget contract).
+            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
+            return;
+        }
+        // m-15: check session BEFORE parsing the body so anonymous callers short-circuit
+        // immediately and malformed-body errors are not reported for anonymous requests.
+        // Defensive against missing UserInfoHelper in slim test DI graphs — treat as anonymous.
+        String userSessionId = null;
+        try {
+            userSessionId = ComponentUtil.getUserInfoHelper().getUserCode();
+        } catch (final RuntimeException e) {
+            // UserInfoHelper unavailable (e.g. unit harness): behave as anonymous.
+        }
+        if (userSessionId == null) {
+            // Anonymous caller: a click log without a session id is meaningless,
+            // so report success with logged:false rather than failing the request.
+            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
             return;
         }
         final Map<String, Object> body;
@@ -111,12 +133,6 @@ public class ClickHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
-        final FessConfig cfg = ComponentUtil.getFessConfig();
-        if (!cfg.isSearchLog()) {
-            // Feature disabled — succeed without doing anything (fire-and-forget contract).
-            V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
-            return;
-        }
         try {
             final SearchHelper searchHelper = ComponentUtil.getSearchHelper();
             final OptionalEntity<Map<String, Object>> docOpt = searchHelper.getDocumentByDocId(docId,
@@ -127,13 +143,6 @@ public class ClickHandler {
             }
             final Map<String, Object> doc = docOpt.get();
             final String url = DocumentUtil.getValue(doc, cfg.getIndexFieldUrl(), String.class);
-            final String userSessionId = ComponentUtil.getUserInfoHelper().getUserCode();
-            if (userSessionId == null) {
-                // Anonymous caller: a click log without a session id is meaningless,
-                // so report success with logged:false rather than failing the request.
-                V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true, "logged", false));
-                return;
-            }
             final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
             final ClickLog clickLog = new ClickLog();
             clickLog.setUrlId((String) doc.get(cfg.getIndexFieldId()));

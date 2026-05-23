@@ -79,7 +79,7 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         if (res.status == 200) {
             final String body = res.body();
             for (final String key : new String[] { "\"site_name\"", "\"login_required\"", "\"locales\"", "\"theme\"", "\"features\"",
-                    "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"" }) {
+                    "\"csrf_required\"", "\"csrf_token\"", "\"page_size_default\"", "\"page_size_max\"" }) {
                 assertTrue(body.contains(key), "missing key: " + key + " in " + body);
             }
         } else {
@@ -94,6 +94,41 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         new UiConfigHandler().handle(new StubRequest("POST", "/api/v2/ui/config"), res);
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        // MJ-18: RFC 7231 §6.5.5 requires Allow header on 405.
+        assertEquals("Allow header must be set on 405", "GET", res.getHeader("Allow"));
+    }
+
+    /**
+     * m-14: when {@code theme.api.csrf.required=true} (default), the response must
+     * include both {@code csrf_required:true} and a non-empty {@code csrf_token}.
+     * When false, {@code csrf_required:false} must be present and {@code csrf_token}
+     * must be empty string.
+     *
+     * <p>The unit harness returns the FessConfig default value. We register a VirtualHostHelper
+     * and ThemeRegistry stub so the handler reaches the payload-assembly section.</p>
+     */
+    @Test
+    public void test_csrfRequiredField_presentInPayload() throws Exception {
+        // Register stubs so the handler's theme block doesn't throw and swallow the payload.
+        ComponentUtil.register(new StubThemeRegistry(java.util.Optional.empty()),
+                org.codelibs.fess.theme.ThemeRegistry.class.getCanonicalName());
+        ComponentUtil.register(new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        }, "virtualHostHelper");
+        final CapturingResponse res = new CapturingResponse();
+        new UiConfigHandler().handle(new StubRequest("GET", "/api/v2/ui/config").withSession(new StubSession()), res);
+        assertTrue(res.status == 200 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        if (res.status == 200) {
+            final String body = res.body();
+            // csrf_required field must always be present (m-14).
+            assertTrue(body.contains("\"csrf_required\""), "csrf_required field missing in: " + body);
+            // The value is a boolean — check for true or false.
+            assertTrue(body.contains("\"csrf_required\":true") || body.contains("\"csrf_required\":false"),
+                    "csrf_required must be a boolean in: " + body);
+        }
     }
 
     /**
@@ -204,12 +239,13 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
         }
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type and body. */
+    /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -351,10 +387,12 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -367,17 +405,18 @@ public class UiConfigHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 
