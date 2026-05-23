@@ -19,12 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -38,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.web.util.LaServletContextUtil;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 
 /**
@@ -74,8 +77,46 @@ public class StaticThemeInstaller {
     private int maxEntries = 1000;
     private int maxCompressionRatio = 100;
 
-    /** Pattern from spec §4.2: theme names must match this regex. */
-    private static final Pattern NAME_RE = Pattern.compile("^[a-z0-9][a-z0-9_-]{0,63}$");
+    /**
+     * Wire configuration keys from {@link FessConfig} and sweep JVM-crash
+     * orphan staging directories at container startup.
+     *
+     * <p>Hardcoded field values above serve as defaults when {@code FessConfig}
+     * is absent (e.g. unit tests where DI is not set up).</p>
+     */
+    @PostConstruct
+    public void init() {
+        if (fessConfig != null) {
+            try {
+                final Integer cfgExtracted = fessConfig.getThemeUploadMaxExtractedSizeAsInteger();
+                if (cfgExtracted != null) {
+                    maxExtractedSize = cfgExtracted.longValue();
+                }
+                final Integer cfgEntries = fessConfig.getThemeUploadMaxEntriesAsInteger();
+                if (cfgEntries != null) {
+                    maxEntries = cfgEntries;
+                }
+                final Integer cfgRatio = fessConfig.getThemeUploadMaxCompressionRatioAsInteger();
+                if (cfgRatio != null) {
+                    maxCompressionRatio = cfgRatio;
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to read theme upload config from FessConfig; using defaults", e);
+            }
+        }
+        // Sweep JVM-crash orphan staging directories from previous runs.
+        try {
+            cleanupOldAtticDirs(resolveThemesDir());
+        } catch (final Exception e) {
+            logger.warn("Failed to sweep orphan staging dirs at startup", e);
+        }
+    }
+
+    /**
+     * Pattern from spec §4.2 — delegated to {@link ThemeManifest#NAME_PATTERN}
+     * to avoid drift between the two identical regexes.
+     */
+    private static final Pattern NAME_RE = ThemeManifest.NAME_PATTERN;
 
     /**
      * Denylist of path segments that must never appear in a ZIP entry name.
@@ -363,10 +404,10 @@ public class StaticThemeInstaller {
         if (p == null || !Files.exists(p)) {
             return;
         }
-        try {
-            Files.walk(p).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+        try (Stream<Path> walk = Files.walk(p)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(x -> {
                 try {
-                    Files.delete(x);
+                    Files.deleteIfExists(x);
                 } catch (final Exception ignore) {
                     // best effort cleanup
                 }
@@ -410,12 +451,22 @@ public class StaticThemeInstaller {
         if (themesDir == null || !Files.isDirectory(themesDir)) {
             return;
         }
-        // TODO: extract to FessConfig — using DEFAULT_ATTIC_RETENTION_DAYS for now
-        final int retentionDays = DEFAULT_ATTIC_RETENTION_DAYS;
+        int retentionDays = DEFAULT_ATTIC_RETENTION_DAYS;
+        if (fessConfig != null) {
+            try {
+                final Integer cfg = fessConfig.getThemeUploadAtticRetentionDaysAsInteger();
+                if (cfg != null) {
+                    retentionDays = cfg;
+                }
+            } catch (final Exception ignore) {
+                // FessConfig unavailable during unit tests — use default
+            }
+        }
         final Instant atticCutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
         final Instant stagingCutoff = Instant.now().minus(ORPHAN_STAGING_MAX_AGE_HOURS, ChronoUnit.HOURS);
         try (Stream<Path> entries = Files.list(themesDir)) {
-            entries.filter(Files::isDirectory).forEach(p -> {
+            // NOFOLLOW_LINKS: never follow symlinks when scanning for attic/staging dirs.
+            entries.filter(p -> Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)).forEach(p -> {
                 final String fname = p.getFileName().toString();
                 final boolean isAttic = fname.startsWith(".attic-");
                 final boolean isStaging = fname.startsWith(".staging-");

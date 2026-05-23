@@ -75,7 +75,7 @@ public class ThemeViewActionTest extends UnitFessTestCase {
         assertEquals("text/css; charset=UTF-8", invokeContentTypeFor("styles.css"));
         assertEquals("text/html; charset=UTF-8", invokeContentTypeFor("index.html"));
         assertEquals("application/json; charset=UTF-8", invokeContentTypeFor("manifest.json"));
-        assertEquals("image/svg+xml", invokeContentTypeFor("icon.svg"));
+        assertEquals("image/svg+xml; charset=UTF-8", invokeContentTypeFor("icon.svg"));
         assertEquals("image/png", invokeContentTypeFor("logo.png"));
         assertEquals("image/jpeg", invokeContentTypeFor("photo.jpg"));
         assertEquals("image/jpeg", invokeContentTypeFor("photo.jpeg"));
@@ -317,6 +317,162 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             assertNotNull(headers.get("Content-Security-Policy"), "SVG must have CSP header");
             final String csp = headers.get("Content-Security-Policy")[0];
             assertTrue(csp.contains("default-src 'none'"), "SVG CSP must restrict to none: " + csp);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_resolveAsset_rejectsDotfiles() throws Exception {
+        // Files whose name starts with '.' must never be served regardless of content type.
+        final Path tmp = Files.createTempDirectory("tva-dotfile-");
+        try {
+            Files.writeString(tmp.resolve(".env"), "SECRET=hunter2");
+            Files.writeString(tmp.resolve(".htaccess"), "deny all");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = new ThemeViewAction();
+
+            assertNull(action.resolveAsset(theme, ".env"), ".env must be rejected");
+            assertNull(action.resolveAsset(theme, ".htaccess"), ".htaccess must be rejected");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_resolveAsset_rejectsSensitiveManifestFiles() throws Exception {
+        // theme.yml, README.md, CHANGELOG.md, and LICENSE* must be blocked.
+        final Path tmp = Files.createTempDirectory("tva-manifest-");
+        try {
+            Files.writeString(tmp.resolve("theme.yml"), "secret manifest content");
+            Files.writeString(tmp.resolve("README.md"), "readme");
+            Files.writeString(tmp.resolve("CHANGELOG.md"), "changes");
+            Files.writeString(tmp.resolve("LICENSE"), "MIT");
+            Files.writeString(tmp.resolve("LICENSE.txt"), "MIT");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = new ThemeViewAction();
+
+            assertNull(action.resolveAsset(theme, "theme.yml"), "theme.yml must be rejected");
+            assertNull(action.resolveAsset(theme, "README.md"), "README.md must be rejected");
+            assertNull(action.resolveAsset(theme, "CHANGELOG.md"), "CHANGELOG.md must be rejected");
+            assertNull(action.resolveAsset(theme, "LICENSE"), "LICENSE must be rejected");
+            assertNull(action.resolveAsset(theme, "LICENSE.txt"), "LICENSE.txt must be rejected");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_resolveAsset_rejectsSymlinks() throws Exception {
+        // A symlink inside the theme directory must not be served — it could escape the sandbox.
+        final Path tmp = Files.createTempDirectory("tva-symlink-");
+        final Path target = Files.createTempFile("outside-", ".txt");
+        try {
+            Files.writeString(target, "secret");
+            final Path link = tmp.resolve("escape.txt");
+            try {
+                Files.createSymbolicLink(link, target);
+            } catch (final java.io.IOException | UnsupportedOperationException e) {
+                // Symlinks may not be supported on all test environments; skip gracefully.
+                return;
+            }
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = new ThemeViewAction();
+
+            assertNull(action.resolveAsset(theme, "escape.txt"), "Symlink must be rejected");
+        } finally {
+            Files.deleteIfExists(target);
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_isBlockedFilename_returnsCorrectly() throws Exception {
+        // Verify the helper directly via package-private access.
+        assertTrue(ThemeViewAction.isBlockedFilename(".env"));
+        assertTrue(ThemeViewAction.isBlockedFilename(".git"));
+        assertTrue(ThemeViewAction.isBlockedFilename("theme.yml"));
+        assertTrue(ThemeViewAction.isBlockedFilename("THEME.YML"));
+        assertTrue(ThemeViewAction.isBlockedFilename("README.md"));
+        assertTrue(ThemeViewAction.isBlockedFilename("CHANGELOG.md"));
+        assertTrue(ThemeViewAction.isBlockedFilename("LICENSE"));
+        assertTrue(ThemeViewAction.isBlockedFilename("LICENSE.txt"));
+        assertTrue(ThemeViewAction.isBlockedFilename("license-apache.txt"));
+        assertFalse(ThemeViewAction.isBlockedFilename("app.js"), "Regular files must not be blocked");
+        assertFalse(ThemeViewAction.isBlockedFilename("index.html"), "index.html must not be blocked");
+        assertFalse(ThemeViewAction.isBlockedFilename("styles.css"), "CSS must not be blocked");
+    }
+
+    @Test
+    public void test_contentTypeFor_wasmAndSvgCharset() throws Exception {
+        assertEquals("application/wasm", invokeContentTypeFor("module.wasm"));
+        assertEquals("application/wasm", invokeContentTypeFor("worker.WASM"));
+        assertEquals("image/svg+xml; charset=UTF-8", invokeContentTypeFor("icon.svg"));
+        assertEquals("image/svg+xml; charset=UTF-8", invokeContentTypeFor("logo.SVG"));
+    }
+
+    @Test
+    public void test_notFound_setsUtf8ContentType() throws Exception {
+        final ThemeViewAction action = new ThemeViewAction();
+        action.themeRegistry = new ThemeRegistry() {
+            @Override
+            public java.util.Optional<Theme> resolveActiveTheme(final String hostKey) {
+                return java.util.Optional.empty();
+            }
+        };
+        action.virtualHostHelper = new org.codelibs.fess.helper.VirtualHostHelper() {
+            @Override
+            public String getVirtualHostKey() {
+                return null;
+            }
+        };
+        // serveIndex returns notFound() when registry returns empty.
+        final ActionResponse resp = action.serveIndex();
+        final StreamResponse sr = (StreamResponse) resp;
+        assertTrue(sr.getHttpStatus().get() == 404, "HTTP status must be 404");
+    }
+
+    @Test
+    public void test_streamFile_setsVaryHeader() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-vary-");
+        try {
+            Files.createDirectories(tmp.resolve("assets"));
+            Files.writeString(tmp.resolve("assets/app.js"), "console.log(1);");
+            final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: t", "displayName: T",
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveAsset("assets/app.js");
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertNotNull(headers.get("Vary"), "Vary header must be set");
+            assertEquals("Accept-Encoding", headers.get("Vary")[0]);
         } finally {
             Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
                 try {

@@ -15,10 +15,6 @@
  */
 package org.codelibs.fess.filter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -152,6 +148,22 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
             f.doFilter(req, new StubResponse(), chain);
             assertTrue(chain.called, "Expected pass-through for " + uri);
         }
+    }
+
+    @Test
+    public void test_nonHttpRequestPassesThroughWithoutClassCastException() throws Exception {
+        // Guard: non-HttpServletRequest must be forwarded to the chain without
+        // triggering a ClassCastException. This exercises the defensive cast guard
+        // added for cross-context or non-HTTP dispatch scenarios.
+        final Theme staticTheme = new Theme(ThemeType.STATIC, "t", Paths.get("/tmp/t"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+
+        // A plain ServletRequest/ServletResponse that is NOT an HttpServletRequest.
+        final StubChain chain = new StubChain();
+        f.doFilter(new NonHttpStubRequest(), new NonHttpStubResponse(), chain);
+        assertTrue(chain.called, "Non-HTTP request must pass through without ClassCastException");
     }
 
     // ===== Stubs =====
@@ -743,6 +755,282 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         @Override
         public jakarta.servlet.ServletConnection getServletConnection() {
             return null;
+        }
+    }
+
+    /**
+     * A plain {@link jakarta.servlet.ServletRequest} that does NOT implement
+     * {@link HttpServletRequest}, used to exercise the defensive cast guard in
+     * {@link StaticThemeFilter#doFilter}.
+     */
+    static class NonHttpStubRequest implements jakarta.servlet.ServletRequest {
+        @Override
+        public Object getAttribute(final String name) {
+            return null;
+        }
+
+        @Override
+        public Enumeration<String> getAttributeNames() {
+            return Collections.emptyEnumeration();
+        }
+
+        @Override
+        public String getCharacterEncoding() {
+            return null;
+        }
+
+        @Override
+        public void setCharacterEncoding(final String env) {
+        }
+
+        @Override
+        public int getContentLength() {
+            return 0;
+        }
+
+        @Override
+        public long getContentLengthLong() {
+            return 0;
+        }
+
+        @Override
+        public String getContentType() {
+            return null;
+        }
+
+        @Override
+        public jakarta.servlet.ServletInputStream getInputStream() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getParameter(final String name) {
+            return null;
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            return Collections.emptyEnumeration();
+        }
+
+        @Override
+        public String[] getParameterValues(final String name) {
+            return null;
+        }
+
+        @Override
+        public java.util.Map<String, String[]> getParameterMap() {
+            return Collections.emptyMap();
+        }
+
+        @Override
+        public String getProtocol() {
+            return "HTTP/1.1";
+        }
+
+        @Override
+        public String getScheme() {
+            return "http";
+        }
+
+        @Override
+        public String getServerName() {
+            return "localhost";
+        }
+
+        @Override
+        public int getServerPort() {
+            return 8080;
+        }
+
+        @Override
+        public java.io.BufferedReader getReader() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getRemoteAddr() {
+            return "127.0.0.1";
+        }
+
+        @Override
+        public String getRemoteHost() {
+            return "localhost";
+        }
+
+        @Override
+        public void setAttribute(final String name, final Object o) {
+        }
+
+        @Override
+        public void removeAttribute(final String name) {
+        }
+
+        @Override
+        public java.util.Locale getLocale() {
+            return java.util.Locale.ROOT;
+        }
+
+        @Override
+        public Enumeration<java.util.Locale> getLocales() {
+            return Collections.enumeration(java.util.Collections.singleton(java.util.Locale.ROOT));
+        }
+
+        @Override
+        public boolean isSecure() {
+            return false;
+        }
+
+        @Override
+        public RequestDispatcher getRequestDispatcher(final String path) {
+            return null;
+        }
+
+        @Override
+        public int getRemotePort() {
+            return 0;
+        }
+
+        @Override
+        public String getLocalName() {
+            return "localhost";
+        }
+
+        @Override
+        public String getLocalAddr() {
+            return "127.0.0.1";
+        }
+
+        @Override
+        public int getLocalPort() {
+            return 8080;
+        }
+
+        @Override
+        public ServletContext getServletContext() {
+            return null;
+        }
+
+        @Override
+        public AsyncContext startAsync() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public AsyncContext startAsync(final ServletRequest req, final ServletResponse resp) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isAsyncStarted() {
+            return false;
+        }
+
+        @Override
+        public boolean isAsyncSupported() {
+            return false;
+        }
+
+        @Override
+        public AsyncContext getAsyncContext() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public DispatcherType getDispatcherType() {
+            return DispatcherType.REQUEST;
+        }
+
+        @Override
+        public String getRequestId() {
+            return "";
+        }
+
+        @Override
+        public String getProtocolRequestId() {
+            return "";
+        }
+
+        @Override
+        public jakarta.servlet.ServletConnection getServletConnection() {
+            return null;
+        }
+    }
+
+    /**
+     * A plain {@link jakarta.servlet.ServletResponse} that does NOT implement
+     * {@link HttpServletResponse}, used alongside {@link NonHttpStubRequest}.
+     */
+    static class NonHttpStubResponse implements jakarta.servlet.ServletResponse {
+        @Override
+        public String getCharacterEncoding() {
+            return "UTF-8";
+        }
+
+        @Override
+        public String getContentType() {
+            return null;
+        }
+
+        @Override
+        public jakarta.servlet.ServletOutputStream getOutputStream() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public java.io.PrintWriter getWriter() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setCharacterEncoding(final String charset) {
+        }
+
+        @Override
+        public void setContentLength(final int len) {
+        }
+
+        @Override
+        public void setContentLengthLong(final long len) {
+        }
+
+        @Override
+        public void setContentType(final String type) {
+        }
+
+        @Override
+        public void setBufferSize(final int size) {
+        }
+
+        @Override
+        public int getBufferSize() {
+            return 0;
+        }
+
+        @Override
+        public void flushBuffer() {
+        }
+
+        @Override
+        public void resetBuffer() {
+        }
+
+        @Override
+        public boolean isCommitted() {
+            return false;
+        }
+
+        @Override
+        public void reset() {
+        }
+
+        @Override
+        public void setLocale(final java.util.Locale loc) {
+        }
+
+        @Override
+        public java.util.Locale getLocale() {
+            return java.util.Locale.ROOT;
         }
     }
 }

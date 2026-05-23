@@ -72,4 +72,56 @@ public class ThemeManifestTest extends UnitFessTestCase {
     public void test_parse_emptyInput() {
         assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(new byte[0])));
     }
+
+    @Test
+    public void test_parse_rejectsOversizedDisplayName() {
+        // displayName now has field-length check; a value > 4096 chars must be rejected.
+        final String huge = "A".repeat(5000);
+        final String yaml = "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: \"" + huge + "\"\nversion: 1.0.0";
+        final ThemeManifestException ex =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(ex.getMessage().contains("displayName"), "Error must identify the 'displayName' field");
+    }
+
+    @Test
+    public void test_parse_rejectsOversizedLicense() {
+        final String huge = "X".repeat(5000);
+        final String yaml =
+                "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: T\nversion: 1.0.0\nlicense: \"" + huge + "\"";
+        final ThemeManifestException ex =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(ex.getMessage().contains("license"), "Error must identify the 'license' field");
+    }
+
+    @Test
+    public void test_parse_rejectsOversizedMinFessVersion() {
+        final String huge = "1".repeat(5000);
+        final String yaml =
+                "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: T\nversion: 1.0.0\nminFessVersion: \"" + huge
+                        + "\"";
+        final ThemeManifestException ex =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(ex.getMessage().contains("minFessVersion"), "Error must identify the 'minFessVersion' field");
+    }
+
+    @Test
+    public void test_parse_rejectsOversizedEntry() {
+        final String huge = "a/".repeat(2500);
+        final String yaml = "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: T\nversion: 1.0.0\nentry: \"" + huge
+                + "index.html\"";
+        final ThemeManifestException ex =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(ex.getMessage().contains("entry"), "Error must identify the 'entry' field");
+    }
+
+    @Test
+    public void test_parse_rejectsOversizedSupportedLocale() {
+        final String huge = "e".repeat(5000);
+        final String yaml =
+                "apiVersion: fess.codelibs.org/v1\nkind: StaticTheme\nname: t\ndisplayName: T\nversion: 1.0.0\nsupportedLocales:\n  - \""
+                        + huge + "\"";
+        final ThemeManifestException ex =
+                assertThrows(ThemeManifestException.class, () -> ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes())));
+        assertTrue(ex.getMessage().contains("supportedLocales"), "Error must identify the 'supportedLocales' field");
+    }
 }

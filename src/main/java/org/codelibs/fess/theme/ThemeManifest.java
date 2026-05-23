@@ -77,6 +77,9 @@ public final class ThemeManifest {
             final LoaderOptions loaderOptions = new LoaderOptions();
             loaderOptions.setCodePointLimit(1_000_000);
             loaderOptions.setMaxAliasesForCollections(50);
+            // theme.yml is a flat document; a nesting depth of 20 is generous while
+            // defending against deeply-nested bomb payloads (SnakeYAML 2.0+).
+            loaderOptions.setNestingDepthLimit(20);
             rawObj = new Yaml(new SafeConstructor(loaderOptions)).load(in);
         } catch (final RuntimeException e) {
             throw new ThemeManifestException("Failed to parse theme.yml", e);
@@ -92,20 +95,24 @@ public final class ThemeManifest {
         b.apiVersion = str(raw, "apiVersion");
         b.kind = str(raw, "kind");
         b.name = str(raw, "name");
-        b.displayName = str(raw, "displayName");
+        b.displayName = checkFieldLength("displayName", str(raw, "displayName"));
         b.version = str(raw, "version");
         b.author = checkFieldLength("author", str(raw, "author"));
         b.description = checkFieldLength("description", str(raw, "description"));
-        b.license = str(raw, "license");
+        b.license = checkFieldLength("license", str(raw, "license"));
         b.homepage = checkFieldLength("homepage", str(raw, "homepage"));
-        b.minFessVersion = str(raw, "minFessVersion");
+        b.minFessVersion = checkFieldLength("minFessVersion", str(raw, "minFessVersion"));
         final Object loc = raw.get("supportedLocales");
         if (loc instanceof List) {
-            b.supportedLocales = ((List<Object>) loc).stream().map(String::valueOf).toList();
+            final List<String> locales = ((List<Object>) loc).stream().map(String::valueOf).toList();
+            for (int i = 0; i < locales.size(); i++) {
+                checkFieldLength("supportedLocales[" + i + "]", locales.get(i));
+            }
+            b.supportedLocales = locales;
         } else if (loc instanceof String s) {
-            b.supportedLocales = List.of(s);
+            b.supportedLocales = List.of(checkFieldLength("supportedLocales", s));
         }
-        b.entry = str(raw, "entry");
+        b.entry = checkFieldLength("entry", str(raw, "entry"));
         final Object spa = raw.get("spaFallback");
         if (spa instanceof Boolean) {
             b.spaFallback = (Boolean) spa;

@@ -226,6 +226,43 @@ public class ThemeRegistryTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_scan_doesNotFollowSymlinkedDirectory() throws Exception {
+        // A symlinked directory inside the themes root must NOT be registered as a theme,
+        // because following it could point outside the sandbox.
+        final Path realTheme = Files.createTempDirectory("theme-real-");
+        final Path tempThemesDir = Files.createTempDirectory("themes-test-symlink-");
+        try {
+            // Materialise a valid theme in a directory outside the themes root.
+            Files.writeString(realTheme.resolve("theme.yml"), String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: outsider", //
+                    "displayName: Outsider", //
+                    "version: 1.0.0"));
+            Files.writeString(realTheme.resolve("index.html"), "<html/>");
+
+            // Create a symlink inside the themes dir pointing to the real theme.
+            final Path symlink = tempThemesDir.resolve("outsider");
+            try {
+                Files.createSymbolicLink(symlink, realTheme);
+            } catch (final java.io.IOException | UnsupportedOperationException e) {
+                // Symlinks not supported on this platform — skip the test gracefully.
+                return;
+            }
+
+            final ThemeRegistry reg = new ThemeRegistry();
+            reg.setThemesDirOverride(tempThemesDir);
+            reg.reload();
+
+            // The symlinked "theme" must NOT be registered.
+            assertTrue(reg.getTheme("outsider").isEmpty(), "Symlinked theme directory must not be registered");
+        } finally {
+            deleteRecursively(realTheme);
+            deleteRecursively(tempThemesDir);
+        }
+    }
+
     /**
      * Constructs a {@link ThemeRegistry} with the supplied {@link FessConfig}
      * injected into the protected {@code fessConfig} field via reflection. The

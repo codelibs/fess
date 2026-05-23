@@ -294,6 +294,66 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_init_fallsBackToDefaultsWhenFessConfigAbsent() throws Exception {
+        // When fessConfig is null (unit test without DI), @PostConstruct must not throw
+        // and the hardcoded defaults must be preserved.
+        final Path themesDir = Files.createTempDirectory("themes-installer-nocfg-");
+        try {
+            final StaticThemeInstaller installer = new StaticThemeInstaller();
+            installer.setThemesDirOverride(themesDir);
+            // fessConfig deliberately NOT set (stays null)
+            installer.init(); // must not throw
+            // Verify defaults still allow a normal install.
+            installer.installZip(new ByteArrayInputStream(buildValidZip("defaults")));
+            assertTrue(Files.exists(themesDir.resolve("defaults/theme.yml")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_init_sweepsOrphanStagingDirOnStartup() throws Exception {
+        // Simulate a JVM-crash orphan: a .staging-* dir older than 1 hour.
+        final Path themesDir = Files.createTempDirectory("themes-installer-sweep-");
+        try {
+            // Create an orphan staging directory with an old mtime.
+            final Path orphan = themesDir.resolve(".staging-orphan-00000000-0000-0000-0000-000000000000");
+            Files.createDirectory(orphan);
+            // Set mtime to 2 hours ago so it is past the 1-hour sweep threshold.
+            final java.nio.file.attribute.FileTime oldMtime =
+                    java.nio.file.attribute.FileTime.from(java.time.Instant.now().minusSeconds(7200));
+            Files.setLastModifiedTime(orphan, oldMtime);
+
+            final StaticThemeInstaller installer = new StaticThemeInstaller();
+            installer.setThemesDirOverride(themesDir);
+            installer.init(); // @PostConstruct triggers cleanup sweep
+
+            assertFalse(Files.exists(orphan), "Orphan staging dir should have been swept on init");
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_init_doesNotSweepRecentStagingDir() throws Exception {
+        // A staging dir younger than 1 hour must NOT be deleted.
+        final Path themesDir = Files.createTempDirectory("themes-installer-nosweep-");
+        try {
+            final Path recent = themesDir.resolve(".staging-recent-00000000-0000-0000-0000-000000000001");
+            Files.createDirectory(recent);
+            // mtime is "now" (default) — well within the 1-hour window.
+
+            final StaticThemeInstaller installer = new StaticThemeInstaller();
+            installer.setThemesDirOverride(themesDir);
+            installer.init();
+
+            assertTrue(Files.exists(recent), "Recent staging dir must NOT be swept");
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
     private static StaticThemeInstaller newInstaller(final Path themesDir) {
         final StaticThemeInstaller installer = new StaticThemeInstaller();
         installer.setThemesDirOverride(themesDir);

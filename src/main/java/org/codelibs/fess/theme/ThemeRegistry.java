@@ -17,6 +17,7 @@ package org.codelibs.fess.theme;
 
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -100,7 +101,9 @@ public class ThemeRegistry {
             return;
         }
         try (Stream<Path> entries = Files.list(base)) {
-            entries.filter(Files::isDirectory).forEach(dir -> {
+            // NOFOLLOW_LINKS: a symlinked directory could point outside the themes root,
+            // violating the sandbox invariant for static-theme assets.
+            entries.filter(p -> Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)).forEach(dir -> {
                 final String name = dir.getFileName().toString();
                 if (name.startsWith(".")) {
                     return;
@@ -203,6 +206,9 @@ public class ThemeRegistry {
     public Optional<Theme> resolveActiveTheme(final String virtualHostKey) {
         final Snapshot snap = snapshot;
         if (StringUtil.isNotBlank(virtualHostKey)) {
+            // Theme names are enforced lowercase by NAME_PATTERN (^[a-z0-9][a-z0-9_-]{0,63}$);
+            // the lowercase here is for resilience against case-preserving virtual-host
+            // configurations that may supply mixed-case keys.
             final String key = virtualHostKey.toLowerCase(Locale.ROOT);
             final Theme t = snap.byName.get(key);
             if (t != null) {

@@ -16,7 +16,9 @@
 package org.codelibs.fess.app.web.theme;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Locale;
@@ -28,7 +30,6 @@ import org.codelibs.fess.theme.ThemeRegistry;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.lastaflute.web.servlet.request.RequestManager;
 
 import jakarta.annotation.Resource;
 
@@ -80,9 +81,9 @@ public class ThemeViewAction extends FessSearchAction {
     @Resource
     protected VirtualHostHelper virtualHostHelper;
 
-    /** Manager used to read the per-request attributes set by {@code StaticThemeFilter}. */
-    @Resource
-    protected RequestManager requestManagerRef;
+    // requestManager is inherited from FessBaseAction (promoted to protected).
+    // LastaFlute guarantees DI injection before any @Execute invocation,
+    // so no defensive null checks are needed in @Execute methods.
 
     /**
      * Default constructor.
@@ -100,9 +101,9 @@ public class ThemeViewAction extends FessSearchAction {
      */
     @Execute
     public ActionResponse index() {
-        final String mode = requestManagerRef.getAttribute(REQ_ATTR_MODE, String.class).orElse("INDEX");
+        final String mode = requestManager.getAttribute(REQ_ATTR_MODE, String.class).orElse("INDEX");
         if ("ASSET".equals(mode)) {
-            final String path = requestManagerRef.getAttribute(REQ_ATTR_ASSET_PATH, String.class).orElse(null);
+            final String path = requestManager.getAttribute(REQ_ATTR_ASSET_PATH, String.class).orElse(null);
             return serveAsset(path);
         }
         return serveIndex();
@@ -123,6 +124,13 @@ public class ThemeViewAction extends FessSearchAction {
         if (!indexFile.startsWith(theme.getBasePath()) || !Files.isRegularFile(indexFile)) {
             return notFound();
         }
+        // TOCTOU note: isRegularFile() and Files.size() are separate syscalls.
+        // A concurrent theme replacement (atomic move + REPLACE_EXISTING) between
+        // these calls is theoretically possible but extremely unlikely in practice.
+        // The worst outcome is a transient 404 or a Content-Length mismatch caught
+        // by the HTTP client; no correctness invariant is violated. A fully atomic
+        // approach would require opening the FileChannel first and deriving size
+        // from the channel, but the complexity is not justified here.
         final long fileSize;
         try {
             fileSize = Files.size(indexFile);
@@ -180,10 +188,53 @@ public class ThemeViewAction extends FessSearchAction {
             }
         }
         final Path candidate = theme.getBasePath().resolve(path).normalize();
-        if (!candidate.startsWith(theme.getBasePath()) || !Files.isRegularFile(candidate)) {
+        // Re-check containment after normalization.
+        if (!candidate.startsWith(theme.getBasePath())) {
+            return null;
+        }
+        // Reject symlinks (NOFOLLOW_LINKS): a symlink could escape the theme sandbox.
+        if (!Files.isRegularFile(candidate, LinkOption.NOFOLLOW_LINKS)) {
+            return null;
+        }
+        final String fname = candidate.getFileName() != null ? candidate.getFileName().toString() : "";
+        // Reject dotfiles and sensitive manifest/documentation files.
+        if (isBlockedFilename(fname)) {
             return null;
         }
         return candidate;
+    }
+
+    /**
+     * Returns {@code true} when a filename should never be served, regardless of
+     * its position inside the theme directory.
+     *
+     * <p>Blocked:
+     * <ul>
+     *   <li>Any file whose name starts with {@code "."} (dotfile, e.g. {@code .env}).</li>
+     *   <li>{@code theme.yml} — the manifest is internal metadata, not a servable asset.</li>
+     *   <li>{@code README.md}, {@code CHANGELOG.md} — documentation leakage.</li>
+     *   <li>Any file whose lowercase name starts with {@code "license"} (e.g.
+     *       {@code LICENSE}, {@code LICENSE.txt}).</li>
+     * </ul>
+     *
+     * @param filename the bare filename (not a path) to test
+     * @return {@code true} if the file must not be served
+     */
+    static boolean isBlockedFilename(final String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return true;
+        }
+        if (filename.startsWith(".")) {
+            return true;
+        }
+        final String lower = filename.toLowerCase(Locale.ROOT);
+        if ("theme.yml".equals(lower) || "readme.md".equals(lower) || "changelog.md".equals(lower)) {
+            return true;
+        }
+        if (lower.startsWith("license")) {
+            return true;
+        }
+        return false;
     }
 
     private Theme resolveTheme() {
@@ -192,9 +243,8 @@ public class ThemeViewAction extends FessSearchAction {
     }
 
     private ActionResponse notFound() {
-        return new StreamResponse("404").httpStatus(404)
-                .contentType("text/plain")
-                .stream(out -> out.stream().write("Not Found".getBytes()));
+        final byte[] body = "Not Found".getBytes(StandardCharsets.UTF_8);
+        return new StreamResponse("404").httpStatus(404).contentType("text/plain; charset=UTF-8").stream(out -> out.stream().write(body));
     }
 
     private ActionResponse streamFile(final Path file) {
@@ -215,7 +265,7 @@ public class ThemeViewAction extends FessSearchAction {
                 .format(java.time.ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(mtime), java.time.ZoneOffset.UTC));
 
         // Honor If-None-Match
-        final String ifNoneMatch = requestManagerRef != null ? requestManagerRef.getHeader("If-None-Match").orElse(null) : null;
+        final String ifNoneMatch = requestManager != null ? requestManager.getHeader("If-None-Match").orElse(null) : null;
         if (etag.equals(ifNoneMatch)) {
             return new StreamResponse(name).httpStatus(304).contentType(contentType).stream(out -> {
                 // no body on 304
@@ -223,7 +273,7 @@ public class ThemeViewAction extends FessSearchAction {
         }
 
         // Honor If-Modified-Since (basic: compare epoch millis rounded to seconds)
-        final String ifModifiedSince = requestManagerRef != null ? requestManagerRef.getHeader("If-Modified-Since").orElse(null) : null;
+        final String ifModifiedSince = requestManager != null ? requestManager.getHeader("If-Modified-Since").orElse(null) : null;
         if (ifModifiedSince != null) {
             try {
                 final long clientMtime =
@@ -243,6 +293,7 @@ public class ThemeViewAction extends FessSearchAction {
 
         final StreamResponse resp = new StreamResponse(name).contentType(contentType)
                 .header("Cache-Control", "public, max-age=86400")
+                .header("Vary", "Accept-Encoding")
                 .header("X-Content-Type-Options", "nosniff")
                 .header("Referrer-Policy", "same-origin")
                 .header("ETag", etag)
@@ -267,7 +318,10 @@ public class ThemeViewAction extends FessSearchAction {
             return "text/css; charset=UTF-8";
         }
         if (lower.endsWith(".svg")) {
-            return "image/svg+xml";
+            return "image/svg+xml; charset=UTF-8";
+        }
+        if (lower.endsWith(".wasm")) {
+            return "application/wasm";
         }
         if (lower.endsWith(".png")) {
             return "image/png";
