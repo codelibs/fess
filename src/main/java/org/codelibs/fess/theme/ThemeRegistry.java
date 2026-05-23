@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -58,7 +59,18 @@ public class ThemeRegistry {
     @Resource
     protected FessConfig fessConfig;
 
-    private volatile Map<String, Theme> snapshot = Map.of();
+    /** Immutable snapshot of themes + the resolved default theme name. */
+    private static final class Snapshot {
+        final Map<String, Theme> byName;
+        final String defaultThemeName;
+
+        Snapshot(final Map<String, Theme> byName, final String defaultThemeName) {
+            this.byName = byName;
+            this.defaultThemeName = defaultThemeName;
+        }
+    }
+
+    private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
     private Path themesDirOverride; // test seam
 
     @PostConstruct
@@ -74,9 +86,11 @@ public class ThemeRegistry {
         final Map<String, Theme> next = new HashMap<>();
         scanStatic(next);
         scanJsp(next);
-        snapshot = Collections.unmodifiableMap(next);
+        final Map<String, Theme> immutable = Collections.unmodifiableMap(next);
+        final String defaultThemeName = lookupDefaultThemeName();
+        snapshot = new Snapshot(immutable, defaultThemeName);
         if (logger.isInfoEnabled()) {
-            logger.info("ThemeRegistry reloaded; {} themes registered", snapshot.size());
+            logger.info("ThemeRegistry reloaded; {} themes registered", immutable.size());
         }
     }
 
@@ -103,7 +117,7 @@ public class ThemeRegistry {
                     }
                     next.put(name, new Theme(ThemeType.STATIC, name, dir, m));
                 } catch (final Exception e) {
-                    logger.warn("Skipping malformed theme at {}: {}", dir, e.getMessage());
+                    logger.warn("Skipping malformed theme at {}: {}", dir, e.getMessage(), e);
                 }
             });
         } catch (final Exception e) {
@@ -164,11 +178,11 @@ public class ThemeRegistry {
         if (StringUtil.isBlank(name)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(snapshot.get(name));
+        return Optional.ofNullable(snapshot.byName.get(name));
     }
 
     public Map<String, Theme> getAllThemes() {
-        return snapshot;
+        return snapshot.byName;
     }
 
     /**
@@ -187,25 +201,28 @@ public class ThemeRegistry {
      * @return the resolved theme, or empty if none configured
      */
     public Optional<Theme> resolveActiveTheme(final String virtualHostKey) {
+        final Snapshot snap = snapshot;
         if (StringUtil.isNotBlank(virtualHostKey)) {
-            final Optional<Theme> t = getTheme(virtualHostKey);
-            if (t.isPresent()) {
-                return t;
+            final String key = virtualHostKey.toLowerCase(Locale.ROOT);
+            final Theme t = snap.byName.get(key);
+            if (t != null) {
+                return Optional.of(t);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Virtual host key '{}' did not resolve to a known theme; falling back", virtualHostKey);
             }
         }
-        if (fessConfig != null) {
-            final String def = lookupDefaultThemeName();
-            if (StringUtil.isNotBlank(def)) {
-                return getTheme(def);
-            }
+        final String def = snap.defaultThemeName;
+        if (StringUtil.isNotBlank(def)) {
+            return Optional.ofNullable(snap.byName.get(def));
         }
         return Optional.empty();
     }
 
     private String lookupDefaultThemeName() {
+        if (fessConfig == null) {
+            return null;
+        }
         try {
             return fessConfig.getSystemProperty(SYSPROP_DEFAULT_THEME, null);
         } catch (final Exception ignore) {
@@ -224,9 +241,9 @@ public class ThemeRegistry {
      * exercise type-specific branches (e.g. JSP-vs-static deletion guards)
      * without materialising real fixtures.
      */
-    void injectThemeForTest(final Theme theme) {
-        final Map<String, Theme> next = new HashMap<>(snapshot);
+    synchronized void injectThemeForTest(final Theme theme) {
+        final Map<String, Theme> next = new HashMap<>(snapshot.byName);
         next.put(theme.getName(), theme);
-        snapshot = Collections.unmodifiableMap(next);
+        snapshot = new Snapshot(Collections.unmodifiableMap(next), snapshot.defaultThemeName);
     }
 }

@@ -122,6 +122,7 @@ public class AdminThemeAction extends FessAdminAction {
     @Secured({ ROLE })
     public HtmlResponse reload(final ThemeListForm form) {
         verifyToken(() -> asListHtml(form));
+        // validate is intentionally not called for reload — it has no form fields to validate
         try {
             themeRegistry.reload();
             saveInfo(m -> m.addSuccessReloadTheme(GLOBAL));
@@ -155,8 +156,8 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse upload(final ThemeUploadForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         final String fileName = form.themeFile.getFileName();
         if (!hasZipExtension(fileName)) {
             throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, String.valueOf(fileName)),
@@ -187,22 +188,29 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse delete(final ThemeDeleteForm form) {
-        validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
         verifyToken(() -> asListHtml(new ThemeListForm()));
+        validate(form, messages -> {}, () -> asListHtml(new ThemeListForm()));
         try {
             staticThemeInstaller.delete(form.name);
             saveInfo(m -> m.addSuccessDeleteTheme(GLOBAL, form.name));
         } catch (final StaticThemeInstaller.InstallException ex) {
             logger.warn("Theme delete rejected: {}", ex.getMessage());
-            final String msg = ex.getMessage();
-            if (msg != null && msg.contains("active")) {
+            switch (ex.code()) {
+            case ACTIVE_DEFAULT:
                 throwValidationError(m -> m.addErrorsThemeIsActive(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-            } else if (msg != null && (msg.contains("JSP") || msg.contains("Refusing"))) {
+                break;
+            case JSP_TYPE:
                 throwValidationError(m -> m.addErrorsThemeIsJspType(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-            } else if (msg != null && msg.contains("not found")) {
+                break;
+            case NOT_FOUND:
                 throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-            } else {
+                break;
+            case INVALID_NAME:
+                throwValidationError(m -> m.addErrorsThemeNameInvalid(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+                break;
+            default:
                 throwValidationError(m -> m.addErrorsFailedToDeleteTheme(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
+                break;
             }
         }
         return redirect(getClass());
@@ -219,8 +227,8 @@ public class AdminThemeAction extends FessAdminAction {
     @Execute
     @Secured({ ROLE })
     public HtmlResponse setdefault(final ThemeListForm form) {
-        validate(form, messages -> {}, () -> asListHtml(form));
         verifyToken(() -> asListHtml(form));
+        validate(form, messages -> {}, () -> asListHtml(form));
         final String name = form.defaultTheme == null ? "" : form.defaultTheme.trim();
         if (!name.isEmpty()) {
             // existence check — refuse to point theme.default at a missing theme

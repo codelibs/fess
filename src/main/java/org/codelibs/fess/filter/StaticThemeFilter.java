@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.codelibs.fess.theme.ThemeManifest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.app.web.theme.ThemeViewAction;
@@ -67,6 +69,11 @@ public class StaticThemeFilter implements Filter {
             "/css/", "/js/", "/images/", //
             "/go", "/thumbnail", "/osdd", //
             "/sso/", "/logout", "/cache", //
+            "/favicon.ico", //
+            "/robots.txt", //
+            "/sitemap.xml", //
+            "/manifest.webmanifest", //
+            "/.well-known", //
             THEME_VIEW_PATH);
 
     /** Overridable registry reference; production code uses the container lookup. */
@@ -76,8 +83,9 @@ public class StaticThemeFilter implements Filter {
      * Latches on the first failed {@link ThemeRegistry} lookup so the operator
      * sees a single WARN instead of one per request when the DI container is not
      * yet ready (or has been torn down). Subsequent failures degrade to DEBUG.
+     * Instance field (not static) so redeploys re-emit the WARN.
      */
-    private static final AtomicBoolean firstFailure = new AtomicBoolean(false);
+    private final AtomicBoolean firstFailure = new AtomicBoolean(false);
 
     /**
      * Default constructor.
@@ -149,7 +157,15 @@ public class StaticThemeFilter implements Filter {
             return;
         }
 
-        // UI path -> index.html
+        // If the theme manifest has spaFallback=false, do not forward non-asset
+        // requests to the theme view — let the original Fess routes handle them.
+        final boolean spaFallback = theme.getManifest().map(ThemeManifest::isSpaFallback).orElse(true);
+        if (!spaFallback) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // UI path -> index.html (SPA fallback mode)
         req.setAttribute(ThemeViewAction.REQ_ATTR_MODE, "INDEX");
         req.getRequestDispatcher(THEME_VIEW_PATH).forward(req, res);
     }
@@ -172,7 +188,9 @@ public class StaticThemeFilter implements Filter {
                 if (uri.startsWith(p)) {
                     return true;
                 }
-            } else if (uri.equals(p) || uri.startsWith(p + "/") || uri.startsWith(p + "?")) {
+            } else if (uri.equals(p) || uri.startsWith(p + "/")) {
+                // Note: getRequestURI() never includes the query string per the
+                // Servlet spec, so the dead uri.startsWith(p + "?") branch is omitted.
                 return true;
             }
         }
@@ -201,8 +219,10 @@ public class StaticThemeFilter implements Filter {
             if (h != null) {
                 return h.getVirtualHostKey();
             }
-        } catch (final Exception ignore) {
-            // virtual host helper not available
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("VirtualHostHelper not available; using null host key", e);
+            }
         }
         return null;
     }

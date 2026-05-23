@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
  * Parsed representation of a static theme's {@code theme.yml} manifest.
@@ -66,31 +68,42 @@ public final class ThemeManifest {
         this.spaFallback = b.spaFallback == null ? true : b.spaFallback;
     }
 
+    private static final int MAX_FIELD_LENGTH = 4096;
+
     @SuppressWarnings("unchecked")
     public static ThemeManifest parse(final InputStream in) {
-        final Map<String, Object> raw;
+        final Object rawObj;
         try {
-            raw = new Yaml().load(in);
+            final LoaderOptions loaderOptions = new LoaderOptions();
+            loaderOptions.setCodePointLimit(1_000_000);
+            loaderOptions.setMaxAliasesForCollections(50);
+            rawObj = new Yaml(new SafeConstructor(loaderOptions)).load(in);
         } catch (final RuntimeException e) {
             throw new ThemeManifestException("Failed to parse theme.yml", e);
         }
-        if (raw == null) {
+        if (rawObj == null) {
             throw new ThemeManifestException("theme.yml is empty");
         }
+        if (!(rawObj instanceof Map)) {
+            throw new ThemeManifestException("theme.yml root must be a mapping");
+        }
+        final Map<String, Object> raw = (Map<String, Object>) rawObj;
         final Builder b = new Builder();
         b.apiVersion = str(raw, "apiVersion");
         b.kind = str(raw, "kind");
         b.name = str(raw, "name");
         b.displayName = str(raw, "displayName");
         b.version = str(raw, "version");
-        b.author = str(raw, "author");
-        b.description = str(raw, "description");
+        b.author = checkFieldLength("author", str(raw, "author"));
+        b.description = checkFieldLength("description", str(raw, "description"));
         b.license = str(raw, "license");
-        b.homepage = str(raw, "homepage");
+        b.homepage = checkFieldLength("homepage", str(raw, "homepage"));
         b.minFessVersion = str(raw, "minFessVersion");
         final Object loc = raw.get("supportedLocales");
         if (loc instanceof List) {
             b.supportedLocales = ((List<Object>) loc).stream().map(String::valueOf).toList();
+        } else if (loc instanceof String s) {
+            b.supportedLocales = List.of(s);
         }
         b.entry = str(raw, "entry");
         final Object spa = raw.get("spaFallback");
@@ -100,6 +113,13 @@ public final class ThemeManifest {
         final ThemeManifest m = new ThemeManifest(b);
         m.validate();
         return m;
+    }
+
+    private static String checkFieldLength(final String fieldName, final String value) {
+        if (value != null && value.length() > MAX_FIELD_LENGTH) {
+            throw new ThemeManifestException("Field '" + fieldName + "' exceeds maximum length of " + MAX_FIELD_LENGTH + " characters");
+        }
+        return value;
     }
 
     private static String str(final Map<String, Object> raw, final String key) {
@@ -123,9 +143,40 @@ public final class ThemeManifest {
         if (version == null || !SEMVER_PATTERN.matcher(version).matches()) {
             throw new ThemeManifestException("Invalid semver version: " + version);
         }
-        if (entry.contains("..") || entry.startsWith("/")) {
+        if (isUnsafeEntry(entry)) {
             throw new ThemeManifestException("entry must be a relative path inside the theme: " + entry);
         }
+    }
+
+    /**
+     * Returns {@code true} when the {@code entry} value is considered unsafe.
+     * Rejects: path traversal ({@code ..}), absolute paths, backslashes,
+     * null bytes, colon (Windows drive separator), and Windows drive letter patterns.
+     */
+    private static boolean isUnsafeEntry(final String e) {
+        if (e == null) {
+            return false; // null entry will default to index.html
+        }
+        if (e.startsWith("/")) {
+            return true;
+        }
+        if (e.contains("..")) {
+            return true;
+        }
+        if (e.contains("\\")) {
+            return true;
+        }
+        if (e.contains("\0")) {
+            return true;
+        }
+        if (e.contains(":")) {
+            return true;
+        }
+        // Windows drive letter: e.g. "C:..." but already caught by colon check above
+        if (e.matches("^[A-Za-z]:.*")) {
+            return true;
+        }
+        return false;
     }
 
     public String getApiVersion() {

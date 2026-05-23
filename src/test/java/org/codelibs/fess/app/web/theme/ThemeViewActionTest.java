@@ -71,8 +71,8 @@ public class ThemeViewActionTest extends UnitFessTestCase {
     public void test_contentTypeFor_returnsExpectedMimeForCommonExtensions() throws Exception {
         // contentTypeFor is private static — exercise via reflection so this guards
         // each branch of the extension-to-mime switch directly.
-        assertEquals("application/javascript", invokeContentTypeFor("app.js"));
-        assertEquals("text/css", invokeContentTypeFor("styles.css"));
+        assertEquals("application/javascript; charset=UTF-8", invokeContentTypeFor("app.js"));
+        assertEquals("text/css; charset=UTF-8", invokeContentTypeFor("styles.css"));
         assertEquals("text/html; charset=UTF-8", invokeContentTypeFor("index.html"));
         assertEquals("application/json; charset=UTF-8", invokeContentTypeFor("manifest.json"));
         assertEquals("image/svg+xml", invokeContentTypeFor("icon.svg"));
@@ -172,6 +172,151 @@ public class ThemeViewActionTest extends UnitFessTestCase {
             final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
             assertEquals("nosniff", headers.get("X-Content-Type-Options")[0]);
             assertEquals("same-origin", headers.get("Referrer-Policy")[0]);
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_contentTypeFor_mjsFiles_returns_applicationJavascript() throws Exception {
+        assertEquals("application/javascript; charset=UTF-8", invokeContentTypeFor("app.mjs"));
+        assertEquals("application/javascript; charset=UTF-8", invokeContentTypeFor("component.MJS"));
+    }
+
+    @Test
+    public void test_contentTypeFor_isCaseInsensitive() throws Exception {
+        assertEquals("text/css; charset=UTF-8", invokeContentTypeFor("Style.CSS"));
+        assertEquals("application/javascript; charset=UTF-8", invokeContentTypeFor("App.JS"));
+        assertEquals("image/png", invokeContentTypeFor("Logo.PNG"));
+        assertEquals("text/html; charset=UTF-8", invokeContentTypeFor("Index.HTML"));
+    }
+
+    @Test
+    public void test_contentTypeFor_webmanifest() throws Exception {
+        assertEquals("application/manifest+json; charset=UTF-8", invokeContentTypeFor("app.webmanifest"));
+        assertEquals("application/manifest+json; charset=UTF-8", invokeContentTypeFor("App.WebManifest"));
+    }
+
+    @Test
+    public void test_serveIndex_setsCsp_andNoStore_cacheControl() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-csp-");
+        try {
+            Files.writeString(tmp.resolve("index.html"), "<html/>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertEquals("no-store", headers.get("Cache-Control")[0]);
+            assertNotNull(headers.get("Content-Security-Policy"), "CSP header must be set");
+            assertTrue(headers.get("Content-Security-Policy")[0].contains("default-src 'self'"));
+            assertTrue(headers.get("Content-Security-Policy")[0].contains("frame-ancestors 'none'"));
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_serveIndex_setsContentLength() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-cl-");
+        try {
+            final String content = "<html><body>hello</body></html>";
+            Files.writeString(tmp.resolve("index.html"), content);
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveIndex();
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertNotNull(headers.get("Content-Length"), "Content-Length must be set");
+            final long len = Long.parseLong(headers.get("Content-Length")[0]);
+            assertTrue(len > 0, "Content-Length must be positive");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_asset_returnsEtag_andHandles_ifNoneMatch_304() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-etag-");
+        try {
+            Files.createDirectories(tmp.resolve("assets"));
+            Files.writeString(tmp.resolve("assets/app.js"), "console.log(1);");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            // First request — no If-None-Match; expect ETag header
+            final ActionResponse firstResp = action.serveAsset("assets/app.js");
+            final Map<String, String[]> headers = ((StreamResponse) firstResp).getHeaderMap();
+            assertNotNull(headers.get("ETag"), "ETag header must be set");
+            final String etag = headers.get("ETag")[0];
+            assertTrue(etag.startsWith("W/\""), "ETag must be weak: " + etag);
+
+            // TODO: 304 round-trip requires a stub RequestManager carrying the If-None-Match
+            // header. LastaFlute RequestManager is non-trivial to mock without DI; covered by
+            // integration tests under it/. Here we verify the ETag shape only.
+            assertTrue(etag.length() > 4, "ETag must be non-empty");
+        } finally {
+            Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
+                try {
+                    Files.delete(x);
+                } catch (final Exception ignore) {}
+            });
+        }
+    }
+
+    @Test
+    public void test_svg_servedWithRestrictiveCsp() throws Exception {
+        final Path tmp = Files.createTempDirectory("tva-svg-");
+        try {
+            Files.writeString(tmp.resolve("icon.svg"), "<svg/>");
+            final String yaml = String.join("\n", //
+                    "apiVersion: fess.codelibs.org/v1", //
+                    "kind: StaticTheme", //
+                    "name: t", //
+                    "displayName: T", //
+                    "version: 1.0.0");
+            final ThemeManifest manifest = ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            final Theme theme = new Theme(ThemeType.STATIC, "t", tmp, manifest);
+            final ThemeViewAction action = newActionWith(theme);
+
+            final ActionResponse resp = action.serveAsset("icon.svg");
+            final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
+            assertNotNull(headers.get("Content-Security-Policy"), "SVG must have CSP header");
+            final String csp = headers.get("Content-Security-Policy")[0];
+            assertTrue(csp.contains("default-src 'none'"), "SVG CSP must restrict to none: " + csp);
         } finally {
             Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
                 try {

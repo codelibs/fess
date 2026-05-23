@@ -18,6 +18,8 @@ package org.codelibs.fess.app.web.theme;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Locale;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.helper.VirtualHostHelper;
@@ -54,6 +56,21 @@ public class ThemeViewAction extends FessSearchAction {
 
     /** Request attribute key for the theme-relative asset path set by the filter when mode is {@code "ASSET"}. */
     public static final String REQ_ATTR_ASSET_PATH = "fess.theme.view.asset.path";
+
+    /**
+     * Content-Security-Policy for the SPA index HTML entry.
+     * Restricts all resource origins to 'self', allows inline styles (required by most SPA themes),
+     * and prevents the page from being embedded in frames.
+     */
+    static final String INDEX_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+            + " img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'";
+
+    /**
+     * Content-Security-Policy for inline SVG assets.
+     * Restricts resource loading to 'none' (SVG needs no external resources),
+     * and permits inline styles that SVG documents often contain.
+     */
+    static final String SVG_CSP = "default-src 'none'; style-src 'unsafe-inline'";
 
     /** Registry providing the active static theme for the current virtual host. */
     @Resource
@@ -106,10 +123,18 @@ public class ThemeViewAction extends FessSearchAction {
         if (!indexFile.startsWith(theme.getBasePath()) || !Files.isRegularFile(indexFile)) {
             return notFound();
         }
+        final long fileSize;
+        try {
+            fileSize = Files.size(indexFile);
+        } catch (final java.io.IOException e) {
+            return notFound();
+        }
         return new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
-                .header("Cache-Control", "no-cache")
+                .header("Cache-Control", "no-store")
+                .header("Content-Security-Policy", INDEX_CSP)
                 .header("X-Content-Type-Options", "nosniff")
                 .header("Referrer-Policy", "same-origin")
+                .header("Content-Length", String.valueOf(fileSize))
                 .stream(out -> {
                     try (InputStream in = Files.newInputStream(indexFile)) {
                         in.transferTo(out.stream());
@@ -145,8 +170,14 @@ public class ThemeViewAction extends FessSearchAction {
      * @return resolved file path within the theme directory, or {@code null} if invalid
      */
     Path resolveAsset(final Theme theme, final String path) {
-        if (path == null || path.contains("..") || path.startsWith("/")) {
+        if (path == null || path.startsWith("/") || path.contains("\\") || path.contains("\0")) {
             return null;
+        }
+        // Per-segment traversal check — avoid blocking 'foo..bar.txt' while rejecting '..'
+        for (final String seg : path.split("/", -1)) {
+            if ("..".equals(seg)) {
+                return null;
+            }
         }
         final Path candidate = theme.getBasePath().resolve(path).normalize();
         if (!candidate.startsWith(theme.getBasePath()) || !Files.isRegularFile(candidate)) {
@@ -167,47 +198,99 @@ public class ThemeViewAction extends FessSearchAction {
     }
 
     private ActionResponse streamFile(final Path file) {
-        final String contentType = contentTypeFor(file.getFileName().toString());
-        return new StreamResponse(file.getFileName().toString()).contentType(contentType)
+        final String name = file.getFileName().toString();
+        final String contentType = contentTypeFor(name);
+        final boolean isSvg = name.toLowerCase(Locale.ROOT).endsWith(".svg");
+
+        final BasicFileAttributes attrs;
+        try {
+            attrs = Files.readAttributes(file, BasicFileAttributes.class);
+        } catch (final java.io.IOException e) {
+            return notFound();
+        }
+        final long size = attrs.size();
+        final long mtime = attrs.lastModifiedTime().toMillis();
+        final String etag = "W/\"" + size + "-" + mtime + "\"";
+        final String lastModified = java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+                .format(java.time.ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(mtime), java.time.ZoneOffset.UTC));
+
+        // Honor If-None-Match
+        final String ifNoneMatch = requestManagerRef != null ? requestManagerRef.getHeader("If-None-Match").orElse(null) : null;
+        if (etag.equals(ifNoneMatch)) {
+            return new StreamResponse(name).httpStatus(304).contentType(contentType).stream(out -> {
+                // no body on 304
+            });
+        }
+
+        // Honor If-Modified-Since (basic: compare epoch millis rounded to seconds)
+        final String ifModifiedSince = requestManagerRef != null ? requestManagerRef.getHeader("If-Modified-Since").orElse(null) : null;
+        if (ifModifiedSince != null) {
+            try {
+                final long clientMtime =
+                        java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.parse(ifModifiedSince, java.time.ZonedDateTime::from)
+                                .toInstant()
+                                .toEpochMilli();
+                // truncate to seconds for comparison
+                if ((mtime / 1000) <= (clientMtime / 1000)) {
+                    return new StreamResponse(name).httpStatus(304).contentType(contentType).stream(out -> {
+                        // no body on 304
+                    });
+                }
+            } catch (final Exception ignore) {
+                // malformed header — serve normally
+            }
+        }
+
+        final StreamResponse resp = new StreamResponse(name).contentType(contentType)
                 .header("Cache-Control", "public, max-age=86400")
                 .header("X-Content-Type-Options", "nosniff")
                 .header("Referrer-Policy", "same-origin")
-                .stream(out -> {
-                    try (InputStream in = Files.newInputStream(file)) {
-                        in.transferTo(out.stream());
-                    }
-                });
+                .header("ETag", etag)
+                .header("Last-Modified", lastModified)
+                .header("Content-Length", String.valueOf(size));
+        if (isSvg) {
+            resp.header("Content-Security-Policy", SVG_CSP);
+        }
+        return resp.stream(out -> {
+            try (InputStream in = Files.newInputStream(file)) {
+                in.transferTo(out.stream());
+            }
+        });
     }
 
-    private static String contentTypeFor(final String name) {
-        if (name.endsWith(".js")) {
-            return "application/javascript";
+    static String contentTypeFor(final String name) {
+        final String lower = name == null ? "" : name.toLowerCase(Locale.ROOT);
+        if (lower.endsWith(".mjs") || lower.endsWith(".js")) {
+            return "application/javascript; charset=UTF-8";
         }
-        if (name.endsWith(".css")) {
-            return "text/css";
+        if (lower.endsWith(".css")) {
+            return "text/css; charset=UTF-8";
         }
-        if (name.endsWith(".svg")) {
+        if (lower.endsWith(".svg")) {
             return "image/svg+xml";
         }
-        if (name.endsWith(".png")) {
+        if (lower.endsWith(".png")) {
             return "image/png";
         }
-        if (name.endsWith(".jpg") || name.endsWith(".jpeg")) {
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
             return "image/jpeg";
         }
-        if (name.endsWith(".gif")) {
+        if (lower.endsWith(".gif")) {
             return "image/gif";
         }
-        if (name.endsWith(".woff2")) {
+        if (lower.endsWith(".woff2")) {
             return "font/woff2";
         }
-        if (name.endsWith(".woff")) {
+        if (lower.endsWith(".woff")) {
             return "font/woff";
         }
-        if (name.endsWith(".html")) {
+        if (lower.endsWith(".html")) {
             return "text/html; charset=UTF-8";
         }
-        if (name.endsWith(".json")) {
+        if (lower.endsWith(".webmanifest")) {
+            return "application/manifest+json; charset=UTF-8";
+        }
+        if (lower.endsWith(".json")) {
             return "application/json; charset=UTF-8";
         }
         return "application/octet-stream";

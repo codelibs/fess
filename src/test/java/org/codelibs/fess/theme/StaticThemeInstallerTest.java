@@ -202,7 +202,7 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_install_rejectsDotfileEntries() throws Exception {
+    public void test_install_rejectsDenylistedDotfileEntries() throws Exception {
         // Files whose path starts with '.' (e.g. .env, .htaccess) must be rejected so a
         // crafted archive cannot smuggle hidden files into a theme directory.
         final Path themesDir = Files.createTempDirectory("themes-installer-");
@@ -210,14 +210,17 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
             final StaticThemeInstaller installer = newInstaller(themesDir);
             final ByteArrayOutputStream bao = new ByteArrayOutputStream();
             try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                // Use a denylisted dotfile (.DS_Store) — under the new policy, only the
+                // denylist set (.git, .svn, .hg, __MACOSX, .DS_Store) is rejected; arbitrary
+                // dotfiles like .well-known are allowed.
                 final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: dotfile",
                         "displayName: \"dotfile\"", "version: 1.0.0");
                 putEntry(zos, "theme.yml", yml.getBytes(StandardCharsets.UTF_8));
-                putEntry(zos, ".env", "SECRET=1".getBytes(StandardCharsets.UTF_8));
+                putEntry(zos, ".DS_Store", new byte[16]);
             }
             final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
                     () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
-            assertTrue(ex.getMessage().contains("Hidden"));
+            assertTrue(ex.getMessage().contains("Denied"));
             assertTrue(!Files.exists(themesDir.resolve("dotfile")));
         } finally {
             deleteRecursively(themesDir);
@@ -225,9 +228,9 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_install_rejectsDotPrefixedDirectories() throws Exception {
-        // Any path segment that begins with '.' is rejected — guards against archives
-        // that embed a hidden directory such as .git/HEAD anywhere in the tree.
+    public void test_install_rejectsDenylistedDirectories() throws Exception {
+        // Denylist policy: .git, .svn, .hg, __MACOSX, .DS_Store path segments are rejected
+        // anywhere in the tree. Other dotfiles (e.g. .well-known) are allowed by design.
         final Path themesDir = Files.createTempDirectory("themes-installer-");
         try {
             final StaticThemeInstaller installer = newInstaller(themesDir);
@@ -240,7 +243,7 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
             }
             final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
                     () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
-            assertTrue(ex.getMessage().contains("Hidden"));
+            assertTrue(ex.getMessage().contains("Denied"));
             assertTrue(!Files.exists(themesDir.resolve("dotdir")));
         } finally {
             deleteRecursively(themesDir);

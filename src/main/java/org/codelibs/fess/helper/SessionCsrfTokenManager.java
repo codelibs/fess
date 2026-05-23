@@ -49,8 +49,23 @@ public class SessionCsrfTokenManager {
         return constantTimeEquals(s, provided);
     }
 
-    public void rotate(final HttpSession session) {
-        session.setAttribute(SESSION_ATTR, null);
+    /**
+     * Rotates the session's CSRF token: invalidates any existing token and issues
+     * a fresh one in a single atomic call from the session's perspective.
+     *
+     * <p>Callers that previously paired {@code rotate(); issue();} will continue to
+     * work correctly because the second {@link #issue(HttpSession)} call is
+     * idempotent — it returns the token already set by this method.</p>
+     *
+     * @param session the HTTP session to rotate the token in
+     * @return the newly issued token, or {@code null} if {@code session} is {@code null}
+     */
+    public String rotate(final HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        session.removeAttribute(SESSION_ATTR);
+        return issue(session);
     }
 
     private static boolean constantTimeEquals(final String a, final String b) {

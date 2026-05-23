@@ -109,12 +109,14 @@ public class ThemeRegistryTest extends UnitFessTestCase {
                     "displayName: Alpha", //
                     "version: 1.0.0"));
 
+            // Point the system property at our fixture BEFORE reload — the registry caches
+            // the resolved default into its snapshot at reload time (so per-read does not
+            // dip into FessConfig). Property changes therefore require a fresh reload to
+            // take effect, mirroring how the admin UI calls reload() after setdefault.
+            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "alpha");
             final ThemeRegistry reg = newRegistryWithFessConfig(tempThemesDir, cfg);
             reg.reload();
 
-            // Point the system property at our fixture; resolveActiveTheme(null)
-            // must return that theme.
-            cfg.setSystemProperty(ThemeRegistry.SYSPROP_DEFAULT_THEME, "alpha");
             final Optional<Theme> resolved = reg.resolveActiveTheme(null);
             assertTrue(resolved.isPresent());
             assertEquals("alpha", resolved.get().getName());
