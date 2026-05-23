@@ -28,6 +28,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.v2.V2EnvelopeWriter;
+import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
@@ -61,9 +63,11 @@ import jakarta.servlet.http.HttpServletResponse;
  *   <li>{@code event: retry|waiting|fallback|warning|error} — diagnostic events (same v1 shape)</li>
  * </ul>
  *
- * <p>Error reporting before the LLM is invoked goes through a single
- * {@code event: error} SSE event followed by stream close — never a v2 envelope —
- * so the SPA's SSE reader doesn't have to switch parser mid-flight.</p>
+ * <p>Error reporting <em>before</em> the LLM is invoked (method check, feature gate,
+ * body parse, rate limit) uses {@link V2EnvelopeWriter#writeError} so the HTTP status
+ * and {@code Content-Type: application/json} are correct. Only after all gates pass are
+ * SSE headers set; subsequent LLM-level errors are reported via {@code event: error}
+ * SSE events, consistent with v1 behaviour the static theme JS parser depends on.</p>
  */
 public class ChatStreamHandler {
 
@@ -78,27 +82,19 @@ public class ChatStreamHandler {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
-        // Always set SSE headers before any writes so error events also arrive
-        // over the same channel the SPA is listening on.
-        setSseHeaders(res);
-
-        // Acquire the writer exactly once. The servlet container manages its lifecycle for
-        // the duration of the request; using try-with-resources here would prematurely close
-        // the writer and prevent the outer error path from emitting a final SSE event.
-        final PrintWriter writer = res.getWriter();
-        // Tracks whether the inner phase callback (or any pre-LLM gate) has already emitted
-        // an "error" SSE event. The outer catch consults it to avoid emitting a duplicate
-        // error event after the callback's onError has fired.
-        final boolean[] errorEmittedHolder = { false };
+        // --- Gate checks: ALL validation runs before any SSE headers are set. ---
+        // Pre-stream failures return proper HTTP status via V2EnvelopeWriter.writeError
+        // (application/json). SSE headers are only committed after every gate passes.
 
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
-            sendSseEvent(writer, "error", Map.of("message", "method not allowed", "errorCode", "method_not_allowed"));
+            res.setHeader("Allow", "POST");
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isRagChatEnabled()) {
-            sendSseEvent(writer, "error", Map.of("message", "chat is not enabled", "errorCode", "chat_disabled"));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "chat is not enabled");
             return;
         }
 
@@ -107,7 +103,7 @@ public class ChatStreamHandler {
             raw = V2JsonBody.read(req, MAX_BODY_BYTES);
         } catch (final V2JsonBody.PayloadTooLargeException | V2JsonBody.MalformedJsonException
                 | V2JsonBody.UnsupportedMediaTypeException e) {
-            sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "invalid_request"));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
@@ -116,33 +112,41 @@ public class ChatStreamHandler {
         try {
             body = ChatRequestBody.from(raw, maxLen);
         } catch (final ChatRequestBody.MessageTooLongException e) {
-            sendSseEvent(writer, "error", Map.of("message", e.getMessage(), "errorCode", "message_too_long"));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
 
         if (StringUtil.isBlank(body.message())) {
-            sendSseEvent(writer, "error", Map.of("message", "message is required", "errorCode", "missing_message"));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
             return;
         }
 
         final String userId = getUserId(req);
-        // Per-user chat rate limit. SSE has no envelope, so on rejection we emit a
-        // dedicated `event: error` with errorCode=rate_limited and close the stream.
+        // Per-user chat rate limit. Pre-stream failure returns a proper 429 JSON envelope.
         final LoginRateLimiter limiter;
         try {
             limiter = ComponentUtil.getLoginRateLimiter();
         } catch (final RuntimeException e) {
-            // Limiter DI not available (e.g. slim test harness); skip rate limiting rather
-            // than failing the request. Production wires it via app.xml.
+            // Limiter DI not available (e.g. slim test harness); log and surface as 500.
             logger.warn("[RAG] /api/v2/chat/stream rate-limit lookup failed", e);
-            sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
         final int chatLimit = getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
-            sendSseEvent(writer, "error", Map.of("message", "too many chat requests", "errorCode", "rate_limited"));
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
+
+        // --- All gates passed: now commit to SSE framing. ---
+        // Acquire the writer exactly once. The servlet container manages its lifecycle for
+        // the duration of the request; using try-with-resources here would prematurely close
+        // the writer and prevent the outer error path from emitting a final SSE event.
+        setSseHeaders(res);
+        final PrintWriter writer = res.getWriter();
+        // Tracks whether the inner phase callback has already emitted an "error" SSE event.
+        // The outer catch consults it to avoid emitting a duplicate error event.
+        final boolean[] errorEmittedHolder = { false };
 
         // Tag the request for the search-log access-type column, same as v1.
         req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));

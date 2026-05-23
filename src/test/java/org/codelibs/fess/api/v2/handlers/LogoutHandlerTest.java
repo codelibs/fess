@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,17 +58,40 @@ public class LogoutHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_rejectsGet() throws Exception {
+    public void test_rejectsGet_returns405WithAllowHeader() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         new LogoutHandler().handle(new StubRequest("GET", "/api/v2/auth/logout"), res);
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        assertEquals("POST", res.getHeader("Allow"));
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type and body. */
+    @Test
+    public void test_sessionPresentAndInvalidateSucceeds() throws Exception {
+        // When the session exists and invalidate() succeeds normally the handler
+        // must still return ok:true with HTTP 200.
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequestWithSession("POST", "/api/v2/auth/logout", false), res);
+        assertEquals(200, res.status);
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+    }
+
+    @Test
+    public void test_sessionAlreadyInvalidated_illegalStateSwallowed() throws Exception {
+        // FessLoginAssist.logout() may already have invalidated the session internally.
+        // session.invalidate() then throws IllegalStateException. The handler must swallow
+        // it and still return ok:true — the contract is "idempotent ok".
+        final CapturingResponse res = new CapturingResponse();
+        new LogoutHandler().handle(new StubRequestWithSession("POST", "/api/v2/auth/logout", true), res);
+        assertEquals(200, res.status);
+        assertTrue(res.body().contains("\"ok\":true"), res.body());
+    }
+
+    /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
+        final Map<String, String> headers = new HashMap<>();
         int status = 200;
         String contentType;
 
@@ -215,33 +235,38 @@ public class LogoutHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void setIntHeader(final String name, final int value) {
+            headers.put(name, Integer.toString(value));
         }
 
         @Override
         public void addIntHeader(final String name, final int value) {
+            headers.put(name, Integer.toString(value));
         }
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 
@@ -609,6 +634,90 @@ public class LogoutHandlerTest extends UnitFessTestCase {
         @Override
         public jakarta.servlet.ServletConnection getServletConnection() {
             return null;
+        }
+    }
+
+    /**
+     * StubRequest variant that returns a {@link HttpSession} from {@code getSession(false)}.
+     * When {@code throwOnInvalidate} is {@code true} the session's {@code invalidate()} throws
+     * {@link IllegalStateException} — simulating the case where {@link FessLoginAssist#logout()}
+     * already invalidated it.
+     */
+    private static class StubRequestWithSession extends StubRequest {
+        private final HttpSession session;
+
+        StubRequestWithSession(final String method, final String uri, final boolean throwOnInvalidate) {
+            super(method, uri);
+            this.session = new HttpSession() {
+                @Override
+                public void invalidate() {
+                    if (throwOnInvalidate) {
+                        throw new IllegalStateException("already invalidated");
+                    }
+                }
+
+                @Override
+                public long getCreationTime() {
+                    return System.currentTimeMillis();
+                }
+
+                @Override
+                public String getId() {
+                    return "stub-session-id";
+                }
+
+                @Override
+                public long getLastAccessedTime() {
+                    return System.currentTimeMillis();
+                }
+
+                @Override
+                public jakarta.servlet.ServletContext getServletContext() {
+                    return null;
+                }
+
+                @Override
+                public void setMaxInactiveInterval(final int interval) {
+                }
+
+                @Override
+                public int getMaxInactiveInterval() {
+                    return 1800;
+                }
+
+                @Override
+                public Object getAttribute(final String name) {
+                    return null;
+                }
+
+                @Override
+                public Enumeration<String> getAttributeNames() {
+                    return Collections.emptyEnumeration();
+                }
+
+                @Override
+                public void setAttribute(final String name, final Object value) {
+                }
+
+                @Override
+                public void removeAttribute(final String name) {
+                }
+
+                @Override
+                public boolean isNew() {
+                    return false;
+                }
+            };
+        }
+
+        @Override
+        public HttpSession getSession(final boolean create) {
+            return session;
+        }
+
+        @Override
+        public HttpSession getSession() {
+            return session;
         }
     }
 }

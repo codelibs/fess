@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
-import org.codelibs.fess.helper.SessionCsrfTokenManager;
 import org.codelibs.fess.util.ComponentUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +34,13 @@ import jakarta.servlet.http.HttpSession;
  *
  * <p>The endpoint is idempotent — calling it without a session still returns
  * {@code {"ok": true}} so SPAs can fire-and-forget on tab close. When a session
- * does exist the CSRF token is rotated (defence-in-depth against fixation) and
- * the session is invalidated.</p>
+ * does exist it is invalidated; the CSRF token need not be rotated explicitly
+ * because {@code session.invalidate()} discards the entire session including all
+ * CSRF state.</p>
+ *
+ * <p>{@link IllegalStateException} from {@code session.invalidate()} is silently
+ * swallowed: {@link FessLoginAssist#logout()} may already have invalidated the
+ * session internally, and the contract is "idempotent ok".</p>
  */
 public class LogoutHandler {
 
@@ -44,6 +48,7 @@ public class LogoutHandler {
 
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
+            res.setHeader("Allow", "POST");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -52,12 +57,15 @@ public class LogoutHandler {
         } catch (final Exception e) {
             // logout is idempotent — no session or unavailable login subsystem; log WARN for
             // actual logout failures but still respond 200 ok (caller's intent is satisfied).
-            logger.warn("logout call threw unexpectedly", e);
+            logger.warn("[v2/logout] logout call failed", e);
         }
         final HttpSession session = req.getSession(false);
         if (session != null) {
-            ComponentUtil.getComponent(SessionCsrfTokenManager.class).rotate(session);
-            session.invalidate();
+            try {
+                session.invalidate();
+            } catch (final IllegalStateException ignore) {
+                // FessLoginAssist.logout() may have already invalidated the session.
+            }
         }
         V2EnvelopeWriter.writeSuccess(res, Map.of("ok", true));
     }

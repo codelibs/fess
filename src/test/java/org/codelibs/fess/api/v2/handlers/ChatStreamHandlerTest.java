@@ -47,60 +47,86 @@ import jakarta.servlet.http.Part;
 /**
  * Unit tests for {@link ChatStreamHandler}.
  *
- * <p>The handler emits SSE (Server-Sent Events) on every code path — including
- * error branches — because the static theme JS reads from a single SSE parser
- * regardless of outcome. Under the default {@code fess_config.properties} where
- * {@code rag.chat.enabled=false}, the disabled-feature branch fires for every
- * POST; we exercise the SSE error shape ({@code event: error\ndata: {...}}) and
- * the canonical SSE response headers across that path.</p>
+ * <p>Pre-stream gate failures (method, feature-disabled, body-parse, rate-limit) return
+ * a proper HTTP status with {@code Content-Type: application/json} and a v2 error
+ * envelope — they do NOT set SSE headers. SSE framing is only committed after all
+ * gates pass.</p>
  */
 public class ChatStreamHandlerTest extends UnitFessTestCase {
 
     @Test
-    public void test_rejectsGet() throws Exception {
-        // Spec §7.2 lists GET; Plan 4 deliberately implements POST-only and rejects GET.
-        // See §Risks (1) — POST lets us read the body shape that v2 standardizes on.
+    public void test_rejectsGet_returnsJsonEnvelope() throws Exception {
+        // GET must return HTTP 405 with application/json and a v2 error envelope —
+        // NOT text/event-stream, so CDNs and SPAs that branch on HTTP status work correctly.
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("GET", "/api/v2/chat/stream"), res);
-        // GET rejected via SSE error event then close. The handler still sets
-        // text/event-stream content type before writing; assert both.
-        assertEquals("text/event-stream", contentTypeMimeOnly(res));
-        assertTrue(res.body().contains("event: error"));
-        assertTrue(res.body().contains("\"errorCode\":\"method_not_allowed\""));
+        assertEquals(405, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertEquals("POST", res.getHeader("Allow"));
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        // Must NOT be SSE framing
+        assertFalse(res.body().contains("event: error"), res.body());
     }
 
     @Test
-    public void test_chatDisabledEmitsSseError() throws Exception {
+    public void test_rejectsHead_returnsJsonEnvelope() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler().handle(new StubRequest("HEAD", "/api/v2/chat/stream"), res);
+        assertEquals(405, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertEquals("POST", res.getHeader("Allow"));
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+    }
+
+    @Test
+    public void test_rejectsOptions_returnsJsonEnvelope() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler().handle(new StubRequest("OPTIONS", "/api/v2/chat/stream"), res);
+        assertEquals(405, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertEquals("POST", res.getHeader("Allow"));
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+    }
+
+    @Test
+    public void test_chatDisabled_returnsJsonEnvelope() throws Exception {
         // Default fess_config.properties has rag.chat.enabled=false. Without the
-        // feature enabled the stream handler emits one error SSE event and closes.
+        // feature enabled the handler returns HTTP 400 application/json — not SSE.
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
-        assertEquals("text/event-stream", contentTypeMimeOnly(res));
-        assertTrue(res.body().contains("event: error"));
-        assertTrue(res.body().contains("\"errorCode\":\"chat_disabled\""));
+        assertEquals(400, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("chat is not enabled"), res.body());
+        assertFalse(res.body().contains("event: error"), res.body());
     }
 
     @Test
-    public void test_missingMessageEmitsSseError() throws Exception {
+    public void test_missingMessage_returnsJsonEnvelope() throws Exception {
         // Enable chat so the handler proceeds past the chat-disabled gate and
         // hits the missing-message branch we want to exercise here.
         enableRagChat();
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{}"), res);
-        assertTrue(res.body().contains("event: error"));
-        assertTrue(res.body().contains("\"errorCode\":\"missing_message\""));
+        assertEquals(400, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("message is required"), res.body());
+        assertFalse(res.body().contains("event: error"), res.body());
     }
 
     @Test
-    public void test_oversizedMessageEmitsSseError() throws Exception {
+    public void test_oversizedMessage_returnsJsonEnvelope() throws Exception {
         // Enable chat so the handler proceeds past the chat-disabled gate and
-        // hits the message-too-long branch we want to exercise here.
+        // hits the message-too-long branch.
         enableRagChat();
         final String big = "x".repeat(4001);
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"" + big + "\"}"), res);
-        assertTrue(res.body().contains("event: error"));
-        assertTrue(res.body().contains("\"errorCode\":\"message_too_long\""));
+        assertEquals(400, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertFalse(res.body().contains("event: error"), res.body());
     }
 
     /**
@@ -119,15 +145,15 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_sseHeadersAreSet() throws Exception {
+    public void test_sseHeadersNotSetOnPreStreamError() throws Exception {
+        // When a gate check rejects the request (chat disabled here) the handler
+        // must NOT set SSE headers — it returns application/json with the proper
+        // HTTP status so clients can branch on status code and content type.
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
-        // Even on the chat-disabled path, the handler sets SSE headers before
-        // writing the error event. The static theme JS client uses them to
-        // distinguish SSE streams from JSON responses.
-        assertEquals("text/event-stream", contentTypeMimeOnly(res));
-        assertEquals("no-cache", res.getHeader("Cache-Control"));
-        assertEquals("no", res.getHeader("X-Accel-Buffering"));
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        // SSE-specific headers must be absent for JSON error responses.
+        assertNull(res.getHeader("X-Accel-Buffering"), "X-Accel-Buffering must not be set for pre-stream error responses");
     }
 
     @Test
@@ -150,18 +176,16 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void chatStream_rateLimited_emitsSseError() throws Exception {
-        // The per-user chat rate limit applies to the streaming endpoint too. SSE has no v2
-        // envelope, so on rejection the handler emits a dedicated `event: error` with
-        // errorCode=rate_limited and closes the stream. Pre-saturate the CHAT bucket for the
-        // empty/guest user-code resolved by ChatStreamHandler under the test harness, then
-        // assert the next request emits exactly one SSE error event with the rate-limited code.
+    public void chatStream_rateLimited_returns429JsonEnvelope() throws Exception {
+        // The per-user chat rate limit is a pre-stream gate check. On rejection the handler
+        // returns HTTP 429 with application/json and a v2 envelope — NOT an SSE event.
+        // Pre-saturate the CHAT bucket for the empty/guest user-code resolved by
+        // ChatStreamHandler under the test harness, then assert the next request returns
+        // the 429 JSON envelope.
         enableRagChat();
-        // Same DI prep as ChatHandlerTest.chat_rateLimited_returns429 — SystemHelper is not
-        // registered in test_app.xml, so register a stub whose getUsername() returns the
-        // literal "guest" (avoids the RequestManager lookup which has no DI binding in this
-        // harness). UserInfoHelper.getUserCode returns empty so the bucket key matches our
-        // pre-saturated empty-string key.
+        // SystemHelper is not registered in test_app.xml — register a stub whose
+        // getUsername() returns "guest". UserInfoHelper.getUserCode returns empty so the
+        // bucket key matches our pre-saturated empty-string key.
         final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
             @Override
             public String getUsername() {
@@ -188,13 +212,14 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
             final CapturingResponse res = new CapturingResponse();
             new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody("{\"message\":\"hi\"}"), res);
             final String body = res.body();
-            // The handler may have resolved a non-empty userId; if so the test is a soft
-            // verification only — the rate_limited path will not have triggered. We pin the
-            // empty-userId scenario expected outcome explicitly.
-            if (body.contains("\"errorCode\":\"rate_limited\"")) {
-                assertEquals("text/event-stream", contentTypeMimeOnly(res));
-                assertTrue(body.contains("event: error"), body);
+            // The handler may resolve a non-empty userId depending on harness state; pin the
+            // empty-userId scenario where the rate-limited path triggers.
+            if (body.contains("\"code\":\"rate_limited\"")) {
+                assertEquals(429, res.status);
+                assertEquals("application/json", contentTypeMimeOnly(res));
                 assertTrue(body.contains("too many chat requests"), body);
+                // Must NOT be SSE framing
+                assertFalse(body.contains("event: error"), body);
             }
         } finally {
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
@@ -203,33 +228,20 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_oversizedBodyEmitsSseErrorAndCloses() throws Exception {
+    public void test_oversizedBody_returnsJsonEnvelope() throws Exception {
         // V2JsonBody caps the body at MAX_BODY_BYTES (32KiB for the streaming handler).
-        // Any larger payload must produce a single SSE error event with errorCode
-        // "invalid_request", and the stream is closed thereafter. Chat must be enabled so
-        // the request gets past the disabled gate and reaches the body-parse branch.
+        // Any larger payload must return HTTP 400 application/json — not an SSE event —
+        // because body-parse is a pre-stream gate check.
         enableRagChat();
-        final String body = "{\"message\":\"" + "x".repeat(40 * 1024) + "\"}";
+        final String bigBody = "{\"message\":\"" + "x".repeat(40 * 1024) + "\"}";
         final CapturingResponse res = new CapturingResponse();
-        new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody(body), res);
-        assertEquals("text/event-stream", contentTypeMimeOnly(res));
+        new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody(bigBody), res);
+        assertEquals(400, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
         final String out = res.body();
-        assertTrue(out.contains("event: error"), out);
-        assertTrue(out.contains("\"errorCode\":\"invalid_request\""), out);
-        // The stream must end with the SSE record terminator and contain exactly one event
-        // (no second event after closing) — assert the record-terminator suffix.
-        assertTrue(out.endsWith("\n\n"), out);
-        org.junit.jupiter.api.Assertions.assertEquals(1, countOccurrences(out, "event: "), "expected exactly one SSE event: " + out);
-    }
-
-    private static int countOccurrences(final String haystack, final String needle) {
-        int n = 0;
-        int idx = 0;
-        while ((idx = haystack.indexOf(needle, idx)) >= 0) {
-            n++;
-            idx += needle.length();
-        }
-        return n;
+        assertTrue(out.contains("\"code\":\"invalid_request\""), out);
+        // Must NOT be SSE framing
+        assertFalse(out.contains("event: error"), out);
     }
 
     private static String contentTypeMimeOnly(final CapturingResponse res) {
