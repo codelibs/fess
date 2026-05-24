@@ -24,11 +24,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.chat.ChatApiHelper;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
@@ -39,10 +39,13 @@ import jakarta.servlet.http.HttpServletResponse;
  * Handles {@code POST /api/v2/chat} — non-streaming RAG chat.
  *
  * <p>Thin adapter: parses the v2 JSON body, validates the message length, then
- * delegates to {@link org.codelibs.fess.chat.ChatClient#chat} or
- * {@link org.codelibs.fess.chat.ChatSessionManager#clearSession} for the {@code clear}
- * branch. The response is wrapped in the v2 envelope as
- * {@code {response: {status:0, version:"v2", session_id, content, sources}}}.</p>
+ * delegates to {@link org.codelibs.fess.chat.ChatClient#chat}. The response is
+ * wrapped in the v2 envelope as
+ * {@code {response: {status:0, session_id, content, sources}}}.</p>
+ *
+ * <p>Session clearing has been moved to the dedicated DELETE endpoint
+ * {@code /api/v2/chat/sessions/{session_id}} handled by
+ * {@link ChatSessionClearHandler}.</p>
  *
  * <p>Anonymous users are supported the same way v1 supports them — the user is
  * identified by {@code UserInfoHelper#getUserCode()} when no logged-in bean is
@@ -80,7 +83,7 @@ public class ChatHandler {
             return;
         }
 
-        final int maxLen = getMaxMessageLength(fessConfig);
+        final int maxLen = ChatApiHelper.getMaxMessageLength(fessConfig);
         final ChatRequestBody body;
         try {
             body = ChatRequestBody.from(raw, maxLen);
@@ -89,43 +92,27 @@ public class ChatHandler {
             return;
         }
 
-        // Clear-session branch — same shape as v1's processChatRequest "clear" path.
-        if (body.isClear()) {
-            if (StringUtil.isBlank(body.sessionId())) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "session_id is required to clear a session");
-                return;
-            }
-            final String userId = getUserId(req);
-            final boolean cleared = ComponentUtil.getChatSessionManager().clearSession(body.sessionId(), userId);
-            if (!cleared) {
-                V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "session not found");
-                return;
-            }
-            final Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("session_id", body.sessionId());
-            payload.put("cleared", true);
-            V2EnvelopeWriter.writeSuccess(res, payload);
-            return;
-        }
-
         if (StringUtil.isBlank(body.message())) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "message is required");
             return;
         }
 
-        final String userId = getUserId(req);
-        // Per-user chat rate limit. We resolve the limiter lazily so the slim test harness
-        // (no DI binding for it) degrades gracefully.
-        LoginRateLimiter limiter = null;
+        final String userId = ChatApiHelper.getUserId(req);
+        // Per-user chat rate limit. Pre-stream failure returns a proper 500 JSON envelope —
+        // skipping rate limiting silently would be a security-affecting behavior, so we
+        // match ChatStreamHandler and surface DI failures as INTERNAL_ERROR.
+        final LoginRateLimiter limiter;
         try {
             limiter = ComponentUtil.getLoginRateLimiter();
         } catch (final RuntimeException e) {
-            // Limiter DI not available; skip rate limiting rather than failing the request.
-            // Production wires it via app.xml.
-            logger.warn("LoginRateLimiter unavailable; skipping rate limit", e);
+            // Limiter DI not available (e.g. slim test harness); log and surface as 500.
+            logger.warn("[RAG] /api/v2/chat rate-limit lookup failed", e);
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
+            return;
         }
-        final int chatLimit = getChatRateLimitPerMinute(fessConfig);
+        final int chatLimit = ChatApiHelper.getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+            res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
@@ -146,7 +133,7 @@ public class ChatHandler {
             payload.put("content", result.getMessage().getContent());
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null) {
-                payload.put("sources", sources);
+                payload.put("sources", toSourceMaps(sources));
             }
             V2EnvelopeWriter.writeSuccess(res, payload);
         } catch (final Exception e) {
@@ -156,51 +143,36 @@ public class ChatHandler {
     }
 
     /**
-     * Mirrors v1 {@code ChatApiManager#getUserId}: prefer the authenticated
-     * username, fall back to the cookie-bound userCode for guests. This keeps
-     * /api/v2/chat usable for anonymous SPA visitors when login is not required.
+     * Converts a list of {@link ChatSource} objects to a list of snake_case maps
+     * suitable for JSON serialization. The Java field names on ChatSource are kept
+     * unchanged (v1 compatibility); only the output wire keys are snake_case.
      *
-     * @param req the incoming HTTP request
-     * @return the user identifier
+     * <p>Output keys: {@code rank}, {@code title}, {@code url}, {@code doc_id},
+     * {@code snippet}, {@code url_link}, {@code go_url}. A {@link LinkedHashMap}
+     * is used to guarantee key order.</p>
+     *
+     * @param sources list of chat sources to convert
+     * @return list of snake_case maps, one per source
      */
-    protected String getUserId(final HttpServletRequest req) {
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final String username = systemHelper.getUsername();
-        if (!Constants.GUEST_USER.equals(username)) {
-            return username;
+    static List<Map<String, Object>> toSourceMaps(final List<ChatSource> sources) {
+        final List<Map<String, Object>> result = new java.util.ArrayList<>(sources.size());
+        for (final ChatSource src : sources) {
+            final Map<String, Object> m = new LinkedHashMap<>();
+            m.put("rank", src.getIndex());
+            putIfNotNull(m, "title", src.getTitle());
+            putIfNotNull(m, "url", src.getUrl());
+            putIfNotNull(m, "doc_id", src.getDocId());
+            putIfNotNull(m, "snippet", src.getSnippet());
+            putIfNotNull(m, "url_link", src.getUrlLink());
+            putIfNotNull(m, "go_url", src.getGoUrl());
+            result.add(m);
         }
-        return ComponentUtil.getUserInfoHelper().getUserCode();
+        return result;
     }
 
-    /**
-     * Resolve {@code rag.chat.message.max.length} from fess_config system
-     * properties, defaulting to 4000 on parse failure.
-     *
-     * @param fessConfig active Fess config
-     * @return max chat message length in characters
-     */
-    protected int getMaxMessageLength(final FessConfig fessConfig) {
-        try {
-            return Integer.parseInt(fessConfig.getSystemProperty("rag.chat.message.max.length", "4000"));
-        } catch (final NumberFormatException e) {
-            return 4000;
-        }
-    }
-
-    /**
-     * Resolve {@code api.v2.chat.rate.limit.per.user.per.minute} from fess_config system
-     * properties, defaulting to 30 on parse failure. A return value &lt;= 0 disables the
-     * rate limit entirely. The system-property indirection avoids regenerating the
-     * LastaFlute-managed FessConfig accessors for a single value.
-     *
-     * @param fessConfig active Fess config
-     * @return max chat requests per minute per user, or {@code <= 0} to disable
-     */
-    protected int getChatRateLimitPerMinute(final FessConfig fessConfig) {
-        try {
-            return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
-        } catch (final NumberFormatException e) {
-            return 30;
+    private static void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
+        if (value != null) {
+            map.put(key, value);
         }
     }
 }

@@ -52,7 +52,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * API Manager for RAG chat endpoints with SSE streaming support.
  *
  * @author FessProject
+ * @deprecated v1 API is deprecated since 15.7.0. Use the v2 API ({@code /api/v2/chat}) for new integrations.
+ *             This class will be removed in a future release.
  */
+@Deprecated(since = "15.7.0", forRemoval = true)
 public class ChatApiManager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(ChatApiManager.class);
@@ -65,18 +68,27 @@ public class ChatApiManager extends BaseApiManager {
     /** Payload keys reserved by the SSE protocol; must not be overridden by phase callback metadata. */
     private static final Set<String> RESERVED_PAYLOAD_KEYS = Set.of("phase", "status");
 
-    /** The path prefix for the chat API endpoints. */
+    /** The path prefix for the chat API endpoints.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String pathPrefix = CHAT_API_PATH;
 
     /**
      * Default constructor.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     public ChatApiManager() {
     }
 
     /**
      * Registers this API manager with the WebApiManagerFactory.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -85,6 +97,10 @@ public class ChatApiManager extends BaseApiManager {
         ComponentUtil.getWebApiManagerFactory().add(this);
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     public boolean matches(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -105,6 +121,10 @@ public class ChatApiManager extends BaseApiManager {
         return matches;
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -132,7 +152,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param request the HTTP request
      * @param response the HTTP response
      * @throws IOException if an I/O error occurs
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processChatRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"POST".equalsIgnoreCase(request.getMethod())) {
             if (logger.isDebugEnabled()) {
@@ -221,7 +243,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param request the HTTP request
      * @param response the HTTP response
      * @throws IOException if an I/O error occurs
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processStreamRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod()) && !"POST".equalsIgnoreCase(request.getMethod())) {
             if (logger.isDebugEnabled()) {
@@ -417,7 +441,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param writer the print writer to write the event to
      * @param event the event name
      * @param data the event data to serialize as JSON
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void emitSseEventSafely(final PrintWriter writer, final String event, final Map<String, Object> data) {
         try {
             sendSseEvent(writer, event, data);
@@ -437,7 +463,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param data the destination map
      * @param key the key to write
      * @param value the value to write (skipped if null)
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected static void putIfNotNull(final Map<String, Object> data, final String key, final Object value) {
         if (value != null) {
             data.put(key, value);
@@ -450,7 +478,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param writer the print writer to write the event to
      * @param event the event name
      * @param data the event data to serialize as JSON
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void sendSseEvent(final PrintWriter writer, final String event, final Map<String, Object> data) {
         try {
             writer.write("event: " + event + "\n");
@@ -468,7 +498,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param status the HTTP status code
      * @param data the data to serialize as JSON
      * @throws IOException if an I/O error occurs
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void writeJsonResponse(final HttpServletResponse response, final int status, final Map<String, Object> data)
             throws IOException {
         response.setStatus(status);
@@ -484,7 +516,9 @@ public class ChatApiManager extends BaseApiManager {
      * @param content the response content
      * @param sources the list of chat sources
      * @return a map containing the success response data
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected Map<String, Object> createSuccessResponse(final String sessionId, final String content, final List<ChatSource> sources) {
         final Map<String, Object> result = new HashMap<>();
         result.put("status", "ok");
@@ -501,7 +535,9 @@ public class ChatApiManager extends BaseApiManager {
      *
      * @param message the error message
      * @return a map containing the error response data
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected Map<String, Object> createErrorResponse(final String message) {
         final Map<String, Object> result = new HashMap<>();
         result.put("status", "error");
@@ -514,7 +550,9 @@ public class ChatApiManager extends BaseApiManager {
      *
      * @param request the HTTP request
      * @return the user ID, or null if the user is a guest
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String getUserId(final HttpServletRequest request) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String username = systemHelper.getUsername();
@@ -530,7 +568,9 @@ public class ChatApiManager extends BaseApiManager {
      *
      * @param fessConfig the Fess configuration
      * @return the maximum message length
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected int getMaxMessageLength(final FessConfig fessConfig) {
         try {
             return Integer.parseInt(fessConfig.getOrDefault("rag.chat.message.max.length", "4000"));
@@ -546,7 +586,9 @@ public class ChatApiManager extends BaseApiManager {
      *
      * @param request the HTTP request
      * @return a map of field names to their validated filter values
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected Map<String, String[]> parseFieldFilters(final HttpServletRequest request) {
         final Map<String, String[]> fields = new HashMap<>();
         final String[] labels = request.getParameterValues("fields.label");
@@ -587,7 +629,9 @@ public class ChatApiManager extends BaseApiManager {
      *
      * @param request the HTTP request
      * @return an array of validated extra query strings
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String[] parseExtraQueries(final HttpServletRequest request) {
         final String[] extraQueries = request.getParameterValues("ex_q");
         if (extraQueries == null || extraQueries.length == 0) {
@@ -636,6 +680,10 @@ public class ChatApiManager extends BaseApiManager {
         return groupedQueries.toArray(new String[0]);
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     protected void writeHeaders(final HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));

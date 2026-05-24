@@ -36,6 +36,7 @@ import org.junit.jupiter.api.TestInfo;
  * Unit tests for {@link ChatApiManager}.
  * Tests the RAG chat API endpoints including SSE streaming.
  */
+@SuppressWarnings("deprecation")
 public class ChatApiManagerTest extends UnitFessTestCase {
 
     private ChatApiManager chatApiManager;

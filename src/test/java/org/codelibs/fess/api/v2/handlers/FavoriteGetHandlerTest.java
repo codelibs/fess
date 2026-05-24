@@ -97,7 +97,7 @@ public class FavoriteGetHandlerTest extends UnitFessTestCase {
         // invalid_request (400). When on but the document isn't indexed, the handler emits
         // not_found (404). When backend is unavailable, internal_error (500). Verify the
         // wire shape rather than pinning a specific path.
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 400 || res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
         assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"not_found\"")
                 || body.contains("\"code\":\"internal_error\""), body);

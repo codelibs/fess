@@ -144,6 +144,8 @@ public class ScrollSearchHandler {
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded {} documents", count);
             }
+        } catch (final V2JsonRequestParams.InvalidPageSizeException e) {
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.INVALID_REQUEST, e.getMessage());
         } catch (final InvalidQueryException | ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("invalid /api/v2/documents/all request", e);

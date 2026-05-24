@@ -51,7 +51,7 @@ public class SearchHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         // The v2 envelope wraps both happy-path and failure paths — assert the shape stays
         // consistent regardless of whether the search helper is wired up in this test JVM.
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"record_count\":0"), body);
@@ -84,7 +84,7 @@ public class SearchHandlerTest extends UnitFessTestCase {
         params.put("q", new String[] { "foo" });
         handler.handle(new StubRequest("/api/v2/search", params), res);
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             // Every top-level snake_case key from the spec should be present in a success

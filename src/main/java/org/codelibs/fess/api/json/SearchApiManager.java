@@ -88,36 +88,55 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * The API manager for search operations.
+ *
+ * @deprecated v1 API is deprecated since 15.7.0. Use the v2 API ({@code /api/v2/...}) for new integrations.
+ *             This class will be removed in a future release.
  */
+@Deprecated(since = "15.7.0", forRemoval = true)
 public class SearchApiManager extends BaseApiManager {
 
     private static final Logger logger = LogManager.getLogger(SearchApiManager.class);
 
     /**
      * The message field.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected static final String MESSAGE_FIELD = "message";
 
     /**
      * The result field.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected static final String RESULT_FIELD = "result";
 
     private static final String DOC_ID_FIELD = "doc_id";
 
     /**
      * The GET method.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected static final String GET = "GET";
 
     /**
      * The POST method.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected static final String POST = "POST";
 
     /**
      * The MIME type.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String mimeType = "application/json";
 
     private static final DateTimeFormatter ISO_8601_EXTEND_FORMATTER =
@@ -129,14 +148,20 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Constructor.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     public SearchApiManager() {
         setPathPrefix("/api/v1");
     }
 
     /**
      * Registers this API manager.
+     *
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @PostConstruct
     public void register() {
         if (logger.isInfoEnabled()) {
@@ -145,6 +170,10 @@ public class SearchApiManager extends BaseApiManager {
         ComponentUtil.getWebApiManagerFactory().add(this);
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     protected FormatType detectFormatType(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
@@ -183,6 +212,10 @@ public class SearchApiManager extends BaseApiManager {
         return FormatType.OTHER;
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     public boolean matches(final HttpServletRequest request) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -194,6 +227,10 @@ public class SearchApiManager extends BaseApiManager {
         return servletPath.startsWith(pathPrefix);
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -230,10 +267,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Accepts the HTTP method.
+     *
      * @param request The HTTP request.
      * @param methods The accepted methods.
      * @return true if the method is accepted, false otherwise.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected boolean acceptHttpMethod(final HttpServletRequest request, final String... methods) {
         final String method = request.getMethod();
         for (final String m : methods) {
@@ -247,10 +287,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a scroll search request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processScrollSearchRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
@@ -320,10 +363,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a ping request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -344,10 +390,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a search request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -532,9 +581,12 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Gets a detailed message of the throwable.
+     *
      * @param t The throwable.
      * @return The detailed message.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String detailedMessage(final Throwable t) {
         if (t == null) {
             return "Unknown";
@@ -562,10 +614,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a label request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -609,10 +664,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a popular word request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processPopularWordRequest(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
@@ -666,10 +724,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a favorite request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, POST)) {
             return;
@@ -761,10 +822,13 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a favorites request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         if (!acceptHttpMethod(request, GET)) {
             return;
@@ -844,12 +908,15 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Processes a suggest request.
+     *
      * @param request The HTTP request.
      * @param response The HTTP response.
      * @param chain The filter chain.
      * @throws IOException If an I/O error occurs.
      * @throws ServletException If a servlet error occurs.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (!acceptHttpMethod(request, GET)) {
@@ -1260,6 +1327,10 @@ public class SearchApiManager extends BaseApiManager {
         }
     }
 
+    /**
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
+     */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     @Override
     protected void writeHeaders(final HttpServletResponse response) {
         ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
@@ -1267,9 +1338,12 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Writes a JSON response.
+     *
      * @param status The status code.
      * @param t The throwable.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void writeJsonResponse(final int status, final Throwable t) {
         final Supplier<String> stacktraceString = () -> {
             final StringBuilder buf = new StringBuilder(100);
@@ -1313,19 +1387,25 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Escapes a JSON key-value pair.
+     *
      * @param key The key.
      * @param value The value.
      * @return The escaped key-value pair.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String escapeJsonKeyValue(final String key, final String value) {
         return "\"" + key + "\":" + escapeJson(value);
     }
 
     /**
      * Writes a JSON response.
+     *
      * @param status The status code.
      * @param body The body.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected void writeJsonResponse(final int status, final String body) {
         final String callback = LaRequestUtil.getOptionalRequest().map(req -> req.getParameter("callback")).orElse(null);
         final boolean isJsonp = ComponentUtil.getFessConfig().isApiJsonpEnabled() && StringUtil.isNotBlank(callback);
@@ -1351,18 +1431,24 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Escapes a callback name.
+     *
      * @param callbackName The callback name.
      * @return The escaped callback name.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String escapeCallbackName(final String callbackName) {
         return "/**/" + CALLBACK_NAME_INVALID_CHARS.matcher(callbackName).replaceAll(StringUtil.EMPTY);
     }
 
     /**
      * Escapes a JSON object.
+     *
      * @param obj The object to escape.
      * @return The escaped object.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     protected String escapeJson(final Object obj) {
         if (obj == null) {
             return "null";
@@ -1422,8 +1508,11 @@ public class SearchApiManager extends BaseApiManager {
 
     /**
      * Sets the MIME type.
+     *
      * @param mimeType The MIME type.
+     * @deprecated Will be removed in a future release. Use the v2 API instead.
      */
+    @Deprecated(since = "15.7.0", forRemoval = true)
     public void setMimeType(final String mimeType) {
         this.mimeType = mimeType;
     }

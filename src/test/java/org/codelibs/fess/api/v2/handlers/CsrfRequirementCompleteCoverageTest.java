@@ -68,7 +68,7 @@ public class CsrfRequirementCompleteCoverageTest {
      * Must equal {@code ENDPOINT_DECISIONS.size()}. Increment when adding a new endpoint
      * so that the mismatch causes a deliberate compile-time / test-time notice.
      */
-    private static final int EXPECTED_ENTRY_COUNT = 14;
+    private static final int EXPECTED_ENTRY_COUNT = 16;
 
     static {
         // LinkedHashMap preserves insertion order for readable failure messages.
@@ -101,6 +101,12 @@ public class CsrfRequirementCompleteCoverageTest {
         // --- CHAT endpoints ---
         m.put("/chat", true); // POST, CSRF required
         m.put("/chat/stream", true); // POST, CSRF required
+
+        // --- CHAT SESSION endpoints (DELETE /chat/sessions/{session_id}) ---
+        // DELETE is a state-changing method; the subPath.startsWith("/chat/sessions/")
+        // rule in CsrfRequirement applies regardless of the trailing session_id value.
+        m.put("/chat/sessions/abc", true); // DELETE, CSRF required
+        m.put("/chat/sessions/def", true); // DELETE, CSRF required (second representative)
 
         ENDPOINT_DECISIONS = java.util.Collections.unmodifiableMap(m);
     }
@@ -135,13 +141,31 @@ public class CsrfRequirementCompleteCoverageTest {
 
     @Test
     public void test_stateChangingEndpointsAreAllCsrfRequired() {
-        // Secondary assertion: all paths that POST actual state changes (auth/logout,
-        // auth/password, click, favorite, chat, chat/stream) must require CSRF.
-        final List<String> stateChanging =
+        // Secondary assertion: all paths that POST/DELETE actual state changes (auth/logout,
+        // auth/password, click, favorite, chat, chat/stream, chat/sessions) must require CSRF.
+        final List<String> stateChangingPost =
                 Arrays.asList("/auth/logout", "/auth/password", "/click", "/documents/abc123/favorite", "/chat", "/chat/stream");
-        for (final String path : stateChanging) {
+        for (final String path : stateChangingPost) {
             assertTrue(CsrfRequirement.requiresCsrf(path, "POST"), "State-changing endpoint must require CSRF token: POST " + path);
         }
+        // DELETE /chat/sessions/{session_id} is state-changing — CSRF required
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "DELETE"),
+                "DELETE /chat/sessions/{session_id} must require CSRF token");
+    }
+
+    @Test
+    public void test_deleteChatSessions_requiresCsrf() {
+        // DELETE /chat/sessions/{session_id} was added as a state-mutating endpoint.
+        // Verify several representative session_id values all require CSRF.
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "DELETE"), "DELETE /chat/sessions/abc must require CSRF");
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/def", "DELETE"), "DELETE /chat/sessions/def must require CSRF");
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/sessions/", "DELETE"), "DELETE /chat/sessions/ (trailing slash) must require CSRF");
+    }
+
+    @Test
+    public void test_getChatSessions_isExemptByGetRule() {
+        // GET on chat/sessions path must be exempt — GET is always idempotent
+        assertFalse(CsrfRequirement.requiresCsrf("/chat/sessions/abc", "GET"), "GET /chat/sessions/{session_id} must be CSRF-exempt");
     }
 
     @Test

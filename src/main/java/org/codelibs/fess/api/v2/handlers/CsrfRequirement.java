@@ -75,6 +75,9 @@ public final class CsrfRequirement {
         if ("/chat/stream".equals(subPath)) {
             return true;
         }
+        if (subPath.startsWith("/chat/sessions/")) {
+            return true;
+        }
         return false;
     }
 }

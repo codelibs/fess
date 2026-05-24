@@ -28,12 +28,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.api.chat.ChatApiHelper;
 import org.codelibs.fess.api.v2.V2EnvelopeWriter;
 import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -54,13 +54,17 @@ import jakarta.servlet.http.HttpServletResponse;
  * static theme JS can share a single SSE parser across v1 and v2. The exception
  * is documented in §Risks (Risk 2).</p>
  *
- * <p>Phase callback events mirror v1:</p>
+ * <p>All SSE event data keys use snake_case:</p>
  * <ul>
- *   <li>{@code event: phase} — {@code {phase, status: start|complete, message?, keywords?, hitCount?}}</li>
+ *   <li>{@code event: phase} — {@code {phase, status: start|complete, message?, keywords?, hit_count?}}</li>
  *   <li>{@code event: chunk} — {@code {content}}</li>
- *   <li>{@code event: sources} — {@code {sources: [...]}}</li>
- *   <li>{@code event: done} — {@code {sessionId, htmlContent?}}</li>
- *   <li>{@code event: retry|waiting|fallback|warning|error} — diagnostic events (same v1 shape)</li>
+ *   <li>{@code event: sources} — {@code {sources: [{rank, title, url, doc_id, snippet, url_link, go_url}]}}</li>
+ *   <li>{@code event: done} — {@code {session_id, html_content?}}</li>
+ *   <li>{@code event: retry} — {@code {phase, operation, attempt, max_attempts, sleep_ms, cause?}}</li>
+ *   <li>{@code event: waiting} — {@code {phase, reason, elapsed_ms, timeout_ms}}</li>
+ *   <li>{@code event: fallback} — {@code {phase, reason, original_query?, new_query?}}</li>
+ *   <li>{@code event: warning} — {@code {phase, code, detail?}}</li>
+ *   <li>{@code event: error} — {@code {phase?, message, error_code}}</li>
  * </ul>
  *
  * <p>Error reporting <em>before</em> the LLM is invoked (method check, feature gate,
@@ -107,7 +111,7 @@ public class ChatStreamHandler {
             return;
         }
 
-        final int maxLen = getMaxMessageLength(fessConfig);
+        final int maxLen = ChatApiHelper.getMaxMessageLength(fessConfig);
         final ChatRequestBody body;
         try {
             body = ChatRequestBody.from(raw, maxLen);
@@ -121,7 +125,7 @@ public class ChatStreamHandler {
             return;
         }
 
-        final String userId = getUserId(req);
+        final String userId = ChatApiHelper.getUserId(req);
         // Per-user chat rate limit. Pre-stream failure returns a proper 429 JSON envelope.
         final LoginRateLimiter limiter;
         try {
@@ -132,8 +136,9 @@ public class ChatStreamHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
         }
-        final int chatLimit = getChatRateLimitPerMinute(fessConfig);
+        final int chatLimit = ChatApiHelper.getChatRateLimitPerMinute(fessConfig);
         if (limiter != null && chatLimit > 0 && !limiter.allow(LoginRateLimiter.Scope.CHAT, userId, chatLimit, 60)) {
+            res.setHeader("Retry-After", "60");
             V2EnvelopeWriter.writeError(res, V2ErrorCode.RATE_LIMITED, "too many chat requests");
             return;
         }
@@ -164,14 +169,14 @@ public class ChatStreamHandler {
 
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null && !sources.isEmpty()) {
-                sendSseEvent(writer, "sources", Map.of("sources", sources));
+                sendSseEvent(writer, "sources", Map.of("sources", ChatHandler.toSourceMaps(sources)));
             }
 
             final Map<String, Object> doneData = new LinkedHashMap<>();
-            doneData.put("sessionId", result.getSessionId());
+            doneData.put("session_id", result.getSessionId());
             final String htmlContent = result.getMessage().getHtmlContent();
             if (htmlContent != null) {
-                doneData.put("htmlContent", htmlContent);
+                doneData.put("html_content", htmlContent);
             }
             sendSseEvent(writer, "done", doneData);
         } catch (final LlmException e) {
@@ -185,7 +190,7 @@ public class ChatStreamHandler {
             // container may have already closed it.
             if (!errorEmittedHolder[0] && !res.isCommitted()) {
                 try {
-                    sendSseEvent(writer, "error", Map.of("message", "internal error", "errorCode", LlmException.ERROR_UNKNOWN));
+                    sendSseEvent(writer, "error", Map.of("message", "internal error", "error_code", LlmException.ERROR_UNKNOWN));
                 } catch (final Exception ioe) {
                     logger.warn("Failed to send SSE error after exception", ioe);
                 }
@@ -209,8 +214,7 @@ public class ChatStreamHandler {
     }
 
     /**
-     * Builds a {@link ChatPhaseCallback} that emits SSE events using the same
-     * wire shape v1 emits, so the static theme JS can share a single parser.
+     * Builds a {@link ChatPhaseCallback} that emits SSE events with snake_case keys.
      *
      * @param writer the per-request servlet writer to emit events to
      * @return a callback bound to the writer
@@ -220,8 +224,7 @@ public class ChatStreamHandler {
     }
 
     /**
-     * Builds a {@link ChatPhaseCallback} that emits SSE events using the same
-     * wire shape v1 emits, so the static theme JS can share a single parser.
+     * Builds a {@link ChatPhaseCallback} that emits SSE events with snake_case keys.
      * The supplied {@code errorEmittedHolder} flag is set whenever onError is
      * invoked so the surrounding handler can avoid double-emitting an error
      * event from its outer catch.
@@ -261,7 +264,9 @@ public class ChatStreamHandler {
                 if (payload != null) {
                     payload.forEach((k, v) -> {
                         if (v != null && !RESERVED_PAYLOAD_KEYS.contains(k)) {
-                            data.put(k, v);
+                            // Rename hitCount → hit_count in phase completion payloads.
+                            final String outKey = "hitCount".equals(k) ? "hit_count" : k;
+                            data.put(outKey, v);
                         }
                     });
                 }
@@ -278,7 +283,14 @@ public class ChatStreamHandler {
             @Override
             public void onError(final String phase, final String errorCode) {
                 errorEmittedHolder[0] = true;
-                emitSafely(writer, "error", Map.of("phase", phase, "message", errorCode, "errorCode", errorCode));
+                // Map.of rejects null values with NPE — build the payload defensively so a
+                // future caller passing phase=null does not crash the error event itself.
+                // errorCode is guaranteed non-null by the wire contract.
+                final Map<String, Object> data = new LinkedHashMap<>();
+                putIfNotNull(data, "phase", phase);
+                data.put("message", errorCode);
+                data.put("error_code", errorCode);
+                emitSafely(writer, "error", data);
             }
 
             @Override
@@ -288,8 +300,8 @@ public class ChatStreamHandler {
                 data.put("phase", phase);
                 data.put("operation", operation);
                 data.put("attempt", attempt);
-                data.put("maxAttempts", maxAttempts);
-                data.put("sleepMs", sleepMs);
+                data.put("max_attempts", maxAttempts);
+                data.put("sleep_ms", sleepMs);
                 putIfNotNull(data, "cause", cause);
                 emitSafely(writer, "retry", data);
             }
@@ -299,8 +311,8 @@ public class ChatStreamHandler {
                 final Map<String, Object> data = new HashMap<>();
                 data.put("phase", phase);
                 data.put("reason", reason);
-                data.put("elapsedMs", elapsedMs);
-                data.put("timeoutMs", timeoutMs);
+                data.put("elapsed_ms", elapsedMs);
+                data.put("timeout_ms", timeoutMs);
                 emitSafely(writer, "waiting", data);
             }
 
@@ -309,8 +321,8 @@ public class ChatStreamHandler {
                 final Map<String, Object> data = new HashMap<>();
                 data.put("phase", phase);
                 data.put("reason", reason);
-                putIfNotNull(data, "originalQuery", originalQuery);
-                putIfNotNull(data, "newQuery", newQuery);
+                putIfNotNull(data, "original_query", originalQuery);
+                putIfNotNull(data, "new_query", newQuery);
                 emitSafely(writer, "fallback", data);
             }
 
@@ -369,55 +381,6 @@ public class ChatStreamHandler {
             writer.flush();
         } catch (final JsonProcessingException e) {
             logger.warn("[RAG] failed to serialize SSE data. event={}", event, e);
-        }
-    }
-
-    /**
-     * Mirrors v1 {@code ChatApiManager#getUserId}: prefer the authenticated
-     * username, fall back to the cookie-bound userCode for guests.
-     *
-     * @param req the incoming HTTP request
-     * @return the user identifier
-     */
-    protected String getUserId(final HttpServletRequest req) {
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final String username = systemHelper.getUsername();
-        if (!Constants.GUEST_USER.equals(username)) {
-            return username;
-        }
-        return ComponentUtil.getUserInfoHelper().getUserCode();
-    }
-
-    /**
-     * Resolve {@code rag.chat.message.max.length} from fess_config system properties,
-     * defaulting to 4000 on parse failure. Uses {@code getSystemProperty} to match the
-     * pattern established by {@link ChatHandler}.
-     *
-     * @param fessConfig active Fess config
-     * @return max chat message length in characters
-     */
-    protected int getMaxMessageLength(final FessConfig fessConfig) {
-        try {
-            return Integer.parseInt(fessConfig.getSystemProperty("rag.chat.message.max.length", "4000"));
-        } catch (final NumberFormatException e) {
-            return 4000;
-        }
-    }
-
-    /**
-     * Resolve {@code api.v2.chat.rate.limit.per.user.per.minute} from fess_config system
-     * properties, defaulting to 30 on parse failure. A return value &lt;= 0 disables the
-     * rate limit entirely. The system-property indirection avoids regenerating the
-     * LastaFlute-managed FessConfig accessors for a single value.
-     *
-     * @param fessConfig active Fess config
-     * @return max chat requests per minute per user, or {@code <= 0} to disable
-     */
-    protected int getChatRateLimitPerMinute(final FessConfig fessConfig) {
-        try {
-            return Integer.parseInt(fessConfig.getSystemProperty("api.v2.chat.rate.limit.per.user.per.minute", "30"));
-        } catch (final NumberFormatException e) {
-            return 30;
         }
     }
 }

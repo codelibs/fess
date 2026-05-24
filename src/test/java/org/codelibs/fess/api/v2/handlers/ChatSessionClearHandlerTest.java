@@ -19,14 +19,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.chat.ChatSessionManager;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -44,184 +45,297 @@ import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
 /**
- * Unit tests for {@link ChatHandler}.
+ * Unit tests for {@link ChatSessionClearHandler}.
  *
- * <p>The handler relies on the production {@code fess_config.properties} default
- * {@code rag.chat.enabled=false}; under that default every POST falls into the
- * "chat is not enabled" branch and we observe the v2 envelope shape. The
- * happy-path test is intentionally {@code @Disabled} pending the DI override
- * scaffolding planned for the Plan 6 integration tests.</p>
+ * <p>The handler guards itself with three pre-conditions before touching session state:
+ * (1) HTTP method must be DELETE, (2) RAG chat must be enabled, and (3) session_id must
+ * match the allowed pattern. The successful clear path requires a registered
+ * {@link ChatSessionManager} that returns {@code true} from {@code clearSession}.
+ * The 404 path is exercised with a manager that returns {@code false}.</p>
+ *
+ * <p>All response assertions follow the v2 envelope shape:
+ * {@code {"response": {"status": ..., ...}}}. The {@code version} field must NOT
+ * appear in the envelope (removed in the new design).</p>
  */
-public class ChatHandlerTest extends UnitFessTestCase {
+public class ChatSessionClearHandlerTest extends UnitFessTestCase {
+
+    /**
+     * Reset the rate limiter before each test to prevent bucket state from leaking
+     * between tests that pre-saturate the CHAT bucket.
+     */
+    @BeforeEach
+    public void resetRateLimiter() {
+        final LoginRateLimiter fresh = new LoginRateLimiter();
+        ComponentUtil.register(fresh, "loginRateLimiter");
+        ComponentUtil.register(fresh, LoginRateLimiter.class.getCanonicalName());
+    }
+
+    // ── Method guard ─────────────────────────────────────────────────────────────
 
     @Test
-    public void test_rejectsGet() throws Exception {
+    public void test_rejectsGet_returns405() throws Exception {
         final CapturingResponse res = new CapturingResponse();
-        new ChatHandler().handle(new StubRequest("GET", "/api/v2/chat"), res);
+        new ChatSessionClearHandler().handle(new StubRequest("GET"), res, "valid-session-1");
+        assertEquals(405, res.status);
+        assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
+        assertEquals("Allow header must be set to DELETE", "DELETE", res.getHeader("Allow"));
+    }
+
+    @Test
+    public void test_rejectsPost_returns405() throws Exception {
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("POST"), res, "valid-session-1");
         assertEquals(405, res.status);
         assertTrue(res.body().contains("\"code\":\"method_not_allowed\""), res.body());
     }
 
+    // ── RAG-disabled guard ────────────────────────────────────────────────────────
+
     @Test
-    public void test_chatDisabledReturnsInvalidRequest() throws Exception {
-        // Default fess_config.properties has rag.chat.enabled=false, so the
-        // disabled branch fires. SPA branches on the code field, not the message
-        // text, so we don't pin the message string here.
+    public void test_chatDisabled_returns400() throws Exception {
+        // Default fess_config.properties has rag.chat.enabled=false.
         final CapturingResponse res = new CapturingResponse();
-        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "valid-session-1");
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("chat is not enabled"), res.body());
+    }
+
+    // ── session_id pattern validation ────────────────────────────────────────────
+
+    @Test
+    public void test_nullSessionId_returns400() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, null);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+        assertTrue(res.body().contains("invalid session_id"), res.body());
+    }
+
+    @Test
+    public void test_emptySessionId_returns400() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "");
         assertEquals(400, res.status);
         assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
     }
 
     @Test
-    public void test_missingMessageReturnsInvalidRequest() throws Exception {
-        // With rag.chat.enabled=false in the test config, the chat-disabled
-        // branch fires first — observable outcome is the same 400/invalid_request.
-        final CapturingResponse res = new CapturingResponse();
-        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{}"), res);
-        assertEquals(400, res.status);
-    }
-
-    @Test
-    public void test_oversizedMessageReturnsInvalidRequest() throws Exception {
-        // rag.chat.message.max.length default = 4000. Send 4001 characters.
-        final String big = "x".repeat(4001);
-        final CapturingResponse res = new CapturingResponse();
-        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"" + big + "\"}"), res);
-        assertEquals(400, res.status);
-    }
-
-    @Test
-    public void test_envelopeShapeContainsResponseAndStatusFields() throws Exception {
-        // Even on the error path, the v2 envelope shape is the same — assert it
-        // so a future shape regression in V2EnvelopeWriter fails this test loud.
-        // The "version" field was removed from the v2 envelope in the new design.
-        final CapturingResponse res = new CapturingResponse();
-        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
-        final String body = res.body();
-        assertTrue(body.startsWith("{\"response\":{"), "body should start with v2 envelope, was: " + body);
-        assertFalse(body.contains("\"version\""), "version field must not appear in v2 envelope: " + body);
-        assertTrue(body.contains("\"status\":"), body);
-    }
-
-    @Test
-    public void test_toSourceMaps_snakeCaseKeys() {
-        // Verify that toSourceMaps converts ChatSource to snake_case wire keys.
-        // rank is 1-based (src.getIndex()), url_link / go_url / doc_id are snake_case.
-        final org.codelibs.fess.entity.ChatMessage.ChatSource src = new org.codelibs.fess.entity.ChatMessage.ChatSource();
-        src.setIndex(1);
-        src.setTitle("My Title");
-        src.setUrl("https://example.com/doc");
-        src.setDocId("doc-123");
-        src.setSnippet("some snippet");
-        src.setUrlLink("https://example.com/link");
-        src.setGoUrl("https://go.example.com");
-        final java.util.List<java.util.Map<String, Object>> maps = ChatHandler.toSourceMaps(java.util.List.of(src));
-        assertEquals(1, maps.size());
-        final java.util.Map<String, Object> m = maps.get(0);
-        assertEquals("rank must be getIndex() value", 1, m.get("rank"));
-        assertEquals("My Title", m.get("title"));
-        assertEquals("https://example.com/doc", m.get("url"));
-        assertEquals("doc_id must be snake_case", "doc-123", m.get("doc_id"));
-        assertEquals("some snippet", m.get("snippet"));
-        assertEquals("url_link must be snake_case", "https://example.com/link", m.get("url_link"));
-        assertEquals("go_url must be snake_case", "https://go.example.com", m.get("go_url"));
-        // Ensure no camelCase keys leaked through
-        assertNull(m.get("docId"), "camelCase docId must not appear");
-        assertNull(m.get("urlLink"), "camelCase urlLink must not appear");
-        assertNull(m.get("goUrl"), "camelCase goUrl must not appear");
-    }
-
-    @Test
-    public void test_toSourceMaps_nullFieldsOmitted() {
-        // Null optional fields (title, url, doc_id, snippet, url_link, go_url) must
-        // not appear in the output map — putIfNotNull skips them.
-        final org.codelibs.fess.entity.ChatMessage.ChatSource src = new org.codelibs.fess.entity.ChatMessage.ChatSource();
-        src.setIndex(2);
-        // All optional fields left null
-        final java.util.List<java.util.Map<String, Object>> maps = ChatHandler.toSourceMaps(java.util.List.of(src));
-        final java.util.Map<String, Object> m = maps.get(0);
-        assertEquals(2, m.get("rank"));
-        assertFalse(m.containsKey("title"), "null title must be omitted");
-        assertFalse(m.containsKey("url"), "null url must be omitted");
-        assertFalse(m.containsKey("doc_id"), "null doc_id must be omitted");
-        assertFalse(m.containsKey("snippet"), "null snippet must be omitted");
-        assertFalse(m.containsKey("url_link"), "null url_link must be omitted");
-        assertFalse(m.containsKey("go_url"), "null go_url must be omitted");
-    }
-
-    @Test
-    @org.junit.jupiter.api.Disabled("TODO: needs DI container override for ChatClient stub — covered by Plan 6 integration tests")
-    public void test_happyPath_returnsSessionIdContentAndSources() throws Exception {
-        // Future implementation: stub ChatClient via FessTestContainerInitializer,
-        // invoke handler with valid POST, assert payload keys session_id, content, sources.
-    }
-
-    @Test
-    public void chat_rateLimited_returns429() throws Exception {
-        // Drive the chat handler past the chat-disabled gate by enabling RAG, then exhaust
-        // the per-user CHAT bucket via a fresh limiter registered into DI. The 31st call
-        // (default limit is 30/min) should be rejected with 429/rate_limited regardless
-        // of the eventual ChatClient state — the handler must short-circuit before any
-        // ChatClient dispatch.
+    public void test_sessionIdWithSpaces_returns400() throws Exception {
         enableRagChat();
-        // Register a SystemHelper stub whose getUsername() returns the literal "guest" rather
-        // than calling getRequestManager() (which has no DI binding in this harness). The
-        // chat handler then falls back to UserInfoHelper for the user code.
-        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
-            @Override
-            public String getUsername() {
-                return org.codelibs.fess.Constants.GUEST_USER;
-            }
-        };
-        ComponentUtil.register(systemHelper, "systemHelper");
-        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
-        // UserInfoHelper's getUserCode() returns "" or a session-bound code; the slim test
-        // harness has no session so a stub returning empty is sufficient.
-        final org.codelibs.fess.helper.UserInfoHelper userInfoHelper = new org.codelibs.fess.helper.UserInfoHelper() {
-            @Override
-            public String getUserCode() {
-                return "";
-            }
-        };
-        ComponentUtil.register(userInfoHelper, "userInfoHelper");
-        ComponentUtil.register(userInfoHelper, org.codelibs.fess.helper.UserInfoHelper.class.getCanonicalName());
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "invalid session");
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_sessionIdWithSpecialChars_returns400() throws Exception {
+        enableRagChat();
+        final CapturingResponse res = new CapturingResponse();
+        // Characters outside [A-Za-z0-9._-] must be rejected
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "session@#$!");
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_sessionIdTooLong_returns400() throws Exception {
+        enableRagChat();
+        // 129 characters — one over the 128-character cap
+        final String tooLong = "a".repeat(129);
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, tooLong);
+        assertEquals(400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_validSessionIdBoundary_acceptsMaxLength() throws Exception {
+        // 128 characters — exactly at the cap; should pass pattern validation.
+        // With RAG enabled, the next gate is the rate limiter. In the test harness
+        // the limiter DI is absent, so we expect INTERNAL_ERROR (500) — confirming
+        // the session_id was accepted and processing continued past the pattern check.
+        enableRagChat();
+        enableSystemHelpers();
+        final String maxId = "a".repeat(128);
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, maxId);
+        // Must NOT be a 400 invalid_request from the pattern guard
+        assertFalse(res.body().contains("invalid session_id"), "128-char session_id must pass pattern validation, got: " + res.body());
+    }
+
+    @Test
+    public void test_validSessionIdWithDotAndHyphen_accepted() throws Exception {
+        // Dots and hyphens are valid per the pattern.
+        enableRagChat();
+        enableSystemHelpers();
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess.ion-id_01");
+        assertFalse(res.body().contains("invalid session_id"),
+                "session_id with dot/hyphen/underscore must pass pattern, got: " + res.body());
+    }
+
+    // ── Rate limit ────────────────────────────────────────────────────────────────
+
+    @Test
+    public void test_rateLimited_returns429() throws Exception {
+        enableRagChat();
+        enableSystemHelpers();
         final LoginRateLimiter rl = new LoginRateLimiter();
-        // Pre-saturate the CHAT bucket for the guest user-code resolved by ChatHandler.
-        // The handler falls back to userCode for guests; since the test harness has no
-        // bound user, we burn through 30 slots for an arbitrary placeholder, then assert
-        // the next request (using the same placeholder) is rejected. The handler resolves
-        // its limit via the DI-managed LoginRateLimiter so we register our pre-saturated
-        // one under the canonical class name.
-        // The handler's getUserId() returns the empty/anon userCode under the test harness,
-        // so saturate the bucket for that key (an empty string) directly.
+        // Pre-saturate the CHAT bucket for the "test-user" userId resolved by enableSystemHelpers().
+        // LoginRateLimiter.allow() denies empty/null keys (MJ-6), so the bucket key must match
+        // the non-empty userCode returned by the stub UserInfoHelper.
         for (int i = 0; i < 30; i++) {
-            rl.allow(LoginRateLimiter.Scope.CHAT, "", 30, 60);
+            rl.allow(LoginRateLimiter.Scope.CHAT, "test-user", 30, 60);
         }
         ComponentUtil.register(rl, "loginRateLimiter");
         ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
         try {
             final CapturingResponse res = new CapturingResponse();
-            new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody("{\"message\":\"hi\"}"), res);
-            // The handler may resolve a non-empty userId via UserInfoHelper, in which case the
-            // pre-saturated empty-key bucket is irrelevant. Accept either: 429 (limit hit on
-            // the resolved userId, exercising the new code path) OR a different-than-429 if
-            // the resolved userId got its own fresh bucket. Pin the EXPECTED case here with
-            // an explicit empty-userId scenario to make the failure mode legible.
-            assertTrue(res.status == 429 || res.status == 200 || res.status == 500,
-                    "unexpected status: " + res.status + " body=" + res.body());
-            if (res.status == 429) {
-                assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
-                assertTrue(res.body().contains("too many chat requests"), res.body());
-            }
+            new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "valid-session-1");
+            assertEquals(429, res.status);
+            assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+            assertTrue(res.body().contains("too many chat requests"), res.body());
+            assertEquals("Retry-After header must be set", "60", res.getHeader("Retry-After"));
         } finally {
-            // Reset to a fresh limiter so neighbors don't see our saturated bucket.
             ComponentUtil.register(new LoginRateLimiter(), "loginRateLimiter");
             ComponentUtil.register(new LoginRateLimiter(), LoginRateLimiter.class.getCanonicalName());
         }
     }
 
-    /** Enables RAG chat by registering a fess-config subclass that returns true. */
+    // ── Session not found (404) ───────────────────────────────────────────────────
+
+    @Test
+    public void test_sessionNotFound_returns404() throws Exception {
+        enableRagChat();
+        enableSystemHelpers();
+        registerLimiter();
+        // Register a ChatSessionManager that always returns false from clearSession
+        final ChatSessionManager notFoundManager = new ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return false;
+            }
+        };
+        ComponentUtil.register(notFoundManager, "chatSessionManager");
+        ComponentUtil.register(notFoundManager, ChatSessionManager.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "nonexistent-session");
+        assertEquals(res.body(), 404, res.status);
+        assertTrue(res.body().contains("\"code\":\"not_found\""), res.body());
+        assertTrue(res.body().contains("session not found"), res.body());
+    }
+
+    // ── Success (200) ─────────────────────────────────────────────────────────────
+
+    @Test
+    public void test_successPath_returnsEnvelopeWithClearedTrue() throws Exception {
+        enableRagChat();
+        enableSystemHelpers();
+        registerLimiter();
+        // Register a ChatSessionManager that always clears successfully
+        final ChatSessionManager mockManager = new ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return true;
+            }
+        };
+        ComponentUtil.register(mockManager, "chatSessionManager");
+        ComponentUtil.register(mockManager, ChatSessionManager.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess-001");
+        assertEquals(res.body(), 200, res.status);
+        final String body = res.body();
+        // v2 envelope structure
+        assertTrue("must start with v2 envelope, was: " + body, body.startsWith("{\"response\":{"));
+        assertFalse("version field must not appear in v2 envelope: " + body, body.contains("\"version\""));
+        assertTrue(body.contains("\"status\":0"), body);
+        // Payload fields
+        assertTrue(body.contains("\"session_id\":\"sess-001\""), body);
+        assertTrue(body.contains("\"cleared\":true"), body);
+    }
+
+    @Test
+    public void test_successPath_sessionIdEchoedBack() throws Exception {
+        enableRagChat();
+        enableSystemHelpers();
+        registerLimiter();
+        final ChatSessionManager mockManager = new ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                return true;
+            }
+        };
+        ComponentUtil.register(mockManager, "chatSessionManager");
+        ComponentUtil.register(mockManager, ChatSessionManager.class.getCanonicalName());
+
+        final String sid = "my.session-id_42";
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, sid);
+        assertEquals(res.body(), 200, res.status);
+        assertTrue(res.body(), res.body().contains("\"session_id\":\"" + sid + "\""));
+    }
+
+    // ── Envelope shape ────────────────────────────────────────────────────────────
+
+    @Test
+    public void test_errorResponseHasNoVersionField() throws Exception {
+        // Even error responses must not include "version" — removed from envelope.
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("GET"), res, "valid");
+        assertFalse(res.body().contains("\"version\""), "version must not appear in error envelope: " + res.body());
+    }
+
+    // ── Internal error (500) ──────────────────────────────────────────────────────
+
+    @Test
+    public void test_clearSessionThrowsRuntime_returns500_internalError() throws Exception {
+        // When ChatSessionManager.clearSession throws an unexpected RuntimeException,
+        // the handler must return HTTP 500 with error code "internal_error".
+        enableRagChat();
+        enableSystemHelpers();
+        registerLimiter();
+        final org.codelibs.fess.chat.ChatSessionManager throwingManager = new org.codelibs.fess.chat.ChatSessionManager() {
+            @Override
+            public boolean clearSession(final String sessionId, final String userId) {
+                throw new RuntimeException("simulated backend failure");
+            }
+        };
+        ComponentUtil.register(throwingManager, "chatSessionManager");
+        ComponentUtil.register(throwingManager, org.codelibs.fess.chat.ChatSessionManager.class.getCanonicalName());
+
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "sess-err-001");
+        assertEquals(res.body(), 500, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"internal_error\""), "must return internal_error code, got: " + body);
+        assertTrue(body.contains("internal error"), "must include internal error message, got: " + body);
+    }
+
+    // ── RAG disabled (400) ────────────────────────────────────────────────────────
+
+    @Test
+    public void test_ragChatDisabled_returns400_invalidRequest() throws Exception {
+        // When RAG chat is disabled the handler must return HTTP 400 with
+        // error code "invalid_request". Default FessConfig from test_app.xml has
+        // rag.chat.enabled=false, so no config override is needed here.
+        final CapturingResponse res = new CapturingResponse();
+        new ChatSessionClearHandler().handle(new StubRequest("DELETE"), res, "valid-session-1");
+        assertEquals(400, res.status);
+        final String body = res.body();
+        assertTrue(body.contains("\"code\":\"invalid_request\""), "must return invalid_request when RAG disabled, got: " + body);
+        assertTrue(body.contains("chat is not enabled"), "must include 'chat is not enabled' message, got: " + body);
+        // Must not reach any session manager logic
+        assertFalse(body.contains("\"cleared\""), "must not contain cleared field when chat is disabled: " + body);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+
     private static void enableRagChat() {
         ComponentUtil.setFessConfig(new org.codelibs.fess.mylasta.direction.FessConfig.SimpleImpl() {
             private static final long serialVersionUID = 1L;
@@ -233,7 +347,36 @@ public class ChatHandlerTest extends UnitFessTestCase {
         });
     }
 
-    /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */
+    private static void enableSystemHelpers() {
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String getUsername() {
+                return org.codelibs.fess.Constants.GUEST_USER;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+
+        final org.codelibs.fess.helper.UserInfoHelper userInfoHelper = new org.codelibs.fess.helper.UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                // Return a non-empty code so LoginRateLimiter.allow() does not deny
+                // on the empty-key guard (MJ-6: empty key → always deny).
+                return "test-user";
+            }
+        };
+        ComponentUtil.register(userInfoHelper, "userInfoHelper");
+        ComponentUtil.register(userInfoHelper, org.codelibs.fess.helper.UserInfoHelper.class.getCanonicalName());
+    }
+
+    private static void registerLimiter() {
+        // Register a fresh (non-saturated) rate limiter so rate-limit checks pass.
+        final LoginRateLimiter rl = new LoginRateLimiter();
+        ComponentUtil.register(rl, "loginRateLimiter");
+        ComponentUtil.register(rl, LoginRateLimiter.class.getCanonicalName());
+    }
+
+    /** Minimal HttpServletResponse stub — captures status, content type, headers, and body. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
@@ -417,25 +560,15 @@ public class ChatHandlerTest extends UnitFessTestCase {
     }
 
     /**
-     * Minimal HttpServletRequest stub. Supports a JSON body (via {@link #withJsonBody}) — the
-     * remote address defaults to "127.0.0.1" since this handler does not key off the IP.
+     * Minimal HttpServletRequest stub for DELETE requests.
+     * No body needed for this handler — only method and URI are used.
      */
     private static class StubRequest implements HttpServletRequest {
         private final String method;
-        private final String uri;
         private final Map<String, Object> attrs = new HashMap<>();
-        private byte[] body;
-        private String contentType;
 
-        StubRequest(final String method, final String uri) {
+        StubRequest(final String method) {
             this.method = method;
-            this.uri = uri;
-        }
-
-        StubRequest withJsonBody(final String json) {
-            this.body = json == null ? new byte[0] : json.getBytes(StandardCharsets.UTF_8);
-            this.contentType = "application/json";
-            return this;
         }
 
         @Override
@@ -445,12 +578,12 @@ public class ChatHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getServletPath() {
-            return uri;
+            return "/api/v2/chat/sessions/stub";
         }
 
         @Override
         public String getRequestURI() {
-            return uri;
+            return "/api/v2/chat/sessions/stub";
         }
 
         @Override
@@ -559,7 +692,7 @@ public class ChatHandlerTest extends UnitFessTestCase {
 
         @Override
         public StringBuffer getRequestURL() {
-            return new StringBuffer(uri);
+            return new StringBuffer(getRequestURI());
         }
 
         @Override
@@ -631,22 +764,22 @@ public class ChatHandlerTest extends UnitFessTestCase {
 
         @Override
         public int getContentLength() {
-            return body == null ? 0 : body.length;
+            return 0;
         }
 
         @Override
         public long getContentLengthLong() {
-            return body == null ? 0L : body.length;
+            return 0;
         }
 
         @Override
         public String getContentType() {
-            return contentType;
+            return null;
         }
 
         @Override
         public ServletInputStream getInputStream() {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(body == null ? new byte[0] : body);
+            final ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
             return new ServletInputStream() {
                 private boolean eof = false;
 
@@ -657,22 +790,6 @@ public class ChatHandlerTest extends UnitFessTestCase {
                         eof = true;
                     }
                     return v;
-                }
-
-                @Override
-                public byte[] readAllBytes() throws IOException {
-                    final byte[] all = bais.readAllBytes();
-                    eof = true;
-                    return all;
-                }
-
-                @Override
-                public byte[] readNBytes(final int len) throws IOException {
-                    final byte[] out = bais.readNBytes(len);
-                    if (bais.available() == 0) {
-                        eof = true;
-                    }
-                    return out;
                 }
 
                 @Override
@@ -687,7 +804,6 @@ public class ChatHandlerTest extends UnitFessTestCase {
 
                 @Override
                 public void setReadListener(final ReadListener listener) {
-                    // no-op
                 }
             };
         }

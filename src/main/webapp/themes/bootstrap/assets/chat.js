@@ -83,37 +83,50 @@ export function attach() {
 
     /**
      * onEvent — receives parsed SSE frames from api.sseStream.
-     * The server emits typed events: "message" (token), "done", "error", "phase".
+     * The v2 server emits typed events: "chunk", "done", "error", "phase",
+     * "sources", "retry", "waiting", "fallback", "warning".
      * All user-visible text is set via textContent — no XSS risk.
      */
     function onEvent({ type, data }) {
       if (type === "done") {
+        // data.session_id may be used for future session management
         currentStream = null;
         return;
       }
       if (type === "error") {
-        // Map server-supplied error codes to i18n keys via an explicit allowlist.
+        // Map server-supplied error_code to i18n keys via an explicit allowlist.
         // Never surface raw server strings — they may contain stack traces or
         // internal paths.
         const KNOWN_ERROR_CODES = [
-          "error.rate_limit",
-          "error.invalid_request",
-          "error.auth_required",
-          "error.feature_disabled",
-          "error.payload_too_large",
-          "error.internal_error"
+          "rate_limit",
+          "auth_error",
+          "service_unavailable",
+          "timeout",
+          "context_length_exceeded",
+          "model_not_found",
+          "invalid_response",
+          "connection_error"
         ];
-        const code = data && data.code;
-        const key = KNOWN_ERROR_CODES.includes("error." + code) ? "error." + code : "error.server";
+        const code = data && data.error_code;
+        const key = KNOWN_ERROR_CODES.includes(code) ? "error." + code : "error.server";
         bubble.textContent = t(key);
         if (currentStream) { currentStream.abort(); currentStream = null; }
         return;
       }
-      // "message" (and unrecognised types) — append token to bubble.
-      if (!cleared) { bubble.textContent = ""; cleared = true; }
-      const token = (data && data.token != null) ? String(data.token) : String(data || "");
-      bubble.textContent += token;   // textContent — no XSS
-      log.scrollTop = log.scrollHeight;
+      if (type === "chunk") {
+        // Append streamed content chunk to bubble.
+        if (!cleared) { bubble.textContent = ""; cleared = true; }
+        const content = (data && data.content != null) ? String(data.content) : "";
+        bubble.textContent += content;   // textContent — no XSS
+        log.scrollTop = log.scrollHeight;
+        return;
+      }
+      if (type === "phase" || type === "retry" || type === "waiting" ||
+          type === "fallback" || type === "warning" || type === "sources") {
+        // Progress/metadata events — no bubble update needed in the minimal UI.
+        return;
+      }
+      // Unrecognised event type — ignore silently.
     }
 
     function onError(err) {

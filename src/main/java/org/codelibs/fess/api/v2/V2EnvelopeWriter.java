@@ -30,13 +30,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * <p>All responses share a common shape:</p>
  *
  * <pre>{@code
- * { "response": { "status": <int>, "version": "v2", ...payload-or-error... } }
+ * { "response": { "status": <int>, ...payload-or-error... } }
  * }</pre>
  *
  * <p>{@code status} follows the same convention as the v1 JSON API
  * ({@code 0} = success, {@code 1} = user error, {@code 9} = system error)
  * so existing client SDKs that already branch on this integer continue
- * to work.</p>
+ * to work. The {@code version} field is omitted from the envelope because
+ * the API version is already encoded in the URL path ({@code /api/v2/...}).</p>
  */
 public final class V2EnvelopeWriter {
 
@@ -49,9 +50,6 @@ public final class V2EnvelopeWriter {
     /** Status value indicating an unexpected server-side failure. */
     public static final int STATUS_SYSTEM_ERROR = 9;
 
-    /** API version stamped into every envelope. */
-    public static final String VERSION = "v2";
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
 
@@ -61,16 +59,16 @@ public final class V2EnvelopeWriter {
 
     /**
      * Reserved keys that the envelope always owns and that a caller-supplied payload must
-     * not contain. If a payload map contains either key the envelope's {@code status} integer
-     * or {@code version} string would be silently overwritten, breaking the wire contract for
-     * every client that branches on those fields.
+     * not contain. If a payload map contains the {@code status} key the envelope's integer
+     * would be silently overwritten, breaking the wire contract for every client that
+     * branches on that field.
      *
      * <p>Call sites that accidentally include these keys represent a programming error, so
      * the method throws {@link IllegalStateException} rather than silently discarding or
      * overriding the value — this surfaces the mistake at development/test time rather than
      * in production.</p>
      */
-    private static final java.util.Set<String> RESERVED_KEYS = java.util.Set.of("status", "version");
+    private static final java.util.Set<String> RESERVED_KEYS = java.util.Set.of("status");
 
     /**
      * Writes a successful v2 envelope wrapping the supplied payload.
@@ -79,16 +77,15 @@ public final class V2EnvelopeWriter {
      * normally {@code 200 OK}). Sets the response content type to
      * {@code application/json; charset=UTF-8}.</p>
      *
-     * <p><strong>Reserved keys:</strong> the payload must not contain the keys
-     * {@code "status"} or {@code "version"}; both are owned by the envelope itself.
-     * Passing a map that contains either key will throw {@link IllegalStateException}
-     * so the mistake is caught at development/test time.</p>
+     * <p><strong>Reserved keys:</strong> the payload must not contain the key
+     * {@code "status"}; it is owned by the envelope itself. Passing a map that
+     * contains that key will throw {@link IllegalStateException} so the mistake is
+     * caught at development/test time.</p>
      *
      * @param res the HTTP response to write to
      * @param payload key/value fields to merge into the envelope; {@code null} is treated as empty
      * @throws IOException if writing to the response fails
-     * @throws IllegalStateException if {@code payload} contains a reserved envelope key
-     *         ({@code "status"} or {@code "version"})
+     * @throws IllegalStateException if {@code payload} contains a reserved envelope key ({@code "status"})
      */
     public static void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
         if (payload != null) {
@@ -103,7 +100,6 @@ public final class V2EnvelopeWriter {
         res.setContentType(CONTENT_TYPE);
         final Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("status", STATUS_OK);
-        envelope.put("version", VERSION);
         if (payload != null) {
             envelope.putAll(payload);
         }
@@ -137,7 +133,6 @@ public final class V2EnvelopeWriter {
         final int statusValue = code.defaultHttpStatus() >= 500 ? STATUS_SYSTEM_ERROR : STATUS_USER_ERROR;
         final Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("status", statusValue);
-        envelope.put("version", VERSION);
         envelope.put("error", err);
         final Map<String, Object> root = Map.of("response", envelope);
         MAPPER.writeValue(res.getWriter(), root);

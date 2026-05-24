@@ -1,0 +1,1342 @@
+openapi: 3.0.3
+info:
+  title: Fess - User API (v2)
+  description: |-
+    v2 of the Fess user-facing Web API. All responses share a uniform envelope:
+
+    ```json
+    { "response": { "status": <int>, ... } }
+    ```
+
+    `status` follows the v1 convention: `0` = success, `1` = client error,
+    `9` = system error. On error the envelope additionally contains an
+    `error` object with stable `code` (snake_case) and a human-readable
+    `message` (English; clients should localize on `code`). The default HTTP
+    status code matches the envelope's `error.code` (e.g. `invalid_request`
+    → 400, `auth_required` → 401, `forbidden` → 403, `not_found` → 404,
+    `method_not_allowed` → 405, `not_acceptable` → 406, `payload_too_large`
+    → 413, `unsupported_media_type` → 415, `rate_limited` → 429,
+    `internal_error` → 500, `service_unavailable` → 503).
+
+    State-changing endpoints (`POST` / `PUT` / `DELETE`) require the
+    `X-Fess-CSRF-Token` header. Acquire the token from
+    `POST /auth/login` (in the `csrf_token` field) or from
+    `GET /ui/config` when `csrf_required=true`. The token rotates on
+    login, logout, and password change.
+
+    `/chat/stream` emits Server-Sent Events (`text/event-stream`).
+    `/documents/all` emits NDJSON (`application/x-ndjson`); each line is a
+    `{"data": {...}}` object except the final line on a mid-stream failure,
+    which is `{"error": {...}}`.
+
+    **Field naming.** All JSON payloads — request bodies, response bodies,
+    and SSE event data — use `snake_case` keys consistently.
+
+    **Method-not-allowed responses** carry an `Allow` header listing the
+    supported HTTP methods for the endpoint.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 15.7.0
+externalDocs:
+  description: API Documentation
+  url: https://fess.codelibs.org/15.7/api/
+servers:
+  - url: http://localhost:8080/api/v2
+tags:
+  - name: search
+    description: Search operations
+  - name: suggest
+    description: Suggest operations
+  - name: popularword
+    description: Popular word operations
+  - name: monitor
+    description: Monitoring operations
+  - name: favorite
+    description: Favorite operations
+  - name: auth
+    description: Authentication and session operations
+  - name: ui
+    description: UI bootstrap and configuration
+  - name: click
+    description: Click logging
+  - name: chat
+    description: RAG chat operations
+  - name: cache
+    description: Cached document content
+
+paths:
+  /health:
+    get:
+      tags: [monitor]
+      summary: Cluster health snapshot
+      description: |-
+        Returns a snapshot of the search engine's cluster health. HTTP status
+        is `200` for `green`/`yellow` and `503` for `red` so monitoring tools
+        can branch on status alone. The envelope `status` field is `0`
+        (success) in both cases because the health check itself succeeded —
+        clients that need to detect `red` MUST branch on the HTTP status or
+        on `data.status`.
+      operationId: healthV2
+      responses:
+        '200':
+          description: Cluster is reachable (status `green` or `yellow`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '503':
+          description: |-
+            Cluster reports `red` or is unreachable. The envelope `status`
+            field remains `0`; check the HTTP status or `data.status` to
+            detect the condition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /search:
+    get:
+      tags: [search]
+      summary: Search documents
+      description: |-
+        Mirrors the v1 `/documents` shape but emits the v2 envelope. Field
+        names inside the payload remain snake_case.
+      operationId: searchV2
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - name: start
+          in: query
+          description: 0-based start position.
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: offset
+          in: query
+          description: Offset from `start`.
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: num
+          in: query
+          description: |-
+            Page size. Values `<= 0` produce `invalid_request`. Values above
+            the configured maximum are silently clamped — clients can detect
+            clamping by comparing the request `num` with the response
+            `page_size` field.
+          required: false
+          schema: { type: integer, minimum: 1, default: 20 }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, example: score }
+        - name: lang
+          in: query
+          description: Repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string }, example: [en] }
+        - name: ex_q
+          in: query
+          description: Extra query expression; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: sdh
+          in: query
+          description: Similar-document hash.
+          required: false
+          schema: { type: string }
+        - name: fields.label
+          in: query
+          description: Filter by label name; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string }, example: [news] }
+        - name: facet.field
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: facet.query
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: geo.location.point
+          in: query
+          required: false
+          schema: { type: string, example: "35.0,139.0" }
+        - name: geo.location.distance
+          in: query
+          required: false
+          schema: { type: string, example: 10km }
+      responses:
+        '200':
+          description: Search executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /documents/all:
+    get:
+      tags: [search]
+      summary: Streaming scroll search (NDJSON)
+      description: |-
+        Streams every matching document as NDJSON. Each line is a
+        `{"data": {...}}` object containing the document fields permitted by
+        `QueryFieldConfig#isApiResponseField`. If a failure occurs mid-stream
+        the handler emits a final
+        `{"error":{"code":"internal_error","message":"stream error"}}` line
+        and flushes. Clients MUST inspect the last line's first key to
+        distinguish stream-complete from server-crashed.
+      operationId: scrollSearchV2
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: NDJSON stream.
+          content:
+            application/x-ndjson:
+              schema:
+                type: string
+                example: |
+                  {"data":{"url":"https://example.com/","title":"Example"}}
+                  {"data":{"url":"https://example.org/","title":"Example Org"}}
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /suggest-words:
+    get:
+      tags: [suggest]
+      summary: Suggest words for an input prefix
+      operationId: suggestWordsV2
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - name: num
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 10 }
+        - name: fn
+          in: query
+          description: Suggest field name(s); repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: lang
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: label
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Suggest words returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestWordsResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /labels:
+    get:
+      tags: [search]
+      summary: List configured labels
+      operationId: labelsV2
+      responses:
+        '200':
+          description: Labels returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelsResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /popular-words:
+    get:
+      tags: [popularword]
+      summary: List popular search words
+      description: |-
+        Returns `invalid_request` (400) when `web.api.popular.word=false`,
+        matching v1's "unsupported operation" semantics.
+      operationId: popularWordsV2
+      parameters:
+        - name: seed
+          in: query
+          required: false
+          schema: { type: string }
+        - name: label
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+        - name: field
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Words returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopularWordsResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /ui/config:
+    get:
+      tags: [ui]
+      summary: UI bootstrap configuration
+      description: |-
+        Returns the bootstrap configuration needed by the SPA: theme,
+        feature flags, pagination limits, and (when CSRF is required) a
+        fresh CSRF token. Called anonymously before login.
+      operationId: uiConfigV2
+      responses:
+        '200':
+          description: Configuration returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UiConfigResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Current authenticated user
+      description: |-
+        Returns `authenticated: false` for anonymous callers (never an
+        error). When authenticated, `user` carries the same shape returned
+        by `/auth/login`.
+      operationId: authMeV2
+      responses:
+        '200':
+          description: Authentication state returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthMeResponse'
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Log in with username and password
+      description: |-
+        On success, the servlet session id is rotated, a fresh CSRF token
+        is issued, and the rate-limit buckets for the caller IP and the
+        target user are cleared. On rate-limit, a `Retry-After` header
+        carries the cooldown in seconds.
+
+        When the active session is already authenticated as the same
+        `username`, the handler re-issues a CSRF token without re-validating
+        credentials and returns the standard `LoginResponse`.
+
+        `return_to` must be a relative path matching
+        `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Values that do not pass the
+        allowlist are silently dropped from the echoed response.
+
+        Oversized request bodies and unsupported `Content-Type` headers are
+        rejected as `400 invalid_request` in the current implementation
+        (a deliberate simplification — clients should treat any 4xx body as
+        a client error and inspect `error.code`).
+
+        This endpoint is exempt from CSRF (no token exists prior to login).
+      operationId: authLoginV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429':
+          description: Rate limited; the `Retry-After` header carries the cooldown in seconds.
+          headers:
+            Retry-After:
+              description: Seconds the caller should wait before retrying.
+              schema: { type: integer, minimum: 0 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Log out (idempotent)
+      description: |-
+        Always returns `ok: true` — invoking logout with no active session
+        is a no-op, not an error. Requires `X-Fess-CSRF-Token`.
+      operationId: authLogoutV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      responses:
+        '200':
+          description: Session invalidated (or already absent).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '405':
+          description: |-
+            Non-POST method. The `Allow: POST` header is set.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+          headers:
+            Allow:
+              schema: { type: string, example: POST }
+
+  /auth/password:
+    post:
+      tags: [auth]
+      summary: Change the current user's password
+      description: |-
+        Validates `current_password`, enforces the configured password
+        policy on `new_password`, rotates the CSRF token, and signals the
+        SPA via `re_login_required: true` so it can prompt for re-login.
+        The current session is NOT invalidated server-side.
+
+        Oversized request bodies and unsupported `Content-Type` headers are
+        rejected as `400 invalid_request` in the current implementation.
+      operationId: authPasswordV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+      responses:
+        '200':
+          description: Password changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordChangeResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /click:
+    post:
+      tags: [click]
+      summary: Record a click on a search result
+      description: |-
+        Logs a click against the search log. Anonymous callers and
+        installations with the search-log feature disabled produce a
+        successful `logged: false` response (no error).
+      operationId: clickV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClickRequest'
+      responses:
+        '200':
+          description: Click accepted (logged or skipped).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClickResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /chat:
+    post:
+      tags: [chat]
+      summary: One-shot RAG chat completion
+      description: |-
+        Synchronous chat completion. The session is identified by
+        `session_id`; if omitted, the server creates one and returns it.
+
+        Rate-limited per user at `api.v2.chat.rate.limit.per.user.per.minute`
+        (default 30/min). The feature is disabled (`invalid_request`) when
+        `rag.chat.enabled=false`.
+
+        Invalid values supplied in `fields.label` or `extra_queries` are
+        dropped silently from the resolved request — they are not surfaced to
+        the caller in the response envelope.
+
+        Oversized request bodies and unsupported `Content-Type` headers are
+        rejected as `400 invalid_request` in the current implementation.
+      operationId: chatV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Chat response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /chat/stream:
+    post:
+      tags: [chat]
+      summary: Streaming RAG chat completion (SSE)
+      description: |-
+        Same request body as `/chat`, but the success response is a
+        `text/event-stream` of named events:
+
+        - `phase` — pipeline phase transitions
+          (`{ phase, status, message?, keywords?, hit_count?, ... }`).
+          `message` and `keywords` are emitted by `onPhaseStart`; additional
+          optional fields (e.g. `hit_count`) flow through from
+          `onPhaseComplete` payloads.
+        - `chunk` — partial generated text (`{ content }`)
+        - `sources` — retrieved sources (`{ sources: [ChatSource] }`)
+        - `retry` — transient failure backoff
+          (`{ phase, operation, attempt, max_attempts, sleep_ms, cause? }`)
+        - `waiting` — long-running phase progress
+          (`{ phase, reason, elapsed_ms, timeout_ms }`)
+        - `fallback` — query rewrite or strategy fallback
+          (`{ phase, reason, original_query?, new_query? }`)
+        - `warning` — recoverable warning (`{ phase, code, detail? }`)
+        - `done` — end of stream (`{ session_id, html_content? }`)
+        - `error` — terminal mid-stream failure
+          (`{ phase?, message, error_code }`). The `message` field carries the
+          same string as `error_code`; clients should localize on `error_code`.
+
+        Pre-stream validation failures still produce a JSON envelope
+        (same error codes as `/chat`). Oversized request bodies and
+        unsupported `Content-Type` headers are rejected as
+        `400 invalid_request` in the current implementation.
+
+        Invalid values supplied in `fields.label` or `extra_queries` are
+        dropped silently from the resolved request — they are not surfaced to
+        the caller in the response envelope or in any SSE event.
+      operationId: chatStreamV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: SSE stream of generation events.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: phase
+                  data: {"phase":"retrieval","status":"start"}
+
+                  event: chunk
+                  data: {"content":"Fess is "}
+
+                  event: done
+                  data: {"session_id":"abc"}
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /chat/sessions/{session_id}:
+    delete:
+      tags: [chat]
+      summary: Clear the conversation history for a chat session
+      description: |-
+        Clear the conversation history for a given chat session. The session
+        is identified by `session_id` in the path. Returns `cleared: true`
+        on success. Returns `not_found` (404) when no active session matches
+        the given id.
+
+        Rate-limited per user at `api.v2.chat.rate.limit.per.user.per.minute`
+        (shared with `POST /chat`). Requires `X-Fess-CSRF-Token`.
+      operationId: chatClearSessionV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+        - name: session_id
+          in: path
+          required: true
+          description: Identifies the session to clear.
+          schema: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9._-]+$' }
+      responses:
+        '200':
+          description: Session cleared.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatClearResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /documents/{docId}/favorite:
+    parameters:
+      - { $ref: '#/components/parameters/DocId' }
+    get:
+      tags: [favorite]
+      summary: Get favorite state for a document
+      operationId: favoriteGetV2
+      responses:
+        '200':
+          description: Favorite state returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteGetResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+    post:
+      tags: [favorite]
+      summary: Mark a document as a favorite
+      operationId: favoritePostV2
+      parameters:
+        - { $ref: '#/components/parameters/CsrfHeader' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoritePostRequest'
+      responses:
+        '200':
+          description: Document marked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoritePostResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /cache/{docId}:
+    get:
+      tags: [cache]
+      summary: Cached HTML for a document
+      description: |-
+        Returns the cached, highlight-applied HTML for a document. When
+        `app.login.required=true` and the caller is anonymous, responds
+        with `auth_required` (401).
+      operationId: cacheV2
+      parameters:
+        - { $ref: '#/components/parameters/DocId' }
+        - name: hq
+          in: query
+          description: Highlight query term; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Cached content returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+components:
+  parameters:
+    Q:
+      name: q
+      in: query
+      description: Search query string.
+      required: false
+      schema: { type: string, example: Fess }
+    DocId:
+      name: docId
+      in: path
+      description: Document identifier (matches `[A-Za-z0-9_-]+`).
+      required: true
+      schema: { type: string, pattern: '^[A-Za-z0-9_-]+$' }
+    CsrfHeader:
+      name: X-Fess-CSRF-Token
+      in: header
+      description: |-
+        CSRF token issued by `POST /auth/login` or `GET /ui/config`.
+        Required for all state-changing requests when
+        `theme.api.csrf.required=true` (the default).
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: Request was rejected as invalid.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Unauthorized:
+      description: Authentication is required or credentials were invalid.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Forbidden:
+      description: Caller is not permitted (e.g. missing or stale CSRF token).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    MethodNotAllowed:
+      description: |-
+        HTTP method is not supported for this endpoint. The `Allow` header
+        lists the supported methods.
+      headers:
+        Allow:
+          description: Supported HTTP methods.
+          required: true
+          schema: { type: string, example: GET }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    PayloadTooLarge:
+      description: Request body exceeded the endpoint's size limit.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    UnsupportedMediaType:
+      description: |-
+        Request `Content-Type` was not supported (most endpoints require
+        `application/json`).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    RateLimited:
+      description: |-
+        Rate limit exceeded. The `Retry-After` header carries the cooldown
+        in seconds.
+      headers:
+        Retry-After:
+          description: Seconds the caller should wait before retrying.
+          schema: { type: integer, minimum: 0 }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    InternalServerError:
+      description: Unhandled server-side error.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
+  schemas:
+    # --- Envelope -----------------------------------------------------
+    EnvelopeMeta:
+      type: object
+      description: Fields owned by the v2 response envelope.
+      required: [status]
+      properties:
+        status:
+          type: integer
+          description: '`0` = success, `1` = client error, `9` = system error.'
+          enum: [0, 1, 9]
+
+    ErrorEnvelope:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [error]
+              properties:
+                error:
+                  type: object
+                  required: [code, message]
+                  properties:
+                    code:
+                      type: string
+                      description: Stable wire code. Clients should localize on this value.
+                      enum:
+                        - invalid_request
+                        - auth_required
+                        - forbidden
+                        - not_found
+                        - method_not_allowed
+                        - not_acceptable
+                        - conflict
+                        - payload_too_large
+                        - unsupported_media_type
+                        - rate_limited
+                        - internal_error
+                        - service_unavailable
+                    message:
+                      type: string
+
+    # --- Reusable user shape -----------------------------------------
+    UserPayload:
+      type: object
+      required: [user_id, roles, groups, permissions, editable]
+      description: |-
+        Authenticated-user descriptor used by `/auth/me` and `/auth/login`.
+        All array fields are guaranteed non-null (empty arrays when no
+        values are present).
+      properties:
+        user_id: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+        groups:
+          type: array
+          items: { type: string }
+        permissions:
+          type: array
+          items: { type: string }
+        editable: { type: boolean }
+
+    # --- Health ------------------------------------------------------
+    HealthResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [engine]
+              properties:
+                engine:
+                  type: object
+                  required: [cluster_name, status, ping_status]
+                  properties:
+                    cluster_name: { type: string }
+                    status:
+                      type: string
+                      enum: [green, yellow, red]
+                    ping_status: { type: integer }
+
+    # --- Search ------------------------------------------------------
+    SearchResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              properties:
+                q: { type: string, nullable: true }
+                query_id: { type: string }
+                exec_time: { type: number, format: double }
+                query_time: { type: integer, format: int64 }
+                page_size: { type: integer }
+                page_number: { type: integer }
+                record_count: { type: integer, format: int64 }
+                record_count_relation:
+                  type: string
+                  description: |-
+                    `eq` when the count is exact, `gte` when only a lower bound is known.
+                page_count: { type: integer }
+                highlight_params: { type: string }
+                next_page: { type: boolean }
+                prev_page: { type: boolean }
+                start_record_number: { type: integer }
+                end_record_number: { type: integer }
+                page_numbers:
+                  type: array
+                  items: { type: string }
+                partial: { type: boolean }
+                search_query: { type: string }
+                requested_time: { type: integer, format: int64 }
+                related_query:
+                  type: array
+                  items: { type: string }
+                related_contents:
+                  type: array
+                  items: { type: string }
+                data:
+                  type: array
+                  description: |-
+                    One entry per document. Only fields permitted by
+                    `QueryFieldConfig#isApiResponseField` are present; nulls
+                    and blank keys are dropped.
+                  items:
+                    type: object
+                    additionalProperties: true
+                facet_field:
+                  type: array
+                  description: Present only when facet fields were requested.
+                  items:
+                    type: object
+                    required: [name, result]
+                    properties:
+                      name: { type: string }
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          required: [value, count]
+                          properties:
+                            value: { type: string }
+                            count: { type: integer, format: int64 }
+                facet_query:
+                  type: array
+                  description: Present only when facet queries were requested.
+                  items:
+                    type: object
+                    required: [value, count]
+                    properties:
+                      value: { type: string }
+                      count: { type: integer, format: int64 }
+
+    # --- Suggest / labels / popular ---------------------------------
+    SuggestWordsResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [q, page_size, record_count, query_time, suggest_words]
+              properties:
+                q: { type: string }
+                page_size: { type: integer }
+                record_count: { type: integer, format: int64 }
+                query_time: { type: integer, format: int64 }
+                suggest_words:
+                  type: array
+                  items:
+                    type: object
+                    required: [text, types]
+                    properties:
+                      text: { type: string }
+                      types:
+                        type: array
+                        items: { type: string }
+
+    LabelsResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [record_count, labels]
+              properties:
+                record_count: { type: integer }
+                labels:
+                  type: array
+                  items:
+                    type: object
+                    required: [label, value]
+                    properties:
+                      label: { type: string }
+                      value: { type: string }
+
+    PopularWordsResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [record_count, popular_words]
+              properties:
+                record_count: { type: integer }
+                popular_words:
+                  type: array
+                  items: { type: string }
+
+    # --- UI config ---------------------------------------------------
+    UiConfigResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required:
+                - site_name
+                - login_required
+                - locales
+                - theme
+                - features
+                - page_size_default
+                - page_size_max
+                - csrf_required
+                - csrf_token
+              properties:
+                site_name: { type: string }
+                login_required: { type: boolean }
+                locales:
+                  type: array
+                  items: { type: string }
+                theme:
+                  type: object
+                  description: Always present; may be empty when no custom theme is active.
+                  properties:
+                    name: { type: string }
+                    type: { type: string }
+                    display_name: { type: string }
+                    version: { type: string }
+                    supported_locales:
+                      type: array
+                      items: { type: string }
+                features:
+                  type: object
+                  required:
+                    - user_favorite
+                    - popular_word
+                    - suggest_search_log
+                    - suggest_documents
+                    - login_required
+                  properties:
+                    user_favorite: { type: boolean }
+                    popular_word: { type: boolean }
+                    suggest_search_log: { type: boolean }
+                    suggest_documents: { type: boolean }
+                    login_required: { type: boolean }
+                page_size_default: { type: integer }
+                page_size_max: { type: integer }
+                csrf_required: { type: boolean }
+                csrf_token:
+                  type: string
+                  description: |-
+                    Empty string when `csrf_required` is `false`; otherwise a
+                    fresh token bound to the current session.
+
+    # --- Auth --------------------------------------------------------
+    AuthMeResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [authenticated]
+              properties:
+                authenticated: { type: boolean }
+                user:
+                  allOf:
+                    - $ref: '#/components/schemas/UserPayload'
+                  description: Present only when `authenticated` is `true`.
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1 }
+        password: { type: string, minLength: 1 }
+        return_to:
+          type: string
+          description: |-
+            Optional post-login redirect target. Must be a relative path
+            matching `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Invalid values are
+            silently dropped from the echoed response.
+          pattern: '^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$'
+
+    LoginResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [csrf_token]
+              properties:
+                user:
+                  $ref: '#/components/schemas/UserPayload'
+                csrf_token:
+                  type: string
+                  description: Fresh CSRF token bound to the new session.
+                return_to:
+                  type: string
+                  description: Echoed only when the request value passed the allowlist.
+
+    PasswordChangeRequest:
+      type: object
+      required: [current_password, new_password, confirm_password]
+      properties:
+        current_password: { type: string, minLength: 1 }
+        new_password:
+          type: string
+          minLength: 1
+          description: Must satisfy the configured password policy.
+        confirm_password:
+          type: string
+          minLength: 1
+          description: Must equal `new_password`.
+
+    PasswordChangeResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [ok, re_login_required]
+              properties:
+                ok: { type: boolean, enum: [true] }
+                re_login_required:
+                  type: boolean
+                  description: |-
+                    Always `true`. The session is NOT invalidated server-side;
+                    the SPA is responsible for redirecting to login when this
+                    flag is set.
+                csrf_token:
+                  type: string
+                  description: |-
+                    Rotated CSRF token. Omitted only if CSRF rotation failed;
+                    in that case the existing token remains valid.
+
+    # --- Click -------------------------------------------------------
+    ClickRequest:
+      type: object
+      required: [doc_id]
+      properties:
+        doc_id:
+          type: string
+          pattern: '^[A-Za-z0-9_-]+$'
+        query_id: { type: string }
+        rank:
+          type: integer
+          minimum: 1
+          description: 1-based position in the result list.
+        rt:
+          type: integer
+          format: int64
+          description: |-
+            Epoch milliseconds of the originating search request. Defaults
+            to the server's current time when absent.
+
+    ClickResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [ok, logged]
+              properties:
+                ok: { type: boolean, enum: [true] }
+                logged:
+                  type: boolean
+                  description: |-
+                    `false` when search-log persistence is disabled or the
+                    caller is anonymous (still a 200 response).
+
+    # --- Chat --------------------------------------------------------
+    ChatRequest:
+      description: |-
+        `message` is required. The session is identified by `session_id`;
+        if omitted, the server creates one and returns it in the response.
+      allOf:
+        - $ref: '#/components/schemas/ChatMessageRequest'
+
+    ChatMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        session_id: { type: string }
+        fields:
+          type: object
+          description: Optional filter fields for the retrieval step.
+          properties:
+            label:
+              oneOf:
+                - { type: string }
+                - { type: array, items: { type: string } }
+              description: Restricts retrieval to allowlisted labels.
+        extra_queries:
+          oneOf:
+            - { type: string }
+            - { type: array, items: { type: string } }
+          description: Allowlisted facet query expressions.
+
+    ChatSource:
+      type: object
+      description: A document referenced by the chat response.
+      properties:
+        rank:
+          type: integer
+          description: 1-based position of this source in the retrieved set.
+        title: { type: string, nullable: true }
+        url: { type: string, nullable: true }
+        doc_id: { type: string, nullable: true }
+        snippet: { type: string, nullable: true }
+        url_link: { type: string, nullable: true }
+        go_url: { type: string, nullable: true }
+
+    ChatResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [session_id]
+              properties:
+                session_id: { type: string }
+                content:
+                  type: string
+                  description: The generated message text.
+                sources:
+                  type: array
+                  items: { $ref: '#/components/schemas/ChatSource' }
+
+    ChatClearResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [session_id, cleared]
+              properties:
+                session_id: { type: string }
+                cleared:
+                  type: boolean
+                  enum: [true]
+                  description: Always `true` when the session was found and cleared.
+
+    # --- Favorite ----------------------------------------------------
+    FavoriteGetResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [doc_id, favorite, count]
+              properties:
+                doc_id: { type: string }
+                favorite: { type: boolean }
+                count: { type: integer, format: int64 }
+
+    FavoritePostRequest:
+      type: object
+      required: [query_id]
+      properties:
+        query_id:
+          type: string
+          description: Opaque `query_id` echoed by `/search`.
+
+    FavoritePostResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [doc_id, ok]
+              properties:
+                doc_id: { type: string }
+                ok: { type: boolean, enum: [true] }
+
+    # --- Cache -------------------------------------------------------
+    CacheResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [doc_id, mimetype, content]
+              properties:
+                doc_id: { type: string }
+                mimetype:
+                  type: string
+                  enum: [text/html]
+                content: { type: string }
+
+    # --- Generic OK --------------------------------------------------
+    OkResponse:
+      type: object
+      required: [response]
+      properties:
+        response:
+          allOf:
+            - $ref: '#/components/schemas/EnvelopeMeta'
+            - type: object
+              required: [ok]
+              properties:
+                ok: { type: boolean, enum: [true] }

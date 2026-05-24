@@ -31,6 +31,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.v2.handlers.CacheHandler;
 import org.codelibs.fess.api.v2.handlers.ChatHandler;
+import org.codelibs.fess.api.v2.handlers.ChatSessionClearHandler;
 import org.codelibs.fess.api.v2.handlers.ChatStreamHandler;
 import org.codelibs.fess.api.v2.handlers.ClickHandler;
 import org.codelibs.fess.api.v2.handlers.CsrfRequirement;
@@ -113,6 +114,9 @@ public class SearchApiV2Manager extends BaseApiManager {
     // ChatStreamHandler is stateless — the per-request PrintWriter and SSE callback
     // are scoped to the handle() invocation, so a single shared instance is safe.
     private final ChatStreamHandler chatStreamHandler = new ChatStreamHandler();
+
+    // ChatSessionClearHandler is stateless — shared single instance is safe across concurrent requests.
+    private final ChatSessionClearHandler chatSessionClearHandler = new ChatSessionClearHandler();
 
     // CacheHandler is stateless — shared single instance is safe across concurrent requests.
     private final CacheHandler cacheHandler = new CacheHandler();
@@ -199,8 +203,14 @@ public class SearchApiV2Manager extends BaseApiManager {
                 cacheHandler.handle(request, response, docId);
                 return;
             }
+            // DELETE /api/v2/chat/sessions/{session_id}
+            if (sub.startsWith("/chat/sessions/")) {
+                final String sessionId = sub.substring("/chat/sessions/".length());
+                chatSessionClearHandler.handle(request, response, sessionId);
+                return;
+            }
             switch (sub) {
-            case "/health" -> handleHealth(response);
+            case "/health" -> handleHealth(request, response);
             case "/search" -> searchHandler.handle(request, response);
             case "/suggest-words" -> handleSuggestWords(request, response);
             case "/labels" -> handleLabels(request, response);
@@ -260,10 +270,16 @@ public class SearchApiV2Manager extends BaseApiManager {
      * is unreachable we still emit a structured error envelope rather than letting
      * the exception escape.</p>
      *
+     * @param request the incoming HTTP request
      * @param response the HTTP response to write to
      * @throws IOException if writing the envelope fails
      */
-    private void handleHealth(final HttpServletResponse response) throws IOException {
+    private void handleHealth(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
+            return;
+        }
         try {
             final PingResponse ping = ComponentUtil.getSearchEngineClient().ping();
             final String clusterStatus = ping.getClusterStatus();
@@ -312,6 +328,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handleSuggestWords(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -401,6 +418,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handleLabels(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }
@@ -446,6 +464,7 @@ public class SearchApiV2Manager extends BaseApiManager {
      */
     private void handlePopularWords(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Allow", "GET");
             V2EnvelopeWriter.writeError(response, V2ErrorCode.METHOD_NOT_ALLOWED, "method not allowed");
             return;
         }

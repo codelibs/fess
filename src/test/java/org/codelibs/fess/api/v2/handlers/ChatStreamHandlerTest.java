@@ -227,6 +227,182 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         }
     }
 
+    // ── SSE event snake_case key verification ─────────────────────────────────
+
+    @Test
+    public void test_sendSseEvent_doneEvent_snakeCase() {
+        // done event must use snake_case: session_id, html_content
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("session_id", "sess-001");
+        data.put("html_content", "<p>Answer</p>");
+        new ChatStreamHandler().sendSseEvent(pw, "done", data);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.contains("\"session_id\":\"sess-001\""), "done event must use snake_case session_id: " + out);
+        assertTrue(out.contains("\"html_content\":"), "done event must use snake_case html_content: " + out);
+        assertFalse(out.contains("\"sessionId\""), "done event must NOT use camelCase sessionId: " + out);
+        assertFalse(out.contains("\"htmlContent\""), "done event must NOT use camelCase htmlContent: " + out);
+    }
+
+    @Test
+    public void test_sendSseEvent_fallbackEvent_snakeCase() {
+        // fallback event must use snake_case: original_query, new_query
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("phase", "retrieval");
+        data.put("reason", "no_results");
+        data.put("original_query", "original q");
+        data.put("new_query", "relaxed q");
+        new ChatStreamHandler().sendSseEvent(pw, "fallback", data);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: fallback\n"), "must be fallback event: " + out);
+        assertTrue(out.contains("\"original_query\":"), "fallback event must use snake_case original_query: " + out);
+        assertTrue(out.contains("\"new_query\":"), "fallback event must use snake_case new_query: " + out);
+        assertFalse(out.contains("\"originalQuery\""), "fallback event must NOT use camelCase originalQuery: " + out);
+        assertFalse(out.contains("\"newQuery\""), "fallback event must NOT use camelCase newQuery: " + out);
+    }
+
+    @Test
+    public void test_sendSseEvent_retryEvent_snakeCase() {
+        // retry event must use snake_case: max_attempts, sleep_ms
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("phase", "generation");
+        data.put("operation", "llm_call");
+        data.put("attempt", 1);
+        data.put("max_attempts", 3);
+        data.put("sleep_ms", 500L);
+        new ChatStreamHandler().sendSseEvent(pw, "retry", data);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: retry\n"), "must be retry event: " + out);
+        assertTrue(out.contains("\"max_attempts\":"), "retry event must use snake_case max_attempts: " + out);
+        assertTrue(out.contains("\"sleep_ms\":"), "retry event must use snake_case sleep_ms: " + out);
+        assertFalse(out.contains("\"maxAttempts\""), "retry event must NOT use camelCase maxAttempts: " + out);
+        assertFalse(out.contains("\"sleepMs\""), "retry event must NOT use camelCase sleepMs: " + out);
+    }
+
+    @Test
+    public void test_sendSseEvent_waitingEvent_snakeCase() {
+        // waiting event must use snake_case: elapsed_ms, timeout_ms
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("phase", "retrieval");
+        data.put("reason", "queue_full");
+        data.put("elapsed_ms", 1200L);
+        data.put("timeout_ms", 30000L);
+        new ChatStreamHandler().sendSseEvent(pw, "waiting", data);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: waiting\n"), "must be waiting event: " + out);
+        assertTrue(out.contains("\"elapsed_ms\":"), "waiting event must use snake_case elapsed_ms: " + out);
+        assertTrue(out.contains("\"timeout_ms\":"), "waiting event must use snake_case timeout_ms: " + out);
+        assertFalse(out.contains("\"elapsedMs\""), "waiting event must NOT use camelCase elapsedMs: " + out);
+        assertFalse(out.contains("\"timeoutMs\""), "waiting event must NOT use camelCase timeoutMs: " + out);
+    }
+
+    @Test
+    public void test_sendSseEvent_errorEvent_snakeCase() {
+        // error event must use snake_case error_code — NOT camelCase errorCode
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("message", "llm_unavailable");
+        data.put("error_code", "llm_unavailable");
+        new ChatStreamHandler().sendSseEvent(pw, "error", data);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: error\n"), "must be error event: " + out);
+        assertTrue(out.contains("\"error_code\":"), "error event must use snake_case error_code: " + out);
+        assertFalse(out.contains("\"errorCode\""), "error event must NOT use camelCase errorCode: " + out);
+    }
+
+    @Test
+    public void test_phaseCallback_onError_producesSnakeCaseErrorCode() {
+        // newPhaseCallback.onError must emit error_code (not errorCode) via sendSseEvent.
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final boolean[] holder = { false };
+        final org.codelibs.fess.chat.ChatPhaseCallback cb = new ChatStreamHandler().newPhaseCallback(pw, holder);
+        cb.onError("generation", "llm_error");
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: error\n"), "callback onError must emit SSE error event: " + out);
+        assertTrue(out.contains("\"error_code\":\"llm_error\""), "onError must use snake_case error_code: " + out);
+        assertFalse(out.contains("\"errorCode\""), "onError must NOT emit camelCase errorCode: " + out);
+        assertTrue(holder[0], "errorEmittedHolder must be set to true after onError");
+    }
+
+    @Test
+    public void test_phaseCallback_onPhaseComplete_hitCountBecomesSnakeCase() {
+        // onPhaseComplete with hitCount in payload → must be renamed to hit_count in SSE output
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final org.codelibs.fess.chat.ChatPhaseCallback cb = new ChatStreamHandler().newPhaseCallback(pw);
+        final java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("hitCount", 42);
+        cb.onPhaseComplete("retrieval", payload);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: phase\n"), "phase complete must emit phase SSE event: " + out);
+        assertTrue(out.contains("\"hit_count\":42"), "hitCount must be renamed to hit_count: " + out);
+        assertFalse(out.contains("\"hitCount\""), "hitCount camelCase must NOT appear in SSE output: " + out);
+    }
+
+    @Test
+    public void test_phaseCallback_onRetry_usesSnakeCaseKeys() {
+        // onRetry must emit max_attempts and sleep_ms (not camelCase)
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final org.codelibs.fess.chat.ChatPhaseCallback cb = new ChatStreamHandler().newPhaseCallback(pw);
+        cb.onRetry("generation", "llm_call", 1, 3, 500L, null);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: retry\n"), "onRetry must emit retry SSE event: " + out);
+        assertTrue(out.contains("\"max_attempts\":3"), "onRetry must use max_attempts: " + out);
+        assertTrue(out.contains("\"sleep_ms\":500"), "onRetry must use sleep_ms: " + out);
+        assertFalse(out.contains("\"maxAttempts\""), "onRetry must NOT use maxAttempts: " + out);
+        assertFalse(out.contains("\"sleepMs\""), "onRetry must NOT use sleepMs: " + out);
+    }
+
+    @Test
+    public void test_phaseCallback_onWaiting_usesSnakeCaseKeys() {
+        // onWaiting must emit elapsed_ms and timeout_ms (not camelCase)
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final org.codelibs.fess.chat.ChatPhaseCallback cb = new ChatStreamHandler().newPhaseCallback(pw);
+        cb.onWaiting("retrieval", "queue_full", 1200L, 30000L);
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: waiting\n"), "onWaiting must emit waiting SSE event: " + out);
+        assertTrue(out.contains("\"elapsed_ms\":1200"), "onWaiting must use elapsed_ms: " + out);
+        assertTrue(out.contains("\"timeout_ms\":30000"), "onWaiting must use timeout_ms: " + out);
+        assertFalse(out.contains("\"elapsedMs\""), "onWaiting must NOT use elapsedMs: " + out);
+        assertFalse(out.contains("\"timeoutMs\""), "onWaiting must NOT use timeoutMs: " + out);
+    }
+
+    @Test
+    public void test_phaseCallback_onFallback_usesSnakeCaseKeys() {
+        // onFallback must emit original_query and new_query (not camelCase)
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final org.codelibs.fess.chat.ChatPhaseCallback cb = new ChatStreamHandler().newPhaseCallback(pw);
+        cb.onFallback("retrieval", "no_results", "original q", "relaxed q");
+        pw.flush();
+        final String out = sw.toString();
+        assertTrue(out.startsWith("event: fallback\n"), "onFallback must emit fallback SSE event: " + out);
+        assertTrue(out.contains("\"original_query\":\"original q\""), "onFallback must use original_query: " + out);
+        assertTrue(out.contains("\"new_query\":\"relaxed q\""), "onFallback must use new_query: " + out);
+        assertFalse(out.contains("\"originalQuery\""), "onFallback must NOT use originalQuery: " + out);
+        assertFalse(out.contains("\"newQuery\""), "onFallback must NOT use newQuery: " + out);
+    }
+
     @Test
     public void test_oversizedBody_returnsJsonEnvelope() throws Exception {
         // V2JsonBody caps the body at MAX_BODY_BYTES (32KiB for the streaming handler).

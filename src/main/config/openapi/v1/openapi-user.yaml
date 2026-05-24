@@ -1,0 +1,1098 @@
+openapi: 3.0.3
+info:
+  title: Fess - User API
+  description: |-
+    **Deprecated.** This v1 API is maintained for backward compatibility and will be removed in a future release. Use the v2 API at `/api/v2` for new integrations.
+
+    This is a Fess Server based on the OpenAPI 3.0 specification.
+
+    ## JSONP
+
+    When `api.jsonp.enabled=true` is set on the server, **every GET endpoint**
+    in this API accepts an optional `callback` query parameter. When present,
+    the response body is wrapped as `callback(<json>);` and served with a
+    JavaScript content type instead of `application/json`. Only the
+    `/documents` GET operation documents the `callback` parameter explicitly,
+    but the same behavior applies uniformly to `/documents/all`, `/labels`,
+    `/popular-words`, `/suggest-words`, `/favorites`, `/documents/{docId}/favorite`
+    (GET-style endpoints) and `/health`. JSONP is disabled by default.
+
+    ## Referer gate
+
+    A subset of endpoints (`/documents/all`, `/suggest-words`) is gated by
+    `web.api.json.referer.hosts`. When that property is set, requests whose
+    `Referer` header host is not on the allowlist are rejected with HTTP 400
+    and body `{"message":"Referer is invalid."}`. See per-operation notes.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 15.7.0
+externalDocs:
+  description: API Documentation
+  url: https://fess.codelibs.org/15.7/api/
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: search
+    description: "Search operations (deprecated: use /api/v2 for new integrations)"
+  - name: popularword
+    description: "Popular word operations (deprecated: use /api/v2 for new integrations)"
+  - name: monitor
+    description: "Monitoring operations (deprecated: use /api/v2 for new integrations)"
+  - name: suggest
+    description: "Suggest operations (deprecated: use /api/v2 for new integrations)"
+  - name: favorite
+    description: "Favorite operations (deprecated: use /api/v2 for new integrations)"
+paths:
+  /documents:
+    get:
+      tags:
+        - search
+      summary: Finds documents by query
+      description: Finds documents by search conditions
+      operationId: searchDocuments
+      deprecated: true
+      parameters:
+        - name: q
+          in: query
+          description: Search words
+          required: false
+          schema:
+            type: string
+            example: Fess
+        - name: start
+          in: query
+          description: Start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: offset
+          in: query
+          description: Offset from a start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: num
+          in: query
+          description: The number of returned documents as a search result
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            maximum: 100
+            exclusiveMaximum: false
+            default: 20
+            example: 20
+        - name: sort
+          in: query
+          description: Sorted field name
+          required: false
+          schema:
+            type: string
+            example: score
+        - name: fields.label
+          in: query
+          description: Filtered label name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [name]
+        - name: facet.field
+          in: query
+          description: Facet field name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: facet.query
+          in: query
+          description: Facet query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["timestamp:[now/d-1d TO *]"]
+        - name: facet.size
+          in: query
+          description: Item size in facets returned by facet.field
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 10
+            example: 10
+        - name: facet.minDocCount
+          in: query
+          description: Minumum document size in facets
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: geo.{geoField}.point
+          in: query
+          description: |-
+            Latitude and Longitude for Geo search. `{geoField}` is a
+            placeholder — substitute one of the configured geo field names
+            from `query.geo.fields` (default: `location`). For example, with
+            the default config the actual parameter name is
+            `geo.location.point`. Parameters whose `{geoField}` does not
+            match an entry in `query.geo.fields` are ignored.
+          required: false
+          schema:
+            type: string
+            example: 35.0,139.0
+        - name: geo.{geoField}.distance
+          in: query
+          description: |-
+            Distance for Geo search. `{geoField}` must match an entry in
+            `query.geo.fields` (default: `location`); see
+            `geo.{geoField}.point` above.
+          required: false
+          schema:
+            type: string
+            example: 10km
+        - name: lang
+          in: query
+          description: Language
+          required: false
+          schema:
+            type: string
+            example: en
+        - name: ex_q
+          in: query
+          description: Extra query expression; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: sdh
+          in: query
+          description: Similar-document hash.
+          required: false
+          schema:
+            type: string
+        - name: track_total_hits
+          in: query
+          description: |-
+            Either `true`/`false` or an integer threshold. Forwarded to the
+            search engine to control how `record_count` is computed; affects
+            the value of `record_count_relation` in the response.
+          required: false
+          schema:
+            type: string
+            example: "true"
+        - name: preference
+          in: query
+          description: String to specify a shard for searching
+          required: false
+          schema:
+            type: string
+            example: abc
+        - name: callback
+          in: query
+          description: Callback name for using JSONP
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  q:
+                    type: string
+                    example: Fess
+                  query_id:
+                    type: string
+                    example: bd60f9579a494dfd8c03db7c8aa905b0
+                  exec_time:
+                    type: number
+                    example: 0.21
+                  query_time:
+                    type: integer
+                    format: int64
+                    example: 0
+                  page_size:
+                    type: integer
+                    example: 20
+                  page_number:
+                    type: integer
+                    example: 1
+                  record_count:
+                    type: integer
+                    format: int64
+                    example: 31625
+                  record_count_relation:
+                    type: string
+                    description: |-
+                      Whether `record_count` is exact or a lower bound. Reflects
+                      the search engine's track-total-hits behavior.
+                    enum: [EQUAL_TO, GREATER_THAN_OR_EQUAL_TO]
+                    example: EQUAL_TO
+                  page_count:
+                    type: integer
+                    example: 1
+                  highlight_params:
+                    type: string
+                    example: "&hq=n2sm&hq=Fess"
+                  next_page:
+                    type: boolean
+                    example: true
+                  prev_page:
+                    type: boolean
+                    example: false
+                  start_record_number:
+                    type: integer
+                    format: int64
+                    example: 1
+                  end_record_number:
+                    type: integer
+                    format: int64
+                    example: 20
+                  page_numbers:
+                    type: array
+                    items:
+                      type: string
+                    example: ["1", "2", "3", "4", "5"]
+                  partial:
+                    type: boolean
+                    example: false
+                  search_query:
+                    type: string
+                    example: "(Fess OR n2sm)"
+                  requested_time:
+                    type: integer
+                    format: int64
+                    example: 1507822131845
+                  related_query:
+                    type: array
+                    items:
+                      type: string
+                    example: ["aaa"]
+                  related_contents:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filetype:
+                          type: string
+                          example: html
+                        title:
+                          type: string
+                          example: "Open Source Enterprise Search Server: Fess — Fess 11.0 documentation"
+                        content_title:
+                          type: string
+                          example: "Open Source Enterprise Search Server: Fess — Fe..."
+                        digest:
+                          type: string
+                          example: "Docs » Open Source Enterprise Search Server: Fess Commercial Support Open Source Enterprise Search Server: Fess What is Fess ? Fess is very powerful and easily deployable Enterprise Search Server. ..."
+                        host:
+                          type: string
+                          format: hostname
+                          example: "fess.codelibs.org"
+                        last_modified:
+                          type: string
+                          format: date-time
+                          example: "2017-10-09T22:28:56.000Z"
+                        content_length:
+                          type: string
+                          example: "29624"
+                        timestamp:
+                          type: string
+                          format: date-time
+                          example: "2017-10-09T22:28:56.000Z"
+                        url_link:
+                          type: string
+                          example: "https://fess.codelibs.org/"
+                        created:
+                          type: string
+                          format: date-time
+                          example: "2017-10-10T15:00:48.609Z"
+                        site_path:
+                          type: string
+                          example: "fess.codelibs.org/"
+                        doc_id:
+                          type: string
+                          example: "e79fbfdfb09d4bffb58ec230c68f6f7e"
+                        url:
+                          type: string
+                          format: uri
+                          example: "https://fess.codelibs.org/"
+                        content_description:
+                          type: string
+                          example: "Enterprise Search Server: <strong>Fess</strong> Commercial Support Open...Search Server: <strong>Fess</strong> What is <strong>Fess</strong> ? <strong>Fess</strong> is very powerful...You can install and run <strong>Fess</strong> quickly on any platforms...Java runtime environment. <strong>Fess</strong> is provided under Apache...Apache license. Demo <strong>Fess</strong> is Elasticsearch-based search"
+                        site:
+                          type: string
+                          example: "fess.codelibs.org/"
+                        boost:
+                          type: string
+                          example: "10.0"
+                        mimetype:
+                          type: string
+                          example: "text/html"
+                  facet_field:
+                    type: array
+                    description: |-
+                      Present only when `facet.field` was supplied and the
+                      search engine returned bucket results.
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: label
+                        result:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                                example: aws
+                              count:
+                                type: integer
+                                format: int64
+                                example: 12
+                  facet_query:
+                    type: array
+                    description: |-
+                      Present only when `facet.query` was supplied.
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                          example: "timestamp:[now/d-1d TO *]"
+                        count:
+                          type: integer
+                          format: int64
+                          example: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /documents/all:
+    get:
+      tags:
+        - search
+      summary: Finds all documents by query
+      description: |-
+        Streams all matching documents as NDJSON via the scroll search API.
+        Accepts the same query parameters as `GET /documents`.
+
+        **Feature gate.** When `api.search.scroll=false` (default depends on
+        deployment), this endpoint responds with HTTP 400 and body
+        `{"message":"Scroll Search is not available."}`.
+
+        **Referer gate.** When `web.api.json.referer.hosts` is configured,
+        requests whose `Referer` header host is not on the allowlist are
+        rejected with HTTP 400 and body `{"message":"Referer is invalid."}`.
+      operationId: searchAllDocuments
+      deprecated: true
+      parameters:
+        - name: q
+          in: query
+          description: Search words
+          required: false
+          schema:
+            type: string
+            example: Fess
+        - name: start
+          in: query
+          description: Start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: offset
+          in: query
+          description: Offset from a start position
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: num
+          in: query
+          description: The number of returned documents as a search result
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            maximum: 100
+            exclusiveMaximum: false
+            default: 20
+            example: 20
+        - name: sort
+          in: query
+          description: Sorted field name
+          required: false
+          schema:
+            type: string
+            example: score
+        - name: fields.label
+          in: query
+          description: Filtered label name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [name]
+        - name: facet.field
+          in: query
+          description: Facet field name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: facet.query
+          in: query
+          description: Facet query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["timestamp:[now/d-1d TO *]"]
+        - name: facet.size
+          in: query
+          description: Item size in facets returned by facet.field
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 10
+            example: 10
+        - name: facet.minDocCount
+          in: query
+          description: Minumum document size in facets
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            default: 0
+            example: 0
+        - name: geo.{geoField}.point
+          in: query
+          description: |-
+            Latitude and Longitude for Geo search. `{geoField}` is a
+            placeholder — substitute one of the configured geo field names
+            from `query.geo.fields` (default: `location`). For example, with
+            the default config the actual parameter name is
+            `geo.location.point`. Parameters whose `{geoField}` does not
+            match an entry in `query.geo.fields` are ignored.
+          required: false
+          schema:
+            type: string
+            example: 35.0,139.0
+        - name: geo.{geoField}.distance
+          in: query
+          description: |-
+            Distance for Geo search. `{geoField}` must match an entry in
+            `query.geo.fields` (default: `location`); see
+            `geo.{geoField}.point` above.
+          required: false
+          schema:
+            type: string
+            example: 10km
+        - name: lang
+          in: query
+          description: Language
+          required: false
+          schema:
+            type: string
+            example: en
+        - name: ex_q
+          in: query
+          description: Extra query expression; repeatable.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: sdh
+          in: query
+          description: Similar-document hash.
+          required: false
+          schema:
+            type: string
+        - name: track_total_hits
+          in: query
+          description: |-
+            Either `true`/`false` or an integer threshold. Forwarded to the
+            search engine to control how `record_count` is computed; affects
+            the value of `record_count_relation` in the response.
+          required: false
+          schema:
+            type: string
+            example: "true"
+        - name: preference
+          in: query
+          description: String to specify a shard for searching
+          required: false
+          schema:
+            type: string
+            example: abc
+        - name: callback
+          in: query
+          description: Callback name for using JSONP
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |-
+            NDJSON stream. Each line is one document object. If the handler
+            fails after at least one line has been written it appends a final
+            line of the form `{"error":{"error_code":"<uuid>","message":"..."}}`
+            and closes the stream; clients MUST inspect the last line.
+          content:
+            application/x-ndjson:
+              schema:
+                type: string
+        '400':
+          description: |-
+            Bad request. In addition to the generic `Error` shape, this
+            endpoint emits two specific 400 bodies:
+            * `{"message":"Scroll Search is not available."}` when
+              `api.search.scroll=false`.
+            * `{"message":"Referer is invalid."}` when the request `Referer`
+              host is not on the `web.api.json.referer.hosts` allowlist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /labels:
+    get:
+      tags:
+        - search
+      summary: List labels
+      description: Returns available labels
+      operationId: listLabels
+      deprecated: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record_count:
+                    type: integer
+                    example: 9
+                  data:
+                    type: array
+                    description: Omitted entirely when no labels are configured.
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                          example: AWS
+                        value:
+                          type: string
+                          example: aws
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /favorites:
+    get:
+      tags:
+        - favorite
+      summary: List favorites
+      description: Returns favorited document IDs
+      operationId: listFavorites
+      deprecated: true
+      parameters:
+        - name: queryId
+          in: query
+          description: Query ID where the document is contained
+          required: true
+          schema:
+            type: string
+            example: queryid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record_count:
+                    type: integer
+                    example: 9
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        doc_id:
+                          type: string
+                          example: "e79fbfdfb09d4bffb58ec230c68f6f7e"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /documents/{docId}/favorite:
+    post:
+      tags:
+        - favorite
+      summary: Set a favorite mark
+      description: Set a favorite mark to the document
+      operationId: setFavorite
+      deprecated: true
+      parameters:
+        - name: docId
+          in: path
+          description: Document ID to be favorited
+          required: true
+          schema:
+            type: string
+            example: documentid
+        - name: queryId
+          in: query
+          description: Query ID where the document is contained
+          required: true
+          schema:
+            type: string
+            example: queryid
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: created
+        '400':
+          description: |-
+            Bad request. Returned in any of the following cases:
+            * the favorite feature is disabled (`user.favorite=false`);
+            * `docId` path parameter is missing or empty;
+            * no authenticated user session is present;
+            * the URL bound to `docId` cannot be resolved or is blank;
+            * `queryId` was not previously issued by `GET /documents`
+              (no matching prior query ID is known to the server).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /popular-words:
+    get:
+      tags:
+        - popularword
+      summary: List popular words
+      description: Returns available labels
+      operationId: listPopularWords
+      deprecated: true
+      parameters:
+        - name: seed
+          in: query
+          description: Random seed to return popular words
+          required: false
+          schema:
+            type: string
+            example: "123"
+        - name: label
+          in: query
+          description: Filtered label name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: field
+          in: query
+          description: Field name to generate suggest words
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [python]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record_count:
+                    type: integer
+                    example: 9
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    example: ["python"]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /health:
+    get:
+      tags:
+        - monitor
+      summary: Check a server status
+      description: |-
+        Returns the search engine cluster health. HTTP `200` is returned for
+        cluster status `green`/`yellow`; `503` is returned for `red`.
+      operationId: ping
+      deprecated: true
+      responses:
+        '200':
+          description: Cluster is reachable (status `green` or `yellow`).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: |-
+                      Cluster health snapshot. The exact set of fields
+                      included is governed by the `api.ping.es.fields`
+                      configuration property — additional numeric fields
+                      such as `number_of_nodes`, `active_primary_shards`,
+                      `active_shards`, `relocating_shards`,
+                      `initializing_shards`, `unassigned_shards`, etc., may
+                      be present in the response. The properties listed
+                      below are always emitted; any other entries
+                      configured via `api.ping.es.fields` are surfaced as
+                      additional properties.
+                    additionalProperties: true
+                    properties:
+                      cluster_name:
+                        type: string
+                        example: fess
+                      status:
+                        type: string
+                        enum: [green, yellow, red]
+                        example: green
+                      timed_out:
+                        type: boolean
+                        example: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          description: Cluster status is `red`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: |-
+                      Same shape as the 200 response `data` object. The
+                      exact set of fields is governed by
+                      `api.ping.es.fields`; see the 200 description.
+                    additionalProperties: true
+                    properties:
+                      cluster_name:
+                        type: string
+                        example: fess
+                      status:
+                        type: string
+                        enum: [green, yellow, red]
+                        example: red
+                      timed_out:
+                        type: boolean
+                        example: false
+
+  /suggest-words:
+    get:
+      tags:
+        - suggest
+      summary: Finds suggest words
+      description: |-
+        Returns words for suggest.
+
+        **Referer gate.** When `web.api.json.referer.hosts` is configured,
+        requests whose `Referer` header host is not on the allowlist are
+        rejected with HTTP 400 and body `{"message":"Referer is invalid."}`.
+      operationId: findSuggestWords
+      deprecated: true
+      parameters:
+        - name: q
+          in: query
+          description: Inputting characters for search
+          required: true
+          schema:
+            type: string
+            example: fe
+        - name: num
+          in: query
+          description: The number of suggest words
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            exclusiveMinimum: false
+            example: 10
+            default: 10
+        - name: label
+          in: query
+          description: Filtered label name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [label]
+        - name: field
+          in: query
+          description: Field name to generate suggest words
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [python]
+        - name: lang
+          in: query
+          description: Target language
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            example: [en]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query_time:
+                    type: integer
+                    format: int64
+                    example: 18
+                  record_count:
+                    type: integer
+                    example: 355
+                  page_size:
+                    type: integer
+                    example: 10
+                  data:
+                    type: array
+                    description: Omitted entirely when no suggestions are returned.
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                          example: fess
+                        labels:
+                          type: array
+                          items:
+                            type: string
+                          example: [java, python]
+        '400':
+          description: |-
+            Bad request. In addition to the generic `Error` shape, this
+            endpoint emits `{"message":"Referer is invalid."}` when the
+            request `Referer` host is not on the
+            `web.api.json.referer.hosts` allowlist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Page not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    MethodNotAllowed:
+      description: Requested HTTP method is not allowed for this endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      description: |-
+        Error body shape. Which key is populated depends on
+        `api.json.response.exception.included`:
+        * `true`  — the response carries `message` with the exception
+          detail (intended for development; never enable in production).
+        * `false` (default) — the response carries the correlation ID
+          under the key `error_code:` (note the **trailing colon in the
+          JSON key**; this is the on-the-wire shape preserved for
+          backward compatibility — see `SearchApiManager`). The value is
+          a UUID that matches the server-side log entry.
+
+        Exactly one of the two keys is present in any given response.
+      properties:
+        "error_code:":
+          type: string
+          description: |-
+            Correlation ID logged on the server. UUID format. The key
+            name includes a literal trailing colon character.
+          example: "bd6b0bd6-0144-40bc-9567-c5751dd8eecb"
+        message:
+          type: string
+          description: |-
+            Human-readable exception detail. Present only when exception
+            details are exposed via configuration.
+          example: "This is an error message."
+    

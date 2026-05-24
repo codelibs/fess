@@ -121,7 +121,7 @@ public class ScrollSearchHandlerTest extends UnitFessTestCase {
             // shape for an empty NDJSON response.
             assertTrue(body == null || body.isEmpty() || body.contains("\"data\""), body);
         } else {
-            assertTrue(body.contains("\"version\":\"v2\""), body);
+            assertFalse(body.contains("\"version\""), body);
             assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
             assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
         }

@@ -165,8 +165,8 @@ ${fe:html(true)}
 	<script type="text/javascript">
 		$(function() {
 			FessChat.init({
-				apiUrl: '${fe:url('/api/v1/chat')}',
-				streamUrl: '${fe:url('/api/v1/chat/stream')}',
+				apiUrl: '${fe:url('/api/v2/chat')}',
+				streamUrl: '${fe:url('/api/v2/chat/stream')}',
 				labels: {
 					thinking: '${fe:escapeJs(fe:message("labels.chat_thinking", ""))}',
 					waiting: '${fe:escapeJs(fe:message("labels.chat_waiting", ""))}',

@@ -106,6 +106,71 @@ public class SearchApiV2ManagerChatTest extends UnitFessTestCase {
         assertNotEquals(403, res.status);
     }
 
+    @Test
+    public void test_deleteChatSessionWithoutCsrf_returns403() throws Exception {
+        // DELETE /api/v2/chat/sessions/{id} is CSRF-gated like POST /chat and POST /chat/stream.
+        // A request without a valid token must be rejected at the CSRF gate before reaching
+        // the handler.
+        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        manager.process(new StubRequest("DELETE", "/api/v2/chat/sessions/sess-abc"), res, null);
+        assertEquals(403, res.status);
+        assertTrue(res.body().contains("\"code\":\"forbidden\""), res.body());
+    }
+
+    @Test
+    public void test_deleteChatSessionWithValidCsrf_routedToChatSessionClearHandler() throws Exception {
+        // DELETE /api/v2/chat/sessions/{id} with a valid CSRF token must pass the gate
+        // and reach ChatSessionClearHandler. With RAG chat disabled (default), the handler
+        // returns 400/invalid_request — proving routing succeeded (would be 403 if blocked).
+        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        final StubRequest req =
+                new StubRequest("DELETE", "/api/v2/chat/sessions/sess-abc").withSession(newSessionWithCsrfToken("the-valid-token"))
+                        .withHeader("X-Fess-CSRF-Token", "the-valid-token");
+        manager.process(req, res, null);
+        assertNotEquals(403, res.status);
+        assertEquals("Expected 400 from ChatSessionClearHandler with RAG disabled: " + res.body(), 400, res.status);
+        assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+    }
+
+    @Test
+    public void test_deleteChatSessionWithValidCsrf_invalidSessionIdPath_returns404() throws Exception {
+        // Path components with invalid characters (e.g. spaces) are URL-decoded by the
+        // servlet container; the resulting raw path may not match the dispatch prefix
+        // exactly. The key invariant: with a valid CSRF token, the request is NOT 403.
+        final SearchApiV2Manager manager = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        final StubRequest req = new StubRequest("DELETE", "/api/v2/chat/sessions/invalid-but-pattern-ok")
+                .withSession(newSessionWithCsrfToken("the-valid-token"))
+                .withHeader("X-Fess-CSRF-Token", "the-valid-token");
+        manager.process(req, res, null);
+        assertNotEquals(403, res.status);
+    }
+
+    private static HttpSession newSessionWithCsrfToken(final String token) {
+        final Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put(SessionCsrfTokenManager.SESSION_ATTR, token);
+        return (HttpSession) java.lang.reflect.Proxy.newProxyInstance(SearchApiV2ManagerChatTest.class.getClassLoader(),
+                new Class<?>[] { HttpSession.class }, (proxy, method, args) -> {
+                    final String name = method.getName();
+                    if ("getAttribute".equals(name) && args != null && args.length == 1) {
+                        return sessionAttrs.get((String) args[0]);
+                    }
+                    if ("setAttribute".equals(name) && args != null && args.length == 2) {
+                        sessionAttrs.put((String) args[0], args[1]);
+                        return null;
+                    }
+                    if (method.getReturnType() == boolean.class) {
+                        return Boolean.FALSE;
+                    }
+                    if (method.getReturnType() == int.class || method.getReturnType() == long.class) {
+                        return 0;
+                    }
+                    return null;
+                });
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override

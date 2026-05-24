@@ -101,7 +101,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // The suggest helper may fail without an OpenSearch instance — accept either a 200
         // success envelope or a structured internal-error envelope, but assert the v2 wire
         // shape is preserved either way.
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"suggest_words\""), body);
@@ -120,7 +120,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/labels"), res, new NopChain());
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"record_count\""), body);
@@ -139,7 +139,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/popular-words"), res, new NopChain());
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
             assertTrue(body.contains("\"popular_words\""), body);
@@ -162,7 +162,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // regardless of whether the search backend is up. Detailed shape is asserted in
         // SearchHandlerTest — here we just verify the route reached the handler.
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 200 || res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
         if (res.status == 200) {
             assertTrue(body.contains("\"status\":0"), body);
@@ -187,7 +187,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
             assertTrue(res.body() == null || res.body().isEmpty() || res.body().contains("\"data\""), res.body());
         } else {
             final String body = res.body();
-            assertTrue(body.contains("\"version\":\"v2\""), body);
+            assertFalse(body.contains("\"version\""), body);
             assertTrue(res.status == 400 || res.status == 500, "unexpected status " + res.status + ": " + body);
             assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"internal_error\""), body);
         }
@@ -202,7 +202,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // The manager only needs to confirm the dispatch reached the favorite-get handler.
         // Either the feature is disabled (invalid_request), the doc isn't indexed (not_found),
         // or the backend is unreachable (internal_error). The v2 envelope shape is required.
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 400 || res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
         assertTrue(body.contains("\"code\":\"invalid_request\"") || body.contains("\"code\":\"not_found\"")
                 || body.contains("\"code\":\"internal_error\""), body);
@@ -258,7 +258,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // accepted as long as the v2 envelope shape is preserved and the engine.cluster_name
         // field is present on the success branch.
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         if (res.status == 200 || res.status == 503) {
             // MJ-26: red cluster → 503 but still uses the success envelope shape (with engine.status:"red").
             assertTrue(body.contains("\"status\":0"), body);
@@ -299,7 +299,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // dispatch landed on MeHandler rather than the not-found default branch.
         assertEquals(200, res.status);
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(body.contains("\"status\":0"), body);
         assertTrue(body.contains("\"authenticated\""), body);
     }
@@ -314,7 +314,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // the structured 500 envelope is acceptable here; we just need to confirm dispatch.
         m.process(new StubRequest("/api/v2/ui/config"), res, new NopChain());
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 200 || res.status == 500, "unexpected status " + res.status + ": " + body);
         if (res.status == 200) {
             // site_name is a UiConfigHandler-specific payload field — proves the dispatch
@@ -337,7 +337,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // unavailable) — never the default not-found "endpoint not found" message that
         // would indicate the route failed to dispatch. The wire-shape assertion ensures
         // we are routing to CacheHandler rather than the default arm.
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
         assertTrue(body.contains("\"code\":\"not_found\"") || body.contains("\"code\":\"internal_error\""), body);
         // The default-arm message would say "endpoint not found"; CacheHandler's not_found
@@ -355,7 +355,7 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         // any of the prefix matchers (/documents/, /cache/).
         assertEquals(404, res.status);
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(body.contains("\"status\":1"), body);
         assertTrue(body.contains("\"code\":\"not_found\""), body);
         assertTrue(body.contains("endpoint not found"), body);

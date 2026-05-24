@@ -38,7 +38,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         V2EnvelopeWriter.writeSuccess(res, payload);
         final String body = res.body();
         assertTrue(body.contains("\"status\":0"), body);
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(body.contains("\"k\":\"v\""), body);
         assertEquals("application/json; charset=UTF-8", res.contentType);
     }
@@ -120,12 +120,13 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_writeSuccess_throwsOnReservedKey_version() {
+    public void test_writeSuccess_versionKeyInPayloadIsAllowed() throws Exception {
+        // "version" is no longer a reserved key; payloads may include it.
         final CapturingResponse res = new CapturingResponse();
         final Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("version", "evil"); // reserved — must be rejected
-        assertThrows(IllegalStateException.class, () -> V2EnvelopeWriter.writeSuccess(res, payload),
-                "payload containing 'version' should throw IllegalStateException");
+        payload.put("version", "custom");
+        V2EnvelopeWriter.writeSuccess(res, payload);
+        assertTrue(res.body().contains("\"version\":\"custom\""), res.body());
     }
 
     @Test
@@ -135,7 +136,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         V2EnvelopeWriter.writeSuccess(res, null);
         final String body = res.body();
         assertTrue(body.contains("\"status\":0"), body);
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
     }
 
     @Test

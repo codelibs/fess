@@ -25,6 +25,7 @@ import org.codelibs.fess.unit.UnitFessTestCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+@SuppressWarnings("deprecation")
 public class SearchApiManagerTest extends UnitFessTestCase {
 
     @Override

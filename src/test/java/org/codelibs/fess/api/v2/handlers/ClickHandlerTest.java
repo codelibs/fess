@@ -127,7 +127,7 @@ public class ClickHandlerTest extends UnitFessTestCase {
         new ClickHandler()
                 .handle(new StubRequest("POST", "/api/v2/click").withJsonBody("{\"doc_id\":\"abc\",\"query_id\":\"q\",\"rank\":3}"), res);
         final String body = res.body();
-        assertTrue(body.contains("\"version\":\"v2\""), body);
+        assertFalse(body.contains("\"version\""), body);
         assertTrue(res.status == 200 || res.status == 404 || res.status == 500, "unexpected status " + res.status + ": " + body);
         if (res.status == 200) {
             assertTrue(body.contains("\"ok\":true"), body);
