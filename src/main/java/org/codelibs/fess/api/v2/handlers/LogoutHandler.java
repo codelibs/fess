@@ -46,6 +46,27 @@ public class LogoutHandler {
 
     private static final Logger logger = LogManager.getLogger(LogoutHandler.class);
 
+    /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public LogoutHandler() {
+        // no-op
+    }
+
+    /**
+     * Processes one {@code /api/v2/auth/logout} POST request.
+     *
+     * <p>Invokes {@link FessLoginAssist#logout()} (swallowing failures so the
+     * call remains idempotent) and then invalidates the underlying
+     * {@link HttpSession} when one exists. Rejects non-{@code POST} methods
+     * with {@link V2ErrorCode#METHOD_NOT_ALLOWED}; otherwise always writes a
+     * success envelope of {@code {"ok": true}}.</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");

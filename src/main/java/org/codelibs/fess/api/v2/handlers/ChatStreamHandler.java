@@ -77,6 +77,14 @@ public class ChatStreamHandler {
 
     private static final Logger logger = LogManager.getLogger(ChatStreamHandler.class);
 
+    /**
+     * Default constructor used by the DI container. The handler holds no
+     * per-request state and is safe to share across concurrent requests.
+     */
+    public ChatStreamHandler() {
+        // no-op
+    }
+
     /** Max raw body bytes the handler will read. Same generous buffer as ChatHandler. */
     private static final int MAX_BODY_BYTES = 32 * 1024;
 
@@ -85,6 +93,20 @@ public class ChatStreamHandler {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /**
+     * Processes one {@code POST /api/v2/chat/stream} request.
+     *
+     * <p>All pre-stream validation (method, feature gate, body parse, rate
+     * limit) runs <strong>before</strong> any SSE headers are committed so that
+     * failures can be reported as a normal JSON error envelope. Once every gate
+     * passes the response is switched to {@code text/event-stream} and the LLM
+     * is invoked; subsequent failures surface via an {@code event: error} SSE
+     * event rather than an HTTP error code.</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope or reading the body fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         // --- Gate checks: ALL validation runs before any SSE headers are set. ---
         // Pre-stream failures return proper HTTP status via V2EnvelopeWriter.writeError

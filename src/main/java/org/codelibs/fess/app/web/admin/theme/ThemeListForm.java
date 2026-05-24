@@ -28,6 +28,11 @@ import jakarta.validation.constraints.Size;
  */
 public class ThemeListForm {
 
+    /** Default constructor used by the framework form binder. */
+    public ThemeListForm() {
+        // default constructor
+    }
+
     /**
      * Selected default theme name, or empty string when "no default" is chosen.
      * Validation matches the spec §4.2 manifest regex so an invalid value

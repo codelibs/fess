@@ -242,6 +242,11 @@ public class V2JsonRequestParams extends SearchRequestParams {
     public static class InvalidPageSizeException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates the exception with a diagnostic message.
+         *
+         * @param message human-readable description of the invalid page size
+         */
         public InvalidPageSizeException(final String message) {
             super(message);
         }

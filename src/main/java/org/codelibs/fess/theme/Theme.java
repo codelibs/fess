@@ -35,6 +35,14 @@ public final class Theme {
     private final Path basePath;
     private final ThemeManifest manifest; // null for JSP themes
 
+    /**
+     * Constructs a new theme descriptor.
+     *
+     * @param type theme type (static or JSP)
+     * @param name theme directory name
+     * @param basePath filesystem location of the theme bundle
+     * @param manifest parsed manifest for static themes, or {@code null} for JSP themes
+     */
     public Theme(final ThemeType type, final String name, final Path basePath, final ThemeManifest manifest) {
         this.type = Objects.requireNonNull(type);
         this.name = Objects.requireNonNull(name);
@@ -42,22 +50,47 @@ public final class Theme {
         this.manifest = manifest;
     }
 
+    /**
+     * Returns the theme type.
+     *
+     * @return the theme type
+     */
     public ThemeType getType() {
         return type;
     }
 
+    /**
+     * Returns the theme name.
+     *
+     * @return the theme name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the filesystem base path of the theme bundle.
+     *
+     * @return the base path
+     */
     public Path getBasePath() {
         return basePath;
     }
 
+    /**
+     * Returns the parsed manifest, empty for JSP themes.
+     *
+     * @return the optional manifest
+     */
     public Optional<ThemeManifest> getManifest() {
         return Optional.ofNullable(manifest);
     }
 
+    /**
+     * Returns {@code true} when this theme is a static theme.
+     *
+     * @return {@code true} for static themes
+     */
     public boolean isStatic() {
         return type == ThemeType.STATIC;
     }

@@ -21,5 +21,8 @@ package org.codelibs.fess.theme;
  * (a ZIP / directory bundle described by theme.yml).
  */
 public enum ThemeType {
-    JSP, STATIC
+    /** Legacy JSP theme distributed as a fess-theme-* JAR plugin. */
+    JSP,
+    /** Static theme bundle described by a {@code theme.yml} manifest. */
+    STATIC
 }

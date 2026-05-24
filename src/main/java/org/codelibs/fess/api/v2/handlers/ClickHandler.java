@@ -74,6 +74,14 @@ public class ClickHandler {
     // Conservative whitelist — see FavoriteGetHandler for rationale.
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
+    /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public ClickHandler() {
+        // no-op
+    }
+
     private static String stringOrNull(final Map<String, Object> body, final String key) {
         final Object v = body.get(key);
         if (v == null) {

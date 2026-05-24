@@ -27,6 +27,11 @@ import org.lastaflute.web.validation.Required;
  */
 public class ThemeUploadForm {
 
+    /** Default constructor used by the framework form binder. */
+    public ThemeUploadForm() {
+        // default constructor
+    }
+
     /**
      * Static-theme ZIP archive. The action enforces the {@code .zip} suffix
      * and the maximum compressed size before invoking the installer.

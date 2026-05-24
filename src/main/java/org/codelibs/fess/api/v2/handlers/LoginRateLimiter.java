@@ -70,8 +70,18 @@ public class LoginRateLimiter {
     /** Default maximum number of distinct (scope, key) entries in the map. */
     static final int DEFAULT_MAX_ENTRIES = 100_000;
 
+    /**
+     * Rate-limit scope: distinguishes the bucket namespace so the same
+     * {@code key} value (e.g. {@code "alice"}) can be tracked independently
+     * for login throttling and chat throttling.
+     */
     public enum Scope {
-        IP, USER, CHAT
+        /** Per-client-IP login bucket. */
+        IP,
+        /** Per-username login bucket. */
+        USER,
+        /** Per-user chat-invocation bucket used by the v2 chat endpoints. */
+        CHAT
     }
 
     private static final class Entry {
@@ -102,6 +112,12 @@ public class LoginRateLimiter {
 
     private org.codelibs.core.timer.TimeoutTask sweepTask;
 
+    /**
+     * Default constructor used by the DI container. Uses
+     * {@link System#currentTimeMillis} as the clock and {@link #DEFAULT_MAX_ENTRIES}
+     * as the initial cap; {@link #init()} may override the cap from
+     * {@code FessConfig} once DI is fully wired.
+     */
     public LoginRateLimiter() {
         this(System::currentTimeMillis, DEFAULT_MAX_ENTRIES);
     }
@@ -178,6 +194,24 @@ public class LoginRateLimiter {
         }
     }
 
+    /**
+     * Attempts to consume one slot in the (scope, key) bucket within a sliding
+     * window of {@code windowSeconds}. Expired timestamps at the head of the
+     * queue are evicted first; if the bucket is currently locked out or already
+     * at {@code maxPerWindow} the call returns {@code false} without recording
+     * a hit.
+     *
+     * <p>MJ-6: empty or null {@code key} is denied rather than silently
+     * allowed; an empty key usually means the caller failed to resolve the
+     * client identity, and granting access would bypass the gate entirely.</p>
+     *
+     * @param scope rate-limit scope (e.g. IP, USER, CHAT)
+     * @param key bucket key (e.g. IP address or username)
+     * @param maxPerWindow upper bound of attempts permitted within {@code windowSeconds};
+     *                     values {@code <= 0} disable the gate and return {@code true}
+     * @param windowSeconds sliding-window width in seconds
+     * @return {@code true} if the slot was consumed, {@code false} if the bucket is full or locked out
+     */
     public boolean allow(final Scope scope, final String key, final int maxPerWindow, final int windowSeconds) {
         if (maxPerWindow <= 0) {
             return true;
@@ -264,6 +298,10 @@ public class LoginRateLimiter {
     /**
      * m-21: uses Math.max so that a shorter lockoutSeconds value supplied in a second
      * call never shrinks an existing longer lockout — the stricter deadline always wins.
+     *
+     * @param scope rate-limit scope (e.g. IP, USER, CHAT) that the lockout applies to
+     * @param key bucket key being locked out (e.g. IP address or username); ignored when {@code null} or empty
+     * @param lockoutSeconds duration of the lockout in seconds; ignored when {@code <= 0}
      */
     public void lockOut(final Scope scope, final String key, final int lockoutSeconds) {
         if (key == null || key.isEmpty() || lockoutSeconds <= 0) {

@@ -60,6 +60,14 @@ public class SearchHandler {
     private static final Logger logger = LogManager.getLogger(SearchHandler.class);
 
     /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public SearchHandler() {
+        // no-op
+    }
+
+    /**
      * Processes one {@code /api/v2/search} request.
      *
      * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
@@ -71,7 +79,7 @@ public class SearchHandler {
      * <p><strong>Referer allowlist (MJ-21):</strong> v1's {@code SearchApiManager}
      * enforced {@code isAcceptedSearchReferer} (~line 262/860) as a browser-driven
      * scraping defence. v2 omits this check deliberately: state-changing endpoints
-     * are protected by the CSRF token enforced by {@link org.codelibs.fess.api.v2.CsrfRequirement},
+     * are protected by the CSRF token enforced by {@link CsrfRequirement},
      * and idempotent GETs carry no side-effects that require Referer gating. If the
      * deployment needs Referer-based rate-limiting, add it in a filter or gateway
      * layer rather than in the handler.</p>

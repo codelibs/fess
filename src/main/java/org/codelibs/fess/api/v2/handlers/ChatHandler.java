@@ -56,12 +56,34 @@ public class ChatHandler {
     private static final Logger logger = LogManager.getLogger(ChatHandler.class);
 
     /**
+     * Default constructor used by the DI container. The handler holds no
+     * per-request state and is safe to share across concurrent requests.
+     */
+    public ChatHandler() {
+        // no-op
+    }
+
+    /**
      * Max raw body bytes the handler will read. Chat messages are bounded by
      * {@code rag.chat.message.max.length} (default 4000) but we add a generous
      * buffer for filter arrays.
      */
     private static final int MAX_BODY_BYTES = 32 * 1024;
 
+    /**
+     * Processes one {@code POST /api/v2/chat} request.
+     *
+     * <p>Rejects non-{@code POST} methods with
+     * {@link V2ErrorCode#METHOD_NOT_ALLOWED}. Validates the feature flag, parses
+     * the JSON body, enforces per-user chat rate limiting, then delegates to
+     * {@link org.codelibs.fess.chat.ChatClient#chat} and writes the result as a
+     * v2 success envelope. Pre-call failures (parse errors, gate failures, DI
+     * lookup failures) are reported as structured error envelopes.</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope or reading the body fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");

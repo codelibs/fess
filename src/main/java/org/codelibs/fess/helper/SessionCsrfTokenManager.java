@@ -23,14 +23,34 @@ import org.apache.logging.log4j.Logger;
 
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Helper that issues, verifies, and rotates per-session CSRF tokens.
+ *
+ * <p>Tokens are 256-bit random strings encoded with the URL-safe Base64
+ * alphabet (no padding) and stored under {@link #SESSION_ATTR} on the
+ * {@link HttpSession}. The verification path uses a constant-time string
+ * comparison to avoid timing side-channels.</p>
+ */
 public class SessionCsrfTokenManager {
+
+    /** Default constructor used by the DI container. */
+    public SessionCsrfTokenManager() {
+        // default constructor
+    }
 
     private static final Logger logger = LogManager.getLogger(SessionCsrfTokenManager.class);
 
+    /** Session attribute name under which the CSRF token is stored. */
     public static final String SESSION_ATTR = "fess.csrf.token";
 
     private static final SecureRandom RNG = new SecureRandom();
 
+    /**
+     * Returns the token bound to {@code session}, creating one if absent.
+     *
+     * @param session the HTTP session to read or update
+     * @return the existing or newly issued token
+     */
     public String issue(final HttpSession session) {
         final Object existing = session.getAttribute(SESSION_ATTR);
         if (existing instanceof String s && !s.isEmpty()) {
@@ -50,6 +70,13 @@ public class SessionCsrfTokenManager {
         return token;
     }
 
+    /**
+     * Verifies that {@code provided} matches the token bound to {@code session}.
+     *
+     * @param session the HTTP session holding the stored token
+     * @param provided the candidate token to validate (typically from a request header or form field)
+     * @return {@code true} when both tokens are non-empty and equal in constant time
+     */
     public boolean verify(final HttpSession session, final String provided) {
         if (provided == null || provided.isEmpty()) {
             if (logger.isDebugEnabled()) {

@@ -128,25 +128,52 @@ public final class V2JsonBody {
         }
     }
 
+    /**
+     * Thrown when the request {@code Content-Type} is not {@code application/json}.
+     * Handlers should map this to a {@code 415 Unsupported Media Type} envelope error.
+     */
     public static class UnsupportedMediaTypeException extends IOException {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates the exception with a diagnostic message.
+         *
+         * @param m human-readable description of the rejected media type
+         */
         public UnsupportedMediaTypeException(final String m) {
             super(m);
         }
     }
 
+    /**
+     * Thrown when the request body exceeds the configured maximum byte size.
+     * Handlers should map this to a {@code 413 Payload Too Large} envelope error.
+     */
     public static class PayloadTooLargeException extends IOException {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates the exception with a diagnostic message.
+         *
+         * @param m human-readable description of the size violation
+         */
         public PayloadTooLargeException(final String m) {
             super(m);
         }
     }
 
+    /**
+     * Thrown when the request body is not parseable as JSON.
+     * Handlers should map this to a {@code 400 Bad Request} envelope error.
+     */
     public static class MalformedJsonException extends IOException {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates the exception with a diagnostic message.
+         *
+         * @param m parser-supplied description of the malformed input
+         */
         public MalformedJsonException(final String m) {
             super(m);
         }

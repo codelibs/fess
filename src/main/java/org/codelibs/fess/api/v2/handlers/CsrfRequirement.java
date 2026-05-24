@@ -43,6 +43,22 @@ public final class CsrfRequirement {
     private CsrfRequirement() {
     }
 
+    /**
+     * Returns whether the given v2 sub-path and HTTP method combination must
+     * pass the CSRF token check.
+     *
+     * <p>Idempotent methods ({@code GET}, {@code HEAD}, {@code OPTIONS}) are
+     * always exempt. {@code POST /auth/login} is exempt because the client
+     * cannot yet possess a token; all other state-changing endpoints listed in
+     * the class Javadoc require a valid token. Unknown sub-paths fall through
+     * to the safe default (no enforcement for unknown reads, enforcement
+     * implied by the {@code SearchApiV2Manager} dispatch table for known
+     * writes).</p>
+     *
+     * @param subPath the v2 sub-path (e.g. {@code /chat}, {@code /auth/login})
+     * @param method the HTTP method (case-insensitive)
+     * @return {@code true} if a valid CSRF token must accompany the request
+     */
     public static boolean requiresCsrf(final String subPath, final String method) {
         if (method == null) {
             return false;

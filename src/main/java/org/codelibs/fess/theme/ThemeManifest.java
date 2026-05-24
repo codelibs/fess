@@ -33,9 +33,13 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
  */
 public final class ThemeManifest {
 
+    /** Required {@code apiVersion} value for theme manifests. */
     public static final String CURRENT_API_VERSION = "fess.codelibs.org/v1";
+    /** Required {@code kind} value for theme manifests. */
     public static final String KIND = "StaticTheme";
+    /** Regex enforced on the theme {@code name} field (spec §4.2). */
     public static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9_-]{0,63}$");
+    /** Regex enforced on the theme {@code version} field (subset of SemVer 2.0). */
     public static final Pattern SEMVER_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$");
 
     private final String apiVersion;
@@ -70,6 +74,13 @@ public final class ThemeManifest {
 
     private static final int MAX_FIELD_LENGTH = 4096;
 
+    /**
+     * Parses and validates a {@code theme.yml} document.
+     *
+     * @param in input stream containing the YAML manifest; the caller retains ownership of closing it
+     * @return a validated manifest instance
+     * @throws ThemeManifestException if the YAML cannot be parsed or fails schema validation
+     */
     @SuppressWarnings("unchecked")
     public static ThemeManifest parse(final InputStream in) {
         final Object rawObj;
@@ -186,54 +197,119 @@ public final class ThemeManifest {
         return false;
     }
 
+    /**
+     * Returns the manifest {@code apiVersion}.
+     *
+     * @return the apiVersion value
+     */
     public String getApiVersion() {
         return apiVersion;
     }
 
+    /**
+     * Returns the manifest {@code kind}.
+     *
+     * @return the kind value
+     */
     public String getKind() {
         return kind;
     }
 
+    /**
+     * Returns the theme directory name.
+     *
+     * @return the theme name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the human-readable display name.
+     *
+     * @return the display name
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * Returns the SemVer version string.
+     *
+     * @return the version string
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * Returns the optional author field.
+     *
+     * @return the author, or {@code null} when absent
+     */
     public String getAuthor() {
         return author;
     }
 
+    /**
+     * Returns the optional description.
+     *
+     * @return the description, or {@code null} when absent
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Returns the optional license identifier.
+     *
+     * @return the license, or {@code null} when absent
+     */
     public String getLicense() {
         return license;
     }
 
+    /**
+     * Returns the optional homepage URL.
+     *
+     * @return the homepage URL, or {@code null} when absent
+     */
     public String getHomepage() {
         return homepage;
     }
 
+    /**
+     * Returns the minimum supported Fess version.
+     *
+     * @return the minimum Fess version, or {@code null} when unspecified
+     */
     public String getMinFessVersion() {
         return minFessVersion;
     }
 
+    /**
+     * Returns the list of supported locales.
+     *
+     * @return the supported locales (never {@code null}, may be empty)
+     */
     public List<String> getSupportedLocales() {
         return supportedLocales;
     }
 
+    /**
+     * Returns the entry-point file (defaults to {@code index.html}).
+     *
+     * @return the entry-point file path
+     */
     public String getEntry() {
         return entry;
     }
 
+    /**
+     * Returns whether SPA-style fallback to the entry file is enabled.
+     *
+     * @return {@code true} when SPA fallback is enabled
+     */
     public boolean isSpaFallback() {
         return spaFallback;
     }

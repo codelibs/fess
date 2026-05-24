@@ -79,6 +79,28 @@ public class PasswordChangeHandler {
 
     private static final int MAX_BODY_BYTES = 4 * 1024;
 
+    /**
+     * Default constructor used by the DI container. The handler holds no
+     * per-request state and is safe to share across concurrent requests.
+     */
+    public PasswordChangeHandler() {
+        // no-op
+    }
+
+    /**
+     * Processes one {@code POST /api/v2/auth/password} request.
+     *
+     * <p>Requires an authenticated session, then re-verifies the supplied
+     * {@code current_password} via {@link FessLoginAssist#findLoginUser} before
+     * updating the stored hash. On success the response includes
+     * {@code re_login_required: true} and a freshly rotated CSRF token; the
+     * current session is intentionally <em>not</em> invalidated (see MJ-7 note
+     * in the class Javadoc).</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope or reading the body fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");

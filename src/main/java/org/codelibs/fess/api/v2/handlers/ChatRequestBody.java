@@ -76,18 +76,38 @@ public final class ChatRequestBody {
         this.warnings = warnings;
     }
 
+    /**
+     * Returns the trimmed {@code message} value supplied by the caller.
+     *
+     * @return the chat message, or {@code null} if the caller omitted it or sent only whitespace
+     */
     public String message() {
         return message;
     }
 
+    /**
+     * Returns the trimmed {@code session_id} value supplied by the caller.
+     *
+     * @return the chat session id, or {@code null} when the caller is starting a fresh session
+     */
     public String sessionId() {
         return sessionId;
     }
 
+    /**
+     * Returns the validated label-filter map ({@code fields.label} entries).
+     *
+     * @return map of label field name to allowlisted value arrays; never {@code null}
+     */
     public Map<String, String[]> fields() {
         return fields;
     }
 
+    /**
+     * Returns the validated {@code extra_queries} array supplied by the caller.
+     *
+     * @return allowlisted facet queries, or an empty array when none were supplied
+     */
     public String[] extraQueries() {
         return extraQueries;
     }
@@ -107,6 +127,20 @@ public final class ChatRequestBody {
         return Collections.unmodifiableMap(warnings);
     }
 
+    /**
+     * Parses a raw JSON body map into a validated {@link ChatRequestBody}.
+     *
+     * <p>The {@code message} and {@code session_id} values are trimmed; blank
+     * inputs become {@code null}. Label filters and {@code extra_queries} are
+     * passed through the {@link ChatApiHelper} allowlist; rejected values are
+     * tracked in {@link #getWarnings()} but otherwise dropped.</p>
+     *
+     * @param raw the parsed JSON request body
+     * @param maxMessageLength upper bound on the {@code message} length, in characters
+     * @return a validated, immutable view of the request body
+     * @throws MessageTooLongException if {@code message} exceeds {@code maxMessageLength}
+     * @throws IOException if validation reports an unrecoverable error
+     */
     public static ChatRequestBody from(final Map<String, Object> raw, final int maxMessageLength) throws IOException {
         final String message = trimmedOrNull(raw.get("message"));
         final String sessionId = trimmedOrNull(raw.get("session_id"));
@@ -131,6 +165,11 @@ public final class ChatRequestBody {
     public static class MessageTooLongException extends IOException {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates a new exception describing the length violation.
+         *
+         * @param m the developer-facing detail message
+         */
         public MessageTooLongException(final String m) {
             super(m);
         }

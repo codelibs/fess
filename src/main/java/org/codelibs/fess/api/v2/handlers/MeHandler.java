@@ -52,6 +52,28 @@ public class MeHandler {
 
     private static final Logger logger = LogManager.getLogger(MeHandler.class);
 
+    /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public MeHandler() {
+        // no-op
+    }
+
+    /**
+     * Processes one {@code /api/v2/auth/me} GET request.
+     *
+     * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
+     * Resolves the bound {@link FessUserBean} from the login subsystem (treating
+     * any lookup failure as anonymous), then writes a success envelope describing
+     * the current authentication state — including the user payload via
+     * {@link UserPayloads#toJson(FessUserBean)} when authenticated, or just
+     * {@code authenticated:false} otherwise.</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");

@@ -22,10 +22,21 @@ public class ThemeManifestException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructs an exception with the supplied diagnostic message.
+     *
+     * @param message human-readable description of the failure
+     */
     public ThemeManifestException(final String message) {
         super(message);
     }
 
+    /**
+     * Constructs an exception with the supplied message and underlying cause.
+     *
+     * @param message human-readable description of the failure
+     * @param cause original throwable that triggered the failure
+     */
     public ThemeManifestException(final String message, final Throwable cause) {
         super(message, cause);
     }

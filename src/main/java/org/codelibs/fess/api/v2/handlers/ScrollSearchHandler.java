@@ -83,6 +83,14 @@ public class ScrollSearchHandler {
     private static final String NDJSON_CONTENT_TYPE = "application/x-ndjson; charset=UTF-8";
 
     /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public ScrollSearchHandler() {
+        // no-op
+    }
+
+    /**
      * Shared, thread-safe {@link ObjectMapper} instance (m-11).
      * {@code ObjectMapper} is safe to share after construction; hoisting here
      * avoids per-request allocation while keeping each write session independent.

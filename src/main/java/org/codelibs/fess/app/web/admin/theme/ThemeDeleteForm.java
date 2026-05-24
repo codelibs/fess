@@ -29,6 +29,11 @@ import jakarta.validation.constraints.Size;
  */
 public class ThemeDeleteForm {
 
+    /** Default constructor used by the framework form binder. */
+    public ThemeDeleteForm() {
+        // default constructor
+    }
+
     /** Theme directory name; must match the spec §4.2 regex. */
     @Required
     @Size(max = 64)

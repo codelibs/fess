@@ -55,6 +55,29 @@ public class UiConfigHandler {
 
     private static final Logger logger = LogManager.getLogger(UiConfigHandler.class);
 
+    /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public UiConfigHandler() {
+        // no-op
+    }
+
+    /**
+     * Processes one {@code /api/v2/ui/config} GET request.
+     *
+     * <p>Rejects non-{@code GET} methods with {@link V2ErrorCode#METHOD_NOT_ALLOWED}.
+     * Otherwise assembles the SPA bootstrap payload — site name, login
+     * requirement, supported locales, active theme descriptor, feature flags,
+     * paging defaults, and (when {@code theme.api.csrf.required=true}) a
+     * freshly-issued CSRF token bound to the session — and writes it via the
+     * standard v2 envelope. Any unexpected exception is caught and emitted as
+     * a structured {@code internal_error} envelope.</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"GET".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "GET");

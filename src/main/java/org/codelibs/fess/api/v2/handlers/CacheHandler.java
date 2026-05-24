@@ -72,6 +72,14 @@ public class CacheHandler {
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public CacheHandler() {
+        // no-op
+    }
+
+    /**
      * Processes one {@code /api/v2/cache/{docId}} GET request.
      *
      * @param req the incoming HTTP request

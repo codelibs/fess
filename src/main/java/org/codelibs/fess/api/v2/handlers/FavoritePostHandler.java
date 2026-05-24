@@ -74,6 +74,14 @@ public class FavoritePostHandler {
 
     private static final Logger logger = LogManager.getLogger(FavoritePostHandler.class);
 
+    /**
+     * Default constructor used by the DI container. The handler holds no
+     * per-request state and is safe to share across concurrent requests.
+     */
+    public FavoritePostHandler() {
+        // no-op
+    }
+
     // Favorite payloads are tiny — only a query_id field is consumed. 1 KiB is
     // ample headroom while making payload-bomb attacks pointless.
     private static final int MAX_BODY_BYTES = 1024;
@@ -107,6 +115,20 @@ public class FavoritePostHandler {
         }
     }
 
+    /**
+     * Processes one {@code POST /api/v2/documents/{docId}/favorite} request.
+     *
+     * <p>Validates the HTTP method, document id format, authenticated session,
+     * favorite feature flag and request body. On success a favorite is recorded
+     * for the user and a success envelope is returned. Failures map to v2 error
+     * codes ({@link V2ErrorCode#AUTH_REQUIRED}, {@link V2ErrorCode#INVALID_REQUEST},
+     * {@link V2ErrorCode#NOT_FOUND}, {@link V2ErrorCode#INTERNAL_ERROR}).</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @param docId the document id extracted from the URL path
+     * @throws IOException if writing the envelope or reading the body fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res, final String docId) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");

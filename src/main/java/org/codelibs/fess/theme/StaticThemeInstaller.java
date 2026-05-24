@@ -64,11 +64,21 @@ import jakarta.annotation.Resource;
  */
 public class StaticThemeInstaller {
 
+    /**
+     * Default constructor. Configured limits are read from {@link FessConfig}
+     * during {@link #init()}; falls back to built-in defaults when DI is absent.
+     */
+    public StaticThemeInstaller() {
+        // default constructor for DI
+    }
+
     private static final Logger logger = LogManager.getLogger(StaticThemeInstaller.class);
 
+    /** Injected Fess configuration used to resolve limits and the themes directory. */
     @Resource
     protected FessConfig fessConfig;
 
+    /** Injected theme registry reloaded after successful install/delete. */
     @Resource
     protected ThemeRegistry themeRegistry;
 
@@ -140,31 +150,82 @@ public class StaticThemeInstaller {
 
         /** Structured error codes for callers that need to dispatch on the cause. */
         public enum Code {
-            INVALID_NAME, ACTIVE_DEFAULT, JSP_TYPE, NOT_FOUND, EXTRACT_FAILED, MOVE_FAILED, MANIFEST_INVALID, SIZE_LIMIT, ENTRY_LIMIT, RATIO_LIMIT, OTHER
+            /** Theme name failed regex validation. */
+            INVALID_NAME,
+            /** Refused because the theme is the currently active default. */
+            ACTIVE_DEFAULT,
+            /** Refused because the registry entry is a JSP theme. */
+            JSP_TYPE,
+            /** Theme directory not found under the themes root. */
+            NOT_FOUND,
+            /** ZIP extraction failed (e.g. ZipSlip, denied segment). */
+            EXTRACT_FAILED,
+            /** Atomic directory rename failed during promotion or rollback. */
+            MOVE_FAILED,
+            /** {@code theme.yml} missing or failed validation. */
+            MANIFEST_INVALID,
+            /** Cumulative extracted size exceeded the configured limit. */
+            SIZE_LIMIT,
+            /** Number of ZIP entries exceeded the configured limit. */
+            ENTRY_LIMIT,
+            /** Per-entry compression ratio exceeded the configured limit. */
+            RATIO_LIMIT,
+            /** Fallback for failures that do not fit any other category. */
+            OTHER
         }
 
+        /** Structured error code attached to this exception. */
         private final Code code;
 
+        /**
+         * Constructs an exception with the default {@link Code#OTHER OTHER} code.
+         *
+         * @param msg diagnostic message
+         */
         public InstallException(final String msg) {
             super(msg);
             this.code = Code.OTHER;
         }
 
+        /**
+         * Constructs an exception with the default {@link Code#OTHER OTHER} code and a cause.
+         *
+         * @param msg diagnostic message
+         * @param cause underlying throwable
+         */
         public InstallException(final String msg, final Throwable cause) {
             super(msg, cause);
             this.code = Code.OTHER;
         }
 
+        /**
+         * Constructs an exception with the supplied structured code.
+         *
+         * @param code structured error code
+         * @param msg diagnostic message
+         */
         public InstallException(final Code code, final String msg) {
             super(msg);
             this.code = code;
         }
 
+        /**
+         * Constructs an exception with the supplied structured code and a cause.
+         *
+         * @param code structured error code
+         * @param msg diagnostic message
+         * @param cause underlying throwable
+         */
         public InstallException(final Code code, final String msg, final Throwable cause) {
             super(msg, cause);
             this.code = code;
         }
 
+        /**
+         * Returns the structured error code associated with this exception.
+         *
+         * @return the structured error code
+         */
         public Code code() {
             return code;
         }

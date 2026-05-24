@@ -52,11 +52,20 @@ import jakarta.annotation.Resource;
  */
 public class ThemeRegistry {
 
+    /**
+     * Default constructor. The registry is wired by the DI container; static
+     * themes are loaded lazily via {@link #init()}.
+     */
+    public ThemeRegistry() {
+        // default constructor for DI
+    }
+
     private static final Logger logger = LogManager.getLogger(ThemeRegistry.class);
 
     /** System property key for the global default theme name. */
     public static final String SYSPROP_DEFAULT_THEME = "theme.default";
 
+    /** Injected Fess configuration used to resolve the themes directory and default theme. */
     @Resource
     protected FessConfig fessConfig;
 
@@ -74,6 +83,11 @@ public class ThemeRegistry {
     private volatile Snapshot snapshot = new Snapshot(Map.of(), null);
     private Path themesDirOverride; // test seam
 
+    /**
+     * Initialises the registry by performing the first scan. Failures are
+     * logged and swallowed so a misconfigured themes directory does not break
+     * application start-up.
+     */
     @PostConstruct
     public void init() {
         try {
@@ -83,6 +97,10 @@ public class ThemeRegistry {
         }
     }
 
+    /**
+     * Rescans the themes directory and the JSP view tree, replacing the
+     * in-memory snapshot atomically.
+     */
     public synchronized void reload() {
         final Map<String, Theme> next = new HashMap<>();
         scanStatic(next);
@@ -177,6 +195,12 @@ public class ThemeRegistry {
         return p;
     }
 
+    /**
+     * Looks up a theme by name.
+     *
+     * @param name theme name (blank values yield empty)
+     * @return the matching theme, or empty when no theme with that name is registered
+     */
     public Optional<Theme> getTheme(final String name) {
         if (StringUtil.isBlank(name)) {
             return Optional.empty();
@@ -184,6 +208,11 @@ public class ThemeRegistry {
         return Optional.ofNullable(snapshot.byName.get(name));
     }
 
+    /**
+     * Returns an immutable view of every registered theme keyed by name.
+     *
+     * @return unmodifiable map of registered themes
+     */
     public Map<String, Theme> getAllThemes() {
         return snapshot.byName;
     }

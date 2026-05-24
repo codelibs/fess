@@ -67,6 +67,14 @@ public class FavoriteGetHandler {
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     /**
+     * Default constructor. The handler is stateless and intended to be
+     * instantiated once by the API manager and shared across concurrent requests.
+     */
+    public FavoriteGetHandler() {
+        // no-op
+    }
+
+    /**
      * Processes one {@code /api/v2/documents/{docId}/favorite} GET request.
      *
      * <p>Order of checks:</p>

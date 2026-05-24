@@ -77,10 +77,34 @@ public class LoginHandler {
 
     private final LoginRateLimiter limiter;
 
+    /**
+     * Creates a handler bound to the given rate limiter.
+     *
+     * <p>Production wires the DI-managed singleton via
+     * {@link ComponentUtil#getLoginRateLimiter()}; tests pass a fresh instance
+     * with a controllable clock.</p>
+     *
+     * @param limiter the rate limiter used for IP- and user-scope checks
+     */
     public LoginHandler(final LoginRateLimiter limiter) {
         this.limiter = limiter;
     }
 
+    /**
+     * Processes one {@code POST /api/v2/auth/login} request.
+     *
+     * <p>Applies a tiered set of cheap-first gates (IP rate-limit, body parse,
+     * presence checks, per-user rate-limit) before invoking
+     * {@link FessLoginAssist} for credential verification. On success the
+     * response carries the freshly issued CSRF token and an echo of the safe
+     * {@code return_to} value; failures map to v2 error codes
+     * ({@link V2ErrorCode#RATE_LIMITED}, {@link V2ErrorCode#INVALID_REQUEST},
+     * {@link V2ErrorCode#AUTH_REQUIRED}, {@link V2ErrorCode#INTERNAL_ERROR}).</p>
+     *
+     * @param req the incoming HTTP request
+     * @param res the HTTP response to write to
+     * @throws IOException if writing the envelope or reading the body fails
+     */
     public void handle(final HttpServletRequest req, final HttpServletResponse res) throws IOException {
         if (!"POST".equalsIgnoreCase(req.getMethod())) {
             res.setHeader("Allow", "POST");
