@@ -40,6 +40,7 @@ import org.codelibs.fess.api.v2.V2ErrorCode;
 import org.codelibs.fess.chat.ChatClient.ChatResult;
 import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
+import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -213,8 +214,13 @@ public class ChatStreamHandler {
         final Map<String, Object> raw;
         try {
             raw = V2JsonBody.read(req, MAX_BODY_BYTES);
-        } catch (final V2JsonBody.PayloadTooLargeException | V2JsonBody.MalformedJsonException
-                | V2JsonBody.UnsupportedMediaTypeException e) {
+        } catch (final V2JsonBody.PayloadTooLargeException e) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            return;
+        } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            return;
+        } catch (final V2JsonBody.MalformedJsonException e) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }
@@ -305,6 +311,10 @@ public class ChatStreamHandler {
         } catch (final LlmException e) {
             // The callback already emitted onError to the SSE stream; do not double-send.
             logger.warn("[RAG] /api/v2/chat/stream LLM error. sessionId={}, errorCode={}", body.sessionId(), e.getErrorCode());
+        } catch (final ClientDisconnectedException e) {
+            // Client closed the TCP connection mid-stream; no point writing an error event
+            // to a dead socket. Log at DEBUG to avoid noise in normal operation.
+            logger.debug("[RAG] /api/v2/chat/stream aborted: client disconnected mid-stream. sessionId={}", body.sessionId());
         } catch (final Exception e) {
             logger.warn("[RAG] /api/v2/chat/stream failed. error={}", e.getMessage(), e);
             // Avoid double-emitting an error event when the callback already wrote one,
@@ -413,18 +423,14 @@ public class ChatStreamHandler {
     }
 
     /**
-     * Same SSE headers as v1. The {@code X-Accel-Buffering: no} header is critical when
-     * running behind nginx — without it the entire stream gets buffered until
-     * close, which destroys the SSE UX.
+     * Same SSE headers as v1. Delegates to {@link SseResponseHelper#applySseHeaders} so the
+     * baseline (including the critical {@code X-Accel-Buffering: no} header that disables
+     * nginx response buffering) stays in sync across v1 and v2.
      *
      * @param res the HTTP response to set headers on
      */
     protected void setSseHeaders(final HttpServletResponse res) {
-        res.setCharacterEncoding("UTF-8");
-        res.setContentType("text/event-stream; charset=UTF-8");
-        res.setHeader("Cache-Control", "no-cache");
-        res.setHeader("Connection", "keep-alive");
-        res.setHeader("X-Accel-Buffering", "no");
+        SseResponseHelper.applySseHeaders(res);
     }
 
     /**
@@ -505,6 +511,16 @@ public class ChatStreamHandler {
 
             @Override
             public void onChunk(final String content, final boolean done) {
+                // Client-disconnect detection: PrintWriter.checkError() flips to true
+                // when the underlying stream has encountered an error (typically because
+                // the client closed the TCP connection mid-stream). Abort the emission
+                // loop early rather than keep generating tokens into a dead socket.
+                if (writer.checkError()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[v2/chat/stream] client disconnected; aborting emission");
+                    }
+                    throw new ClientDisconnectedException();
+                }
                 if (content != null && !content.isEmpty()) {
                     emitSafely(writer, "chunk", Map.of("content", content), writeLock);
                 }
@@ -565,6 +581,20 @@ public class ChatStreamHandler {
                 emitSafely(writer, "warning", data, writeLock);
             }
         };
+    }
+
+    /**
+     * Thrown by {@link ChatPhaseCallback#onChunk} when {@link PrintWriter#checkError()}
+     * detects that the client has disconnected mid-stream. This is a control-flow
+     * signal only — it carries no message payload and is caught by the outer handler
+     * to abort token generation without emitting a redundant SSE error event.
+     */
+    static final class ClientDisconnectedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        ClientDisconnectedException() {
+            super("client disconnected", null, true, false); // suppress stacktrace fill-in
+        }
     }
 
     /**

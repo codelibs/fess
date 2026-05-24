@@ -204,33 +204,24 @@
   <!--                                                                    Session Config -->
   <!--                                                                    ============== -->
   <!--
-    SECURITY: Session cookie hardening (MJ-3 / PR #3136).
+    Session cookie configuration.
 
-    HttpOnly  - blocks JavaScript access to JSESSIONID, mitigating XSS-based session theft.
-    Secure    - restricts cookie transmission to HTTPS only.
+    HttpOnly blocks JavaScript access to JSESSIONID, mitigating XSS-based session theft.
+    It is safe to enable on both HTTP and HTTPS deployments.
 
-    PRODUCTION REQUIREMENT: Fess MUST be served over HTTPS (TLS termination at the
-    container, a reverse proxy, or a load balancer).  If you run HTTP-only (e.g. plain
-    `bin/fess` on port 8080 without TLS), the browser will silently drop the Secure cookie
-    and sessions will not persist.  For HTTP-only local development either:
-      (a) front Fess with an HTTPS reverse proxy (nginx/Caddy with a self-signed cert), or
-      (b) temporarily remove the <secure> element — but do NOT do this in production.
+    The Secure attribute is intentionally NOT set here so the default `bin/fess` experience
+    on http://localhost:8080 works out of the box. In production, terminate TLS at a
+    reverse proxy (nginx, Caddy, ALB, etc.) and have the proxy add the Secure attribute,
+    or set it at the Tomcat connector layer.
 
-    SameSite policy cannot be set via web.xml in Servlet 6.1 / Jakarta EE 10.
-    To enforce SameSite=Lax (recommended) configure the Tomcat CookieProcessor at the
-    deployment level in one of:
-      - META-INF/context.xml  (per-webapp, checked into the WAR):
-            <Context>
-              <CookieProcessor sameSiteCookies="lax"/>
-            </Context>
-      - $CATALINA_HOME/conf/context.xml  (global, all webapps)
-      - A reverse proxy that rewrites Set-Cookie headers.
+    SameSite policy is configured via the `sameSiteCookies` key in tomcat_config.properties
+    (default: lax; valid values: lax, strict, none). FessBoot applies it to all
+    CookieProcessor instances at startup. Strict will break OAuth/OIDC redirect flows.
     See https://tomcat.apache.org/tomcat-10.1-doc/config/cookie-processor.html
   -->
   <session-config>
     <cookie-config>
       <http-only>true</http-only>
-      <secure>true</secure>
     </cookie-config>
     <tracking-mode>COOKIE</tracking-mode>
   </session-config>

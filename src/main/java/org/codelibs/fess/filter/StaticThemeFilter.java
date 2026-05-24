@@ -215,7 +215,7 @@ public class StaticThemeFilter implements Filter {
             return themeRegistry;
         }
         try {
-            return ComponentUtil.getComponent(ThemeRegistry.class);
+            return ComponentUtil.getThemeRegistry();
         } catch (final Exception e) {
             if (firstFailure.compareAndSet(false, true)) {
                 logger.warn("ThemeRegistry not available; static-theme routing disabled", e);

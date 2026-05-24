@@ -94,6 +94,8 @@ import org.codelibs.fess.query.parser.QueryParser;
 import org.codelibs.fess.rank.fusion.RankFusionProcessor;
 import org.codelibs.fess.script.ScriptEngineFactory;
 import org.codelibs.fess.sso.SsoManager;
+import org.codelibs.fess.theme.StaticThemeInstaller;
+import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.security.PrimaryCipher;
@@ -146,6 +148,10 @@ public final class ComponentUtil {
     private static final String LOGIN_RATE_LIMITER = "loginRateLimiter";
 
     private static final String SESSION_CSRF_TOKEN_MANAGER = "sessionCsrfTokenManager";
+
+    private static final String THEME_REGISTRY = "themeRegistry";
+
+    private static final String STATIC_THEME_INSTALLER = "staticThemeInstaller";
 
     private static final String AUTHENTICATION_MANAGER = "authenticationManager";
 
@@ -764,6 +770,22 @@ public final class ComponentUtil {
      */
     public static SessionCsrfTokenManager getSessionCsrfTokenManager() {
         return getComponent(SESSION_CSRF_TOKEN_MANAGER);
+    }
+
+    /**
+     * Gets the theme registry component.
+     * @return The theme registry (shared singleton).
+     */
+    public static ThemeRegistry getThemeRegistry() {
+        return getComponent(THEME_REGISTRY);
+    }
+
+    /**
+     * Gets the static theme installer component.
+     * @return The static theme installer (shared singleton).
+     */
+    public static StaticThemeInstaller getStaticThemeInstaller() {
+        return getComponent(STATIC_THEME_INSTALLER);
     }
 
     /**

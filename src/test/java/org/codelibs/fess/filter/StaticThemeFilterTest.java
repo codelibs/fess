@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.filter;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -22,8 +24,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.codelibs.fess.app.web.theme.ThemeViewAction;
 import org.codelibs.fess.theme.Theme;
+import org.codelibs.fess.theme.ThemeManifest;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.unit.UnitFessTestCase;
@@ -164,6 +173,163 @@ public class StaticThemeFilterTest extends UnitFessTestCase {
         final StubChain chain = new StubChain();
         f.doFilter(new NonHttpStubRequest(), new NonHttpStubResponse(), chain);
         assertTrue(chain.called, "Non-HTTP request must pass through without ClassCastException");
+    }
+
+    // ── E-2: warn-once / firstFailure AtomicBoolean gate ─────────────────────
+
+    @Test
+    public void test_warnOnce_logsOnlyOnceWhenRegistryUnavailable() throws Exception {
+        // When themeRegistry is NOT injected via setThemeRegistry() the filter falls
+        // through to ComponentUtil.getThemeRegistry(), which throws in the slim test
+        // harness. The firstFailure AtomicBoolean ensures exactly one WARN is emitted
+        // no matter how many requests arrive.
+        //
+        // Capture log4j2 output via a ListAppender attached to StaticThemeFilter's logger.
+        final String loggerName = StaticThemeFilter.class.getName();
+        final LoggerContext ctx = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
+        final org.apache.logging.log4j.core.config.Configuration cfg = ctx.getConfiguration();
+        final org.apache.logging.log4j.core.config.LoggerConfig loggerCfg = cfg.getLoggerConfig(loggerName);
+        // Temporarily set to WARN so the appender captures it.
+        final Level originalLevel = loggerCfg.getLevel();
+        final java.util.List<LogEvent> captured = new java.util.ArrayList<>();
+        final AbstractAppender listAppender =
+                new AbstractAppender("test-list-appender", null, PatternLayout.createDefaultLayout(), true, Property.EMPTY_ARRAY) {
+                    @Override
+                    public void append(final LogEvent event) {
+                        if (event.getLevel().isMoreSpecificThan(Level.WARN)) {
+                            captured.add(event.toImmutable());
+                        }
+                    }
+                };
+        listAppender.start();
+        loggerCfg.addAppender(listAppender, Level.WARN, null);
+        loggerCfg.setLevel(Level.WARN);
+        ctx.updateLoggers();
+        try {
+            // Create a fresh filter with NO registry injected — ComponentUtil will throw.
+            final StaticThemeFilter f = new StaticThemeFilter();
+            // Send 5 GET requests. Each should pass through (registry unavailable).
+            for (int i = 0; i < 5; i++) {
+                final StubChain chain = new StubChain();
+                f.doFilter(new StubRequest("GET", "/search"), new StubResponse(), chain);
+                assertTrue(chain.called, "filter must pass through when registry is unavailable");
+            }
+            // Count only WARN events from StaticThemeFilter's logger about ThemeRegistry.
+            final long warnCount = captured.stream()
+                    .filter(e -> loggerName.equals(e.getLoggerName()))
+                    .filter(e -> Level.WARN.equals(e.getLevel()))
+                    .filter(e -> {
+                        final String msg = e.getMessage().getFormattedMessage();
+                        return msg != null && msg.contains("ThemeRegistry");
+                    })
+                    .count();
+            org.junit.jupiter.api.Assertions.assertEquals(1L, warnCount,
+                    "exactly 1 WARN must be emitted for ThemeRegistry unavailable across 5 requests; got " + warnCount);
+        } finally {
+            loggerCfg.removeAppender("test-list-appender");
+            loggerCfg.setLevel(originalLevel);
+            ctx.updateLoggers();
+            listAppender.stop();
+        }
+    }
+
+    // ── E-3: spaFallback=false — non-asset requests pass through ─────────────
+
+    /**
+     * Builds a minimal valid {@link ThemeManifest} YAML with {@code spaFallback: false}.
+     */
+    private static ThemeManifest buildManifest(final boolean spaFallback) throws Exception {
+        final String yaml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: alpha",
+                "displayName: Alpha Theme", "version: 1.0.0", "spaFallback: " + spaFallback);
+        return ThemeManifest.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void test_spaFallbackFalse_passesNonAssetRequestThrough() throws Exception {
+        // When manifest.spaFallback=false, non-asset UI requests must pass through
+        // to the original Fess routes rather than being forwarded to the SPA index.
+        // A regression here would silently break themes that opt out of SPA mode.
+        final ThemeManifest manifest = buildManifest(false);
+        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+
+        // Non-asset request (no file extension match / not a /themes/{name}/... path)
+        final StubRequest req = new StubRequest("GET", "/some/route");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+
+        // Must pass through — not forwarded to /theme-view.
+        assertTrue(chain.called, "spaFallback=false must pass non-asset requests through to original routes");
+        assertNull(req.forwardedTo, "spaFallback=false must not forward to /theme-view for non-asset requests");
+    }
+
+    @Test
+    public void test_spaFallbackTrue_forwardsNonAssetToIndex() throws Exception {
+        // Symmetric test: when manifest.spaFallback=true (explicit), non-asset UI
+        // requests must be forwarded to the SPA index.
+        final ThemeManifest manifest = buildManifest(true);
+        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+
+        final StubRequest req = new StubRequest("GET", "/some/route");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+
+        // Must forward to /theme-view with INDEX mode.
+        assertFalse(chain.called, "spaFallback=true must not pass through non-asset requests");
+        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo, "spaFallback=true must forward to /theme-view");
+        assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
+    }
+
+    @Test
+    public void test_spaFallbackFalse_assetPathStillForwardsToThemeView() throws Exception {
+        // Even when spaFallback=false, asset paths (/themes/{name}/...) must still
+        // be forwarded to /theme-view with ASSET mode — the spaFallback flag only
+        // governs non-asset SPA routing, not static asset delivery.
+        final ThemeManifest manifest = buildManifest(false);
+        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), manifest);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+
+        final StubRequest req = new StubRequest("GET", "/themes/alpha/assets/app.js");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+
+        // Asset path must be forwarded regardless of spaFallback setting.
+        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo,
+                "asset paths must forward to /theme-view even when spaFallback=false");
+        assertEquals("ASSET", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
+        assertFalse(chain.called, "asset path must not pass through when active theme matches");
+    }
+
+    @Test
+    public void test_spaFallbackDefault_isTrue_whenManifestIsNull() throws Exception {
+        // Theme with null manifest (JSP or stub with no manifest) falls back to
+        // the default spaFallback=true behavior via orElse(true) in the filter.
+        // A Theme with null manifest is NOT static (ThemeType.STATIC + null manifest
+        // should still pass the isStatic() check) — verify that null-manifest themes
+        // with spaFallback not set still forward non-asset requests.
+        // (This is already covered by test_forwardsIndexForUiPath — this test
+        // documents the contract explicitly.)
+        final Theme staticTheme = new Theme(ThemeType.STATIC, "alpha", Paths.get("/tmp/alpha"), null);
+        final StubRegistry reg = new StubRegistry(staticTheme);
+        final StaticThemeFilter f = new StaticThemeFilter();
+        f.setThemeRegistry(reg);
+
+        final StubRequest req = new StubRequest("GET", "/search");
+        final StubChain chain = new StubChain();
+        f.doFilter(req, new StubResponse(), chain);
+
+        // Null manifest → orElse(true) → spaFallback=true → forward to index.
+        org.junit.jupiter.api.Assertions.assertEquals("/theme-view", req.forwardedTo,
+                "null manifest must default spaFallback=true and forward to /theme-view");
+        assertEquals("INDEX", req.getAttribute(ThemeViewAction.REQ_ATTR_MODE));
+        assertFalse(chain.called);
     }
 
     // ===== Stubs =====

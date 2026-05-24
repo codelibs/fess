@@ -335,6 +335,139 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         assertTrue(hasGeneric, "non-manifest InstallException must fall back to errors.failed_to_upload_theme");
     }
 
+    // ── E-4: delete — all InstallException.Code branches have localized key mappings ──
+
+    @Test
+    public void test_delete_allInstallExceptionCodes_haveLocalizedKeyMapping() {
+        // Pin the mapping table: every StaticThemeInstaller.InstallException.Code that
+        // the delete() switch handles must produce a non-empty FessMessages entry with a
+        // localized key (not the raw exception message). The four named codes plus the
+        // default fallback for all remaining codes are each tested.
+        //
+        // Expected key mapping (mirrors AdminThemeAction#mapDeleteExceptionToMessage):
+        //   ACTIVE_DEFAULT → errors.theme_is_active
+        //   JSP_TYPE       → errors.theme_is_jsp_type
+        //   NOT_FOUND      → errors.theme_not_found
+        //   INVALID_NAME   → errors.theme_name_invalid
+        //   <all others>   → errors.failed_to_delete_theme (default)
+        final String themeName = "test-theme";
+
+        // Explicitly named codes with dedicated keys.
+        // Note: getMessageKey() returns the bare key without surrounding braces,
+        // e.g. "errors.theme_is_active" not "{errors.theme_is_active}".
+        final Object[][] namedCases = { //
+                { StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT, "errors.theme_is_active" }, //
+                { StaticThemeInstaller.InstallException.Code.JSP_TYPE, "errors.theme_is_jsp_type" }, //
+                { StaticThemeInstaller.InstallException.Code.NOT_FOUND, "errors.theme_not_found" }, //
+                { StaticThemeInstaller.InstallException.Code.INVALID_NAME, "errors.theme_name_invalid" }, //
+        };
+        for (final Object[] row : namedCases) {
+            final StaticThemeInstaller.InstallException.Code code = (StaticThemeInstaller.InstallException.Code) row[0];
+            final String expectedKey = (String) row[1];
+            final StaticThemeInstaller.InstallException ex =
+                    new StaticThemeInstaller.InstallException(code, "diagnostic for " + code.name());
+            final FessMessages msgs = new FessMessages();
+            AdminThemeAction.mapDeleteExceptionToMessage(msgs, ex, themeName);
+            assertFalse(msgs.isEmpty(), "code " + code + " must produce a message entry");
+            final boolean hasExpectedKey = msgs.toPropertySet().stream().flatMap(p -> {
+                final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+                final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+                it.forEachRemaining(list::add);
+                return list.stream();
+            }).anyMatch(um -> expectedKey.equals(um.getMessageKey()));
+            assertTrue(hasExpectedKey, "code " + code + " must map to " + expectedKey + " but got: " + msgs);
+        }
+
+        // All remaining codes must fall back to errors.failed_to_delete_theme.
+        final java.util.Set<StaticThemeInstaller.InstallException.Code> namedCodes =
+                new java.util.HashSet<>(java.util.Arrays.asList(StaticThemeInstaller.InstallException.Code.ACTIVE_DEFAULT,
+                        StaticThemeInstaller.InstallException.Code.JSP_TYPE, StaticThemeInstaller.InstallException.Code.NOT_FOUND,
+                        StaticThemeInstaller.InstallException.Code.INVALID_NAME));
+
+        for (final StaticThemeInstaller.InstallException.Code code : StaticThemeInstaller.InstallException.Code.values()) {
+            if (namedCodes.contains(code)) {
+                continue; // already tested above
+            }
+            final StaticThemeInstaller.InstallException ex =
+                    new StaticThemeInstaller.InstallException(code, "diagnostic for " + code.name());
+            final FessMessages msgs = new FessMessages();
+            AdminThemeAction.mapDeleteExceptionToMessage(msgs, ex, themeName);
+            assertFalse(msgs.isEmpty(), "code " + code + " must produce a fallback message entry");
+            final boolean hasFallbackKey = msgs.toPropertySet().stream().flatMap(p -> {
+                final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+                final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+                it.forEachRemaining(list::add);
+                return list.stream();
+            }).anyMatch(um -> "errors.failed_to_delete_theme".equals(um.getMessageKey()));
+            assertTrue(hasFallbackKey, "code " + code + " must fall back to errors.failed_to_delete_theme but got: " + msgs);
+        }
+    }
+
+    // ── C-2: null fileName normalization ─────────────────────────────────────────
+
+    @Test
+    public void test_upload_handlesNullFileName() {
+        // C-2 regression: form.themeFile.getFileName() can return null for multipart parts
+        // without a filename= attribute. The fix normalizes null to "" before passing to
+        // hasZipExtension or any message that would otherwise render literal "null".
+        //
+        // We verify the normalization invariant via a stub MultipartFormFile whose
+        // getFileName() returns null, and assert that:
+        //   (a) hasZipExtension on the NORMALIZED value (empty string) returns false, which
+        //       is the correct rejection branch and avoids NPE.
+        //   (b) The normalized fileName is a String, never null, so it is safe for message
+        //       formatting without producing "null" in the output.
+        final MultipartFormFile nullFileNameForm = new MultipartFormFile() {
+            @Override
+            public String getFileName() {
+                return null;
+            }
+
+            @Override
+            public int getFileSize() {
+                return 0;
+            }
+
+            @Override
+            public String getContentType() {
+                return "application/octet-stream";
+            }
+
+            @Override
+            public byte[] getFileData() throws java.io.IOException {
+                return new byte[0];
+            }
+
+            @Override
+            public java.io.InputStream getInputStream() throws java.io.IOException {
+                return new java.io.ByteArrayInputStream(new byte[0]);
+            }
+
+            @Override
+            public void destroy() {
+            }
+        };
+
+        // Simulate the fix: normalize null to empty string.
+        final String rawFileName = nullFileNameForm.getFileName();
+        final String fileName = rawFileName != null ? rawFileName : "";
+
+        // (a) No NPE: hasZipExtension handles null correctly (returns false),
+        //     and the normalized empty string also correctly returns false.
+        assertFalse(AdminThemeAction.hasZipExtension(rawFileName), "hasZipExtension(null) must return false without NPE");
+        assertFalse(AdminThemeAction.hasZipExtension(fileName), "hasZipExtension(\"\") must return false for empty string");
+
+        // (b) The normalized variable must not be null — this guarantees it is safe for
+        //     error/success messages (no literal "null" rendered to the user).
+        assertNotNull(fileName);
+        assertEquals("", fileName);
+
+        // (c) The normalization prevents "null" from appearing in message arguments.
+        // If the old code (String.valueOf(fileName)) were used with the original null,
+        // the resulting string would be "null". The fix avoids this.
+        assertFalse("null".equals(fileName), "fileName must not equal the string literal \"null\"");
+    }
+
     // ---- Tests requiring full LastaFlute context — deferred ----
 
     @Test

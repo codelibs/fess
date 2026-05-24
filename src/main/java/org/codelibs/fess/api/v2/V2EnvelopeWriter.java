@@ -88,6 +88,13 @@ public final class V2EnvelopeWriter {
      * @throws IllegalStateException if {@code payload} contains a reserved envelope key ({@code "status"})
      */
     public static void writeSuccess(final HttpServletResponse res, final Map<String, Object> payload) throws IOException {
+        if (res.isCommitted()) {
+            return;
+        }
+        // Discard any partial body a handler may have buffered before calling writeSuccess —
+        // mirrors the resetBuffer() contract in writeErrorWithDetails so both paths are
+        // symmetric and a double-call or early-flush scenario cannot corrupt the envelope.
+        res.resetBuffer();
         if (payload != null) {
             for (final String reserved : RESERVED_KEYS) {
                 if (payload.containsKey(reserved)) {
@@ -161,6 +168,11 @@ public final class V2EnvelopeWriter {
         res.setStatus(code.defaultHttpStatus());
         res.setCharacterEncoding("UTF-8");
         res.setContentType(CONTENT_TYPE);
+        // Override any Cache-Control that may have been set by an SSE/NDJSON handler before
+        // it errored out. The SSE prelude uses `no-cache` which permits revalidation; for
+        // an error envelope `no-store` is semantically correct (and equally correct for the
+        // non-streaming error path) — the response carries a failure and must not be reused.
+        res.setHeader("Cache-Control", "no-store");
         final Map<String, Object> err = new LinkedHashMap<>();
         err.put("code", code.code());
         err.put("message", message == null ? "" : message);

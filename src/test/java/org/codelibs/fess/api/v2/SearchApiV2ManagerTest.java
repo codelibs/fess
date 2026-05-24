@@ -220,15 +220,28 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_process_labelsRejectsNonGetMethod() throws Exception {
+    public void test_process_labelsRejectsPostAtCsrfGate() throws Exception {
+        // Per spec §7.3, an anonymous client POSTing to a GET-only endpoint like /labels
+        // without a CSRF token is rejected at the CSRF gate (403 forbidden) before the
+        // method check fires. This is the secure-default contract: the CSRF gate is the
+        // first line of defense and applies uniformly to all unsafe HTTP methods on the
+        // v2 surface. A 405 (method_not_allowed) is what an authorized client with a
+        // valid CSRF token receives when POSTing to a GET-only endpoint — that path is
+        // exercised in SearchApiV2ManagerCsrfTest which registers sessionCsrfTokenManager.
+        // Note: sessionCsrfTokenManager is NOT registered in this test class, so we
+        // must register it here to allow the CSRF check to complete (without a token, the
+        // gate returns 403 before any ComponentNotFoundException is thrown).
+        final org.codelibs.fess.helper.SessionCsrfTokenManager csrfManager = new org.codelibs.fess.helper.SessionCsrfTokenManager();
+        org.codelibs.fess.util.ComponentUtil.register(csrfManager, "sessionCsrfTokenManager");
+        org.codelibs.fess.util.ComponentUtil.register(csrfManager,
+                org.codelibs.fess.helper.SessionCsrfTokenManager.class.getCanonicalName());
         final SearchApiV2Manager m = new SearchApiV2Manager();
         final CapturingResponse res = new CapturingResponse();
         m.process(new StubRequest("/api/v2/labels").withMethod("POST"), res, new NopChain());
-        assertEquals(405, res.status);
+        assertEquals(403, res.status);
         final String body = res.body();
         assertTrue(body.contains("\"status\":1"), body);
-        assertTrue(body.contains("\"code\":\"method_not_allowed\""), body);
-        assertTrue(body.contains("method not allowed"), body);
+        assertTrue(body.contains("\"code\":\"forbidden\""), body);
     }
 
     @Test
@@ -421,6 +434,31 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         assertTrue(body.contains("endpoint not found"), body);
     }
 
+    @Test
+    public void test_writeHeaders_appliesConfiguredHeaders() {
+        // F1: v2 must apply the same `api.json.response.headers` (default:
+        // Referrer-Policy: strict-origin-when-cross-origin) as v1 so the security baseline
+        // is uniform across both surfaces. Without this, every /api/v2 response was leaking
+        // the Referrer-Policy header.
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.writeHeaders(res);
+        assertEquals("Referrer-Policy from api.json.response.headers must be applied on v2 responses", "strict-origin-when-cross-origin",
+                res.headers.get("Referrer-Policy"));
+    }
+
+    @Test
+    public void test_process_appliesConfiguredResponseHeaders() throws Exception {
+        // F1: confirm the writeHeaders call is wired into the process(...) dispatch path so
+        // every v2 response (including error envelopes from unknown paths) carries the
+        // configured baseline headers.
+        final SearchApiV2Manager m = new SearchApiV2Manager();
+        final CapturingResponse res = new CapturingResponse();
+        m.process(new StubRequest("/api/v2/does-not-exist"), res, new NopChain());
+        assertEquals("v2 dispatch must apply api.json.response.headers before writing the envelope", "strict-origin-when-cross-origin",
+                res.headers.get("Referrer-Policy"));
+    }
+
     /** A FilterChain that does nothing — the v2 manager never delegates further. */
     private static class NopChain implements FilterChain {
         @Override
@@ -429,12 +467,13 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
         }
     }
 
-    /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
+    /** Minimal HttpServletResponse stub that captures setContentType/setStatus/setHeader/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
         final StringWriter sw = new StringWriter();
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final Map<String, String> headers = new HashMap<>();
 
         String body() {
             writer.flush();
@@ -576,10 +615,12 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -592,17 +633,18 @@ public class SearchApiV2ManagerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return new java.util.ArrayList<>(headers.keySet());
         }
     }
 

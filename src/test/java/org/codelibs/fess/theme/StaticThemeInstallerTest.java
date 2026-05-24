@@ -34,6 +34,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 public class StaticThemeInstallerTest extends UnitFessTestCase {
@@ -521,6 +522,65 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
             installer.installZip(new ByteArrayInputStream(bao.toByteArray()));
             assertTrue(Files.exists(themesDir.resolve("oktheme/theme.yml")));
         } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    // ── A-3: symlink rejection ────────────────────────────────────────────────────
+
+    @Test
+    public void test_install_rejectsWhenTargetIsSymlink() throws Exception {
+        // A-3: if themes/<name> is a symbolic link the installer must refuse rather than
+        // following the link and potentially moving content outside the themes directory.
+        Assumptions.assumeTrue(!System.getProperty("os.name", "").toLowerCase().contains("win"), "Symlink test skipped on Windows");
+        final Path themesDir = Files.createTempDirectory("themes-installer-symlink-");
+        final Path linkTarget = Files.createTempDirectory("themes-symlink-target-");
+        try {
+            // Create themes/alpha as a symlink pointing to linkTarget.
+            final Path symlinkPath = themesDir.resolve("alpha");
+            try {
+                Files.createSymbolicLink(symlinkPath, linkTarget);
+            } catch (final UnsupportedOperationException e) {
+                Assumptions.abort("Filesystem does not support symbolic links; skipping test");
+                return;
+            }
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(buildValidZip("alpha"))));
+            assertTrue(ex.getMessage().contains("symbolic link") || ex.getMessage().contains("symlink"),
+                    "install must refuse with a symlink-related message: " + ex.getMessage());
+            // linkTarget must not have been touched.
+            assertTrue(Files.exists(linkTarget), "symlink target must not be deleted by the installer");
+        } finally {
+            deleteRecursively(linkTarget);
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_delete_rejectsWhenTargetIsSymlink() throws Exception {
+        // A-3: if themes/<name> is a symbolic link the delete method must refuse rather
+        // than atomically renaming the link target to an attic directory.
+        Assumptions.assumeTrue(!System.getProperty("os.name", "").toLowerCase().contains("win"), "Symlink test skipped on Windows");
+        final Path themesDir = Files.createTempDirectory("themes-installer-del-symlink-");
+        final Path linkTarget = Files.createTempDirectory("themes-del-symlink-target-");
+        try {
+            final Path symlinkPath = themesDir.resolve("alpha");
+            try {
+                Files.createSymbolicLink(symlinkPath, linkTarget);
+            } catch (final UnsupportedOperationException e) {
+                Assumptions.abort("Filesystem does not support symbolic links; skipping test");
+                return;
+            }
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            final StaticThemeInstaller.InstallException ex =
+                    assertThrows(StaticThemeInstaller.InstallException.class, () -> installer.delete("alpha"));
+            assertTrue(ex.getMessage().contains("symbolic link") || ex.getMessage().contains("symlink"),
+                    "delete must refuse with a symlink-related message: " + ex.getMessage());
+            // linkTarget must still exist (not moved to an attic).
+            assertTrue(Files.exists(linkTarget), "symlink target must not be moved by the delete operation");
+        } finally {
+            deleteRecursively(linkTarget);
             deleteRecursively(themesDir);
         }
     }

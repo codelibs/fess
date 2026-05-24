@@ -34,6 +34,7 @@ import org.codelibs.fess.chat.ChatPhaseCallback;
 import org.codelibs.fess.entity.ChatMessage.ChatSource;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.SseResponseHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.llm.LlmException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -279,12 +280,8 @@ public class ChatApiManager extends BaseApiManager {
             return;
         }
 
-        // Set SSE headers
-        response.setContentType("text/event-stream");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Connection", "keep-alive");
-        response.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering
+        // Set SSE headers (shared with v2 ChatStreamHandler via SseResponseHelper).
+        SseResponseHelper.applySseHeaders(response);
 
         try (final PrintWriter writer = response.getWriter()) {
             final String userId = getUserId(request);

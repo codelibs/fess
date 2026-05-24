@@ -640,6 +640,48 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_handle_payloadTooLarge_returns413() throws Exception {
+        // A body exceeding MAX_BODY_BYTES (4 KiB) must return HTTP 413 with the
+        // payload_too_large error code — not 400 invalid_request.
+        // Set up an authenticated user so the handler proceeds past the auth gate to body parse.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final String bigBody =
+                    "{\"current_password\":\"" + "x".repeat(5 * 1024) + "\",\"new_password\":\"a\",\"confirm_password\":\"a\"}";
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(bigBody), res);
+            assertEquals(413, res.status);
+            assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void test_handle_unsupportedMediaType_returns415() throws Exception {
+        // A POST with Content-Type text/plain must return HTTP 415 with the
+        // unsupported_media_type error code — not 400 invalid_request.
+        // Set up an authenticated user so the handler proceeds past the auth gate to body parse.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final StubRequest req = new StubRequest("POST", "/api/v2/auth/password") {
+                @Override
+                public String getContentType() {
+                    return "text/plain";
+                }
+            };
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(req, res);
+            assertEquals(415, res.status);
+            assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
     /**
      * Stub FessLoginAssist that returns a populated entity only when the supplied
      * LocalUserCredential carries {@code expectedPw}. Used by the password-change

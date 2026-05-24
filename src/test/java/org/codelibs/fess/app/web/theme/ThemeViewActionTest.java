@@ -122,8 +122,10 @@ public class ThemeViewActionTest extends UnitFessTestCase {
 
     @Test
     public void test_serveIndex_setsSecurityHeaders() throws Exception {
-        // The HTML entry response must always carry X-Content-Type-Options: nosniff
-        // and a Referrer-Policy header so themed UIs don't leak referer to third parties.
+        // The HTML entry response must carry a Referrer-Policy header so themed UIs don't
+        // leak referer to third parties. X-Content-Type-Options: nosniff is intentionally
+        // NOT asserted here — it's applied uniformly by Tomcat's HttpHeaderSecurityFilter
+        // (web.xml, blockContentTypeSniffingEnabled=true), so this Action no longer sets it.
         final Path tmp = Files.createTempDirectory("tva-headers-");
         try {
             Files.writeString(tmp.resolve("index.html"), "<html/>");
@@ -139,8 +141,9 @@ public class ThemeViewActionTest extends UnitFessTestCase {
 
             final ActionResponse resp = action.serveIndex();
             final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
-            assertEquals("nosniff", headers.get("X-Content-Type-Options")[0]);
             assertEquals("same-origin", headers.get("Referrer-Policy")[0]);
+            assertNull(headers.get("X-Content-Type-Options"),
+                    "Action must not duplicate X-Content-Type-Options — it's set by HttpHeaderSecurityFilter");
         } finally {
             Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
                 try {
@@ -153,7 +156,8 @@ public class ThemeViewActionTest extends UnitFessTestCase {
     @Test
     public void test_serveAsset_setsSecurityHeaders() throws Exception {
         // Static asset responses share the same minimum-header baseline as the
-        // index response so a sniffing or hot-linking attack cannot bypass them.
+        // index response. X-Content-Type-Options: nosniff is intentionally NOT asserted
+        // here — it's applied uniformly by Tomcat's HttpHeaderSecurityFilter (web.xml).
         final Path tmp = Files.createTempDirectory("tva-headers-");
         try {
             Files.createDirectories(tmp.resolve("assets"));
@@ -170,8 +174,9 @@ public class ThemeViewActionTest extends UnitFessTestCase {
 
             final ActionResponse resp = action.serveAsset("assets/app.js");
             final Map<String, String[]> headers = ((StreamResponse) resp).getHeaderMap();
-            assertEquals("nosniff", headers.get("X-Content-Type-Options")[0]);
             assertEquals("same-origin", headers.get("Referrer-Policy")[0]);
+            assertNull(headers.get("X-Content-Type-Options"),
+                    "Action must not duplicate X-Content-Type-Options — it's set by HttpHeaderSecurityFilter");
         } finally {
             Files.walk(tmp).sorted((a, b) -> b.compareTo(a)).forEach(x -> {
                 try {

@@ -161,8 +161,13 @@ public class ClickHandler {
         final Map<String, Object> body;
         try {
             body = V2JsonBody.read(req, MAX_BODY_BYTES);
-        } catch (final V2JsonBody.PayloadTooLargeException | V2JsonBody.MalformedJsonException
-                | V2JsonBody.UnsupportedMediaTypeException e) {
+        } catch (final V2JsonBody.PayloadTooLargeException e) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.PAYLOAD_TOO_LARGE, e.getMessage());
+            return;
+        } catch (final V2JsonBody.UnsupportedMediaTypeException e) {
+            V2EnvelopeWriter.writeError(res, V2ErrorCode.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+            return;
+        } catch (final V2JsonBody.MalformedJsonException e) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, e.getMessage());
             return;
         }

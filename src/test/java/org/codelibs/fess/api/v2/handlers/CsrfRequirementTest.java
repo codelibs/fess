@@ -69,9 +69,21 @@ public class CsrfRequirementTest {
     }
 
     @Test
-    public void test_chatTrailingSlashNotMatched() {
-        // Defensive: the manager normalizes paths so /chat/ would not reach here,
-        // but verify the rule table doesn't accidentally CSRF-gate the trailing slash.
-        assertFalse(CsrfRequirement.requiresCsrf("/chat/", "POST"));
+    public void test_chatTrailingSlashInheritsSecureDefault() {
+        // The manager normalizes paths before dispatch so /chat/ is normalized to /chat
+        // before it reaches CsrfRequirement. The trailing-slash form is therefore not an
+        // exempted path and falls through to the secure default: CSRF required.
+        assertTrue(CsrfRequirement.requiresCsrf("/chat/", "POST"));
+    }
+
+    @Test
+    public void test_unknownStateChangingPath_requiresCsrfByDefault() {
+        // Regression guard for the secure-default contract: any unknown sub-path with a
+        // state-changing method (POST/PUT/DELETE) must require CSRF so that a new endpoint
+        // added to SearchApiV2Manager.process without a corresponding CsrfRequirement entry
+        // is CSRF-gated rather than silently exempt.
+        assertTrue(CsrfRequirement.requiresCsrf("/some/future/path", "POST"));
+        assertTrue(CsrfRequirement.requiresCsrf("/unknown/endpoint", "PUT"));
+        assertTrue(CsrfRequirement.requiresCsrf("/another/new/path", "DELETE"));
     }
 }

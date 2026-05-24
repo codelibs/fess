@@ -7,10 +7,26 @@ export async function probeMe() {
     setLoggedIn(env.user || {});
     return env.user;
   } catch (e) {
+    // 401 / AUTH_REQUIRED → not logged in; expected and silent.
     if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
       setLoggedOut();
       return null;
     }
+    // Network-class errors (fetch rejection → NetworkError, or HTTP 5xx/0) →
+    // surface a diagnostic without treating the user as logged out.
+    const isNetworkClass =
+      e.name === "NetworkError" ||
+      (e.httpStatus != null && (e.httpStatus === 0 || e.httpStatus >= 500));
+    if (isNetworkClass) {
+      console.warn("[fess] probeMe: network/server error", e);
+      document.dispatchEvent(new CustomEvent("fess:auth:network-error", { detail: { error: e } }));
+      const meta = document.getElementById("results-meta");
+      if (meta) meta.textContent = t("error.network");
+      // Do not call setLoggedOut() — auth state is unknown, not confirmed gone.
+      return null;
+    }
+    // All other errors: log and treat as logged out (preserve safety net).
+    console.warn("[fess] probeMe: unexpected error", e);
     setLoggedOut();
     return null;
   }
@@ -78,7 +94,11 @@ export function attach() {
         if (env.csrf_token) api.setCsrfToken(env.csrf_token);
         else await rotateCsrf();
         setLoggedIn(env.user || { username });
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).hide();
+        if (!window.bootstrap || !bootstrap.Modal) {
+          console.warn("[fess] bootstrap not loaded; skipping modal hide");
+        } else {
+          bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).hide();
+        }
         document.dispatchEvent(new CustomEvent("fess:auth:login", { detail: env.user }));
       } catch (e) {
         if (e.code === "RATE_LIMITED" || e.httpStatus === 429) err.textContent = t("auth.error_rate_limited");

@@ -175,20 +175,17 @@ public class LoginHandler {
         // GET /api/v2/ui/config, not the login endpoint. So we always go through assist.login()
         // regardless of existing session state; the post-success changeSessionId() handles
         // session fixation, and an account-switch is just the natural outcome of a fresh login.
-        final OptionalThing<FessUserBean> existingBean;
+        // Capture the previous user ID BEFORE authentication so it is available for the
+        // post-success audit log, without logging anything here (A-1: avoid false-positive
+        // audit lines when credentials are subsequently rejected).
+        final String prevUserId;
         try {
-            existingBean = assist.getSavedUserBean();
+            final OptionalThing<FessUserBean> existingBean = assist.getSavedUserBean();
+            prevUserId = existingBean.isPresent() ? existingBean.get().getUserId() : null;
         } catch (final RuntimeException e) {
             logger.warn("login: could not check existing session state", e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
-        }
-        if (existingBean.isPresent()) {
-            final String existingUserId = existingBean.get().getUserId();
-            if (!username.equals(existingUserId)) {
-                // Different username: operator-visible audit log for account-switch path.
-                logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", existingUserId, username);
-            }
         }
 
         try {
@@ -215,6 +212,13 @@ public class LoginHandler {
             logger.warn("login failed unexpectedly", e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "internal error");
             return;
+        }
+
+        // A-1: emit account-switch audit log AFTER successful credential verification so
+        // that an unauthenticated attacker with a stolen session cookie cannot trigger a
+        // false-positive audit line by posting bad credentials for a different username.
+        if (prevUserId != null && !username.equals(prevUserId)) {
+            logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", prevUserId, username);
         }
 
         // Successful login — rotate the session id to defeat session fixation, then issue

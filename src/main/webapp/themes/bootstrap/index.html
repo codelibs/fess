@@ -58,7 +58,7 @@
 
       <section class="col-lg-6 col-md-8" id="results-column">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="text-muted small" id="results-meta" aria-live="polite"></div>
+          <div class="text-muted small" id="results-meta" aria-live="polite" aria-atomic="true"></div>
           <div>
             <label for="sort-select" class="form-label me-2 mb-0 small" data-i18n="search.sort">Sort</label>
             <select class="form-select form-select-sm d-inline-block w-auto" id="sort-select" aria-label="Sort order">
@@ -69,7 +69,7 @@
             </select>
           </div>
         </div>
-        <ol class="list-unstyled" id="results" role="list" aria-live="polite"></ol>
+        <ol class="list-unstyled" id="results" role="list"></ol>
         <nav aria-label="Pagination" class="d-none" id="pagination-nav">
           <ul class="pagination" id="pagination"></ul>
         </nav>
@@ -114,6 +114,14 @@
     </div>
   </div>
 
+  <!--
+    Load order matters: bootstrap.min.js (classic defer) MUST appear before
+    app.js (type="module") in document order. Both are deferred, but browsers
+    execute classic-defer scripts before module scripts that follow them, so
+    window.bootstrap is populated before any module callback runs.
+    If you move app.js above bootstrap.min.js, modal interactions will throw
+    TypeError because window.bootstrap will be undefined at callback time.
+  -->
   <script src="/js/bootstrap.min.js" defer></script>
   <script type="module" src="/themes/bootstrap/assets/app.js"></script>
 </body>

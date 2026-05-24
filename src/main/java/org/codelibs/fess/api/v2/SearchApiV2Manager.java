@@ -170,6 +170,14 @@ public class SearchApiV2Manager extends BaseApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
+        // Apply the configured `api.json.response.headers` (e.g. Referrer-Policy) at the very
+        // top of dispatch so EVERY v2 response carries the security-baseline headers —
+        // including CSRF rejections, NDJSON / SSE streams, and error envelopes. Unlike v1
+        // which routes through BaseApiManager.write(...) → writeHeaders(...), v2 writes
+        // envelopes through V2EnvelopeWriter directly, so we must call writeHeaders here
+        // ourselves. resetBuffer() in V2EnvelopeWriter only clears the body buffer per the
+        // servlet spec; headers set here are preserved.
+        writeHeaders(response);
         final String sub = subPath(request);
         if (ComponentUtil.getFessConfig().isThemeApiCsrfRequired() && CsrfRequirement.requiresCsrf(sub, request.getMethod())) {
             final HttpSession session = request.getSession(false);
@@ -520,7 +528,11 @@ public class SearchApiV2Manager extends BaseApiManager {
 
     @Override
     protected void writeHeaders(final HttpServletResponse response) {
-        // v2 envelopes are written through V2EnvelopeWriter which sets its own Content-Type;
-        // no additional response headers are required here for the skeleton.
+        // Mirror v1 SearchApiManager.writeHeaders() so the configured
+        // `api.json.response.headers` (default: Referrer-Policy: strict-origin-when-cross-origin)
+        // apply uniformly across both v1 and v2 JSON responses. V2EnvelopeWriter only sets the
+        // Content-Type / charset; security-baseline headers must be applied here so they reach
+        // every response that flows through write(...) → writeHeaders(...).
+        ComponentUtil.getFessConfig().getApiJsonResponseHeaderList().forEach(e -> response.setHeader(e.getFirst(), e.getSecond()));
     }
 }

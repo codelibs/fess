@@ -51,9 +51,9 @@ public final class CsrfRequirement {
      * always exempt. {@code POST /auth/login} is exempt because the client
      * cannot yet possess a token; all other state-changing endpoints listed in
      * the class Javadoc require a valid token. Unknown sub-paths fall through
-     * to the safe default (no enforcement for unknown reads, enforcement
-     * implied by the {@code SearchApiV2Manager} dispatch table for known
-     * writes).</p>
+     * to the secure default ({@code true}) — enforcement required — so that a
+     * newly added endpoint is CSRF-gated by default rather than silently
+     * exempt.</p>
      *
      * @param subPath the v2 sub-path (e.g. {@code /chat}, {@code /auth/login})
      * @param method the HTTP method (case-insensitive)
@@ -94,6 +94,9 @@ public final class CsrfRequirement {
         if (subPath.startsWith("/chat/sessions/")) {
             return true;
         }
-        return false;
+        // Secure default: unknown state-changing sub-paths require a CSRF token.
+        // If a new endpoint is added to SearchApiV2Manager.process and not listed here,
+        // it inherits CSRF enforcement rather than being silently exempt.
+        return true;
     }
 }

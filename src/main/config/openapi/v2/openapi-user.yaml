@@ -359,9 +359,8 @@ paths:
         target user are cleared. On rate-limit, a `Retry-After` header
         carries the cooldown in seconds.
 
-        When the active session is already authenticated as the same
-        `username`, the handler re-issues a CSRF token without re-validating
-        credentials and returns the standard `LoginResponse`.
+        An already-authenticated session does not short-circuit; the
+        supplied credentials are always verified.
 
         `return_to` must be a relative path matching
         `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Values that do not pass the
@@ -463,6 +462,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
   /click:
@@ -1308,6 +1308,11 @@ components:
               properties:
                 doc_id: { type: string }
                 ok: { type: boolean, enum: [true] }
+                already_existed:
+                  type: boolean
+                  description: |
+                    True when the favorite was previously recorded (idempotent re-POST).
+                    Absent or false on the first POST that newly records the favorite.
 
     # --- Cache -------------------------------------------------------
     CacheResponse:

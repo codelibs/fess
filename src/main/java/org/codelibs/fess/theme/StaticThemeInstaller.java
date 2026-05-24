@@ -285,8 +285,13 @@ public class StaticThemeInstaller {
                 }
             }
             final Path target = themesDir.resolve(m.getName());
+            // A-3: reject symlinks at the target path — a symlink could redirect the
+            // atomic rename onto a location outside the themes directory.
+            if (Files.isSymbolicLink(target)) {
+                throw new InstallException(InstallException.Code.OTHER, "Refusing to install: target is a symbolic link: " + target);
+            }
             Path attic = null;
-            if (Files.exists(target)) {
+            if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
                 attic = themesDir.resolve(
                         ".attic-" + m.getName() + "-" + Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8));
                 moveDir(target, attic);
@@ -369,7 +374,12 @@ public class StaticThemeInstaller {
         }
         final Path themesDir = resolveThemesDir();
         final Path target = themesDir.resolve(name);
-        if (!Files.isDirectory(target)) {
+        // A-3: reject symlinks at the target path — a symlink could redirect the
+        // atomic rename onto a location outside the themes directory.
+        if (Files.isSymbolicLink(target)) {
+            throw new InstallException(InstallException.Code.OTHER, "Refusing to delete: target is a symbolic link: " + target);
+        }
+        if (!Files.isDirectory(target, LinkOption.NOFOLLOW_LINKS)) {
             throw new InstallException(InstallException.Code.NOT_FOUND, "Theme not found: " + name);
         }
         final Path attic = themesDir

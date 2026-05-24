@@ -150,6 +150,57 @@ public class ClickHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_handle_payloadTooLarge_returns413() throws Exception {
+        // A body exceeding MAX_BODY_BYTES (2 KiB) must return HTTP 413 with the
+        // payload_too_large error code — not 400 invalid_request.
+        // Register a stub UserInfoHelper so the handler proceeds past the anonymous gate.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final String bigBody = "{\"doc_id\":\"" + "x".repeat(3 * 1024) + "\"}";
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(new StubRequest("POST", "/api/v2/click").withJsonBody(bigBody), res);
+            assertEquals(413, res.status);
+            assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
+    public void test_handle_unsupportedMediaType_returns415() throws Exception {
+        // A POST with Content-Type text/plain must return HTTP 415 with the
+        // unsupported_media_type error code — not 400 invalid_request.
+        // Register a stub UserInfoHelper so the handler proceeds past the anonymous gate.
+        final UserInfoHelper stub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "test-user-code";
+            }
+        };
+        ComponentUtil.register(stub, "userInfoHelper");
+        try {
+            final StubRequest req = new StubRequest("POST", "/api/v2/click") {
+                @Override
+                public String getContentType() {
+                    return "text/plain";
+                }
+            };
+            final CapturingResponse res = new CapturingResponse();
+            new ClickHandler().handle(req, res);
+            assertEquals(415, res.status);
+            assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
+        } finally {
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+        }
+    }
+
+    @Test
     public void test_validPostReturnsStableEnvelope() throws Exception {
         // When isSearchLog() is false, the handler returns 200 with logged:false.
         // When it is enabled but the backend is unavailable / doc not indexed, the handler

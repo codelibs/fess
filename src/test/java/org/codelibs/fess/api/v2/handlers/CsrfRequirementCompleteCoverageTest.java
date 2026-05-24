@@ -74,24 +74,25 @@ public class CsrfRequirementCompleteCoverageTest {
         // LinkedHashMap preserves insertion order for readable failure messages.
         final Map<String, Boolean> m = new LinkedHashMap<>();
 
-        // --- READ / GET-ONLY endpoints (default: CSRF required if called via POST) ---
+        // --- READ / GET-ONLY endpoints (secure default: CSRF required if called via POST) ---
         // These paths only support GET; a POST would reach the method-not-allowed branch
-        // before any CSRF check, but we pin the CsrfRequirement decision here to confirm
-        // the table does not accidentally exempt them.
-        m.put("/health", false); // GET only — exempt by GET rule; no POST handling
-        m.put("/search", false); // GET only
-        m.put("/suggest-words", false); // GET only
-        m.put("/labels", false); // GET only
-        m.put("/popular-words", false); // GET only
+        // before any CSRF check. However, CsrfRequirement's secure default is CSRF required
+        // for unknown/unlisted state-changing methods, so a POST to these paths returns true.
+        // This is intentional: any path not explicitly exempted falls through to the safe default.
+        m.put("/health", true); // GET only — no explicit POST exemption → secure default (CSRF required)
+        m.put("/search", true); // GET only — secure default
+        m.put("/suggest-words", true); // GET only — secure default
+        m.put("/labels", true); // GET only — secure default
+        m.put("/popular-words", true); // GET only — secure default
 
         // --- AUTH endpoints ---
-        m.put("/auth/me", false); // GET only
+        m.put("/auth/me", true); // GET only — secure default
         m.put("/auth/login", false); // POST, but explicitly CSRF-exempt (no token yet)
         m.put("/auth/logout", true); // POST, CSRF required
         m.put("/auth/password", true); // POST, CSRF required
 
         // --- UI endpoint ---
-        m.put("/ui/config", false); // GET only
+        m.put("/ui/config", true); // GET only — secure default
 
         // --- CLICK / FAVORITE endpoints ---
         m.put("/click", true); // POST, CSRF required

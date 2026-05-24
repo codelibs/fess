@@ -405,7 +405,11 @@ async function toggleFavorite(docId, btn) {
     setFavoriteUi(btn, !!env.favorite, env.count || 0);
   } catch (e) {
     if (e.code === "AUTH_REQUIRED" || e.httpStatus === 401) {
-      bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
+      if (!window.bootstrap || !bootstrap.Modal) {
+        console.warn("[fess] bootstrap not loaded; skipping modal show");
+      } else {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("login-modal")).show();
+      }
     }
   }
 }

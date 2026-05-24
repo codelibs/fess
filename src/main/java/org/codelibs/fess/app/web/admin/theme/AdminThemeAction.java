@@ -177,10 +177,13 @@ public class AdminThemeAction extends FessAdminAction {
     public HtmlResponse upload(final ThemeUploadForm form) {
         verifyToken(() -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         validate(form, messages -> {}, () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
-        final String fileName = form.themeFile.getFileName();
+        // C-2: normalize null fileName (multipart parts without a filename= attribute return null
+        // from getFileName()). Using the normalized local everywhere prevents a literal "null"
+        // from appearing in error/success messages and prevents NPE in hasZipExtension.
+        final String rawFileName = form.themeFile.getFileName();
+        final String fileName = rawFileName != null ? rawFileName : "";
         if (!hasZipExtension(fileName)) {
-            throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, String.valueOf(fileName)),
-                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, fileName), () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         }
         // M-1: server-side size guard. The JSP enforces the same limit client-side
         // but untrusted clients can post past it. The installer also enforces
@@ -301,25 +304,40 @@ public class AdminThemeAction extends FessAdminAction {
             saveInfo(m -> m.addSuccessDeleteTheme(GLOBAL, form.name));
         } catch (final StaticThemeInstaller.InstallException ex) {
             logger.warn("Theme delete rejected", ex);
-            switch (ex.code()) {
-            case ACTIVE_DEFAULT:
-                throwValidationError(m -> m.addErrorsThemeIsActive(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-                break;
-            case JSP_TYPE:
-                throwValidationError(m -> m.addErrorsThemeIsJspType(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-                break;
-            case NOT_FOUND:
-                throwValidationError(m -> m.addErrorsThemeNotFound(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-                break;
-            case INVALID_NAME:
-                throwValidationError(m -> m.addErrorsThemeNameInvalid(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-                break;
-            default:
-                throwValidationError(m -> m.addErrorsFailedToDeleteTheme(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));
-                break;
-            }
+            final String name = form.name;
+            throwValidationError(m -> mapDeleteExceptionToMessage(m, ex, name), () -> asListHtml(new ThemeListForm()));
         }
         return redirect(getClass());
+    }
+
+    /**
+     * Maps a delete-phase {@link StaticThemeInstaller.InstallException} to a localized
+     * {@link FessMessages} entry. Called from {@link #delete} and directly testable
+     * at the unit level without a full LastaFlute container.
+     *
+     * @param messages the message accumulator
+     * @param ex the install exception raised by the installer during delete
+     * @param themeName the theme name from the delete form (used as the message argument)
+     */
+    static void mapDeleteExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex,
+            final String themeName) {
+        switch (ex.code()) {
+        case ACTIVE_DEFAULT:
+            messages.addErrorsThemeIsActive(GLOBAL, themeName);
+            break;
+        case JSP_TYPE:
+            messages.addErrorsThemeIsJspType(GLOBAL, themeName);
+            break;
+        case NOT_FOUND:
+            messages.addErrorsThemeNotFound(GLOBAL, themeName);
+            break;
+        case INVALID_NAME:
+            messages.addErrorsThemeNameInvalid(GLOBAL, themeName);
+            break;
+        default:
+            messages.addErrorsFailedToDeleteTheme(GLOBAL, themeName);
+            break;
+        }
     }
 
     /**

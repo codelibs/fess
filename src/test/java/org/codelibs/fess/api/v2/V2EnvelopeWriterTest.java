@@ -181,6 +181,87 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         assertTrue(body.contains("\"status\":\"red\""), body);
     }
 
+    // ── B-6: writeSuccess committed/resetBuffer symmetry ─────────────────────────
+
+    @Test
+    public void test_writeSuccess_returnsEarlyWhenResponseCommitted() throws Exception {
+        // B-6: writeSuccess must be a no-op when the response is already committed,
+        // mirroring the early-return contract of writeError/writeErrorWithDetails.
+        final CapturingResponse res = new CapturingResponse() {
+            @Override
+            public boolean isCommitted() {
+                return true;
+            }
+        };
+        final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("k", "v");
+        V2EnvelopeWriter.writeSuccess(res, payload);
+        // Nothing must be written to the body — the response is committed.
+        assertEquals("", res.body());
+        // HTTP status must remain at the default 200 (not changed).
+        assertEquals(200, res.status);
+    }
+
+    @Test
+    public void test_writeSuccess_resetsBufferBeforeWrite() throws Exception {
+        // B-6: writeSuccess must call resetBuffer() before writing so that any partial
+        // content buffered by an earlier call (or a streaming handler that called
+        // writeSuccess twice) is discarded — matching the buffer-reset contract of
+        // writeErrorWithDetails.
+        final CapturingResponse res = new CapturingResponse();
+        // Simulate a partial body already in the buffer.
+        res.getWriter().write("{\"partial\":\"stale\"}");
+        final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("result", "ok");
+        V2EnvelopeWriter.writeSuccess(res, payload);
+        // resetBuffer() must have been called, discarding the stale partial body.
+        assertTrue(res.resetBufferCalled, "writeSuccess must call resetBuffer() before writing");
+        final String body = res.body();
+        // The stale partial content must not appear in the final response.
+        assertFalse(body.contains("stale"), "writeSuccess must discard stale buffered content: " + body);
+        // The success envelope must be present.
+        assertTrue(body.contains("\"status\":0"), "writeSuccess must write the status=0 envelope: " + body);
+        assertTrue(body.contains("\"result\":\"ok\""), "writeSuccess must include the payload: " + body);
+    }
+
+    @Test
+    public void test_writeError_setsCacheControlNoStore() throws Exception {
+        // F4: an SSE handler may have already set Cache-Control: no-cache in its prelude
+        // before erroring out. writeError must overwrite it to no-store because the
+        // response now carries a failure and must not be cached or revalidated.
+        final CapturingResponse res = new CapturingResponse();
+        // Simulate the SSE prelude header that was set before the handler errored.
+        res.setHeader("Cache-Control", "no-cache");
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
+        assertEquals("writeError must override Cache-Control to no-store so SSE prelude no-cache does not leak", "no-store",
+                res.headers.get("Cache-Control"));
+    }
+
+    @Test
+    public void test_writeErrorWithDetails_setsCacheControlNoStore() throws Exception {
+        // F4: the details-bearing path must apply the same Cache-Control override.
+        final CapturingResponse res = new CapturingResponse();
+        res.setHeader("Cache-Control", "no-cache");
+        V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "red", java.util.Map.of("engine", "red"));
+        assertEquals("writeErrorWithDetails must also override Cache-Control to no-store", "no-store", res.headers.get("Cache-Control"));
+    }
+
+    @Test
+    public void test_writeSuccess_doesNotForceCacheControlNoStore() throws Exception {
+        // F4: success responses must NOT have Cache-Control forced to no-store — caching
+        // policy on success is endpoint-specific (e.g. /labels can be cached). Confirm the
+        // success path leaves any caller-set Cache-Control alone after resetBuffer().
+        final CapturingResponse res = new CapturingResponse();
+        // Mirror the resetBuffer contract: writeSuccess calls resetBuffer (which per spec
+        // does not clear headers), so a header set before write must survive. But the key
+        // assertion here is that writeSuccess itself does not set Cache-Control.
+        final java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("k", "v");
+        V2EnvelopeWriter.writeSuccess(res, payload);
+        assertFalse(res.headers.containsKey("Cache-Control"),
+                "writeSuccess must not set Cache-Control on its own; caching is endpoint-specific");
+    }
+
     @Test
     public void test_writeInternalError_does_not_leak_throwable_message() throws Exception {
         final CapturingResponse res = new CapturingResponse();
@@ -203,6 +284,7 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
         String contentType;
         String characterEncoding;
         boolean resetBufferCalled;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -356,10 +438,12 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -372,17 +456,18 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return new java.util.ArrayList<>(headers.keySet());
         }
     }
 }

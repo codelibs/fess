@@ -151,6 +151,37 @@ public class ChatHandlerTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_handle_payloadTooLarge_returns413() throws Exception {
+        // A body exceeding MAX_BODY_BYTES (32 KiB) must return HTTP 413 with the
+        // payload_too_large error code — not 400 invalid_request.
+        // Enable RAG chat so the handler proceeds past the feature-gate to body parsing.
+        enableRagChat();
+        final String bigBody = "{\"message\":\"" + "x".repeat(33 * 1024) + "\"}";
+        final CapturingResponse res = new CapturingResponse();
+        new ChatHandler().handle(new StubRequest("POST", "/api/v2/chat").withJsonBody(bigBody), res);
+        assertEquals(413, res.status);
+        assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
+    }
+
+    @Test
+    public void test_handle_unsupportedMediaType_returns415() throws Exception {
+        // A POST with Content-Type text/plain must return HTTP 415 with the
+        // unsupported_media_type error code — not 400 invalid_request.
+        // Enable RAG chat so the handler proceeds past the feature-gate to body parsing.
+        enableRagChat();
+        final StubRequest req = new StubRequest("POST", "/api/v2/chat") {
+            @Override
+            public String getContentType() {
+                return "text/plain";
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        new ChatHandler().handle(req, res);
+        assertEquals(415, res.status);
+        assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
+    }
+
+    @Test
     @org.junit.jupiter.api.Disabled("TODO: needs DI container override for ChatClient stub — covered by Plan 6 integration tests")
     public void test_happyPath_returnsSessionIdContentAndSources() throws Exception {
         // Future implementation: stub ChatClient via FessTestContainerInitializer,

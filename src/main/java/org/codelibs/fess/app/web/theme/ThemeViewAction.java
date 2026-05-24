@@ -137,10 +137,10 @@ public class ThemeViewAction extends FessSearchAction {
         } catch (final java.io.IOException e) {
             return notFound();
         }
+        // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
         return new StreamResponse("index.html").contentType("text/html; charset=UTF-8")
                 .header("Cache-Control", "no-store")
                 .header("Content-Security-Policy", INDEX_CSP)
-                .header("X-Content-Type-Options", "nosniff")
                 .header("Referrer-Policy", "same-origin")
                 .header("Content-Length", String.valueOf(fileSize))
                 .stream(out -> {
@@ -291,10 +291,10 @@ public class ThemeViewAction extends FessSearchAction {
             }
         }
 
+        // X-Content-Type-Options: nosniff is added by Tomcat HttpHeaderSecurityFilter (web.xml).
         final StreamResponse resp = new StreamResponse(name).contentType(contentType)
                 .header("Cache-Control", "public, max-age=86400")
                 .header("Vary", "Accept-Encoding")
-                .header("X-Content-Type-Options", "nosniff")
                 .header("Referrer-Policy", "same-origin")
                 .header("ETag", etag)
                 .header("Last-Modified", lastModified)

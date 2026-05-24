@@ -348,6 +348,95 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         assertTrue(res.status != 500, "anonymous caller must not produce 500: " + res.body());
     }
 
+    @Test
+    public void test_handle_payloadTooLarge_returns413() throws Exception {
+        // A body exceeding MAX_BODY_BYTES (1 KiB) must return HTTP 413 with the
+        // payload_too_large error code — not 400 invalid_request.
+        // Set up an authenticated user and the favorite feature so the handler reaches body parse.
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("alice"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "alice-code";
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+        try {
+            final String bigBody = "{\"query_id\":\"" + "x".repeat(2 * 1024) + "\"}";
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler().handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody(bigBody), res, "abc");
+            assertEquals(413, res.status);
+            assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+            ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void test_handle_unsupportedMediaType_returns415() throws Exception {
+        // A POST with Content-Type text/plain must return HTTP 415 with the
+        // unsupported_media_type error code — not 400 invalid_request.
+        // Set up an authenticated user and the favorite feature so the handler reaches body parse.
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("alice"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "alice-code";
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+        try {
+            final StubRequest req = new StubRequest("POST", "/api/v2/documents/abc/favorite") {
+                @Override
+                public String getContentType() {
+                    return "text/plain";
+                }
+            };
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler().handle(req, res, "abc");
+            assertEquals(415, res.status);
+            assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+            ComponentUtil.register(new UserInfoHelper(), "userInfoHelper");
+            ComponentUtil.register(new UserInfoHelper(), UserInfoHelper.class.getCanonicalName());
+        }
+    }
+
     /**
      * Minimal {@link FessConfig} stub that enables the favorite feature and supplies the
      * index-field names the handler accesses. Everything else delegates to {@code SimpleImpl}.

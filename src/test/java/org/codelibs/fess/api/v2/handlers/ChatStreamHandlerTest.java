@@ -610,18 +610,120 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
     @Test
     public void test_oversizedBody_returnsJsonEnvelope() throws Exception {
         // V2JsonBody caps the body at MAX_BODY_BYTES (32KiB for the streaming handler).
-        // Any larger payload must return HTTP 400 application/json — not an SSE event —
+        // Any larger payload must return HTTP 413 application/json — not an SSE event —
         // because body-parse is a pre-stream gate check.
         enableRagChat();
         final String bigBody = "{\"message\":\"" + "x".repeat(40 * 1024) + "\"}";
         final CapturingResponse res = new CapturingResponse();
         new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody(bigBody), res);
-        assertEquals(400, res.status);
+        assertEquals(413, res.status);
         assertEquals("application/json", contentTypeMimeOnly(res));
         final String out = res.body();
-        assertTrue(out.contains("\"code\":\"invalid_request\""), out);
+        assertTrue(out.contains("\"code\":\"payload_too_large\""), out);
         // Must NOT be SSE framing
         assertFalse(out.contains("event: error"), out);
+    }
+
+    @Test
+    public void test_handle_payloadTooLarge_returns413() throws Exception {
+        // A body exceeding MAX_BODY_BYTES (32 KiB) must return HTTP 413 with the
+        // payload_too_large error code — not 400 invalid_request — and NOT use SSE framing.
+        // This is a pre-stream gate check: V2EnvelopeWriter writes the JSON error envelope.
+        enableRagChat();
+        final String bigBody = "{\"message\":\"" + "x".repeat(33 * 1024) + "\"}";
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler().handle(new StubRequest("POST", "/api/v2/chat/stream").withJsonBody(bigBody), res);
+        assertEquals(413, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"payload_too_large\""), res.body());
+        assertFalse(res.body().contains("event: error"), res.body());
+    }
+
+    @Test
+    public void test_handle_unsupportedMediaType_returns415() throws Exception {
+        // A POST with Content-Type text/plain must return HTTP 415 with the
+        // unsupported_media_type error code — not 400 invalid_request — and NOT use SSE framing.
+        enableRagChat();
+        final StubRequest req = new StubRequest("POST", "/api/v2/chat/stream") {
+            @Override
+            public String getContentType() {
+                return "text/plain";
+            }
+        };
+        final CapturingResponse res = new CapturingResponse();
+        new ChatStreamHandler().handle(req, res);
+        assertEquals(415, res.status);
+        assertEquals("application/json", contentTypeMimeOnly(res));
+        assertTrue(res.body().contains("\"code\":\"unsupported_media_type\""), res.body());
+        assertFalse(res.body().contains("event: error"), res.body());
+    }
+
+    // ── E-1: client-disconnect detection via PrintWriter.checkError() ─────────
+
+    @Test
+    public void test_emissionLoop_exitsOnClientDisconnect() {
+        // Arrange: a PrintWriter whose checkError() returns true after 2 successful
+        // writes (simulating a mid-stream client disconnect). Drive onChunk with
+        // 10 tokens and assert the callback throws ClientDisconnectedException on
+        // the 3rd call, before all 10 tokens are emitted.
+        final java.util.concurrent.atomic.AtomicInteger writeCount = new java.util.concurrent.atomic.AtomicInteger(0);
+        final java.io.StringWriter sw = new java.io.StringWriter();
+        // Wrap a PrintWriter that reports checkError()=true after 2 emitSafely calls.
+        final PrintWriter disconnectingWriter = new PrintWriter(sw) {
+            @Override
+            public boolean checkError() {
+                // Return true once 2 chunk events have been written (simulates disconnect).
+                return writeCount.get() >= 2;
+            }
+
+            @Override
+            public void write(final String s) {
+                super.write(s);
+                // Count each "event: chunk" line to track chunks emitted.
+                if (s.startsWith("event: chunk")) {
+                    writeCount.incrementAndGet();
+                }
+            }
+        };
+
+        final boolean[] errorEmittedHolder = { false };
+        final org.codelibs.fess.chat.ChatPhaseCallback cb =
+                new ChatStreamHandler().newPhaseCallback(disconnectingWriter, errorEmittedHolder, new Object());
+
+        // Act: emit 10 chunks — should throw ClientDisconnectedException on the 3rd.
+        int emittedBeforeDisconnect = 0;
+        boolean disconnectDetected = false;
+        for (int i = 0; i < 10; i++) {
+            try {
+                cb.onChunk("token" + i, false);
+                emittedBeforeDisconnect++;
+            } catch (final ChatStreamHandler.ClientDisconnectedException cde) {
+                disconnectDetected = true;
+                break;
+            }
+        }
+
+        // Assert: disconnect was detected and emission stopped before all 10 tokens.
+        assertTrue(disconnectDetected, "ClientDisconnectedException must be thrown when checkError() returns true");
+        assertTrue(emittedBeforeDisconnect < 10,
+                "handler must stop emitting after disconnect; emitted " + emittedBeforeDisconnect + " of 10 tokens");
+        // The error event must NOT have been emitted to the dead socket.
+        assertFalse(errorEmittedHolder[0], "errorEmittedHolder must remain false on disconnect (no error SSE to dead socket)");
+    }
+
+    @Test
+    public void test_clientDisconnectedException_isNotErrorEmitted() {
+        // ClientDisconnectedException must be caught by the outer handler without
+        // triggering the generic error-SSE-event path, verifying the class exists
+        // and is distinguishable from RuntimeException and LlmException by type.
+        final ChatStreamHandler.ClientDisconnectedException ex = new ChatStreamHandler.ClientDisconnectedException();
+        assertNotNull(ex);
+        // Must be a RuntimeException (caught by the outer broad catch as well).
+        assertTrue(ex instanceof RuntimeException, "ClientDisconnectedException must be a RuntimeException");
+        // Must NOT be the same class as LlmException — they are distinct types.
+        assertFalse(ex.getClass().getName().contains("LlmException"), "ClientDisconnectedException must not be an LlmException subtype");
+        // The exception suppresses stack-trace fill-in to avoid overhead on hot disconnect paths.
+        assertEquals(0, ex.getStackTrace().length, "ClientDisconnectedException must suppress stack-trace fill-in");
     }
 
     private static String contentTypeMimeOnly(final CapturingResponse res) {

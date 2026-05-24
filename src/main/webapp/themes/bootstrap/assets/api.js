@@ -122,6 +122,10 @@ export function sse(path, params, onMessage, onError) {
  * @param {function} onError - called with ApiError or NetworkError on failure
  * @returns {AbortController} caller may call .abort() to cancel the stream
  */
+/** Maximum SSE response buffer in bytes (1 MiB). Prevents unbounded growth when a
+ *  misbehaving server or proxy buffers without emitting blank-line separators. */
+const MAX_SSE_BUFFER = 1_048_576;
+
 export function sseStream(path, body, onEvent, onError) {
   const controller = new AbortController();
   const { signal } = controller;
@@ -170,6 +174,11 @@ export function sseStream(path, body, onEvent, onError) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
+        if (buffer.length > MAX_SSE_BUFFER) {
+          reader.cancel();
+          if (onError) onError(new ApiError("BUFFER_OVERFLOW", "SSE buffer limit exceeded", 0));
+          return;
+        }
         // SSE frames are separated by blank lines (\n\n or \r\n\r\n).
         let sepIdx;
         while ((sepIdx = findFrameSep(buffer)) !== -1) {
