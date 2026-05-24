@@ -24,6 +24,11 @@ info:
     `GET /ui/config` when `csrf_required=true`. The token rotates on
     login, logout, and password change.
 
+    CSRF verification runs **before** authentication, so a state-changing
+    request that carries neither a session nor a valid CSRF token receives
+    `403 forbidden` (not `401 auth_required`). `/auth/login` is exempt from
+    CSRF since no token can exist prior to login.
+
     `/chat/stream` emits Server-Sent Events (`text/event-stream`).
     `/documents/all` emits NDJSON (`application/x-ndjson`); each line is a
     `{"data": {...}}` object except the final line on a mid-stream failure,
@@ -363,13 +368,17 @@ paths:
         supplied credentials are always verified.
 
         `return_to` must be a relative path matching
-        `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Values that do not pass the
-        allowlist are silently dropped from the echoed response.
+        `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`, and additionally must not be
+        protocol-relative (no leading `//`) or contain ASCII control
+        characters. Values that do not pass the allowlist are silently
+        dropped from the echoed response.
 
-        Oversized request bodies and unsupported `Content-Type` headers are
-        rejected as `400 invalid_request` in the current implementation
-        (a deliberate simplification — clients should treat any 4xx body as
-        a client error and inspect `error.code`).
+        Unlike the other state-changing endpoints, this endpoint folds
+        oversized request bodies and unsupported `Content-Type` headers
+        into `400 invalid_request` (a deliberate simplification — clients
+        should treat any 4xx body as a client error and inspect
+        `error.code`). The other endpoints emit distinct `413` and `415`
+        statuses.
 
         This endpoint is exempt from CSRF (no token exists prior to login).
       operationId: authLoginV2
@@ -439,9 +448,6 @@ paths:
         to the login page. Because the session is destroyed server-side,
         no `csrf_token` is returned; the SPA must obtain a fresh token
         after re-authenticating.
-
-        Oversized request bodies and unsupported `Content-Type` headers are
-        rejected as `400 invalid_request` in the current implementation.
       operationId: authPasswordV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -462,6 +468,8 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -493,6 +501,8 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
   /chat:
@@ -510,9 +520,6 @@ paths:
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
         the caller in the response envelope.
-
-        Oversized request bodies and unsupported `Content-Type` headers are
-        rejected as `400 invalid_request` in the current implementation.
       operationId: chatV2
       parameters:
         - { $ref: '#/components/parameters/CsrfHeader' }
@@ -533,6 +540,8 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -564,9 +573,7 @@ paths:
           same string as `error_code`; clients should localize on `error_code`.
 
         Pre-stream validation failures still produce a JSON envelope
-        (same error codes as `/chat`). Oversized request bodies and
-        unsupported `Content-Type` headers are rejected as
-        `400 invalid_request` in the current implementation.
+        (same error codes as `/chat`).
 
         Invalid values supplied in `fields.label` or `extra_queries` are
         dropped silently from the resolved request — they are not surfaced to
@@ -599,6 +606,8 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
@@ -629,11 +638,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatClearResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
 
   /documents/{docId}/favorite:
     parameters:
@@ -677,6 +688,8 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
   /cache/{docId}:
@@ -1104,8 +1117,10 @@ components:
           type: string
           description: |-
             Optional post-login redirect target. Must be a relative path
-            matching `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Invalid values are
-            silently dropped from the echoed response.
+            matching `^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$`. Additionally
+            rejected (silently dropped from the echoed response): paths
+            starting with `//` (protocol-relative) and paths containing
+            ASCII control characters.
           pattern: '^/[A-Za-z0-9_\-/.?&=%:@+~#*!,;]*$'
 
     LoginResponse:

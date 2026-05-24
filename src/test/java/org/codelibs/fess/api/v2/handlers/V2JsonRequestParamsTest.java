@@ -97,19 +97,11 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
     }
 
     @Test
-    public void test_getPageSize_aboveMaxClampsAndSetsFlag() {
-        // num=99999 exceeds the configured max (100); should clamp and set the clamped flag.
+    public void test_getPageSize_aboveMaxClamps() {
+        // num=99999 exceeds the configured max (100); should clamp silently to the max.
+        // Clients detect clamping by comparing the request num with the response page_size.
         final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "99999" }));
         assertEquals(100, params.getPageSize());
-        assertTrue(params.isPageSizeClamped(), "isPageSizeClamped() should be true after clamping");
-    }
-
-    @Test
-    public void test_getPageSize_validValueDoesNotSetClampedFlag() {
-        // num=5 is within range; the clamped flag must stay false.
-        final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "5" }));
-        assertEquals(5, params.getPageSize());
-        assertFalse(params.isPageSizeClamped(), "isPageSizeClamped() must be false for a valid page size");
     }
 
     @Test
@@ -207,7 +199,6 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
         final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "5" }));
         assertEquals(5, params.getPageSize());
         assertEquals(5, params.getPageSize());
-        assertFalse(params.isPageSizeClamped());
     }
 
     private static V2JsonRequestParams newParams(final Map<String, String[]> params) {

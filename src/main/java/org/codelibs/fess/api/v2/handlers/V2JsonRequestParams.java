@@ -18,7 +18,6 @@ package org.codelibs.fess.api.v2.handlers;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -60,14 +59,6 @@ public class V2JsonRequestParams extends SearchRequestParams {
     private int pageSize;
 
     private boolean pageSizeInitialized;
-
-    /**
-     * Set to {@code true} when the requested {@code num} value exceeded the configured
-     * maximum page size and was silently clamped. Handlers that include this information
-     * in their response body should call {@link #isPageSizeClamped()} and, when
-     * {@code true}, add {@code page_size_clamped: true} to the envelope payload.
-     */
-    private final AtomicBoolean pageSizeClamped = new AtomicBoolean(false);
 
     /**
      * Constructs a v2 request-params adapter over an incoming HTTP request.
@@ -228,9 +219,9 @@ public class V2JsonRequestParams extends SearchRequestParams {
      *   <li>{@code num <= 0}: throws {@link InvalidPageSizeException} — zero and negative
      *       values are not meaningful and likely indicate a client bug; rejecting them early
      *       prevents silent amplification to the configured maximum.</li>
-     *   <li>{@code num > max}: clamps to the configured maximum and sets the
-     *       {@link #isPageSizeClamped()} flag to {@code true} so the caller can include
-     *       {@code "page_size_clamped": true} in the response envelope.</li>
+     *   <li>{@code num > max}: clamps silently to the configured maximum. Clients can
+     *       detect clamping by comparing the request {@code num} with the
+     *       {@code page_size} field returned in the response envelope.</li>
      *   <li>{@code 1 <= num <= max}: returned unchanged.</li>
      * </ul>
      *
@@ -257,7 +248,6 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 final int max = fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue();
                 if (requested > max) {
                     pageSize = max;
-                    pageSizeClamped.set(true);
                 } else {
                     pageSize = requested;
                 }
@@ -267,17 +257,6 @@ public class V2JsonRequestParams extends SearchRequestParams {
         }
         pageSizeInitialized = true;
         return pageSize;
-    }
-
-    /**
-     * Returns {@code true} if the last {@link #getPageSize()} call clamped the requested
-     * value to the configured maximum. Handlers can use this to include
-     * {@code "page_size_clamped": true} in the v2 envelope payload.
-     *
-     * @return whether the page size was clamped
-     */
-    public boolean isPageSizeClamped() {
-        return pageSizeClamped.get();
     }
 
     /**
