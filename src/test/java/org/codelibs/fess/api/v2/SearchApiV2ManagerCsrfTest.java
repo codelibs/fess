@@ -219,11 +219,15 @@ public class SearchApiV2ManagerCsrfTest extends UnitFessTestCase {
         org.junit.jupiter.api.Assumptions.assumeTrue(java.nio.file.Files.exists(src),
                 "skipping: source file not present at runtime cwd=" + java.nio.file.Paths.get(".").toAbsolutePath());
         final String source = java.nio.file.Files.readString(src);
-        final int catchIdx = source.indexOf("/api/v2 handler failed for");
-        assertTrue(catchIdx >= 0, "broad-catch log statement not found");
-        // The fix uses `if (response.isCommitted()) { return; }` immediately after the log
-        // call but BEFORE writeError. Verify both ordering invariants by checking string
-        // positions in the window.
+        // Anchor specifically on the broad `catch (final Exception e)` block — Wave 1 added a
+        // dedicated IOException catch earlier in the same try/catch that re-throws on commit
+        // (semantically different from the broad catch's early-return), so we cannot use the
+        // first occurrence of the shared log message as an anchor.
+        final int catchIdx = source.indexOf("} catch (final Exception e) {");
+        assertTrue(catchIdx >= 0, "broad Exception catch block not found");
+        // The fix uses `if (response.isCommitted()) { return; }` BEFORE writeError. Verify
+        // ordering invariants by checking string positions in the window starting at the
+        // broad-catch declaration.
         final String window = source.substring(catchIdx, Math.min(source.length(), catchIdx + 2000));
         final int committedIdx = window.indexOf("isCommitted()");
         final int writeErrorIdx = window.indexOf("V2EnvelopeWriter.writeError");
