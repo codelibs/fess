@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -31,21 +29,52 @@ import org.junit.jupiter.api.Test;
 
 public class LoginRateLimiterTest extends UnitFessTestCase {
 
-    // ── MJ-4: memory cap ────────────────────────────────────────────────────────
+    // ── MJ-4 / M-4: memory cap ──────────────────────────────────────────────────
 
     @Test
-    public void test_memoryCap_boundsMapSize() {
-        // Insert more entries than the cap and verify the map size stays bounded.
-        // We use a small cap of 100 to keep the test fast.
+    public void test_memoryCap_evictsIdleEntries() {
+        // Eviction policy picks an idle entry (no recent hits, no active lockout). The
+        // implementation uses SWEEP_INTERVAL_SECONDS (300s = 5min) as the idle threshold,
+        // so we advance the clock past that bound before the cap-triggering insert.
+        final long[] now = { 1_000_000L };
         final int cap = 100;
-        final LoginRateLimiter rl = new LoginRateLimiter(() -> 1_000_000L, cap);
-        for (int i = 0; i < cap + 50; i++) {
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0], cap);
+        for (int i = 0; i < cap; i++) {
             rl.allow(LoginRateLimiter.Scope.USER, "user" + i, 5, 60);
         }
-        // After inserting cap+50 distinct keys, the map must not exceed cap.
-        // We verify indirectly: allow() on user0 (the first-inserted, evicted key)
-        // must succeed (empty bucket), meaning the cap eviction happened.
-        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "user0", 5, 60), "first-inserted key should be evicted and its bucket reset");
+        // Age all entries past the 5-minute idle bound so they are evictable.
+        now[0] += 6L * 60L * 1_000L;
+        // Add one more entry beyond cap — an idle entry must be evicted.
+        rl.allow(LoginRateLimiter.Scope.USER, "extra", 5, 60);
+        // The first-inserted key (user0, oldest) should have been evicted. Re-inserting it
+        // creates a fresh bucket; subsequent allow() against the recycled key must succeed.
+        assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "user0", 5, 60),
+                "after idle-eviction, a fresh insert under a recycled key must succeed");
+    }
+
+    @Test
+    public void test_memoryCap_doesNotEvictLockedOutEntries() {
+        // M-4: an attacker MUST NOT be able to pump bogus usernames to overflow the map
+        // and silently release a victim's lockout. Fill the map with locked-out entries
+        // up to cap, then try to add one more — assert no locked entry is released.
+        final long[] now = { 1_000_000L };
+        final int cap = 50;
+        final LoginRateLimiter rl = new LoginRateLimiter(() -> now[0], cap);
+        // Lock out cap distinct victim users.
+        for (int i = 0; i < cap; i++) {
+            rl.lockOut(LoginRateLimiter.Scope.USER, "victim" + i, 900);
+        }
+        // Verify all are locked.
+        for (int i = 0; i < cap; i++) {
+            assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "victim" + i, 5, 60), "victim" + i + " should be locked out");
+        }
+        // Attacker triggers a new entry insertion (lockOut() also inserts). The map may grow
+        // by one (best-effort cap) but NO locked-out entry may be evicted.
+        rl.lockOut(LoginRateLimiter.Scope.USER, "attacker_noise", 900);
+        for (int i = 0; i < cap; i++) {
+            assertFalse(rl.allow(LoginRateLimiter.Scope.USER, "victim" + i, 5, 60),
+                    "victim" + i + " lockout must be preserved across cap-pressure inserts");
+        }
     }
 
     // ── MJ-5: clear() removes the bucket ────────────────────────────────────────

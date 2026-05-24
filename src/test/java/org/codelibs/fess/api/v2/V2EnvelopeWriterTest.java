@@ -140,6 +140,48 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
     }
 
     @Test
+    public void test_writeError_resetsBuffer_to_discard_streaming_partial_body() throws Exception {
+        // C-8: a streaming handler may have set Content-Type to application/x-ndjson
+        // (or text/event-stream) and written a partial frame before failing pre-flush.
+        // writeError must call resetBuffer() so the wire response contains ONLY the
+        // JSON error envelope — no NDJSON prefix bytes, clean Content-Type.
+        final CapturingResponse res = new CapturingResponse();
+        // Streaming handler simulation: set NDJSON content-type and write a partial line.
+        res.setContentType("application/x-ndjson; charset=UTF-8");
+        res.getWriter().write("{\"partial\":1}\n");
+        res.getWriter().write("{\"partial\":2}\n");
+        // Failure pre-flush → writeError takes over.
+        V2EnvelopeWriter.writeError(res, V2ErrorCode.INTERNAL_ERROR, "boom");
+        // resetBuffer must have been invoked.
+        assertTrue(res.resetBufferCalled, "writeError must call resetBuffer() to clear streaming partial body");
+        // Content-Type must end up as application/json (not the NDJSON one set earlier).
+        assertEquals("application/json; charset=UTF-8", res.contentType);
+        final String body = res.body();
+        // Body must contain ONLY the JSON envelope, never the NDJSON partials.
+        assertFalse(body.contains("\"partial\""), "buffered NDJSON partials must not leak: " + body);
+        assertTrue(body.contains("\"code\":\"internal_error\""), body);
+        assertTrue(body.contains("\"status\":9"), body);
+    }
+
+    @Test
+    public void test_writeErrorWithDetails_embedsDetailsUnderError() throws Exception {
+        // C-9 support: writeErrorWithDetails carries structured details under error.details.
+        final CapturingResponse res = new CapturingResponse();
+        final Map<String, Object> engine = new LinkedHashMap<>();
+        engine.put("cluster_name", "fess");
+        engine.put("status", "red");
+        V2EnvelopeWriter.writeErrorWithDetails(res, V2ErrorCode.SERVICE_UNAVAILABLE, "cluster red", Map.of("engine", engine));
+        final String body = res.body();
+        assertEquals(503, res.status);
+        assertTrue(body.contains("\"code\":\"service_unavailable\""), body);
+        assertTrue(body.contains("\"status\":9"), body);
+        assertTrue(body.contains("\"details\""), body);
+        assertTrue(body.contains("\"engine\""), body);
+        assertTrue(body.contains("\"cluster_name\":\"fess\""), body);
+        assertTrue(body.contains("\"status\":\"red\""), body);
+    }
+
+    @Test
     public void test_writeInternalError_does_not_leak_throwable_message() throws Exception {
         final CapturingResponse res = new CapturingResponse();
         // Create a logger that does nothing (we just need to not throw)
@@ -155,11 +197,12 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
 
     /** Minimal HttpServletResponse stub that captures setContentType/setStatus/getWriter output. */
     private static class CapturingResponse implements HttpServletResponse {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter writer = new PrintWriter(sw);
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
         String characterEncoding;
+        boolean resetBufferCalled;
 
         String body() {
             writer.flush();
@@ -231,6 +274,15 @@ public class V2EnvelopeWriterTest extends UnitFessTestCase {
 
         @Override
         public void resetBuffer() {
+            // C-8: must discard any buffered partial body (e.g. an NDJSON streaming
+            // handler's pre-flush bytes) so writeError emits ONLY the JSON envelope.
+            resetBufferCalled = true;
+            // Drop whatever the buffer contained by swapping in a fresh writer pair.
+            sw = new StringWriter();
+            writer = new PrintWriter(sw);
+            // The Content-Type set by the streaming handler must also be cleared so the
+            // envelope writer's subsequent setContentType becomes the final value.
+            contentType = null;
         }
 
         @Override

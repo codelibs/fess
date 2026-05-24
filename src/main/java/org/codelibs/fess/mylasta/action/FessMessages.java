@@ -452,6 +452,51 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to reload the theme registry */
     public static final String ERRORS_failed_to_reload_theme = "{errors.failed_to_reload_theme}";
 
+    /** The key of the message: Theme archive is too large: {1} bytes exceeds the configured limit of {0} bytes. */
+    public static final String ERRORS_theme_upload_too_large = "{errors.theme_upload_too_large}";
+
+    /** The key of the message: theme.yml could not be parsed. */
+    public static final String ERRORS_theme_manifest_parse_failed = "{errors.theme_manifest_parse_failed}";
+
+    /** The key of the message: theme.yml is empty. */
+    public static final String ERRORS_theme_manifest_empty = "{errors.theme_manifest_empty}";
+
+    /** The key of the message: theme.yml root must be a YAML mapping. */
+    public static final String ERRORS_theme_manifest_not_mapping = "{errors.theme_manifest_not_mapping}";
+
+    /** The key of the message: A field in theme.yml exceeds the maximum allowed length. */
+    public static final String ERRORS_theme_manifest_field_too_long = "{errors.theme_manifest_field_too_long}";
+
+    /** The key of the message: Unsupported apiVersion in theme.yml. */
+    public static final String ERRORS_theme_manifest_unsupported_api_version = "{errors.theme_manifest_unsupported_api_version}";
+
+    /** The key of the message: Unsupported kind in theme.yml. */
+    public static final String ERRORS_theme_manifest_unsupported_kind = "{errors.theme_manifest_unsupported_kind}";
+
+    /** The key of the message: Invalid theme name in theme.yml. */
+    public static final String ERRORS_theme_manifest_invalid_name = "{errors.theme_manifest_invalid_name}";
+
+    /** The key of the message: displayName is required in theme.yml. */
+    public static final String ERRORS_theme_manifest_display_name_required = "{errors.theme_manifest_display_name_required}";
+
+    /** The key of the message: Invalid version in theme.yml (expected SemVer). */
+    public static final String ERRORS_theme_manifest_invalid_version = "{errors.theme_manifest_invalid_version}";
+
+    /** The key of the message: entry in theme.yml must be a relative path inside the theme. */
+    public static final String ERRORS_theme_manifest_unsafe_entry = "{errors.theme_manifest_unsafe_entry}";
+
+    /** The key of the message: The extracted size of the theme archive exceeds the allowed limit. */
+    public static final String ERRORS_theme_install_size_limit = "{errors.theme_install_size_limit}";
+
+    /** The key of the message: The theme archive contains too many entries. */
+    public static final String ERRORS_theme_install_entry_limit = "{errors.theme_install_entry_limit}";
+
+    /** The key of the message: A file in the theme archive has an excessive compression ratio. */
+    public static final String ERRORS_theme_install_ratio_limit = "{errors.theme_install_ratio_limit}";
+
+    /** The key of the message: The theme archive was rejected because its cumulative compression ratio indicates a zip bomb. */
+    public static final String ERRORS_theme_install_zip_bomb_ratio = "{errors.theme_install_zip_bomb_ratio}";
+
     /** The key of the message: {0} is required. */
     public static final String ERRORS_property_required = "{errors.property_required}";
 
@@ -2661,6 +2706,218 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToReloadTheme(String property) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_failed_to_reload_theme));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_upload_too_large' with parameters.
+     * <pre>
+     * message: Theme archive is too large: {1} bytes exceeds the configured limit of {0} bytes.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The configured limit in bytes. (NotNull)
+     * @param arg1 The actual size in bytes. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeUploadTooLarge(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_upload_too_large, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_parse_failed' with parameters.
+     * <pre>
+     * message: theme.yml could not be parsed.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestParseFailed(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_parse_failed));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_empty' with parameters.
+     * <pre>
+     * message: theme.yml is empty.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestEmpty(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_empty));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_not_mapping' with parameters.
+     * <pre>
+     * message: theme.yml root must be a YAML mapping.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestNotMapping(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_not_mapping));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_field_too_long' with parameters.
+     * <pre>
+     * message: A field in theme.yml exceeds the maximum allowed length.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestFieldTooLong(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_field_too_long));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_unsupported_api_version' with parameters.
+     * <pre>
+     * message: Unsupported apiVersion in theme.yml.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestUnsupportedApiVersion(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_unsupported_api_version));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_unsupported_kind' with parameters.
+     * <pre>
+     * message: Unsupported kind in theme.yml.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestUnsupportedKind(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_unsupported_kind));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_invalid_name' with parameters.
+     * <pre>
+     * message: Invalid theme name in theme.yml.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestInvalidName(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_invalid_name));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_display_name_required' with parameters.
+     * <pre>
+     * message: displayName is required in theme.yml.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestDisplayNameRequired(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_display_name_required));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_invalid_version' with parameters.
+     * <pre>
+     * message: Invalid version in theme.yml (expected SemVer).
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestInvalidVersion(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_invalid_version));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_manifest_unsafe_entry' with parameters.
+     * <pre>
+     * message: entry in theme.yml must be a relative path inside the theme.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeManifestUnsafeEntry(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_manifest_unsafe_entry));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_install_size_limit' with parameters.
+     * <pre>
+     * message: The extracted size of the theme archive exceeds the allowed limit.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeInstallSizeLimit(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_install_size_limit));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_install_entry_limit' with parameters.
+     * <pre>
+     * message: The theme archive contains too many entries.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeInstallEntryLimit(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_install_entry_limit));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_install_ratio_limit' with parameters.
+     * <pre>
+     * message: A file in the theme archive has an excessive compression ratio.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeInstallRatioLimit(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_install_ratio_limit));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.theme_install_zip_bomb_ratio' with parameters.
+     * <pre>
+     * message: The theme archive was rejected because its cumulative compression ratio indicates a zip bomb.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsThemeInstallZipBombRatio(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_theme_install_zip_bomb_ratio));
         return this;
     }
 

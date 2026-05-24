@@ -3807,9 +3807,6 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Version */
     public static final String LABELS_theme_version = "{labels.theme_version}";
 
-    /** The key of the message: Assigned Hosts */
-    public static final String LABELS_theme_assigned_hosts = "{labels.theme_assigned_hosts}";
-
     /** The key of the message: Default */
     public static final String LABELS_theme_is_default = "{labels.theme_is_default}";
 
@@ -3818,12 +3815,6 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: OK */
     public static final String LABELS_theme_health_ok = "{labels.theme_health_ok}";
-
-    /** The key of the message: Manifest invalid */
-    public static final String LABELS_theme_health_manifest_invalid = "{labels.theme_health_manifest_invalid}";
-
-    /** The key of the message: Directory missing */
-    public static final String LABELS_theme_health_directory_missing = "{labels.theme_health_directory_missing}";
 
     /** The key of the message: Upload Theme */
     public static final String LABELS_theme_upload_title = "{labels.theme_upload_title}";
@@ -3849,14 +3840,8 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Manifest */
     public static final String LABELS_theme_manifest = "{labels.theme_manifest}";
 
-    /** The key of the message: Directory Path */
-    public static final String LABELS_theme_directory_path = "{labels.theme_directory_path}";
-
     /** The key of the message: Thumbnail */
     public static final String LABELS_theme_thumbnail = "{labels.theme_thumbnail}";
-
-    /** The key of the message: Delete */
-    public static final String LABELS_theme_button_delete = "{labels.theme_button_delete}";
 
     /**
      * Assert the property is not null.

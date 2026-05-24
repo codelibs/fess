@@ -77,6 +77,60 @@ public class RateLimitHelperTest extends UnitFessTestCase {
         assertEquals("192.168.1.100", rateLimitHelper.getClientIp(request));
     }
 
+    // ── M-2: reverse-proxy / trusted-proxy allowlist scenarios ──────────────
+
+    @Test
+    public void test_getClientIp_noTrustedProxy_emptyXff_returnsRemoteAddr() {
+        // When the requesting peer is not a trusted proxy, X-Forwarded-For MUST be ignored
+        // even if the header is present — prevents a direct client from spoofing their IP.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("10.0.0.1");
+        request.addHeader("X-Forwarded-For", "1.1.1.1, 2.2.2.2");
+        // 10.0.0.1 is NOT in the default trusted-proxy allowlist (127.0.0.1,::1)
+        assertEquals("10.0.0.1", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_trustedProxy_xffWithSpaces_trimsTokens() {
+        // RFC 7239-style: each token in the XFF list may have surrounding whitespace.
+        // The leftmost (client-provided) address must be returned as a trimmed string.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1"); // trusted proxy by default config
+        request.addHeader("X-Forwarded-For", "  1.1.1.1  ,  2.2.2.2  ");
+        // The helper takes [0].trim() — leading/trailing spaces around "1.1.1.1" must be stripped.
+        assertEquals("1.1.1.1", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_trustedProxy_malformedXff_returnsRemoteAddr() {
+        // A blank / whitespace-only XFF header is treated as absent: fall through to remoteAddr.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1"); // trusted proxy by default config
+        request.addHeader("X-Forwarded-For", "   ");
+        // StringUtil.isNotBlank("   ") is false, so XFF branch is skipped.
+        assertEquals("127.0.0.1", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_trustedProxy_xffSingleEntry_returnsClientIp() {
+        // Simple common case: a single-hop reverse proxy appends exactly one IP.
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "203.0.113.10");
+        assertEquals("203.0.113.10", rateLimitHelper.getClientIp(request));
+    }
+
+    @Test
+    public void test_getClientIp_trustedProxy_xffMultiHop_returnsLeftmost() {
+        // Multi-hop proxy chain: "client, proxy1, proxy2". The leftmost entry is the
+        // originating client address; we always return it (the rightmost non-trusted entry
+        // per RFC 7239 for strict mode, but the current implementation uses index 0).
+        final MockletHttpServletRequest request = getMockRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Forwarded-For", "1.1.1.1, 2.2.2.2, 3.3.3.3");
+        assertEquals("1.1.1.1", rateLimitHelper.getClientIp(request));
+    }
+
     @Test
     public void test_blockIp() {
         rateLimitHelper.blockIp("192.168.1.100", 1000L);

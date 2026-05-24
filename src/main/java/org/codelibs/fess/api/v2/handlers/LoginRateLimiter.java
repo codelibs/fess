@@ -45,10 +45,13 @@ import jakarta.annotation.PreDestroy;
  * {@link #sweep} can be invoked periodically to evict empty entries.</p>
  *
  * <p>Memory cap: the entries map is bounded by {@link #effectiveCap}. When the cap
- * is reached the oldest-inserted entry is evicted (FIFO). The cap defaults to
- * {@link #DEFAULT_MAX_ENTRIES} (100,000) and can be tuned via the
- * {@code theme.api.login.rate.limit.max.entries} property. A WARN log is emitted
- * once per threshold crossing so operators detect unexpected traffic bursts before OOM.</p>
+ * is reached, eviction picks the oldest <em>idle</em> entry (no in-window hits AND
+ * no active lockout) — M-4: locked-out entries are never evicted, otherwise an
+ * attacker could pump bogus usernames to silently release a victim's lockout. If
+ * every entry is either locked or active the map is allowed to grow above cap by
+ * one and a WARN is logged (best-effort policy: prefer correctness over a strict
+ * cap). The cap defaults to {@link #DEFAULT_MAX_ENTRIES} (100,000) and can be
+ * tuned via the {@code theme.api.login.rate.limit.max.entries} property.</p>
  *
  * <p>Sweep schedule: on DI init a {@link TimeoutManager} periodic task calls
  * {@link #sweep()} every {@link #SWEEP_INTERVAL_SECONDS} seconds (default 300).
@@ -103,10 +106,14 @@ public class LoginRateLimiter {
     private volatile boolean capWarnLogged = false;
 
     /**
-     * Insertion-ordered map capped at {@link #effectiveCap}. Access-order=false so
-     * the eldest-inserted entry (i.e. the key that was created first and has not
-     * been touched since) is evicted when the map is full — a simple FIFO cap.
-     * All mutations and removals are guarded by synchronized(entries).
+     * Insertion-ordered map capped at {@link #effectiveCap}. Access-order=false so the
+     * eldest-inserted entry is the natural FIFO candidate. Eviction is deliberately NOT
+     * delegated to {@link LinkedHashMap#removeEldestEntry} because that would happily
+     * evict a locked-out entry — letting an attacker pump bogus usernames to silently
+     * release a victim's lockout. Instead, all insertions go through
+     * {@link #insertWithEviction} which scans for an idle (no hits, no active lockout)
+     * eldest entry; if none exists the map grows by one and a WARN is logged. All
+     * mutations and removals are guarded by synchronized(entries).
      */
     private final Map<String, Entry> entries;
 
@@ -129,31 +136,79 @@ public class LoginRateLimiter {
     LoginRateLimiter(final LongSupplier clock, final int maxEntries) {
         this.clock = clock;
         this.effectiveCap = maxEntries;
-        // accessOrder=false means removeEldestEntry evicts by insertion order (FIFO).
-        // removeEldestEntry reads effectiveCap (volatile) so it always uses the
-        // current cap even if init() updates it after construction.
-        this.entries = new LinkedHashMap<>(16, 0.75f, false) {
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<String, Entry> eldest) {
-                final int cap = effectiveCap;
-                if (size() > cap) {
-                    if (!capWarnLogged) {
-                        logger.warn(
-                                "LoginRateLimiter entries map reached cap={}; evicting oldest entry. "
-                                        + "Consider increasing theme.api.login.rate.limit.max.entries or investigating traffic anomaly.",
-                                cap);
-                        capWarnLogged = true;
+        // accessOrder=false: iteration order is insertion order, used by insertWithEviction
+        // to find the oldest idle entry. We do NOT override removeEldestEntry — eviction is
+        // performed explicitly in insertWithEviction so locked-out entries are never evicted.
+        this.entries = new LinkedHashMap<>(16, 0.75f, false);
+    }
+
+    /**
+     * Inserts a fresh Entry for {@code mapKey}, performing best-effort eviction to honour
+     * {@link #effectiveCap}. Locked-out entries (lockUntilEpochMs >= now) are NEVER evicted
+     * — M-4: otherwise an attacker could pump bogus usernames to silently release a victim's
+     * lockout. The eldest entry whose lockout has expired AND whose hit-deque contains no
+     * timestamp newer than the {@code idleWindowMs} threshold is chosen as the victim; if
+     * no such entry exists the map is allowed to grow above cap by one and a WARN is
+     * logged (best-effort policy: prefer correctness over a strict cap).
+     *
+     * <p>The {@code idleWindowMs} bound is the largest of any sliding window we care about
+     * — for the login limiter the call sites use 60s so a hit older than 60s is
+     * effectively stale. We use {@link #SWEEP_INTERVAL_SECONDS} * 1000 (i.e. 5min) as the
+     * conservative idle threshold so that an entry with very-old stale hits is still
+     * considered evictable even when called outside the normal sweep cadence.</p>
+     *
+     * <p>Must be called while holding {@code synchronized(entries)}.</p>
+     *
+     * @return the Entry now associated with {@code mapKey}
+     */
+    private Entry insertWithEviction(final String mapKey, final long now) {
+        if (entries.size() >= effectiveCap) {
+            // Conservative idle threshold: any hit older than the sweep interval is stale.
+            // (The handler's sliding windows are bounded by 60s; we use 5min as a defensive
+            // upper bound so this remains safe even if future callers raise window sizes.)
+            final long idleWindowMs = (long) SWEEP_INTERVAL_SECONDS * 1_000L;
+            String victim = null;
+            for (final Map.Entry<String, Entry> en : entries.entrySet()) {
+                final Entry candidate = en.getValue();
+                synchronized (candidate) {
+                    // M-4: skip locked-out entries entirely. A locked-out entry must
+                    // survive cap pressure — otherwise an attacker could overflow the
+                    // map with bogus keys to release a victim's lockout.
+                    if (candidate.lockUntilEpochMs >= now) {
+                        continue;
                     }
-                    return true;
+                    // Idle = no hit within the idle window. We compare against peekLast()
+                    // because hits are appended in chronological order, so the newest hit
+                    // is at the tail. If even the newest hit is older than idleWindowMs, the
+                    // entry is stale and safe to evict.
+                    if (candidate.hits.isEmpty() || candidate.hits.peekLast() < now - idleWindowMs) {
+                        victim = en.getKey();
+                        break;
+                    }
                 }
-                // Reset the warning flag once usage drops back well below cap so it will
-                // fire again if a new burst arrives.
-                if (capWarnLogged && size() < cap / 2) {
+            }
+            if (victim != null) {
+                entries.remove(victim);
+                if (capWarnLogged && entries.size() < effectiveCap / 2) {
                     capWarnLogged = false;
                 }
-                return false;
+            } else {
+                // All entries are either locked-out or have a recent hit. Best-effort policy:
+                // allow the map to grow by one rather than evicting a locked entry, and log
+                // WARN so operators see the cap-pressure signal.
+                if (!capWarnLogged) {
+                    logger.warn(
+                            "LoginRateLimiter entries map at cap={} but no idle entry to evict "
+                                    + "(all locked or active); growing temporarily. "
+                                    + "Consider increasing theme.api.login.rate.limit.max.entries or investigating traffic anomaly.",
+                            effectiveCap);
+                    capWarnLogged = true;
+                }
             }
-        };
+        }
+        final Entry e = new Entry();
+        entries.put(mapKey, e);
+        return e;
     }
 
     /**
@@ -227,7 +282,11 @@ public class LoginRateLimiter {
         final long windowMs = (long) windowSeconds * 1_000L;
         final Entry e;
         synchronized (entries) {
-            e = entries.computeIfAbsent(mapKey, k -> new Entry());
+            Entry existing = entries.get(mapKey);
+            if (existing == null) {
+                existing = insertWithEviction(mapKey, now);
+            }
+            e = existing;
         }
         synchronized (e) {
             if (now < e.lockUntilEpochMs) {
@@ -308,12 +367,17 @@ public class LoginRateLimiter {
             return;
         }
         final String mapKey = scope.name() + ":" + key;
+        final long now = clock.getAsLong();
         final Entry e;
         synchronized (entries) {
-            e = entries.computeIfAbsent(mapKey, k -> new Entry());
+            Entry existing = entries.get(mapKey);
+            if (existing == null) {
+                existing = insertWithEviction(mapKey, now);
+            }
+            e = existing;
         }
         synchronized (e) {
-            e.lockUntilEpochMs = Math.max(e.lockUntilEpochMs, clock.getAsLong() + (long) lockoutSeconds * 1_000L);
+            e.lockUntilEpochMs = Math.max(e.lockUntilEpochMs, now + (long) lockoutSeconds * 1_000L);
         }
     }
 

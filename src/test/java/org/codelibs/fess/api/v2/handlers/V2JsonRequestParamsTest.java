@@ -146,6 +146,70 @@ public class V2JsonRequestParamsTest extends UnitFessTestCase {
         assertEquals(0, newParams(Map.of("offset", new String[] { "abc" })).getOffset());
     }
 
+    @Test
+    public void test_getOffset_negative_throwsInvalidOffsetException() {
+        // M-6: offset=-1 previously collided with the "uninitialised" sentinel and was
+        // silently re-parsed on every call; clients passing -1 also bypassed validation
+        // and forwarded -1 to the search backend. Now the explicit init-flag means -1 is
+        // a real value, and it must be rejected with InvalidOffsetException.
+        final V2JsonRequestParams params = newParams(Map.of("offset", new String[] { "-1" }));
+        assertThrows(V2JsonRequestParams.InvalidOffsetException.class, params::getOffset, "offset=-1 must throw InvalidOffsetException");
+    }
+
+    @Test
+    public void test_getOffset_negativeOther_throwsInvalidOffsetException() {
+        // Any negative value must throw, not just -1.
+        final V2JsonRequestParams params = newParams(Map.of("offset", new String[] { "-42" }));
+        assertThrows(V2JsonRequestParams.InvalidOffsetException.class, params::getOffset, "offset=-42 must throw InvalidOffsetException");
+    }
+
+    @Test
+    public void test_getOffset_cachedAcrossCalls() {
+        // M-6: the explicit init-flag must drive caching so repeated calls return the
+        // same parsed value without re-reading the request.
+        final V2JsonRequestParams params = newParams(Map.of("offset", new String[] { "7" }));
+        assertEquals(7, params.getOffset());
+        assertEquals(7, params.getOffset());
+        assertEquals(7, params.getOffset());
+    }
+
+    @Test
+    public void test_getOffset_zeroIsCachedNotReparsed() {
+        // Boundary case: offset=0 must NOT trigger a re-parse on subsequent calls.
+        // Under the old "-1 == uninitialised" sentinel scheme this happened to work
+        // because 0 != -1, but the explicit-flag scheme makes the contract intentional.
+        final V2JsonRequestParams params = newParams(Map.of("offset", new String[] { "0" }));
+        assertEquals(0, params.getOffset());
+        assertEquals(0, params.getOffset());
+    }
+
+    @Test
+    public void test_getStartPosition_negative_throwsInvalidOffsetException() {
+        // M-6 (start variant): negative start is equally invalid — reject so the
+        // search backend never sees -1.
+        final V2JsonRequestParams params = newParams(Map.of("start", new String[] { "-1" }));
+        assertThrows(V2JsonRequestParams.InvalidOffsetException.class, params::getStartPosition,
+                "start=-1 must throw InvalidOffsetException");
+    }
+
+    @Test
+    public void test_getStartPosition_cachedAcrossCalls() {
+        // Caching invariant for start, same as offset.
+        final V2JsonRequestParams params = newParams(Map.of("start", new String[] { "3" }));
+        assertEquals(3, params.getStartPosition());
+        assertEquals(3, params.getStartPosition());
+    }
+
+    @Test
+    public void test_getPageSize_cachedAcrossCalls() {
+        // The same explicit-flag caching contract applies to pageSize. Ensure repeated
+        // calls don't re-clamp / re-validate.
+        final V2JsonRequestParams params = newParams(Map.of("num", new String[] { "5" }));
+        assertEquals(5, params.getPageSize());
+        assertEquals(5, params.getPageSize());
+        assertFalse(params.isPageSizeClamped());
+    }
+
     private static V2JsonRequestParams newParams(final Map<String, String[]> params) {
         return new V2JsonRequestParams(new StubRequest(params), ComponentUtil.getFessConfig());
     }

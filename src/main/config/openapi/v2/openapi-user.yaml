@@ -72,11 +72,12 @@ paths:
       summary: Cluster health snapshot
       description: |-
         Returns a snapshot of the search engine's cluster health. HTTP status
-        is `200` for `green`/`yellow` and `503` for `red` so monitoring tools
-        can branch on status alone. The envelope `status` field is `0`
-        (success) in both cases because the health check itself succeeded —
-        clients that need to detect `red` MUST branch on the HTTP status or
-        on `data.status`.
+        is `200` for `green`/`yellow` and `503` for `red`. The envelope obeys
+        the canonical invariant `status >= 1 iff HTTP >= 400`: green/yellow
+        emit a success envelope (`status: 0`) carrying `engine`, red emits an
+        error envelope (`status: 9`, `error.code: service_unavailable`) with
+        the engine snapshot embedded under `error.details.engine` so
+        monitoring tools can still parse cluster metadata.
       operationId: healthV2
       responses:
         '200':
@@ -88,13 +89,13 @@ paths:
         '405': { $ref: '#/components/responses/MethodNotAllowed' }
         '503':
           description: |-
-            Cluster reports `red` or is unreachable. The envelope `status`
-            field remains `0`; check the HTTP status or `data.status` to
-            detect the condition.
+            Cluster reports `red`. The response is the standard v2 error
+            envelope with `error.code: service_unavailable` and the engine
+            snapshot under `error.details.engine`.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /search:
     get:
@@ -434,9 +435,11 @@ paths:
       summary: Change the current user's password
       description: |-
         Validates `current_password`, enforces the configured password
-        policy on `new_password`, rotates the CSRF token, and signals the
-        SPA via `re_login_required: true` so it can prompt for re-login.
-        The current session is NOT invalidated server-side.
+        policy on `new_password`, invalidates the current session (M-3),
+        and signals the SPA via `re_login_required: true` so it redirects
+        to the login page. Because the session is destroyed server-side,
+        no `csrf_token` is returned; the SPA must obtain a fresh token
+        after re-authenticating.
 
         Oversized request bodies and unsupported `Content-Type` headers are
         rejected as `400 invalid_request` in the current implementation.
@@ -1152,14 +1155,9 @@ components:
                 re_login_required:
                   type: boolean
                   description: |-
-                    Always `true`. The session is NOT invalidated server-side;
-                    the SPA is responsible for redirecting to login when this
-                    flag is set.
-                csrf_token:
-                  type: string
-                  description: |-
-                    Rotated CSRF token. Omitted only if CSRF rotation failed;
-                    in that case the existing token remains valid.
+                    Always `true`. The current session has been invalidated
+                    server-side (M-3). The SPA MUST redirect to the login page
+                    to obtain a fresh session and CSRF token.
 
     # --- Click -------------------------------------------------------
     ClickRequest:

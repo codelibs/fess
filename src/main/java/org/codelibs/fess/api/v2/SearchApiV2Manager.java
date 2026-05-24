@@ -209,6 +209,13 @@ public class SearchApiV2Manager extends BaseApiManager {
                 chatSessionClearHandler.handle(request, response, sessionId);
                 return;
             }
+            // Unknown sub-path under /documents/{id}/... — return a clearer not_found message
+            // than the generic "endpoint not found" emitted by the switch default arm. This
+            // closes the dispatch hole where /documents/abc/foo silently fell through.
+            if (sub.startsWith("/documents/")) {
+                V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "unknown action on document: " + sub);
+                return;
+            }
             switch (sub) {
             case "/health" -> handleHealth(request, response);
             case "/search" -> searchHandler.handle(request, response);
@@ -225,14 +232,31 @@ public class SearchApiV2Manager extends BaseApiManager {
             case "/chat/stream" -> chatStreamHandler.handle(request, response);
             default -> V2EnvelopeWriter.writeError(response, V2ErrorCode.NOT_FOUND, "endpoint not found: " + sub);
             }
-        } catch (final Exception e) {
+        } catch (final IOException e) {
+            // Streaming handlers can disconnect mid-write (broken pipe, client abort). Once
+            // the response is committed there's no envelope to write — re-throw so the
+            // container can terminate the connection cleanly. If we are NOT committed yet
+            // the IOException came from somewhere before the first byte; log it like any
+            // other failure and emit the standard internal-error envelope.
+            if (response.isCommitted()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("/api/v2 handler IO failure after commit for {}", sub, e);
+                } else if (logger.isInfoEnabled()) {
+                    logger.info("/api/v2 handler IO failure after commit for sub={}", sub);
+                }
+                throw e;
+            }
             logger.warn("/api/v2 handler failed for {}", sub, e);
+            V2EnvelopeWriter.writeError(response, V2ErrorCode.INTERNAL_ERROR, "internal error");
+        } catch (final Exception e) {
             if (response.isCommitted()) {
                 // SSE / NDJSON handlers have already started flushing; the v2 envelope can no
-                // longer be written without producing a malformed wire frame. The exception
-                // detail is in the log; the wire transcript ends where it last flushed.
+                // longer be written without producing a malformed wire frame. Do not attempt
+                // a second write — log and return so the in-flight body is left intact.
+                logger.warn("/api/v2 handler failed after commit for {}", sub, e);
                 return;
             }
+            logger.warn("/api/v2 handler failed for {}", sub, e);
             // Do not leak e.getMessage() to the wire — message content from upstream
             // libraries can include connection strings, stack-trace fragments, or other
             // information the SPA must not see.
@@ -287,14 +311,14 @@ public class SearchApiV2Manager extends BaseApiManager {
             engine.put("cluster_name", ping.getClusterName());
             engine.put("status", clusterStatus);
             engine.put("ping_status", ping.getStatus());
-            // Map cluster health to HTTP status: red → 503 (service unavailable),
-            // yellow/green → 200. This allows monitoring tooling to use the HTTP status
-            // directly without parsing the envelope body.
+            // Envelope invariant: envelope.status>=1 iff HTTP>=400. A red cluster maps to
+            // HTTP 503, so it must emit a SERVICE_UNAVAILABLE error envelope (not the
+            // success envelope used for green/yellow). The engine details are surfaced
+            // through Map.of("engine", engine) in writeErrorWithDetails so monitoring
+            // tooling can still parse them out of error.details.
             if ("red".equalsIgnoreCase(clusterStatus)) {
-                response.setStatus(V2ErrorCode.SERVICE_UNAVAILABLE.defaultHttpStatus());
-                final Map<String, Object> payload = new LinkedHashMap<>();
-                payload.put("engine", engine);
-                V2EnvelopeWriter.writeSuccess(response, payload);
+                V2EnvelopeWriter.writeErrorWithDetails(response, V2ErrorCode.SERVICE_UNAVAILABLE, "search engine cluster is red",
+                        Map.of("engine", engine));
             } else {
                 // yellow or green — both return 200; the engine.status field carries the detail.
                 V2EnvelopeWriter.writeSuccess(response, Map.of("engine", engine));

@@ -49,11 +49,17 @@ public class V2JsonRequestParams extends SearchRequestParams {
 
     private final FessConfig fessConfig;
 
-    private int startPosition = -1;
+    private int startPosition;
 
-    private int offset = -1;
+    private boolean startPositionInitialized;
 
-    private int pageSize = -1;
+    private int offset;
+
+    private boolean offsetInitialized;
+
+    private int pageSize;
+
+    private boolean pageSizeInitialized;
 
     /**
      * Set to {@code true} when the requested {@code num} value exceeded the configured
@@ -135,9 +141,22 @@ public class V2JsonRequestParams extends SearchRequestParams {
         return request.getParameter("sort");
     }
 
+    /**
+     * Returns the {@code start} parameter from the request, defaulting to the configured
+     * {@code paging.search.page.start} when missing or malformed.
+     *
+     * <p>The parsed value is cached after the first call so concurrent paging fields can
+     * read it without re-parsing. A negative {@code start} is rejected with
+     * {@link InvalidOffsetException} — historically the {@code -1} sentinel meant
+     * "uninitialised", which collided with a client legitimately requesting {@code -1};
+     * the sentinel is now an explicit {@link #startPositionInitialized} flag.</p>
+     *
+     * @return the validated, non-negative start position
+     * @throws InvalidOffsetException if {@code start} is present and {@code < 0}
+     */
     @Override
     public int getStartPosition() {
-        if (startPosition != -1) {
+        if (startPositionInitialized) {
             return startPosition;
         }
 
@@ -146,17 +165,37 @@ public class V2JsonRequestParams extends SearchRequestParams {
             startPosition = fessConfig.getPagingSearchPageStartAsInteger();
         } else {
             try {
-                startPosition = Integer.parseInt(start);
+                final int parsed = Integer.parseInt(start);
+                if (parsed < 0) {
+                    // Reject negative start rather than passing -1 to the search backend.
+                    // The handler should map InvalidOffsetException to INVALID_REQUEST.
+                    throw new InvalidOffsetException("start must be non-negative, got: " + parsed);
+                }
+                startPosition = parsed;
             } catch (final NumberFormatException e) {
                 startPosition = fessConfig.getPagingSearchPageStartAsInteger();
             }
         }
+        startPositionInitialized = true;
         return startPosition;
     }
 
+    /**
+     * Returns the {@code offset} parameter from the request, defaulting to {@code 0}
+     * when missing or non-numeric.
+     *
+     * <p>The parsed value is cached after the first call. A negative {@code offset} is
+     * rejected with {@link InvalidOffsetException} — historically the {@code -1}
+     * sentinel meant "uninitialised", which collided with a client legitimately
+     * passing {@code -1}. Caching is now driven by an explicit
+     * {@link #offsetInitialized} flag.</p>
+     *
+     * @return the validated, non-negative offset
+     * @throws InvalidOffsetException if {@code offset} is present and {@code < 0}
+     */
     @Override
     public int getOffset() {
-        if (offset != -1) {
+        if (offsetInitialized) {
             return offset;
         }
 
@@ -165,11 +204,17 @@ public class V2JsonRequestParams extends SearchRequestParams {
             offset = 0;
         } else {
             try {
-                offset = Integer.parseInt(value);
+                final int parsed = Integer.parseInt(value);
+                if (parsed < 0) {
+                    // Reject negative offset rather than passing -1 to the search backend.
+                    throw new InvalidOffsetException("offset must be non-negative, got: " + parsed);
+                }
+                offset = parsed;
             } catch (final NumberFormatException e) {
                 offset = 0;
             }
         }
+        offsetInitialized = true;
         return offset;
     }
 
@@ -194,7 +239,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
      */
     @Override
     public int getPageSize() {
-        if (pageSize != -1) {
+        if (pageSizeInitialized) {
             return pageSize;
         }
 
@@ -220,6 +265,7 @@ public class V2JsonRequestParams extends SearchRequestParams {
                 pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
             }
         }
+        pageSizeInitialized = true;
         return pageSize;
     }
 
@@ -248,6 +294,32 @@ public class V2JsonRequestParams extends SearchRequestParams {
          * @param message human-readable description of the invalid page size
          */
         public InvalidPageSizeException(final String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Thrown by {@link #getOffset()} or {@link #getStartPosition()} when the
+     * {@code offset} / {@code start} parameter is present but negative. Negative paging
+     * positions are not meaningful and previously collided with the {@code -1}
+     * "uninitialised" sentinel — handlers should catch this and map it to
+     * {@link org.codelibs.fess.api.v2.V2ErrorCode#INVALID_REQUEST}.
+     *
+     * <p>Extends {@link InvalidPageSizeException} so existing handler catch blocks
+     * that already map invalid paging input to {@code INVALID_REQUEST} also cover
+     * the offset variant without per-handler edits. Test code that asserts
+     * specifically on {@link InvalidOffsetException} keeps working because
+     * {@code instanceof InvalidOffsetException} narrows beyond the parent type.</p>
+     */
+    public static class InvalidOffsetException extends InvalidPageSizeException {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Creates the exception with a diagnostic message.
+         *
+         * @param message human-readable description of the invalid offset
+         */
+        public InvalidOffsetException(final String message) {
             super(message);
         }
     }

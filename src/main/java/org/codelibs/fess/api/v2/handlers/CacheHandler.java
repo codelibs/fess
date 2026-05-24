@@ -97,14 +97,26 @@ public class CacheHandler {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.INVALID_REQUEST, "invalid doc_id");
             return;
         }
-        // Auth lookup is wrapped because the unit harness (and any environment
-        // where the login subsystem isn't fully wired) can throw at lookup time.
-        OptionalThing<FessUserBean> userBean;
+        // M-17: split DI-binding failure from "no user bean present". A genuine anonymous
+        // caller still falls into the AUTH_REQUIRED branch below (when login is required);
+        // a system-level lookup failure surfaces as INTERNAL_ERROR (500) so a logged-in
+        // user isn't misled into thinking their session expired when the underlying issue
+        // is DI breakage.
+        final FessLoginAssist assist;
         try {
-            userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
-        } catch (final Exception e) {
-            logger.warn("/api/v2/cache: login subsystem lookup failed; treating as anonymous", e);
-            userBean = OptionalThing.empty();
+            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2/cache/{}: could not acquire FessLoginAssist", docId, e);
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
+            return;
+        }
+        final OptionalThing<FessUserBean> userBean;
+        try {
+            userBean = assist.getSavedUserBean();
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2/cache/{}: getSavedUserBean failed", docId, e);
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/cache/" + docId);
+            return;
         }
         // MJ-20: parity with v1 CacheAction:68-70 — honor app.login.required.
         // When login is required and no authenticated user is present, reject with

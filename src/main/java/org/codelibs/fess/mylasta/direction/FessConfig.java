@@ -2061,6 +2061,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String THEME_UPLOAD_MAX_COMPRESSION_RATIO = "theme.upload.max.compression.ratio";
 
+    /** The key of the configuration. e.g. 100 */
+    String THEME_UPLOAD_ZIP_RATIO_MAX = "theme.upload.zip.ratio.max";
+
+    /** The key of the configuration. e.g. 1048576 */
+    String THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES = "theme.upload.zip.ratio.check.threshold.bytes";
+
     /** The key of the configuration. e.g. 7 */
     String THEME_UPLOAD_ATTIC_RETENTION_DAYS = "theme.upload.attic.retention.days";
 
@@ -2087,6 +2093,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 100000 */
     String THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES = "theme.api.login.rate.limit.max.entries";
+
+    /** The key of the configuration. e.g. 15000 */
+    String API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS = "api.v2.chat.stream.keepalive.interval.ms";
 
     /**
      * Get the value of property as {@link String}.
@@ -3062,6 +3071,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getRateLimitWhitelistIps();
 
     /**
+     * Get the value for the key 'rate.limit.whitelist.ips' as a {@link java.util.Set}. <br>
+     * Splits the comma-separated string and returns a set of trimmed, non-blank IP addresses.
+     * An empty or blank configured value returns an empty set.
+     * @return Set of whitelisted IP strings (NotNull, may be empty)
+     */
+    java.util.Set<String> getRateLimitWhitelistIpsAsSet();
+
+    /**
      * Get the value for the key 'rate.limit.blocked.ips'. <br>
      * The value is, e.g.  <br>
      * comment: Comma-separated list of blocked IPs.
@@ -3070,13 +3087,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getRateLimitBlockedIps();
 
     /**
-     * Get the value for the key 'rate.limit.blocked.ips' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * comment: Comma-separated list of blocked IPs.
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
+     * Get the value for the key 'rate.limit.blocked.ips' as a {@link java.util.Set}. <br>
+     * Splits the comma-separated string and returns a set of trimmed, non-blank IP addresses.
+     * An empty or blank configured value returns an empty set.
+     * @return Set of blocked IP strings (NotNull, may be empty)
      */
-    Integer getRateLimitBlockedIpsAsInteger();
+    java.util.Set<String> getRateLimitBlockedIpsAsSet();
 
     /**
      * Get the value for the key 'rate.limit.trusted.proxies'. <br>
@@ -3085,6 +3101,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRateLimitTrustedProxies();
+
+    /**
+     * Get the value for the key 'rate.limit.trusted.proxies' as a {@link java.util.Set}. <br>
+     * Splits the comma-separated string and returns a set of trimmed, non-blank IP addresses.
+     * When the set is non-empty, {@link org.codelibs.fess.helper.RateLimitHelper} will only
+     * honour {@code X-Forwarded-For} / {@code X-Real-IP} headers when the direct connection
+     * address ({@code getRemoteAddr()}) appears in this set (trusted-proxy allowlist).
+     * When empty, proxy headers are never trusted and {@code getRemoteAddr()} is always used
+     * — preserving the pre-reverse-proxy-support behaviour.
+     * @return Set of trusted proxy IP strings (NotNull, may be empty)
+     */
+    java.util.Set<String> getRateLimitTrustedProxiesAsSet();
 
     /**
      * Get the value for the key 'rate.limit.cleanup.interval'. <br>
@@ -9861,6 +9889,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getThemeUploadMaxCompressionRatioAsInteger();
 
     /**
+     * Get the value for the key 'theme.upload.zip.ratio.max'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadZipRatioMax();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.max' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getThemeUploadZipRatioMaxAsInteger();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.check.threshold.bytes'. <br>
+     * The value is, e.g. 1048576 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThemeUploadZipRatioCheckThresholdBytes();
+
+    /**
+     * Get the value for the key 'theme.upload.zip.ratio.check.threshold.bytes' as {@link Long}. <br>
+     * The value is, e.g. 1048576 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not long.
+     */
+    Long getThemeUploadZipRatioCheckThresholdBytesAsLong();
+
+    /**
      * Get the value for the key 'theme.upload.attic.retention.days'. <br>
      * The value is, e.g. 7 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -9984,6 +10042,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getThemeApiLoginRateLimitMaxEntriesAsInteger();
+
+    /**
+     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms'. <br>
+     * The value is, e.g. 15000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiV2ChatStreamKeepaliveIntervalMs();
+
+    /**
+     * Get the value for the key 'api.v2.chat.stream.keepalive.interval.ms' as {@link Integer}. <br>
+     * The value is, e.g. 15000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger();
 
     /**
      * The simple implementation for configuration.
@@ -10406,16 +10479,46 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.RATE_LIMIT_WHITELIST_IPS);
         }
 
+        public java.util.Set<String> getRateLimitWhitelistIpsAsSet() {
+            return toStringSet(getRateLimitWhitelistIps());
+        }
+
         public String getRateLimitBlockedIps() {
             return get(FessConfig.RATE_LIMIT_BLOCKED_IPS);
         }
 
-        public Integer getRateLimitBlockedIpsAsInteger() {
-            return getAsInteger(FessConfig.RATE_LIMIT_BLOCKED_IPS);
+        public java.util.Set<String> getRateLimitBlockedIpsAsSet() {
+            return toStringSet(getRateLimitBlockedIps());
         }
 
         public String getRateLimitTrustedProxies() {
             return get(FessConfig.RATE_LIMIT_TRUSTED_PROXIES);
+        }
+
+        public java.util.Set<String> getRateLimitTrustedProxiesAsSet() {
+            return toStringSet(getRateLimitTrustedProxies());
+        }
+
+        /**
+         * Splits a comma-separated string of values into a {@link java.util.Set}.
+         * Each token is trimmed; blank tokens are discarded. A blank or null input
+         * yields an empty set. The returned set is unmodifiable.
+         *
+         * @param csv the raw comma-separated string, may be null or blank
+         * @return unmodifiable set of non-blank trimmed tokens (NotNull)
+         */
+        private static java.util.Set<String> toStringSet(final String csv) {
+            if (csv == null || csv.isBlank()) {
+                return java.util.Set.of();
+            }
+            final java.util.Set<String> result = new java.util.HashSet<>();
+            for (final String token : csv.split(",")) {
+                final String trimmed = token.trim();
+                if (!trimmed.isEmpty()) {
+                    result.add(trimmed);
+                }
+            }
+            return java.util.Collections.unmodifiableSet(result);
         }
 
         public String getRateLimitCleanupInterval() {
@@ -13638,6 +13741,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.THEME_UPLOAD_MAX_COMPRESSION_RATIO);
         }
 
+        public String getThemeUploadZipRatioMax() {
+            return get(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX);
+        }
+
+        public Integer getThemeUploadZipRatioMaxAsInteger() {
+            return getAsInteger(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX);
+        }
+
+        public String getThemeUploadZipRatioCheckThresholdBytes() {
+            return get(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES);
+        }
+
+        public Long getThemeUploadZipRatioCheckThresholdBytesAsLong() {
+            return getAsLong(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES);
+        }
+
         public String getThemeUploadAtticRetentionDays() {
             return get(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS);
         }
@@ -13704,6 +13823,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getThemeApiLoginRateLimitMaxEntriesAsInteger() {
             return getAsInteger(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES);
+        }
+
+        public String getApiV2ChatStreamKeepaliveIntervalMs() {
+            return get(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
+        }
+
+        public Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger() {
+            return getAsInteger(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS);
         }
 
         @Override
@@ -14332,6 +14459,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_UPLOAD_MAX_EXTRACTED_SIZE, "209715200");
             defaultMap.put(FessConfig.THEME_UPLOAD_MAX_ENTRIES, "1000");
             defaultMap.put(FessConfig.THEME_UPLOAD_MAX_COMPRESSION_RATIO, "100");
+            defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_MAX, "100");
+            defaultMap.put(FessConfig.THEME_UPLOAD_ZIP_RATIO_CHECK_THRESHOLD_BYTES, "1048576");
             defaultMap.put(FessConfig.THEME_UPLOAD_ATTIC_RETENTION_DAYS, "7");
             defaultMap.put(FessConfig.THEME_ALLOWED_ARCHIVE_EXTENSIONS, "zip");
             defaultMap.put(FessConfig.THEME_ASSETS_CACHE_MAX_AGE, "86400");
@@ -14341,6 +14470,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_PER_USER_PER_MINUTE, "5");
             defaultMap.put(FessConfig.THEME_API_LOGIN_LOCKOUT_SECONDS, "900");
             defaultMap.put(FessConfig.THEME_API_LOGIN_RATE_LIMIT_MAX_ENTRIES, "100000");
+            defaultMap.put(FessConfig.API_V2_CHAT_STREAM_KEEPALIVE_INTERVAL_MS, "15000");
             defaultMap.put(FessConfig.lasta_di_SMART_DEPLOY_MODE, "warm");
             defaultMap.put(FessConfig.DEVELOPMENT_HERE, "true");
             defaultMap.put(FessConfig.ENVIRONMENT_TITLE, "Local Development");

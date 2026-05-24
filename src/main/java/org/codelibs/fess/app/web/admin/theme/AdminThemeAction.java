@@ -27,9 +27,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.annotation.Secured;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.mylasta.action.FessMessages;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.theme.StaticThemeInstaller;
 import org.codelibs.fess.theme.Theme;
 import org.codelibs.fess.theme.ThemeManifest;
+import org.codelibs.fess.theme.ThemeManifestException;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.theme.ThemeType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -155,8 +158,16 @@ public class AdminThemeAction extends FessAdminAction {
 
     /**
      * Handles a static-theme ZIP upload. The file extension and size guard
-     * here are pre-flight checks; the installer enforces structural and size
-     * limits authoritatively.
+     * here are pre-flight checks at the Action layer (M-1 defense in depth);
+     * the installer enforces structural and size limits authoritatively.
+     *
+     * <p>If the installer raises a {@link ThemeManifestException} (wrapped
+     * inside an {@link StaticThemeInstaller.InstallException} of code
+     * {@link StaticThemeInstaller.InstallException.Code#MANIFEST_INVALID
+     * MANIFEST_INVALID}), the structured {@link ThemeManifestException.Code
+     * code} is used to surface a localized error key
+     * (see {@code errors.theme_manifest_*}) instead of the raw English
+     * diagnostic (M-14).</p>
      *
      * @param form the multipart upload form
      * @return redirect to the theme index on success
@@ -171,19 +182,106 @@ public class AdminThemeAction extends FessAdminAction {
             throwValidationError(m -> m.addErrorsFileIsNotSupported(GLOBAL, String.valueOf(fileName)),
                     () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         }
+        // M-1: server-side size guard. The JSP enforces the same limit client-side
+        // but untrusted clients can post past it. The installer also enforces
+        // a (post-extraction) size cap, but we reject obviously-oversized uploads
+        // here before allocating any IO buffer to read the stream.
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final long maxBytes = fessConfig.getThemeUploadMaxSizeAsInteger().longValue();
+        final long actualBytes = form.themeFile.getFileSize();
+        if (actualBytes > maxBytes) {
+            logger.warn("Theme upload rejected: size limit exceeded. fileName={}, actualBytes={}, maxBytes={}", fileName, actualBytes,
+                    maxBytes);
+            final String maxStr = Long.toString(maxBytes);
+            final String actualStr = Long.toString(actualBytes);
+            throwValidationError(m -> m.addErrorsThemeUploadTooLarge(GLOBAL, maxStr, actualStr),
+                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+        }
         try (InputStream in = form.themeFile.getInputStream()) {
             staticThemeInstaller.installZip(in);
             saveInfo(m -> m.addSuccessUploadTheme(GLOBAL, fileName));
         } catch (final StaticThemeInstaller.InstallException ex) {
-            logger.warn("Theme upload rejected: {}", ex.getMessage());
-            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, ex.getMessage()),
-                    () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
+            logger.warn("Theme upload rejected", ex);
+            throwValidationError(m -> mapInstallExceptionToMessage(m, ex), () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         } catch (final IOException ex) {
             logger.warn("Failed to read upload stream", ex);
-            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, ex.getMessage()),
+            throwValidationError(m -> m.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage())),
                     () -> asHtml(path_AdminTheme_AdminThemeUploadJsp));
         }
         return redirect(getClass());
+    }
+
+    /**
+     * Routes an {@link StaticThemeInstaller.InstallException} to a localized
+     * message (M-14). When the cause is a {@link ThemeManifestException},
+     * the structured {@link ThemeManifestException.Code} determines the
+     * error key; otherwise the generic {@code errors.failed_to_upload_theme}
+     * is used.
+     *
+     * @param messages the message accumulator
+     * @param ex the install exception raised by the installer
+     */
+    static void mapInstallExceptionToMessage(final FessMessages messages, final StaticThemeInstaller.InstallException ex) {
+        if (ex.getCause() instanceof ThemeManifestException tme) {
+            addErrorForManifestCode(messages, tme.code());
+            return;
+        }
+        switch (ex.code()) {
+        case SIZE_LIMIT:
+            messages.addErrorsThemeInstallSizeLimit(GLOBAL);
+            break;
+        case ENTRY_LIMIT:
+            messages.addErrorsThemeInstallEntryLimit(GLOBAL);
+            break;
+        case RATIO_LIMIT:
+            messages.addErrorsThemeInstallRatioLimit(GLOBAL);
+            break;
+        case ZIP_BOMB_RATIO:
+            messages.addErrorsThemeInstallZipBombRatio(GLOBAL);
+            break;
+        default:
+            messages.addErrorsFailedToUploadTheme(GLOBAL, String.valueOf(ex.getMessage()));
+            break;
+        }
+    }
+
+    private static void addErrorForManifestCode(final FessMessages messages, final ThemeManifestException.Code code) {
+        switch (code) {
+        case PARSE_FAILED:
+            messages.addErrorsThemeManifestParseFailed(GLOBAL);
+            break;
+        case EMPTY:
+            messages.addErrorsThemeManifestEmpty(GLOBAL);
+            break;
+        case NOT_MAPPING:
+            messages.addErrorsThemeManifestNotMapping(GLOBAL);
+            break;
+        case FIELD_TOO_LONG:
+            messages.addErrorsThemeManifestFieldTooLong(GLOBAL);
+            break;
+        case UNSUPPORTED_API_VERSION:
+            messages.addErrorsThemeManifestUnsupportedApiVersion(GLOBAL);
+            break;
+        case UNSUPPORTED_KIND:
+            messages.addErrorsThemeManifestUnsupportedKind(GLOBAL);
+            break;
+        case INVALID_NAME:
+            messages.addErrorsThemeManifestInvalidName(GLOBAL);
+            break;
+        case DISPLAY_NAME_REQUIRED:
+            messages.addErrorsThemeManifestDisplayNameRequired(GLOBAL);
+            break;
+        case INVALID_VERSION:
+            messages.addErrorsThemeManifestInvalidVersion(GLOBAL);
+            break;
+        case UNSAFE_ENTRY:
+            messages.addErrorsThemeManifestUnsafeEntry(GLOBAL);
+            break;
+        case OTHER:
+        default:
+            messages.addErrorsFailedToUploadTheme(GLOBAL, "");
+            break;
+        }
     }
 
     /**
@@ -202,7 +300,7 @@ public class AdminThemeAction extends FessAdminAction {
             staticThemeInstaller.delete(form.name);
             saveInfo(m -> m.addSuccessDeleteTheme(GLOBAL, form.name));
         } catch (final StaticThemeInstaller.InstallException ex) {
-            logger.warn("Theme delete rejected: {}", ex.getMessage());
+            logger.warn("Theme delete rejected", ex);
             switch (ex.code()) {
             case ACTIVE_DEFAULT:
                 throwValidationError(m -> m.addErrorsThemeIsActive(GLOBAL, form.name), () -> asListHtml(new ThemeListForm()));

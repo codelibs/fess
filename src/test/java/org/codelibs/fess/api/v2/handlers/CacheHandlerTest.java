@@ -23,7 +23,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.AsyncContext;
@@ -111,6 +115,53 @@ public class CacheHandlerTest extends UnitFessTestCase {
         final String body = res.body();
         assertTrue(body.contains("\"code\":\"not_found\"") || body.contains("\"code\":\"internal_error\""),
                 "expected structured error envelope: " + body);
+    }
+
+    @Test
+    public void cache_authLookupException_returns500NotAuthRequired() throws Exception {
+        // M-17: when FessLoginAssist throws on the user-bean lookup, the response must be
+        // INTERNAL_ERROR (500), not AUTH_REQUIRED (401). The previous behavior swallowed the
+        // exception and treated the caller as anonymous, which — when app.login.required=true
+        // — would surface as a misleading 401 telling the user to re-login.
+        final FessLoginAssist throwing = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                throw new RuntimeException("forced DI lookup failure");
+            }
+        };
+        ComponentUtil.register(throwing, "fessLoginAssist");
+        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new CacheHandler().handle(new StubRequest("GET", "/api/v2/cache/abc"), res, "abc");
+            org.junit.jupiter.api.Assertions.assertEquals(500, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+            assertFalse(res.body().contains("\"code\":\"auth_required\""),
+                    "lookup exception must not be misreported as auth_required: " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void cache_anonymousUser_returns401OrBackendError() throws Exception {
+        // M-17 regression: a genuine anonymous caller (no user bean) must NOT see 500 from
+        // the auth path — only the configured login-required gate (401) or downstream
+        // search-engine failure (404/500). The existing test_loginRequired_whenNotAuthenticated_*
+        // covers the auth-gate path; this one explicitly asserts no spurious 500 from the
+        // auth lookup itself when the lookup returns empty (rather than throwing).
+        final CapturingResponse res = new CapturingResponse();
+        new CacheHandler().handle(new StubRequest("GET", "/api/v2/cache/zzz"), res, "zzz");
+        // Either 401 (login required + anonymous) or 404/500 from backend.
+        assertTrue(res.status == 401 || res.status == 404 || res.status == 500, "unexpected status: " + res.status + " body=" + res.body());
+        // Critical M-17 assertion: when the 500 path is taken it must not be because the
+        // auth lookup itself raised an unexpected exception with a misleading code.
+        if (res.status == 500) {
+            assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */

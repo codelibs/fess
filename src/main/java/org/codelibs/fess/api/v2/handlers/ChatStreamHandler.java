@@ -23,6 +23,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +47,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -78,11 +86,89 @@ public class ChatStreamHandler {
     private static final Logger logger = LogManager.getLogger(ChatStreamHandler.class);
 
     /**
+     * Number of threads in the shared keep-alive scheduler pool.
+     *
+     * <p>Two threads are sufficient for typical deployments: one can be occupied
+     * delivering a ping while the second takes the next scheduled slot, preventing
+     * head-of-line blocking under bursts of simultaneous SSE connections. A single
+     * thread would serialise all pings — acceptable for low concurrency but a
+     * risk at scale. More than two threads offer no benefit because each task is
+     * O(microseconds) (a single write + flush) and the dominant cost is the
+     * scheduler overhead itself, not CPU.</p>
+     */
+    private static final int KEEPALIVE_POOL_SIZE = 2;
+
+    /**
+     * Shared scheduler for SSE keep-alive pings. All concurrent SSE requests share this
+     * pool so thread count is bounded to {@link #KEEPALIVE_POOL_SIZE} regardless of the
+     * number of simultaneous connections. Threads are daemon threads so they never prevent
+     * JVM shutdown.
+     *
+     * <p>Lifecycle: initialized in {@link #init()} ({@link PostConstruct}) and shut down
+     * in {@link #destroy()} ({@link PreDestroy}). The field is {@code volatile} so the
+     * write in {@code init()} is visible to request threads without requiring
+     * synchronization on every {@code handle()} call.</p>
+     */
+    private volatile ScheduledExecutorService sharedKeepalivePool;
+
+    /**
      * Default constructor used by the DI container. The handler holds no
      * per-request state and is safe to share across concurrent requests.
+     * {@link #init()} must be called (by the DI container via {@link PostConstruct})
+     * before any request is processed.
      */
     public ChatStreamHandler() {
-        // no-op
+        // no-op — pool is created in init()
+    }
+
+    /**
+     * Initializes the shared keep-alive scheduler pool. Called by Lasta Di after
+     * the component is bound ({@link PostConstruct}).
+     *
+     * <p>The pool uses daemon threads named {@code fess-sse-keepalive-N} (1-based)
+     * so they are visible in thread dumps and never prevent JVM shutdown.</p>
+     */
+    @PostConstruct
+    public void init() {
+        final AtomicInteger counter = new AtomicInteger(0);
+        final ThreadFactory factory = r -> {
+            final Thread t = new Thread(r, "fess-sse-keepalive-" + counter.incrementAndGet());
+            t.setDaemon(true);
+            return t;
+        };
+        sharedKeepalivePool = Executors.newScheduledThreadPool(KEEPALIVE_POOL_SIZE, factory);
+        if (logger.isInfoEnabled()) {
+            logger.info("ChatStreamHandler keepalive pool initialized: poolSize={}", KEEPALIVE_POOL_SIZE);
+        }
+    }
+
+    /**
+     * Shuts down the shared keep-alive pool on container shutdown ({@link PreDestroy}).
+     *
+     * <p>Waits up to 1 second for in-flight tasks to complete; if they have not
+     * finished by then, {@link ScheduledExecutorService#shutdownNow()} is called to
+     * interrupt waiting threads. Individual per-request futures are cancelled via
+     * {@link ScheduledFuture#cancel(boolean)} before this point, so only the pool
+     * lifecycle itself needs termination here.</p>
+     */
+    @PreDestroy
+    public void destroy() {
+        final ScheduledExecutorService pool = sharedKeepalivePool;
+        if (pool == null) {
+            return;
+        }
+        pool.shutdown();
+        try {
+            if (!pool.awaitTermination(1L, TimeUnit.SECONDS)) {
+                pool.shutdownNow();
+            }
+        } catch (final InterruptedException e) {
+            pool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("ChatStreamHandler keepalive pool shut down");
+        }
     }
 
     /** Max raw body bytes the handler will read. Same generous buffer as ChatHandler. */
@@ -174,12 +260,23 @@ public class ChatStreamHandler {
         // Tracks whether the inner phase callback has already emitted an "error" SSE event.
         // The outer catch consults it to avoid emitting a duplicate error event.
         final boolean[] errorEmittedHolder = { false };
+        // Shared monitor that serializes ALL writes to the response writer — phase events,
+        // chunks, keep-alive pings and the final done/error. Without this, the scheduler
+        // thread could interleave a ":keepalive" comment in the middle of an event:/data:
+        // pair from the request thread, corrupting the SSE wire format.
+        final Object writeLock = new Object();
 
         // Tag the request for the search-log access-type column, same as v1.
         req.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, fessConfig.getSystemProperty("rag.llm.name", "ollama"));
 
+        // Schedule periodic keep-alive pings to defeat idle-connection timeouts on
+        // intermediaries (nginx default proxy_read_timeout = 60s) during long LLM phases.
+        // The future is cancelled in finally — the shared pool itself is NOT shut down here.
+        final long keepaliveMs = resolveKeepaliveIntervalMs(fessConfig);
+        final ScheduledFuture<?> pingerFuture = startKeepalivePinger(writer, writeLock, keepaliveMs);
+
         try {
-            final ChatPhaseCallback phaseCallback = newPhaseCallback(writer, errorEmittedHolder);
+            final ChatPhaseCallback phaseCallback = newPhaseCallback(writer, errorEmittedHolder, writeLock);
 
             final ChatResult result;
             if (body.fields().isEmpty() && body.extraQueries().length == 0) {
@@ -191,7 +288,9 @@ public class ChatStreamHandler {
 
             final List<ChatSource> sources = result.getMessage().getSources();
             if (sources != null && !sources.isEmpty()) {
-                sendSseEvent(writer, "sources", Map.of("sources", ChatHandler.toSourceMaps(sources)));
+                synchronized (writeLock) {
+                    sendSseEvent(writer, "sources", Map.of("sources", ChatHandler.toSourceMaps(sources)));
+                }
             }
 
             final Map<String, Object> doneData = new LinkedHashMap<>();
@@ -200,7 +299,9 @@ public class ChatStreamHandler {
             if (htmlContent != null) {
                 doneData.put("html_content", htmlContent);
             }
-            sendSseEvent(writer, "done", doneData);
+            synchronized (writeLock) {
+                sendSseEvent(writer, "done", doneData);
+            }
         } catch (final LlmException e) {
             // The callback already emitted onError to the SSE stream; do not double-send.
             logger.warn("[RAG] /api/v2/chat/stream LLM error. sessionId={}, errorCode={}", body.sessionId(), e.getErrorCode());
@@ -212,11 +313,102 @@ public class ChatStreamHandler {
             // container may have already closed it.
             if (!errorEmittedHolder[0] && !res.isCommitted()) {
                 try {
-                    sendSseEvent(writer, "error", Map.of("message", "internal error", "error_code", LlmException.ERROR_UNKNOWN));
+                    synchronized (writeLock) {
+                        sendSseEvent(writer, "error", Map.of("message", "internal error", "error_code", LlmException.ERROR_UNKNOWN));
+                    }
                 } catch (final Exception ioe) {
                     logger.warn("Failed to send SSE error after exception", ioe);
                 }
             }
+        } finally {
+            stopKeepalivePinger(pingerFuture);
+        }
+    }
+
+    /**
+     * Resolves the keep-alive interval from configuration with a safe default. Returns the
+     * configured value when valid, or {@code 15000} ms when the config key is missing,
+     * malformed, or negative. A value of {@code 0} disables the pinger.
+     *
+     * @param fessConfig active configuration
+     * @return interval in milliseconds; {@code 0} disables the pinger
+     */
+    protected long resolveKeepaliveIntervalMs(final FessConfig fessConfig) {
+        try {
+            final Integer v = fessConfig.getApiV2ChatStreamKeepaliveIntervalMsAsInteger();
+            if (v == null) {
+                return 15000L;
+            }
+            return v.longValue() < 0 ? 0L : v.longValue();
+        } catch (final RuntimeException e) {
+            // Config key missing in slim test harnesses or malformed value: fall back to default.
+            return 15000L;
+        }
+    }
+
+    /**
+     * Schedules a periodic keep-alive ping task on the shared {@link #sharedKeepalivePool}.
+     * Emits {@code ": keepalive\n\n"} (SSE comment line — ignored by EventSource clients)
+     * on a fixed delay. Returns {@code null} when {@code intervalMs} is {@code <=0} so the
+     * pinger is fully disabled.
+     *
+     * <p>All emissions are guarded by {@code writeLock} which is also held by the
+     * request thread while writing event/data pairs, so the pinger can never interleave
+     * inside an event frame.</p>
+     *
+     * <p>The returned {@link ScheduledFuture} must be cancelled (not the pool) when the
+     * request completes — call {@link #stopKeepalivePinger(ScheduledFuture)}.</p>
+     *
+     * @param writer servlet writer
+     * @param writeLock shared monitor serializing writes to {@code writer}
+     * @param intervalMs ping interval; {@code <=0} disables pinging
+     * @return a future representing the scheduled ping task, or {@code null} when disabled
+     */
+    protected ScheduledFuture<?> startKeepalivePinger(final PrintWriter writer, final Object writeLock, final long intervalMs) {
+        if (intervalMs <= 0L) {
+            return null;
+        }
+        final ScheduledExecutorService pool = sharedKeepalivePool;
+        if (pool == null || pool.isShutdown()) {
+            // Pool not yet initialized (e.g. slim test harness that did not call init())
+            // or already shut down — degrade gracefully without pinging.
+            logger.debug("ChatStreamHandler: keepalive pool unavailable; pinger disabled for this request");
+            return null;
+        }
+        final ScheduledFuture<?> future = pool.scheduleAtFixedRate(() -> {
+            try {
+                synchronized (writeLock) {
+                    writer.write(": keepalive\n\n");
+                    writer.flush();
+                }
+            } catch (final Exception e) {
+                // Most likely the client disconnected — don't spam logs; let the
+                // request thread surface the error on its next write.
+                logger.debug("SSE keep-alive write failed", e);
+            }
+        }, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
+        assert future != null;
+        return future;
+    }
+
+    /**
+     * Cancels a keep-alive ping future previously returned by
+     * {@link #startKeepalivePinger(PrintWriter, Object, long)}. The shared pool is
+     * NOT shut down — only this request's scheduled task is cancelled.
+     * Safe to call with {@code null}.
+     *
+     * @param future the ping future to cancel; may be null
+     */
+    protected void stopKeepalivePinger(final ScheduledFuture<?> future) {
+        if (future == null) {
+            return;
+        }
+        try {
+            // mayInterruptIfRunning=false: let a ping that already started (write + flush)
+            // finish naturally; the cost is bounded by one flush cycle.
+            future.cancel(false);
+        } catch (final RuntimeException e) {
+            logger.debug("SSE keep-alive future cancel failed", e);
         }
     }
 
@@ -242,14 +434,13 @@ public class ChatStreamHandler {
      * @return a callback bound to the writer
      */
     protected ChatPhaseCallback newPhaseCallback(final PrintWriter writer) {
-        return newPhaseCallback(writer, new boolean[1]);
+        return newPhaseCallback(writer, new boolean[1], new Object());
     }
 
     /**
-     * Builds a {@link ChatPhaseCallback} that emits SSE events with snake_case keys.
-     * The supplied {@code errorEmittedHolder} flag is set whenever onError is
-     * invoked so the surrounding handler can avoid double-emitting an error
-     * event from its outer catch.
+     * Backward-compatible overload that synthesises a private write lock. Prefer
+     * {@link #newPhaseCallback(PrintWriter, boolean[], Object)} from the request
+     * thread so the lock is shared with the keep-alive pinger.
      *
      * @param writer the per-request servlet writer to emit events to
      * @param errorEmittedHolder single-element boolean array; element 0 is set to true
@@ -257,6 +448,23 @@ public class ChatStreamHandler {
      * @return a callback bound to the writer
      */
     protected ChatPhaseCallback newPhaseCallback(final PrintWriter writer, final boolean[] errorEmittedHolder) {
+        return newPhaseCallback(writer, errorEmittedHolder, new Object());
+    }
+
+    /**
+     * Builds a {@link ChatPhaseCallback} that emits SSE events with snake_case keys.
+     * The supplied {@code errorEmittedHolder} flag is set whenever onError is
+     * invoked so the surrounding handler can avoid double-emitting an error
+     * event from its outer catch. All emissions are serialized on {@code writeLock}
+     * so they cannot interleave with concurrent keep-alive pings.
+     *
+     * @param writer the per-request servlet writer to emit events to
+     * @param errorEmittedHolder single-element boolean array; element 0 is set to true
+     *                           after the first onError emission
+     * @param writeLock shared monitor serializing writes to {@code writer}
+     * @return a callback bound to the writer
+     */
+    protected ChatPhaseCallback newPhaseCallback(final PrintWriter writer, final boolean[] errorEmittedHolder, final Object writeLock) {
         return new ChatPhaseCallback() {
             @Override
             public void onPhaseStart(final String phase, final String message) {
@@ -270,7 +478,7 @@ public class ChatStreamHandler {
                 data.put("status", "start");
                 data.put("message", message);
                 putIfNotNull(data, "keywords", keywords);
-                emitSafely(writer, "phase", data);
+                emitSafely(writer, "phase", data, writeLock);
             }
 
             @Override
@@ -292,13 +500,13 @@ public class ChatStreamHandler {
                         }
                     });
                 }
-                emitSafely(writer, "phase", data);
+                emitSafely(writer, "phase", data, writeLock);
             }
 
             @Override
             public void onChunk(final String content, final boolean done) {
                 if (content != null && !content.isEmpty()) {
-                    emitSafely(writer, "chunk", Map.of("content", content));
+                    emitSafely(writer, "chunk", Map.of("content", content), writeLock);
                 }
             }
 
@@ -312,7 +520,7 @@ public class ChatStreamHandler {
                 putIfNotNull(data, "phase", phase);
                 data.put("message", errorCode);
                 data.put("error_code", errorCode);
-                emitSafely(writer, "error", data);
+                emitSafely(writer, "error", data, writeLock);
             }
 
             @Override
@@ -325,7 +533,7 @@ public class ChatStreamHandler {
                 data.put("max_attempts", maxAttempts);
                 data.put("sleep_ms", sleepMs);
                 putIfNotNull(data, "cause", cause);
-                emitSafely(writer, "retry", data);
+                emitSafely(writer, "retry", data, writeLock);
             }
 
             @Override
@@ -335,7 +543,7 @@ public class ChatStreamHandler {
                 data.put("reason", reason);
                 data.put("elapsed_ms", elapsedMs);
                 data.put("timeout_ms", timeoutMs);
-                emitSafely(writer, "waiting", data);
+                emitSafely(writer, "waiting", data, writeLock);
             }
 
             @Override
@@ -345,7 +553,7 @@ public class ChatStreamHandler {
                 data.put("reason", reason);
                 putIfNotNull(data, "original_query", originalQuery);
                 putIfNotNull(data, "new_query", newQuery);
-                emitSafely(writer, "fallback", data);
+                emitSafely(writer, "fallback", data, writeLock);
             }
 
             @Override
@@ -354,7 +562,7 @@ public class ChatStreamHandler {
                 data.put("phase", phase);
                 data.put("code", code);
                 putIfNotNull(data, "detail", detail);
-                emitSafely(writer, "warning", data);
+                emitSafely(writer, "warning", data, writeLock);
             }
         };
     }
@@ -371,6 +579,26 @@ public class ChatStreamHandler {
     protected void emitSafely(final PrintWriter writer, final String event, final Map<String, Object> data) {
         try {
             sendSseEvent(writer, event, data);
+        } catch (final Exception e) {
+            logger.warn("Failed to emit SSE event. event={}", event, e);
+        }
+    }
+
+    /**
+     * Lock-aware variant of {@link #emitSafely(PrintWriter, String, Map)} that
+     * serializes the write on a shared monitor — used so phase events cannot
+     * interleave with concurrent keep-alive pings inside an event/data frame.
+     *
+     * @param writer servlet writer
+     * @param event SSE event name
+     * @param data event payload to serialize as JSON
+     * @param writeLock shared monitor serializing writes to {@code writer}
+     */
+    protected void emitSafely(final PrintWriter writer, final String event, final Map<String, Object> data, final Object writeLock) {
+        try {
+            synchronized (writeLock) {
+                sendSseEvent(writer, event, data);
+            }
         } catch (final Exception e) {
             logger.warn("Failed to emit SSE event. event={}", event, e);
         }

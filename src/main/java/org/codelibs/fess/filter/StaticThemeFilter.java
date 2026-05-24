@@ -88,6 +88,14 @@ public class StaticThemeFilter implements Filter {
     private final AtomicBoolean firstFailure = new AtomicBoolean(false);
 
     /**
+     * Latches on the first {@link VirtualHostHelper} lookup failure so the
+     * operator sees a single WARN instead of one per request when the helper
+     * cannot be resolved. Subsequent failures degrade to DEBUG. Mirrors
+     * {@link #firstFailure} but tracks the virtual-host helper independently.
+     */
+    private final AtomicBoolean hostKeyFirstFailure = new AtomicBoolean(false);
+
+    /**
      * Default constructor.
      */
     public StaticThemeFilter() {
@@ -225,7 +233,9 @@ public class StaticThemeFilter implements Filter {
                 return h.getVirtualHostKey();
             }
         } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
+            if (hostKeyFirstFailure.compareAndSet(false, true)) {
+                logger.warn("VirtualHostHelper not available; using null host key for static-theme routing", e);
+            } else if (logger.isDebugEnabled()) {
                 logger.debug("VirtualHostHelper not available; using null host key", e);
             }
         }

@@ -166,11 +166,15 @@ public class LoginHandler {
             return;
         }
 
-        // MJ-27: Already-authenticated path — check before calling assist.login().
-        // If the session already has a valid user bean, avoid unnecessary re-auth:
-        //  - same username: return early with existing bean + current CSRF token (no re-auth).
-        //  - different username: this is an explicit account-switch; log at INFO for audit
-        //    visibility, then proceed with full re-auth (no forced logout here — SPA UX).
+        // C-2: POST /auth/login MUST always verify the supplied password. We previously had a
+        // "same-user fast path" that returned a fresh CSRF token when the existing session was
+        // already bound to the same userId — that branch skipped credential verification AND
+        // rate-limiting AND session-id rotation, letting any holder of a valid session cookie
+        // confirm session validity and rotate CSRF tokens without proving the password. The
+        // intended "refresh CSRF token while keeping session" use case belongs to
+        // GET /api/v2/ui/config, not the login endpoint. So we always go through assist.login()
+        // regardless of existing session state; the post-success changeSessionId() handles
+        // session fixation, and an account-switch is just the natural outcome of a fresh login.
         final OptionalThing<FessUserBean> existingBean;
         try {
             existingBean = assist.getSavedUserBean();
@@ -180,24 +184,11 @@ public class LoginHandler {
             return;
         }
         if (existingBean.isPresent()) {
-            final FessUserBean existing = existingBean.get();
-            if (username.equals(existing.getUserId())) {
-                // Same user is already authenticated — return success without re-auth so
-                // the SPA can refresh its token without triggering a redundant credential check.
-                final HttpSession existingSession = req.getSession(false);
-                final SessionCsrfTokenManager csrf = ComponentUtil.getComponent(SessionCsrfTokenManager.class);
-                final String existingToken;
-                if (existingSession != null) {
-                    existingToken = csrf.issue(existingSession);
-                } else {
-                    existingToken = csrf.issue(req.getSession(true));
-                }
-                final Map<String, Object> payload = buildUserPayload(existing, existingToken, returnTo);
-                V2EnvelopeWriter.writeSuccess(res, payload);
-                return;
+            final String existingUserId = existingBean.get().getUserId();
+            if (!username.equals(existingUserId)) {
+                // Different username: operator-visible audit log for account-switch path.
+                logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", existingUserId, username);
             }
-            // Different username: operator-visible audit log for account-switch path.
-            logger.info("[v2/login] account switch: prevUserId={}, newUserId={}", existing.getUserId(), username);
         }
 
         try {
@@ -297,8 +288,16 @@ public class LoginHandler {
         payload.put("return_to", returnTo);
     }
 
+    /**
+     * Strictly coerces a JSON value to {@code String}. Non-string types (numbers,
+     * booleans, arrays, objects, null) all return {@code null} — matching the
+     * pattern used by other v2 handlers (e.g. ClickHandler). Calling
+     * {@code Object.toString()} here would silently accept e.g. {@code 42} as a
+     * username and let the auth flow proceed with a stringified non-string, which
+     * is not what the wire contract intends.
+     */
     private static String stringOrNull(final Object v) {
-        return v == null ? null : v.toString();
+        return v instanceof String s ? s : null;
     }
 
     /**

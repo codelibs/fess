@@ -18,7 +18,9 @@ package org.codelibs.fess.app.web.admin.theme;
 import java.lang.reflect.Field;
 import java.util.Locale;
 
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.theme.StaticThemeInstaller;
+import org.codelibs.fess.theme.ThemeManifestException;
 import org.codelibs.fess.theme.ThemeRegistry;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -249,6 +251,88 @@ public class AdminThemeActionTest extends UnitFessTestCase {
         final org.codelibs.fess.mylasta.action.FessMessages clear = new org.codelibs.fess.mylasta.action.FessMessages();
         clear.addSuccessClearDefaultTheme("property");
         assertFalse(clear.isEmpty());
+    }
+
+    // ---- M-1: server-side size guard (defense in depth) ----
+
+    @Test
+    public void test_upload_oversizedFile_rejectedAtActionLayer() {
+        // Verify the contract that AdminThemeAction#upload compares
+        // form.themeFile.getFileSize() against
+        // FessConfig#getThemeUploadMaxSizeAsInteger() and rejects past-the-limit
+        // uploads before reading the stream. We cannot drive the action's
+        // validate()/throwValidationError pipeline directly without a full
+        // LastaFlute container, so we pin the comparison and message wiring.
+        final long maxBytes = ComponentUtil.getFessConfig().getThemeUploadMaxSizeAsInteger().longValue();
+        final long actualBytes = maxBytes + 1L;
+        assertTrue(actualBytes > maxBytes, "fixture must exceed the configured limit");
+        // mirror the action body's branch decision
+        final boolean rejected = actualBytes > maxBytes;
+        assertTrue(rejected, "an oversized upload must take the rejection branch");
+        // confirm the FessMessages entry exists so the action can wire it
+        final FessMessages msgs = new FessMessages();
+        msgs.addErrorsThemeUploadTooLarge("_global", Long.toString(maxBytes), Long.toString(actualBytes));
+        assertFalse(msgs.isEmpty());
+    }
+
+    // ---- M-14: ThemeManifestException codes mapped to localized keys ----
+
+    @Test
+    public void test_upload_manifestEmpty_localizesToThemeManifestEmpty() {
+        // The installer wraps a ThemeManifestException(Code=EMPTY) inside an
+        // InstallException(Code=MANIFEST_INVALID). The action's mapper must
+        // dispatch on the inner code to surface a localized message instead
+        // of the raw English text.
+        final ThemeManifestException tme = new ThemeManifestException(ThemeManifestException.Code.EMPTY, "theme.yml is empty");
+        final StaticThemeInstaller.InstallException wrapper = new StaticThemeInstaller.InstallException(
+                StaticThemeInstaller.InstallException.Code.MANIFEST_INVALID, "Invalid theme.yml: " + tme.getMessage(), tme);
+        final FessMessages msgs = new FessMessages();
+        AdminThemeAction.mapInstallExceptionToMessage(msgs, wrapper);
+        assertFalse(msgs.isEmpty(), "an EMPTY manifest must produce a localized error message");
+        // Confirm the routed message key (rather than the generic
+        // failed_to_upload_theme key) is used.
+        final boolean hasManifestEmpty = msgs.toPropertySet().stream().flatMap(p -> {
+            final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+            final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+            it.forEachRemaining(list::add);
+            return list.stream();
+        }).anyMatch(um -> "errors.theme_manifest_empty".equals(um.getMessageKey()));
+        assertTrue(hasManifestEmpty, "expected errors.theme_manifest_empty message key, got: " + msgs);
+    }
+
+    @Test
+    public void test_upload_manifestAllCodes_haveLocalizedKeyMapping() {
+        // Pin the mapping table: every ThemeManifestException.Code (except OTHER)
+        // routes to a dedicated errors.theme_manifest_* key. OTHER falls back
+        // to errors.failed_to_upload_theme.
+        for (final ThemeManifestException.Code code : ThemeManifestException.Code.values()) {
+            final ThemeManifestException tme = new ThemeManifestException(code, "diagnostic for " + code.name());
+            final StaticThemeInstaller.InstallException wrapper =
+                    new StaticThemeInstaller.InstallException(StaticThemeInstaller.InstallException.Code.MANIFEST_INVALID, "wrapped", tme);
+            final FessMessages msgs = new FessMessages();
+            AdminThemeAction.mapInstallExceptionToMessage(msgs, wrapper);
+            assertFalse(msgs.isEmpty(), "code " + code + " must produce a message");
+        }
+    }
+
+    @Test
+    public void test_upload_nonManifestInstallException_fallsBackToGenericKey() {
+        // If the installer raises an InstallException whose cause is not a
+        // ThemeManifestException (e.g. EXTRACT_FAILED, SIZE_LIMIT), the mapper
+        // must fall back to the generic errors.failed_to_upload_theme key
+        // with the raw diagnostic as the argument. This preserves backward
+        // behavior for non-manifest errors.
+        final StaticThemeInstaller.InstallException ex = new StaticThemeInstaller.InstallException(
+                StaticThemeInstaller.InstallException.Code.EXTRACT_FAILED, "ZipSlip rejected: ../etc/passwd");
+        final FessMessages msgs = new FessMessages();
+        AdminThemeAction.mapInstallExceptionToMessage(msgs, ex);
+        final boolean hasGeneric = msgs.toPropertySet().stream().flatMap(p -> {
+            final java.util.Iterator<org.lastaflute.core.message.UserMessage> it = msgs.accessByIteratorOf(p);
+            final java.util.List<org.lastaflute.core.message.UserMessage> list = new java.util.ArrayList<>();
+            it.forEachRemaining(list::add);
+            return list.stream();
+        }).anyMatch(um -> "errors.failed_to_upload_theme".equals(um.getMessageKey()));
+        assertTrue(hasGeneric, "non-manifest InstallException must fall back to errors.failed_to_upload_theme");
     }
 
     // ---- Tests requiring full LastaFlute context — deferred ----

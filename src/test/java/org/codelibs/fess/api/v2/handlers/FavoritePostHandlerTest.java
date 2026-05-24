@@ -25,8 +25,19 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.app.service.FavoriteLogService;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.SearchHelper;
+import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
@@ -46,13 +57,46 @@ import jakarta.servlet.http.Part;
  * Unit tests for {@link FavoritePostHandler}.
  *
  * <p>Verifies the wire contract for {@code POST /api/v2/documents/{docId}/favorite}:
- * GET is rejected (400), anonymous callers see {@code auth_required} (401), and
- * malformed doc ids surface as {@code invalid_request} (400). The auth check is
- * testable because the handler wraps the {@link org.codelibs.fess.app.web.base.login.FessLoginAssist}
- * lookup in a try/catch — in the unit harness the lookup typically fails, which
- * is treated as anonymous (same pattern as {@code MeHandler}).</p>
+ * GET is rejected (405), anonymous callers see {@code auth_required} (401) or
+ * {@code invalid_request} (400) from the feature gate, and malformed doc ids
+ * surface as {@code invalid_request} (400).</p>
+ *
+ * <p>The default setUp registers an anonymous-stub {@link FessLoginAssist} that
+ * returns {@code OptionalThing.empty()} from {@code getSavedUserBean()} so the
+ * M-17 exception-from-session-manager path does not fire and unauthenticated
+ * tests get the expected 401/400 rather than 500.</p>
  */
 public class FavoritePostHandlerTest extends UnitFessTestCase {
+
+    /**
+     * Registers an anonymous-returning stub so that
+     * {@code ComponentUtil.getComponent(FessLoginAssist.class)} succeeds and
+     * {@code getSavedUserBean()} returns {@code OptionalThing.empty()}.
+     *
+     * <p>Without this stub the DI lookup fails or the real
+     * {@link FessLoginAssist} throws when accessing the session manager with
+     * no active HTTP context — both routes trigger M-17's INTERNAL_ERROR
+     * branch and produce a misleading 500 instead of the expected 401/400.</p>
+     */
+    @Override
+    protected void setUp(final TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        registerAnonymousLoginAssist();
+    }
+
+    /** Registers a stub that always reports "no user in session" (anonymous). */
+    private static void registerAnonymousLoginAssist() {
+        final FessLoginAssist anon = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.empty();
+            }
+        };
+        ComponentUtil.register(anon, "fessLoginAssist");
+        ComponentUtil.register(anon, FessLoginAssist.class.getCanonicalName());
+    }
 
     @Test
     public void test_anonymousReturnsAuthRequired() throws Exception {
@@ -134,7 +178,11 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
                 res, "abc");
         if (res.status == 500) {
             final String body = res.body();
-            assertTrue(body.contains("\"message\":\"favorite add failed\""),
+            // V2EnvelopeWriter.writeInternalError always emits "internal error" — the
+            // exact literal used by all internal-error paths in the v2 API. The original
+            // expectation of "favorite add failed" predated writeInternalError and is
+            // corrected here to match the current fixed-string contract.
+            assertTrue(body.contains("\"message\":\"internal error\""),
                     "internal error response must use the fixed message, not e.getMessage(): " + body);
         }
     }
@@ -147,6 +195,225 @@ public class FavoritePostHandlerTest extends UnitFessTestCase {
         assertEquals(400, res.status);
         assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
         assertTrue(res.body().contains("invalid doc_id"), res.body());
+    }
+
+    /**
+     * M-9: a duplicate POST of the same favorite must NOT surface as 500.
+     * The handler treats addUrl()==false as an idempotent no-op and returns 200 with
+     * {@code already_existed: true}. We stub every collaborator the handler touches
+     * so the path runs end-to-end against in-memory fakes.
+     */
+    @Test
+    public void favoritePost_duplicate_returns200Idempotent() throws Exception {
+        final FessUserBean userBean = new FessUserBean(new StubFessUser("alice"));
+        final FessLoginAssist loginStub = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.of(userBean);
+            }
+        };
+        ComponentUtil.register(loginStub, "fessLoginAssist");
+        ComponentUtil.register(loginStub, FessLoginAssist.class.getCanonicalName());
+
+        final FessConfig cfgStub = new FavoriteEnabledFessConfig();
+        // Use setFessConfig so ComponentUtil.getFessConfig() returns this stub —
+        // the static cache is checked first and bypasses the DI lookup entirely.
+        ComponentUtil.setFessConfig(cfgStub);
+        ComponentUtil.register(cfgStub, "fessConfig");
+        ComponentUtil.register(cfgStub, FessConfig.class.getCanonicalName());
+
+        final UserInfoHelper userInfoStub = new UserInfoHelper() {
+            @Override
+            public String getUserCode() {
+                return "alice-code";
+            }
+
+            @Override
+            public String[] getResultDocIds(final String queryId) {
+                return new String[] { "abc" };
+            }
+        };
+        ComponentUtil.register(userInfoStub, "userInfoHelper");
+        ComponentUtil.register(userInfoStub, UserInfoHelper.class.getCanonicalName());
+
+        final SearchHelper searchHelperStub = new SearchHelper() {
+            @Override
+            public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+                    final OptionalThing<FessUserBean> ub) {
+                final Map<String, Object> doc = new HashMap<>();
+                doc.put("url", "http://example.com/abc");
+                doc.put("_id", "abc-id");
+                return OptionalEntity.of(doc);
+            }
+        };
+        ComponentUtil.register(searchHelperStub, "searchHelper");
+        ComponentUtil.register(searchHelperStub, SearchHelper.class.getCanonicalName());
+
+        // The duplicate-on-second-call FavoriteLogService stub: returns true the first call,
+        // false on every subsequent call. The handler is invoked twice; the second invocation
+        // is the idempotency assertion target.
+        final int[] addUrlCalls = { 0 };
+        final FavoriteLogService favLogStub = new FavoriteLogService() {
+            @Override
+            public boolean addUrl(final String userCode,
+                    final java.util.function.BiConsumer<org.codelibs.fess.opensearch.log.exentity.UserInfo, org.codelibs.fess.opensearch.log.exentity.FavoriteLog> favoriteLogLambda) {
+                addUrlCalls[0]++;
+                return addUrlCalls[0] == 1;
+            }
+        };
+        ComponentUtil.register(favLogStub, "favoriteLogService");
+        ComponentUtil.register(favLogStub, FavoriteLogService.class.getCanonicalName());
+
+        // SystemHelper is fetched before the search try-block — register a minimal stub so
+        // ComponentUtil.getSystemHelper() does not throw ComponentNotFoundException.
+        final org.codelibs.fess.helper.SystemHelper systemHelperStub = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public java.time.LocalDateTime getCurrentTimeAsLocalDateTime() {
+                return java.time.LocalDateTime.now();
+            }
+        };
+        ComponentUtil.register(systemHelperStub, "systemHelper");
+        ComponentUtil.register(systemHelperStub, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+
+        try {
+            // First call — addUrl returns true, but searchHelper.update will throw because
+            // we did not stub the language helper / search-engine client. The handler's
+            // outer catch turns that into a 500. For the M-9 contract we only care about
+            // the SECOND call where addUrl returns false → idempotent 200.
+            final CapturingResponse first = new CapturingResponse();
+            try {
+                new FavoritePostHandler().handle(
+                        new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q1\"}"), first, "abc");
+            } catch (final RuntimeException ignore) {
+                // The first call's searchHelper.update path may throw because we did not
+                // stub LanguageHelper or the search-engine client; the M-9 assertion is on
+                // the second call. Either 200 or 500 from the first call is acceptable here.
+            }
+
+            final CapturingResponse second = new CapturingResponse();
+            new FavoritePostHandler()
+                    .handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q1\"}"), second, "abc");
+            org.junit.jupiter.api.Assertions.assertEquals(200, second.status, second.body());
+            assertTrue(second.body().contains("\"ok\":true"), second.body());
+            assertTrue(second.body().contains("\"doc_id\":\"abc\""), second.body());
+            assertTrue(second.body().contains("\"already_existed\":true"),
+                    "duplicate POST must carry already_existed:true: " + second.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void favoritePost_authLookupException_returns500NotAuthRequired() throws Exception {
+        // M-17: when FessLoginAssist throws on the user-bean lookup, the response must be
+        // INTERNAL_ERROR (500), not AUTH_REQUIRED (401). A logged-in caller seeing 401
+        // would be misled into thinking their session expired when DI is actually broken.
+        final FessLoginAssist throwing = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                throw new RuntimeException("forced DI lookup failure");
+            }
+        };
+        ComponentUtil.register(throwing, "fessLoginAssist");
+        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new FavoritePostHandler().handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q\"}"),
+                    res, "abc");
+            org.junit.jupiter.api.Assertions.assertEquals(500, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+            assertFalse(res.body().contains("\"code\":\"auth_required\""),
+                    "lookup exception must not be misreported as auth_required: " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void favoritePost_anonymousUser_returns401OrFeatureGated() throws Exception {
+        // M-17 regression: a genuine anonymous caller (no user bean) must still surface as
+        // AUTH_REQUIRED 401 — the M-17 fix only diverts on lookup exceptions. The unit
+        // harness may have the favorite feature disabled (returning 400 invalid_request from
+        // the cfg.isUserFavorite() gate); either way the response must NOT be 500.
+        final CapturingResponse res = new CapturingResponse();
+        new FavoritePostHandler().handle(new StubRequest("POST", "/api/v2/documents/abc/favorite").withJsonBody("{\"query_id\":\"q\"}"),
+                res, "abc");
+        assertTrue(res.status == 401 || res.status == 400, "unexpected status " + res.status + ": " + res.body());
+        assertTrue(res.status != 500, "anonymous caller must not produce 500: " + res.body());
+    }
+
+    /**
+     * Minimal {@link FessConfig} stub that enables the favorite feature and supplies the
+     * index-field names the handler accesses. Everything else delegates to {@code SimpleImpl}.
+     */
+    private static class FavoriteEnabledFessConfig extends FessConfig.SimpleImpl {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean isUserFavorite() {
+            return true;
+        }
+
+        @Override
+        public String getIndexFieldUrl() {
+            return "url";
+        }
+
+        @Override
+        public String getIndexFieldId() {
+            return "_id";
+        }
+
+        @Override
+        public String getIndexFieldLang() {
+            return "lang";
+        }
+
+        @Override
+        public String getIndexFieldFavoriteCount() {
+            return "favorite_count";
+        }
+
+        @Override
+        public Integer getPageFavoriteLogMaxFetchSizeAsInteger() {
+            return 100;
+        }
+    }
+
+    /** Minimal {@link FessUser} stub — the handler only reads name/userId. */
+    private static class StubFessUser implements FessUser {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+
+        StubFessUser(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String[] getRoleNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getGroupNames() {
+            return new String[0];
+        }
+
+        @Override
+        public String[] getPermissions() {
+            return new String[0];
+        }
     }
 
     /** Minimal HttpServletResponse stub — captures status, content type, headers and body. */

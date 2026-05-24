@@ -118,6 +118,37 @@ public class ClickHandlerTest extends UnitFessTestCase {
         }
     }
 
+    /**
+     * m-8: epoch-ms to LocalDateTime conversion must use UTC, not ZoneId.systemDefault().
+     * Forces the JVM default TimeZone to two opposing zones (PST and JST) and asserts the
+     * resulting LocalDateTime is identical — proving the conversion is timezone-independent.
+     */
+    @Test
+    public void test_epochMsToUtcLocalDateTime_isTimezoneInvariant() {
+        final java.util.TimeZone original = java.util.TimeZone.getDefault();
+        try {
+            // 2024-06-15T12:34:56.789Z — picked so PST and JST land on different calendar days.
+            final long epochMs = 1718454896789L;
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/Los_Angeles"));
+            final java.time.LocalDateTime pst = ClickHandler.epochMsToUtcLocalDateTime(epochMs);
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Tokyo"));
+            final java.time.LocalDateTime jst = ClickHandler.epochMsToUtcLocalDateTime(epochMs);
+            // Same epoch must yield the same LocalDateTime irrespective of default zone.
+            assertEquals(pst, jst);
+            // And that LocalDateTime must be the UTC wall-clock for the epoch.
+            assertEquals(java.time.LocalDateTime.of(2024, 6, 15, 12, 34, 56, 789_000_000), pst);
+        } finally {
+            java.util.TimeZone.setDefault(original);
+        }
+    }
+
+    @Test
+    public void test_epochMsToUtcLocalDateTime_handlesEpochZero() {
+        // Defensive sanity: epoch 0 → 1970-01-01T00:00:00 UTC. Was prone to off-by-hours
+        // drift under the old systemDefault() conversion in non-UTC test environments.
+        assertEquals(java.time.LocalDateTime.of(1970, 1, 1, 0, 0, 0), ClickHandler.epochMsToUtcLocalDateTime(0L));
+    }
+
     @Test
     public void test_validPostReturnsStableEnvelope() throws Exception {
         // When isSearchLog() is false, the handler returns 200 with logged:false.

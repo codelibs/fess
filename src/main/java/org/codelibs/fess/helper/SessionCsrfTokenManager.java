@@ -15,8 +15,12 @@
  */
 package org.codelibs.fess.helper;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HexFormat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +60,9 @@ public class SessionCsrfTokenManager {
         if (existing instanceof String s && !s.isEmpty()) {
             if (logger.isDebugEnabled()) {
                 // m-9: log token length only — NEVER log the token value itself.
-                logger.debug("[csrf.issue] token already present: sessionId={}, tokenLength={}", sessionId(session), s.length());
+                // m-19: log a truncated SHA-256 of the session id instead of the raw id
+                // so the log line can correlate events without leaking a hijackable id.
+                logger.debug("[csrf.issue] token already present: sessionIdHash={}, tokenLength={}", redactSessionId(session), s.length());
             }
             return s;
         }
@@ -65,7 +71,7 @@ public class SessionCsrfTokenManager {
         final String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         session.setAttribute(SESSION_ATTR, token);
         if (logger.isDebugEnabled()) {
-            logger.debug("[csrf.issue] new token issued: sessionId={}, tokenLength={}", sessionId(session), token.length());
+            logger.debug("[csrf.issue] new token issued: sessionIdHash={}, tokenLength={}", redactSessionId(session), token.length());
         }
         return token;
     }
@@ -80,15 +86,15 @@ public class SessionCsrfTokenManager {
     public boolean verify(final HttpSession session, final String provided) {
         if (provided == null || provided.isEmpty()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("[csrf.verify] rejected: provided token is null or empty; sessionId={}",
-                        session != null ? sessionId(session) : "null");
+                logger.debug("[csrf.verify] rejected: provided token is null or empty; sessionIdHash={}",
+                        session != null ? redactSessionId(session) : "null");
             }
             return false;
         }
         final Object stored = session.getAttribute(SESSION_ATTR);
         if (!(stored instanceof String s) || s.isEmpty()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("[csrf.verify] rejected: no stored token in session; sessionId={}", sessionId(session));
+                logger.debug("[csrf.verify] rejected: no stored token in session; sessionIdHash={}", redactSessionId(session));
             }
             return false;
         }
@@ -96,7 +102,7 @@ public class SessionCsrfTokenManager {
         if (logger.isDebugEnabled()) {
             // Log lengths only — never log token values. The matched flag is safe to log
             // because it carries no token material; it only tells ops why a 403 occurred.
-            logger.debug("[csrf.verify] result: sessionId={}, storedLength={}, providedLength={}, matched={}", sessionId(session),
+            logger.debug("[csrf.verify] result: sessionIdHash={}, storedLength={}, providedLength={}, matched={}", redactSessionId(session),
                     s.length(), provided.length(), matched);
         }
         return matched;
@@ -119,20 +125,45 @@ public class SessionCsrfTokenManager {
         }
         session.removeAttribute(SESSION_ATTR);
         if (logger.isDebugEnabled()) {
-            logger.debug("[csrf.rotate] token removed, issuing fresh token: sessionId={}", sessionId(session));
+            logger.debug("[csrf.rotate] token removed, issuing fresh token: sessionIdHash={}", redactSessionId(session));
         }
         return issue(session);
     }
 
     /**
-     * Safe accessor for session id — some container implementations throw on {@code getId()}
-     * when the session has already been invalidated, so we catch and fall back to a literal.
+     * Returns a redacted, log-safe identifier derived from the session id: the first
+     * 8 hex characters of its SHA-256 digest. The raw session id is NEVER logged,
+     * because anyone who reads it from a log can hijack the session.
+     *
+     * <p>If the session id cannot be retrieved (container threw {@code IllegalStateException}
+     * because the session was invalidated, or another runtime failure) or SHA-256 is not
+     * available on the JVM (should not happen on a standard Java runtime), this returns
+     * a literal placeholder rather than leaking the raw id.</p>
+     *
+     * @param session the HTTP session whose id should be hashed; may be {@code null}
+     * @return an 8-character lowercase hex prefix of {@code SHA-256(sessionId)}, or a literal placeholder
      */
-    private static String sessionId(final HttpSession session) {
+    static String redactSessionId(final HttpSession session) {
+        if (session == null) {
+            return "(null)";
+        }
+        final String id;
         try {
-            return session.getId();
+            id = session.getId();
         } catch (final Exception e) {
             return "(unavailable)";
+        }
+        if (id == null || id.isEmpty()) {
+            return "(empty)";
+        }
+        try {
+            final MessageDigest md = MessageDigest.getInstance("SHA-256");
+            final byte[] digest = md.digest(id.getBytes(StandardCharsets.UTF_8));
+            // First 8 hex chars (= 32 bits) is enough entropy to correlate log lines
+            // for a single user session without being reversible to the raw id.
+            return HexFormat.of().formatHex(digest, 0, 4);
+        } catch (final NoSuchAlgorithmException e) {
+            return "(no-sha256)";
         }
     }
 

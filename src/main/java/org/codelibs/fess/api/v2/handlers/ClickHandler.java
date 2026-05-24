@@ -18,8 +18,9 @@ package org.codelibs.fess.api.v2.handlers;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -75,11 +76,35 @@ public class ClickHandler {
     private static final Pattern DOC_ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     /**
+     * One-shot warning flag so a missing {@code UserInfoHelper} component is
+     * logged at WARN exactly once per JVM lifetime instead of being silently
+     * swallowed. Mirrors {@code LoginHandler.ipResolveWarned}.
+     */
+    private static final AtomicBoolean userInfoHelperWarned = new AtomicBoolean(false);
+
+    /**
      * Default constructor. The handler is stateless and intended to be
      * instantiated once by the API manager and shared across concurrent requests.
      */
     public ClickHandler() {
         // no-op
+    }
+
+    /**
+     * Converts an epoch-millis timestamp into a {@link LocalDateTime} using UTC, so the
+     * same value yields the same date/time regardless of the host's default timezone.
+     *
+     * <p>m-8: previously this conversion used {@code ZoneId.systemDefault()} which
+     * caused wall-clock drift in mixed-timezone deployments (e.g. a click logged with
+     * the same {@code rt} would land at different hours depending on which Fess node
+     * processed it). UTC is the consistent canonical form for storage; the admin UI
+     * is responsible for any per-user timezone formatting.</p>
+     *
+     * @param epochMs epoch millis
+     * @return UTC-anchored {@link LocalDateTime}
+     */
+    static LocalDateTime epochMsToUtcLocalDateTime(final long epochMs) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMs), ZoneOffset.UTC);
     }
 
     private static String stringOrNull(final Map<String, Object> body, final String key) {
@@ -120,6 +145,12 @@ public class ClickHandler {
             userSessionId = ComponentUtil.getUserInfoHelper().getUserCode();
         } catch (final RuntimeException e) {
             // UserInfoHelper unavailable (e.g. unit harness): behave as anonymous.
+            // Promote to WARN exactly once per JVM so an accidental misconfiguration
+            // in production (e.g. component removed from DI graph) is surfaced
+            // without flooding logs on every click.
+            if (userInfoHelperWarned.compareAndSet(false, true)) {
+                logger.warn("UserInfoHelper unavailable; treating click as anonymous", e);
+            }
         }
         if (userSessionId == null) {
             // Anonymous caller: a click log without a session id is meaningless,
@@ -158,11 +189,9 @@ public class ClickHandler {
             clickLog.setRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
             final Object rt = body.get("rt");
             if (rt instanceof Number) {
-                // Convert epoch millis -> LocalDateTime via java.time to stay independent of
-                // DBFlute's util layer. Same result as DfTypeUtil.toLocalDateTime(long) but
-                // expressed with the JDK's standard API.
-                clickLog.setQueryRequestedAt(
-                        LocalDateTime.ofInstant(Instant.ofEpochMilli(((Number) rt).longValue()), ZoneId.systemDefault()));
+                // m-8: use UTC so the same epoch-ms yields the same LocalDateTime regardless of
+                // host timezone; click logs are stored consistently across mixed-TZ clusters.
+                clickLog.setQueryRequestedAt(epochMsToUtcLocalDateTime(((Number) rt).longValue()));
             } else {
                 clickLog.setQueryRequestedAt(systemHelper.getCurrentTimeAsLocalDateTime());
             }

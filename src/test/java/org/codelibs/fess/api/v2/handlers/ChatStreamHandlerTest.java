@@ -403,6 +403,210 @@ public class ChatStreamHandlerTest extends UnitFessTestCase {
         assertFalse(out.contains("\"newQuery\""), "onFallback must NOT use newQuery: " + out);
     }
 
+    // ── M-11: SSE keep-alive ping (defeats nginx proxy_read_timeout during long LLM phases) ───
+
+    @Test
+    public void test_keepalivePinger_emitsCommentLineOnInterval() throws Exception {
+        // Use a small interval (50ms) so the scheduler fires several times during a short
+        // wait. The pinger emits ": keepalive\n\n" (SSE comment) which EventSource clients
+        // ignore but which keeps the TCP connection alive across idle-timeout proxies.
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final Object lock = new Object();
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        final java.util.concurrent.ScheduledFuture<?> future = handler.startKeepalivePinger(pw, lock, 50L);
+        try {
+            // Wait long enough for at least 2 pings to fire (50ms * 3 = 150ms; allow extra slack).
+            Thread.sleep(300L);
+        } finally {
+            handler.stopKeepalivePinger(future);
+            handler.destroy();
+        }
+        final String out;
+        synchronized (lock) {
+            pw.flush();
+            out = sw.toString();
+        }
+        // Must emit the SSE comment line.
+        assertTrue(out.contains(": keepalive\n\n"), "keep-alive comment must appear: " + out);
+        // And must emit MORE than once across the wait window.
+        final int count = out.split(java.util.regex.Pattern.quote(": keepalive\n\n"), -1).length - 1;
+        assertTrue(count >= 2, "expected >=2 keep-alive pings, got " + count + " in: " + out);
+    }
+
+    @Test
+    public void test_keepalivePinger_disabledWhenIntervalZero() {
+        // intervalMs <= 0 must NOT schedule any work — returns null so the handler can
+        // skip shutdown logic and unit tests can verify the disable path.
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        try {
+            assertNull(handler.startKeepalivePinger(pw, new Object(), 0L), "intervalMs=0 must disable the pinger");
+            assertNull(handler.startKeepalivePinger(pw, new Object(), -1L), "negative interval must disable the pinger");
+        } finally {
+            handler.destroy();
+        }
+    }
+
+    @Test
+    public void test_keepalivePinger_serializesWritesWithEvents() throws Exception {
+        // Verify that a concurrent SSE event emission and a keep-alive ping cannot interleave
+        // inside a frame. We synchronize event emission on the SAME writeLock the pinger uses;
+        // after running both concurrently, every "event: " line must be immediately followed
+        // by a "data: " line on the very next line, i.e. no ":keepalive" wedged between them.
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final Object lock = new Object();
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        final java.util.concurrent.ScheduledFuture<?> future = handler.startKeepalivePinger(pw, lock, 5L);
+        try {
+            // Hammer the same lock from this thread emitting phase events.
+            for (int i = 0; i < 200; i++) {
+                final java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+                data.put("phase", "retrieval");
+                data.put("status", "start");
+                handler.emitSafely(pw, "phase", data, lock);
+            }
+        } finally {
+            handler.stopKeepalivePinger(future);
+            handler.destroy();
+        }
+        synchronized (lock) {
+            pw.flush();
+        }
+        final String out = sw.toString();
+        // Walk every "event:" occurrence and assert the next non-empty line starts with "data:".
+        final String[] lines = out.split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith("event: ")) {
+                assertTrue(i + 1 < lines.length && lines[i + 1].startsWith("data: "),
+                        "event line must be immediately followed by data line — keepalive must not interleave; " + "got at " + i + ": ["
+                                + lines[i] + "] / [" + (i + 1 < lines.length ? lines[i + 1] : "<eof>") + "] full output:\n" + out);
+            }
+        }
+    }
+
+    @Test
+    public void test_resolveKeepaliveIntervalMs_defaultsTo15s() {
+        // When the config getter is unavailable (slim test harness) the helper must fall
+        // back to the documented default of 15000ms — never throw, never return 0 (which
+        // would silently disable the pinger in production).
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        // SimpleImpl will resolve to the default via the generated default map (15000ms).
+        // Use a stub that explicitly throws to exercise the catch branch.
+        final FessConfig throwing = new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Integer getApiV2ChatStreamKeepaliveIntervalMsAsInteger() {
+                throw new RuntimeException("not configured");
+            }
+        };
+        assertEquals(15000L, handler.resolveKeepaliveIntervalMs(throwing));
+    }
+
+    // ── MAJOR-3: shared keepalive pool tests ───────────────────────────────────
+
+    @Test
+    public void test_sharedKeepalivePool_singleInstanceAcrossRequests() throws Exception {
+        // Multiple concurrent requests must share a single ScheduledExecutorService
+        // instance, not create one per request. We verify this by comparing the pool
+        // reference obtained via reflection before and after calling startKeepalivePinger
+        // on the same handler instance.
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        try {
+            final java.lang.reflect.Field poolField = ChatStreamHandler.class.getDeclaredField("sharedKeepalivePool");
+            poolField.setAccessible(true);
+            final java.util.concurrent.ScheduledExecutorService pool1 =
+                    (java.util.concurrent.ScheduledExecutorService) poolField.get(handler);
+
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
+            final Object lock = new Object();
+
+            // Simulate two concurrent requests — both must obtain futures from the same pool.
+            final java.util.concurrent.ScheduledFuture<?> f1 = handler.startKeepalivePinger(pw, lock, 10000L);
+            final java.util.concurrent.ScheduledFuture<?> f2 = handler.startKeepalivePinger(pw, lock, 10000L);
+
+            // Pool reference must be identical between calls.
+            final java.util.concurrent.ScheduledExecutorService pool2 =
+                    (java.util.concurrent.ScheduledExecutorService) poolField.get(handler);
+            assertTrue("sharedKeepalivePool must be the same instance across multiple startKeepalivePinger calls", pool1 == pool2);
+
+            // Futures are distinct per-request tasks even though the pool is shared.
+            assertNotNull(f1, "first future must not be null");
+            assertNotNull(f2, "second future must not be null");
+            assertTrue("each request must receive a distinct ScheduledFuture", f1 != f2);
+
+            handler.stopKeepalivePinger(f1);
+            handler.stopKeepalivePinger(f2);
+        } finally {
+            handler.destroy();
+        }
+    }
+
+    @Test
+    public void test_keepaliveFutureCancelledOnRequestEnd() throws Exception {
+        // stopKeepalivePinger must cancel the future (cancel(false)) without affecting
+        // the shared pool. After cancellation the future must report isDone() == true
+        // while the pool itself remains alive (not isShutdown()).
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        try {
+            final java.lang.reflect.Field poolField = ChatStreamHandler.class.getDeclaredField("sharedKeepalivePool");
+            poolField.setAccessible(true);
+            final java.util.concurrent.ScheduledExecutorService pool =
+                    (java.util.concurrent.ScheduledExecutorService) poolField.get(handler);
+
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
+            // Use a very long interval so the task never actually fires during the test.
+            final java.util.concurrent.ScheduledFuture<?> future = handler.startKeepalivePinger(pw, new Object(), 60000L);
+            assertNotNull(future, "future must not be null");
+            assertFalse(future.isDone(), "future must not be done before cancellation");
+
+            handler.stopKeepalivePinger(future);
+
+            // Future must be cancelled.
+            assertTrue(future.isDone(), "future must be done after stopKeepalivePinger");
+            assertTrue(future.isCancelled(), "future must be cancelled (not completed normally) after stopKeepalivePinger");
+
+            // Shared pool must remain alive — only the request-level future is cancelled.
+            assertFalse(pool.isShutdown(), "shared pool must NOT be shut down after stopKeepalivePinger");
+        } finally {
+            handler.destroy();
+        }
+    }
+
+    @Test
+    public void test_keepalivePoolThreadNaming() throws Exception {
+        // Threads in the shared pool must follow the fess-sse-keepalive-N naming pattern
+        // so they are identifiable in thread dumps and do not collide with other pools.
+        final ChatStreamHandler handler = new ChatStreamHandler();
+        handler.init();
+        try {
+            // Submit a task that captures the name of the executing thread, then await it.
+            final java.lang.reflect.Field poolField = ChatStreamHandler.class.getDeclaredField("sharedKeepalivePool");
+            poolField.setAccessible(true);
+            final java.util.concurrent.ScheduledExecutorService pool =
+                    (java.util.concurrent.ScheduledExecutorService) poolField.get(handler);
+
+            final java.util.concurrent.CompletableFuture<String> threadNameFuture = new java.util.concurrent.CompletableFuture<>();
+            pool.submit(() -> threadNameFuture.complete(Thread.currentThread().getName()));
+            final String threadName = threadNameFuture.get(3, java.util.concurrent.TimeUnit.SECONDS);
+
+            assertTrue(threadName.matches("fess-sse-keepalive-\\d+"),
+                    "keepalive pool thread name must match fess-sse-keepalive-N pattern; got: " + threadName);
+        } finally {
+            handler.destroy();
+        }
+    }
+
     @Test
     public void test_oversizedBody_returnsJsonEnvelope() throws Exception {
         // V2JsonBody caps the body at MAX_BODY_BYTES (32KiB for the streaming handler).

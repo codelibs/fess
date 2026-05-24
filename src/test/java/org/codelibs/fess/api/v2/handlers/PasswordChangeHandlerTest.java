@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.api.v2.handlers;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,6 +35,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.lastaflute.web.login.credential.LoginCredential;
 
 import jakarta.servlet.AsyncContext;
@@ -56,11 +55,14 @@ import jakarta.servlet.http.Part;
 /**
  * Unit tests for {@link PasswordChangeHandler}.
  *
- * <p>Extends {@link UnitFessTestCase} so {@code FessLoginAssist} resolves via
- * Lasta DI. In the unit harness no session is bound, so
- * {@code getSavedUserBean()} returns an empty {@code OptionalThing} — that
- * gives us the auth-required branch for free. The pre-auth validation tests
- * (GET method) exit before the auth check.</p>
+ * <p>Extends {@link UnitFessTestCase} so the DI container is available.
+ * The default setUp registers an anonymous-stub {@link FessLoginAssist} that
+ * returns {@code OptionalThing.empty()} from {@code getSavedUserBean()} so
+ * unauthenticated-path tests receive the expected {@code 401 auth_required}
+ * rather than a {@code 500 internal_error} from the M-17 session-manager
+ * lookup (which throws in the unit harness when no HTTP context is bound).
+ * Tests that need an authenticated or throwing stub call
+ * {@link #registerStubLoginAssist} or register their own stub directly.</p>
  *
  * <p>The mismatch and blank tests use {@code application/json} bodies but —
  * importantly — also exit at the auth-required gate because no user is logged
@@ -70,6 +72,36 @@ import jakarta.servlet.http.Part;
  * harness with a logged-in user is available.</p>
  */
 public class PasswordChangeHandlerTest extends UnitFessTestCase {
+
+    /**
+     * Registers an anonymous-returning stub so that
+     * {@code ComponentUtil.getComponent(FessLoginAssist.class)} succeeds and
+     * {@code getSavedUserBean()} returns {@code OptionalThing.empty()}.
+     *
+     * <p>Without this stub the DI lookup either throws (no-component) or the
+     * real {@link FessLoginAssist} calls {@code sessionManager.getAttribute()}
+     * which throws in the unit harness when no HTTP session context is bound —
+     * both would be caught by M-17 and produce a misleading 500 instead of 401.</p>
+     */
+    @Override
+    protected void setUp(final TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
+        registerAnonymousLoginAssist();
+    }
+
+    /** Registers a stub that always reports "no user in session" (anonymous). */
+    private static void registerAnonymousLoginAssist() {
+        final FessLoginAssist anon = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                return OptionalThing.empty();
+            }
+        };
+        ComponentUtil.register(anon, "fessLoginAssist");
+        ComponentUtil.register(anon, FessLoginAssist.class.getCanonicalName());
+    }
 
     @Test
     public void test_rejectsGet() throws Exception {
@@ -156,11 +188,10 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
     }
 
     @Test
-    public void passwordChange_successRotatesAndReturnsFreshCsrfToken() throws Exception {
-        // M-03: on a successful password change, the handler MUST rotate the CSRF token and
-        // return a freshly issued one in the response payload under "csrf_token". This forces
-        // SPA clients to refresh their stored token after the change, defending against an
-        // attacker who exfiltrated the old token via a separate vector (XSS, phishing kit).
+    public void passwordChange_successInvalidatesSession() throws Exception {
+        // M-3: on a successful password change the handler MUST invalidate the current HTTP
+        // session so any exfiltrated session token is immediately revoked. We verify this by
+        // attaching a TrackingStubSession that records whether invalidate() was called.
         registerStubLoginAssist("alice", "secret-current");
         final boolean[] changedCalled = { false };
         final StubUserService stubSvc = new StubUserService(changedCalled);
@@ -174,15 +205,9 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         };
         ComponentUtil.register(systemHelper, "systemHelper");
         ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
-        // Install a real SessionCsrfTokenManager so the handler can rotate + issue.
-        final org.codelibs.fess.helper.SessionCsrfTokenManager csrf = new org.codelibs.fess.helper.SessionCsrfTokenManager();
-        ComponentUtil.register(csrf, "sessionCsrfTokenManager");
-        ComponentUtil.register(csrf, org.codelibs.fess.helper.SessionCsrfTokenManager.class.getCanonicalName());
         try {
-            // Pre-seed the session with an existing CSRF token so we can verify rotation.
-            final StubSession session = new StubSession();
-            final String preCallToken = csrf.issue(session);
-            assertNotNull(preCallToken, "pre-call token must be non-null");
+            final TrackingStubSession session = new TrackingStubSession();
+            assertFalse(session.invalidateCalled, "invalidate must not have been called before the handler");
 
             final CapturingResponse res = new CapturingResponse();
             new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
@@ -194,16 +219,64 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
             assertTrue(res.body().contains("\"ok\":true"), res.body());
             assertTrue(changedCalled[0], "expected UserService.changePassword to be invoked");
 
-            // The response must carry a fresh csrf_token.
-            assertTrue(res.body().contains("\"csrf_token\""), "response must contain csrf_token: " + res.body());
+            // M-3: session.invalidate() must have been called after the password was changed.
+            assertTrue(session.invalidateCalled, "session.invalidate() must be called after a successful password change (M-3)");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
 
-            // The rotated token in the session must differ from the pre-call token.
-            final String freshToken = csrf.issue(session);
-            assertNotNull(freshToken, "fresh token must be non-null");
-            assertNotEquals(preCallToken, freshToken, "csrf_token must have been rotated after password change");
+    @Test
+    public void passwordChange_successDoesNotReturnCsrfToken() throws Exception {
+        // M-3: because the session is destroyed on success, the response must NOT carry a
+        // csrf_token field — the old token belongs to a dead session and the SPA must
+        // obtain a fresh token after re-authenticating.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
 
-            // The pre-call token must no longer verify — it was rotated out.
-            assertFalse(csrf.verify(session, preCallToken), "pre-call token must be invalid after rotation");
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertFalse(res.body().contains("\"csrf_token\""),
+                    "response must NOT contain csrf_token after session invalidation (M-3): " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_failureDoesNotInvalidateSession() throws Exception {
+        // M-3: when the current_password is wrong the session must NOT be invalidated —
+        // only a verified, successful password change warrants session destruction.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final TrackingStubSession session = new TrackingStubSession();
+
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody("{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(401, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+            assertFalse(session.invalidateCalled, "session.invalidate() must NOT be called when password change fails (M-3)");
         } finally {
             ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
             ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
@@ -212,9 +285,9 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
     @Test
     public void passwordChange_successResponse_containsReLoginRequired() throws Exception {
-        // MJ-7: successful password change response MUST include re_login_required:true
-        // so the SPA knows to redirect to login. The current session is NOT invalidated
-        // (SPA UX decision), but the signal is there for SPAs that want to re-authenticate.
+        // M-3 / MJ-7: successful password change response MUST include re_login_required:true
+        // so the SPA knows to redirect to login. The current session IS invalidated server-side
+        // (M-3); the SPA MUST redirect to the login page after receiving this flag.
         registerStubLoginAssist("alice", "secret-current");
         final boolean[] changedCalled = { false };
         final StubUserService stubSvc = new StubUserService(changedCalled);
@@ -299,6 +372,274 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void passwordChange_currentPasswordWrong_consumesRateLimit() throws Exception {
+        // C-3: a wrong current_password must consume exactly one slot in the per-user
+        // bucket. The handler reads the limit from FessConfig (default 5/min for the
+        // unit harness). We pre-burn 4 of 5 directly via the limiter so the handler's
+        // own slot-consume on the wrong-password path is the 5th — afterwards peek()
+        // returns false, proving exactly one slot was taken.
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final LoginRateLimiter rl = new LoginRateLimiter();
+            for (int i = 0; i < 4; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60);
+            }
+            assertTrue(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60), "one slot must remain before the wrong-pw call");
+
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
+
+            assertEquals(401, res.status);
+            assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+
+            // The wrong-pw path must have consumed the final slot.
+            assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60),
+                    "bucket must be exhausted after one wrong-pw call consumed the 5th slot");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_lockedOut_returns429() throws Exception {
+        // C-3: when the per-user bucket is already exhausted before this request, the
+        // handler must return 429 RATE_LIMITED with a Retry-After header — and crucially
+        // it must NOT call findLoginUser (we assert by registering a stub that throws
+        // if called, see comment below).
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final LoginRateLimiter rl = new LoginRateLimiter();
+            // Pre-exhaust the bucket so peek() will fail immediately.
+            for (int i = 0; i < 5; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60);
+            }
+            assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60), "bucket must be exhausted");
+
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler(rl).handle(
+                    new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+
+            assertEquals(429, res.status);
+            assertTrue(res.body().contains("\"code\":\"rate_limited\""), res.body());
+            assertNotNull(res.getHeader("Retry-After"), "Retry-After header must be set on 429");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_successDoesNotConsumeSlot() throws Exception {
+        // C-3: a successful change must NOT leave consumed slots behind — the clear()
+        // call resets the bucket. We pre-burn 4 of 5 slots to prove the reset is real:
+        // after the success, the bucket admits a fresh full 5 attempts again.
+        registerStubLoginAssist("alice", "secret-current");
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final LoginRateLimiter rl = new LoginRateLimiter();
+            for (int i = 0; i < 4; i++) {
+                rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60);
+            }
+            assertTrue(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60), "one slot must remain before success");
+
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler(rl).handle(new StubRequest("POST", "/api/v2/auth/password").withJsonBody(
+                    "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(changedCalled[0], "expected UserService.changePassword to be invoked");
+
+            // After clear() the bucket must admit all 5 slots again.
+            for (int i = 0; i < 5; i++) {
+                assertTrue(rl.allow(LoginRateLimiter.Scope.USER, "alice", 5, 60), "bucket must be fully reset after success");
+            }
+            assertFalse(rl.peek(LoginRateLimiter.Scope.USER, "alice", 5, 60), "bucket must now be exhausted on the 6th");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_nonStringCurrentPassword_returns400() throws Exception {
+        // M-10: a numeric JSON value for current_password used to be silently stringified
+        // by v.toString(). With the instanceof guard the value is treated as null, the
+        // blank-check trips, and the client sees an invalid_request 400 rather than a
+        // misleading auth_required 401 from a hash-compare against "12345".
+        registerStubLoginAssist("alice", "secret-current");
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password")
+                    .withJsonBody("{\"current_password\":12345,\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"), res);
+            org.junit.jupiter.api.Assertions.assertEquals(400, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"invalid_request\""), res.body());
+            assertTrue(res.body().contains("current_password"), res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_authLookupException_returns500NotAuthRequired() throws Exception {
+        // M-17: when FessLoginAssist itself throws on the saved-user lookup, the response
+        // must be INTERNAL_ERROR (500), not AUTH_REQUIRED (401). The latter would mislead
+        // a logged-in user into thinking their session expired when DI is actually broken.
+        final FessLoginAssist throwing = new FessLoginAssist() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public OptionalThing<FessUserBean> getSavedUserBean() {
+                throw new RuntimeException("forced DI lookup failure");
+            }
+        };
+        ComponentUtil.register(throwing, "fessLoginAssist");
+        ComponentUtil.register(throwing, FessLoginAssist.class.getCanonicalName());
+        try {
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password")
+                    .withJsonBody("{\"current_password\":\"x\",\"new_password\":\"y\",\"confirm_password\":\"y\"}"), res);
+            org.junit.jupiter.api.Assertions.assertEquals(500, res.status, res.body());
+            assertTrue(res.body().contains("\"code\":\"internal_error\""), res.body());
+            assertFalse(res.body().contains("\"code\":\"auth_required\""),
+                    "lookup exception must not be misreported as auth_required: " + res.body());
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_anonymousUser_returns401() throws Exception {
+        // M-17 regression: a genuine anonymous caller (no user bean present) must still
+        // get the AUTH_REQUIRED 401 — the M-17 fix only diverts on lookup exceptions,
+        // not on empty results.
+        final CapturingResponse res = new CapturingResponse();
+        new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password")
+                .withJsonBody("{\"current_password\":\"x\",\"new_password\":\"y\",\"confirm_password\":\"y\"}"), res);
+        assertEquals(401, res.status);
+        assertTrue(res.body().contains("\"code\":\"auth_required\""), res.body());
+    }
+
+    // ── MINOR-4: assist.logout() before session.invalidate() ──────────────────
+
+    @Test
+    public void passwordChange_success_callsAssistLogout() throws Exception {
+        // MINOR-4: on a successful password change, assist.logout() must be called
+        // BEFORE session.invalidate() so remember-me cookies are cleared and audit events
+        // are recorded — matching the LogoutHandler contract.
+        final TrackingStubLoginAssist trackingAssist = new TrackingStubLoginAssist("alice", "secret-current");
+        ComponentUtil.register(trackingAssist, "fessLoginAssist");
+        ComponentUtil.register(trackingAssist, FessLoginAssist.class.getCanonicalName());
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final TrackingStubSession session = new TrackingStubSession();
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            assertTrue(trackingAssist.logoutCalled, "assist.logout() must be called on the success path (MINOR-4)");
+            assertTrue(session.invalidateCalled, "session.invalidate() must still be called after assist.logout()");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_success_sessionInvalidatedEvenWhenLogoutThrows() throws Exception {
+        // MINOR-4: if assist.logout() throws, session.invalidate() must still run and
+        // the response must still be the normal 200 ok — logout failure must be swallowed.
+        final ThrowingLogoutStubLoginAssist throwingAssist = new ThrowingLogoutStubLoginAssist("alice", "secret-current");
+        ComponentUtil.register(throwingAssist, "fessLoginAssist");
+        ComponentUtil.register(throwingAssist, FessLoginAssist.class.getCanonicalName());
+        final boolean[] changedCalled = { false };
+        final StubUserService stubSvc = new StubUserService(changedCalled);
+        ComponentUtil.register(stubSvc, "userService");
+        ComponentUtil.register(stubSvc, org.codelibs.fess.app.service.UserService.class.getCanonicalName());
+        final org.codelibs.fess.helper.SystemHelper systemHelper = new org.codelibs.fess.helper.SystemHelper() {
+            @Override
+            public String validatePassword(final String password) {
+                return null;
+            }
+        };
+        ComponentUtil.register(systemHelper, "systemHelper");
+        ComponentUtil.register(systemHelper, org.codelibs.fess.helper.SystemHelper.class.getCanonicalName());
+        try {
+            final TrackingStubSession session = new TrackingStubSession();
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody(
+                            "{\"current_password\":\"secret-current\",\"new_password\":\"NewLongPass123!\",\"confirm_password\":\"NewLongPass123!\"}"),
+                    res);
+
+            // Response must still be 200 ok even though logout() threw.
+            org.junit.jupiter.api.Assertions.assertEquals(200, res.status, res.body());
+            assertTrue(res.body().contains("\"ok\":true"), res.body());
+            // session.invalidate() must still have been called.
+            assertTrue(session.invalidateCalled, "session.invalidate() must be called even when assist.logout() throws (MINOR-4)");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
+    @Test
+    public void passwordChange_wrongPassword_doesNotCallAssistLogout() throws Exception {
+        // MINOR-4: when the current_password is wrong the handler short-circuits before
+        // reaching the logout/session-invalidation block. Neither assist.logout() nor
+        // session.invalidate() should be called.
+        final TrackingStubLoginAssist trackingAssist = new TrackingStubLoginAssist("alice", "secret-current");
+        ComponentUtil.register(trackingAssist, "fessLoginAssist");
+        ComponentUtil.register(trackingAssist, FessLoginAssist.class.getCanonicalName());
+        try {
+            final TrackingStubSession session = new TrackingStubSession();
+            final CapturingResponse res = new CapturingResponse();
+            new PasswordChangeHandler().handle(new StubRequest("POST", "/api/v2/auth/password").withSession(session)
+                    .withJsonBody("{\"current_password\":\"WRONG\",\"new_password\":\"NewPass1!\",\"confirm_password\":\"NewPass1!\"}"),
+                    res);
+
+            org.junit.jupiter.api.Assertions.assertEquals(401, res.status, res.body());
+            assertFalse(trackingAssist.logoutCalled, "assist.logout() must NOT be called on the wrong-password path (MINOR-4)");
+            assertFalse(session.invalidateCalled, "session.invalidate() must NOT be called on the wrong-password path");
+        } finally {
+            ComponentUtil.register(new FessLoginAssist(), "fessLoginAssist");
+            ComponentUtil.register(new FessLoginAssist(), FessLoginAssist.class.getCanonicalName());
+        }
+    }
+
     /**
      * Stub FessLoginAssist that returns a populated entity only when the supplied
      * LocalUserCredential carries {@code expectedPw}. Used by the password-change
@@ -328,6 +669,42 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
                 return OptionalEntity.of(new StubFessUser(local.getUserId()));
             }
             return OptionalEntity.empty();
+        }
+    }
+
+    /**
+     * Extends {@link StubFessLoginAssist} to record whether {@link #logout()} was called.
+     * Used by MINOR-4 tests to verify the logout path.
+     */
+    private static class TrackingStubLoginAssist extends StubFessLoginAssist {
+        private static final long serialVersionUID = 1L;
+        boolean logoutCalled = false;
+
+        TrackingStubLoginAssist(final String userId, final String expectedPw) {
+            super(userId, expectedPw);
+        }
+
+        @Override
+        public void logout() {
+            logoutCalled = true;
+        }
+    }
+
+    /**
+     * Extends {@link StubFessLoginAssist} so that {@link #logout()} throws a
+     * {@link RuntimeException}. Used to verify that a logout failure does not
+     * prevent session invalidation or alter the response status.
+     */
+    private static class ThrowingLogoutStubLoginAssist extends StubFessLoginAssist {
+        private static final long serialVersionUID = 1L;
+
+        ThrowingLogoutStubLoginAssist(final String userId, final String expectedPw) {
+            super(userId, expectedPw);
+        }
+
+        @Override
+        public void logout() {
+            throw new RuntimeException("forced logout failure (test)");
         }
     }
 
@@ -384,6 +761,7 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         final PrintWriter writer = new PrintWriter(sw);
         int status = 200;
         String contentType;
+        final java.util.Map<String, String> headers = new java.util.HashMap<>();
 
         String body() {
             writer.flush();
@@ -525,10 +903,12 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
         @Override
         public void setHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
         public void addHeader(final String name, final String value) {
+            headers.put(name, value);
         }
 
         @Override
@@ -541,17 +921,18 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
 
         @Override
         public String getHeader(final String name) {
-            return null;
+            return headers.get(name);
         }
 
         @Override
         public java.util.Collection<String> getHeaders(final String name) {
-            return java.util.Collections.emptyList();
+            final String v = headers.get(name);
+            return v == null ? java.util.Collections.emptyList() : java.util.Collections.singletonList(v);
         }
 
         @Override
         public java.util.Collection<String> getHeaderNames() {
-            return java.util.Collections.emptyList();
+            return headers.keySet();
         }
     }
 
@@ -1048,6 +1429,21 @@ public class PasswordChangeHandlerTest extends UnitFessTestCase {
         @Override
         public boolean isNew() {
             return false;
+        }
+    }
+
+    /**
+     * A {@link StubSession} extension that also tracks whether {@link #invalidate()}
+     * was called. Used by M-3 tests to assert that session destruction occurs exactly
+     * on the success path and never on failure paths.
+     */
+    private static class TrackingStubSession extends StubSession {
+        boolean invalidateCalled = false;
+
+        @Override
+        public void invalidate() {
+            invalidateCalled = true;
+            super.invalidate();
         }
     }
 }

@@ -67,10 +67,29 @@ var FessChat = (function() {
     var phaseOrder = ['intent', 'search', 'evaluate', 'fetch', 'answer'];
 
     /**
+     * Resolve the servlet context path from the hidden #contextPath input that
+     * the JSP renders (see chat.jsp). Returns an empty string when the page is
+     * served from the root context or the input is missing — preserving the
+     * pre-existing absolute-path behaviour on root-context deployments.
+     */
+    function getContextPath() {
+        var el = document.getElementById('contextPath');
+        return (el && el.value) ? el.value : '';
+    }
+
+    /**
+     * Prepend the context path to an absolute API path so requests work when
+     * Fess is mounted under a non-root servlet context (e.g. /fess/api/v2/...).
+     */
+    function withContextPath(path) {
+        return getContextPath() + path;
+    }
+
+    /**
      * Fetch CSRF token from /api/v2/ui/config
      */
     function fetchCsrfToken() {
-        return fetch('/api/v2/ui/config', {
+        return fetch(withContextPath('/api/v2/ui/config'), {
             method: 'GET',
             credentials: 'same-origin',
             headers: { 'Accept': 'application/json' }
@@ -909,7 +928,7 @@ var FessChat = (function() {
 
         if (state.sessionId) {
             // Clear session on server via DELETE /api/v2/chat/sessions/{session_id}
-            var clearUrl = '/api/v2/chat/sessions/' + encodeURIComponent(state.sessionId);
+            var clearUrl = withContextPath('/api/v2/chat/sessions/' + encodeURIComponent(state.sessionId));
             fetch(clearUrl, {
                 method: 'DELETE',
                 credentials: 'same-origin',

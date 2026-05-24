@@ -115,21 +115,58 @@ public final class V2EnvelopeWriter {
      * A {@code null} message is normalised to the empty string so the wire shape stays
      * predictable.</p>
      *
+     * <p><strong>Buffer reset contract:</strong> when the response is not yet committed,
+     * this method calls {@link HttpServletResponse#resetBuffer()} before writing so that
+     * any buffered partial body from a streaming handler (e.g. NDJSON, SSE) is discarded.
+     * This guarantees the wire response contains ONLY the error envelope and a clean
+     * {@code application/json} Content-Type — no hybrid responses.</p>
+     *
      * @param res the HTTP response to write to
      * @param code the v2 error code; its default HTTP status is applied to the response
      * @param message a human-readable message safe to expose to API callers
      * @throws IOException if writing to the response fails
      */
     public static void writeError(final HttpServletResponse res, final V2ErrorCode code, final String message) throws IOException {
+        writeErrorWithDetails(res, code, message, null);
+    }
+
+    /**
+     * Writes an error v2 envelope with optional structured details.
+     *
+     * <p>Behaves exactly like {@link #writeError(HttpServletResponse, V2ErrorCode, String)}
+     * except that, when {@code details} is non-null, the map is embedded as
+     * {@code error.details} so callers can carry structured diagnostics (e.g. the
+     * engine snapshot on a {@code service_unavailable} health check) without breaking
+     * the canonical envelope shape.</p>
+     *
+     * <p><strong>Buffer reset contract:</strong> when the response is not yet committed,
+     * this method calls {@link HttpServletResponse#resetBuffer()} before writing so any
+     * buffered partial body from a streaming handler is discarded.</p>
+     *
+     * @param res the HTTP response to write to
+     * @param code the v2 error code; its default HTTP status is applied to the response
+     * @param message a human-readable message safe to expose to API callers
+     * @param details optional structured details merged under {@code error.details}; {@code null} omits the key
+     * @throws IOException if writing to the response fails
+     */
+    public static void writeErrorWithDetails(final HttpServletResponse res, final V2ErrorCode code, final String message,
+            final Map<String, Object> details) throws IOException {
         if (res.isCommitted()) {
             return;
         }
+        // Discard any partial body a streaming handler may have buffered (NDJSON / SSE)
+        // before failing — otherwise the wire frame becomes a hybrid of pre-error bytes
+        // and the JSON envelope. Safe to call on an uncommitted response per servlet spec.
+        res.resetBuffer();
         res.setStatus(code.defaultHttpStatus());
         res.setCharacterEncoding("UTF-8");
         res.setContentType(CONTENT_TYPE);
         final Map<String, Object> err = new LinkedHashMap<>();
         err.put("code", code.code());
         err.put("message", message == null ? "" : message);
+        if (details != null && !details.isEmpty()) {
+            err.put("details", details);
+        }
         final int statusValue = code.defaultHttpStatus() >= 500 ? STATUS_SYSTEM_ERROR : STATUS_USER_ERROR;
         final Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("status", statusValue);

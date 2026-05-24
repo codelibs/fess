@@ -116,6 +116,21 @@ public class FavoritePostHandler {
     }
 
     /**
+     * M-9 signal exception: thrown from inside the search-helper lambda when
+     * {@link FavoriteLogService#addUrl} reports the URL was not added (typically
+     * because it already exists for the calling user). The catching outer block
+     * treats this as a no-op success rather than a 500 — a repeated POST of the
+     * same favorite is a logical idempotent retry, not an error.
+     */
+    private static class AlreadyFavoritedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        AlreadyFavoritedException() {
+            super("already favorited");
+        }
+    }
+
+    /**
      * Processes one {@code POST /api/v2/documents/{docId}/favorite} request.
      *
      * <p>Validates the HTTP method, document id format, authenticated session,
@@ -141,14 +156,26 @@ public class FavoritePostHandler {
         }
         // Auth check before body parsing — avoids spending CPU on the body for
         // unauthenticated requests and gives the caller a more accurate error.
-        OptionalThing<FessUserBean> userBean;
+        //
+        // M-17: split DI-binding failure from "no user bean present". Genuine anonymous
+        // callers still see AUTH_REQUIRED (401); a system-level lookup failure surfaces
+        // as INTERNAL_ERROR (500) so we do not mislead a logged-in user into thinking
+        // their session expired when DI is broken.
+        final FessLoginAssist assist;
         try {
-            userBean = ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean();
-        } catch (final Exception e) {
-            // Same fallback as MeHandler / PasswordChangeHandler — in environments
-            // where the login subsystem isn't fully wired, treat as anonymous.
-            logger.warn("/api/v2/documents/{}/favorite POST: login subsystem lookup failed", docId, e);
-            userBean = OptionalThing.empty();
+            assist = ComponentUtil.getComponent(FessLoginAssist.class);
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2/documents/{}/favorite POST: could not acquire FessLoginAssist", docId, e);
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            return;
+        }
+        final OptionalThing<FessUserBean> userBean;
+        try {
+            userBean = assist.getSavedUserBean();
+        } catch (final RuntimeException e) {
+            logger.warn("/api/v2/documents/{}/favorite POST: getSavedUserBean failed", docId, e);
+            V2EnvelopeWriter.writeInternalError(res, e, logger, "/api/v2/documents/" + docId + "/favorite POST");
+            return;
         }
         if (!userBean.isPresent()) {
             V2EnvelopeWriter.writeError(res, V2ErrorCode.AUTH_REQUIRED, "login required");
@@ -211,6 +238,12 @@ public class FavoritePostHandler {
                         if (StringUtil.isBlank(favoriteUrl)) {
                             throw new FavoriteAddFailedException("URL is null");
                         }
+                        // M-9: addUrl returns false when the (user, url) pair already exists
+                        // (or the user info cannot be resolved). Treat the duplicate case as
+                        // an idempotent no-op success — re-POSTing the same favorite should
+                        // not be a 500. We signal "already favorited" via a dedicated marker
+                        // exception so the outer catch can short-circuit the favorite-count
+                        // bump and emit a 200 success envelope.
                         if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
                             favoriteLog.setUserInfoId(userInfo.getId());
                             favoriteLog.setUrl(favoriteUrl);
@@ -218,7 +251,7 @@ public class FavoritePostHandler {
                             favoriteLog.setQueryId(queryId);
                             favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
                         })) {
-                            throw new FavoriteAddFailedException("Failed to add url");
+                            throw new AlreadyFavoritedException();
                         }
                         final String id = DocumentUtil.getValue(doc, cfg.getIndexFieldId(), String.class);
                         searchHelper.update(id, builder -> {
@@ -237,6 +270,20 @@ public class FavoritePostHandler {
         } catch (final DocNotFoundException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: doc not found", docId, e);
             V2EnvelopeWriter.writeError(res, V2ErrorCode.NOT_FOUND, "doc not found: " + docId);
+            return;
+        } catch (final AlreadyFavoritedException e) {
+            // M-9: idempotent re-POST — return 200 with the same payload shape plus an
+            // optional already_existed:true marker so clients can distinguish "freshly
+            // marked" from "already marked" without breaking the documented schema (the
+            // OpenAPI FavoritePostResponse does not declare additionalProperties:false).
+            if (logger.isDebugEnabled()) {
+                logger.debug("/api/v2/documents/{}/favorite POST: already favorited (idempotent no-op)", docId);
+            }
+            final Map<String, Object> idempotentPayload = new java.util.LinkedHashMap<>();
+            idempotentPayload.put("doc_id", docId);
+            idempotentPayload.put("ok", true);
+            idempotentPayload.put("already_existed", true);
+            V2EnvelopeWriter.writeSuccess(res, idempotentPayload);
             return;
         } catch (final FavoriteAddFailedException e) {
             logger.warn("/api/v2/documents/{}/favorite POST: add failed", docId, e);

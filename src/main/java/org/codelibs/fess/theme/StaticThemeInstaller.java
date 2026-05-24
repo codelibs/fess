@@ -57,9 +57,16 @@ import jakarta.annotation.Resource;
  *       {@code themes/.staging-&lt;uuid&gt;}.</li>
  *   <li>Validate the embedded {@code theme.yml} via {@link ThemeManifest}.</li>
  *   <li>If a theme with the same name exists, rename it to an {@code .attic-}
- *       backup so a failed promotion can roll back.</li>
+ *       backup so a failed promotion can roll back. The attic's
+ *       {@code lastModifiedTime} is reset to "now" right after the rename so
+ *       the {@code theme.upload.attic.retention.days} window starts from the
+ *       install moment, not the original theme directory's age.</li>
  *   <li>Atomically rename the staging directory to {@code themes/&lt;name&gt;}
  *       and reload the {@link ThemeRegistry}.</li>
+ *   <li>On success the attic backup is retained per
+ *       {@code theme.upload.attic.retention.days} (default
+ *       {@value #DEFAULT_ATTIC_RETENTION_DAYS} days) and aged out by
+ *       {@link #cleanupOldAtticDirs(Path)}; it is no longer eagerly deleted.</li>
  * </ol>
  */
 public class StaticThemeInstaller {
@@ -86,6 +93,12 @@ public class StaticThemeInstaller {
     private long maxExtractedSize = 209_715_200L;
     private int maxEntries = 1000;
     private int maxCompressionRatio = 100;
+    /** Incremental zip-bomb guard: maximum allowed cumulative uncompressed/compressed ratio. */
+    private int zipRatioMax = 50;
+    /** Incremental zip-bomb guard: minimum cumulative compressed bytes before ratio is evaluated (suppresses FP on tiny archives). */
+    private long zipRatioCheckThresholdBytes = 65_536L;
+    /** Test seam: when non-null, overrides the {@code FessConfig}-driven attic retention. */
+    private Integer atticRetentionDaysOverride;
 
     /**
      * Wire configuration keys from {@link FessConfig} and sweep JVM-crash
@@ -109,6 +122,14 @@ public class StaticThemeInstaller {
                 final Integer cfgRatio = fessConfig.getThemeUploadMaxCompressionRatioAsInteger();
                 if (cfgRatio != null) {
                     maxCompressionRatio = cfgRatio;
+                }
+                final Integer cfgZipRatioMax = fessConfig.getThemeUploadZipRatioMaxAsInteger();
+                if (cfgZipRatioMax != null) {
+                    zipRatioMax = cfgZipRatioMax;
+                }
+                final Long cfgZipRatioThreshold = fessConfig.getThemeUploadZipRatioCheckThresholdBytesAsLong();
+                if (cfgZipRatioThreshold != null) {
+                    zipRatioCheckThresholdBytes = cfgZipRatioThreshold;
                 }
             } catch (final Exception e) {
                 logger.warn("Failed to read theme upload config from FessConfig; using defaults", e);
@@ -170,6 +191,8 @@ public class StaticThemeInstaller {
             ENTRY_LIMIT,
             /** Per-entry compression ratio exceeded the configured limit. */
             RATIO_LIMIT,
+            /** Cumulative uncompressed/compressed ratio exceeded the configured limit. */
+            ZIP_BOMB_RATIO,
             /** Fallback for failures that do not fit any other category. */
             OTHER
         }
@@ -267,6 +290,15 @@ public class StaticThemeInstaller {
                 attic = themesDir.resolve(
                         ".attic-" + m.getName() + "-" + Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8));
                 moveDir(target, attic);
+                // Files.move preserves the source dir's lastModifiedTime, so a long-lived
+                // theme dir would be atticized with an old mtime and instantly culled by
+                // cleanupOldAtticDirs. Reset to "now" so the retention window starts from
+                // the install moment. Best effort: never fail the install on this.
+                try {
+                    Files.setLastModifiedTime(attic, FileTime.from(Instant.now()));
+                } catch (final IOException mtimeErr) {
+                    logger.warn("Failed to reset attic mtime; retention window may be shortened: attic={}", attic, mtimeErr);
+                }
             }
             try {
                 moveDir(staging, target);
@@ -282,11 +314,9 @@ public class StaticThemeInstaller {
                 }
                 throw new InstallException(InstallException.Code.MOVE_FAILED, "Failed to finalize install", moveErr);
             }
-            if (attic != null && !deleteRecursivelyBestEffort(attic) && logger.isWarnEnabled()) {
-                logger.warn(
-                        "Failed to clean up previous attic directory after successful install; " + "manual cleanup recommended: attic={}",
-                        attic);
-            }
+            // Note: the previous attic is intentionally NOT deleted here. It is retained
+            // per theme.upload.attic.retention.days (default DEFAULT_ATTIC_RETENTION_DAYS)
+            // and aged out by cleanupOldAtticDirs to honor the §4.4 retention semantics.
             if (themeRegistry != null) {
                 themeRegistry.reload();
             }
@@ -363,6 +393,8 @@ public class StaticThemeInstaller {
             ZipEntry entry;
             int entries = 0;
             long total = 0;
+            long cumulativeCompressed = 0L;
+            long cumulativeUncompressed = 0L;
             final byte[] buffer = new byte[8192];
             while ((entry = zis.getNextEntry()) != null) {
                 if (++entries > maxEntries) {
@@ -413,6 +445,23 @@ public class StaticThemeInstaller {
                     if (ratio > maxCompressionRatio) {
                         throw new InstallException(InstallException.Code.RATIO_LIMIT, "Compression ratio for " + name + " exceeds limit");
                     }
+                    // Accumulate for incremental zip-bomb ratio check.
+                    cumulativeCompressed += compressed;
+                    cumulativeUncompressed += entrySize;
+                } else if (entrySize > 0) {
+                    // compressedSize unavailable (-1); accumulate uncompressed only so threshold can still fire.
+                    cumulativeUncompressed += entrySize;
+                }
+                // Incremental zip-bomb guard: once enough compressed bytes have been seen,
+                // verify the cumulative ratio does not exceed the configured limit.
+                if (cumulativeCompressed > zipRatioCheckThresholdBytes
+                        && cumulativeUncompressed / Math.max(cumulativeCompressed, 1L) > zipRatioMax) {
+                    logger.warn("Zip-bomb ratio exceeded: cumulativeUncompressed={}, cumulativeCompressed={}, ratio={}, ratioMax={}",
+                            cumulativeUncompressed, cumulativeCompressed, cumulativeUncompressed / Math.max(cumulativeCompressed, 1L),
+                            zipRatioMax);
+                    throw new InstallException(InstallException.Code.ZIP_BOMB_RATIO,
+                            "Cumulative compression ratio exceeds limit: cumulativeUncompressed=" + cumulativeUncompressed
+                                    + " cumulativeCompressed=" + cumulativeCompressed);
                 }
                 zis.closeEntry();
             }
@@ -513,7 +562,9 @@ public class StaticThemeInstaller {
             return;
         }
         int retentionDays = DEFAULT_ATTIC_RETENTION_DAYS;
-        if (fessConfig != null) {
+        if (atticRetentionDaysOverride != null) {
+            retentionDays = atticRetentionDaysOverride.intValue();
+        } else if (fessConfig != null) {
             try {
                 final Integer cfg = fessConfig.getThemeUploadAtticRetentionDaysAsInteger();
                 if (cfg != null) {
@@ -570,11 +621,31 @@ public class StaticThemeInstaller {
         this.maxCompressionRatio = v;
     }
 
+    void setZipRatioMax(final int v) {
+        this.zipRatioMax = v;
+    }
+
+    void setZipRatioCheckThresholdBytes(final long v) {
+        this.zipRatioCheckThresholdBytes = v;
+    }
+
     void setThemeRegistry(final ThemeRegistry r) {
         this.themeRegistry = r;
     }
 
     void setActiveDefaultProbe(final Supplier<String> probe) {
         this.activeDefaultProbe = probe;
+    }
+
+    void setAtticRetentionDaysOverride(final Integer days) {
+        this.atticRetentionDaysOverride = days;
+    }
+
+    /**
+     * Test seam: invokes {@link #cleanupOldAtticDirs(Path)} against the resolved
+     * themes directory.
+     */
+    void runCleanupOldAtticDirsForTest() {
+        cleanupOldAtticDirs(resolveThemesDir());
     }
 }

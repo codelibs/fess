@@ -24,7 +24,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -282,6 +287,8 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
             installer.setMaxEntries(100);
             installer.setMaxExtractedSize(1024L * 1024L);
             installer.setMaxCompressionRatio(100);
+            installer.setZipRatioMax(50);
+            installer.setZipRatioCheckThresholdBytes(65_536L);
 
             final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
                     () -> installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("rollback", "<html>v2</html>"))));
@@ -354,12 +361,179 @@ public class StaticThemeInstallerTest extends UnitFessTestCase {
         }
     }
 
+    @Test
+    public void test_install_resetsAtticMtimeSoRetentionStartsAtInstall() throws Exception {
+        // C-4 regression guard: when a theme's source dir has an old mtime (e.g. installed
+        // long ago, or restored from backup), Files.move preserves that mtime onto the
+        // attic backup — which would then be culled instantly by cleanupOldAtticDirs.
+        // After the move we must reset the attic's mtime to "now" and the same-call
+        // cleanup must keep the attic intact.
+        final Path themesDir = Files.createTempDirectory("themes-installer-mtime-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Install v1, then age its directory's mtime so the next install's attic
+            // would inherit a stale mtime if we didn't reset it.
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("aging", "<html>v1</html>")));
+            final Path themeDir = themesDir.resolve("aging");
+            final Instant aged = Instant.now().minusSeconds(30L * 24L * 3600L); // 30 days ago
+            Files.setLastModifiedTime(themeDir, FileTime.from(aged));
+
+            final Instant beforeInstall = Instant.now();
+            // Install v2 of the same name — this will atticize the v1 directory.
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("aging", "<html>v2</html>")));
+
+            // Locate the resulting attic directory.
+            final List<Path> attics;
+            try (Stream<Path> s = Files.list(themesDir)) {
+                attics = s.filter(p -> p.getFileName().toString().startsWith(".attic-aging-")).collect(Collectors.toList());
+            }
+            assertEquals("expected exactly one attic for aging theme", 1, attics.size());
+            final Path attic = attics.get(0);
+
+            // Attic mtime must be "now" (within 5 seconds), NOT the source's 30-day-old mtime.
+            final Instant atticMtime = Files.getLastModifiedTime(attic).toInstant();
+            final long secondsSinceInstall = Math.abs(atticMtime.getEpochSecond() - beforeInstall.getEpochSecond());
+            assertTrue(secondsSinceInstall <= 5L,
+                    "attic mtime should be within 5s of install moment but was " + secondsSinceInstall + "s away");
+
+            // The cleanup that ran at the end of installZip must not have deleted the attic.
+            assertTrue(Files.exists(attic), "attic must not be culled immediately after install");
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_retainsPreviousAtticPerRetentionPolicy() throws Exception {
+        // C-5 regression guard: after a successful replacement install, the attic of the
+        // previous version must NOT be deleted eagerly. It is retained until the
+        // configured retention window elapses, at which point cleanupOldAtticDirs ages
+        // it out. We use a negative retention override to deterministically force the
+        // cutoff into the future and exercise the cleanup path.
+        final Path themesDir = Files.createTempDirectory("themes-installer-retain-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("retained", "<html>v1</html>")));
+            installer.installZip(new ByteArrayInputStream(buildValidZipWithIndex("retained", "<html>v2</html>")));
+
+            // v2 must be present; the attic for v1 must still exist (retention not exceeded).
+            assertTrue(Files.exists(themesDir.resolve("retained/theme.yml")));
+            final List<Path> atticsAfterInstall;
+            try (Stream<Path> s = Files.list(themesDir)) {
+                atticsAfterInstall = s.filter(p -> p.getFileName().toString().startsWith(".attic-retained-")).collect(Collectors.toList());
+            }
+            assertEquals("v1 attic must be retained after successful v2 install", 1, atticsAfterInstall.size());
+            final Path attic = atticsAfterInstall.get(0);
+            assertTrue(Files.exists(attic));
+
+            // Now collapse the retention window to the past so cleanup deletes the attic.
+            installer.setAtticRetentionDaysOverride(Integer.valueOf(-1));
+            installer.runCleanupOldAtticDirsForTest();
+            assertFalse(Files.exists(attic), "attic must be deleted once retention window has elapsed");
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_rejectsCumulativeZipBombRatio() throws Exception {
+        // Multiple entries each with a modest individual ratio can combine into a
+        // cumulative ratio that exceeds the incremental zip-bomb limit.
+        final Path themesDir = Files.createTempDirectory("themes-installer-zipbomb-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Allow absolute extracted size and per-entry ratio to be high so only the
+            // incremental cumulative ratio guard fires.
+            installer.setMaxExtractedSize(512L * 1024L * 1024L);
+            installer.setMaxCompressionRatio(Integer.MAX_VALUE);
+            // Set a low threshold (1 byte) so ratio check triggers immediately after the
+            // first entry, and a tight ratio (5:1) so 1 MB of zeros (which compresses
+            // to ~1 KB) exceeds the limit.
+            installer.setZipRatioMax(5);
+            installer.setZipRatioCheckThresholdBytes(1L);
+
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: bombtheme",
+                        "displayName: \"bombtheme\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                // 1 MB of zero bytes compresses extremely well — cumulative ratio >> 5.
+                putEntry(zos, "bomb.bin", new byte[1024 * 1024]);
+            }
+
+            final StaticThemeInstaller.InstallException ex = assertThrows(StaticThemeInstaller.InstallException.class,
+                    () -> installer.installZip(new ByteArrayInputStream(bao.toByteArray())));
+            assertEquals(StaticThemeInstaller.InstallException.Code.ZIP_BOMB_RATIO, ex.code());
+            assertFalse(Files.exists(themesDir.resolve("bombtheme")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_allowsNormalZipBelowRatioThreshold() throws Exception {
+        // A ZIP whose cumulative compressed bytes never exceeds the check threshold must
+        // never be rejected by the incremental ratio guard — even if the ratio would
+        // otherwise be high (FP suppression for tiny archives).
+        final Path themesDir = Files.createTempDirectory("themes-installer-zipbomb-fp-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Strict ratio limit, but threshold is very high so check never activates.
+            installer.setZipRatioMax(1);
+            installer.setZipRatioCheckThresholdBytes(Long.MAX_VALUE);
+            // Also relax per-entry ratio so that guard does not fire either.
+            installer.setMaxCompressionRatio(Integer.MAX_VALUE);
+
+            final byte[] zip = buildValidZip("safetheme");
+            // Must succeed without exception.
+            installer.installZip(new ByteArrayInputStream(zip));
+            assertTrue(Files.exists(themesDir.resolve("safetheme/theme.yml")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
+    @Test
+    public void test_install_allowsLargeZipWithLowRatio() throws Exception {
+        // A ZIP that exceeds the check threshold but whose cumulative ratio is within
+        // the allowed limit must install successfully (no false positive).
+        final Path themesDir = Files.createTempDirectory("themes-installer-zipbomb-ok-");
+        try {
+            final StaticThemeInstaller installer = newInstaller(themesDir);
+            // Allow large size cap, generous ratio (200:1), threshold 1 byte so check
+            // activates immediately.
+            installer.setMaxExtractedSize(512L * 1024L * 1024L);
+            installer.setMaxCompressionRatio(Integer.MAX_VALUE);
+            installer.setZipRatioMax(5);
+            installer.setZipRatioCheckThresholdBytes(1L);
+
+            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(bao)) {
+                final String yml = String.join("\n", "apiVersion: fess.codelibs.org/v1", "kind: StaticTheme", "name: oktheme",
+                        "displayName: \"oktheme\"", "version: 1.0.0");
+                putEntry(zos, "theme.yml", yml.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                // 1 MB of pseudo-random bytes barely compresses (ratio ~ 1.0:1 << 5:1).
+                final byte[] payload = new byte[1024 * 1024];
+                new java.util.Random(42L).nextBytes(payload);
+                putEntry(zos, "data.bin", payload);
+            }
+            // Must succeed without exception.
+            installer.installZip(new ByteArrayInputStream(bao.toByteArray()));
+            assertTrue(Files.exists(themesDir.resolve("oktheme/theme.yml")));
+        } finally {
+            deleteRecursively(themesDir);
+        }
+    }
+
     private static StaticThemeInstaller newInstaller(final Path themesDir) {
         final StaticThemeInstaller installer = new StaticThemeInstaller();
         installer.setThemesDirOverride(themesDir);
         installer.setMaxEntries(100);
         installer.setMaxExtractedSize(1024L * 1024L);
         installer.setMaxCompressionRatio(100);
+        // Production defaults for incremental zip-bomb ratio check.
+        installer.setZipRatioMax(50);
+        installer.setZipRatioCheckThresholdBytes(65_536L);
         return installer;
     }
 

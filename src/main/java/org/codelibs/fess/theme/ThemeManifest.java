@@ -93,13 +93,13 @@ public final class ThemeManifest {
             loaderOptions.setNestingDepthLimit(20);
             rawObj = new Yaml(new SafeConstructor(loaderOptions)).load(in);
         } catch (final RuntimeException e) {
-            throw new ThemeManifestException("Failed to parse theme.yml", e);
+            throw new ThemeManifestException(ThemeManifestException.Code.PARSE_FAILED, "Failed to parse theme.yml", e);
         }
         if (rawObj == null) {
-            throw new ThemeManifestException("theme.yml is empty");
+            throw new ThemeManifestException(ThemeManifestException.Code.EMPTY, "theme.yml is empty");
         }
         if (!(rawObj instanceof Map)) {
-            throw new ThemeManifestException("theme.yml root must be a mapping");
+            throw new ThemeManifestException(ThemeManifestException.Code.NOT_MAPPING, "theme.yml root must be a mapping");
         }
         final Map<String, Object> raw = (Map<String, Object>) rawObj;
         final Builder b = new Builder();
@@ -135,7 +135,8 @@ public final class ThemeManifest {
 
     private static String checkFieldLength(final String fieldName, final String value) {
         if (value != null && value.length() > MAX_FIELD_LENGTH) {
-            throw new ThemeManifestException("Field '" + fieldName + "' exceeds maximum length of " + MAX_FIELD_LENGTH + " characters");
+            throw new ThemeManifestException(ThemeManifestException.Code.FIELD_TOO_LONG,
+                    "Field '" + fieldName + "' exceeds maximum length of " + MAX_FIELD_LENGTH + " characters");
         }
         return value;
     }
@@ -147,22 +148,23 @@ public final class ThemeManifest {
 
     private void validate() {
         if (!CURRENT_API_VERSION.equals(apiVersion)) {
-            throw new ThemeManifestException("Unsupported apiVersion: " + apiVersion);
+            throw new ThemeManifestException(ThemeManifestException.Code.UNSUPPORTED_API_VERSION, "Unsupported apiVersion: " + apiVersion);
         }
         if (!KIND.equals(kind)) {
-            throw new ThemeManifestException("Unsupported kind: " + kind);
+            throw new ThemeManifestException(ThemeManifestException.Code.UNSUPPORTED_KIND, "Unsupported kind: " + kind);
         }
         if (name == null || !NAME_PATTERN.matcher(name).matches()) {
-            throw new ThemeManifestException("Invalid theme name: " + name);
+            throw new ThemeManifestException(ThemeManifestException.Code.INVALID_NAME, "Invalid theme name: " + name);
         }
         if (displayName == null || displayName.isBlank()) {
-            throw new ThemeManifestException("displayName is required");
+            throw new ThemeManifestException(ThemeManifestException.Code.DISPLAY_NAME_REQUIRED, "displayName is required");
         }
         if (version == null || !SEMVER_PATTERN.matcher(version).matches()) {
-            throw new ThemeManifestException("Invalid semver version: " + version);
+            throw new ThemeManifestException(ThemeManifestException.Code.INVALID_VERSION, "Invalid semver version: " + version);
         }
         if (isUnsafeEntry(entry)) {
-            throw new ThemeManifestException("entry must be a relative path inside the theme: " + entry);
+            throw new ThemeManifestException(ThemeManifestException.Code.UNSAFE_ENTRY,
+                    "entry must be a relative path inside the theme: " + entry);
         }
     }
 
