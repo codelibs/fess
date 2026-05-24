@@ -59,6 +59,7 @@ public class ThemeManifestException extends RuntimeException {
         OTHER
     }
 
+    /** Structured error code attached to this exception (never {@code null}). */
     private final Code code;
 
     /**
